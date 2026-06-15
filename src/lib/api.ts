@@ -315,6 +315,7 @@ export const api = {
 
   getEmailIntegration: () => get('/email/integration'),
   enableEmailIntegration: () => post('/email/integration/enable', {}),
+  disableEmailIntegration: () => del('/email/integration'),
   getEmailDomains: () => get('/email/domains'),
   createEmailDomain: (data: { domain: string; provider?: string }) =>
     post('/email/domains', data),

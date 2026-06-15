@@ -259,30 +259,33 @@ function ConnectedChannelCard({
           <p className="mt-1 text-sm font-bold text-gray-800 truncate">{title}</p>
         </div>
 
-        {(channel === 'email' || channel === 'whatsapp') && onManage ? (
-          <button
-            type="button"
-            onClick={onManage}
-            aria-label={`Manage ${title}`}
-            className="shrink-0 p-1.5 rounded-lg text-gray-400 hover:text-primary hover:bg-sky-50 transition-all -mt-0.5 -mr-0.5"
-          >
-            <Settings className="w-4 h-4" />
-          </button>
-        ) : onDisconnect ? (
-          <button
-            type="button"
-            onClick={onDisconnect}
-            disabled={disconnecting}
-            aria-label={`Disconnect ${title}`}
-            className="shrink-0 p-1.5 rounded-lg text-gray-400 hover:text-danger-red hover:bg-red-50 transition-all disabled:opacity-50 -mt-0.5 -mr-0.5"
-          >
-            {disconnecting ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Trash2 className="w-4 h-4" />
-            )}
-          </button>
-        ) : null}
+        <div className="flex items-center gap-0.5 shrink-0 -mt-0.5 -mr-0.5">
+          {onManage ? (
+            <button
+              type="button"
+              onClick={onManage}
+              aria-label={`Manage ${title}`}
+              className="p-1.5 rounded-lg text-gray-400 hover:text-primary hover:bg-sky-50 transition-all"
+            >
+              <Settings className="w-4 h-4" />
+            </button>
+          ) : null}
+          {onDisconnect ? (
+            <button
+              type="button"
+              onClick={onDisconnect}
+              disabled={disconnecting}
+              aria-label={`Disconnect ${title}`}
+              className="p-1.5 rounded-lg text-gray-400 hover:text-danger-red hover:bg-red-50 transition-all disabled:opacity-50"
+            >
+              {disconnecting ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Trash2 className="w-4 h-4" />
+              )}
+            </button>
+          ) : null}
+        </div>
       </div>
 
       <div className="mt-3 space-y-1 flex-1">
@@ -448,6 +451,27 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
       setEnablingEmail(false);
     }
   }, [loadEmailStatus, openEmailChannel]);
+
+  const handleEmailDisconnect = useCallback(async () => {
+    if (
+      !window.confirm(
+        'Remove email integration? Custom domains, senders, and provider settings will be deleted. Delivery logs and templates are kept.'
+      )
+    ) {
+      return;
+    }
+    setDisconnectingKey('email');
+    setError(null);
+    try {
+      await api.disableEmailIntegration();
+      await loadEmailStatus();
+      setView('hub');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to remove email integration');
+    } finally {
+      setDisconnectingKey(null);
+    }
+  }, [loadEmailStatus]);
 
   useEffect(() => {
     if (!isActive) return;
@@ -751,12 +775,27 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
           Back to integrations
         </button>
 
-        <header>
-          <h2 className="text-xl font-black text-gray-950">Email</h2>
-          <p className="text-xs text-gray-500 font-medium mt-1">
-            Verify domains, manage sender addresses, and send transactional email from{' '}
-            {defaultEmail} or your own domain.
-          </p>
+        <header className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div>
+            <h2 className="text-xl font-black text-gray-950">Email</h2>
+            <p className="text-xs text-gray-500 font-medium mt-1">
+              Verify domains, manage sender addresses, and send transactional email from{' '}
+              {defaultEmail} or your own domain.
+            </p>
+          </div>
+          <button
+            type="button"
+            disabled={disconnectingKey === 'email'}
+            onClick={() => void handleEmailDisconnect()}
+            className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-red-200 text-sm font-bold text-danger-red hover:bg-red-50 disabled:opacity-50 transition-colors shrink-0"
+          >
+            {disconnectingKey === 'email' ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Trash2 className="w-4 h-4" />
+            )}
+            Remove integration
+          </button>
         </header>
 
         <EmailPanel />
@@ -925,6 +964,8 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
                       : undefined
                 }
                 onManage={openEmailChannel}
+                onDisconnect={() => void handleEmailDisconnect()}
+                disconnecting={disconnectingKey === 'email'}
               />
             )}
           </div>
