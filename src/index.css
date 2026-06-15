@@ -1,0 +1,169 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Roboto+Mono:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Roboto", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Roboto", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Roboto Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: calc(1.25 / 0.8125);
+  --text-sm: 0.9375rem;
+  --text-sm--line-height: calc(1.375 / 0.9375);
+  --text-base: 1.0625rem;
+  --text-base--line-height: calc(1.625 / 1.0625);
+  --text-lg: 1.1875rem;
+  --text-lg--line-height: calc(1.75 / 1.1875);
+  --text-xl: 1.3125rem;
+  --text-xl--line-height: calc(1.75 / 1.3125);
+  --text-2xl: 1.625rem;
+  --text-2xl--line-height: calc(2 / 1.625);
+  /* Inbox-aligned scale: sm = primary, xs = secondary, meta = timestamps, badge = counts */
+  --text-meta: 0.6875rem;
+  --text-meta--line-height: 1.25;
+  --text-badge: 0.625rem;
+  --text-badge--line-height: 1;
+  --color-primary: #0284c7;
+  --color-primary-hover: #0369a1;
+  --color-accent-green: #006d2f;
+  --color-accent-green-bg: #e6f7ec;
+  --color-warning-orange: #f2994a;
+  --color-danger-red: #ba1a1a;
+  --color-border-subtle: #e2e8f0;
+  --color-brand-indigo: #0ea5e9;
+  --color-channel-green: #25d366;
+  --color-channel-pink: #e1306c;
+  --color-channel-blue: #0084ff;
+  --color-channel-sky: #229ed9;
+  --color-dark-navy: #0f0f1a;
+}
+
+html {
+  font-size: 106.25%;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  background-color: #f8fafc;
+  color: #0f172a;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Custom visual styles */
+.dot-grid {
+  background-image: radial-gradient(#cbd5e1 1.5px, transparent 1.5px);
+  background-size: 24px 24px;
+}
+
+.chat-bubble-in {
+  border-radius: 0px 16px 16px 16px;
+}
+
+.chat-bubble-out {
+  border-radius: 16px 0px 16px 16px;
+}
+
+@layer utilities {
+  .glow-orb {
+    filter: blur(140px);
+    opacity: 0.35;
+    pointer-events: none;
+  }
+}
+
+@keyframes app-loader-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes app-loader-spin-reverse {
+  to { transform: rotate(-360deg); }
+}
+
+@keyframes app-loader-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.45; }
+  50% { transform: scale(1.08); opacity: 0.85; }
+}
+
+@keyframes app-loader-glow {
+  0%, 100% { opacity: 0.35; transform: scale(0.92); }
+  50% { opacity: 0.7; transform: scale(1.05); }
+}
+
+@keyframes app-loader-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(12px, -18px) scale(1.05); }
+  66% { transform: translate(-10px, 10px) scale(0.95); }
+}
+
+@keyframes app-loader-dot {
+  0%, 80%, 100% { opacity: 0.25; transform: translateY(0); }
+  40% { opacity: 1; transform: translateY(-4px); }
+}
+
+@keyframes app-loader-bar {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(250%); }
+}
+
+.app-loader-ring {
+  animation: app-loader-spin 1.4s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+}
+
+.app-loader-ring-reverse {
+  animation: app-loader-spin-reverse 2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+}
+
+.app-loader-pulse {
+  animation: app-loader-pulse 2s ease-in-out infinite;
+}
+
+.app-loader-glow {
+  animation: app-loader-glow 2.4s ease-in-out infinite;
+}
+
+.app-loader-orb {
+  animation: app-loader-float 8s ease-in-out infinite;
+}
+
+.app-loader-dot {
+  animation: app-loader-dot 1.2s ease-in-out infinite;
+}
+
+.app-loader-bar {
+  animation: app-loader-bar 1.6s ease-in-out infinite;
+}
+
+/* Journey workflow canvas */
+.journey-canvas-shell .react-flow__controls-button {
+  border-bottom-color: #e2e8f0;
+}
+
+.journey-canvas-shell .react-flow__controls-button:hover {
+  background: #f8fafc;
+}
+
+.journey-canvas-shell .react-flow__edge-path {
+  stroke-linecap: round;
+}
+
+.journey-canvas-shell .react-flow__node.selected {
+  z-index: 10;
+}
+
