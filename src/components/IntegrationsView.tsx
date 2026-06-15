@@ -357,6 +357,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
     defaultSenderEmail: 'noreply@classivo.app',
   });
   const [enablingEmail, setEnablingEmail] = useState(false);
+  const [emailError, setEmailError] = useState('');
 
   const goToHub = useCallback(() => {
     setView('hub');
@@ -440,13 +441,13 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
 
   const handleEnableEmail = useCallback(async () => {
     setEnablingEmail(true);
-    setError(null);
+    setEmailError('');
     try {
       await api.enableEmailIntegration();
       await loadEmailStatus();
       openEmailChannel();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to enable email');
+      setEmailError(err instanceof Error ? err.message : 'Failed to enable email');
     } finally {
       setEnablingEmail(false);
     }
@@ -461,13 +462,13 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
       return;
     }
     setDisconnectingKey('email');
-    setError(null);
+    setEmailError('');
     try {
       await api.disableEmailIntegration();
       await loadEmailStatus();
       setView('hub');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to remove email integration');
+      setEmailError(err instanceof Error ? err.message : 'Failed to remove email integration');
     } finally {
       setDisconnectingKey(null);
     }
@@ -751,6 +752,12 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
               custom domains and senders after enabling.
             </p>
 
+            {emailError && (
+              <p className="text-sm font-bold text-red-600 bg-red-50 border border-red-100 rounded-xl px-4 py-2">
+                {emailError}
+              </p>
+            )}
+
             <button
               type="button"
               disabled={enablingEmail}
@@ -797,6 +804,12 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
             Remove integration
           </button>
         </header>
+
+        {emailError && (
+          <p className="text-sm font-bold text-red-600 bg-red-50 border border-red-100 rounded-xl px-4 py-2">
+            {emailError}
+          </p>
+        )}
 
         <EmailPanel />
       </div>
@@ -883,6 +896,12 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
           {messengerSyncMessage}
         </p>
       )} */}
+
+      {emailError && (
+        <p className="text-sm font-bold text-red-600 bg-red-50 border border-red-100 rounded-xl px-4 py-2">
+          {emailError}
+        </p>
+      )}
 
       {instagramSyncMessage && (
         <p className="text-sm font-bold text-[#C13584] bg-[#fce8f0] border border-[#E1306C]/15 rounded-xl px-4 py-2">
