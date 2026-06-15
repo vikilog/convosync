@@ -4,6 +4,7 @@
  */
 
 import { MessageSquareCode, Github, Twitter, Linkedin, Facebook } from 'lucide-react';
+import { COMPANY_NAME, PRODUCT_NAME } from '../brand';
 
 interface FooterProps {
   onNavigate: (sectionId: string) => void;
@@ -24,9 +25,9 @@ export default function Footer({ onNavigate }: FooterProps) {
               </div>
               <div>
                 <span className="text-lg font-bold font-display tracking-tight text-gray-950 block leading-tight">
-                  WaBiz
+                  {PRODUCT_NAME}
                 </span>
-                <span className="text-[11px] text-gray-500 font-mono tracking-wider block">By Lazybinary</span>
+                <span className="text-[11px] text-gray-500 font-mono tracking-wider block">By {COMPANY_NAME}</span>
               </div>
             </div>
 
@@ -126,7 +127,7 @@ export default function Footer({ onNavigate }: FooterProps) {
 
         <div className="border-t border-gray-200 pt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between text-sm text-gray-500">
           <p className="text-center sm:text-left font-sans">
-            © 2025 WaBiz by Lazybinary · Made with ❤️ in India 🇮🇳
+            © 2025 {PRODUCT_NAME} by {COMPANY_NAME} · Made with ❤️ in India 🇮🇳
           </p>
           <div className="flex flex-wrap items-center justify-center sm:justify-end gap-x-3 gap-y-1 text-center font-sans">
             <a href="#" className="hover:text-brand-indigo transition-colors">

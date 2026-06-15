@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { INITIAL_CONVERSATIONS } from '../data';
 import { Conversation, Message } from '../types';
+import { PRODUCT_DOMAIN, PRODUCT_NAME } from '../brand';
 
 interface HeroProps {
   onStartFree: () => void;
@@ -94,14 +95,14 @@ export default function Hero({ onStartFree, onWatchDemo }: HeroProps) {
       setTimeout(() => {
         setIsTyping(false);
         const aiRepliesMap: Record<string, string> = {
-          'conv-1': '🤖 AI Agent Max (WaBiz): Course registration for the next Full Stack cohort is open until Sunday evening. Here is the link to complete payment immediately: wabiz.ai/pay. Do you need any help during check-out?',
-          'conv-2': '🤖 AI Agent Sara (WaBiz): Order #7731 is currently transit-cleared via India Post. Estimated delivery to Bengaluru is Friday afternoon! I will auto-send a WhatsApp text the second it lands.',
-          'conv-3': '🤖 AI Agent Sara (WaBiz): Our official prices are ₹1,999/month for Starter and ₹4,999/month for Growth, with zero hidden setup surcharges. All cards and UPI are supported directly in Indian Rupees!',
-          'conv-4': '🤖 AI Agent Sara (WaBiz): Yes! We provide a complete 100% money-back guarantee if you cancel your subscription within 3 days. No questions asked.',
-          'conv-5': '🤖 AI Agent Sara (WaBiz): Invoice for April 2026 has been compiled and emailed directly to finance@company.com with receipt copies attached automatically. Check your spam if it fails to arrive!'
+          'conv-1': `🤖 AI Agent Max (${PRODUCT_NAME}): Course registration for the next Full Stack cohort is open until Sunday evening. Here is the link to complete payment immediately: ${PRODUCT_DOMAIN}/pay. Do you need any help during check-out?`,
+          'conv-2': `🤖 AI Agent Sara (${PRODUCT_NAME}): Order #7731 is currently transit-cleared via India Post. Estimated delivery to Bengaluru is Friday afternoon! I will auto-send a WhatsApp text the second it lands.`,
+          'conv-3': `🤖 AI Agent Sara (${PRODUCT_NAME}): Our official prices are ₹1,999/month for Starter and ₹4,999/month for Growth, with zero hidden setup surcharges. All cards and UPI are supported directly in Indian Rupees!`,
+          'conv-4': `🤖 AI Agent Sara (${PRODUCT_NAME}): Yes! We provide a complete 100% money-back guarantee if you cancel your subscription within 3 days. No questions asked.`,
+          'conv-5': `🤖 AI Agent Sara (${PRODUCT_NAME}): Invoice for April 2026 has been compiled and emailed directly to finance@company.com with receipt copies attached automatically. Check your spam if it fails to arrive!`
         };
 
-        const aiMsgText = aiRepliesMap[activeConv.id] || "🤖 WaBiz Agent: I am auto-processing your inquiry right now. An agent is notified!";
+        const aiMsgText = aiRepliesMap[activeConv.id] || `🤖 ${PRODUCT_NAME} Agent: I am auto-processing your inquiry right now. An agent is notified!`;
         
         const aiMsg: Message = {
           id: `m-ai-${Date.now()}`,
@@ -151,7 +152,7 @@ export default function Hero({ onStartFree, onWatchDemo }: HeroProps) {
 
         {/* Subtext */}
         <p className="text-base sm:text-lg md:text-xl text-gray-300 text-center max-w-2xl px-2 leading-relaxed mb-10">
-          Your customers are on WhatsApp, Instagram, Messenger, Telegram, and Email. WaBiz unifies them all into one AI-powered inbox — so your team never misses a message, and your AI handles the rest.
+          Your customers are on WhatsApp, Instagram, Messenger, Telegram, and Email. {PRODUCT_NAME} unifies them all into one AI-powered inbox — so your team never misses a message, and your AI handles the rest.
         </p>
 
         {/* CTAs */}
@@ -201,7 +202,7 @@ export default function Hero({ onStartFree, onWatchDemo }: HeroProps) {
           <span className="text-xs text-gray-400 font-mono tracking-wider mt-4">ALL CHANNELS. ONE PLATFORM.</span>
         </div>
 
-        {/* Hero visual — Complete Interactive WaBiz Dashboard Mockup */}
+        {/* Hero visual — interactive inbox demo */}
         <div className="w-full max-w-5xl rounded-2xl bg-[#0B0B13]/90 border border-white/10 shadow-2xl overflow-hidden relative">
           
           {/* Mockup Header bar */}
@@ -210,7 +211,7 @@ export default function Hero({ onStartFree, onWatchDemo }: HeroProps) {
               <span className="w-3.5 h-3.5 rounded-full bg-[#EF4444]" />
               <span className="w-3.5 h-3.5 rounded-full bg-[#F59E0B]" />
               <span className="w-3.5 h-3.5 rounded-full bg-[#10B981]" />
-              <p className="text-xs text-gray-400 ml-4 font-mono font-medium hidden sm:inline">WaBiz Inbox (Live Demonstration Sandbox)</p>
+              <p className="text-xs text-gray-400 ml-4 font-mono font-medium hidden sm:inline">{PRODUCT_NAME} Inbox (Live Demonstration Sandbox)</p>
             </div>
             <div className="flex items-center space-x-3 text-xs">
               <span id="conn-channels-ind" className="flex items-center space-x-1.5 px-3 py-1 bg-channel-green/10 text-channel-green hover:bg-channel-green/20 rounded-md border border-channel-green/20 font-medium">
@@ -289,7 +290,7 @@ export default function Hero({ onStartFree, onWatchDemo }: HeroProps) {
                         {activeConv.channel}
                       </span>
                     </h3>
-                    <p className="text-[10px] text-gray-400">Assigned: {activeConv.assignedTo === 'ai' ? '🤖 WaBiz AI' : '👤 Support Rep'}</p>
+                    <p className="text-[10px] text-gray-400">Assigned: {activeConv.assignedTo === 'ai' ? `🤖 ${PRODUCT_NAME} AI` : '👤 Support Rep'}</p>
                   </div>
                 </div>
               </div>

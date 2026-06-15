@@ -5,6 +5,7 @@
 
 import { Quote, MessageSquare, Heart } from 'lucide-react';
 import { TESTIMONIALS } from '../data';
+import { PRODUCT_NAME } from '../brand';
 
 export default function Testimonials() {
   return (
@@ -20,7 +21,7 @@ export default function Testimonials() {
             Real businesses. Real results.
           </h2>
           <p className="text-xs sm:text-sm text-gray-500 mt-3 font-sans">
-            Hear from leading marketing managers, educational institutes, and real estate agencies running automation under WaBiz.
+            Hear from leading marketing managers, educational institutes, and real estate agencies running automation under {PRODUCT_NAME}.
           </p>
         </div>
 
@@ -36,7 +37,7 @@ export default function Testimonials() {
             
             <div className="space-y-6">
               <p className="text-lg sm:text-xl md:text-2xl font-semibold leading-relaxed font-display">
-                "We replaced 3 different tools with WaBiz. Our WhatsApp, Instagram, and Telegram are all in one place now. The AI agent handles 89% of student queries for our coaching institute. Best investment we made this year."
+                &ldquo;We replaced 3 different tools with {PRODUCT_NAME}. Our WhatsApp, Instagram, and Telegram are all in one place now. The AI agent handles 89% of student queries for our coaching institute. Best investment we made this year.&rdquo;
               </p>
               
               <div className="border-t border-white/20 pt-4 flex items-center justify-between">

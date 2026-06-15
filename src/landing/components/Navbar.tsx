@@ -5,6 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { Menu, X, ArrowRight, MessageSquareCode } from 'lucide-react';
+import { PRODUCT_NAME } from '../brand';
 
 interface NavbarProps {
   onNavigate: (sectionId: string) => void;
@@ -55,7 +56,7 @@ export default function Navbar({ onNavigate, onLogin, onSignup }: NavbarProps) {
             </div>
             <div>
               <span className="text-xl font-bold font-display tracking-tight flex items-center">
-                WaBiz
+                {PRODUCT_NAME}
                 <span className="text-xs ml-1.5 px-1.5 py-0.5 roundedbg rounded-md bg-brand-indigo/10 text-brand-indigo font-normal border border-brand-indigo/20 hidden sm:inline">
                   v2.0
                 </span>

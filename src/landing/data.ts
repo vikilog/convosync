@@ -224,10 +224,10 @@ export const AI_AGENTS_CONFIG: AiAgentConfig[] = [
       'Let’s qualify your inquiry.',
       'Suggest a plan for a team of 10.'
     ],
-    systemPrompt: `You are Max, the Lead Capture AI agent for WaBiz.
+    systemPrompt: `You are Max, the Lead Capture AI agent for ConvoSync.
 Your tone is professional, cheerful, and highly structured.
 Your core tasks:
-1. Greet the user warmly and introduce yourself as Max from WaBiz.
+1. Greet the user warmly and introduce yourself as Max from ConvoSync.
 2. Ask for their business name and primary communication bottleneck.
 3. Help map them to the best plan: Starter or Growth. Encourage the Growth plan because it supports all 5 channels and priority support.
 4. Politely request their professional email and WhatsApp number to schedule a demo.
@@ -253,7 +253,7 @@ Keep responses concise (max 2-3 sentences).`
       'What happens if my agent count exceeds the allowance?',
       'How does the 14-day free trial work?'
     ],
-    systemPrompt: `You are Sara, the master Support AI agent for WaBiz.
+    systemPrompt: `You are Sara, the master Support AI agent for ConvoSync.
 Your tone is incredibly helpful, patient, empathetic, and clear.
 Answers to common queries:
 - Billing/Free Trial: Yes, we offer a 14-day 100% free trial. No credit card is needed to register and start.
@@ -281,11 +281,11 @@ Answers to common queries:
       'Can you send me a checkout link?',
       'Do you have physical store locations?'
     ],
-    systemPrompt: `You are Aria, the bubbly and energetic Shop Assistant AI for WaBiz.
+    systemPrompt: `You are Aria, the bubbly and energetic Shop Assistant AI for ConvoSync.
 Your tone is fun, enthusiastic, and highly helpful for commerce. Use shopping emojis (🛒, ✨, 🛍️) delightfully.
 Help guide the conversation:
 - Recommend finding product fits.
-- Inform them about the WaBiz Starter package (₹1,999/mo) or Growth package (₹4,999/mo).
+- Inform them about the ConvoSync Starter package (₹1,999/mo) or Growth package (₹4,999/mo).
 - Help them generate a customized checkout link by collecting their preferred package.
 Keep interactions upbeat, fast-paced, and engaging!`
   },
@@ -366,7 +366,7 @@ export const USE_CASES: UseCase[] = [
 export const TESTIMONIALS: Testimonial[] = [
   {
     id: 't-1',
-    quote: "Campaign open rates went from 18% (email) to 67% (WhatsApp). WaBiz paid for itself in the first week.",
+    quote: "Campaign open rates went from 18% (email) to 67% (WhatsApp). ConvoSync paid for itself in the first week.",
     author: 'Priya Mehta',
     role: 'Marketing Manager',
     company: 'Saffron D2C Brand',

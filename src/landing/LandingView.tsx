@@ -4,6 +4,7 @@
  */
 
 import { useState } from 'react';
+import { PRODUCT_NAME } from './brand';
 import { useNavigate } from 'react-router-dom';
 import { Bot, X } from 'lucide-react';
 import Navbar from './components/Navbar';
@@ -96,7 +97,7 @@ export default function LandingView() {
                 </div>
 
                 <h3 className="text-xl sm:text-2xl font-bold font-display text-white">
-                  WaBiz 2-minute Product Overview
+                  {PRODUCT_NAME} 2-minute Product Overview
                 </h3>
                 <p className="text-xs sm:text-sm text-gray-400 leading-relaxed font-sans">
                   Watch how our AI Agent Sara instantly answers a complex WhatsApp return enquiry,

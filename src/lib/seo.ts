@@ -1,9 +1,11 @@
 import { settingsSectionFromPath, tabFromPath, type AppTab } from '../routes';
 import { SETTINGS_SECTION_TITLES } from '../components/settings/settingsNav';
 
-export const SITE_NAME = 'WaBiz';
+import { PRODUCT_NAME } from '../brand';
+
+export const SITE_NAME = PRODUCT_NAME;
 export const SITE_DESCRIPTION =
-  'WhatsApp Business workspace for teams — shared inbox, campaigns, message templates, AI agents, and analytics.';
+  'ConvoSync unifies WhatsApp, Instagram, email, and more into one AI-powered inbox for growing teams.';
 
 export type PageSeo = {
   title: string;

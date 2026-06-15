@@ -8,6 +8,7 @@ import {
   Check, MessageSquare, Instagram, Send, Mail, MessageCircle, 
   Sparkles, ShieldCheck, RefreshCw, Unlink
 } from 'lucide-react';
+import { PRODUCT_NAME } from '../brand';
 
 interface ChannelNode {
   id: string;
@@ -98,7 +99,7 @@ export default function SolutionDiagram() {
             THE ARCHITECTURE
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold font-display tracking-tight text-gray-900 mt-2">
-            WaBiz: The Central Unified Command Center
+            {PRODUCT_NAME}: The Central Unified Command Center
           </h2>
           <p className="text-xs sm:text-sm text-gray-500 mt-3 font-sans">
             Unify WhatsApp, Instagram, Telegram, Messenger, Email & Live Chat systems directly into a singular cloud interface backed by intelligent, autonomous agents.
@@ -111,10 +112,10 @@ export default function SolutionDiagram() {
           {/* Diagram Stage (Left side for desktop) */}
           <div className="relative w-[340px] h-[340px] sm:w-[420px] sm:h-[420px] flex items-center justify-center bg-white/40 rounded-full border border-gray-100 shadow-inner p-10 select-none">
             
-            {/* Center Nucleus: WaBiz */}
+            {/* Center nucleus */}
             <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-brand-indigo border-4 border-white shadow-xl shadow-brand-indigo/40 flex flex-col items-center justify-center text-white z-20 hover:scale-105 transition-transform cursor-pointer relative group">
               <span className="absolute -inset-2 bg-brand-indigo/10 rounded-full animate-ping -z-10 group-hover:animate-none" />
-              <div className="font-extrabold font-display text-lg sm:text-xl drop-shadow-md">WaBiz</div>
+              <div className="font-extrabold font-display text-lg sm:text-xl drop-shadow-md">{PRODUCT_NAME}</div>
               <div className="text-[9px] uppercase font-mono tracking-wider opacity-90">Central</div>
             </div>
 

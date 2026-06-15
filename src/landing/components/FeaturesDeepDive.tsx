@@ -9,13 +9,14 @@ import {
   Check, ChevronRight, FileText, Plus, Calendar, Sparkles, Trophy, Mail
 } from 'lucide-react';
 import { CAMPAIGN_TEMPLATES, INITIAL_CAMPAIGNS } from '../data';
+import { PRODUCT_NAME } from '../brand';
 
 export default function FeaturesDeepDive() {
   const [activeTab, setActiveTab] = useState<'inbox' | 'agents' | 'campaigns' | 'journeys' | 'analytics'>('inbox');
 
   // Interactive Tab 2 (AI Agent Docs list simulation)
   const [mockDocs, setMockDocs] = useState<string[]>([
-    'wa-biz-pricing-plans.pdf',
+    'convosync-pricing-plans.pdf',
     'product-faq-sheet-q2.docx',
     'shipping-return-standards.txt'
   ]);
@@ -44,7 +45,7 @@ export default function FeaturesDeepDive() {
             A complete omnichannel suite — not just another inbox
           </h2>
           <p className="text-sm sm:text-base text-gray-500 mt-4 leading-relaxed">
-            Stop stitching disparate products. WaBiz powers unified inbound routing, AI-driven resolution, mass outbound broadcasts, and drag-and-drop automation journeys from one tab.
+            Stop stitching disparate products. {PRODUCT_NAME} powers unified inbound routing, AI-driven resolution, mass outbound broadcasts, and drag-and-drop automation journeys from one tab.
           </p>
         </div>
 

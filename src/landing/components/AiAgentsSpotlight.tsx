@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { AI_AGENTS_CONFIG } from '../data';
 import { AiAgentConfig } from '../types';
+import { PRODUCT_NAME } from '../brand';
 
 interface AiAgentsSpotlightProps {
   onStartAgentDemo: () => void;
@@ -61,7 +62,7 @@ export default function AiAgentsSpotlight({ onStartAgentDemo }: AiAgentsSpotligh
       // Sara response rules
       if (activeAgent.id === 'agent-sara') {
         if (promptLower.includes('trial') || promptLower.includes('free') || promptLower.includes('cancel')) {
-          replyText = "Yes! WaBiz comes with a 14-day fully featured free trial. There is absolutely no credit card required to start, and you can cancel anytime with single click! 💳";
+          replyText = `Yes! ${PRODUCT_NAME} comes with a 14-day fully featured free trial. There is absolutely no credit card required to start, and you can cancel anytime with single click! 💳`;
         } else if (promptLower.includes('cost') || promptLower.includes('price') || promptLower.includes('charge') || promptLower.includes('markup') || promptLower.includes('inr')) {
           replyText = "Our pricing is 100% transparent: Starter is ₹1,999/month and Growth is ₹4,999/month. We charge ZERO per-message markup. You pay your Meta API costs directly! 🇮🇳";
         } else if (promptLower.includes('agent') || promptLower.includes('seat')) {
@@ -73,7 +74,7 @@ export default function AiAgentsSpotlight({ onStartAgentDemo }: AiAgentsSpotligh
       // Max responses rules
       else if (activeAgent.id === 'agent-max') {
         if (promptLower.includes('whatsapp') || promptLower.includes('instagram') || promptLower.includes('channel')) {
-          replyText = "Awesome! WaBiz lets you connect WhatsApp and Instagram official business profiles simultanously. This lets your single team view and respond to mixed source messages effortlessly! 🌐";
+          replyText = `Awesome! ${PRODUCT_NAME} lets you connect WhatsApp and Instagram official business profiles simultanously. This lets your single team view and respond to mixed source messages effortlessly! 🌐`;
         } else if (promptLower.includes('budget') || promptLower.includes('email') || promptLower.includes('demo') || promptLower.includes('@')) {
           replyText = "Brilliant! I can tag your contact details as 'Hot Enterprise Lead' and have our sales director email you standard guides. Let's schedule a 10-minute demo! 🎯";
         } else {
@@ -83,9 +84,9 @@ export default function AiAgentsSpotlight({ onStartAgentDemo }: AiAgentsSpotligh
       // Aria response rules
       else if (activeAgent.id === 'agent-aria') {
         if (promptLower.includes('discount') || promptLower.includes('code') || promptLower.includes('coupon')) {
-          replyText = "✨ VIP Offer! Use coupon code WABIZ10 at checkout to secure an extra 10% discount on any annual subscription tier today! 🎁";
+          replyText = "✨ VIP Offer! Use coupon code CONVOSYNC10 at checkout to secure an extra 10% discount on any annual subscription tier today! 🎁";
         } else if (promptLower.includes('checkout') || promptLower.includes('link') || promptLower.includes('buy') || promptLower.includes('pay')) {
-          replyText = "🛒 Let's generate a secured checkout link for you. Would you like to proceed with the highly recommended WaBiz Growth Tier (₹4,999/month) or Starter (₹1,999/month)?";
+          replyText = `🛒 Let's generate a secured checkout link for you. Would you like to proceed with the highly recommended ${PRODUCT_NAME} Growth Tier (₹4,999/month) or Starter (₹1,999/month)?`;
         } else {
           replyText = "Welcome to our WhatsApp checkout workspace! Aria can list catalogs, calculate quantities, and collect secure UPI orders perfectly. Ask about our discount codes! 🛍️";
         }
