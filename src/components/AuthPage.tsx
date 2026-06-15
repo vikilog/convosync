@@ -5,7 +5,8 @@
 
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Lock, Mail, Sparkles } from 'lucide-react';
+import { ArrowLeft, Lock, Mail } from 'lucide-react';
+import { PRODUCT_LOGO, PRODUCT_NAME } from '../lib/brand';
 import { api } from '../lib/api';
 import { applyAuthSession, userNeedsOnboarding } from '../lib/session';
 import { connectSocket } from '../lib/socket';
@@ -62,14 +63,16 @@ export function AuthPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex selection:bg-sky-50">
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-primary items-center justify-center p-12">
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-brand-gradient items-center justify-center p-12">
         <div className="absolute inset-0 dot-grid opacity-20" />
         <div className="relative z-10 max-w-md text-white">
-          <div className="w-14 h-14 rounded-2xl bg-white/15 flex items-center justify-center mb-8 backdrop-blur-sm">
-            <Sparkles className="w-8 h-8" />
-          </div>
+          <img
+            src={PRODUCT_LOGO}
+            alt={PRODUCT_NAME}
+            className="h-14 w-14 mb-8 object-contain"
+          />
           <h1 className="text-3xl font-black tracking-tight leading-tight">
-            Welcome back to WaBiz
+            Welcome back to ConvoSync
           </h1>
           <p className="mt-4 text-white/80 text-sm leading-relaxed">
             Sign in to manage inbox, campaigns, AI agents, and your connected channels from one
@@ -92,10 +95,7 @@ export function AuthPage() {
         <div className="flex-1 flex items-center justify-center p-6 md:p-10">
           <div className="w-full max-w-[400px]">
             <div className="flex items-center gap-2 mb-8 lg:hidden">
-              <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center text-white">
-                <Sparkles className="w-5 h-5" />
-              </div>
-              <span className="font-bold text-xl text-primary">WaBiz</span>
+              <img src={PRODUCT_LOGO} alt={PRODUCT_NAME} className="h-12 w-12 object-contain" />
             </div>
 
             <h2 className="text-xl font-bold text-gray-900">Log in to your workspace</h2>
@@ -150,14 +150,14 @@ export function AuthPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 rounded-xl bg-primary text-white text-sm font-bold hover:bg-primary-hover transition-colors disabled:opacity-60 shadow-sm cursor-pointer"
+                className="w-full py-3 rounded-xl bg-brand-gradient hover:bg-brand-gradient-hover text-white text-sm font-bold transition-all disabled:opacity-60 shadow-sm cursor-pointer"
               >
                 {loading ? 'Please wait…' : 'Log in'}
               </button>
             </form>
 
             <p className="text-sm text-center text-gray-500 mt-6">
-              New to WaBiz?{' '}
+              New to ConvoSync?{' '}
               <Link to="/signup" className="font-semibold text-primary hover:underline cursor-pointer">
                 Start free trial
               </Link>

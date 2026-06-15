@@ -59,7 +59,7 @@ export function BillingAddonsPanel({ addonCatalog, onPurchased }: BillingAddonsP
         order_id: order.orderId,
         amount: order.amountPaise,
         currency: 'INR',
-        name: 'WaBiz',
+        name: 'ConvoSync',
         description: `${entry.label} add-on`,
         theme: { color: '#0284c7' },
         onSuccess: async (response) => {

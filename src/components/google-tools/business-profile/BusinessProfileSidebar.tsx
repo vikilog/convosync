@@ -81,7 +81,7 @@ export function BusinessProfileSidebar({
 
       <div className="p-4 mt-auto border-t border-slate-200 text-xs text-gray-400 flex items-center gap-1.5">
         <MapPin className="w-3 h-3" />
-        WaBiz Local
+        ConvoSync Local
       </div>
     </aside>
   );

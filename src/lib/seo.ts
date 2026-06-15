@@ -60,7 +60,7 @@ const TAB_SEO: Record<AppTab, Omit<PageSeo, 'path'>> = {
   },
   facebook: {
     title: 'Facebook Pages',
-    description: 'Manage Facebook Page posts, comments, and page insights from WaBiz.',
+    description: 'Manage Facebook Page posts, comments, and page insights from ConvoSync.',
   },
   pay: {
     title: 'WhatsApp Pay',
@@ -72,7 +72,7 @@ const TAB_SEO: Record<AppTab, Omit<PageSeo, 'path'>> = {
   },
   integrations: {
     title: 'Integrations',
-    description: 'Connect CRM, spreadsheets, LMS, and webhooks to WaBiz.',
+    description: 'Connect CRM, spreadsheets, LMS, and webhooks to ConvoSync.',
   },
   'google-tools': {
     title: 'Google Tools',
@@ -100,7 +100,7 @@ export function seoForPath(
     return {
       title: 'WhatsApp Business for teams',
       description:
-        'WaBiz — shared inbox, AI agents, campaigns, and multi-channel messaging for growing businesses.',
+        'ConvoSync — shared inbox, AI agents, campaigns, and multi-channel messaging for growing businesses.',
       path: '/',
       robots: 'index, follow',
     };
@@ -109,7 +109,7 @@ export function seoForPath(
   if (pathname === '/login' || pathname.startsWith('/login')) {
     return {
       title: 'Sign in',
-      description: 'Sign in to your WaBiz workspace to manage WhatsApp Business.',
+      description: 'Sign in to your ConvoSync workspace to manage WhatsApp Business.',
       path: '/login',
       robots: PRIVATE_ROBOTS,
     };
@@ -118,9 +118,29 @@ export function seoForPath(
   if (pathname === '/signup' || pathname.startsWith('/signup')) {
     return {
       title: 'Start free trial',
-      description: 'Create your WaBiz account and start your 14-day free trial. No credit card required.',
+      description: 'Create your ConvoSync account and start your 14-day free trial. No credit card required.',
       path: '/signup',
       robots: PRIVATE_ROBOTS,
+    };
+  }
+
+  if (pathname === '/privacy') {
+    return {
+      title: 'Privacy Policy',
+      description:
+        'Learn how ConvoSync collects, uses, and protects personal data across our omnichannel communication platform.',
+      path: '/privacy',
+      robots: 'index, follow',
+    };
+  }
+
+  if (pathname === '/terms') {
+    return {
+      title: 'Terms of Service',
+      description:
+        'Terms and conditions for using ConvoSync, including subscriptions, acceptable use, and platform integrations.',
+      path: '/terms',
+      robots: 'index, follow',
     };
   }
 
@@ -167,7 +187,7 @@ export function seoForPath(
     const sectionLabel = SETTINGS_SECTION_TITLES[section];
     return {
       title: `Settings — ${sectionLabel}`,
-      description: `Manage ${sectionLabel.toLowerCase()} for your WaBiz workspace.`,
+      description: `Manage ${sectionLabel.toLowerCase()} for your ConvoSync workspace.`,
       path: pathname,
       robots: PRIVATE_ROBOTS,
     };

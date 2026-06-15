@@ -44,7 +44,7 @@ export const ACCOUNT_TYPES: { id: AccountType; label: string; description: strin
   {
     id: 'company',
     label: 'Company',
-    description: 'A business or team using WaBiz for customer communication.',
+    description: 'A business or team using ConvoSync for customer communication.',
   },
   {
     id: 'freelancer',

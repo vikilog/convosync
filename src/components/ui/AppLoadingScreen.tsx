@@ -1,4 +1,4 @@
-import { Sparkles } from 'lucide-react';
+import { PRODUCT_LOGO, PRODUCT_NAME } from '../../lib/brand';
 
 type AppLoadingScreenProps = {
   message?: string;
@@ -38,7 +38,11 @@ function AnimatedLoader({ compact = false }: { compact?: boolean }) {
       <div
         className={`app-loader-pulse relative flex ${innerSize} items-center justify-center rounded-2xl border border-primary/20 bg-white shadow-[0_8px_32px_rgba(2,132,199,0.16)]`}
       >
-        <Sparkles className={`${iconSize} text-primary`} strokeWidth={2} />
+        <img
+          src={PRODUCT_LOGO}
+          alt={PRODUCT_NAME}
+          className={`${iconSize} object-contain`}
+        />
       </div>
     </div>
   );
@@ -64,7 +68,7 @@ function isLoadingMessage(message: string) {
 
 export function AppLoadingScreen({
   message = 'Loading',
-  brand = 'WaBiz',
+  brand = 'ConvoSync',
   variant = 'fullscreen',
   title,
 }: AppLoadingScreenProps) {

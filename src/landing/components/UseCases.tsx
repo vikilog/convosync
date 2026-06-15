@@ -52,16 +52,16 @@ export default function UseCases() {
         </div>
 
         {/* 6 Industry tabs picker bar */}
-        <div className="flex overflow-x-auto pb-3 gap-2 border-b border-gray-100 mb-12 scrollbar-none">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:flex lg:flex-nowrap lg:overflow-x-auto pb-3 gap-2 border-b border-gray-100 mb-12 scrollbar-none">
           {USE_CASES.map((uc) => {
             const isActive = activeIndustryId === uc.id;
             return (
               <button
                 key={uc.id}
                 onClick={() => setActiveIndustryId(uc.id)}
-                className={`flex items-center space-x-2 px-5 py-3 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                className={`flex w-full lg:w-auto lg:shrink-0 items-center justify-center lg:justify-start space-x-2 px-4 py-3 rounded-xl text-xs font-bold lg:whitespace-nowrap transition-all cursor-pointer ${
                   isActive 
-                    ? 'bg-brand-indigo text-white shadow-md shadow-brand-indigo/15' 
+                    ? 'bg-brand-gradient text-white shadow-md shadow-brand-purple/20' 
                     : 'bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                 }`}
               >

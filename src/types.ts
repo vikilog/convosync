@@ -407,7 +407,7 @@ export interface QuickCampaign {
 
 export const CURRENT_USER: UserProfile = {
   name: 'Vikas Sharma',
-  email: 'vikas@wabiz.in',
+  email: 'vikas@convosync.io',
   role: 'Admin',
   avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCNh8W4QIUaPqGa12B6lyYPP1sKBFcEYqw1g9SpV4Ro5SsAhXuLNrI-NloR2HA4COlxiPWXqNSSmYc5kgeu3q0cW_jj2RZj4qupszOTaUfSSrMgGyQGHvvJ6EzXidX6m9GBA_-SnuD6jr3XHUFgfeosw-cpjpljFoz3QvozMbZDr1YBJxnlOAgBr3EBM3PV60NM4jo8T6SC4gk35NGyDyu9ASAAMe2gkab94E3dkCh2cn1SJIzAHKy3VJeiBWkVt9EuuVX-IHTRliKB'
 };
@@ -417,7 +417,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     id: 'agent_1',
     name: 'Ananya Patel',
     initials: 'AP',
-    email: 'ananya@wabiz.in',
+    email: 'ananya@convosync.io',
     conversationsCount: 1240,
     csat: 4.8,
     avgResponse: '3m 15s',
@@ -427,7 +427,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     id: 'agent_2',
     name: 'Rahul Kumar',
     initials: 'RK',
-    email: 'rahul.k@wabiz.in',
+    email: 'rahul.k@convosync.io',
     conversationsCount: 982,
     csat: 4.2,
     avgResponse: '5m 45s',
@@ -437,7 +437,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     id: 'agent_3',
     name: 'Sneha Das',
     initials: 'SD',
-    email: 'sneha.das@wabiz.in',
+    email: 'sneha.das@convosync.io',
     conversationsCount: 1056,
     csat: 4.9,
     avgResponse: '2m 50s',

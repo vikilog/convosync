@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { api, formatCatchError, getUserRole } from '../../lib/api';
 
-type AiProviderMode = 'wabiz' | 'byok';
+type AiProviderMode = 'convosync' | 'byok';
 type AiProviderType = 'openai' | 'anthropic' | 'custom';
 
 type AiProviderConfig = {
@@ -63,14 +63,14 @@ export function AiProviderPanel() {
   const [success, setSuccess] = useState<string | null>(null);
   const [config, setConfig] = useState<AiProviderConfig | null>(null);
 
-  const [mode, setMode] = useState<AiProviderMode>('wabiz');
+  const [mode, setMode] = useState<AiProviderMode>('convosync');
   const [provider, setProvider] = useState<AiProviderType>('openai');
   const [model, setModel] = useState('gpt-4o-mini');
   const [apiKey, setApiKey] = useState('');
   const [baseUrl, setBaseUrl] = useState('');
 
   const modelOptions = useMemo(() => {
-    if (mode === 'wabiz' && config?.model) return [config.model];
+    if (mode === 'convosync' && config?.model) return [config.model];
     return PROVIDER_MODELS[provider] ?? PROVIDER_MODELS.openai;
   }, [config?.model, mode, provider]);
 
@@ -137,8 +137,8 @@ export function AiProviderPanel() {
         const label =
           res.provider && res.mode === 'byok'
             ? PROVIDER_LABELS[res.provider]
-            : res.mode === 'wabiz'
-              ? 'WaBiz hosted (OpenAI)'
+            : res.mode === 'convosync'
+              ? 'ConvoSync hosted (OpenAI)'
               : 'Provider';
         setSuccess(`Connection OK (${label}): ${res.message}. Save settings to apply changes.`);
       } else {
@@ -152,7 +152,7 @@ export function AiProviderPanel() {
   };
 
   const canTest =
-    mode === 'wabiz' || Boolean(apiKey.trim()) || Boolean(config?.hasApiKey);
+    mode === 'convosync' || Boolean(apiKey.trim()) || Boolean(config?.hasApiKey);
 
   if (loading) {
     return (
@@ -173,7 +173,7 @@ export function AiProviderPanel() {
           <div>
             <h3 className="text-base font-bold text-gray-900">AI Provider</h3>
             <p className="mt-1 text-sm text-gray-500">
-              Use WaBiz-hosted OpenAI tokens from your plan, or bring your own API key (BYOK) for
+              Use ConvoSync-hosted OpenAI tokens from your plan, or bring your own API key (BYOK) for
               OpenAI, Claude, or a local OpenAI-compatible server.
             </p>
           </div>
@@ -210,8 +210,8 @@ export function AiProviderPanel() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {(
               [
-                { id: 'wabiz' as const, title: 'WaBiz hosted', desc: 'Uses platform OpenAI key & plan quota' },
-                { id: 'byok' as const, title: 'Bring your own key', desc: 'Your API key; no WaBiz token quota' },
+                { id: 'convosync' as const, title: 'ConvoSync hosted', desc: 'Uses platform OpenAI key & plan quota' },
+                { id: 'byok' as const, title: 'Bring your own key', desc: 'Your API key; no ConvoSync token quota' },
               ] as const
             ).map((opt) => (
               <button
@@ -320,7 +320,7 @@ export function AiProviderPanel() {
           </>
         )}
 
-        {mode === 'wabiz' && (
+        {mode === 'convosync' && (
           <div className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 text-sm text-gray-600">
             Model: <span className="font-semibold text-gray-800">{model}</span>
             {config?.hasApiKey ? (

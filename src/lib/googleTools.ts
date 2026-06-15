@@ -31,7 +31,7 @@ export function isGoogleToolsMainTab(value: string): value is GoogleToolsMainTab
   return (GOOGLE_TOOLS_MAIN_TABS as readonly string[]).includes(value);
 }
 
-export const GOOGLE_TOOLS_CHANGED_EVENT = 'wabiz:google-tools-changed';
+export const GOOGLE_TOOLS_CHANGED_EVENT = 'convosync:google-tools-changed';
 
 export const GOOGLE_TOOL_META: Record<
   GoogleToolProduct,

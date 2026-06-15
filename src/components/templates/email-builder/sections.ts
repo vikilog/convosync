@@ -2,7 +2,7 @@ import type { EmailBlock } from './types';
 import { createBlock } from './blockRegistry';
 import { getWorkspaceId } from '../../../lib/api';
 
-const STORAGE_KEY = 'wabiz_email_sections';
+const STORAGE_KEY = 'convosync_email_sections';
 
 export type SavedSection = {
   id: string;
@@ -60,7 +60,7 @@ export const BUILTIN_SECTIONS: { name: string; blocks: EmailBlock[] }[] = [
     name: 'Social proof',
     blocks: (() => {
       const t = createBlock('text');
-      t.props.content = '"WaBiz helped us 3× our reply rate." — Happy Customer';
+      t.props.content = '"ConvoSync helped us 3× our reply rate." — Happy Customer';
       t.props.align = 'center';
       return [t, createBlock('divider')];
     })(),

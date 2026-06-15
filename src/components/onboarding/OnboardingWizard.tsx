@@ -67,7 +67,7 @@ function stateToForm(state: OnboardingState): FormState {
 function validateStep(step: number, form: FormState): string | null {
   switch (step) {
     case 1:
-      return form.accountType ? null : 'Please select how you plan to use WaBiz.';
+      return form.accountType ? null : 'Please select how you plan to use ConvoSync.';
     case 2:
       if (!form.name.trim() || form.name.trim().length < 2) return 'Full name is required.';
       if (!form.phone.trim()) return 'Phone number is required.';
@@ -255,7 +255,7 @@ export function OnboardingWizard() {
             <Sparkles className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-sm font-bold text-primary">WaBiz setup</p>
+            <p className="text-sm font-bold text-primary">ConvoSync setup</p>
             <p className="text-xs text-gray-500">Tell us about yourself — takes about 3 minutes</p>
           </div>
         </div>
@@ -266,7 +266,7 @@ export function OnboardingWizard() {
           {currentStep === 1 && (
             <div className="space-y-5">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Welcome to WaBiz</h1>
+                <h1 className="text-2xl font-bold text-gray-900">Welcome to ConvoSync</h1>
                 <p className="mt-2 text-sm text-gray-500">
                   How will you be using the platform? This helps us tailor your workspace.
                 </p>
@@ -416,7 +416,7 @@ export function OnboardingWizard() {
           {currentStep === 4 && (
             <div className="space-y-5">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">What brings you to WaBiz?</h1>
+                <h1 className="text-2xl font-bold text-gray-900">What brings you to ConvoSync?</h1>
                 <p className="mt-2 text-sm text-gray-500">Select all that apply — we use this to personalize tips.</p>
               </div>
               <div className="grid gap-2 sm:grid-cols-2">
@@ -446,7 +446,7 @@ export function OnboardingWizard() {
             <div className="space-y-5">
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">How did you hear about us?</h1>
-                <p className="mt-2 text-sm text-gray-500">Optional — helps us improve how people discover WaBiz.</p>
+                <p className="mt-2 text-sm text-gray-500">Optional — helps us improve how people discover ConvoSync.</p>
               </div>
               <label className="block">
                 <span className="text-meta font-bold uppercase tracking-wide text-gray-500">Source</span>

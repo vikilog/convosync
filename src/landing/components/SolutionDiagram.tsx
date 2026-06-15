@@ -8,7 +8,7 @@ import {
   Check, MessageSquare, Instagram, Send, Mail, MessageCircle, 
   Sparkles, ShieldCheck, RefreshCw, Unlink
 } from 'lucide-react';
-import { PRODUCT_NAME } from '../brand';
+import { PRODUCT_NAME, PRODUCT_LOGO } from '../brand';
 
 interface ChannelNode {
   id: string;
@@ -113,10 +113,13 @@ export default function SolutionDiagram() {
           <div className="relative w-[340px] h-[340px] sm:w-[420px] sm:h-[420px] flex items-center justify-center bg-white/40 rounded-full border border-gray-100 shadow-inner p-10 select-none">
             
             {/* Center nucleus */}
-            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-brand-indigo border-4 border-white shadow-xl shadow-brand-indigo/40 flex flex-col items-center justify-center text-white z-20 hover:scale-105 transition-transform cursor-pointer relative group">
-              <span className="absolute -inset-2 bg-brand-indigo/10 rounded-full animate-ping -z-10 group-hover:animate-none" />
-              <div className="font-extrabold font-display text-lg sm:text-xl drop-shadow-md">{PRODUCT_NAME}</div>
-              <div className="text-[9px] uppercase font-mono tracking-wider opacity-90">Central</div>
+            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-white border-4 border-white shadow-xl shadow-brand-purple/25 flex items-center justify-center z-20 hover:scale-105 transition-transform cursor-pointer relative group ring-2 ring-brand-indigo/15">
+              <span className="absolute -inset-3 bg-brand-gradient opacity-20 rounded-full animate-ping -z-10 group-hover:animate-none" aria-hidden />
+              <img
+                src={PRODUCT_LOGO}
+                alt={PRODUCT_NAME}
+                className="w-[4.5rem] h-[4.5rem] sm:w-20 sm:h-20 object-contain"
+              />
             </div>
 
             {/* Orbit paths - SVGs */}

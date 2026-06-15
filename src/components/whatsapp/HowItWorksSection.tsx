@@ -73,7 +73,7 @@ export const HowItWorksSection: FC<HowItWorksSectionProps> = ({
                 <p className="text-sm font-black uppercase tracking-widest text-primary">
                   Platform
                 </p>
-                <h4 className="text-base font-black text-gray-950">WaBiz Dashboard</h4>
+                <h4 className="text-base font-black text-gray-950">ConvoSync Dashboard</h4>
               </div>
             </div>
             <FeatureList items={platformFeatures} />

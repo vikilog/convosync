@@ -16,10 +16,10 @@ import {
 } from './whatsapp';
 import WhatsAppEmbeddedSignup from './WhatsAppEmbeddedSignup';
 
-const CONNECTION_TYPE_STORAGE_KEY = 'wabiz_whatsapp_connection_type';
-const BUSINESS_API_ONBOARDING_STEP_KEY = 'wabiz_business_api_onboarding_step';
-const COEXISTENCE_ONBOARDING_STEP_KEY = 'wabiz_coexistence_onboarding_step';
-const PENDING_SETUP_SESSION_KEY = 'wabiz_whatsapp_pending_setup';
+const CONNECTION_TYPE_STORAGE_KEY = 'convosync_whatsapp_connection_type';
+const BUSINESS_API_ONBOARDING_STEP_KEY = 'convosync_business_api_onboarding_step';
+const COEXISTENCE_ONBOARDING_STEP_KEY = 'convosync_coexistence_onboarding_step';
+const PENDING_SETUP_SESSION_KEY = 'convosync_whatsapp_pending_setup';
 
 type NumbersFlowView =
   | 'selector'
@@ -146,7 +146,7 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
 
   useEffect(() => {
     if (!isActive) return;
-    if (!localStorage.getItem('wabiz_token')) {
+    if (!localStorage.getItem('convosync_token')) {
       setAccountsLoading(false);
       return;
     }
@@ -257,7 +257,7 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('whatsapp_connected') === '1') {
-      sessionStorage.removeItem('wabiz_onboarding');
+      sessionStorage.removeItem('convosync_onboarding');
       loadWhatsappAccounts({ silent: true }).then((accounts) => {
         setShowAddNumber(false);
         if (accounts.length > 0) {
@@ -680,7 +680,7 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
               <Globe className="w-4.5 h-4.5 text-primary" /> Integrated webhook configs
             </h4>
             <p className="text-xs text-gray-400 font-bold mt-1 leading-none">
-              On connect, WaBiz registers this callback with Meta via API. Use retry if you change
+              On connect, ConvoSync registers this callback with Meta via API. Use retry if you change
               your tunnel URL.
             </p>
           </div>

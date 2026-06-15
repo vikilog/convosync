@@ -131,14 +131,14 @@ export default function AiAgentsSpotlight({ onStartAgentDemo }: AiAgentsSpotligh
         </div>
 
         {/* 4 Agent Grid Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
           {AI_AGENTS_CONFIG.map((agent) => {
             const isSelected = selectedAgentId === agent.id;
             return (
               <button
                 key={agent.id}
                 onClick={() => setSelectedAgentId(agent.id)}
-                className={`text-left p-6 rounded-2xl transition-all cursor-pointer relative overflow-hidden group flex flex-col justify-between h-[230px] ${
+                className={`text-left p-6 rounded-2xl transition-all cursor-pointer relative overflow-hidden group flex flex-col justify-between min-h-[220px] md:min-h-[230px] ${
                   isSelected 
                     ? 'bg-[#151525] border-2 border-brand-indigo/60 shadow-xl shadow-brand-indigo/10' 
                     : 'bg-[#11111E]/85 border border-white/5 hover:border-white/10 hover:bg-[#131322]'
@@ -199,9 +199,9 @@ export default function AiAgentsSpotlight({ onStartAgentDemo }: AiAgentsSpotligh
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-12 h-[340px]">
+          <div className="grid grid-cols-1 md:grid-cols-12 md:min-h-[340px]">
             {/* Left suggested questions links */}
-            <div className="md:col-span-4 border-r border-white/5 bg-[#0E0E1B] p-4 flex flex-col justify-between">
+            <div className="md:col-span-4 border-b md:border-b-0 md:border-r border-white/5 bg-[#0E0E1B] p-4 flex flex-col justify-between">
               <div>
                 <p className="text-[9.5px] text-gray-400 uppercase tracking-widest font-extrabold mb-3 font-mono">Suggested Questions</p>
                 <div className="space-y-2">
@@ -267,7 +267,7 @@ export default function AiAgentsSpotlight({ onStartAgentDemo }: AiAgentsSpotligh
                 />
                 <button
                   type="submit"
-                  className="bg-brand-indigo hover:bg-brand-indigo/90 text-white p-2.5 rounded-xl text-xs font-semibold shrink-0 cursor-pointer"
+                  className="bg-brand-gradient hover:bg-brand-gradient-hover text-white p-2.5 rounded-xl text-xs font-semibold shrink-0 cursor-pointer"
                 >
                   <Send className="w-4 h-4" />
                 </button>
@@ -284,7 +284,7 @@ export default function AiAgentsSpotlight({ onStartAgentDemo }: AiAgentsSpotligh
           <button
             id="spot-cta-btn"
             onClick={onStartAgentDemo}
-            className="mt-4 inline-flex items-center space-x-2 bg-brand-indigo hover:bg-brand-indigo/90 text-white font-bold text-xs px-6 py-3 rounded-xl shadow-lg shadow-brand-indigo/25 transition-all cursor-pointer"
+            className="mt-4 inline-flex items-center space-x-2 bg-brand-gradient hover:bg-brand-gradient-hover text-white font-bold text-xs px-6 py-3 rounded-xl shadow-lg shadow-brand-purple/25 transition-all cursor-pointer"
           >
             <span>Create Your AI Agent</span>
             <ArrowRight className="w-3.5 h-3.5" />

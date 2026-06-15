@@ -1,4 +1,4 @@
-/** WaBiz template tags — same labels as backend / Meta mapping. */
+/** ConvoSync template tags — same labels as backend / Meta mapping. */
 
 export const TEMPLATE_CATEGORIES = ['Utility', 'Marketing', 'Authentication'] as const;
 export type TemplateCategory = (typeof TEMPLATE_CATEGORIES)[number];

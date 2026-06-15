@@ -170,7 +170,7 @@ export function PlanCustomizer({ pricingRules, initialQuote, onSaved }: PlanCust
         order_id: order.orderId,
         amount: order.amountPaise,
         currency: 'INR',
-        name: 'WaBiz',
+        name: 'ConvoSync',
         description: 'Custom plan — first month',
         theme: { color: '#0284c7' },
         onSuccess: async (response) => {
@@ -388,7 +388,7 @@ export function PlanCustomizer({ pricingRules, initialQuote, onSaved }: PlanCust
             const body = quote
               ? `Contacts: ${quote.contacts}\nAI agents: ${quote.aiAgents}\nTeam: ${quote.teamMembers}\nChannels: ${quote.channels}\nEmails/mo: ${quote.emails}\nMonthly: $${quote.monthlyTotal}`
               : '';
-            window.location.href = `mailto:support@wabiz.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            window.location.href = `mailto:support@convosync.io?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
           }}
           className="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50"
         >

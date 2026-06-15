@@ -1,0 +1,22 @@
+import {
+  PRODUCT_NAME,
+  COMPANY_NAME,
+  LEGAL_ENTITY,
+  PRODUCT_DOMAIN,
+  PRODUCT_LOGO,
+  PRIVACY_EMAIL,
+  LEGAL_EMAIL,
+} from '../landing/brand';
+
+export {
+  PRODUCT_NAME,
+  COMPANY_NAME,
+  LEGAL_ENTITY,
+  PRODUCT_DOMAIN,
+  PRODUCT_LOGO,
+  PRIVACY_EMAIL,
+  LEGAL_EMAIL,
+};
+
+export const SUPPORT_EMAIL = `support@${PRODUCT_DOMAIN}`;
+export const NOREPLY_EMAIL = `noreply@${PRODUCT_DOMAIN}`;

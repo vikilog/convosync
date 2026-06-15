@@ -1,6 +1,6 @@
-export const INBOX_UNREAD_TOTAL_EVENT = 'wabiz:inbox-unread-total';
-export const INBOX_MESSAGE_NOTIFICATION_EVENT = 'wabiz:inbox-message-notification';
-export const INBOX_OPEN_CONVERSATION_EVENT = 'wabiz:open-inbox-conversation';
+export const INBOX_UNREAD_TOTAL_EVENT = 'convosync:inbox-unread-total';
+export const INBOX_MESSAGE_NOTIFICATION_EVENT = 'convosync:inbox-message-notification';
+export const INBOX_OPEN_CONVERSATION_EVENT = 'convosync:open-inbox-conversation';
 
 export function dispatchInboxUnreadTotal(total: number) {
   window.dispatchEvent(

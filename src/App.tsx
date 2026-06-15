@@ -55,6 +55,8 @@ import {
 } from './lib/workspacePermissions';
 import { DocumentSeo } from './components/DocumentSeo';
 import { LandingPage } from './components/LandingPage';
+import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
+import { TermsOfServicePage } from './pages/TermsOfServicePage';
 import { InboxRealtimeBridge } from './components/InboxRealtimeBridge';
 import { OnboardingWizard } from './components/onboarding/OnboardingWizard';
 import { OnboardingGuard } from './components/onboarding/OnboardingGuard';
@@ -178,7 +180,7 @@ function AppShell() {
       case 'settings':
         return 'Settings';
       default:
-        return 'WaBiz Workspace';
+        return 'ConvoSync Workspace';
     }
   };
 
@@ -481,6 +483,8 @@ export default function App() {
         }
       />
       <Route path="/" element={<HomeRoute />} />
+      <Route path="/privacy" element={<PrivacyPolicyPage />} />
+      <Route path="/terms" element={<TermsOfServicePage />} />
       <Route
         path="/ai-agent/*"
         element={

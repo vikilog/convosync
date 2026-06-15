@@ -36,9 +36,9 @@ export type AuthSession = {
   activeWorkspaceId?: string;
 };
 
-const ONBOARDING_CACHE_KEY = 'wabiz_onboarding_cache';
+const ONBOARDING_CACHE_KEY = 'convosync_onboarding_cache';
 const ONBOARDING_CACHE_TTL_MS = 60_000;
-export const AUTH_CHANGED_EVENT = 'wabiz:auth-changed';
+export const AUTH_CHANGED_EVENT = 'convosync:auth-changed';
 
 function notifyAuthChanged() {
   if (typeof window !== 'undefined') {
@@ -59,7 +59,7 @@ export function subscribeAuth(callback: () => void) {
 
 export function readLoggedIn(): boolean {
   if (typeof window === 'undefined') return false;
-  return !!localStorage.getItem('wabiz_token');
+  return !!localStorage.getItem('convosync_token');
 }
 
 export function isLoggedIn(): boolean {
@@ -120,16 +120,16 @@ export function isOnboardingCacheFresh(cache: OnboardingCache | null) {
 }
 
 export function clearAuthSession() {
-  localStorage.removeItem('wabiz_token');
-  localStorage.removeItem('wabiz_workspace_id');
-  localStorage.removeItem('wabiz_user_id');
-  localStorage.removeItem('wabiz_user_name');
-  localStorage.removeItem('wabiz_user_email');
-  localStorage.removeItem('wabiz_user_role');
-  localStorage.removeItem('wabiz_user_permissions');
-  localStorage.removeItem('wabiz_user_inbox_scope');
-  localStorage.removeItem('wabiz_user_avatar');
+  localStorage.removeItem('convosync_token');
+  localStorage.removeItem('convosync_workspace_id');
+  localStorage.removeItem('convosync_user_id');
+  localStorage.removeItem('convosync_user_name');
+  localStorage.removeItem('convosync_user_email');
+  localStorage.removeItem('convosync_user_role');
+  localStorage.removeItem('convosync_user_permissions');
+  localStorage.removeItem('convosync_user_inbox_scope');
+  localStorage.removeItem('convosync_user_avatar');
   sessionStorage.removeItem(ONBOARDING_CACHE_KEY);
-  sessionStorage.removeItem('wabiz_onboarding');
+  sessionStorage.removeItem('convosync_onboarding');
   notifyAuthChanged();
 }

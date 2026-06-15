@@ -19,9 +19,9 @@ export function buildMetaOAuthDialogUrl(params: {
   return url.toString();
 }
 
-export const INSTAGRAM_OAUTH_REDIRECT_STORAGE_KEY = 'wabiz_instagram_oauth_redirect';
-export const MESSENGER_OAUTH_REDIRECT_STORAGE_KEY = 'wabiz_messenger_oauth_redirect';
-export const FACEBOOK_OAUTH_REDIRECT_STORAGE_KEY = 'wabiz_facebook_oauth_redirect';
+export const INSTAGRAM_OAUTH_REDIRECT_STORAGE_KEY = 'convosync_instagram_oauth_redirect';
+export const MESSENGER_OAUTH_REDIRECT_STORAGE_KEY = 'convosync_messenger_oauth_redirect';
+export const FACEBOOK_OAUTH_REDIRECT_STORAGE_KEY = 'convosync_facebook_oauth_redirect';
 
 export const FACEBOOK_PAGE_SCOPES = [
   'pages_show_list',
@@ -33,7 +33,7 @@ export const FACEBOOK_PAGE_SCOPES = [
   'business_management',
 ].join(',');
 
-export const META_ADS_OAUTH_REDIRECT_STORAGE_KEY = 'wabiz_meta_ads_oauth_redirect';
+export const META_ADS_OAUTH_REDIRECT_STORAGE_KEY = 'convosync_meta_ads_oauth_redirect';
 
 export const META_ADS_SCOPES = [
   'ads_read',

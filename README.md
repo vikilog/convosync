@@ -1,55 +1,20 @@
-# ConvoSync Frontend
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
+</div>
 
-React + Vite web app for **ConvoSync** — unified customer conversations across WhatsApp, Instagram, Messenger, email, campaigns, journeys, and AI agents.
+# Run and deploy your AI Studio app
 
-## Prerequisites
+This contains everything you need to run your app locally.
 
-- Node.js 20+
-- ConvoSync backend API running (see backend repo)
+View your app in AI Studio: https://ai.studio/apps/515ab63b-24ed-4279-86c1-5e45af6c24bc
 
-## Setup
+## Run Locally
 
-```bash
-npm install
-cp .env.example .env
-# Edit .env — set VITE_API_URL and VITE_SOCKET_URL
-npm run dev
-```
+**Prerequisites:**  Node.js
 
-App runs at [http://localhost:3000](http://localhost:3000).
 
-## Environment
-
-| Variable | Description |
-|----------|-------------|
-| `VITE_API_URL` | Backend API base URL (include `/api`) |
-| `VITE_SOCKET_URL` | Socket.IO server URL |
-| `VITE_APP_URL` | Public frontend URL (SEO / OAuth redirects) |
-| `VITE_META_*` | Meta / WhatsApp embedded signup |
-
-See `.env.example` for the full list.
-
-## Scripts
-
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Development server |
-| `npm run build` | Production build → `dist/` |
-| `npm run preview` | Preview production build |
-| `npm run lint` | TypeScript check |
-
-## Docker
-
-```bash
-docker build -t convosync-frontend .
-docker run -p 8080:80 convosync-frontend
-```
-
-Build args: `VITE_API_URL`, `VITE_SOCKET_URL`, `VITE_APP_URL`, and Meta OAuth variables (see `Dockerfile`).
-
-## Repository
-
-- Frontend: [github.com/vikilog/convosync](https://github.com/vikilog/convosync)
-- Backend: [github.com/vikilog/convosync-api](https://github.com/vikilog/convosync-api)
-
-This frontend was split from the main ConvoSync monorepo.
+1. Install dependencies:
+   `npm install`
+2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+3. Run the app:
+   `npm run dev`

@@ -4,15 +4,14 @@
  */
 
 import { 
-  ArrowRight, PhoneCall, Sparkles, MessageSquare, Instagram, Send, Mail, CheckCircle2 
+  ArrowRight, Sparkles, MessageSquare, Instagram, Send, Mail, CheckCircle2 
 } from 'lucide-react';
 
 interface FinalCtaProps {
   onStartFree: () => void;
-  onBookDemo: () => void;
 }
 
-export default function FinalCta({ onStartFree, onBookDemo }: FinalCtaProps) {
+export default function FinalCta({ onStartFree }: FinalCtaProps) {
   return (
     <section id="final-cta" className="bg-[#0A0A12] py-24 relative overflow-hidden text-white text-center">
       
@@ -44,19 +43,10 @@ export default function FinalCta({ onStartFree, onBookDemo }: FinalCtaProps) {
           <button
             id="last-cta-start"
             onClick={onStartFree}
-            className="w-full bg-brand-indigo hover:bg-brand-indigo/90 text-white font-semibold text-xs sm:text-sm px-6 py-4 rounded-xl shadow-xl shadow-brand-indigo/35 hover:-translate-y-0.5 transition-all flex items-center justify-center space-x-1.5 cursor-pointer"
+            className="w-full bg-brand-gradient hover:bg-brand-gradient-hover text-white font-semibold text-xs sm:text-sm px-6 py-4 rounded-xl shadow-xl shadow-brand-purple/35 hover:-translate-y-0.5 transition-all flex items-center justify-center space-x-1.5 cursor-pointer"
           >
             <span>Start Free Trial — No Card Needed</span>
             <ArrowRight className="w-4 h-4" />
-          </button>
-          
-          <button
-            id="last-cta-demo"
-            onClick={onBookDemo}
-            className="w-full hover:bg-white/5 text-white font-semibold text-xs sm:text-sm px-6 py-4 rounded-xl border border-white/10 hover:border-white/20 transition-all flex items-center justify-center space-x-1.5 cursor-pointer"
-          >
-            <PhoneCall className="w-4 h-4 text-brand-indigo" />
-            <span>Book a Live Demo</span>
           </button>
         </div>
 

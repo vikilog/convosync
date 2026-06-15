@@ -4,7 +4,7 @@ import { useEmailBuilderStore } from './store';
 import { CanvasBlock } from './CanvasBlock';
 import type { BlockType } from './types';
 
-const PALETTE_TYPE = 'application/x-wabiz-block-type';
+const PALETTE_TYPE = 'application/x-convosync-block-type';
 
 export function BuilderCanvas() {
   const blocks = useEmailBuilderStore((s) => s.blocks);

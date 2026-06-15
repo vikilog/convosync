@@ -44,7 +44,7 @@ export default function PricingSection({ onSelectPlan }: PricingSectionProps) {
             onClick={() => setIsAnnual(!isAnnual)}
             className="w-14 h-7 bg-brand-indigo/10 rounded-full p-1 border border-brand-indigo/20 flex items-center justify-start cursor-pointer transition-all focus:outline-none"
           >
-            <div className={`w-5 h-5 bg-brand-indigo rounded-full transition-transform transform ${isAnnual ? 'translate-x-7' : 'translate-x-0'}`} />
+            <div className={`w-5 h-5 bg-brand-gradient rounded-full transition-transform transform ${isAnnual ? 'translate-x-7' : 'translate-x-0'}`} />
           </button>
           <div className="flex items-center space-x-1.5">
             <span className={`text-xs sm:text-sm font-semibold transition-colors ${isAnnual ? 'text-brand-indigo font-extrabold' : 'text-gray-400'}`}>Billed Annually</span>
@@ -69,7 +69,7 @@ export default function PricingSection({ onSelectPlan }: PricingSectionProps) {
               >
                 {/* Popular Pill badge */}
                 {isGrowth && (
-                  <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-brand-indigo text-white text-[10px] font-mono font-bold px-3 py-1.5 rounded-full uppercase tracking-widest flex items-center space-x-1">
+                  <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-brand-gradient text-white text-[10px] font-mono font-bold px-3 py-1.5 rounded-full uppercase tracking-widest flex items-center space-x-1">
                     <Sparkles className="w-3.5 h-3.5" />
                     <span>Recommended Plan</span>
                   </span>
@@ -113,7 +113,7 @@ export default function PricingSection({ onSelectPlan }: PricingSectionProps) {
                     onClick={() => onSelectPlan(plan.id, isAnnual)}
                     className={`w-full font-bold text-xs py-3.5 rounded-xl transition-all flex items-center justify-center cursor-pointer shadow-md shadow-brand-indigo/5 ${
                       isGrowth
-                        ? 'bg-brand-indigo hover:bg-brand-indigo/90 text-white shadow-brand-indigo/20'
+                        ? 'bg-brand-gradient hover:bg-brand-gradient-hover text-white shadow-brand-purple/25'
                         : 'bg-gray-50 hover:bg-gray-100 text-gray-800'
                     }`}
                   >

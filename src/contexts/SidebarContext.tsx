@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { LG_BREAKPOINT, useMediaQuery } from '../hooks/useBreakpoint';
 
-const STORAGE_KEY = 'wabiz:sidebar-collapsed';
+const STORAGE_KEY = 'convosync:sidebar-collapsed';
 
 export const SIDEBAR_WIDTH_EXPANDED = 220;
 export const SIDEBAR_WIDTH_COLLAPSED = 72;

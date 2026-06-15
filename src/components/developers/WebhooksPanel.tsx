@@ -243,7 +243,7 @@ export function WebhooksPanel() {
               <h4 className="text-sm font-bold text-gray-900">Incoming webhook</h4>
               <p className="text-xs text-gray-500 mt-1">
                 Unique URL and secret per organization. Send events with header{' '}
-                <code className="text-xs bg-gray-100 px-1 rounded">X-WaBiz-Secret</code>.
+                <code className="text-xs bg-gray-100 px-1 rounded">X-ConvoSync-Secret</code>.
               </p>
             </div>
             <label className="flex items-center gap-2 text-sm font-semibold text-gray-600">

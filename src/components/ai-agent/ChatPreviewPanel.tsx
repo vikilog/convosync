@@ -78,7 +78,7 @@ type ChatApiResponse = {
   costInr: number;
   intent: string;
   stage: string;
-  billingMode?: 'wabiz' | 'byok';
+  billingMode?: 'convosync' | 'byok';
 };
 
 export const ChatPreviewPanel: React.FC<Props> = ({ agentId, avatarUrl: avatarUrlProp }) => {
@@ -93,7 +93,7 @@ export const ChatPreviewPanel: React.FC<Props> = ({ agentId, avatarUrl: avatarUr
     tokensUsed: number;
     costInr: number;
     fromCache: boolean;
-    billingMode?: 'wabiz' | 'byok';
+    billingMode?: 'convosync' | 'byok';
   } | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);

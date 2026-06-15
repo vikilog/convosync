@@ -5,7 +5,8 @@
 
 import { useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Check, Lock, Mail, Sparkles, User } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Lock, Mail, User } from 'lucide-react';
+import { PRODUCT_LOGO, PRODUCT_NAME } from '../lib/brand';
 import { api } from '../lib/api';
 import { applyAuthSession, userNeedsOnboarding } from '../lib/session';
 import { connectSocket } from '../lib/socket';
@@ -79,17 +80,19 @@ export function SignupPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex selection:bg-sky-50">
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-primary items-center justify-center p-12">
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-brand-gradient items-center justify-center p-12">
         <div className="absolute inset-0 dot-grid opacity-20" />
         <div className="relative z-10 max-w-md text-white">
-          <div className="w-14 h-14 rounded-2xl bg-white/15 flex items-center justify-center mb-8 backdrop-blur-sm">
-            <Sparkles className="w-8 h-8" />
-          </div>
+          <img
+            src={PRODUCT_LOGO}
+            alt={PRODUCT_NAME}
+            className="h-14 w-14 mb-8 object-contain"
+          />
           <p className="text-sm font-bold uppercase tracking-widest text-white/70">
             14-day free trial
           </p>
           <h1 className="text-3xl font-black tracking-tight leading-tight mt-2">
-            Start your WaBiz workspace in minutes
+            Start your ConvoSync workspace in minutes
           </h1>
           <p className="mt-4 text-white/80 text-sm leading-relaxed">
             Create your account, then complete a short setup wizard for your company, goals, and
@@ -124,10 +127,7 @@ export function SignupPage() {
         <div className="flex-1 flex items-center justify-center p-6 md:p-10">
           <div className="w-full max-w-[420px]">
             <div className="flex items-center gap-2 mb-6 lg:hidden">
-              <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center text-white">
-                <Sparkles className="w-5 h-5" />
-              </div>
-              <span className="font-bold text-xl text-primary">WaBiz</span>
+              <img src={PRODUCT_LOGO} alt={PRODUCT_NAME} className="h-12 w-12 object-contain" />
             </div>
 
             <div className="inline-flex items-center gap-2 rounded-full border border-sky-100 bg-sky-50 px-3 py-1 text-sm font-bold uppercase tracking-wider text-primary mb-4">
@@ -207,7 +207,7 @@ export function SignupPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 rounded-xl bg-primary text-white text-sm font-bold hover:bg-primary-hover transition-colors disabled:opacity-60 shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-3 rounded-xl bg-brand-gradient hover:bg-brand-gradient-hover text-white text-sm font-bold transition-all disabled:opacity-60 shadow-sm flex items-center justify-center gap-2 cursor-pointer"
               >
                 {loading ? (
                   'Creating account…'
@@ -221,7 +221,15 @@ export function SignupPage() {
             </form>
 
             <p className="text-meta text-gray-400 text-center mt-4 leading-relaxed">
-              No credit card required. By signing up you agree to our terms and privacy policy.
+              No credit card required. By signing up you agree to our{' '}
+              <Link to="/terms" className="text-primary hover:underline">
+                Terms of Service
+              </Link>{' '}
+              and{' '}
+              <Link to="/privacy" className="text-primary hover:underline">
+                Privacy Policy
+              </Link>
+              .
             </p>
 
             <p className="text-sm text-center text-gray-500 mt-6">

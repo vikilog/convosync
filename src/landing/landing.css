@@ -23,7 +23,9 @@
   --text-badge: 0.625rem;
   --text-badge--line-height: 1;
 
-  --color-brand-indigo: #0284c7;
+  --color-brand-blue: #0095ff;
+  --color-brand-purple: #9d00ff;
+  --color-brand-indigo: #7a2fff;
   --color-channel-green: #25D366;
   --color-channel-pink: #E1306C;
   --color-channel-blue: #0084FF;

@@ -50,10 +50,10 @@ export default function FeaturesDeepDive() {
         </div>
 
         {/* Tab Selection Row */}
-        <div className="flex overflow-x-auto pb-3 gap-2 border-b border-gray-100 mb-14 scrollbar-none">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:flex lg:overflow-x-auto pb-3 gap-2 border-b border-gray-100 mb-14 scrollbar-none lg:flex-nowrap">
           <button
             onClick={() => setActiveTab('inbox')}
-            className={`flex items-center space-x-2 px-5 py-3.5 rounded-lg text-sm font-semibold whitespace-nowrap cursor-pointer transition-all ${
+            className={`flex w-full lg:w-auto lg:shrink-0 items-center justify-center lg:justify-start space-x-2 px-4 sm:px-5 py-3 rounded-lg text-xs sm:text-sm font-semibold lg:whitespace-nowrap cursor-pointer transition-all ${
               activeTab === 'inbox' 
                 ? 'bg-brand-indigo/10 text-brand-indigo border-b-2 border-brand-indigo' 
                 : 'text-gray-500 hover:text-gray-800'
@@ -65,7 +65,7 @@ export default function FeaturesDeepDive() {
           
           <button
             onClick={() => setActiveTab('agents')}
-            className={`flex items-center space-x-2 px-5 py-3.5 rounded-lg text-sm font-semibold whitespace-nowrap cursor-pointer transition-all ${
+            className={`flex w-full lg:w-auto lg:shrink-0 items-center justify-center lg:justify-start space-x-2 px-4 sm:px-5 py-3 rounded-lg text-xs sm:text-sm font-semibold lg:whitespace-nowrap cursor-pointer transition-all ${
               activeTab === 'agents' 
                 ? 'bg-brand-indigo/10 text-brand-indigo border-b-2 border-brand-indigo' 
                 : 'text-gray-500 hover:text-gray-800'
@@ -77,7 +77,7 @@ export default function FeaturesDeepDive() {
 
           <button
             onClick={() => setActiveTab('campaigns')}
-            className={`flex items-center space-x-2 px-5 py-3.5 rounded-lg text-sm font-semibold whitespace-nowrap cursor-pointer transition-all ${
+            className={`flex w-full lg:w-auto lg:shrink-0 items-center justify-center lg:justify-start space-x-2 px-4 sm:px-5 py-3 rounded-lg text-xs sm:text-sm font-semibold lg:whitespace-nowrap cursor-pointer transition-all ${
               activeTab === 'campaigns' 
                 ? 'bg-brand-indigo/10 text-brand-indigo border-b-2 border-brand-indigo' 
                 : 'text-gray-500 hover:text-gray-800'
@@ -89,7 +89,7 @@ export default function FeaturesDeepDive() {
 
           <button
             onClick={() => setActiveTab('journeys')}
-            className={`flex items-center space-x-2 px-5 py-3.5 rounded-lg text-sm font-semibold whitespace-nowrap cursor-pointer transition-all ${
+            className={`flex w-full lg:w-auto lg:shrink-0 items-center justify-center lg:justify-start space-x-2 px-4 sm:px-5 py-3 rounded-lg text-xs sm:text-sm font-semibold lg:whitespace-nowrap cursor-pointer transition-all ${
               activeTab === 'journeys' 
                 ? 'bg-brand-indigo/10 text-brand-indigo border-b-2 border-brand-indigo' 
                 : 'text-gray-500 hover:text-gray-800'
@@ -101,7 +101,7 @@ export default function FeaturesDeepDive() {
 
           <button
             onClick={() => setActiveTab('analytics')}
-            className={`flex items-center space-x-2 px-5 py-3.5 rounded-lg text-sm font-semibold whitespace-nowrap cursor-pointer transition-all ${
+            className={`flex w-full lg:w-auto lg:shrink-0 items-center justify-center lg:justify-start space-x-2 px-4 sm:px-5 py-3 rounded-lg text-xs sm:text-sm font-semibold lg:whitespace-nowrap cursor-pointer transition-all ${
               activeTab === 'analytics' 
                 ? 'bg-brand-indigo/10 text-brand-indigo border-b-2 border-brand-indigo' 
                 : 'text-gray-500 hover:text-gray-800'
@@ -308,7 +308,7 @@ export default function FeaturesDeepDive() {
                       />
                       <button 
                         type="submit"
-                        className="bg-brand-indigo hover:bg-brand-indigo/90 text-white px-2.5 py-1 text-xs font-semibold rounded shrink-0 cursor-pointer"
+                        className="bg-brand-gradient hover:bg-brand-gradient-hover text-white px-2.5 py-1 text-xs font-semibold rounded shrink-0 cursor-pointer"
                       >
                         <Plus className="w-4 h-4" />
                       </button>
@@ -357,11 +357,11 @@ export default function FeaturesDeepDive() {
                   
                   {/* Step indicators */}
                   <div className="flex items-center space-x-1.5 text-[9px] font-mono text-gray-400">
-                    <button onClick={() => setWizardStep(1)} className={`px-2 py-0.5 rounded cursor-pointer ${wizardStep === 1 ? 'bg-brand-indigo text-white font-bold' : 'bg-white/5'}`}>1. Segment</button>
+                    <button onClick={() => setWizardStep(1)} className={`px-2 py-0.5 rounded cursor-pointer ${wizardStep === 1 ? 'bg-brand-gradient text-white font-bold' : 'bg-white/5'}`}>1. Segment</button>
                     <ChevronRight className="w-2.5 h-2.5" />
-                    <button onClick={() => setWizardStep(2)} className={`px-2 py-0.5 rounded cursor-pointer ${wizardStep === 2 ? 'bg-brand-indigo text-white font-bold' : 'bg-white/5'}`}>2. Craft</button>
+                    <button onClick={() => setWizardStep(2)} className={`px-2 py-0.5 rounded cursor-pointer ${wizardStep === 2 ? 'bg-brand-gradient text-white font-bold' : 'bg-white/5'}`}>2. Craft</button>
                     <ChevronRight className="w-2.5 h-2.5" />
-                    <button onClick={() => setWizardStep(3)} className={`px-2 py-0.5 rounded cursor-pointer ${wizardStep === 3 ? 'bg-brand-indigo text-white font-bold' : 'bg-white/5'}`}>3. Blast</button>
+                    <button onClick={() => setWizardStep(3)} className={`px-2 py-0.5 rounded cursor-pointer ${wizardStep === 3 ? 'bg-brand-gradient text-white font-bold' : 'bg-white/5'}`}>3. Blast</button>
                   </div>
                 </div>
 
@@ -411,7 +411,7 @@ export default function FeaturesDeepDive() {
                         </div>
                         <div>
                           <p className="text-xl font-bold text-brand-indigo">₩0.00</p>
-                          <p className="text-[9px] text-gray-500 font-mono">WABIZ FEE</p>
+                          <p className="text-[9px] text-gray-500 font-mono">CONVOSYNC FEE</p>
                         </div>
                       </div>
                     </div>
@@ -423,7 +423,7 @@ export default function FeaturesDeepDive() {
                   <span>Template Status: APPROVED BY META</span>
                   <button 
                     onClick={() => setWizardStep(wizardStep === 3 ? 1 : (wizardStep + 1) as 1 | 2 | 3)} 
-                    className="p-1 px-3 bg-brand-indigo hover:bg-brand-indigo/90 text-white rounded text-xs font-semibold cursor-pointer shrink-0"
+                    className="p-1 px-3 bg-brand-gradient hover:bg-brand-gradient-hover text-white rounded text-xs font-semibold cursor-pointer shrink-0"
                   >
                     Next Wizard Step
                   </button>

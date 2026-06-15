@@ -9,7 +9,7 @@ function apiUrl(path: string): string {
 }
 
 function getToken() {
-  return localStorage.getItem('wabiz_token');
+  return localStorage.getItem('convosync_token');
 }
 
 function authHeaders(extra?: Record<string, string>): Record<string, string> {
@@ -37,63 +37,63 @@ export function formatCatchError(err: unknown): string {
 }
 
 export function setToken(token: string) {
-  localStorage.setItem('wabiz_token', token);
+  localStorage.setItem('convosync_token', token);
 }
 
 export function getWorkspaceId() {
-  return localStorage.getItem('wabiz_workspace_id');
+  return localStorage.getItem('convosync_workspace_id');
 }
 
 export function setWorkspaceId(id: string) {
-  localStorage.setItem('wabiz_workspace_id', id);
+  localStorage.setItem('convosync_workspace_id', id);
 }
 
 export function setUserId(id: string) {
-  localStorage.setItem('wabiz_user_id', id);
+  localStorage.setItem('convosync_user_id', id);
 }
 
 export function getUserId() {
-  return localStorage.getItem('wabiz_user_id');
+  return localStorage.getItem('convosync_user_id');
 }
 
 function notifyProfileUpdated() {
   if (typeof window !== 'undefined') {
-    window.dispatchEvent(new CustomEvent('wabiz:profile-updated'));
+    window.dispatchEvent(new CustomEvent('convosync:profile-updated'));
   }
 }
 
 export function setUserName(name: string) {
-  localStorage.setItem('wabiz_user_name', name);
+  localStorage.setItem('convosync_user_name', name);
   notifyProfileUpdated();
 }
 
 export function getUserName() {
-  return localStorage.getItem('wabiz_user_name');
+  return localStorage.getItem('convosync_user_name');
 }
 
 export function setUserEmail(email: string) {
-  localStorage.setItem('wabiz_user_email', email);
+  localStorage.setItem('convosync_user_email', email);
 }
 
 export function getUserEmail() {
-  return localStorage.getItem('wabiz_user_email');
+  return localStorage.getItem('convosync_user_email');
 }
 
 export function setUserRole(role: string) {
-  localStorage.setItem('wabiz_user_role', role);
+  localStorage.setItem('convosync_user_role', role);
 }
 
 export function getUserRole() {
-  return localStorage.getItem('wabiz_user_role');
+  return localStorage.getItem('convosync_user_role');
 }
 
 export function setUserPermissions(permissions: string[]) {
-  localStorage.setItem('wabiz_user_permissions', JSON.stringify(permissions));
+  localStorage.setItem('convosync_user_permissions', JSON.stringify(permissions));
 }
 
 export function getUserPermissions(): string[] {
   try {
-    const raw = localStorage.getItem('wabiz_user_permissions');
+    const raw = localStorage.getItem('convosync_user_permissions');
     if (!raw) return [];
     const parsed = JSON.parse(raw) as unknown;
     return Array.isArray(parsed) ? parsed.filter((p) => typeof p === 'string') : [];
@@ -104,15 +104,15 @@ export function getUserPermissions(): string[] {
 
 export function setUserInboxScope(scope: unknown) {
   if (scope === undefined || scope === null) {
-    localStorage.removeItem('wabiz_user_inbox_scope');
+    localStorage.removeItem('convosync_user_inbox_scope');
     return;
   }
-  localStorage.setItem('wabiz_user_inbox_scope', JSON.stringify(scope));
+  localStorage.setItem('convosync_user_inbox_scope', JSON.stringify(scope));
 }
 
 export function getUserInboxScope(): unknown {
   try {
-    const raw = localStorage.getItem('wabiz_user_inbox_scope');
+    const raw = localStorage.getItem('convosync_user_inbox_scope');
     if (!raw) return null;
     return JSON.parse(raw) as unknown;
   } catch {
@@ -122,15 +122,15 @@ export function getUserInboxScope(): unknown {
 
 export function setUserAvatar(avatar: string) {
   if (avatar) {
-    localStorage.setItem('wabiz_user_avatar', avatar);
+    localStorage.setItem('convosync_user_avatar', avatar);
   } else {
-    localStorage.removeItem('wabiz_user_avatar');
+    localStorage.removeItem('convosync_user_avatar');
   }
   notifyProfileUpdated();
 }
 
 export function getUserAvatar() {
-  return localStorage.getItem('wabiz_user_avatar');
+  return localStorage.getItem('convosync_user_avatar');
 }
 
 async function get(path: string, params?: Record<string, string>) {

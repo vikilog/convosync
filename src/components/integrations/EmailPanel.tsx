@@ -25,7 +25,7 @@ type EmailTab = 'domains' | 'senders' | 'providers' | 'logs';
 
 type EmailProviderConfig = {
   id: string;
-  provider: 'WABIZ_MANAGED' | 'RESEND' | 'AWS_SES' | 'SENDGRID' | 'SMTP';
+  provider: 'CONVOSYNC_MANAGED' | 'RESEND' | 'AWS_SES' | 'SENDGRID' | 'SMTP';
   isDefault: boolean;
   status: string;
   hasCredentials: boolean;
@@ -36,7 +36,7 @@ type EmailProviderConfig = {
 type ProviderFormType = EmailProviderConfig['provider'];
 
 const PROVIDER_LABELS: Record<ProviderFormType, string> = {
-  WABIZ_MANAGED: 'WaBiz Managed (Resend)',
+  CONVOSYNC_MANAGED: 'ConvoSync Managed (Resend)',
   RESEND: 'Resend (BYOP)',
   AWS_SES: 'AWS SES',
   SENDGRID: 'SendGrid',
@@ -150,8 +150,8 @@ export function EmailPanel() {
   });
   const [testSend, setTestSend] = useState({
     to: '',
-    subject: 'WaBiz test email',
-    text: 'Hello from WaBiz Email Infrastructure.',
+    subject: 'ConvoSync test email',
+    text: 'Hello from ConvoSync Email Infrastructure.',
   });
   const [expandedDomainIds, setExpandedDomainIds] = useState<Set<string>>(new Set());
 
@@ -242,7 +242,7 @@ export function EmailPanel() {
       if (newSender.useSharedDomain) {
         const sharedDomain = sharedSenders[0]?.email.split('@')[1];
         if (!sharedDomain) {
-          setError('Enter a full email address (e.g. noreply@mailer.wabiz.app)');
+          setError('Enter a full email address (e.g. noreply@mail.convosync.io)');
           return;
         }
         email = `${raw}@${sharedDomain}`;
@@ -304,7 +304,7 @@ export function EmailPanel() {
 
   const usedProviderTypes = new Set(providers.map((p) => p.provider));
   const availableProviderTypes = (
-    ['WABIZ_MANAGED', 'RESEND', 'AWS_SES', 'SENDGRID', 'SMTP'] as ProviderFormType[]
+    ['CONVOSYNC_MANAGED', 'RESEND', 'AWS_SES', 'SENDGRID', 'SMTP'] as ProviderFormType[]
   ).filter((t) => !usedProviderTypes.has(t) || providerForm.provider === t);
 
   const resetProviderForm = () => {
@@ -327,7 +327,7 @@ export function EmailPanel() {
 
   const buildProviderConfigPayload = () => {
     switch (providerForm.provider) {
-      case 'WABIZ_MANAGED':
+      case 'CONVOSYNC_MANAGED':
         return {};
       case 'RESEND':
         return { apiKey: providerForm.apiKey.trim() };
@@ -714,7 +714,7 @@ export function EmailPanel() {
                   className="flex items-center justify-between text-xs bg-white rounded-lg px-3 py-2 border border-slate-200"
                 >
                   <span>
-                    <span className="font-bold text-gray-900">{s.displayName ?? 'WaBiz'}</span>
+                    <span className="font-bold text-gray-900">{s.displayName ?? 'ConvoSync'}</span>
                     <span className="text-gray-500 ml-2 font-mono">{s.email}</span>
                   </span>
                   {s.isDefault && (
@@ -736,7 +736,7 @@ export function EmailPanel() {
                 onChange={(e) => setNewSender((s) => ({ ...s, email: e.target.value }))}
                 placeholder={
                   newSender.useSharedDomain
-                    ? 'noreply or noreply@mailer.wabiz.app'
+                    ? 'noreply or noreply@mail.convosync.io'
                     : newSender.domainId
                       ? `support or support@${verifiedDomains.find((d) => d.id === newSender.domainId)?.domain ?? 'yourdomain.com'}`
                       : 'support@yourdomain.com'
@@ -758,7 +758,7 @@ export function EmailPanel() {
                   setNewSender((s) => ({ ...s, useSharedDomain: e.target.checked }))
                 }
               />
-              Use shared WaBiz domain
+              Use shared ConvoSync domain
             </label>
             {!newSender.useSharedDomain && (
               <select
@@ -868,7 +868,7 @@ export function EmailPanel() {
               )}
             </div>
             <p className="text-xs text-gray-400 mb-4">
-              Bring your own provider or use WaBiz Managed Resend. Credentials are encrypted at rest.
+              Bring your own provider or use ConvoSync Managed Resend. Credentials are encrypted at rest.
             </p>
 
             {providers.length === 0 ? (
@@ -896,7 +896,7 @@ export function EmailPanel() {
                               Default
                             </span>
                           )}
-                          {!p.hasCredentials && p.provider !== 'WABIZ_MANAGED' && (
+                          {!p.hasCredentials && p.provider !== 'CONVOSYNC_MANAGED' && (
                             <span className="text-xs text-amber-700">No credentials</span>
                           )}
                         </div>
@@ -929,7 +929,7 @@ export function EmailPanel() {
                         >
                           {p.status === 'disabled' ? 'Enable' : 'Disable'}
                         </button>
-                        {p.provider !== 'WABIZ_MANAGED' && (
+                        {p.provider !== 'CONVOSYNC_MANAGED' && (
                           <button
                             type="button"
                             disabled={saving}
@@ -1174,7 +1174,7 @@ export function EmailPanel() {
                 </div>
               ) : null}
 
-              {providerForm.provider === 'WABIZ_MANAGED' ? (
+              {providerForm.provider === 'CONVOSYNC_MANAGED' ? (
                 <p className="text-xs text-gray-500">
                   Uses platform Resend credentials. No API key required from your workspace.
                 </p>

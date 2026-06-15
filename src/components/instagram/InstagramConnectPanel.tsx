@@ -105,7 +105,7 @@ export function InstagramConnectPanel({
       <h4 className="text-xl font-black text-gray-950">Connect Instagram DMs</h4>
       <p className="mt-2 text-sm text-gray-600 font-medium max-w-xl">
         You will be redirected to Meta to authorize Instagram messaging. After approval, you return
-        here automatically and DMs flow into your WaBiz inbox.
+        here automatically and DMs flow into your ConvoSync inbox.
       </p>
 
       <ul className="mt-4 space-y-2 text-xs text-gray-500 font-medium">

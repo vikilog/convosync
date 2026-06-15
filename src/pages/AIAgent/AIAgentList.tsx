@@ -14,7 +14,7 @@ import { CreateAgentModal } from './CreateAgentModal';
 import { DeleteAgentDialog } from './DeleteAgentDialog';
 
 type ViewMode = 'list' | 'grid';
-const VIEW_STORAGE_KEY = 'wabiz_ai_agent_view';
+const VIEW_STORAGE_KEY = 'convosync_ai_agent_view';
 
 function loadViewMode(): ViewMode {
   const stored = localStorage.getItem(VIEW_STORAGE_KEY);

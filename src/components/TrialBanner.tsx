@@ -40,8 +40,8 @@ export function TrialBanner() {
   useEffect(() => {
     void loadTrial();
     const onCompanyUpdated = () => void loadTrial();
-    window.addEventListener('wabiz:company-updated', onCompanyUpdated);
-    return () => window.removeEventListener('wabiz:company-updated', onCompanyUpdated);
+    window.addEventListener('convosync:company-updated', onCompanyUpdated);
+    return () => window.removeEventListener('convosync:company-updated', onCompanyUpdated);
   }, [loadTrial]);
 
   if (loading || !trial) return null;

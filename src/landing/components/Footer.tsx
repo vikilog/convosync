@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { MessageSquareCode, Github, Twitter, Linkedin, Facebook } from 'lucide-react';
-import { COMPANY_NAME, PRODUCT_NAME } from '../brand';
+import { Github, Twitter, Linkedin, Facebook } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { PRODUCT_LOGO, PRODUCT_NAME } from '../brand';
 
 interface FooterProps {
   onNavigate: (sectionId: string) => void;
@@ -20,14 +21,17 @@ export default function Footer({ onNavigate }: FooterProps) {
         <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-12 lg:gap-x-10 lg:gap-y-0 mb-14">
           <div className="lg:col-span-5 space-y-5">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 shrink-0 rounded-full bg-brand-indigo flex items-center justify-center text-white shadow-md shadow-brand-indigo/20">
-                <MessageSquareCode className="w-5 h-5" />
+              <div className="shrink-0 rounded-xl bg-white p-1.5 shadow-sm ring-1 ring-gray-100">
+                <img
+                  src={PRODUCT_LOGO}
+                  alt={PRODUCT_NAME}
+                  className="h-12 w-12 object-contain"
+                />
               </div>
               <div>
                 <span className="text-lg font-bold font-display tracking-tight text-gray-950 block leading-tight">
                   {PRODUCT_NAME}
                 </span>
-                <span className="text-[11px] text-gray-500 font-mono tracking-wider block">By {COMPANY_NAME}</span>
               </div>
             </div>
 
@@ -108,17 +112,29 @@ export default function Footer({ onNavigate }: FooterProps) {
             <h4 className="text-xs font-bold text-gray-950 uppercase tracking-widest font-mono">Company</h4>
             <ul className="space-y-3">
               {[
-                'About Lazybinary',
-                'Product Blog',
-                'Careers (Hiring!)',
-                'Partnerships',
-                'Privacy Policy',
-                'Terms of Service',
-              ].map((label) => (
-                <li key={label}>
-                  <a href="#" className={linkClass}>
-                    {label}
-                  </a>
+                { label: 'About Lazybinary', href: 'https://www.lazybinary.com' },
+                { label: 'Product Blog', href: '#' },
+                { label: 'Careers (Hiring!)', href: '#' },
+                { label: 'Partnerships', href: '#' },
+                { label: 'Privacy Policy', href: '/privacy' },
+                { label: 'Terms of Service', href: '/terms' },
+              ].map((item) => (
+                <li key={item.label}>
+                  {item.href.startsWith('/') ? (
+                    <Link to={item.href} className={linkClass}>
+                      {item.label}
+                    </Link>
+                  ) : (
+                    <a
+                      href={item.href}
+                      className={linkClass}
+                      {...(item.href.startsWith('http')
+                        ? { target: '_blank', rel: 'noopener noreferrer' }
+                        : {})}
+                    >
+                      {item.label}
+                    </a>
+                  )}
                 </li>
               ))}
             </ul>
@@ -127,7 +143,7 @@ export default function Footer({ onNavigate }: FooterProps) {
 
         <div className="border-t border-gray-200 pt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between text-sm text-gray-500">
           <p className="text-center sm:text-left font-sans">
-            © 2025 {PRODUCT_NAME} by {COMPANY_NAME} · Made with ❤️ in India 🇮🇳
+            © {new Date().getFullYear()} {PRODUCT_NAME} · Made with ❤️ in India 🇮🇳
           </p>
           <div className="flex flex-wrap items-center justify-center sm:justify-end gap-x-3 gap-y-1 text-center font-sans">
             <a href="#" className="hover:text-brand-indigo transition-colors">
@@ -136,9 +152,15 @@ export default function Footer({ onNavigate }: FooterProps) {
             <span className="text-gray-300 hidden sm:inline" aria-hidden>
               ·
             </span>
-            <a href="#" className="hover:text-brand-indigo transition-colors font-medium text-gray-700">
-              Lazybinary Software Ltd
-            </a>
+            <Link to="/privacy" className="hover:text-brand-indigo transition-colors">
+              Privacy
+            </Link>
+            <span className="text-gray-300 hidden sm:inline" aria-hidden>
+              ·
+            </span>
+            <Link to="/terms" className="hover:text-brand-indigo transition-colors">
+              Terms
+            </Link>
           </div>
         </div>
       </div>

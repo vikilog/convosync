@@ -238,7 +238,7 @@ export function SubscriptionPanel() {
 
       const checkoutBase = {
         key: created.keyId,
-        name: 'WaBiz',
+        name: 'ConvoSync',
         description: `${planName} (${billingCycle})`,
         theme: { color: '#0284c7' as const },
       };
@@ -493,7 +493,7 @@ export function SubscriptionPanel() {
                       type="button"
                       className="w-full rounded-xl border border-slate-200 py-2.5 text-sm font-bold text-gray-700 hover:bg-gray-50"
                       onClick={() => {
-                        window.location.href = `mailto:support@wabiz.com?subject=${encodeURIComponent('Enterprise plan inquiry')}`;
+                        window.location.href = `mailto:support@convosync.io?subject=${encodeURIComponent('Enterprise plan inquiry')}`;
                       }}
                     >
                       Contact sales
@@ -515,7 +515,7 @@ export function SubscriptionPanel() {
       </section>
 
       <p className="text-xs text-gray-400">
-        Payments are processed securely via Razorpay in INR. Need help? Contact support@wabiz.com
+        Payments are processed securely via Razorpay in INR. Need help? Contact support@convosync.io
       </p>
     </div>
   );

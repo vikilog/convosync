@@ -5,7 +5,7 @@ import { createBlock, createBlockId } from './blockRegistry';
 import type { BlockType } from './types';
 import { getWorkspaceId } from '../../../lib/api';
 
-const BRAND_KEY = 'wabiz_email_brand';
+const BRAND_KEY = 'convosync_email_brand';
 
 function loadBrand(): BrandSettings {
   try {

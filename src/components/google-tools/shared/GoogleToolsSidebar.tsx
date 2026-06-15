@@ -127,7 +127,7 @@ export function GoogleToolsSidebar({
       {!footer && (
         <div className="p-4 mt-auto border-t border-slate-200 text-xs text-gray-400 flex items-center gap-1.5">
           <ProductIcon className="w-3 h-3" />
-          WaBiz · {meta.shortLabel}
+          ConvoSync · {meta.shortLabel}
         </div>
       )}
     </aside>

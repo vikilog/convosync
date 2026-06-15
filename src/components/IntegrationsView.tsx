@@ -219,55 +219,67 @@ function ConnectedChannelCard({
       : channel === 'instagram'
         ? 'text-[#C13584] bg-[#fce8f0] border-[#E1306C]/20 hover:bg-[#fad9e8]'
         : 'text-primary bg-sky-50 border-primary/20 hover:bg-primary/10';
+  const manageBtnClass =
+    channel === 'whatsapp'
+      ? 'text-channel-green bg-[#e6f7ec] border-channel-green/20 hover:bg-[#d4f5df]'
+      : 'text-channel-blue bg-[#e8f4ff] border-channel-blue/20 hover:bg-[#dbeafe]';
+  const statusText =
+    channel === 'email' ? 'Connected · Ready to send' : 'Connected · Inbox ready';
+  const metaLine = [subtitle, detail].filter(Boolean).join(' · ');
 
   return (
     <article
-      className={`bg-white rounded-2xl border-2 ${borderAccent} p-5 flex flex-col h-full shadow-[0_1px_3px_rgba(0,0,0,0.02)]`}
+      className={`bg-white rounded-xl border ${borderAccent} p-3.5 flex flex-col gap-2.5 h-full shadow-[0_1px_2px_rgba(0,0,0,0.04)]`}
     >
-      <div className="flex items-start gap-3 min-w-0">
+      <div className="flex items-start gap-2.5 min-w-0">
         {avatarUrl ? (
           <img
             src={avatarUrl}
             alt=""
-            className="w-11 h-11 rounded-xl object-cover border border-slate-200 shrink-0"
+            className="w-9 h-9 rounded-lg object-cover border border-slate-200 shrink-0"
           />
         ) : (
           <div
-            className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${iconBg}`}
+            className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${iconBg}`}
           >
             {channel === 'whatsapp' ? (
-              <WhatsAppBrandIcon className={`w-5 h-5 ${iconColor}`} />
+              <WhatsAppBrandIcon className={`w-4 h-4 ${iconColor}`} />
             ) : channel === 'messenger' ? (
-              <Facebook className={`w-5 h-5 ${iconColor}`} />
+              <Facebook className={`w-4 h-4 ${iconColor}`} />
             ) : channel === 'email' ? (
-              <Mail className={`w-5 h-5 ${iconColor}`} />
+              <Mail className={`w-4 h-4 ${iconColor}`} />
             ) : (
-              <Instagram className={`w-5 h-5 ${iconColor}`} />
+              <Instagram className={`w-4 h-4 ${iconColor}`} />
             )}
           </div>
         )}
 
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 min-w-0">
-            <h3 className="text-sm font-black text-gray-950 leading-tight truncate flex-1 min-w-0">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className="text-[11px] font-black uppercase tracking-wide text-gray-500 truncate">
               {channelLabel}
-            </h3>
-            <span className="shrink-0 inline-flex items-center gap-1 text-sm font-bold uppercase tracking-wider px-2 py-1 rounded-full bg-accent-green-bg text-accent-green border border-accent-green/10">
+            </span>
+            <span className="shrink-0 inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-accent-green-bg text-accent-green border border-accent-green/10">
               Live
             </span>
           </div>
-          <p className="mt-1 text-sm font-bold text-gray-800 truncate">{title}</p>
+          <p className="mt-0.5 text-sm font-bold text-gray-900 leading-snug truncate">{title}</p>
+          {metaLine ? (
+            <p className="mt-0.5 text-[11px] text-gray-500 leading-snug truncate" title={metaLine}>
+              {metaLine}
+            </p>
+          ) : null}
         </div>
 
-        <div className="flex items-center gap-0.5 shrink-0 -mt-0.5 -mr-0.5">
+        <div className="flex items-center gap-0.5 shrink-0 -mt-0.5">
           {onManage ? (
             <button
               type="button"
               onClick={onManage}
               aria-label={`Manage ${title}`}
-              className="p-1.5 rounded-lg text-gray-400 hover:text-primary hover:bg-sky-50 transition-all"
+              className="p-1 rounded-md text-gray-400 hover:text-primary hover:bg-sky-50 transition-colors cursor-pointer"
             >
-              <Settings className="w-4 h-4" />
+              <Settings className="w-3.5 h-3.5" />
             </button>
           ) : null}
           {onDisconnect ? (
@@ -276,38 +288,27 @@ function ConnectedChannelCard({
               onClick={onDisconnect}
               disabled={disconnecting}
               aria-label={`Disconnect ${title}`}
-              className="p-1.5 rounded-lg text-gray-400 hover:text-danger-red hover:bg-red-50 transition-all disabled:opacity-50"
+              className="p-1 rounded-md text-gray-400 hover:text-danger-red hover:bg-red-50 transition-colors disabled:opacity-50 cursor-pointer"
             >
               {disconnecting ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
               ) : (
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="w-3.5 h-3.5" />
               )}
             </button>
           ) : null}
         </div>
       </div>
 
-      <div className="mt-3 space-y-1 flex-1">
-        <p className="text-xs text-gray-500 font-medium truncate">{subtitle}</p>
-        {detail && (
-          <p className="text-xs text-gray-400 font-mono truncate">{detail}</p>
-        )}
-      </div>
-
-      <div className="mt-5 pt-3 border-t border-slate-200 flex items-center justify-between gap-2">
-        <p className="text-sm font-bold text-gray-400 uppercase tracking-wide">
-          {channel === 'email' ? 'Connected · Ready to send' : 'Connected · Inbox ready'}
+      <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide truncate">
+          {statusText}
         </p>
         {(channel === 'email' || channel === 'whatsapp') && onManage ? (
           <button
             type="button"
             onClick={onManage}
-            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-sm font-black border transition-colors ${
-              channel === 'whatsapp'
-                ? 'text-channel-green bg-[#e6f7ec] border-channel-green/20 hover:bg-[#d4f5df]'
-                : 'text-channel-blue bg-[#e8f4ff] border-channel-blue/20 hover:bg-[#dbeafe]'
-            }`}
+            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold border transition-colors cursor-pointer shrink-0 ${manageBtnClass}`}
           >
             <Settings className="w-3 h-3" />
             Manage
@@ -317,7 +318,7 @@ function ConnectedChannelCard({
             type="button"
             onClick={onSync}
             disabled={syncing || disconnecting}
-            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-sm font-black border disabled:opacity-50 transition-colors ${syncBtnClass}`}
+            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold border disabled:opacity-50 transition-colors cursor-pointer shrink-0 ${syncBtnClass}`}
           >
             <RefreshCw className={`w-3 h-3 ${syncing ? 'animate-spin' : ''}`} />
             {syncing ? 'Syncing…' : 'Sync chats'}
@@ -354,7 +355,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
   const [emailStatus, setEmailStatus] = useState<EmailIntegrationSummary>({
     connected: false,
     verifiedDomainCount: 0,
-    defaultSenderEmail: 'noreply@classivo.app',
+    defaultSenderEmail: 'noreply@convosync.io',
   });
   const [enablingEmail, setEnablingEmail] = useState(false);
   const [emailError, setEmailError] = useState('');
@@ -388,7 +389,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
   }, [searchParams, setSearchParams]);
 
   const loadWhatsappAccounts = useCallback(() => {
-    if (!localStorage.getItem('wabiz_token')) return Promise.resolve();
+    if (!localStorage.getItem('convosync_token')) return Promise.resolve();
     return api
       .getWhatsAppAccounts()
       .then((data: { accounts?: WhatsAppAccountSummary[] }) => {
@@ -398,7 +399,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
   }, []);
 
   const loadInstagramAccounts = useCallback(() => {
-    if (!localStorage.getItem('wabiz_token')) return Promise.resolve();
+    if (!localStorage.getItem('convosync_token')) return Promise.resolve();
     return api
       .getInstagramAccounts()
       .then((data: { accounts?: InstagramAccountSummary[] }) => {
@@ -408,7 +409,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
   }, []);
 
   const loadMessengerAccounts = useCallback(() => {
-    if (!localStorage.getItem('wabiz_token')) return Promise.resolve();
+    if (!localStorage.getItem('convosync_token')) return Promise.resolve();
     return api
       .getMessengerAccounts()
       .then((data: { accounts?: MessengerAccountSummary[] }) => {
@@ -418,7 +419,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
   }, []);
 
   const loadEmailStatus = useCallback(() => {
-    if (!localStorage.getItem('wabiz_token')) return Promise.resolve();
+    if (!localStorage.getItem('convosync_token')) return Promise.resolve();
     return api
       .getEmailIntegration()
       .then((res: {
@@ -430,7 +431,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
       }) => {
         setEmailStatus({
           connected: Boolean(res.enabled),
-          defaultSenderEmail: res.defaultSenderEmail ?? 'noreply@classivo.app',
+          defaultSenderEmail: res.defaultSenderEmail ?? 'noreply@convosync.io',
           defaultSenderName: res.defaultSenderName ?? undefined,
           verifiedDomainCount: res.verifiedDomainCount ?? 0,
           providerLabel: res.providerLabel ?? undefined,
@@ -719,7 +720,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
   }
 
   if (view === 'email') {
-    const defaultEmail = emailStatus.defaultSenderEmail ?? 'noreply@classivo.app';
+    const defaultEmail = emailStatus.defaultSenderEmail ?? 'noreply@convosync.io';
 
     if (!emailStatus.connected) {
       return (
@@ -912,7 +913,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
       {hasConnectedChannels && (
         <section>
           <h3 className="text-sm font-black text-gray-950 mb-3">Connected channels</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
             {whatsappAccounts.map((account) => {
               const title = account.label || account.displayName || 'WhatsApp Business';
               const phone = account.phoneNumber || account.phoneNumberId;
@@ -1043,7 +1044,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
           {!emailConnected && (
             <IntegrationCard
               title="Email"
-              description={`Send transactional and marketing email. Enable to use the shared sender ${emailStatus.defaultSenderEmail ?? 'noreply@classivo.app'} or add your own domain later.`}
+              description={`Send transactional and marketing email. Enable to use the shared sender ${emailStatus.defaultSenderEmail ?? 'noreply@convosync.io'} or add your own domain later.`}
               icon={Mail}
               iconBgClass="bg-[#e8f4ff]"
               iconClass="text-channel-blue"
@@ -1098,7 +1099,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
 
           <IntegrationCard
             title="Data connectors"
-            description="Connect databases and data warehouses to sync customer data into WaBiz."
+            description="Connect databases and data warehouses to sync customer data into ConvoSync."
             icon={Database}
             iconBgClass="bg-[#e8f4ff]"
             iconClass="text-channel-blue"

@@ -24,8 +24,8 @@ import {
   PanelLeftClose,
   Settings,
   LogOut,
-  Sparkles,
 } from 'lucide-react';
+import { PRODUCT_LOGO, PRODUCT_NAME } from '../lib/brand';
 import { useSidebar } from '../contexts/SidebarContext';
 import { api, getWorkspaceId, getUserName, getUserAvatar } from '../lib/api';
 import { useWorkspaceAccess } from '../hooks/useWorkspaceAccess';
@@ -87,7 +87,7 @@ function SectionLabel({ label, collapsed }: { label: string; collapsed: boolean 
 }
 
 export const SideNavBar: React.FC<SideNavBarProps> = ({
-  workspaceName = 'WaBiz',
+  workspaceName = 'ConvoSync',
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -108,8 +108,8 @@ export const SideNavBar: React.FC<SideNavBarProps> = ({
 
   useEffect(() => {
     const onProfileUpdated = () => setProfileTick((n) => n + 1);
-    window.addEventListener('wabiz:profile-updated', onProfileUpdated);
-    return () => window.removeEventListener('wabiz:profile-updated', onProfileUpdated);
+    window.addEventListener('convosync:profile-updated', onProfileUpdated);
+    return () => window.removeEventListener('convosync:profile-updated', onProfileUpdated);
   }, []);
 
   useEffect(() => {
@@ -168,7 +168,7 @@ export const SideNavBar: React.FC<SideNavBarProps> = ({
     return () => window.removeEventListener(INBOX_UNREAD_TOTAL_EVENT, onUnreadTotal);
   }, [activeWorkspace?.id]);
 
-  const displayName = activeWorkspace?.name ?? 'Classivo';
+  const displayName = activeWorkspace?.name ?? 'ConvoSync';
   const displayInitial = displayName.charAt(0).toUpperCase();
 
   const navSections: NavSection[] = [
@@ -265,9 +265,11 @@ export const SideNavBar: React.FC<SideNavBarProps> = ({
             className={`flex items-center ${sidebarCollapsed ? 'flex-col gap-2' : 'justify-between gap-2'}`}
           >
             <div className={`flex items-center gap-2 ${sidebarCollapsed ? 'justify-center' : 'min-w-0'}`}>
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-900 text-white shadow-sm">
-                <Sparkles className="h-4 w-4" />
-              </div>
+              <img
+                src={PRODUCT_LOGO}
+                alt={PRODUCT_NAME}
+                className={`shrink-0 object-contain ${sidebarCollapsed ? 'h-9 w-9' : 'h-9 w-9'}`}
+              />
               {!sidebarCollapsed && (
                 <h1 className="truncate font-sans text-base font-semibold tracking-tight text-slate-900">
                   {workspaceName}

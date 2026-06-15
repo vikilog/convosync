@@ -1,4 +1,4 @@
-export const GOOGLE_OAUTH_REDIRECT_STORAGE_KEY = 'wabiz_google_oauth_redirect';
+export const GOOGLE_OAUTH_REDIRECT_STORAGE_KEY = 'convosync_google_oauth_redirect';
 
 /** Must match a URI registered in Google Cloud Console and allowed by the API. */
 export function getGoogleOAuthRedirectUri(): string {
