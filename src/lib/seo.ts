@@ -1,7 +1,7 @@
 import { settingsSectionFromPath, tabFromPath, type AppTab } from '../routes';
 import { SETTINGS_SECTION_TITLES } from '../components/settings/settingsNav';
 
-import { PRODUCT_NAME } from '../brand';
+import { PRODUCT_NAME } from '../landing/brand';
 
 export const SITE_NAME = PRODUCT_NAME;
 export const SITE_DESCRIPTION =
