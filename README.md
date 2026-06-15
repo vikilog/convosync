@@ -49,4 +49,7 @@ Build args: `VITE_API_URL`, `VITE_SOCKET_URL`, `VITE_APP_URL`, and Meta OAuth va
 
 ## Repository
 
-This frontend was split from the main ConvoSync monorepo. Backend lives in a separate repository.
+- Frontend: [github.com/vikilog/convosync](https://github.com/vikilog/convosync)
+- Backend: [github.com/vikilog/convosync-api](https://github.com/vikilog/convosync-api)
+
+This frontend was split from the main ConvoSync monorepo.
