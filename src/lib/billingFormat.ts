@@ -1,3 +1,12 @@
+export function formatInrAmount(rupees: number, decimals = 2): string {
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  }).format(rupees);
+}
+
 export function formatInrPaise(paise: number, currency = 'INR'): string {
   if (currency !== 'INR') {
     return `${(paise / 100).toFixed(2)} ${currency}`;

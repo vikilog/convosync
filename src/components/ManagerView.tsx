@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Smartphone, Globe, ShieldAlert, Plus, ArrowLeft, Blocks } from 'lucide-react';
+import { ArrowLeft, Blocks } from 'lucide-react';
 import { pathForTab } from '../routes';
 import { api } from '../lib/api';
 import {
@@ -15,6 +15,10 @@ import {
   type WhatsAppConnectionType,
 } from './whatsapp';
 import WhatsAppEmbeddedSignup from './WhatsAppEmbeddedSignup';
+import {
+  WhatsAppAccountManager,
+  type WhatsAppPhoneAccount,
+} from './integrations/WhatsAppAccountManager';
 
 const CONNECTION_TYPE_STORAGE_KEY = 'convosync_whatsapp_connection_type';
 const BUSINESS_API_ONBOARDING_STEP_KEY = 'convosync_business_api_onboarding_step';
@@ -28,17 +32,6 @@ type NumbersFlowView =
   | 'coexistence_guide'
   | 'coexistence_connect'
   | 'accounts';
-
-type WhatsAppPhoneAccount = {
-  id: string;
-  phoneNumberId: string;
-  label: string;
-  phone: string;
-  dailyLimit: string;
-  qosRating: string;
-  status: string;
-  verified: boolean;
-};
 
 function loadStoredConnectionType(): WhatsAppConnectionType | null {
   const raw = localStorage.getItem(CONNECTION_TYPE_STORAGE_KEY);
@@ -65,6 +58,8 @@ type ManagerViewProps = {
   variant?: 'standalone' | 'integrations';
   onBackToHub?: () => void;
   onAccountsChanged?: () => void;
+  channelLimitReached?: boolean;
+  channelLimitMessage?: string;
 };
 
 export const ManagerView: React.FC<ManagerViewProps> = ({
@@ -72,6 +67,8 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
   variant = 'standalone',
   onBackToHub,
   onAccountsChanged,
+  channelLimitReached = false,
+  channelLimitMessage = 'Channel limit reached for your current plan. Upgrade to connect a new channel.',
 }) => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'numbers' | 'webhooks'>('numbers');
@@ -362,6 +359,10 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
   };
 
   const handleConnectAnotherAccount = () => {
+    if (channelLimitReached) {
+      setConnectError(channelLimitMessage);
+      return;
+    }
     setConnectError('');
     setConnectionType('business_api');
     setShowAddNumber(true);
@@ -414,41 +415,35 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
       )}
 
       {hasWhatsappNumbers && (
-        <>
-          <div>
-            <h3 className="font-sans font-black text-gray-900 text-lg leading-none">
-              WhatsApp Account Manager & Settings
-            </h3>
-            <p className="text-xs text-gray-400 mt-1.5 font-medium">
-              Verify Meta API phone accounts and inspect webhook integration callbacks.
-            </p>
-          </div>
-
-          <div className="flex border-b border-slate-200 select-none">
-            <button
-              type="button"
-              onClick={() => setActiveTab('numbers')}
-              className={`px-4 py-2 text-sm font-bold transition-all border-b-2 mr-3 ${
-                activeTab === 'numbers'
-                  ? 'text-primary border-primary font-black'
-                  : 'text-gray-400 hover:text-gray-700 border-transparent'
-              }`}
-            >
-              WhatsApp Numbers
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('webhooks')}
-              className={`px-4 py-2 text-sm font-bold transition-all border-b-2 ${
-                activeTab === 'webhooks'
-                  ? 'text-primary border-primary font-black'
-                  : 'text-gray-400 hover:text-gray-700 border-transparent'
-              }`}
-            >
-              Webhooks & Integration Callback
-            </button>
-          </div>
-        </>
+        <WhatsAppAccountManager
+          accounts={whatsappAccounts}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          showAddNumber={showAddNumber}
+          onConnectAnother={handleConnectAnotherAccount}
+          connectAnotherDisabled={channelLimitReached}
+          connectAnotherLabel={channelLimitReached ? 'Limit reached' : 'Connect number'}
+          onCancelAdd={() => {
+            setShowAddNumber(false);
+            setAutoLaunchSignup(false);
+            setConnectError('');
+          }}
+          onDisconnect={handleDisconnectWhatsApp}
+          connectError={connectError}
+          autoLaunchSignup={autoLaunchSignup}
+          onAutoStartConsumed={() => setAutoLaunchSignup(false)}
+          onConnectSuccess={handleConnectSuccess}
+          onConnectError={(error) => setConnectError(error)}
+          webhookUrl={webhookUrl}
+          webhookVerifyToken={webhookVerifyToken}
+          webhookSubscribed={webhookSubscribed}
+          webhookOverrideUri={webhookOverrideUri}
+          webhookSubscribeMessage={webhookSubscribeMessage}
+          webhookSubscribing={webhookSubscribing}
+          onSubscribeWebhooks={handleSubscribeWebhooks}
+          copyHint={copyHint}
+          onCopyWebhookUrl={copyWebhookUrl}
+        />
       )}
 
       {showConnectionSelector && variant === 'integrations' && (
@@ -569,211 +564,6 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
         </div>
       )}
 
-      {hasWhatsappNumbers && activeTab === 'numbers' && (
-        <div className="space-y-4 animate-scale-up max-w-4xl">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h4 className="text-sm font-black text-gray-400 uppercase tracking-widest leading-none">
-              Active WhatsApp Business Phone Accounts
-            </h4>
-            {!showAddNumber && (
-              <button
-                type="button"
-                onClick={handleConnectAnotherAccount}
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-xl text-meta font-bold shadow-sm shadow-primary/20 transition-all"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                Connect new account
-              </button>
-            )}
-          </div>
-
-          <div className="space-y-4 text-left">
-            {whatsappAccounts.map((account) => (
-              <div
-                key={account.id}
-                className="bg-white border border-slate-200 p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-              >
-                <div className="flex items-start gap-3.5">
-                  <div className="p-2.5 bg-[#e6f7ec] text-accent-green rounded-xl shrink-0">
-                    <Smartphone className="w-6 h-6 text-accent-green" />
-                  </div>
-                  <div>
-                    <h5 className="font-bold text-gray-900 text-sm leading-none flex items-center gap-2">
-                      {account.label}
-                      <span className="w-1.5 h-1.5 rounded-full bg-accent-green inline-block" />
-                    </h5>
-                    <p className="text-sm font-black text-gray-500 font-mono mt-1.5">
-                      {account.phone}
-                    </p>
-                    <div className="flex gap-4 mt-3 text-sm font-bold text-gray-400 font-mono flex-wrap">
-                      <span>
-                        Daily Limit: <strong className="text-gray-800">{account.dailyLimit}</strong>
-                      </span>
-                      <span>•</span>
-                      <span>
-                        QoS Rating: <strong className="text-accent-green">{account.qosRating}</strong>
-                      </span>
-                      <span>•</span>
-                      <span>
-                        Status: <strong className="text-accent-green">{account.status}</strong>
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                {account.verified && (
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm font-extrabold uppercase tracking-widest text-[#006d2f] bg-[#e6f7ec] px-3 py-1 rounded-full border border-[#5dfd8a]/20">
-                      Meta Verified
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => handleDisconnectWhatsApp(account.phoneNumberId)}
-                      className="text-sm font-extrabold uppercase tracking-widest text-red-500 hover:text-red-700 transition-colors"
-                    >
-                      Disconnect
-                    </button>
-                  </div>
-                )}
-              </div>
-            ))}
-
-            {showAddNumber && (
-              <div className="bg-white border-2 border-primary/20 rounded-2xl p-6 sm:p-8 shadow-[0_8px_32px_rgba(65,44,221,0.08)]">
-                <div className="flex items-start justify-between gap-4 mb-4">
-                  <div>
-                    <h4 className="text-lg font-black text-gray-950">Connect another number</h4>
-                    <p className="mt-1 text-sm text-gray-600 font-medium">
-                      Sign in with Meta to add another WhatsApp Business phone to this workspace.
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowAddNumber(false);
-                      setAutoLaunchSignup(false);
-                      setConnectError('');
-                    }}
-                    className="text-sm font-bold text-gray-500 hover:text-primary"
-                  >
-                    Cancel
-                  </button>
-                </div>
-                <WhatsAppEmbeddedSignup
-                  autoStart={autoLaunchSignup}
-                  onAutoStartConsumed={() => setAutoLaunchSignup(false)}
-                  onSuccess={handleConnectSuccess}
-                  onError={(error) => setConnectError(error)}
-                />
-                {connectError && (
-                  <p className="mt-3 text-sm font-bold text-red-500">{connectError}</p>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {hasWhatsappNumbers && activeTab === 'webhooks' && (
-        <div className="bg-white border border-slate-200 p-6 rounded-2xl space-y-6 text-left animate-scale-up select-none max-w-2xl">
-          <div className="border-b border-gray-100 pb-3">
-            <h4 className="font-bold text-gray-950 text-sm flex items-center gap-2">
-              <Globe className="w-4.5 h-4.5 text-primary" /> Integrated webhook configs
-            </h4>
-            <p className="text-xs text-gray-400 font-bold mt-1 leading-none">
-              On connect, ConvoSync registers this callback with Meta via API. Use retry if you change
-              your tunnel URL.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3 p-3 rounded-xl bg-slate-50 border border-primary/15">
-            <div className="flex-1 min-w-[140px]">
-              <p className="text-sm font-black uppercase text-gray-400 tracking-wider">
-                API subscription
-              </p>
-              <p className="text-sm font-bold text-gray-800 mt-0.5">
-                {webhookSubscribed === null
-                  ? 'Checking…'
-                  : webhookSubscribed
-                    ? 'Subscribed to WABA webhooks'
-                    : 'Not subscribed yet'}
-              </p>
-              {webhookOverrideUri && (
-                <p className="text-xs text-gray-400 font-mono mt-1 truncate">
-                  Override: {webhookOverrideUri}
-                </p>
-              )}
-            </div>
-            <button
-              type="button"
-              onClick={handleSubscribeWebhooks}
-              disabled={webhookSubscribing}
-              className="px-4 py-2 text-sm font-black text-white bg-primary rounded-xl hover:bg-primary/90 disabled:opacity-60"
-            >
-              {webhookSubscribing ? 'Subscribing…' : 'Subscribe via API'}
-            </button>
-          </div>
-
-          {webhookSubscribeMessage && (
-            <p className="text-sm font-semibold text-gray-600 bg-gray-50 border border-slate-200 rounded-lg px-3 py-2">
-              {webhookSubscribeMessage}
-            </p>
-          )}
-
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-black uppercase text-gray-400 tracking-wider mb-1.5">
-                Target Webhook URL Endpoint
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  readOnly
-                  value={webhookUrl || 'Loading…'}
-                  className="w-full bg-gray-50 border border-border-subtle rounded-xl py-2 px-3 text-sm focus:ring-0 outline-none text-gray-500 font-mono select-all"
-                />
-                <button
-                  type="button"
-                  className="px-3.5 bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-bold rounded-xl transition-colors border border-border-subtle shrink-0"
-                  onClick={copyWebhookUrl}
-                  disabled={!webhookUrl}
-                >
-                  {copyHint || 'Copy'}
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-black uppercase text-gray-400 tracking-wider mb-1.5">
-                Verify secret token
-              </label>
-              <input
-                type="text"
-                readOnly
-                value={webhookVerifyToken || 'Loading…'}
-                className="w-full bg-slate-50 border border-border-subtle rounded-xl py-2 px-3 text-xs outline-none text-gray-500 font-mono select-all"
-              />
-              <p className="text-xs text-gray-400 mt-1.5">
-                Same token as <span className="font-mono">META_WEBHOOK_VERIFY_TOKEN</span> on the
-                server. Manual Meta Console setup is optional if API subscribe succeeds.
-              </p>
-            </div>
-
-            <div className="p-4 bg-orange-50 border border-warning-orange/15 rounded-xl flex gap-3 text-left">
-              <ShieldAlert className="w-5 h-5 text-warning-orange shrink-0 mt-0.5 animate-pulse" />
-              <div>
-                <p className="text-sm font-bold text-warning-orange leading-none uppercase tracking-wider mb-1">
-                  Verify Webhook Payload compliance
-                </p>
-                <p className="text-xs text-gray-400 font-bold leading-normal">
-                  WhatsApp Cloud API verifies webhook connection by dispatching verification
-                  parameters. Please assert verify token checks are matched on your receiver server
-                  code prior to launching.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

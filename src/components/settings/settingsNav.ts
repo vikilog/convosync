@@ -14,7 +14,6 @@ export type SettingsNavGroup = {
 export const SETTINGS_HIDDEN_SECTIONS = new Set<SettingsSection>([
   'security',
   'holidays',
-  'notifications',
   'recharge',
   'contact-attributes',
   'contact-tags',

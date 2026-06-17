@@ -138,6 +138,7 @@ type WhatsAppAccountSummary = {
 type InstagramAccountSummary = {
   id: string;
   instagramUserId: string;
+  pageId: string;
   username?: string;
   displayName?: string;
   pageName?: string;
@@ -160,6 +161,12 @@ type EmailIntegrationSummary = {
   defaultSenderName?: string;
   verifiedDomainCount: number;
   providerLabel?: string;
+};
+
+type ChannelUsageSummary = {
+  used: number;
+  limit: number | null;
+  pending: number | null;
 };
 
 type ConnectedChannelCardProps = {
@@ -329,6 +336,73 @@ function ConnectedChannelCard({
   );
 }
 
+type WhatsAppGroupedCardProps = {
+  accounts: WhatsAppAccountSummary[];
+  onManage: () => void;
+};
+
+function WhatsAppGroupedCard({ accounts, onManage }: WhatsAppGroupedCardProps) {
+  const shownAccounts = accounts.slice(0, 3);
+  const remainingCount = accounts.length - shownAccounts.length;
+  return (
+    <article className="bg-white rounded-xl border border-channel-green/20 p-3 flex flex-col gap-2.5 h-full shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-[#e6f7ec]">
+            <WhatsAppBrandIcon className="w-4 h-4 text-channel-green" />
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="text-[11px] font-black uppercase tracking-wide text-gray-500 truncate">
+                WhatsApp
+              </span>
+              <span className="shrink-0 inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-accent-green-bg text-accent-green border border-accent-green/10">
+                Live
+              </span>
+            </div>
+            <p className="mt-0.5 text-sm font-bold text-gray-900 leading-snug">
+              {accounts.length} connected number{accounts.length === 1 ? '' : 's'}
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={onManage}
+          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold border text-channel-green bg-[#e6f7ec] border-channel-green/20 hover:bg-[#d4f5df] transition-colors cursor-pointer shrink-0"
+        >
+          <Settings className="w-3 h-3" />
+          Manage
+        </button>
+      </div>
+
+      <div className="pt-2 border-t border-slate-100">
+        <div className="flex flex-wrap gap-1.5">
+        {shownAccounts.map((account) => {
+          const title = account.label || account.displayName || 'WhatsApp Business';
+          const phone = account.phoneNumber || account.phoneNumberId;
+          return (
+            <div
+              key={account.id}
+              className="inline-flex max-w-full items-center gap-1 rounded-md bg-slate-50 border border-slate-100 px-2 py-1 text-[10px] leading-none"
+              title={`${title} · ${phone}`}
+            >
+              <span className="font-semibold text-gray-800 truncate">{title}</span>
+              <span className="text-gray-400">•</span>
+              <span className="text-gray-600 truncate">{phone}</span>
+            </div>
+          );
+        })}
+        {remainingCount > 0 && (
+          <span className="inline-flex items-center rounded-md bg-[#e6f7ec] border border-channel-green/20 px-2 py-1 text-[10px] font-semibold text-channel-green">
+            +{remainingCount} more
+          </span>
+        )}
+        </div>
+      </div>
+    </article>
+  );
+}
+
 type IntegrationsViewProps = {
   isActive?: boolean;
 };
@@ -359,6 +433,9 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
   });
   const [enablingEmail, setEnablingEmail] = useState(false);
   const [emailError, setEmailError] = useState('');
+  const [channelUsage, setChannelUsage] = useState<ChannelUsageSummary | null>(null);
+  const isChannelLimitReached =
+    channelUsage != null && channelUsage.pending != null && channelUsage.pending <= 0;
 
   const goToHub = useCallback(() => {
     setView('hub');
@@ -440,19 +517,56 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
       .catch(console.error);
   }, []);
 
+  const loadBillingUsage = useCallback(() => {
+    if (!localStorage.getItem('convosync_token')) return Promise.resolve();
+    return api
+      .getBillingWorkspace()
+      .then((res: {
+        usageSnapshot?: {
+          channels?: {
+            used?: number;
+            limit?: number | null;
+            pending?: number | null;
+          };
+        };
+      }) => {
+        const channels = res.usageSnapshot?.channels;
+        if (!channels) {
+          setChannelUsage(null);
+          return;
+        }
+        const used = Number(channels.used ?? 0);
+        const limit = channels.limit ?? null;
+        const pending =
+          typeof channels.pending === 'number'
+            ? channels.pending
+            : limit === null
+              ? null
+              : Math.max(0, limit - used);
+        setChannelUsage({ used, limit, pending });
+      })
+      .catch(() => {
+        setChannelUsage(null);
+      });
+  }, []);
+
   const handleEnableEmail = useCallback(async () => {
+    if (channelUsage != null && channelUsage.pending != null && channelUsage.pending <= 0) {
+      setEmailError('Channel limit reached for your current plan. Upgrade to connect a new channel.');
+      return;
+    }
     setEnablingEmail(true);
     setEmailError('');
     try {
       await api.enableEmailIntegration();
-      await loadEmailStatus();
+      await Promise.all([loadEmailStatus(), loadBillingUsage()]);
       openEmailChannel();
     } catch (err) {
       setEmailError(err instanceof Error ? err.message : 'Failed to enable email');
     } finally {
       setEnablingEmail(false);
     }
-  }, [loadEmailStatus, openEmailChannel]);
+  }, [channelUsage, loadBillingUsage, loadEmailStatus, openEmailChannel]);
 
   const handleEmailDisconnect = useCallback(async () => {
     if (
@@ -481,7 +595,15 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
     loadInstagramAccounts();
     loadMessengerAccounts();
     loadEmailStatus();
-  }, [isActive, loadWhatsappAccounts, loadInstagramAccounts, loadMessengerAccounts, loadEmailStatus]);
+    loadBillingUsage();
+  }, [
+    isActive,
+    loadWhatsappAccounts,
+    loadInstagramAccounts,
+    loadMessengerAccounts,
+    loadEmailStatus,
+    loadBillingUsage,
+  ]);
 
   useEffect(() => {
     if (!isActive || view !== 'hub') return;
@@ -516,6 +638,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
     }
     if (searchParams.get('instagram_connected') === '1') {
       void loadInstagramAccounts();
+      void loadMessengerAccounts();
       setView('hub');
       setInstagramConnectError('');
       const next = new URLSearchParams(searchParams);
@@ -581,6 +704,12 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
   };
 
   const handleInstagramConnect = () => {
+    if (channelUsage != null && channelUsage.pending != null && channelUsage.pending <= 0) {
+      setInstagramConnectError(
+        'Channel limit reached for your current plan. Upgrade to connect a new channel.'
+      );
+      return;
+    }
     setInstagramConnectError('');
     setInstagramAutoLaunch(true);
     setView('instagram');
@@ -589,7 +718,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
   const handleInstagramConnectSuccess = async () => {
     setInstagramConnectError('');
     setInstagramAutoLaunch(false);
-    await loadInstagramAccounts();
+    await Promise.all([loadInstagramAccounts(), loadMessengerAccounts(), loadBillingUsage()]);
     setView('hub');
   };
 
@@ -607,6 +736,12 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
 
   const handleMessengerConnect = () => {
     setMessengerConnectError('');
+    if (channelUsage != null && channelUsage.pending != null && channelUsage.pending <= 0) {
+      setMessengerConnectError(
+        'Channel limit reached for your current plan. Upgrade to connect a new channel.'
+      );
+      return;
+    }
     if (instagramAccounts.length === 0) {
       setMessengerConnectError(
         'Connect Instagram first. Messenger uses the same Meta Page access token.'
@@ -620,7 +755,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
   const handleMessengerConnectSuccess = async () => {
     setMessengerConnectError('');
     setMessengerAutoLaunch(false);
-    await loadMessengerAccounts();
+    await Promise.all([loadMessengerAccounts(), loadBillingUsage()]);
     setView('hub');
   };
 
@@ -676,8 +811,23 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
 
         <MessengerConnectPanel
           hasInstagram={instagramAccounts.length > 0}
+          pendingPages={instagramAccounts
+            .filter(
+              (account) =>
+                account.pageId &&
+                !messengerAccounts.some((messenger) => messenger.pageId === account.pageId)
+            )
+            .map((account) => ({
+              pageId: account.pageId,
+              pageName: account.pageName,
+              username: account.username,
+              displayName: account.displayName,
+              profilePicture: account.profilePicture,
+            }))}
           autoStart={messengerAutoLaunch}
           onAutoStartConsumed={() => setMessengerAutoLaunch(false)}
+          connectDisabled={isChannelLimitReached}
+          connectDisabledMessage="Channel limit reached for your current plan. Upgrade plan or add-on to enable Messenger."
           onSuccess={() => void handleMessengerConnectSuccess()}
           onError={(error) => setMessengerConnectError(error)}
         />
@@ -761,11 +911,11 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
 
             <button
               type="button"
-              disabled={enablingEmail}
+              disabled={enablingEmail || isChannelLimitReached}
               onClick={() => void handleEnableEmail()}
               className="w-full px-4 py-2.5 bg-gray-900 hover:bg-gray-800 disabled:opacity-60 text-white text-sm font-bold rounded-xl transition-all"
             >
-              {enablingEmail ? 'Enabling…' : 'Enable Email'}
+              {isChannelLimitReached ? 'Channel limit reached' : enablingEmail ? 'Enabling…' : 'Enable Email'}
             </button>
           </div>
         </div>
@@ -878,6 +1028,8 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
           variant="integrations"
           onBackToHub={goToHub}
           onAccountsChanged={() => void loadWhatsappAccounts()}
+          channelLimitReached={isChannelLimitReached}
+          channelLimitMessage="Channel limit reached for your current plan. Upgrade plan or add-on to connect more channels."
         />
       </div>
     );
@@ -887,20 +1039,34 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
   const instagramConnected = instagramAccounts.length > 0;
   const messengerConnected = messengerAccounts.length > 0;
   const emailConnected = emailStatus.connected;
+  const messengerPendingPages = instagramAccounts.filter(
+    (account) =>
+      account.pageId &&
+      !messengerAccounts.some((messenger) => messenger.pageId === account.pageId)
+  );
+  const canEnableMessenger = instagramConnected && messengerPendingPages.length > 0;
   const hasConnectedChannels =
-    whatsappConnected || instagramConnected || emailConnected;
+    whatsappConnected || instagramConnected || messengerConnected || emailConnected;
 
   return (
     <div className="w-full space-y-5 pb-8 animate-scale-up">
-      {/* {messengerSyncMessage && (
+      {messengerSyncMessage && (
         <p className="text-sm font-bold text-[#1877F2] bg-[#e8f4ff] border border-[#1877F2]/15 rounded-xl px-4 py-2">
           {messengerSyncMessage}
         </p>
-      )} */}
+      )}
 
       {emailError && (
         <p className="text-sm font-bold text-red-600 bg-red-50 border border-red-100 rounded-xl px-4 py-2">
           {emailError}
+        </p>
+      )}
+
+      {isChannelLimitReached && (
+        <p className="text-sm font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2">
+          Channel limit reached ({channelUsage?.used ?? 0}
+          {channelUsage?.limit !== null ? ` / ${channelUsage?.limit}` : ''}). Upgrade plan or add-on
+          to connect more channels.
         </p>
       )}
 
@@ -914,21 +1080,12 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
         <section>
           <h3 className="text-sm font-black text-gray-950 mb-3">Connected channels</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
-            {whatsappAccounts.map((account) => {
-              const title = account.label || account.displayName || 'WhatsApp Business';
-              const phone = account.phoneNumber || account.phoneNumberId;
-              return (
-                <ConnectedChannelCard
-                  key={account.id}
-                  channel="whatsapp"
-                  channelLabel="WhatsApp"
-                  title={title}
-                  subtitle={phone}
-                  detail={account.wabaId ? `WABA · ${account.wabaId}` : undefined}
-                  onManage={openWhatsappChannel}
-                />
-              );
-            })}
+            {whatsappConnected && (
+              <WhatsAppGroupedCard
+                accounts={whatsappAccounts}
+                onManage={openWhatsappChannel}
+              />
+            )}
 
             {instagramAccounts.map((account) => {
               const title =
@@ -951,7 +1108,6 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
               );
             })}
 
-            {/* Messenger — hidden for now
             {messengerAccounts.map((account) => {
               const title = account.label || account.displayName || account.pageName || 'Messenger';
               return (
@@ -961,6 +1117,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
                   channelLabel="Messenger"
                   title={title}
                   subtitle={account.pageName ? `Page · ${account.pageName}` : 'Facebook Page'}
+                  avatarUrl={account.profilePicture}
                   disconnecting={disconnectingKey === `fb:${account.pageId}`}
                   onDisconnect={() => void handleMessengerDisconnect(account.pageId)}
                   onSync={() => void handleMessengerSync()}
@@ -968,7 +1125,6 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
                 />
               );
             })}
-            */}
 
             {emailConnected && (
               <ConnectedChannelCard
@@ -1002,22 +1158,24 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
               icon={WhatsAppBrandIcon}
               iconBgClass="bg-[#e6f7ec]"
               iconClass="text-channel-green"
+              connectLabel={isChannelLimitReached ? 'Limit reached' : 'Connect'}
+              connectDisabled={isChannelLimitReached}
               onConnect={openWhatsappChannel}
             />
           )}
 
-          {/* Facebook Messenger — hidden for now
-          {!messengerConnected && instagramConnected && (
+          {canEnableMessenger && (
             <IntegrationCard
               title="Facebook Messenger"
-              description="Enable Messenger using your connected Instagram Page token — no extra Meta login."
+              description="Enable Messenger for a connected Instagram Page. Uses the same Meta token — no extra login."
               icon={Facebook}
               iconBgClass="bg-[#e8f4ff]"
-              iconClass="text-channel-blue"
+              iconClass="text-[#1877F2]"
+              connectLabel={isChannelLimitReached ? 'Limit reached' : 'Enable'}
+              connectDisabled={isChannelLimitReached}
               onConnect={handleMessengerConnect}
             />
           )}
-          */}
 
           {!instagramConnected && (
             <IntegrationCard
@@ -1026,6 +1184,8 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
               icon={Instagram}
               iconBgClass="bg-[#fce8f0]"
               iconClass="text-channel-pink"
+              connectLabel={isChannelLimitReached ? 'Limit reached' : 'Connect'}
+              connectDisabled={isChannelLimitReached}
               onConnect={handleInstagramConnect}
             />
           )}
@@ -1048,8 +1208,8 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
               icon={Mail}
               iconBgClass="bg-[#e8f4ff]"
               iconClass="text-channel-blue"
-              connectLabel={enablingEmail ? 'Enabling…' : 'Enable'}
-              connectDisabled={enablingEmail}
+              connectLabel={isChannelLimitReached ? 'Limit reached' : enablingEmail ? 'Enabling…' : 'Enable'}
+              connectDisabled={enablingEmail || isChannelLimitReached}
               onConnect={() => void handleEnableEmail()}
             />
           )}

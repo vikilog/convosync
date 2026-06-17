@@ -10,7 +10,6 @@ import {
   SidebarProvider,
   useSidebarOffset,
 } from './contexts/SidebarContext';
-import { TopNavBar } from './components/TopNavBar';
 import { TrialBanner } from './components/TrialBanner';
 import { AuthPage } from './components/AuthPage';
 import { SignupPage } from './components/SignupPage';
@@ -39,11 +38,7 @@ import { DevelopersView } from './components/DevelopersView';
 import { SettingsView } from './components/SettingsView';
 import { UsageCost } from './pages/UsageCost';
 import { motion } from 'motion/react';
-import { googleToolFromPath, tabFromPath, pathForTab, pathForNewCampaign, isNewCampaignPath, type AppTab } from './routes';
-import {
-  GOOGLE_TOOL_META,
-  isGoogleToolsMainTab,
-} from './lib/googleTools';
+import { tabFromPath, pathForTab, pathForNewCampaign, isNewCampaignPath, type AppTab } from './routes';
 import { KeepAlive } from './components/KeepAlive';
 import { getOnboardingCache, isLoggedIn } from './lib/session';
 import { getUserPermissions, getUserRole, getWorkspaceId } from './lib/api';
@@ -67,7 +62,6 @@ function AppShell() {
   const navigate = useNavigate();
   const { permissions, role, canPath } = useWorkspaceAccess();
   const activeTab = tabFromPath(location.pathname);
-  const [searchQuery, setSearchQuery] = useState<string>('');
   const [mountedTabs, setMountedTabs] = useState<Set<AppTab>>(() => new Set([activeTab]));
   const companyKey = getWorkspaceId() ?? 'company';
   const prevCompanyKey = useRef(companyKey);
@@ -134,65 +128,9 @@ function AppShell() {
     }
   }, [activeTab, location.pathname, navigate, permissions, role]);
 
-  const getHeaderTitle = () => {
-    switch (activeTab) {
-      case 'dashboard':
-        return 'Dashboard Overview';
-      case 'manager':
-        return 'WhatsApp Accounts';
-      case 'inbox':
-        return 'Inbox';
-      case 'contacts':
-        return 'Contacts';
-      case 'calling':
-        return 'WhatsApp Calling';
-      case 'campaigns':
-        return location.pathname.startsWith('/campaigns/') ? 'Campaign details' : 'Campaigns';
-      case 'templates':
-        if (location.pathname.includes('/canned')) return 'Canned responses';
-        if (location.pathname.includes('/email')) return 'Email templates';
-        return 'Message templates';
-      case 'journey':
-        return 'Journey Workflow Canvas';
-      case 'ai-agent':
-        return 'AI Agent';
-      case 'ctwa':
-        return 'Click-to-WhatsApp Ads Analytics';
-      case 'facebook':
-        return 'Facebook Page Manager';
-      case 'pay':
-        return 'WhatsApp Pay Settlements';
-      case 'shop':
-        return 'Workspace Product Catalog';
-      case 'integrations':
-        return 'Integrations';
-      case 'google-tools': {
-        const tool = googleToolFromPath(location.pathname);
-        const meta =
-          tool && isGoogleToolsMainTab(tool) ? GOOGLE_TOOL_META[tool] : null;
-        return meta?.label ?? 'Google Tools';
-      }
-      case 'developers':
-        return 'Developer API Console';
-      case 'reports':
-        return 'Operational Analytics Reports';
-      case 'usage-cost':
-        return 'Usage & Cost';
-      case 'settings':
-        return 'Settings';
-      default:
-        return 'ConvoSync Workspace';
-    }
-  };
-
-  const headerTitle = getHeaderTitle();
-
   return (
     <SidebarProvider>
       <AppShellLayout
-        headerTitle={headerTitle}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
         activeTab={activeTab}
         companyKey={companyKey}
         mountedTabs={mountedTabs}
@@ -203,17 +141,11 @@ function AppShell() {
 }
 
 function AppShellLayout({
-  headerTitle,
-  searchQuery,
-  setSearchQuery,
   activeTab,
   companyKey,
   mountedTabs,
   navigate,
 }: {
-  headerTitle: string;
-  searchQuery: string;
-  setSearchQuery: (q: string) => void;
   activeTab: string;
   companyKey: string;
   mountedTabs: Set<string>;
@@ -232,27 +164,15 @@ function AppShellLayout({
         className="flex h-screen min-h-0 min-w-0 flex-1 flex-col overflow-hidden transition-[padding-left] duration-200 ease-out"
         style={{ paddingLeft: sidebarPadding }}
       >
-        <TopNavBar
-          title={headerTitle}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          hideSearch={activeTab === 'google-tools'}
-          hideTitle={activeTab === 'usage-cost'}
-        />
-        <div className="h-16 shrink-0" aria-hidden="true" />
         <TrialBanner />
 
         <main
           className={
-            activeTab === 'inbox' || campaignCreateWizard
-              ? 'min-h-0 flex-1 overflow-hidden'
+            activeTab === 'inbox' || activeTab === 'contacts' || campaignCreateWizard
+              ? 'min-h-0 flex-1 overflow-hidden px-1 md:px-2'
               : activeTab === 'google-tools'
-                ? 'p-2 md:p-3 flex-1 min-h-0 min-w-0 overflow-hidden'
-              : activeTab === 'integrations'
-                ? 'px-4 py-2 md:px-5 md:py-3 flex-1 min-h-0 overflow-x-hidden overflow-y-auto'
-                : activeTab === 'dashboard' || activeTab === 'usage-cost'
-                  ? 'flex-1 min-h-0 overflow-x-hidden overflow-y-auto px-4 py-5 md:px-8 md:py-6'
-                  : 'flex-1 min-h-0 overflow-x-hidden overflow-y-auto p-4 md:p-6'
+                ? 'px-1 md:px-2 py-2 md:py-3 flex-1 min-h-0 min-w-0 overflow-hidden'
+                : 'flex-1 min-h-0 overflow-x-hidden overflow-y-auto px-1 md:px-2 pt-2 md:pt-3'
           }
         >
           <motion.div
@@ -261,7 +181,10 @@ function AppShellLayout({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.15 }}
             className={
-              activeTab === 'inbox' || activeTab === 'google-tools' || campaignCreateWizard
+              activeTab === 'inbox' ||
+              activeTab === 'contacts' ||
+              activeTab === 'google-tools' ||
+              campaignCreateWizard
                 ? 'h-full min-h-0 min-w-0 overflow-hidden'
                 : 'h-full min-h-0'
             }

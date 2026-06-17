@@ -94,8 +94,8 @@ export function SettingsView() {
   }, [permissions, role, section]);
 
   return (
-    <div className="flex flex-col md:flex-row gap-0 min-h-[calc(100vh-8rem)] -m-2 md:-m-4 rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-sm">
-      <div className="md:hidden border-b border-slate-200 bg-slate-50 p-3">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden border border-slate-200 bg-white">
+      <div className="border-b border-slate-200 bg-slate-50 px-3 py-2.5 md:hidden">
         <label htmlFor="settings-section-mobile" className="sr-only">
           Settings section
         </label>
@@ -103,7 +103,7 @@ export function SettingsView() {
           id="settings-section-mobile"
           value={section}
           onChange={(e) => navigate(pathForSettingsSection(e.target.value as SettingsSection))}
-          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-gray-800"
+          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-200"
         >
           {flatNavItems.map((item) => (
             <option key={item.id} value={item.id}>
@@ -113,44 +113,56 @@ export function SettingsView() {
         </select>
       </div>
 
-      <aside className="hidden md:block w-[220px] shrink-0 border-r border-slate-200 bg-slate-50 py-4 overflow-y-auto">
-        <p className="px-4 text-sm font-bold text-gray-400 uppercase tracking-widest mb-3">
-          Settings
-        </p>
-        {visibleNav.map((group) => (
-          <div key={group.title} className="mb-4">
-            <p className="px-4 text-sm font-bold text-gray-500 mb-1">{group.title}</p>
-            <nav className="space-y-0.5 px-2">
-              {group.items.map((item) => (
-                <NavLink
-                  key={item.id}
-                  to={pathForSettingsSection(item.id)}
-                  className={({ isActive }) =>
-                    `block px-3 py-2 rounded-lg text-xs transition-all ${
-                      isActive
-                        ? 'bg-white text-sky-600 font-bold shadow-sm border border-sky-100'
-                        : 'text-gray-600 hover:bg-white/80 hover:text-sky-600'
-                    }`
-                  }
-                >
-                  {item.label}
-                </NavLink>
-              ))}
-            </nav>
+      <div className="flex min-h-0 flex-1">
+        <aside className="hidden w-[230px] shrink-0 overflow-y-auto border-r border-slate-200 bg-slate-50 md:block">
+          <div className="px-3 py-3">
+            <p className="px-2 pb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+              Workspace settings
+            </p>
+            {visibleNav.map((group) => (
+              <div key={group.title} className="mb-4 last:mb-0">
+                <p className="px-2 pb-1 text-xs font-semibold text-slate-500">{group.title}</p>
+                <nav className="space-y-1">
+                  {group.items.map((item) => (
+                    <NavLink
+                      key={item.id}
+                      to={pathForSettingsSection(item.id)}
+                      className={({ isActive }) =>
+                        `block rounded-lg px-2.5 py-2 text-sm transition-colors ${
+                          isActive
+                            ? 'bg-sky-100 text-sky-800 font-semibold'
+                            : 'text-slate-600 hover:bg-white hover:text-slate-900'
+                        }`
+                      }
+                    >
+                      {item.label}
+                    </NavLink>
+                  ))}
+                </nav>
+              </div>
+            ))}
           </div>
-        ))}
-      </aside>
+        </aside>
 
-      <div className="flex-1 min-w-0 bg-slate-50 p-4 md:p-6 overflow-y-auto">
-        <h2 className="text-lg font-bold text-gray-900 mb-4 md:mb-6">{title}</h2>
-        {currentSectionAllowed ? (
-          <SettingsPanel section={section} />
-        ) : (
-          <p className="text-sm text-gray-500">
-            You do not have permission to view this settings section. Ask an admin to update your
-            access under Users and teams.
-          </p>
-        )}
+        <div className="flex-1 min-w-0 overflow-y-auto bg-slate-50 p-3 md:p-4">
+          <div className="mb-3 border border-slate-200 bg-white px-4 py-3 md:mb-4">
+            <h2 className="text-base font-semibold text-slate-900 md:text-lg">{title}</h2>
+            <p className="mt-0.5 text-xs text-slate-500 md:text-sm">
+              Manage your workspace preferences and account configuration.
+            </p>
+          </div>
+
+          {currentSectionAllowed ? (
+            <SettingsPanel section={section} />
+          ) : (
+            <div className="border border-slate-200 bg-white p-4">
+              <p className="text-sm text-slate-600">
+                You do not have permission to view this settings section. Ask an admin to update
+                your access under Users and teams.
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

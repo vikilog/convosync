@@ -405,6 +405,7 @@ export const api = {
   getContactAudits: (id: string) => get(`/contacts/${id}/audits`),
   createContact: (data: unknown) => post('/contacts', data),
   updateContact: (id: string, data: unknown) => put(`/contacts/${id}`, data),
+  deleteContact: (id: string) => del(`/contacts/${id}`),
   getSegments: () => get('/contacts/segments'),
   getCampaignAudience: (channel: 'whatsapp' | 'email' | 'instagram') =>
     get('/contacts/campaign-audience', { channel }),
@@ -550,8 +551,27 @@ export const api = {
       status?: 'started' | 'completed' | 'in_progress';
       message?: string;
     }>,
-  connectInstagram: (code: string, session?: { redirectUri?: string; pageId?: string }) =>
-    post('/instagram/connect', { code, ...session }),
+  connectInstagram: (data: {
+    connectToken?: string;
+    pageId?: string;
+    code?: string;
+    redirectUri?: string;
+  }) => post('/instagram/connect', data),
+  previewInstagramConnect: (code: string, session?: { redirectUri?: string }) =>
+    post('/instagram/connect/preview', { code, ...session }) as Promise<{
+      success: boolean;
+      connectToken: string;
+      requiresSelection: boolean;
+      candidates: Array<{
+        pageId: string;
+        pageName?: string;
+        instagramUserId: string;
+        username?: string;
+        displayName?: string;
+        profilePicture?: string;
+        alreadyConnected?: boolean;
+      }>;
+    }>,
   disconnectInstagram: (instagramUserId?: string) =>
     del(
       instagramUserId

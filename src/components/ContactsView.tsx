@@ -5,10 +5,8 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  Plus,
   Search,
   Download,
-  Filter,
   Users,
   UserX,
   Ban,
@@ -17,6 +15,7 @@ import {
   Facebook,
   Instagram,
   Pencil,
+  Trash2,
 } from 'lucide-react';
 import { Contact } from '../types';
 import { api } from '../lib/api';
@@ -85,8 +84,7 @@ export const ContactsView: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editContact, setEditContact] = useState<ContactEditPayload | null>(null);
-  const [showFilters, setShowFilters] = useState(false);
-  const [filterTag, setFilterTag] = useState('');
+  const [deletingContactId, setDeletingContactId] = useState<string | null>(null);
 
   const loadContacts = useCallback(async (options?: { silent?: boolean }) => {
     if (!options?.silent) setLoading(true);
@@ -94,7 +92,6 @@ export const ContactsView: React.FC = () => {
       const params: Record<string, string> = { list: activeList };
       if (channelFilter !== 'all') params.channel = channelFilter;
       if (searchQuery.trim()) params.search = searchQuery.trim();
-      if (filterTag) params.tag = filterTag;
 
       const [rawContacts, rawStats] = await Promise.all([
         api.getContacts(params),
@@ -107,7 +104,7 @@ export const ContactsView: React.FC = () => {
     } finally {
       if (!options?.silent) setLoading(false);
     }
-  }, [activeList, channelFilter, searchQuery, filterTag]);
+  }, [activeList, channelFilter, searchQuery]);
 
   useEffect(() => {
     const t = window.setTimeout(() => void loadContacts(), searchQuery ? 300 : 0);
@@ -124,7 +121,12 @@ export const ContactsView: React.FC = () => {
     return stats.blocklist;
   };
 
-  const allTags = Array.from(new Set(contacts.flatMap((c) => c.tags))).sort();
+  const listLabelForContact = (contact: Contact) => {
+    if (contact.tags.includes('Blocked')) return 'Blocklist';
+    if (contact.tags.includes('Unsubscribed')) return 'Unsubscribe';
+    return 'All';
+  };
+
 
   const openAddContact = () => {
     setEditContact(null);
@@ -180,332 +182,230 @@ export const ContactsView: React.FC = () => {
     URL.revokeObjectURL(url);
   };
 
+  const handleDeleteContact = async (contact: Contact) => {
+    const confirmed = window.confirm(
+      `Delete ${contact.name}? This will also delete related conversations, messages, and journey history.`
+    );
+    if (!confirmed) return;
+    setDeletingContactId(contact.id);
+    try {
+      await api.deleteContact(contact.id);
+      setContacts((prev) => prev.filter((c) => c.id !== contact.id));
+      await loadContacts({ silent: true });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to delete contact';
+      window.alert(message);
+    } finally {
+      setDeletingContactId(null);
+    }
+  };
+
   return (
-    <div className="flex flex-col md:flex-row min-h-[calc(100dvh-9.5rem)] md:h-[calc(100vh-4rem)] max-h-[calc(100dvh-9.5rem)] md:max-h-none -m-2 md:-m-4 lg:-m-6 bg-white border border-slate-200 rounded-2xl overflow-hidden">
-      <div className="md:hidden border-b border-slate-200 bg-slate-50 p-3 shrink-0">
-        <div className="grid grid-cols-2 gap-2">
-          <label htmlFor="contacts-list-mobile" className="sr-only">
-            Contact list
-          </label>
-          <select
-            id="contacts-list-mobile"
-            value={activeList}
-            onChange={(e) => setActiveList(e.target.value as ContactListKey)}
-            className={SELECT_FIELD_CLASS}
-          >
-            {LIST_NAV.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.label} ({countForList(item.id)})
-              </option>
-            ))}
-          </select>
-          <label htmlFor="contacts-channel-mobile" className="sr-only">
-            Channel filter
-          </label>
-          <select
-            id="contacts-channel-mobile"
-            value={channelFilter}
-            onChange={(e) => setChannelFilter(e.target.value as ContactChannelKey)}
-            className={SELECT_FIELD_CLASS}
-          >
-            {CHANNEL_NAV.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.label}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {/* List sidebar — All / Unsubscribe / Blocklist */}
-      <aside className="hidden md:flex w-[188px] shrink-0 border-r border-slate-200 bg-slate-50 py-3 flex-col">
-        <nav className="space-y-0.5 px-2">
-          {LIST_NAV.map((item) => {
-            const active = activeList === item.id;
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => setActiveList(item.id)}
-                className={`w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-lg text-sm transition-all ${
-                  active
-                    ? 'bg-sky-50 text-primary font-bold'
-                    : 'text-gray-600 hover:bg-white hover:text-primary'
-                }`}
-              >
-                <span className="flex items-center gap-2 truncate">
-                  <span className={active ? 'text-primary' : 'text-gray-400'}>{item.icon}</span>
-                  {item.label}
-                </span>
-                <span className="text-xs font-mono text-gray-500 shrink-0">
-                  ({countForList(item.id)})
-                </span>
-              </button>
-            );
-          })}
-        </nav>
-
-        <div className="mt-4 px-3">
-          <p className="text-sm font-bold uppercase tracking-wider text-gray-400 mb-2 px-1">
-            Channel
-          </p>
-          <nav className="space-y-0.5">
-            {CHANNEL_NAV.map((item) => {
-              const active = channelFilter === item.id;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => setChannelFilter(item.id)}
-                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
-                    active
-                      ? `${item.activeClass} font-bold`
-                      : 'text-gray-600 hover:bg-white hover:text-primary'
-                  }`}
-                >
-                  <span className={active ? '' : 'text-gray-400'}>{item.icon}</span>
-                  <span className="truncate">{item.label}</span>
-                </button>
-              );
-            })}
-          </nav>
-        </div>
-      </aside>
-
-      {/* Main panel */}
-      <section className="flex-1 flex flex-col min-w-0">
-        <div className="px-3 md:px-4 py-3 border-b border-slate-200 space-y-3 shrink-0">
-          <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2">
-            <div className="relative flex-1 min-w-0">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-              <input
-                type="search"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search contacts…"
-                className="w-full pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-              />
+    <div className="h-full min-h-0 border border-slate-200 bg-slate-50/60 overflow-hidden">
+      <div className="h-full min-h-0">
+        <section className="min-h-0 h-full flex flex-col">
+          <div className="border-b border-slate-200 bg-white px-3 md:px-4 py-3 space-y-3">
+            <div>
+              <h2 className="text-base font-bold text-slate-900">Contacts</h2>
             </div>
-            <button
-              type="button"
-              onClick={() => setShowFilters((v) => !v)}
-              className={`inline-flex items-center justify-center gap-1.5 px-3 py-2.5 text-sm font-semibold rounded-xl border transition-colors shrink-0 ${
-                showFilters || filterTag
-                  ? 'border-primary text-primary bg-sky-50'
-                  : 'border-slate-200 text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              <Filter className="w-4 h-4 sm:hidden" aria-hidden />
-              <Plus className="w-3.5 h-3.5 hidden sm:block" aria-hidden />
-              <span>{showFilters || filterTag ? 'Filters' : 'Add filter'}</span>
-            </button>
-          </div>
 
-          {showFilters && (
-            <div className="flex flex-wrap items-center gap-2 pb-1">
-              <span className="text-xs text-gray-500 font-medium">Tag:</span>
+            <div className="grid grid-cols-1 lg:grid-cols-[minmax(260px,1fr)_auto_auto_auto] gap-2 items-center">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                <input
+                  type="search"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search name, phone, email..."
+                  className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                />
+              </div>
+
               <select
-                value={filterTag}
-                onChange={(e) => setFilterTag(e.target.value)}
-                className={`${SELECT_FIELD_CLASS} w-auto min-w-[140px] py-2 text-sm font-medium`}
+                value={activeList}
+                onChange={(e) => setActiveList(e.target.value as ContactListKey)}
+                className={`${SELECT_FIELD_CLASS} py-2 min-w-[120px]`}
               >
-                <option value="">Any</option>
-                {allTags.map((t) => (
-                  <option key={t} value={t}>
-                    {t}
+                {LIST_NAV.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.label}
                   </option>
                 ))}
               </select>
-              {filterTag && (
-                <button
-                  type="button"
-                  onClick={() => setFilterTag('')}
-                  className="text-sm font-bold text-primary"
-                >
-                  Clear
-                </button>
-              )}
-            </div>
-          )}
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-gray-600 shrink-0">
-              <span className="font-bold text-gray-900">{contacts.length}</span> Contacts
-            </p>
-            <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 w-full sm:w-auto">
               <button
                 type="button"
                 onClick={handleExport}
                 disabled={contacts.length === 0 || loading}
-                className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 text-sm font-semibold text-gray-700 border border-slate-200 rounded-xl hover:bg-gray-50 disabled:opacity-50"
+                className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
               >
-                <Download className="w-4 h-4 shrink-0" />
-                <span className="truncate hidden sm:inline">Export all</span>
-                <span className="truncate sm:hidden">Export</span>
+                <Download className="w-4 h-4" />
+                Export
               </button>
+
               <button
                 type="button"
                 onClick={openAddContact}
-                className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 text-sm font-semibold text-white bg-primary hover:bg-primary-hover rounded-xl shadow-sm"
+                className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-white hover:bg-primary-hover"
               >
-                <UserPlus className="w-4 h-4 shrink-0" />
-                <span className="truncate hidden sm:inline">Add contact</span>
-                <span className="truncate sm:hidden">Add</span>
+                <UserPlus className="w-4 h-4" />
+                Add contact
               </button>
             </div>
-          </div>
-        </div>
 
-        <div className="flex-1 overflow-y-auto overflow-x-hidden min-h-0">
-          {loading ? (
-            <>
-              <div className="p-4 space-y-3 md:hidden">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center gap-3 rounded-xl border border-slate-200 p-3 animate-pulse"
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5">
+              {CHANNEL_NAV.map((item) => {
+                const active = channelFilter === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setChannelFilter(item.id)}
+                    className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 py-1.5 text-xs font-semibold border transition-colors cursor-pointer ${
+                      active
+                        ? 'bg-sky-50 text-primary border-primary/20'
+                        : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                    }`}
                   >
-                    <div className="w-10 h-10 rounded-full bg-gray-100 shrink-0" />
-                    <div className="flex-1 space-y-2">
-                      <div className="h-3 w-2/5 rounded bg-gray-100" />
-                      <div className="h-3 w-3/5 rounded bg-gray-100" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="hidden md:flex items-center justify-center min-h-[12rem] text-sm text-gray-400">
-                Loading contacts…
-              </div>
-            </>
-          ) : contacts.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full min-h-[320px] text-center px-6">
-              <div className="w-24 h-24 rounded-2xl bg-sky-50 border border-sky-100 flex items-center justify-center mb-4">
-                <Filter className="w-10 h-10 text-primary/40" />
-              </div>
-              <p className="text-sm font-bold text-gray-500">No data</p>
-              <p className="text-xs text-gray-400 mt-1 max-w-xs">
-                {activeList === 'all' && channelFilter === 'all'
-                  ? 'Add a contact or connect WhatsApp to start building your audience.'
-                  : activeList !== 'all'
-                    ? `No contacts in ${activeList === 'unsubscribe' ? 'Unsubscribe' : 'Blocklist'}${channelFilter !== 'all' ? ` on ${CHANNEL_NAV.find((c) => c.id === channelFilter)?.label}` : ''} yet.`
-                    : `No ${CHANNEL_NAV.find((c) => c.id === channelFilter)?.label ?? ''} contacts yet.`}
-              </p>
-              {activeList === 'all' && (
-                <button
-                  type="button"
-                  onClick={openAddContact}
-                  className="mt-4 px-4 py-2 text-sm font-bold text-primary border border-primary/30 rounded-lg hover:bg-sky-50"
-                >
-                  Add your first contact
-                </button>
-              )}
+                    <span className={active ? 'text-primary' : 'text-slate-400'}>{item.icon}</span>
+                    {item.label}
+                  </button>
+                );
+              })}
             </div>
-          ) : (
-            <>
-              <ul className="md:hidden divide-y divide-slate-200/60">
-                {contacts.map((contact) => (
-                  <li key={contact.id}>
-                    <button
-                      type="button"
-                      onClick={() => void openEditContact(contact)}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-50/80 active:bg-sky-50 transition-colors"
-                    >
-                      <div className="w-10 h-10 rounded-full bg-primary/10 text-primary text-sm font-bold flex items-center justify-center shrink-0">
-                        {contact.name.charAt(0).toUpperCase()}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-gray-900 truncate">{contact.name}</p>
-                        <p className="text-xs text-gray-500 truncate mt-0.5">
-                          {contact.phone || contact.email || contact.source}
-                        </p>
-                        {contact.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mt-1.5">
-                            {contact.tags.slice(0, 2).map((tag) => (
-                              <span
-                                key={tag}
-                                className="px-1.5 py-0.5 rounded text-[11px] font-bold bg-sky-50 text-primary"
-                              >
-                                {tag}
-                              </span>
-                            ))}
-                            {contact.tags.length > 2 && (
-                              <span className="text-[11px] text-gray-400">
-                                +{contact.tags.length - 2}
-                              </span>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                      <Pencil className="w-4 h-4 text-gray-300 shrink-0" aria-hidden />
-                    </button>
-                  </li>
-                ))}
-              </ul>
 
-              <div className="hidden md:block overflow-x-auto">
-            <table className="w-full text-left text-sm min-w-[640px]">
-              <thead className="bg-slate-50 text-xs uppercase tracking-wider font-bold text-gray-400 border-b border-slate-200 sticky top-0">
-                <tr>
-                  <th className="px-4 py-3">Nickname</th>
-                  <th className="px-4 py-3">Phone</th>
-                  <th className="px-4 py-3">Email</th>
-                  <th className="px-4 py-3">Source</th>
-                  <th className="px-4 py-3">Tags</th>
-                  <th className="px-4 py-3">Last active</th>
-                  <th className="px-4 py-3 w-16 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200/60">
-                {contacts.map((contact) => (
-                  <tr key={contact.id} className="hover:bg-slate-50/80">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-bold flex items-center justify-center shrink-0">
+          </div>
+
+          <div className="flex-1 min-h-0 overflow-auto bg-white">
+            {loading ? (
+              <div className="flex items-center justify-center h-full text-sm text-slate-500">
+                Loading contacts...
+              </div>
+            ) : contacts.length === 0 ? (
+              <div className="h-full flex flex-col items-center justify-center px-6 text-center">
+                <div className="w-16 h-16 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center mb-3">
+                  <Users className="w-7 h-7 text-slate-400" />
+                </div>
+                <p className="text-sm font-semibold text-slate-700">No contacts found</p>
+                <p className="mt-1 text-xs text-slate-500 max-w-xs">
+                  Try changing list/channel filters or add your first contact.
+                </p>
+              </div>
+            ) : (
+              <>
+                <ul className="md:hidden divide-y divide-slate-200/70">
+                  {contacts.map((contact) => (
+                    <li key={contact.id} className="px-3 py-2.5">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center shrink-0">
                           {contact.name.charAt(0).toUpperCase()}
                         </div>
-                        <span className="font-semibold text-gray-900">{contact.name}</span>
+                        <button
+                          type="button"
+                          onClick={() => void openEditContact(contact)}
+                          className="flex-1 min-w-0 text-left"
+                        >
+                          <p className="text-sm font-semibold text-slate-900 truncate">{contact.name}</p>
+                          <p className="text-xs text-slate-500 truncate">{contact.phone}</p>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void handleDeleteContact(contact)}
+                          disabled={deletingContactId === contact.id}
+                          className="inline-flex items-center justify-center p-2 rounded-md text-red-600 hover:text-red-700 hover:bg-red-50 disabled:opacity-50"
+                          aria-label={`Delete ${contact.name}`}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </div>
-                    </td>
-                    <td className="px-4 py-3 font-mono text-xs text-gray-600">{contact.phone}</td>
-                    <td className="px-4 py-3 text-gray-600">{contact.email || '—'}</td>
-                    <td className="px-4 py-3 text-gray-500">{contact.source}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex flex-wrap gap-1">
-                        {contact.tags.length === 0 ? (
-                          <span className="text-gray-400">—</span>
-                        ) : (
-                          contact.tags.map((tag) => (
-                            <span
-                              key={tag}
-                              className="px-1.5 py-0.5 rounded text-sm font-bold bg-sky-50 text-primary"
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="hidden md:block">
+                  <table className="w-full min-w-[760px] text-left">
+                    <thead className="sticky top-0 z-10 bg-slate-50 border-b border-slate-200">
+                      <tr className="text-[11px] uppercase tracking-wider text-slate-500">
+                        <th className="px-4 py-2 font-bold">Contact</th>
+                        <th className="px-4 py-2 font-bold">Phone</th>
+                        <th className="px-4 py-2 font-bold">Email</th>
+                        <th className="px-4 py-2 font-bold">Source</th>
+                        <th className="px-4 py-2 font-bold">List</th>
+                        <th className="px-4 py-2 font-bold">Tags</th>
+                        <th className="px-4 py-2 font-bold">Last active</th>
+                        <th className="px-4 py-2 font-bold text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200/70 text-sm">
+                      {contacts.map((contact) => (
+                        <tr key={contact.id} className="hover:bg-slate-50/70">
+                          <td className="px-4 py-2">
+                            <button
+                              type="button"
+                              onClick={() => void openEditContact(contact)}
+                              className="flex items-center gap-2 min-w-0 cursor-pointer"
                             >
-                              {tag}
-                            </span>
-                          ))
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-xs text-gray-400">{contact.lastActive}</td>
-                    <td className="px-4 py-3 text-right">
-                      <button
-                        type="button"
-                        onClick={() => void openEditContact(contact)}
-                        className="inline-flex items-center justify-center p-2 rounded-lg text-gray-400 hover:text-primary hover:bg-sky-50 transition-colors"
-                        title="Edit contact"
-                        aria-label={`Edit ${contact.name}`}
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-              </div>
-            </>
-          )}
-        </div>
-      </section>
+                              <div className="w-7 h-7 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center shrink-0">
+                                {contact.name.charAt(0).toUpperCase()}
+                              </div>
+                              <span className="font-semibold text-slate-900 truncate">{contact.name}</span>
+                            </button>
+                          </td>
+                          <td className="px-4 py-2 font-mono text-xs text-slate-600">{contact.phone}</td>
+                          <td className="px-4 py-2 text-slate-600">{contact.email || '—'}</td>
+                          <td className="px-4 py-2 text-slate-500">{contact.source}</td>
+                          <td className="px-4 py-2 text-slate-600">{listLabelForContact(contact)}</td>
+                          <td className="px-4 py-2">
+                            {contact.tags.length === 0 ? (
+                              <span className="text-xs text-slate-400">—</span>
+                            ) : (
+                              <div className="flex flex-wrap gap-1">
+                                {contact.tags.slice(0, 2).map((tag) => (
+                                  <span
+                                    key={tag}
+                                    className="rounded-md bg-sky-50 px-1.5 py-0.5 text-[11px] font-semibold text-primary"
+                                  >
+                                    {tag}
+                                  </span>
+                                ))}
+                                {contact.tags.length > 2 && (
+                                  <span className="text-[11px] text-slate-400">
+                                    +{contact.tags.length - 2}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                          </td>
+                          <td className="px-4 py-2 text-xs text-slate-400">{contact.lastActive}</td>
+                          <td className="px-4 py-2 text-right">
+                            <button
+                              type="button"
+                              onClick={() => void openEditContact(contact)}
+                              className="inline-flex items-center justify-center p-1.5 rounded-md text-slate-400 hover:text-primary hover:bg-sky-50"
+                              aria-label={`Edit ${contact.name}`}
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => void handleDeleteContact(contact)}
+                              disabled={deletingContactId === contact.id}
+                              className="inline-flex items-center justify-center p-1.5 rounded-md text-red-600 hover:text-red-700 hover:bg-red-50 disabled:opacity-50"
+                              aria-label={`Delete ${contact.name}`}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )}
+          </div>
+        </section>
+      </div>
 
       <AddContactDrawer
         open={drawerOpen}

@@ -10,6 +10,7 @@ import {
   LayoutGrid,
   Inbox,
   Users,
+  Bell,
   Megaphone,
   FileText,
   GitBranch,
@@ -24,6 +25,8 @@ import {
   PanelLeftClose,
   Settings,
   LogOut,
+  Menu,
+  X,
 } from 'lucide-react';
 import { PRODUCT_LOGO, PRODUCT_NAME } from '../lib/brand';
 import { useSidebar } from '../contexts/SidebarContext';
@@ -70,6 +73,8 @@ type NavItem = {
   label: string;
   icon: React.ComponentType<{ className?: string }>;
   badge?: number;
+  path?: string;
+  pulse?: boolean;
 };
 
 type NavSection = {
@@ -99,7 +104,7 @@ export const SideNavBar: React.FC<SideNavBarProps> = ({
     location.pathname.startsWith('/google-tools')
   );
   const [, setProfileTick] = useState(0);
-  const { collapsed, toggleCollapsed, setCollapsed, mobileOpen, setMobileOpen, isLargeScreen } =
+  const { collapsed, toggleCollapsed, setCollapsed, mobileOpen, setMobileOpen, toggleMobile, isLargeScreen } =
     useSidebar();
   const sidebarCollapsed = collapsed && isLargeScreen;
   const { role: displayUserRole, canTab } = useWorkspaceAccess();
@@ -182,6 +187,13 @@ export const SideNavBar: React.FC<SideNavBarProps> = ({
           icon: Inbox,
           badge: inboxUnreadTotal > 0 ? inboxUnreadTotal : undefined,
         },
+        {
+          id: 'notifications',
+          label: 'Notifications',
+          icon: Bell,
+          path: pathForSettingsSection('notifications'),
+          pulse: true,
+        },
         { id: 'contacts', label: 'Contacts', icon: Users },
       ],
     },
@@ -244,6 +256,17 @@ export const SideNavBar: React.FC<SideNavBarProps> = ({
 
   return (
     <>
+      {!isLargeScreen && !mobileOpen && (
+        <button
+          type="button"
+          onClick={toggleMobile}
+          className="fixed left-3 top-3 z-40 inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-sm transition-colors hover:bg-slate-50 hover:text-sky-600 lg:hidden"
+          aria-label="Open navigation menu"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+      )}
+
       {!isLargeScreen && mobileOpen && (
         <button
           type="button"
@@ -289,6 +312,16 @@ export const SideNavBar: React.FC<SideNavBarProps> = ({
                 <PanelLeftClose className="h-4 w-4" />
               )}
             </button>
+            {!isLargeScreen && (
+              <button
+                type="button"
+                onClick={() => setMobileOpen(false)}
+                className="inline-flex rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 lg:hidden"
+                aria-label="Close navigation menu"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
           </div>
 
           <button
@@ -326,25 +359,34 @@ export const SideNavBar: React.FC<SideNavBarProps> = ({
                   const Icon = item.icon;
                   const isCampaigns = item.id === 'campaigns';
                   const isSettings = item.id === 'settings';
+                  const isNotifications = item.id === 'notifications';
+                  const itemPath = item.path ?? pathForTab(item.id);
+                  const onNotificationsPage = location.pathname.startsWith(
+                    '/settings/notifications'
+                  );
+                  const onSettingsPage =
+                    location.pathname.startsWith('/settings') && !onNotificationsPage;
+
+                  const isItemActive = (isActive: boolean) => {
+                    if (isNotifications) return onNotificationsPage;
+                    if (isSettings) return onSettingsPage;
+                    return (
+                      isActive ||
+                      (isCampaigns && location.pathname.startsWith('/campaigns/'))
+                    );
+                  };
 
                   return (
                     <NavLink
                       key={item.id}
-                      to={pathForTab(item.id)}
+                      to={itemPath}
                       title={sidebarCollapsed ? item.label : undefined}
-                      className={({ isActive }) => {
-                        const active =
-                          isActive ||
-                          (isCampaigns && location.pathname.startsWith('/campaigns/')) ||
-                          (isSettings && location.pathname.startsWith('/settings'));
-                        return navLinkClass(active, sidebarCollapsed);
-                      }}
+                      className={({ isActive }) =>
+                        navLinkClass(isItemActive(isActive), sidebarCollapsed)
+                      }
                     >
                       {({ isActive }) => {
-                        const active =
-                          isActive ||
-                          (isCampaigns && location.pathname.startsWith('/campaigns/')) ||
-                          (isSettings && location.pathname.startsWith('/settings'));
+                        const active = isItemActive(isActive);
                         return (
                           <>
                             <div
@@ -356,6 +398,9 @@ export const SideNavBar: React.FC<SideNavBarProps> = ({
                                 }`}
                               />
                               {!sidebarCollapsed && <span>{item.label}</span>}
+                              {item.pulse ? (
+                                <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full border-2 border-white bg-red-500 animate-pulse" />
+                              ) : null}
                               {sidebarCollapsed && item.badge ? (
                                 <span className="absolute -right-1 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-sky-600 px-1 text-[10px] font-bold text-white">
                                   {item.badge > 99 ? '99+' : item.badge}

@@ -9,6 +9,7 @@ import { api } from '../../lib/api';
 import {
   buildMetaOAuthDialogUrl,
   INSTAGRAM_OAUTH_REDIRECT_STORAGE_KEY,
+  INSTAGRAM_SCOPES,
 } from '../../lib/metaOAuth';
 
 type ConnectSuccessData = {
@@ -25,17 +26,6 @@ type Props = {
   autoStart?: boolean;
   onAutoStartConsumed?: () => void;
 };
-
-const INSTAGRAM_SCOPES = [
-  'instagram_basic',
-  'instagram_manage_messages',
-  'pages_show_list',
-  'pages_read_engagement',
-  'pages_manage_metadata',
-  'pages_manage_engagement',
-  'pages_messaging',
-  'business_management',
-].join(',');
 
 export function InstagramConnectPanel({
   onSuccess,

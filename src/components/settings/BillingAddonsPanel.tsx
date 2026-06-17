@@ -4,7 +4,7 @@
  */
 
 import { useState } from 'react';
-import { Loader2, Mail, Plus } from 'lucide-react';
+import { Loader2, Mail, Minus, Plus } from 'lucide-react';
 import { api, formatCatchError } from '../../lib/api';
 import { formatInrPaise } from '../../lib/billingFormat';
 import { openRazorpayCheckout } from '../../lib/razorpay';
@@ -22,6 +22,11 @@ export type AddonCatalogEntry = {
 
 type BillingAddonsPanelProps = {
   addonCatalog: AddonCatalogEntry[];
+  fx?: {
+    usdInrRate: number;
+    fetchedAt: string;
+    source: string;
+  } | null;
   onPurchased: () => void | Promise<void>;
 };
 
@@ -30,7 +35,7 @@ function formatUsdPerUnit(usd: number): string {
   return `$${usd.toFixed(2)}`;
 }
 
-export function BillingAddonsPanel({ addonCatalog, onPurchased }: BillingAddonsPanelProps) {
+export function BillingAddonsPanel({ addonCatalog, fx, onPurchased }: BillingAddonsPanelProps) {
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [checkoutType, setCheckoutType] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -87,56 +92,99 @@ export function BillingAddonsPanel({ addonCatalog, onPurchased }: BillingAddonsP
   function renderAddonCard(entry: AddonCatalogEntry, highlight = false) {
     const quantity = quantities[entry.type] ?? entry.minQuantity;
     const totalPaise = entry.unitPaise * quantity;
+    const checkoutBusy = checkoutType !== null;
 
     return (
       <div
         key={entry.type}
-        className={`rounded-xl border p-4 ${
-          highlight ? 'border-[#0284c7]/40 bg-[#f8f7fc]' : 'border-slate-200 bg-slate-50'
+        className={`rounded-xl border p-4 transition-colors ${
+          highlight ? 'border-sky-200 bg-sky-50/40' : 'border-slate-200 bg-white'
         }`}
       >
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start justify-between gap-2">
           <div>
-            <p className="text-sm font-bold text-gray-900">{entry.label}</p>
-            <p className="mt-1 text-xs text-gray-500">{entry.description}</p>
-            <p className="mt-2 text-sm font-semibold text-sky-600">
-              {formatUsdPerUnit(entry.usdPerUnit)} / {entry.unitLabel}
-              <span className="ml-1 font-normal text-gray-400">
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-semibold text-slate-900">{entry.label}</p>
+              {highlight ? (
+                <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[11px] font-semibold text-sky-700">
+                  Recommended
+                </span>
+              ) : null}
+            </div>
+            <p className="mt-1 text-xs text-slate-500">{entry.description}</p>
+            <p className="mt-2 text-sm font-semibold text-slate-900">
+              {formatUsdPerUnit(entry.usdPerUnit)} / {entry.unitLabel}{' '}
+              <span className="font-normal text-slate-500">
                 ({formatInrPaise(entry.unitPaise)} per block)
               </span>
             </p>
           </div>
-          {highlight && <Mail className="h-5 w-5 shrink-0 text-sky-600" />}
+          {highlight && <Mail className="h-4 w-4 shrink-0 text-sky-600" />}
         </div>
 
-        <div className="mt-4 flex flex-wrap items-end gap-3">
-          <label className="text-xs text-gray-500">
-            Quantity
-            <input
-              type="number"
-              min={entry.minQuantity}
-              max={entry.maxQuantity}
-              value={quantity}
-              onChange={(e) =>
-                setQuantities((prev) => ({
-                  ...prev,
-                  [entry.type]: Math.min(
-                    entry.maxQuantity,
-                    Math.max(entry.minQuantity, Number.parseInt(e.target.value, 10) || entry.minQuantity)
-                  ),
-                }))
-              }
-              className="mt-1 block w-24 rounded-lg border border-slate-200 px-2 py-1.5 text-sm text-gray-900"
-            />
-          </label>
-          <div className="text-xs text-gray-600">
-            Total: <span className="font-bold text-gray-900">{formatInrPaise(totalPaise)}</span>
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-3">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+              Quantity
+            </p>
+            <div className="mt-1 inline-flex items-center rounded-lg border border-slate-200 bg-white">
+              <button
+                type="button"
+                disabled={checkoutBusy || quantity <= entry.minQuantity}
+                onClick={() =>
+                  setQuantities((prev) => ({
+                    ...prev,
+                    [entry.type]: Math.max(entry.minQuantity, quantity - 1),
+                  }))
+                }
+                className="inline-flex h-9 w-9 cursor-pointer items-center justify-center text-slate-500 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                aria-label={`Decrease ${entry.label} quantity`}
+              >
+                <Minus className="h-3.5 w-3.5" />
+              </button>
+              <input
+                type="number"
+                min={entry.minQuantity}
+                max={entry.maxQuantity}
+                value={quantity}
+                onChange={(e) =>
+                  setQuantities((prev) => ({
+                    ...prev,
+                    [entry.type]: Math.min(
+                      entry.maxQuantity,
+                      Math.max(entry.minQuantity, Number.parseInt(e.target.value, 10) || entry.minQuantity)
+                    ),
+                  }))
+                }
+                className="h-9 w-16 border-x border-slate-200 text-center text-sm font-semibold text-slate-800 focus:outline-none"
+              />
+              <button
+                type="button"
+                disabled={checkoutBusy || quantity >= entry.maxQuantity}
+                onClick={() =>
+                  setQuantities((prev) => ({
+                    ...prev,
+                    [entry.type]: Math.min(entry.maxQuantity, quantity + 1),
+                  }))
+                }
+                className="inline-flex h-9 w-9 cursor-pointer items-center justify-center text-slate-500 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                aria-label={`Increase ${entry.label} quantity`}
+              >
+                <Plus className="h-3.5 w-3.5" />
+              </button>
+            </div>
           </div>
+
+          <div className="text-right">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Total</p>
+            <p className="mt-1 text-base font-semibold text-slate-900">{formatInrPaise(totalPaise)}</p>
+          </div>
+
           <button
             type="button"
-            disabled={checkoutType !== null}
+            disabled={checkoutBusy}
             onClick={() => void purchaseAddon(entry)}
-            className="ml-auto inline-flex items-center gap-1.5 rounded-xl bg-sky-600 px-3 py-2 text-sm font-bold text-white hover:bg-sky-700 disabled:opacity-60"
+            className="inline-flex h-10 cursor-pointer items-center gap-1.5 rounded-lg bg-sky-700 px-4 text-sm font-semibold text-white transition-colors hover:bg-sky-800 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {checkoutType === entry.type ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -153,13 +201,22 @@ export function BillingAddonsPanel({ addonCatalog, onPurchased }: BillingAddonsP
   if (addonCatalog.length === 0) return null;
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <section className="rounded-xl border border-slate-200 bg-white p-5">
       <div>
-        <p className="text-sm font-bold text-gray-900">Add-ons</p>
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="text-sm font-semibold text-slate-900">Add-ons</p>
+        <p className="mt-1 text-xs text-slate-500">
           Increase limits beyond your plan. Platform email is delivered via Resend at $1 per 1,000
           sends.
         </p>
+        {fx && (
+          <p className="mt-1 text-xs text-slate-500">
+            Live FX: 1 USD = ₹{fx.usdInrRate.toFixed(2)} · updated{' '}
+            {new Date(fx.fetchedAt).toLocaleTimeString('en-IN', {
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
+          </p>
+        )}
       </div>
 
       {error && (
@@ -168,7 +225,7 @@ export function BillingAddonsPanel({ addonCatalog, onPurchased }: BillingAddonsP
         </div>
       )}
 
-      <div className="mt-4 space-y-3">
+      <div className="mt-4 grid gap-3 lg:grid-cols-2">
         {emailAddon ? renderAddonCard(emailAddon, true) : null}
         {otherAddons.map((entry) => renderAddonCard(entry))}
       </div>
