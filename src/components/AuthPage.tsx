@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Lock, Mail } from 'lucide-react';
 import { PRODUCT_LOGO, PRODUCT_NAME } from '../lib/brand';
@@ -11,6 +11,7 @@ import { api } from '../lib/api';
 import { applyAuthSession, userNeedsOnboarding } from '../lib/session';
 import { connectSocket } from '../lib/socket';
 import { pathForTab } from '../routes';
+import { trackEvent } from '../lib/analytics';
 
 export function AuthPage() {
   const navigate = useNavigate();
@@ -19,6 +20,10 @@ export function AuthPage() {
   const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  useEffect(() => {
+    trackEvent('login_started');
+  }, []);
 
   const finishAuth = (res: {
     token: string;
@@ -33,6 +38,7 @@ export function AuthPage() {
     activeWorkspaceId?: string;
   }) => {
     applyAuthSession(res);
+    trackEvent('login_complete');
     const wsId = res.activeWorkspaceId ?? res.workspace?.id;
     if (wsId) connectSocket(wsId);
     const returnTo = (location.state as { from?: string } | null)?.from;

@@ -70,6 +70,8 @@ export function trackEvent(name: string, params: AnalyticsEventParams = {}): voi
   if (window.fbq) {
     if (name === 'signup_complete') {
       window.fbq('track', 'CompleteRegistration', cleanParams);
+    } else if (name === 'login_complete') {
+      window.fbq('track', 'Lead', { ...cleanParams, content_name: 'login' });
     } else if (name === 'cta_click' && cleanParams.source === 'pricing') {
       window.fbq('track', 'InitiateCheckout', cleanParams);
     } else if (name === 'signup_started') {

@@ -34,6 +34,19 @@ function loadGtm(gtmId: string): void {
   window.dataLayer = window.dataLayer || [];
   window.dataLayer.push({ 'gtm.start': Date.now(), event: 'gtm.js' });
   injectScript(`https://www.googletagmanager.com/gtm.js?id=${gtmId}`, 'convosync-gtm');
+
+  if (!document.getElementById('convosync-gtm-noscript')) {
+    const noscript = document.createElement('noscript');
+    noscript.id = 'convosync-gtm-noscript';
+    const iframe = document.createElement('iframe');
+    iframe.src = `https://www.googletagmanager.com/ns.html?id=${gtmId}`;
+    iframe.height = '0';
+    iframe.width = '0';
+    iframe.style.display = 'none';
+    iframe.style.visibility = 'hidden';
+    noscript.appendChild(iframe);
+    document.body.prepend(noscript);
+  }
 }
 
 /** 2. Google Analytics 4 (direct — skip when GTM handles GA4) */
