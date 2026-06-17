@@ -6,6 +6,7 @@
 import { useState } from 'react';
 import { Check, Info, Sparkles, Receipt, Coins } from 'lucide-react';
 import { PRICING_PLANS } from '../data';
+import { trackEvent } from '../../lib/analytics';
 
 interface PricingSectionProps {
   onSelectPlan: (planId: string, isAnnual: boolean) => void;
@@ -41,7 +42,11 @@ export default function PricingSection({ onSelectPlan }: PricingSectionProps) {
           <span className={`text-xs sm:text-sm font-semibold transition-colors ${!isAnnual ? 'text-gray-900' : 'text-gray-400'}`}>Billed Monthly</span>
           <button
             id="billing-frequency-toggle"
-            onClick={() => setIsAnnual(!isAnnual)}
+            onClick={() => {
+              const next = !isAnnual;
+              trackEvent('pricing_billing_toggle', { billing: next ? 'annual' : 'monthly' });
+              setIsAnnual(next);
+            }}
             className="w-14 h-7 bg-brand-indigo/10 rounded-full p-1 border border-brand-indigo/20 flex items-center justify-start cursor-pointer transition-all focus:outline-none"
           >
             <div className={`w-5 h-5 bg-brand-gradient rounded-full transition-transform transform ${isAnnual ? 'translate-x-7' : 'translate-x-0'}`} />

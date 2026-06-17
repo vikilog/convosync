@@ -54,6 +54,7 @@ import {
   firstAccessibleTabPath,
 } from './lib/workspacePermissions';
 import { DocumentSeo } from './components/DocumentSeo';
+import { AnalyticsRoot } from './components/analytics/AnalyticsRoot';
 import { LandingPage } from './components/LandingPage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsOfServicePage } from './pages/TermsOfServicePage';
@@ -431,6 +432,7 @@ export default function App() {
   return (
     <>
       <DocumentSeo />
+      <AnalyticsRoot />
       <Routes>
       <Route path="/login" element={<LoginRedirect />} />
       <Route path="/signup" element={<SignupRedirect />} />

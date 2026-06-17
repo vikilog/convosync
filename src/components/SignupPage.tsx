@@ -3,13 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Check, Lock, Mail, User } from 'lucide-react';
 import { PRODUCT_LOGO, PRODUCT_NAME } from '../lib/brand';
 import { api } from '../lib/api';
 import { applyAuthSession, userNeedsOnboarding } from '../lib/session';
 import { connectSocket } from '../lib/socket';
+import { trackEvent } from '../lib/analytics';
 
 const PLAN_LABELS: Record<string, string> = {
   starter: 'Starter',
@@ -25,6 +26,13 @@ export function SignupPage() {
   const selectedPlan = search.get('plan') ?? 'growth';
   const billing = search.get('billing') === 'annual' ? 'annual' : 'monthly';
   const planLabel = PLAN_LABELS[selectedPlan] ?? 'Growth';
+
+  useEffect(() => {
+    trackEvent('signup_started', {
+      plan_id: selectedPlan,
+      billing,
+    });
+  }, [selectedPlan, billing]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,6 +53,10 @@ export function SignupPage() {
     activeWorkspaceId?: string;
   }) => {
     applyAuthSession(res);
+    trackEvent('signup_complete', {
+      plan_id: selectedPlan,
+      billing,
+    });
     const wsId = res.activeWorkspaceId ?? res.workspace?.id;
     if (wsId) connectSocket(wsId);
     if (userNeedsOnboarding(res.user)) {

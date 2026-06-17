@@ -13,6 +13,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { PRODUCT_NAME } from '../brand';
+import { trackEvent } from '../../lib/analytics';
 import {
   HERO_MODULES,
   HeroPlatformPreview,
@@ -152,7 +153,10 @@ export default function Hero({ onStartFree }: HeroProps) {
                     id={`hero-tab-${id}`}
                     aria-selected={selected}
                     aria-controls={`hero-panel-${id}`}
-                    onClick={() => setActiveModule(id)}
+                    onClick={() => {
+                      trackEvent('hero_tab_change', { module_id: id, trigger: 'click' });
+                      setActiveModule(id);
+                    }}
                     className={`flex items-center justify-center gap-1.5 w-full lg:w-auto lg:shrink-0 px-3 py-2.5 rounded-full text-xs font-semibold border transition-colors duration-200 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-indigo ${
                       selected
                         ? 'bg-brand-gradient text-white border-transparent shadow-sm'
