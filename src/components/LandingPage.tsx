@@ -1,0 +1,5 @@
+import LandingView from '../landing/LandingView';
+
+export function LandingPage() {
+  return <LandingView />;
+}

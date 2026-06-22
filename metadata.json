@@ -1,0 +1,6 @@
+{
+  "name": "ConvoSync Workspace",
+  "description": "Enterprise customer communications dashboard featuring a Team Inbox, Campaign Wizard, Automated Journey Canvas, AI Agent center, and Analytics Reports for WhatsApp Marketing.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
