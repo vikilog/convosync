@@ -43,6 +43,8 @@ export interface ChatMessage {
   createdAt?: string;
   timestamp: string;
   status?: 'sending' | 'sent' | 'delivered' | 'read';
+  /** WhatsApp "delete for everyone" */
+  revoked?: boolean;
   /** Optimistic local preview while outbound media is uploading */
   localPreviewUrl?: string;
 }
@@ -1173,9 +1175,12 @@ export const CAMPAIGN_CHANNELS: ChannelConfig[] = [
     borderColor: '#F5A7C7',
     description: 'Send direct messages to Instagram followers who have messaged you.',
     limit: '1,000 char limit',
-    available: true,
+    available: false,
   },
 ];
+
+/** Channels shown in the new-campaign channel picker. */
+export const SELECTABLE_CAMPAIGN_CHANNELS = CAMPAIGN_CHANNELS.filter((ch) => ch.available);
 
 export interface EmailCampaignConfig {
   subject: string;

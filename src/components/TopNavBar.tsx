@@ -33,14 +33,14 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
 
   return (
     <header
-      className="h-16 fixed top-0 right-0 left-0 lg:left-auto bg-white border-b border-slate-200 flex items-center gap-3 px-4 md:px-6 z-40 selection:bg-sky-100 transition-[left] duration-200 ease-out"
+      className="h-16 fixed top-0 right-0 left-0 lg:left-auto bg-white/90 backdrop-blur-sm border-b border-gray-200/80 flex items-center gap-3 px-4 md:px-6 z-40 selection:bg-emerald-100 transition-[left] duration-200 ease-out"
       style={isLargeScreen ? { left: sidebarOffset } : undefined}
     >
       {!isLargeScreen && (
         <button
           type="button"
           onClick={toggleMobile}
-          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-sky-600 transition-colors"
+          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gray-50 text-gray-600 hover:bg-emerald-50 hover:text-emerald-700 transition-colors"
           aria-label="Open navigation menu"
         >
           <Menu className="h-5 w-5" />
@@ -66,7 +66,7 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={searchPlaceholder}
-              className="w-full bg-slate-50 border border-slate-200 rounded-lg py-1.5 pl-9 pr-4 text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-500 transition-all"
+              className="w-full bg-white border border-gray-200 rounded-lg py-1.5 pl-9 pr-4 text-xs font-medium text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 focus:border-channel-green transition-all"
             />
           </div>
         </div>
@@ -75,7 +75,7 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
       <div className="flex items-center justify-end gap-2 shrink-0">
         <button
           type="button"
-          className="w-10 h-10 flex items-center justify-center rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-sky-600 transition-colors relative"
+          className="w-10 h-10 flex items-center justify-center rounded-lg bg-gray-50 text-gray-600 hover:bg-emerald-50 hover:text-emerald-700 transition-colors relative"
           aria-label="Notifications"
         >
           <Bell className="w-4 h-4" />

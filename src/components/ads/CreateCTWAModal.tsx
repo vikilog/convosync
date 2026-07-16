@@ -90,7 +90,7 @@ export const CreateCTWAModal: React.FC<{
                   value={form.campaignName}
                   onChange={(e) => update('campaignName', e.target.value)}
                   placeholder="e.g. Diwali Sale — WhatsApp Leads"
-                  className="w-full text-sm border border-slate-200 rounded-xl px-4 py-2.5 outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-100"
+                  className="w-full text-sm border border-slate-200 rounded-xl px-4 py-2.5 outline-none focus:border-channel-green focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
               <div>
@@ -125,7 +125,7 @@ export const CreateCTWAModal: React.FC<{
                   type="date"
                   value={form.startDate}
                   onChange={(e) => update('startDate', e.target.value)}
-                  className="w-full text-sm border border-slate-200 rounded-xl px-4 py-2.5 outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-100"
+                  className="w-full text-sm border border-slate-200 rounded-xl px-4 py-2.5 outline-none focus:border-channel-green focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
             </>
@@ -143,7 +143,7 @@ export const CreateCTWAModal: React.FC<{
                   onChange={(e) => update('headline', e.target.value)}
                   placeholder="e.g. Chat with us on WhatsApp!"
                   maxLength={40}
-                  className="w-full text-sm border border-slate-200 rounded-xl px-4 py-2.5 outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-100"
+                  className="w-full text-sm border border-slate-200 rounded-xl px-4 py-2.5 outline-none focus:border-channel-green focus:ring-2 focus:ring-emerald-100"
                 />
                 <p className="text-xs text-gray-500 mt-1">{form.headline.length}/40 characters</p>
               </div>
@@ -158,7 +158,7 @@ export const CreateCTWAModal: React.FC<{
                   placeholder="e.g. Get instant answers. Click to start a WhatsApp conversation with our team."
                   rows={3}
                   maxLength={125}
-                  className="w-full text-sm border border-slate-200 rounded-xl px-4 py-2.5 outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-100 resize-none"
+                  className="w-full text-sm border border-slate-200 rounded-xl px-4 py-2.5 outline-none focus:border-channel-green focus:ring-2 focus:ring-emerald-100 resize-none"
                 />
                 <p className="text-xs text-gray-500 mt-1">{form.description.length}/125 characters</p>
               </div>
@@ -196,7 +196,7 @@ export const CreateCTWAModal: React.FC<{
                   value={form.locations}
                   onChange={(e) => update('locations', e.target.value)}
                   placeholder="India, Mumbai, Delhi..."
-                  className="w-full text-sm border border-slate-200 rounded-xl px-4 py-2.5 outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-100"
+                  className="w-full text-sm border border-slate-200 rounded-xl px-4 py-2.5 outline-none focus:border-channel-green focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
               <div>
@@ -263,7 +263,7 @@ export const CreateCTWAModal: React.FC<{
             type="button"
             onClick={step === 3 ? () => void onCreate(form) : () => setStep((s) => s + 1)}
             disabled={(step === 1 && !form.campaignName) || creating}
-            className="px-5 py-2 bg-sky-600 hover:bg-sky-700 disabled:bg-gray-200 disabled:cursor-not-allowed text-white text-sm font-bold rounded-xl flex items-center gap-2 cursor-pointer transition-colors"
+            className="px-5 py-2 bg-channel-green hover:bg-[#20bd5a] disabled:bg-gray-200 disabled:cursor-not-allowed text-white text-sm font-bold rounded-xl flex items-center gap-2 cursor-pointer transition-colors"
           >
             {creating ? (
               'Launching…'

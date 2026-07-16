@@ -222,6 +222,15 @@ export const api = {
   }) => post('/workspace/subscription/quote', data),
 
   getBillingWorkspace: () => get('/billing/workspace'),
+  getBillingWallet: () => get('/billing/wallet'),
+  getBillingWalletTransactions: (limit = 50) =>
+    get('/billing/wallet/transactions', { limit: String(limit) }),
+  updateBillingWallet: (data: {
+    lowBalanceThresholdPaise?: number;
+    autoRechargeEnabled?: boolean;
+    autoRechargeAmountPaise?: number;
+  }) => patch('/billing/wallet', data),
+  // createAutoRechargeSetup: () => post('/billing/wallet/auto-recharge/setup', {}),
   getBillingInvoices: (limit = 50) =>
     get('/billing/invoices', { limit: String(limit) }),
   getBillingPlans: () => get('/billing/plans'),
@@ -229,7 +238,8 @@ export const api = {
     get('/billing/usage', month ? { month } : undefined),
   createBillingOrder: (data: {
     amountPaise?: number;
-    purpose?: 'addon' | 'custom_plan' | 'one_time';
+    creditAmountPaise?: number;
+    purpose?: 'addon' | 'custom_plan' | 'one_time' | 'wallet_topup' | 'plan_purchase';
     addonType?: string;
     quantity?: number;
     description?: string;
@@ -324,6 +334,7 @@ export const api = {
   refreshEmailDomain: (id: string) => post(`/email/domains/${id}/refresh`, {}),
   getEmailSenders: () => get('/email/senders'),
   createEmailSender: (data: unknown) => post('/email/senders', data),
+  setDefaultEmailSender: (email: string) => post('/email/senders/default', { email }),
   sendEmail: (data: unknown) => post('/email/send', data),
   getEmailLogs: (params?: { limit?: string }) => get('/email/logs', params),
   getEmailProviders: () => get('/email/providers'),
@@ -337,8 +348,6 @@ export const api = {
   createEmailTemplate: (data: unknown) => post('/email/templates', data),
   updateEmailTemplate: (id: string, data: unknown) => patch(`/email/templates/${id}`, data),
   deleteEmailTemplate: (id: string) => del(`/email/templates/${id}`),
-  generateEmailTemplateAi: (prompt: string) =>
-    post('/email/templates/ai-generate', { prompt }),
 
   getCannedResponses: () => get('/canned-responses'),
   createCannedResponse: (data: unknown) => post('/canned-responses', data),
@@ -417,7 +426,16 @@ export const api = {
   getConversations: (params?: Record<string, string>) => get('/conversations', params),
   getConversation: (id: string) => get(`/conversations/${id}`),
   openConversation: (contactId: string) => post('/conversations/open', { contactId }),
-  getMessages: (convId: string) => get(`/conversations/${convId}/messages`),
+  getMessages: (
+    convId: string,
+    params?: { limit?: number; before?: string }
+  ) => {
+    const qs = new URLSearchParams();
+    if (params?.limit) qs.set('limit', String(params.limit));
+    if (params?.before) qs.set('before', params.before);
+    const query = qs.toString();
+    return get(`/conversations/${convId}/messages${query ? `?${query}` : ''}`);
+  },
   sendMessage: (convId: string, content: string) =>
     post(`/conversations/${convId}/messages`, { content }),
   sendMediaMessage: async (convId: string, file: File, caption?: string) => {

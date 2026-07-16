@@ -34,7 +34,7 @@ export const ActionCard: React.FC<Props> = ({
           aria-checked={action.enabled}
           onClick={() => onChange({ enabled: !action.enabled })}
           className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${
-            action.enabled ? 'bg-sky-600' : 'bg-[#D1D5DB]'
+            action.enabled ? 'bg-channel-green' : 'bg-[#D1D5DB]'
           }`}
         >
           <span

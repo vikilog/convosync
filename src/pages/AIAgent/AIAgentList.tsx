@@ -227,7 +227,7 @@ export const AIAgentList: React.FC = () => {
           <button
             type="button"
             onClick={() => setShowCreateMenu(true)}
-            className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-sky-600 hover:bg-sky-700 rounded-lg transition-colors cursor-pointer"
+            className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-channel-green hover:bg-[#20bd5a] rounded-lg transition-colors cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             Create Agent

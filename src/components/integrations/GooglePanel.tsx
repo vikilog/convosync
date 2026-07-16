@@ -176,7 +176,7 @@ function GoogleProductCard({
             type="button"
             disabled={busy || connections.length === 0}
             onClick={() => selectedConnection && onConnect(selectedConnection)}
-            className="flex-1 min-w-[80px] px-3 py-2 rounded-lg text-sm font-bold bg-gray-900 hover:bg-gray-800 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 min-w-[80px] px-3 py-2 rounded-lg text-sm font-bold bg-channel-green hover:bg-[#20bd5a] text-white disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Connect
           </button>
@@ -186,7 +186,7 @@ function GoogleProductCard({
               type="button"
               disabled={busy}
               onClick={onSync}
-              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-sm font-black border border-[#4285F4]/20 text-[#4285F4] bg-[#e8f4ff] hover:bg-[#dbeafe] disabled:opacity-50"
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-sm font-black border border-channel-green/20 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 disabled:opacity-50"
             >
               <RefreshCw className={`w-3 h-3 ${busy ? 'animate-spin' : ''}`} />
               Sync
@@ -358,7 +358,7 @@ export function GooglePanel() {
             type="button"
             onClick={() => void handleConnectAccount()}
             disabled={connectingAccount}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold bg-[#4285F4] hover:bg-[#3367d6] text-white disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold bg-channel-green hover:bg-[#20bd5a] text-white disabled:opacity-50"
           >
             {connectingAccount ? <Loader2 className="w-4 h-4 animate-spin" /> : <FolderOpen className="w-4 h-4" />}
             {connectingAccount ? 'Redirecting…' : 'Connect Google account'}
@@ -455,7 +455,7 @@ export function GooglePanel() {
               <button
                 type="button"
                 onClick={() => setManageProduct(null)}
-                className="px-4 py-2 rounded-lg text-sm font-bold bg-gray-900 text-white"
+                className="px-4 py-2 rounded-lg text-sm font-bold bg-channel-green hover:bg-[#20bd5a] text-white"
               >
                 Close
               </button>

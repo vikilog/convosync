@@ -400,7 +400,7 @@ export function WebhooksPanel() {
                   type="button"
                   disabled={saving || !newOutgoing.name || !newOutgoing.url}
                   onClick={() => void createOutgoing()}
-                  className="text-sm font-bold px-4 py-2 rounded-lg bg-primary text-white disabled:opacity-50"
+                  className="text-sm font-bold px-4 py-2 rounded-full bg-channel-green text-white disabled:opacity-50"
                 >
                   Save
                 </button>

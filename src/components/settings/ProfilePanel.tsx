@@ -1,6 +1,10 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Camera, Loader2, Lock, Save, Trash2, User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Camera, Loader2, Lock, LogOut, Save, Trash2, User } from 'lucide-react';
 import { api, getUserAvatar, getUserEmail, getUserName, setUserAvatar, setUserName } from '../../lib/api';
+import { compressImageFile } from '../../lib/imageUpload';
+import { clearAuthSession } from '../../lib/session';
+import { disconnectSocket } from '../../lib/socket';
 
 type ProfileUser = {
   id: string;
@@ -10,44 +14,8 @@ type ProfileUser = {
   role?: string;
 };
 
-async function compressAvatarFile(file: File, maxEdge = 256, quality = 0.85): Promise<string> {
-  if (!file.type.startsWith('image/')) {
-    throw new Error('Please choose a JPEG, PNG, or WebP image');
-  }
-  if (file.size > 5 * 1024 * 1024) {
-    throw new Error('Image must be smaller than 5 MB before upload');
-  }
-
-  const dataUrl = await new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result));
-    reader.onerror = () => reject(new Error('Failed to read image file'));
-    reader.readAsDataURL(file);
-  });
-
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => {
-      const scale = Math.min(1, maxEdge / Math.max(img.width, img.height));
-      const width = Math.max(1, Math.round(img.width * scale));
-      const height = Math.max(1, Math.round(img.height * scale));
-      const canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) {
-        reject(new Error('Could not process image'));
-        return;
-      }
-      ctx.drawImage(img, 0, 0, width, height);
-      resolve(canvas.toDataURL('image/jpeg', quality));
-    };
-    img.onerror = () => reject(new Error('Invalid image file'));
-    img.src = dataUrl;
-  });
-}
-
 export function ProfilePanel() {
+  const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [profile, setProfile] = useState<ProfileUser>(() => ({
     id: '',
@@ -119,7 +87,7 @@ export function ProfilePanel() {
     setError(null);
     setMessage(null);
     try {
-      const compressed = await compressAvatarFile(file);
+      const compressed = await compressImageFile(file);
       const res = (await api.updateAvatar(compressed)) as { user: ProfileUser };
       setProfile((prev) => ({ ...prev, avatar: res.user.avatar ?? null }));
       setUserAvatar(res.user.avatar ?? '');
@@ -362,6 +330,30 @@ export function ProfilePanel() {
           </button>
         </div>
       </form>
+
+      <section className="border border-slate-200 bg-white p-4 md:p-5">
+        <div className="mb-1 flex items-center gap-2">
+          <LogOut className="h-4 w-4 text-slate-500" aria-hidden />
+          <h3 className="text-sm font-semibold text-slate-900">Sign out</h3>
+        </div>
+        <p className="mt-1 text-sm text-slate-500">
+          Log out of ConvoSync on this device. You can sign back in anytime.
+        </p>
+        <div className="mt-4 flex justify-end">
+          <button
+            type="button"
+            onClick={() => {
+              disconnectSocket();
+              clearAuthSession();
+              navigate('/login', { replace: true });
+            }}
+            className="inline-flex h-10 cursor-pointer items-center gap-1.5 rounded-lg border border-red-200 bg-white px-3.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
+          >
+            <LogOut className="h-4 w-4" aria-hidden />
+            Log out
+          </button>
+        </div>
+      </section>
     </div>
   );
 }

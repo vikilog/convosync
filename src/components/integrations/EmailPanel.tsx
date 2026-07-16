@@ -7,11 +7,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import {
   AlertCircle,
   CheckCircle2,
-  ChevronDown,
-  Copy,
   Globe,
   Loader2,
-  Mail,
   Plus,
   RefreshCw,
   Send,
@@ -36,25 +33,28 @@ type EmailProviderConfig = {
 type ProviderFormType = EmailProviderConfig['provider'];
 
 const PROVIDER_LABELS: Record<ProviderFormType, string> = {
-  CONVOSYNC_MANAGED: 'ConvoSync Managed (Resend)',
-  RESEND: 'Resend (BYOP)',
+  CONVOSYNC_MANAGED: 'ConvoSync',
+  RESEND: 'Resend',
   AWS_SES: 'AWS SES',
   SENDGRID: 'SendGrid',
   SMTP: 'SMTP',
 };
 
-type EmailDomain = {
-  id: string;
-  domain: string;
-  provider: string;
-  status: string;
-  spfVerified: boolean;
-  dkimVerified: boolean;
-  dmarcVerified: boolean;
-  dnsRecords?: Array<{ type: string; name: string; value: string; status?: string }>;
-  verifiedAt: string | null;
-  createdAt: string;
-};
+/** BYOP only — platform default is auto-seeded and must not reveal the vendor. */
+const BYOP_PROVIDER_TYPES: ProviderFormType[] = ['RESEND', 'AWS_SES', 'SENDGRID', 'SMTP'];
+
+function logProviderLabel(log: { provider: string; providerName: string | null }): string {
+  const name = log.providerName ?? log.provider;
+  if (
+    name === 'ConvoSync' ||
+    name === 'CONVOSYNC_MANAGED' ||
+    name === 'WABIZ_MANAGED' ||
+    log.provider === 'platform'
+  ) {
+    return 'ConvoSync';
+  }
+  return name;
+}
 
 type EmailSender = {
   id: string;
@@ -103,20 +103,11 @@ function statusBadge(status: string) {
   return map[status] ?? 'bg-gray-50 text-gray-600 border-gray-200';
 }
 
-async function copyText(text: string) {
-  try {
-    await navigator.clipboard.writeText(text);
-  } catch {
-    /* ignore */
-  }
-}
-
 export function EmailPanel() {
   const [tab, setTab] = useState<EmailTab>('domains');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [domains, setDomains] = useState<EmailDomain[]>([]);
   const [sharedSenders, setSharedSenders] = useState<EmailSender[]>([]);
   const [customSenders, setCustomSenders] = useState<EmailSender[]>([]);
   const [logs, setLogs] = useState<EmailLog[]>([]);
@@ -140,44 +131,21 @@ export function EmailPanel() {
     password: '',
   });
 
-  const [newDomain, setNewDomain] = useState('');
-  const [newSender, setNewSender] = useState({
-    email: '',
-    displayName: '',
-    isDefault: false,
-    useSharedDomain: true,
-    domainId: '',
-  });
   const [testSend, setTestSend] = useState({
     to: '',
     subject: 'ConvoSync test email',
     text: 'Hello from ConvoSync Email Infrastructure.',
   });
-  const [expandedDomainIds, setExpandedDomainIds] = useState<Set<string>>(new Set());
-
-  const isDomainExpanded = (domain: EmailDomain) =>
-    domain.status !== 'verified' || expandedDomainIds.has(domain.id);
-
-  const toggleDomainExpanded = (domainId: string) => {
-    setExpandedDomainIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(domainId)) next.delete(domainId);
-      else next.add(domainId);
-      return next;
-    });
-  };
 
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const [domainRows, senderRows, logRows, providerRows] = await Promise.all([
-        api.getEmailDomains() as Promise<EmailDomain[]>,
+      const [senderRows, logRows, providerRows] = await Promise.all([
         api.getEmailSenders() as Promise<{ shared: EmailSender[]; custom: EmailSender[] }>,
         api.getEmailLogs() as Promise<EmailLog[]>,
         api.getEmailProviders() as Promise<EmailProviderConfig[]>,
       ]);
-      setDomains(domainRows);
       setSharedSenders(senderRows.shared ?? []);
       setCustomSenders(senderRows.custom ?? []);
       setLogs(logRows);
@@ -193,86 +161,11 @@ export function EmailPanel() {
     void load();
   }, [load]);
 
-  const handleAddDomain = async () => {
-    if (!newDomain.trim()) return;
+  const handleSetDefaultSender = async (email: string) => {
     setSaving(true);
     setError(null);
     try {
-      await api.createEmailDomain({ domain: newDomain.trim().toLowerCase() });
-      setNewDomain('');
-      await load();
-    } catch (err) {
-      setError(formatCatchError(err));
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleVerifyDomain = async (domainId: string) => {
-    setSaving(true);
-    setError(null);
-    try {
-      await api.verifyEmailDomain(domainId);
-      await load();
-    } catch (err) {
-      setError(formatCatchError(err));
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleRefreshDomain = async (domainId: string) => {
-    setSaving(true);
-    try {
-      await api.refreshEmailDomain(domainId);
-      await load();
-    } catch (err) {
-      setError(formatCatchError(err));
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleAddSender = async () => {
-    const raw = newSender.email.trim().toLowerCase();
-    if (!raw) return;
-
-    let email = raw;
-    if (!raw.includes('@')) {
-      if (newSender.useSharedDomain) {
-        const sharedDomain = sharedSenders[0]?.email.split('@')[1];
-        if (!sharedDomain) {
-          setError('Enter a full email address (e.g. noreply@mail.convosync.io)');
-          return;
-        }
-        email = `${raw}@${sharedDomain}`;
-      } else {
-        const domain = verifiedDomains.find((d) => d.id === newSender.domainId);
-        if (!domain) {
-          setError('Select a verified domain or enter a full email like support@yourdomain.com');
-          return;
-        }
-        email = `${raw}@${domain.domain}`;
-      }
-    }
-
-    setSaving(true);
-    setError(null);
-    try {
-      await api.createEmailSender({
-        email,
-        displayName: newSender.displayName.trim() || undefined,
-        isDefault: newSender.isDefault,
-        useSharedDomain: newSender.useSharedDomain,
-        domainId: newSender.domainId || undefined,
-      });
-      setNewSender({
-        email: '',
-        displayName: '',
-        isDefault: false,
-        useSharedDomain: true,
-        domainId: '',
-      });
+      await api.setDefaultEmailSender(email);
       await load();
     } catch (err) {
       setError(formatCatchError(err));
@@ -300,12 +193,11 @@ export function EmailPanel() {
     }
   };
 
-  const verifiedDomains = domains.filter((d) => d.status === 'verified');
 
   const usedProviderTypes = new Set(providers.map((p) => p.provider));
-  const availableProviderTypes = (
-    ['CONVOSYNC_MANAGED', 'RESEND', 'AWS_SES', 'SENDGRID', 'SMTP'] as ProviderFormType[]
-  ).filter((t) => !usedProviderTypes.has(t) || providerForm.provider === t);
+  const availableProviderTypes = BYOP_PROVIDER_TYPES.filter(
+    (t) => !usedProviderTypes.has(t) || providerForm.provider === t
+  );
 
   const resetProviderForm = () => {
     setProviderForm({
@@ -487,7 +379,7 @@ export function EmailPanel() {
         </div>
       )}
 
-      {loading && tab === 'domains' && domains.length === 0 ? (
+      {loading && tab === 'domains' && sharedSenders.length === 0 ? (
         <div className="flex justify-center py-12 text-gray-400">
           <Loader2 className="w-6 h-6 animate-spin" />
         </div>
@@ -495,207 +387,30 @@ export function EmailPanel() {
 
       {tab === 'domains' && (
         <div className="space-y-4">
-          <div className="bg-white rounded-2xl border border-slate-200 p-4">
-            <h4 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
-              <Globe className="w-4 h-4 text-primary" />
-              Add custom domain
-            </h4>
-            <div className="flex gap-2">
-              <input
-                value={newDomain}
-                onChange={(e) => setNewDomain(e.target.value)}
-                placeholder="yourcompany.com"
-                className="flex-1 text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20"
-              />
-              <button
-                type="button"
-                disabled={saving || !newDomain.trim()}
-                onClick={() => void handleAddDomain()}
-                className="px-4 py-2 rounded-lg bg-primary text-white text-sm font-bold disabled:opacity-50 inline-flex items-center gap-1"
-              >
-                {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
-                Add
-              </button>
+          {loading && sharedSenders.length === 0 ? (
+            <div className="flex justify-center py-12 text-gray-400">
+              <Loader2 className="w-6 h-6 animate-spin" />
             </div>
-            <p className="text-xs text-gray-400 mt-2">
-              DNS records (SPF, DKIM, DMARC) will appear after adding. Verify once records propagate.
-            </p>
-          </div>
-
-          {domains.length === 0 ? (
-            <p className="text-xs text-gray-500 text-center py-6">
-              No custom domains yet. Use shared senders below to send immediately.
-            </p>
-          ) : (
-            domains.map((d) => {
-              const isVerified = d.status === 'verified';
-              const expanded = isDomainExpanded(d);
-
-              return (
-              <div
-                key={d.id}
-                className={`bg-white rounded-2xl border p-4 space-y-3 transition-colors ${
-                  isVerified
-                    ? 'border-[#5dfd8a]/30 shadow-[0_1px_3px_rgba(0,0,0,0.02)]'
-                    : 'border-slate-200'
-                }`}
-              >
-                {isVerified ? (
-                  <button
-                    type="button"
-                    onClick={() => toggleDomainExpanded(d.id)}
-                    className="w-full flex items-start justify-between gap-3 text-left group"
-                    aria-expanded={expanded}
-                  >
-                    <div className="flex items-start gap-2 min-w-0 flex-1">
-                      <ChevronDown
-                        className={`w-4 h-4 shrink-0 text-gray-400 mt-0.5 transition-transform duration-200 ${
-                          expanded ? 'rotate-180' : ''
-                        }`}
-                      />
-                      <div className="min-w-0">
-                        <p className="text-sm font-bold text-gray-900 truncate">{d.domain}</p>
-                        <p className="text-xs text-gray-400 mt-0.5">
-                          {expanded
-                            ? `Provider: ${d.provider} · Added ${formatDate(d.createdAt)}`
-                            : 'Verified · SPF & DKIM ready · Click to expand DNS records'}
-                        </p>
-                      </div>
-                    </div>
-                    <span
-                      className={`shrink-0 px-2 py-0.5 rounded-full text-sm font-bold uppercase border ${statusBadge(d.status)}`}
-                    >
-                      {d.status}
-                    </span>
-                  </button>
-                ) : (
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <p className="text-sm font-bold text-gray-900">{d.domain}</p>
-                      <p className="text-xs text-gray-400 mt-0.5">
-                        Provider: {d.provider} · Added {formatDate(d.createdAt)}
-                      </p>
-                    </div>
-                    <span
-                      className={`px-2 py-0.5 rounded-full text-sm font-bold uppercase border ${statusBadge(d.status)}`}
-                    >
-                      {d.status}
-                    </span>
-                  </div>
-                )}
-
-                {(!isVerified || expanded) && (
-                  <>
-                <div className="flex flex-wrap gap-2 text-sm font-bold">
-                  <span className={`px-2 py-1 rounded-md border ${d.spfVerified ? 'bg-green-50 text-green-700' : 'bg-gray-50 text-gray-500'}`}>
-                    SPF {d.spfVerified ? '✓' : '○'}
-                  </span>
-                  <span className={`px-2 py-1 rounded-md border ${d.dkimVerified ? 'bg-green-50 text-green-700' : 'bg-gray-50 text-gray-500'}`}>
-                    DKIM {d.dkimVerified ? '✓' : '○'}
-                  </span>
-                  <span className={`px-2 py-1 rounded-md border ${d.dmarcVerified ? 'bg-green-50 text-green-700' : 'bg-gray-50 text-gray-500'}`}>
-                    DMARC {d.dmarcVerified ? '✓' : '○'}
-                  </span>
+          ) : sharedSenders[0] ? (
+            <div className="bg-white rounded-2xl border border-slate-200 p-4">
+              <h4 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
+                <Globe className="w-4 h-4 text-primary" />
+                Your domain
+              </h4>
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/15 bg-slate-50 px-4 py-3">
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-gray-900">
+                    {sharedSenders[0].displayName ?? 'ConvoSync'}
+                  </p>
+                  <p className="text-sm font-mono text-gray-600 mt-0.5 break-all">
+                    {sharedSenders[0].email}
+                  </p>
                 </div>
-
-                {Array.isArray(d.dnsRecords) && d.dnsRecords.length > 0 && (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-meta">
-                      <thead>
-                        <tr className="text-left text-gray-400 border-b border-gray-100">
-                          <th className="py-1 pr-2">Type</th>
-                          <th className="py-1 pr-2">Name</th>
-                          <th className="py-1">Value</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {d.dnsRecords.map((r, i) => (
-                          <tr key={i} className="border-b border-gray-50 align-top">
-                            <td className="py-1.5 pr-2 font-bold text-gray-700">{r.type}</td>
-                            <td className="py-1.5 pr-2 font-mono text-gray-600 max-w-[120px] truncate" title={r.name}>
-                              {r.name}
-                            </td>
-                            <td className="py-1.5">
-                              <div className="flex items-start gap-1">
-                                <code className="text-xs text-gray-600 break-all">{r.value}</code>
-                                <button
-                                  type="button"
-                                  onClick={() => void copyText(r.value)}
-                                  className="shrink-0 text-gray-400 hover:text-primary"
-                                  aria-label="Copy DNS value"
-                                >
-                                  <Copy className="w-3 h-3" />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-
-                <div className="flex gap-2 flex-wrap items-center">
-                  {d.status !== 'verified' && (
-                    <button
-                      type="button"
-                      disabled={saving}
-                      onClick={() => void handleVerifyDomain(d.id)}
-                      className="px-3 py-1.5 rounded-lg bg-gray-900 text-white text-sm font-bold disabled:opacity-50"
-                    >
-                      {saving ? 'Checking…' : 'Verify domain'}
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    disabled={saving}
-                    onClick={() => void handleRefreshDomain(d.id)}
-                    className="px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-bold text-gray-700 disabled:opacity-50"
-                  >
-                    Refresh status
-                  </button>
-                  {d.status === 'verified' && expanded && (
-                    <span className="text-xs text-gray-400 font-medium">
-                      Domain verified — use Refresh to sync DNS changes.
-                    </span>
-                  )}
-                </div>
-                  </>
-                )}
-
-                {isVerified && !expanded && (
-                  <div className="flex flex-wrap items-center gap-2 pl-6">
-                    <span
-                      className={`text-sm font-bold px-2 py-1 rounded-md border ${
-                        d.spfVerified ? 'bg-green-50 text-green-700' : 'bg-gray-50 text-gray-500'
-                      }`}
-                    >
-                      SPF {d.spfVerified ? '✓' : '○'}
-                    </span>
-                    <span
-                      className={`text-sm font-bold px-2 py-1 rounded-md border ${
-                        d.dkimVerified ? 'bg-green-50 text-green-700' : 'bg-gray-50 text-gray-500'
-                      }`}
-                    >
-                      DKIM {d.dkimVerified ? '✓' : '○'}
-                    </span>
-                    <button
-                      type="button"
-                      disabled={saving}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        void handleRefreshDomain(d.id);
-                      }}
-                      className="ml-auto inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-sm font-bold text-gray-600 border border-slate-200 hover:border-primary/30 disabled:opacity-50"
-                    >
-                      <RefreshCw className={`w-3 h-3 ${saving ? 'animate-spin' : ''}`} />
-                      Refresh
-                    </button>
-                  </div>
-                )}
+                <span className="shrink-0 text-sm font-bold text-primary uppercase">Default</span>
               </div>
-            );
-            })
+            </div>
+          ) : (
+            <p className="text-xs text-gray-500 text-center py-10">No domain available yet.</p>
           )}
         </div>
       )}
@@ -703,19 +418,16 @@ export function EmailPanel() {
       {tab === 'senders' && (
         <div className="space-y-4">
           <div className="bg-slate-50 rounded-2xl border border-primary/15 p-4">
-            <h4 className="text-sm font-bold text-gray-900 mb-2">Shared domain (instant send)</h4>
-            <p className="text-xs text-gray-500 mb-3">
-              Send without custom domain setup using platform fallback addresses.
-            </p>
+            <h4 className="text-sm font-bold text-gray-900 mb-2">Your domain</h4>
             <ul className="space-y-2">
               {sharedSenders.map((s) => (
                 <li
                   key={s.id}
-                  className="flex items-center justify-between text-xs bg-white rounded-lg px-3 py-2 border border-slate-200"
+                  className="flex flex-wrap items-center justify-between gap-2 text-xs bg-white rounded-lg px-3 py-2 border border-slate-200"
                 >
-                  <span>
+                  <span className="min-w-0">
                     <span className="font-bold text-gray-900">{s.displayName ?? 'ConvoSync'}</span>
-                    <span className="text-gray-500 ml-2 font-mono">{s.email}</span>
+                    <span className="text-gray-500 ml-2 font-mono break-all">{s.email}</span>
                   </span>
                   {s.isDefault && (
                     <span className="text-sm font-bold text-primary uppercase">Default</span>
@@ -725,72 +437,6 @@ export function EmailPanel() {
             </ul>
           </div>
 
-          <div className="bg-white rounded-2xl border border-slate-200 p-4 space-y-3">
-            <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-              <Mail className="w-4 h-4 text-primary" />
-              Register sender address
-            </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <input
-                value={newSender.email}
-                onChange={(e) => setNewSender((s) => ({ ...s, email: e.target.value }))}
-                placeholder={
-                  newSender.useSharedDomain
-                    ? 'noreply or noreply@mail.convosync.io'
-                    : newSender.domainId
-                      ? `support or support@${verifiedDomains.find((d) => d.id === newSender.domainId)?.domain ?? 'yourdomain.com'}`
-                      : 'support@yourdomain.com'
-                }
-                className="text-sm border border-slate-200 rounded-lg px-3 py-2"
-              />
-              <input
-                value={newSender.displayName}
-                onChange={(e) => setNewSender((s) => ({ ...s, displayName: e.target.value }))}
-                placeholder="Display name"
-                className="text-sm border border-slate-200 rounded-lg px-3 py-2"
-              />
-            </div>
-            <label className="flex items-center gap-2 text-xs text-gray-600">
-              <input
-                type="checkbox"
-                checked={newSender.useSharedDomain}
-                onChange={(e) =>
-                  setNewSender((s) => ({ ...s, useSharedDomain: e.target.checked }))
-                }
-              />
-              Use shared ConvoSync domain
-            </label>
-            {!newSender.useSharedDomain && (
-              <select
-                value={newSender.domainId}
-                onChange={(e) => setNewSender((s) => ({ ...s, domainId: e.target.value }))}
-                className="w-full text-sm border border-slate-200 rounded-lg px-3 py-2"
-              >
-                <option value="">Select verified domain</option>
-                {verifiedDomains.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {d.domain}
-                  </option>
-                ))}
-              </select>
-            )}
-            <label className="flex items-center gap-2 text-xs text-gray-600">
-              <input
-                type="checkbox"
-                checked={newSender.isDefault}
-                onChange={(e) => setNewSender((s) => ({ ...s, isDefault: e.target.checked }))}
-              />
-              Set as default sender
-            </label>
-            <button
-              type="button"
-              disabled={saving}
-              onClick={() => void handleAddSender()}
-              className="px-4 py-2 rounded-lg bg-primary text-white text-sm font-bold disabled:opacity-50"
-            >
-              Add sender
-            </button>
-          </div>
 
           {customSenders.length > 0 && (
             <div className="bg-white rounded-2xl border border-slate-200 p-4">
@@ -805,12 +451,21 @@ export function EmailPanel() {
                       <span className="font-bold">{s.displayName ?? s.email}</span>
                       <span className="text-gray-400 ml-2 font-mono">{s.email}</span>
                     </span>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 items-center">
                       {s.isShared && (
                         <span className="text-xs text-gray-400 uppercase">Shared</span>
                       )}
-                      {s.isDefault && (
+                      {s.isDefault ? (
                         <span className="text-sm font-bold text-primary">Default</span>
+                      ) : (
+                        <button
+                          type="button"
+                          disabled={saving}
+                          onClick={() => void handleSetDefaultSender(s.email)}
+                          className="px-2 py-0.5 rounded border border-slate-200 text-xs font-bold text-gray-600 hover:border-primary/30 disabled:opacity-50"
+                        >
+                          Set default
+                        </button>
                       )}
                     </div>
                   </li>
@@ -834,7 +489,7 @@ export function EmailPanel() {
               type="button"
               disabled={saving || !testSend.to.trim()}
               onClick={() => void handleTestSend()}
-              className="px-4 py-2 rounded-lg bg-gray-900 text-white text-sm font-bold disabled:opacity-50"
+              className="px-4 py-2 rounded-lg bg-channel-green hover:bg-[#20bd5a] text-white text-sm font-bold disabled:opacity-50"
             >
               Send test
             </button>
@@ -860,7 +515,7 @@ export function EmailPanel() {
                       provider: availableProviderTypes[0] ?? 'RESEND',
                     }));
                   }}
-                  className="px-3 py-1.5 rounded-lg bg-primary text-white text-sm font-bold inline-flex items-center gap-1"
+                  className="px-3 py-1.5 rounded-full bg-channel-green text-white text-sm font-bold inline-flex items-center gap-1"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   Add provider
@@ -868,7 +523,8 @@ export function EmailPanel() {
               )}
             </div>
             <p className="text-xs text-gray-400 mb-4">
-              Bring your own provider or use ConvoSync Managed Resend. Credentials are encrypted at rest.
+              ConvoSync includes platform email by default. Optionally bring your own provider —
+              credentials are encrypted at rest.
             </p>
 
             {providers.length === 0 ? (
@@ -1056,7 +712,7 @@ export function EmailPanel() {
                             type="button"
                             disabled={saving}
                             onClick={() => void handleUpdateProvider(p.id)}
-                            className="px-3 py-1.5 rounded-lg bg-primary text-white text-sm font-bold disabled:opacity-50"
+                            className="px-3 py-1.5 rounded-full bg-channel-green text-white text-sm font-bold disabled:opacity-50"
                           >
                             Save
                           </button>
@@ -1176,7 +832,7 @@ export function EmailPanel() {
 
               {providerForm.provider === 'CONVOSYNC_MANAGED' ? (
                 <p className="text-xs text-gray-500">
-                  Uses platform Resend credentials. No API key required from your workspace.
+                  Uses ConvoSync platform email. No API key required from your workspace.
                 </p>
               ) : null}
 
@@ -1196,7 +852,7 @@ export function EmailPanel() {
                   type="button"
                   disabled={saving}
                   onClick={() => void handleCreateProvider()}
-                  className="px-4 py-2 rounded-lg bg-primary text-white text-sm font-bold disabled:opacity-50"
+                  className="px-4 py-2 rounded-full bg-channel-green text-white text-sm font-bold disabled:opacity-50"
                 >
                   Add provider
                 </button>
@@ -1242,7 +898,7 @@ export function EmailPanel() {
                         {log.subject}
                       </td>
                       <td className="px-4 py-2 text-xs text-gray-500 whitespace-nowrap">
-                        {log.providerName ?? log.provider}
+                        {logProviderLabel(log)}
                       </td>
                       <td className="px-4 py-2">
                         <span

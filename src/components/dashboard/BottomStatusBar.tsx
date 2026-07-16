@@ -55,7 +55,7 @@ export const BottomStatusBar: React.FC<BottomStatusBarProps> = ({
       <span className="hidden h-4 w-px bg-slate-200 sm:block" aria-hidden />
 
       <Link
-        to={pathForSettingsSection('subscription')}
+        to={pathForSettingsSection('wallet')}
         className="inline-flex cursor-pointer items-center gap-2 text-slate-600 transition-colors hover:text-slate-900"
       >
         <span className="font-medium text-slate-900">{planName || 'Starter Plan'}</span>
@@ -84,7 +84,7 @@ export const BottomStatusBar: React.FC<BottomStatusBarProps> = ({
       <button
         type="button"
         onClick={onNewCampaign}
-        className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-sky-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-sky-700"
+        className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-channel-green px-3 py-1.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#20bd5a]"
       >
         <Plus className="h-4 w-4" />
         New campaign

@@ -187,7 +187,7 @@ export const GoogleAdsIntegrationPanel: React.FC<GoogleAdsIntegrationPanelProps>
         type="button"
         onClick={() => void handleConnect()}
         disabled={connecting}
-        className="w-full px-4 py-2.5 bg-gray-900 hover:bg-gray-800 disabled:opacity-60 text-white text-sm font-bold rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-2"
+        className="w-full px-4 py-2.5 bg-channel-green hover:bg-[#20bd5a] disabled:opacity-60 text-white text-sm font-bold rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-2"
       >
         <Link2 className="w-4 h-4" />
         {connecting ? 'Redirecting…' : linkedEmail ? 'Authorize Google Ads' : 'Connect with Google'}

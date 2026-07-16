@@ -5,7 +5,6 @@ import {
   LayoutGrid,
   Layers,
   Palette,
-  Sparkles,
   Trash2,
 } from 'lucide-react';
 import { BLOCK_DEFINITIONS } from './blockRegistry';
@@ -25,8 +24,8 @@ import { VariablePreviewForm } from './VariablePreviewForm';
 const TABS: { id: LeftPanelTab; label: string; icon: React.ReactNode }[] = [
   { id: 'blocks', label: 'Blocks', icon: <LayoutGrid className="w-4 h-4" /> },
   { id: 'gallery', label: 'Gallery', icon: <Layers className="w-4 h-4" /> },
-  { id: 'sections', label: 'Sections', icon: <Bookmark className="w-4 h-4" /> },
-  { id: 'variables', label: 'Variables', icon: <Braces className="w-4 h-4" /> },
+  { id: 'sections', label: 'Saved', icon: <Bookmark className="w-4 h-4" /> },
+  { id: 'variables', label: 'Vars', icon: <Braces className="w-4 h-4" /> },
   { id: 'brand', label: 'Brand', icon: <Palette className="w-4 h-4" /> },
 ];
 
@@ -61,20 +60,15 @@ function BlockPaletteItem({
   );
 }
 
-export function LeftSidebar({
-  onOpenAi,
-  aiLoading,
-}: {
-  onOpenAi: () => void;
-  aiLoading?: boolean;
-}) {
+export function LeftSidebar() {
   const leftTab = useEmailBuilderStore((s) => s.leftTab);
   const setLeftTab = useEmailBuilderStore((s) => s.setLeftTab);
   const addBlock = useEmailBuilderStore((s) => s.addBlock);
   const insertBlocks = useEmailBuilderStore((s) => s.insertBlocks);
   const applyGallery = useEmailBuilderStore((s) => s.applyGallery);
   const blocks = useEmailBuilderStore((s) => s.blocks);
-  const setBrand = useEmailBuilderStore((s) => s.brand);
+  const brand = useEmailBuilderStore((s) => s.brand);
+  const setBrand = useEmailBuilderStore((s) => s.setBrand);
   const selectedBlockId = useEmailBuilderStore((s) => s.selectedBlockId);
 
   const [sections, setSections] = useState<SavedSection[]>(() => loadSavedSections());
@@ -91,34 +85,22 @@ export function LeftSidebar({
   };
 
   return (
-    <aside className="w-[280px] shrink-0 border-r border-slate-200 bg-[#fafbfc] flex flex-col min-h-0">
-      <div className="p-3 border-b border-slate-200 bg-white">
-        <button
-          type="button"
-          onClick={onOpenAi}
-          disabled={aiLoading}
-          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-r from-primary to-[#6d5ce7] text-white text-sm font-bold shadow-sm hover:opacity-95 disabled:opacity-60"
-        >
-          <Sparkles className="w-4 h-4" />
-          {aiLoading ? 'Generating…' : 'Generate with AI'}
-        </button>
-      </div>
-
-      <div className="flex border-b border-slate-200 bg-white overflow-x-auto">
+    <aside className="w-[300px] shrink-0 border-r border-slate-200 bg-[#fafbfc] flex flex-col min-h-0">
+      <div className="grid grid-cols-5 border-b border-slate-200 bg-white">
         {TABS.map((tab) => (
           <button
             key={tab.id}
             type="button"
             onClick={() => setLeftTab(tab.id)}
             title={tab.label}
-            className={`flex-1 min-w-[52px] py-2.5 flex flex-col items-center gap-0.5 text-sm font-semibold ${
+            className={`min-w-0 py-2 px-0.5 flex flex-col items-center justify-center gap-1 text-[10px] font-semibold leading-tight ${
               leftTab === tab.id
-                ? 'text-primary border-b-2 border-primary'
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'text-primary border-b-2 border-primary bg-primary/[0.04]'
+                : 'text-gray-500 hover:text-gray-700 border-b-2 border-transparent'
             }`}
           >
             {tab.icon}
-            {tab.label}
+            <span className="w-full truncate text-center">{tab.label}</span>
           </button>
         ))}
       </div>

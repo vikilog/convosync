@@ -195,7 +195,7 @@ export const AddKnowledgeModal: React.FC<Props> = ({
                   handleSubmit();
                 }
               }}
-              className="px-6 py-2.5 bg-sky-600 hover:bg-sky-700 disabled:opacity-50 text-white rounded-xl text-sm font-bold"
+              className="px-6 py-2.5 bg-channel-green hover:bg-[#20bd5a] disabled:opacity-50 text-white rounded-xl text-sm font-bold"
             >
               {step === 'select' ? 'Next' : submitting ? 'Adding…' : 'Add knowledge'}
             </button>

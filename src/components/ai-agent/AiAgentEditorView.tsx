@@ -204,7 +204,7 @@ export const AiAgentEditorView: React.FC<Props> = ({ agentId, pathname }) => {
 
                   <div className="grid grid-cols-1 sm:grid-cols-[120px_1fr] gap-6 items-start">
                     <div>
-                      <label className="block w-[120px] h-[120px] border-2 border-dashed border-slate-200 rounded-xl bg-gray-50 cursor-pointer overflow-hidden hover:border-sky-600/40 transition-colors">
+                      <label className="block w-[120px] h-[120px] border-2 border-dashed border-slate-200 rounded-xl bg-gray-50 cursor-pointer overflow-hidden hover:border-channel-green/40 transition-colors">
                         {agent.avatarUrl ? (
                           <img src={agent.avatarUrl} alt="" className="w-full h-full object-cover" />
                         ) : (
@@ -238,7 +238,7 @@ export const AiAgentEditorView: React.FC<Props> = ({ agentId, pathname }) => {
                             setAgent((prev) => (prev ? { ...prev, name } : prev));
                             scheduleSave({ name });
                           }}
-                          className="w-full border border-slate-200 rounded-lg py-2.5 px-3 text-sm focus:ring-2 focus:ring-[#0284c7]/20 focus:border-sky-600 outline-none"
+                          className="w-full border border-slate-200 rounded-lg py-2.5 px-3 text-sm focus:ring-2 focus:ring-[#0284c7]/20 focus:border-channel-green outline-none"
                         />
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-mono">
                           {agent.name.length}/250
@@ -278,7 +278,7 @@ export const AiAgentEditorView: React.FC<Props> = ({ agentId, pathname }) => {
                       }}
                       className="sr-only peer"
                     />
-                    <div className="w-10 h-5 bg-gray-200 rounded-full peer peer-checked:bg-sky-600 after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:after:translate-x-5" />
+                    <div className="w-10 h-5 bg-gray-200 rounded-full peer peer-checked:bg-channel-green after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:after:translate-x-5" />
                   </label>
                 </section>
 

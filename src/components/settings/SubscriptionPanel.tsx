@@ -4,210 +4,82 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import {
-  Bot,
-  Check,
-  Contact,
-  Crown,
-  Loader2,
-  Mail,
-  Sparkles,
-  Users,
-  Zap,
-} from 'lucide-react';
-import { pathForSettingsSection } from '../../routes';
+import { Check, Loader2 } from 'lucide-react';
 import { api, formatCatchError } from '../../lib/api';
 import { openRazorpayCheckout } from '../../lib/razorpay';
-import { PlanCustomizer } from './PlanCustomizer';
+import { BRAND_PURPLE } from '../../lib/convocoins';
 
-type PlanFeatures = {
-  contacts: string;
-  teamMembers: string;
-  aiAgents: string;
-  channels: string;
-};
+const PLAN_NAME = 'ConvoSync Pro';
+const PLAN_PRICE_INR = 1999;
+const PLAN_SLUG = 'starter';
 
-type SubscriptionPlan = {
-  id: string;
-  planId: string;
-  name: string;
-  labelColor: string;
-  price: number | null;
-  priceLabel?: string;
-  annualPrice?: number;
-  priceMonthlyPaise?: number;
-  priceAnnualPaise?: number;
-  popular?: boolean;
-  borderColor?: string;
-  trialDays?: number;
-  features: PlanFeatures;
-  messagesPerMonth?: number;
-  storageGb?: number;
-  apiAccess?: boolean;
-  customBranding?: boolean;
-  prioritySupport?: boolean;
-  aiReplies?: number | 'unlimited' | 'custom';
-  campaigns?: number | 'unlimited' | 'custom';
-  integrations?: number | 'unlimited' | 'custom';
-  emailsPerMonth?: number | 'unlimited' | 'custom';
-  sortOrder?: number;
-};
+const INCLUDED_FEATURES = [
+  'WhatsApp Inbox (unlimited)',
+  'Instagram Inbox (unlimited)',
+  'Campaigns',
+  'Templates',
+  'Journey builder',
+  'AI Agent',
+  'Email campaigns',
+  'All channels access',
+  'Unlimited team members',
+  'Priority support',
+] as const;
 
-type TrialInfo = {
+type BillingWorkspace = {
   subscriptionStatus: string;
-  displayStatus: string;
-  isTrial: boolean;
-  trialEndsAt: string | null;
-  trialDaysLeft: number;
-  trialExpired: boolean;
-  planName: string | null;
+  plan: { id: string; slug: string; name: string } | null;
+  billingSubscription: {
+    status: string;
+    billingCycle: string;
+    currentPeriodEnd: string | null;
+    cancelAtPeriodEnd: boolean;
+  } | null;
 };
 
-type CustomPlanQuote = {
-  contacts: number;
-  aiAgents: number;
-  teamMembers: number;
-  channels: number;
-  emails: number;
-  monthlyTotal: number;
-  annualTotal: number;
-  currency: string;
-  breakdown: Array<{ key: string; label: string; quantity?: number; unitLabel?: string; amount: number }>;
-  matchedPlanSlug: string | null;
-  matchedPlanName: string | null;
-  requiresSales: boolean;
-  savedAt: string | null;
-};
-
-type PricingRules = {
-  currency: string;
-  limits: {
-    contacts: { min: number; max: number; step: number };
-    aiAgents: { min: number; max: number; step: number };
-    teamMembers: { min: number; max: number; step: number };
-    channels: { min: number; max: number; step: number };
-    emails: { min: number; max: number; step: number };
-  };
-  defaults: {
-    contacts: number;
-    aiAgents: number;
-    teamMembers: number;
-    channels: number;
-    emails: number;
-  };
-};
-
-type SubscriptionResponse = {
-  subscriptionStatus: string;
-  hasPlan: boolean;
-  currentPlanSlug: string | null;
-  currentPlan: SubscriptionPlan | null;
-  trial: TrialInfo;
-  plans: SubscriptionPlan[];
-  pricingRules: PricingRules;
-  customPlan: CustomPlanQuote | null;
-};
-
-const statusStyles: Record<string, string> = {
-  Trial: 'bg-amber-50 text-amber-800 border-amber-200',
-  Active: 'bg-emerald-50 text-emerald-800 border-emerald-200',
-  'Past Due': 'bg-orange-50 text-orange-800 border-orange-200',
-  Suspended: 'bg-red-50 text-red-800 border-red-200',
-};
-
-const tierBadges: Record<string, string> = {
-  starter: 'Essential',
-  growth: 'Most popular',
-  pro: 'Scale',
-  enterprise: 'Enterprise',
-};
-
-function formatPrice(plan: SubscriptionPlan, billingCycle: 'monthly' | 'annual') {
-  if (plan.priceLabel) return plan.priceLabel;
-  if (billingCycle === 'annual' && plan.priceAnnualPaise) {
-    return `₹${(plan.priceAnnualPaise / 100).toLocaleString('en-IN')}`;
-  }
-  if (plan.priceMonthlyPaise) {
-    return `₹${(plan.priceMonthlyPaise / 100).toLocaleString('en-IN')}`;
-  }
-  if (plan.price == null) return 'Custom';
-  return `$${plan.price}`;
-}
-
-function formatPriceSuffix(plan: SubscriptionPlan, billingCycle: 'monthly' | 'annual') {
-  if (plan.priceLabel || plan.price == null) return null;
-  if (billingCycle === 'annual' && plan.priceAnnualPaise) return '/yr';
-  if (plan.priceMonthlyPaise) return '/mo';
-  return '/mo';
-}
-
-function formatTrialEnd(iso: string | null) {
-  if (!iso) return null;
-  return new Date(iso).toLocaleDateString('en-US', {
-    month: 'long',
+function formatBillingDate(iso: string | null): string {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleDateString('en-IN', {
     day: 'numeric',
+    month: 'long',
     year: 'numeric',
   });
 }
 
-function formatEmailsPerMonth(value: SubscriptionPlan['emailsPerMonth']): string | null {
-  if (value == null) return null;
-  if (value === 'unlimited') return 'Unlimited';
-  if (value === 'custom') return 'Custom';
-  return value >= 1000 ? value.toLocaleString() : String(value);
+function subscriptionLabel(status: string, billingStatus?: string): string {
+  const normalized = (billingStatus ?? status).toLowerCase();
+  if (normalized === 'active' || normalized === 'authenticated') return 'Active';
+  if (normalized === 'trial' || status === 'trial') return 'Trial';
+  if (normalized === 'past_due') return 'Past due';
+  if (normalized === 'cancelled' || normalized === 'canceled') return 'Cancelled';
+  return 'Inactive';
 }
 
-function PlanFeatureList({ plan }: { plan: SubscriptionPlan }) {
-  const emailsLabel = formatEmailsPerMonth(plan.emailsPerMonth);
-  const rows = [
-    { icon: Contact, label: 'Contacts', value: plan.features.contacts },
-    { icon: Users, label: 'Team members', value: plan.features.teamMembers },
-    { icon: Bot, label: 'AI agents', value: plan.features.aiAgents },
-    { icon: Zap, label: 'Channels', value: plan.features.channels },
-    ...(emailsLabel
-      ? [{ icon: Mail, label: 'Emails / mo', value: emailsLabel }]
-      : []),
-  ];
-
-  return (
-    <ul className="mt-4 space-y-2.5 border-t border-slate-200 pt-4">
-      {rows.map(({ icon: Icon, label, value }) => (
-        <li key={label} className="flex items-center justify-between gap-2 text-xs">
-          <span className="flex items-center gap-2 text-gray-500">
-            <Icon className="h-3.5 w-3.5 shrink-0" />
-            {label}
-          </span>
-          <span className="font-semibold text-gray-800">{value}</span>
-        </li>
-      ))}
-      {plan.messagesPerMonth ? (
-        <li className="flex items-center justify-between gap-2 text-xs">
-          <span className="text-gray-500">Messages / mo</span>
-          <span className="font-semibold text-gray-800">
-            {plan.messagesPerMonth >= 1000
-              ? `${(plan.messagesPerMonth / 1000).toFixed(0)}k`
-              : plan.messagesPerMonth}
-          </span>
-        </li>
-      ) : null}
-    </ul>
-  );
+function isActiveSubscription(data: BillingWorkspace): boolean {
+  const status = data.billingSubscription?.status ?? data.subscriptionStatus;
+  const normalized = status.toLowerCase();
+  return ['active', 'authenticated', 'trial'].includes(normalized);
 }
 
-export function SubscriptionPanel() {
-  const [data, setData] = useState<SubscriptionResponse | null>(null);
+export function SubscriptionPanel({
+  embedded = false,
+  onBillingChange,
+}: {
+  embedded?: boolean;
+  onBillingChange?: () => void;
+}) {
+  const [data, setData] = useState<BillingWorkspace | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
-  const [checkoutPlanId, setCheckoutPlanId] = useState<string | null>(null);
-  const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [checkoutBusy, setCheckoutBusy] = useState(false);
+  const [cancelBusy, setCancelBusy] = useState(false);
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = (await api.getSubscription()) as SubscriptionResponse;
+      const res = (await api.getBillingWorkspace()) as BillingWorkspace;
       setData(res);
     } catch (err) {
       setError(formatCatchError(err));
@@ -221,13 +93,14 @@ export function SubscriptionPanel() {
     void load();
   }, [load]);
 
-  async function handleSubscribe(planSlug: string, planName: string) {
-    setCheckoutPlanId(planSlug);
-    setCheckoutError(null);
+  async function handleSubscribe() {
+    setCheckoutBusy(true);
+    setError(null);
+    setActionMessage(null);
     try {
       const created = (await api.createBillingSubscription({
-        planId: planSlug,
-        billingCycle,
+        planId: PLAN_SLUG,
+        billingCycle: 'monthly',
       })) as {
         checkoutMode?: 'subscription' | 'order';
         subscriptionId?: string;
@@ -236,17 +109,13 @@ export function SubscriptionPanel() {
         amountPaise: number;
       };
 
-      const checkoutBase = {
-        key: created.keyId,
-        name: 'ConvoSync',
-        description: `${planName} (${billingCycle})`,
-        theme: { color: '#0284c7' as const },
-      };
-
       const useOrderCheckout = created.checkoutMode === 'order' || Boolean(created.orderId);
 
       await openRazorpayCheckout({
-        ...checkoutBase,
+        key: created.keyId,
+        name: 'ConvoSync',
+        description: `${PLAN_NAME} (monthly)`,
+        theme: { color: BRAND_PURPLE },
         ...(useOrderCheckout
           ? { order_id: created.orderId, amount: created.amountPaise, currency: 'INR' }
           : { subscription_id: created.subscriptionId }),
@@ -271,252 +140,154 @@ export function SubscriptionPanel() {
             });
           }
           await load();
+          onBillingChange?.();
         },
       });
     } catch (err) {
       const message = formatCatchError(err);
       if (message !== 'Payment cancelled') {
-        setCheckoutError(message);
+        setError(message);
       }
     } finally {
-      setCheckoutPlanId(null);
+      setCheckoutBusy(false);
+    }
+  }
+
+  async function handleCancel() {
+    const confirmed = window.confirm(
+      'Cancel your subscription at the end of the current billing period? You will keep access until then.'
+    );
+    if (!confirmed) return;
+
+    setCancelBusy(true);
+    setError(null);
+    setActionMessage(null);
+    try {
+      await api.cancelBillingSubscription({ cancelAtPeriodEnd: true });
+      setActionMessage('Subscription will cancel at the end of the current billing period.');
+      await load();
+      onBillingChange?.();
+    } catch (err) {
+      setError(formatCatchError(err));
+    } finally {
+      setCancelBusy(false);
     }
   }
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20 text-gray-400">
+      <div className={`flex items-center justify-center py-20 text-slate-400 ${embedded ? 'py-12' : ''}`}>
         <Loader2 className="h-6 w-6 animate-spin" />
       </div>
     );
   }
 
-  if (error || !data) {
+  if (error && !data) {
     return (
       <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-        {error ?? 'Could not load subscription'}
+        {error}
       </div>
     );
   }
 
-  const { trial, currentPlan, currentPlanSlug, plans, hasPlan, pricingRules, customPlan } = data;
-  const displayStatus = trial.displayStatus;
-  const trialEndLabel = formatTrialEnd(trial.trialEndsAt);
+  const active = data ? isActiveSubscription(data) : false;
+  const status = data
+    ? subscriptionLabel(data.subscriptionStatus, data.billingSubscription?.status)
+    : 'Inactive';
+  const nextBilling = data?.billingSubscription?.currentPeriodEnd ?? null;
+  const cancelling = data?.billingSubscription?.cancelAtPeriodEnd ?? false;
 
   return (
-    <div className="space-y-8 max-w-5xl">
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-[#f8f7fc] px-4 py-3 text-sm">
-        <p className="text-gray-600">
-          {trial.isTrial ? (
-            <>
-              <span className="font-semibold text-gray-900">
-                {hasPlan ? currentPlan?.name : 'Free trial'}
-              </span>
-              {' · '}
-              {trial.trialDaysLeft} day{trial.trialDaysLeft === 1 ? '' : 's'} left
-              {trialEndLabel ? ` (ends ${trialEndLabel})` : ''}
-            </>
-          ) : (
-            <>
-              Current:{' '}
-              <span className="font-semibold text-gray-900">
-                {customPlan
-                  ? 'Custom plan'
-                  : hasPlan
-                    ? (currentPlan?.name ?? '—')
-                    : 'No plan'}
-              </span>
-              {' · '}
-              <span
-                className={`inline-flex rounded-full border px-2 py-0.5 text-sm font-bold ${
-                  statusStyles[displayStatus] ?? statusStyles.Trial
-                }`}
-              >
-                {displayStatus}
-              </span>
-            </>
-          )}
-        </p>
-        <Link
-          to={pathForSettingsSection('billing')}
-          className="text-sm font-bold text-sky-600 hover:underline"
-        >
-          Billing overview →
-        </Link>
-      </div>
-
-      <PlanCustomizer
-        pricingRules={pricingRules}
-        initialQuote={customPlan}
-        onSaved={() => void load()}
-      />
-
-      {checkoutError && (
+    <div className={embedded ? 'space-y-5' : 'mx-auto max-w-2xl space-y-5'}>
+      {error ? (
         <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {checkoutError}
+          {error}
         </div>
-      )}
+      ) : null}
+      {actionMessage ? (
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          {actionMessage}
+        </div>
+      ) : null}
 
-      <div className="rounded-xl border border-slate-200 bg-[#f8f7fc] px-4 py-3 text-xs text-gray-600">
-        <p className="font-semibold text-gray-800">UPI payment</p>
-        <p className="mt-1">
-          Company profile में phone number जोड़ें (Settings → Company) — UPI के लिए ज़रूरी है।
-          Test mode में UPI ID <span className="font-mono">success@razorpay</span> डालें।
+      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+        <p className="text-xl font-bold text-slate-900">{PLAN_NAME}</p>
+        <p className="mt-1 text-2xl font-bold text-slate-900">
+          ₹{PLAN_PRICE_INR.toLocaleString('en-IN')}
+          <span className="text-base font-medium text-slate-500">/month</span>
         </p>
-        <p className="mt-2 text-gray-500">
-          Checkout uses a one-time payment for your selected billing period. Auto-renew (UPI Autopay)
-          activates when recurring billing is enabled on your Razorpay account.
-        </p>
-      </div>
 
-      <section>
-        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h3 className="text-sm font-bold text-gray-900">Standard plans</h3>
-            <p className="mt-1 text-xs text-gray-500">
-              {hasPlan
-                ? 'Compare tiers and choose the plan that fits your team. Your current plan is highlighted.'
-                : 'You are on a free trial without a plan. Pick a tier below when you are ready to subscribe.'}
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          <span
+            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold ${
+              active
+                ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
+                : 'bg-slate-100 text-slate-600 ring-1 ring-slate-200'
+            }`}
+          >
+            {active ? <Check className="h-3.5 w-3.5" /> : null}
+            {status}
+          </span>
+          {cancelling ? (
+            <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800 ring-1 ring-amber-200">
+              Cancels at period end
+            </span>
+          ) : null}
+        </div>
+
+        {active ? (
+          <>
+            <p className="mt-5 text-sm text-slate-600">
+              <span className="font-semibold text-slate-800">Next billing:</span>{' '}
+              {formatBillingDate(nextBilling)}
             </p>
-          </div>
-          <div className="inline-flex rounded-lg border border-slate-200 p-0.5 text-sm font-semibold">
-            <button
-              type="button"
-              onClick={() => setBillingCycle('monthly')}
-              className={`rounded-md px-3 py-1.5 ${billingCycle === 'monthly' ? 'bg-sky-600 text-white' : 'text-gray-600'}`}
-            >
-              Monthly
-            </button>
-            <button
-              type="button"
-              onClick={() => setBillingCycle('annual')}
-              className={`rounded-md px-3 py-1.5 ${billingCycle === 'annual' ? 'bg-sky-600 text-white' : 'text-gray-600'}`}
-            >
-              Annual
-            </button>
-          </div>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {plans.map((plan) => {
-            const isCurrent = hasPlan && plan.id === currentPlanSlug;
-            const canChoose =
-              !hasPlan ||
-              (plan.sortOrder ?? 0) > (currentPlan?.sortOrder ?? -1);
-
-            return (
-              <div
-                key={plan.id}
-                className={`relative flex flex-col rounded-2xl bg-white p-5 transition-shadow ${
-                  isCurrent
-                    ? 'border-2 border-[#0284c7] shadow-[0_8px_30px_rgba(108,99,255,0.12)]'
-                    : plan.popular
-                      ? 'border border-[#0284c7]/40 shadow-sm'
-                      : 'border border-slate-200 shadow-sm'
-                }`}
+            {!cancelling ? (
+              <button
+                type="button"
+                disabled={cancelBusy}
+                onClick={() => void handleCancel()}
+                className="mt-5 text-sm font-semibold text-slate-500 underline-offset-2 hover:text-slate-700 hover:underline disabled:opacity-50"
               >
-                {isCurrent && (
-                  <span className="absolute -top-2.5 left-4 inline-flex items-center gap-1 rounded-full bg-sky-600 px-2.5 py-0.5 text-sm font-bold tracking-wide text-white">
-                    <Check className="h-3 w-3" />
-                    YOUR PLAN
-                  </span>
-                )}
-                {plan.popular && !isCurrent && (
-                  <span className="absolute -top-2.5 left-1/2 inline-flex -translate-x-1/2 items-center gap-1 rounded-full bg-sky-600 px-2.5 py-0.5 text-sm font-bold tracking-wide text-white">
-                    <Sparkles className="h-3 w-3" />
-                    POPULAR
-                  </span>
-                )}
-
-                <div className="mb-3 flex items-center gap-2">
-                  {plan.id === 'enterprise' && <Crown className="h-4 w-4 text-gray-700" />}
-                  <span
-                    className="text-sm font-bold uppercase tracking-widest"
-                    style={{ color: plan.labelColor }}
-                  >
-                    {tierBadges[plan.id] ?? plan.name}
-                  </span>
-                </div>
-
-                <p className="text-lg font-bold text-gray-900">{plan.name}</p>
-
-                <div className="mt-2 flex items-baseline gap-1">
-                  <span className="text-2xl font-bold text-gray-900">
-                    {formatPrice(plan, billingCycle)}
-                  </span>
-                  {formatPriceSuffix(plan, billingCycle) ? (
-                    <span className="text-sm text-gray-400">{formatPriceSuffix(plan, billingCycle)}</span>
-                  ) : null}
-                </div>
-                {plan.annualPrice != null && plan.annualPrice > 0 && !plan.priceAnnualPaise && (
-                  <p className="mt-0.5 text-xs text-gray-500">
-                    or ${plan.annualPrice.toLocaleString()}/yr
-                  </p>
-                )}
-                {plan.trialDays ? (
-                  <p className="mt-1 text-xs text-sky-600 font-medium">
-                    {plan.trialDays}-day free trial
-                  </p>
-                ) : null}
-
-                <PlanFeatureList plan={plan} />
-
-                <div className="mt-5 pt-1">
-                  {isCurrent ? (
-                    <button
-                      type="button"
-                      disabled
-                      className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 text-sm font-bold text-gray-500"
-                    >
-                      Current plan
-                    </button>
-                  ) : canChoose && plan.id !== 'enterprise' ? (
-                    <button
-                      type="button"
-                      disabled={checkoutPlanId === plan.id}
-                      className="w-full rounded-xl bg-sky-600 py-2.5 text-sm font-bold text-white hover:bg-sky-700 transition-colors disabled:opacity-60"
-                      onClick={() => void handleSubscribe(plan.id, plan.name)}
-                    >
-                      {checkoutPlanId === plan.id ? (
-                        <span className="inline-flex items-center justify-center gap-2">
-                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                          Opening checkout…
-                        </span>
-                      ) : hasPlan ? (
-                        'Upgrade'
-                      ) : (
-                        'Subscribe'
-                      )}
-                    </button>
-                  ) : plan.id === 'enterprise' ? (
-                    <button
-                      type="button"
-                      className="w-full rounded-xl border border-slate-200 py-2.5 text-sm font-bold text-gray-700 hover:bg-gray-50"
-                      onClick={() => {
-                        window.location.href = `mailto:support@convosync.io?subject=${encodeURIComponent('Enterprise plan inquiry')}`;
-                      }}
-                    >
-                      Contact sales
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      disabled
-                      className="w-full rounded-xl border border-slate-200 py-2.5 text-sm font-bold text-gray-400"
-                    >
-                      Included in higher tiers
-                    </button>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                {cancelBusy ? 'Cancelling…' : 'Cancel subscription'}
+              </button>
+            ) : null}
+          </>
+        ) : (
+          <button
+            type="button"
+            disabled={checkoutBusy}
+            onClick={() => void handleSubscribe()}
+            className="mt-5 inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:opacity-95 disabled:opacity-60"
+            style={{ backgroundColor: BRAND_PURPLE }}
+          >
+            {checkoutBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+            Subscribe to {PLAN_NAME}
+          </button>
+        )}
       </section>
 
-      <p className="text-xs text-gray-400">
-        Payments are processed securely via Razorpay in INR. Need help? Contact support@convosync.io
-      </p>
+      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+        <h3 className="text-sm font-bold uppercase tracking-wide text-slate-500">
+          What&apos;s included
+        </h3>
+        <ul className="mt-4 space-y-2.5">
+          {INCLUDED_FEATURES.map((feature) => (
+            <li key={feature} className="flex items-start gap-2.5 text-sm text-slate-700">
+              <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+              <span>{feature}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {!embedded ? (
+        <section className="rounded-xl border border-violet-100 bg-violet-50/60 p-5 shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
+          <p className="text-sm leading-relaxed text-slate-700">
+            Usage charges (WhatsApp templates, AI responses, emails) are billed separately from
+            your <span className="font-semibold text-violet-800">ConvoCoins</span> wallet.
+          </p>
+        </section>
+      ) : null}
     </div>
   );
 }

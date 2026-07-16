@@ -362,7 +362,7 @@ export const AgentProfile: React.FC<Props> = ({
                 type="button"
                 disabled={saving}
                 onClick={() => void handlePublish()}
-                className="px-4 py-2 bg-sky-600 hover:bg-sky-700 disabled:opacity-60 text-white rounded-xl text-sm font-bold"
+                className="px-4 py-2 bg-channel-green hover:bg-[#20bd5a] disabled:opacity-60 text-white rounded-xl text-sm font-bold"
               >
                 Publish
               </button>

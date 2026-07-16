@@ -21,6 +21,7 @@ import {
   LayoutGrid,
   Settings,
   ShoppingBag,
+  Sparkles,
   Ticket,
   Trash2,
 } from 'lucide-react';
@@ -33,6 +34,7 @@ import { EmailPanel } from './integrations/EmailPanel';
 import { GooglePanel } from './integrations/GooglePanel';
 import { MetaAdsIntegrationPanel } from './integrations/MetaAdsIntegrationPanel';
 import { GoogleAdsIntegrationPanel } from './integrations/GoogleAdsIntegrationPanel';
+import { AiProviderPanel } from './settings/AiProviderPanel';
 import {
   clearStoredConnectError,
   META_ADS_CONNECT_ERROR_KEY,
@@ -50,7 +52,8 @@ type ChannelView =
   | 'google'
   | 'meta-ads'
   | 'google-ads'
-  | 'voice';
+  | 'voice'
+  | 'ai';
 
 function channelViewFromSearch(search: string): ChannelView {
   const channel = new URLSearchParams(search).get('channel');
@@ -59,6 +62,7 @@ function channelViewFromSearch(search: string): ChannelView {
   if (channel === 'whatsapp') return 'whatsapp';
   if (channel === 'meta-ads') return 'meta-ads';
   if (channel === 'google-ads') return 'google-ads';
+  if (channel === 'ai') return 'ai';
   return 'hub';
 }
 
@@ -121,7 +125,7 @@ function IntegrationCard({
           className={`w-full px-3 py-2 rounded-lg text-sm font-bold transition-all ${
             connectDisabled
               ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              : 'bg-gray-900 hover:bg-gray-800 text-white'
+              : 'bg-channel-green hover:bg-[#20bd5a] text-white'
           }`}
         >
           {connectLabel}
@@ -234,15 +238,11 @@ function ConnectedChannelCard({
           ? 'border-channel-blue/25'
           : 'border-[#E1306C]/25';
   const syncBtnClass =
-    channel === 'messenger'
-      ? 'text-[#1877F2] bg-[#e8f4ff] border-[#1877F2]/20 hover:bg-[#dbeafe]'
-      : channel === 'instagram'
-        ? 'text-[#C13584] bg-[#fce8f0] border-[#E1306C]/20 hover:bg-[#fad9e8]'
-        : 'text-primary bg-sky-50 border-primary/20 hover:bg-primary/10';
+    channel === 'instagram'
+      ? 'text-[#C13584] bg-[#fce8f0] border-[#E1306C]/20 hover:bg-[#fad9e8]'
+      : 'text-emerald-700 bg-emerald-50 border-channel-green/20 hover:bg-emerald-100';
   const manageBtnClass =
-    channel === 'whatsapp'
-      ? 'text-channel-green bg-[#e6f7ec] border-channel-green/20 hover:bg-[#d4f5df]'
-      : 'text-channel-blue bg-[#e8f4ff] border-channel-blue/20 hover:bg-[#dbeafe]';
+    'text-channel-green bg-[#e6f7ec] border-channel-green/20 hover:bg-[#d4f5df]';
   const statusText =
     channel === 'email' ? 'Connected · Ready to send' : 'Connected · Inbox ready';
   const metaLine = [subtitle, detail].filter(Boolean).join(' · ');
@@ -444,7 +444,7 @@ function ConnectedAdsToolCard({
       <button
         type="button"
         onClick={onManage}
-        className="mt-auto w-full px-3 py-2 rounded-lg text-sm font-bold text-channel-blue bg-[#e8f4ff] border border-channel-blue/20 hover:bg-[#dbeafe] transition-colors cursor-pointer"
+        className="mt-auto w-full px-3 py-2 rounded-lg text-sm font-bold text-channel-green bg-[#e6f7ec] border border-channel-green/20 hover:bg-[#d4f5df] transition-colors cursor-pointer"
       >
         Manage
       </button>
@@ -539,6 +539,13 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
     setView('google-ads');
     const next = new URLSearchParams(searchParams);
     next.set('channel', 'google-ads');
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
+
+  const openAiChannel = useCallback(() => {
+    setView('ai');
+    const next = new URLSearchParams(searchParams);
+    next.set('channel', 'ai');
     setSearchParams(next, { replace: true });
   }, [searchParams, setSearchParams]);
 
@@ -718,6 +725,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
     else if (channel === 'whatsapp') setView('whatsapp');
     else if (channel === 'meta-ads') setView('meta-ads');
     else if (channel === 'google-ads') setView('google-ads');
+    else if (channel === 'ai') setView('ai');
   }, [isActive, searchParams]);
 
   useEffect(() => {
@@ -1040,7 +1048,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
               type="button"
               disabled={enablingEmail || isChannelLimitReached}
               onClick={() => void handleEnableEmail()}
-              className="w-full px-4 py-2.5 bg-gray-900 hover:bg-gray-800 disabled:opacity-60 text-white text-sm font-bold rounded-xl transition-all"
+              className="w-full px-4 py-2.5 bg-channel-green hover:bg-[#20bd5a] disabled:opacity-60 text-white text-sm font-bold rounded-xl transition-all"
             >
               {isChannelLimitReached ? 'Channel limit reached' : enablingEmail ? 'Enabling…' : 'Enable Email'}
             </button>
@@ -1063,10 +1071,6 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
         <header className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
             <h2 className="text-xl font-black text-gray-950">Email</h2>
-            <p className="text-xs text-gray-500 font-medium mt-1">
-              Verify domains, manage sender addresses, and send transactional email from{' '}
-              {defaultEmail} or your own domain.
-            </p>
           </div>
           <button
             type="button"
@@ -1223,28 +1227,38 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
     );
   }
 
+  if (view === 'ai') {
+    return (
+      <div className="w-full pb-12 animate-scale-up flex justify-center">
+        <div className="w-full max-w-2xl space-y-6">
+          <button
+            type="button"
+            onClick={goToHub}
+            className="inline-flex items-center gap-1.5 text-sm font-bold text-gray-500 hover:text-primary transition-colors"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            Back to integrations
+          </button>
+
+          <header className="text-center">
+            <h2 className="text-xl font-black text-gray-950">AI Provider</h2>
+            <p className="text-xs text-gray-500 font-medium mt-1">
+              Use managed AI or connect your own API key for agents, copilot, and automations.
+            </p>
+          </header>
+
+          <AiProviderPanel />
+        </div>
+      </div>
+    );
+  }
+
   const whatsappConnected = whatsappAccounts.length > 0;
-  const instagramConnected = instagramAccounts.length > 0;
-  const messengerConnected = messengerAccounts.length > 0;
   const emailConnected = emailStatus.connected;
-  const messengerPendingPages = instagramAccounts.filter(
-    (account) =>
-      account.pageId &&
-      !messengerAccounts.some((messenger) => messenger.pageId === account.pageId)
-  );
-  const canEnableMessenger = instagramConnected && messengerPendingPages.length > 0;
-  const hasConnectedChannels =
-    whatsappConnected || instagramConnected || messengerConnected || emailConnected;
-  const hasConnectedAdsTools = metaAdsConnected || googleAdsConnected;
+  const hasConnectedChannels = whatsappConnected || emailConnected;
 
   return (
     <div className="w-full space-y-5 pb-8 animate-scale-up">
-      {messengerSyncMessage && (
-        <p className="text-sm font-bold text-[#1877F2] bg-[#e8f4ff] border border-[#1877F2]/15 rounded-xl px-4 py-2">
-          {messengerSyncMessage}
-        </p>
-      )}
-
       {emailError && (
         <p className="text-sm font-bold text-red-600 bg-red-50 border border-red-100 rounded-xl px-4 py-2">
           {emailError}
@@ -1259,38 +1273,6 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
         </p>
       )}
 
-      {instagramSyncMessage && (
-        <p className="text-sm font-bold text-[#C13584] bg-[#fce8f0] border border-[#E1306C]/15 rounded-xl px-4 py-2">
-          {instagramSyncMessage}
-        </p>
-      )}
-
-      {hasConnectedAdsTools && (
-        <section>
-          <h3 className="text-sm font-black text-gray-950 mb-3">Connected advertising tools</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
-            {metaAdsConnected && (
-              <ConnectedAdsToolCard
-                title="Meta Ads"
-                accountName={metaAdsAccountName || 'Meta Ad Account'}
-                subtitle="Click-to-WhatsApp & campaign sync"
-                icon={<MousePointerClick className="w-4 h-4 text-[#1877F2]" />}
-                onManage={openMetaAdsChannel}
-              />
-            )}
-            {googleAdsConnected && (
-              <ConnectedAdsToolCard
-                title="Google Ads"
-                accountName={googleAdsAccountName || 'Google Ads Account'}
-                subtitle="Search, Display & lead campaigns"
-                icon={<GoogleIcon className="w-4 h-4" />}
-                onManage={openGoogleAdsChannel}
-              />
-            )}
-          </div>
-        </section>
-      )}
-
       {hasConnectedChannels && (
         <section>
           <h3 className="text-sm font-black text-gray-950 mb-3">Connected channels</h3>
@@ -1301,45 +1283,6 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
                 onManage={openWhatsappChannel}
               />
             )}
-
-            {instagramAccounts.map((account) => {
-              const title =
-                account.label ||
-                (account.username ? `@${account.username}` : account.displayName || 'Instagram');
-              return (
-                <ConnectedChannelCard
-                  key={account.id}
-                  channel="instagram"
-                  channelLabel="Instagram"
-                  title={title}
-                  subtitle={account.pageName ? `Page · ${account.pageName}` : 'Instagram DMs'}
-                  detail={account.username ? `@${account.username}` : undefined}
-                  avatarUrl={account.profilePicture}
-                  disconnecting={disconnectingKey === `ig:${account.instagramUserId}`}
-                  onDisconnect={() => void handleInstagramDisconnect(account.instagramUserId)}
-                  onSync={() => void handleInstagramSync()}
-                  syncing={instagramSyncing}
-                />
-              );
-            })}
-
-            {messengerAccounts.map((account) => {
-              const title = account.label || account.displayName || account.pageName || 'Messenger';
-              return (
-                <ConnectedChannelCard
-                  key={account.id}
-                  channel="messenger"
-                  channelLabel="Messenger"
-                  title={title}
-                  subtitle={account.pageName ? `Page · ${account.pageName}` : 'Facebook Page'}
-                  avatarUrl={account.profilePicture}
-                  disconnecting={disconnectingKey === `fb:${account.pageId}`}
-                  onDisconnect={() => void handleMessengerDisconnect(account.pageId)}
-                  onSync={() => void handleMessengerSync()}
-                  syncing={messengerSyncing}
-                />
-              );
-            })}
 
             {emailConnected && (
               <ConnectedChannelCard
@@ -1369,7 +1312,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
           {!whatsappConnected && (
             <IntegrationCard
               title="WhatsApp"
-              description="Connect WhatsApp Business API or Business App for inbox, templates, broadcasts, and customer support."
+              description="Connect WhatsApp Business API for inbox, templates, broadcasts, and customer support."
               icon={WhatsAppBrandIcon}
               iconBgClass="bg-[#e6f7ec]"
               iconClass="text-channel-green"
@@ -1378,43 +1321,6 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
               onConnect={openWhatsappChannel}
             />
           )}
-
-          {canEnableMessenger && (
-            <IntegrationCard
-              title="Facebook Messenger"
-              description="Enable Messenger for a connected Instagram Page. Uses the same Meta token — no extra login."
-              icon={Facebook}
-              iconBgClass="bg-[#e8f4ff]"
-              iconClass="text-[#1877F2]"
-              connectLabel={isChannelLimitReached ? 'Limit reached' : 'Enable'}
-              connectDisabled={isChannelLimitReached}
-              onConnect={handleMessengerConnect}
-            />
-          )}
-
-          {!instagramConnected && (
-            <IntegrationCard
-              title="Instagram"
-              description="Connect Instagram DMs to your inbox. Requires a linked Facebook Page and Instagram Business account."
-              icon={Instagram}
-              iconBgClass="bg-[#fce8f0]"
-              iconClass="text-channel-pink"
-              connectLabel={isChannelLimitReached ? 'Limit reached' : 'Connect'}
-              connectDisabled={isChannelLimitReached}
-              onConnect={handleInstagramConnect}
-            />
-          )}
-
-          {/* SMS — hidden for now
-          <IntegrationCard
-            title="SMS"
-            description="Send text messages to customers worldwide. Reach users on any device with global SMS delivery."
-            icon={MessageSquare}
-            iconBgClass="bg-[#fff8e6]"
-            iconClass="text-amber-500"
-            onConnect={() => setView('sms')}
-          />
-          */}
 
           {!emailConnected && (
             <IntegrationCard
@@ -1428,121 +1334,23 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
               onConnect={() => void handleEnableEmail()}
             />
           )}
-
-          {/* Voice code — hidden for now
-          <IntegrationCard
-            title="Voice code"
-            description="Verification method for delivering one-time passwords via automated phone calls to users."
-            icon={Phone}
-            iconBgClass="bg-[#f3eeff]"
-            iconClass="text-primary"
-            onConnect={() => setView('voice')}
-          />
-          */}
         </div>
       </section>
 
       <section>
-        <h3 className="text-sm font-black text-gray-950 mb-3">Advertising tools</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {!metaAdsConnected && (
-            <IntegrationCard
-              title="Meta Ads"
-              description="Run Click-to-WhatsApp campaigns and sync Meta ad performance to the Ads Manager."
-              icon={MousePointerClick}
-              iconBgClass="bg-[#e8f4ff]"
-              iconClass="text-[#1877F2]"
-              connectLabel="Connect"
-              onConnect={openMetaAdsChannel}
-            />
-          )}
-
-          {!googleAdsConnected && (
-            <IntegrationCard
-              title="Google Ads"
-              description="Connect Google Ads to monitor Search, Display, and lead form campaigns alongside Meta."
-              icon={() => <GoogleIcon className="w-5 h-5" />}
-              iconBgClass="bg-white border border-slate-200"
-              iconClass=""
-              connectLabel="Connect"
-              onConnect={openGoogleAdsChannel}
-            />
-          )}
-        </div>
-      </section>
-
-      {/* Google — hidden for now
-      <section>
-        <h3 className="text-sm font-black text-gray-950 mb-4">Google</h3>
+        <h3 className="text-sm font-black text-gray-950 mb-3">AI & automation</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <IntegrationCard
-            title="Google Workspace"
-            description="Calendar, Business Profile, Sheets, Drive, Gmail, and Meet — one OAuth framework for journeys and AI."
-            icon={LayoutGrid}
-            iconBgClass="bg-[#e8f4ff]"
-            iconClass="text-[#4285F4]"
-            onConnect={openGoogleChannel}
+            title="AI Provider"
+            description="Use managed AI or connect your own API key for agents and automations."
+            icon={Sparkles}
+            iconBgClass="bg-violet-50"
+            iconClass="text-violet-600"
+            connectLabel="Manage"
+            onConnect={openAiChannel}
           />
         </div>
       </section>
-      */}
-
-      {/* Tools — hidden for now
-      <section>
-        <h3 className="text-sm font-black text-gray-950 mb-4">Tools</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <IntegrationCard
-            title="HubSpot"
-            description="Sync contacts and conversations with HubSpot CRM for sales and support workflows."
-            icon={Link2}
-            iconBgClass="bg-[#fff0ed]"
-            iconClass="text-orange-600"
-            connectDisabled
-            onConnect={() => {}}
-          />
-
-          <IntegrationCard
-            title="Data connectors"
-            description="Connect databases and data warehouses to sync customer data into ConvoSync."
-            icon={Database}
-            iconBgClass="bg-[#e8f4ff]"
-            iconClass="text-channel-blue"
-            connectDisabled
-            onConnect={() => {}}
-          />
-
-          <IntegrationCard
-            title="Shopify"
-            description="Connect your Shopify store to send order updates and cart recovery messages."
-            icon={ShoppingBag}
-            iconBgClass="bg-[#e6f7ec]"
-            iconClass="text-channel-green"
-            connectDisabled
-            onConnect={() => {}}
-          />
-
-          <IntegrationCard
-            title="WhatsApp MM Lite API"
-            description="Lightweight WhatsApp messaging API for high-volume marketing and notification use cases."
-            icon={Link2}
-            iconBgClass="bg-[#f3eeff]"
-            iconClass="text-primary"
-            connectDisabled
-            onConnect={() => {}}
-          />
-
-          <IntegrationCard
-            title="Coupons"
-            description="Generate and deliver coupon codes automatically through chat campaigns and journeys."
-            icon={Ticket}
-            iconBgClass="bg-[#fce8f0]"
-            iconClass="text-channel-pink"
-            connectDisabled
-            onConnect={() => {}}
-          />
-        </div>
-      </section>
-      */}
     </div>
   );
 };

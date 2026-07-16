@@ -383,7 +383,7 @@ export const AdsView: React.FC = () => {
           onClick={() => setShowCreateModal(true)}
           disabled={!canCreateMetaAd}
           title={canCreateMetaAd ? undefined : 'Connect Meta Ads in Integrations to create CTWA campaigns'}
-          className="bg-sky-600 hover:bg-sky-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white px-4 py-2.5 rounded-xl flex items-center gap-2 text-sm font-bold transition-colors cursor-pointer"
+          className="bg-channel-green hover:bg-[#20bd5a] disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white px-4 py-2.5 rounded-xl flex items-center gap-2 text-sm font-bold transition-colors cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           Create CTWA Ad
@@ -405,7 +405,7 @@ export const AdsView: React.FC = () => {
                 type="button"
                 onClick={() => setPlatformScope(tab.id)}
                 className={`px-3 py-1.5 text-sm font-bold rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 ${
-                  platformScope === tab.id ? 'bg-sky-600 text-white' : 'text-gray-600 hover:bg-slate-50'
+                  platformScope === tab.id ? 'bg-channel-green text-white' : 'text-gray-600 hover:bg-slate-50'
                 }`}
               >
                 {tab.id === 'google' && <GoogleIcon className="w-3.5 h-3.5" />}
@@ -436,7 +436,7 @@ export const AdsView: React.FC = () => {
                 type="button"
                 onClick={() => setFilterStatus(s)}
                 className={`px-3 py-1.5 text-sm font-bold rounded-lg transition-colors cursor-pointer ${
-                  filterStatus === s ? 'bg-sky-600 text-white' : 'text-gray-600 hover:bg-slate-50'
+                  filterStatus === s ? 'bg-channel-green text-white' : 'text-gray-600 hover:bg-slate-50'
                 }`}
               >
                 {s}
@@ -458,7 +458,7 @@ export const AdsView: React.FC = () => {
                   type="button"
                   onClick={() => setFilterType(t.id)}
                   className={`px-3 py-1.5 text-sm font-bold rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 ${
-                    filterType === t.id ? 'bg-sky-600 text-white' : 'text-gray-600 hover:bg-slate-50'
+                    filterType === t.id ? 'bg-channel-green text-white' : 'text-gray-600 hover:bg-slate-50'
                   }`}
                 >
                   <t.icon className="w-3.5 h-3.5" />

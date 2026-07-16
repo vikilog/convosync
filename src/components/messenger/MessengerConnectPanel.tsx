@@ -191,7 +191,7 @@ export function MessengerConnectPanel({
                   </div>
                   <span
                     className={`h-4 w-4 rounded-full border shrink-0 ${
-                      selected ? 'border-[#1877F2] bg-[#1877F2]' : 'border-slate-300 bg-white'
+                      selected ? 'border-channel-green bg-channel-green' : 'border-slate-300 bg-white'
                     }`}
                     aria-hidden
                   />
@@ -210,7 +210,7 @@ export function MessengerConnectPanel({
         type="button"
         onClick={() => void handleConnect()}
         disabled={!canConnect}
-        className="mt-6 inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#1877F2] hover:bg-[#166fe5] disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-xl text-sm font-black shadow-md transition-all"
+        className="mt-6 inline-flex items-center justify-center gap-2 px-6 py-3 bg-channel-green hover:bg-[#20bd5a] disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-xl text-sm font-black shadow-md transition-all"
       >
         {loading ? 'Enabling Messenger…' : requiresSelection ? 'Enable Messenger for page' : 'Enable Messenger'}
       </button>

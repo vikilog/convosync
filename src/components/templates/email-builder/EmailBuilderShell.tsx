@@ -19,7 +19,6 @@ import {
   extractEmailTemplateVariables,
   stripHtmlToText,
 } from '../emailTemplateUtils';
-import { AiAssistModal } from './AiAssistModal';
 import { BuilderCanvas } from './BuilderCanvas';
 import { LeftSidebar } from './LeftSidebar';
 import { PreviewPane } from './PreviewPane';
@@ -29,8 +28,6 @@ import { PreviewVariablesPanel } from './PreviewVariablesPanel';
 import { designFromApi, designToJson } from './parseDesign';
 import { renderDesignToFullHtml } from './renderHtml';
 import { useEmailBuilderStore } from './store';
-import { createBlock, createBlockId } from './blockRegistry';
-import type { BlockType, EmailBlock } from './types';
 
 type Props = {
   template: EmailTemplateRecord | null;
@@ -39,28 +36,6 @@ type Props = {
 };
 
 type ViewMode = 'edit' | 'preview' | 'html';
-
-function aiBlocksToEmailBlocks(
-  blocks: { type: string; props: Record<string, unknown> }[]
-): EmailBlock[] {
-  const allowed: BlockType[] = [
-    'header',
-    'text',
-    'image',
-    'button',
-    'divider',
-    'spacer',
-    'columns',
-    'footer',
-  ];
-  return blocks
-    .filter((b) => allowed.includes(b.type as BlockType))
-    .map((b) => ({
-      id: createBlockId(),
-      type: b.type as BlockType,
-      props: { ...createBlock(b.type as BlockType).props, ...b.props },
-    }));
-}
 
 export function EmailBuilderShell({ template, onBack, onSaved }: Props) {
   const initDesign = useEmailBuilderStore((s) => s.initDesign);
@@ -74,8 +49,6 @@ export function EmailBuilderShell({ template, onBack, onSaved }: Props) {
   const [viewMode, setViewMode] = useState<ViewMode>('edit');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [aiOpen, setAiOpen] = useState(false);
-  const [aiLoading, setAiLoading] = useState(false);
 
   useEffect(() => {
     const design = designFromApi(template?.designJson, template?.htmlBody ?? '');
@@ -128,30 +101,6 @@ export function EmailBuilderShell({ template, onBack, onSaved }: Props) {
       setError(e instanceof Error ? e.message : 'Failed to save template');
     } finally {
       setSaving(false);
-    }
-  };
-
-  const handleAiGenerate = async (prompt: string) => {
-    setAiLoading(true);
-    setError('');
-    try {
-      const result = (await api.generateEmailTemplateAi(prompt)) as {
-        subject?: string;
-        blocks?: { type: string; props: Record<string, unknown> }[];
-      };
-      const newBlocks = aiBlocksToEmailBlocks(result.blocks ?? []);
-      if (newBlocks.length) {
-        initDesign(
-          { version: 1, blocks: newBlocks, brand },
-          { subject: result.subject ?? subject }
-        );
-      }
-      if (result.subject) setMeta({ subject: result.subject });
-      setAiOpen(false);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'AI generation failed');
-    } finally {
-      setAiLoading(false);
     }
   };
 
@@ -231,7 +180,7 @@ export function EmailBuilderShell({ template, onBack, onSaved }: Props) {
             type="button"
             disabled={saving}
             onClick={() => handleSave(true)}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-white text-sm font-bold hover:opacity-95 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-channel-green text-white text-sm font-bold hover:opacity-95 disabled:opacity-50"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
             Publish
@@ -247,7 +196,7 @@ export function EmailBuilderShell({ template, onBack, onSaved }: Props) {
 
       <div className="flex-1 flex min-h-0 min-w-0">
         {viewMode !== 'preview' ? (
-          <LeftSidebar onOpenAi={() => setAiOpen(true)} aiLoading={aiLoading} />
+          <LeftSidebar />
         ) : null}
 
         {viewMode === 'edit' ? <BuilderCanvas /> : null}
@@ -258,13 +207,6 @@ export function EmailBuilderShell({ template, onBack, onSaved }: Props) {
         {viewMode === 'html' ? <PropertyPanel /> : null}
         {viewMode === 'preview' ? <PreviewVariablesPanel /> : null}
       </div>
-
-      <AiAssistModal
-        open={aiOpen}
-        loading={aiLoading}
-        onClose={() => setAiOpen(false)}
-        onGenerate={handleAiGenerate}
-      />
     </div>
   );
 }

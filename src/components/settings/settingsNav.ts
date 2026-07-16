@@ -14,6 +14,9 @@ export type SettingsNavGroup = {
 export const SETTINGS_HIDDEN_SECTIONS = new Set<SettingsSection>([
   'security',
   'holidays',
+  'ai-provider',
+  'subscription',
+  'billing',
   'recharge',
   'contact-attributes',
   'contact-tags',
@@ -32,36 +35,15 @@ export const SETTINGS_NAV: SettingsNavGroup[] = [
       { id: 'profile', label: 'My profile' },
       { id: 'company-info', label: 'Company info' },
       { id: 'users', label: 'Users and teams' },
-      // { id: 'security', label: 'Security' },
-      // { id: 'holidays', label: 'Holidays' },
-      // { id: 'notifications', label: 'Notifications' },
     ],
   },
   {
     title: 'Billing',
     items: [
-      { id: 'subscription', label: 'Subscription' },
-      { id: 'billing', label: 'Billing overview' },
-      // { id: 'recharge', label: 'Recharge' },
+      { id: 'wallet', label: 'Wallet' },
       { id: 'invoices', label: 'Invoice logs' },
     ],
   },
-  // {
-  //   title: 'Contact',
-  //   items: [
-  //     { id: 'contact-attributes', label: 'Attributes' },
-  //     { id: 'contact-tags', label: 'Tags' },
-  //     { id: 'contact-events', label: 'Custom events' },
-  //   ],
-  // },
-  {
-    title: 'AI',
-    items: [{ id: 'ai-provider', label: 'AI Provider' }],
-  },
-  // {
-  //   title: 'Calling',
-  //   items: [{ id: 'calling-tags', label: 'Calling tags' }],
-  // },
 ];
 
 export const SETTINGS_SECTION_TITLES: Record<SettingsSection, string> = {
@@ -71,9 +53,10 @@ export const SETTINGS_SECTION_TITLES: Record<SettingsSection, string> = {
   security: 'Security',
   holidays: 'Holidays',
   notifications: 'Notifications',
+  wallet: 'Wallet',
   subscription: 'Subscription',
   billing: 'Billing overview',
-  recharge: 'Recharge',
+  recharge: 'ConvoCoins',
   invoices: 'Invoice logs',
   'contact-attributes': 'Attributes',
   'contact-tags': 'Tags',

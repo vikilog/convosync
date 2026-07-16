@@ -290,7 +290,7 @@ export const ChatPreviewPanel: React.FC<Props> = ({ agentId, avatarUrl: avatarUr
             type="button"
             onClick={() => void sendMessage()}
             disabled={loading || !input.trim()}
-            className="w-8 h-8 rounded-lg bg-sky-600 text-white flex items-center justify-center hover:bg-sky-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-8 h-8 rounded-lg bg-channel-green text-white flex items-center justify-center hover:bg-[#20bd5a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Send className="w-4 h-4" />
           </button>

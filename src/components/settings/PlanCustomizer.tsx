@@ -223,7 +223,7 @@ export function PlanCustomizer({ pricingRules, initialQuote, onSaved }: PlanCust
           <p className="mt-1 max-w-xl text-sm text-gray-500">
             Set contacts, AI agents, team size, channels, and email sends — your monthly price updates automatically.
             <span className="mt-1 block text-xs text-gray-400">
-              Email via Resend · $1 per 1,000 sends / month (1,000 included in base)
+              Email via AWS SES · $1 per 1,000 sends / month (1,000 included in base)
             </span>
           </p>
         </div>
@@ -364,7 +364,7 @@ export function PlanCustomizer({ pricingRules, initialQuote, onSaved }: PlanCust
             type="button"
             disabled={paying || quoting || !quote}
             onClick={() => void handlePayCustomPlan()}
-            className="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-sky-700 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-xl bg-channel-green px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#20bd5a] disabled:opacity-50"
           >
             {paying ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
             Pay with Razorpay

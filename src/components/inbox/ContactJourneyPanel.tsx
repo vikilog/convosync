@@ -146,7 +146,7 @@ function StepDot({ state }: { state: JourneyProgressStep['state'] }) {
 
   if (state === 'current') {
     return (
-      <span className="absolute -left-[21px] top-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-sky-600 ring-2 ring-sky-100">
+      <span className="absolute -left-[21px] top-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-channel-green ring-2 ring-emerald-100">
         <span className="h-1 w-1 animate-pulse rounded-full bg-white" />
       </span>
     );
@@ -338,7 +338,7 @@ export const ContactJourneyPanel: React.FC<Props> = ({
           <select
             value={selectedJourneyId}
             onChange={(e) => setSelectedJourneyId(e.target.value)}
-            className="w-full cursor-pointer rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-gray-800 outline-none transition-colors focus:border-sky-500/40 focus:ring-2 focus:ring-sky-200"
+            className="w-full cursor-pointer rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-gray-800 outline-none transition-colors focus:border-channel-green/40 focus:ring-2 focus:ring-emerald-100"
           >
             <option value="">Select a journey…</option>
             {publishedJourneys.map((journey) => (
@@ -354,7 +354,7 @@ export const ContactJourneyPanel: React.FC<Props> = ({
               if (!selectedJourneyId) return;
               onAssignJourney(selectedJourneyId);
             }}
-            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-sky-600 py-2.5 text-sm font-bold text-white transition-colors hover:bg-sky-600-hover disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-channel-green py-2.5 text-sm font-bold text-white transition-colors hover:bg-channel-green-hover disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Play className="h-3.5 w-3.5" />
             {selectedJourneyId && selectedJourneyId === assignedJourneyId

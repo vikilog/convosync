@@ -46,7 +46,7 @@ export default function LandingView() {
   };
 
   return (
-    <div id="root" className="min-h-screen bg-[#FAFAFA] font-sans antialiased text-gray-900 scroll-smooth">
+    <div className="landing-page min-h-screen app-grid-bg font-sans antialiased text-gray-900 scroll-smooth">
       <Navbar
         onNavigate={handleNavigate}
         onLogin={() => {

@@ -62,7 +62,7 @@ export function GoogleGmailView() {
           <button
             type="button"
             onClick={() => navigate(`${pathForTab('integrations')}?channel=google`)}
-            className="mt-5 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-bold shadow-[0_2px_8px_rgba(91,76,245,0.25)]"
+            className="mt-5 px-4 py-2.5 rounded-full bg-channel-green text-white text-sm font-bold shadow-[0_2px_8px_rgba(91,76,245,0.25)]"
           >
             Go to Integrations
           </button>

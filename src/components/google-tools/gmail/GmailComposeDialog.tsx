@@ -90,7 +90,7 @@ export function GmailComposeDialog({
             <button
               type="submit"
               disabled={sending}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold bg-primary text-white shadow-[0_2px_8px_rgba(91,76,245,0.25)] hover:bg-primary/90 disabled:opacity-50 transition-all"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold bg-primary text-white shadow-[0_2px_8px_rgba(91,76,245,0.25)] hover:bg-[#20bd5a] disabled:opacity-50 transition-all"
             >
               {sending ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />

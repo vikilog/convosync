@@ -50,11 +50,11 @@ export function BuilderCanvas() {
 
   return (
     <div
-      className="flex-1 min-h-0 min-w-0 overflow-y-auto bg-[#eceff4] p-3 md:p-4"
+      className="flex-1 min-h-0 min-w-0 overflow-y-auto bg-[#eceff4] p-4 md:p-6"
       onClick={() => selectBlock(null)}
     >
       <div
-        className="w-full min-h-full bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden"
+        className="w-full max-w-[640px] mx-auto min-h-full bg-white rounded-xl shadow-sm border border-slate-200"
         onClick={(e) => e.stopPropagation()}
       >
         {brand.logoUrl ? (
@@ -77,13 +77,13 @@ export function BuilderCanvas() {
                 e.stopPropagation();
                 addBlock('text');
               }}
-              className="mt-4 inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary text-white text-sm font-bold"
+              className="mt-4 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-channel-green text-white text-sm font-bold"
             >
               <Plus className="w-3.5 h-3.5" /> Add text block
             </button>
           </div>
         ) : (
-          <div className="py-4 px-4 md:px-6 space-y-1">
+          <div className="py-4 px-3 sm:px-5 space-y-1">
             <DropZone index={0} />
             {blocks.map((block, index) => (
               <React.Fragment key={block.id}>

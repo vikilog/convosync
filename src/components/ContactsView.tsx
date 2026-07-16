@@ -85,6 +85,8 @@ export const ContactsView: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editContact, setEditContact] = useState<ContactEditPayload | null>(null);
   const [deletingContactId, setDeletingContactId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
+  const [bulkDeleting, setBulkDeleting] = useState(false);
 
   const loadContacts = useCallback(async (options?: { silent?: boolean }) => {
     if (!options?.silent) setLoading(true);
@@ -111,9 +113,32 @@ export const ContactsView: React.FC = () => {
     return () => window.clearTimeout(t);
   }, [loadContacts, searchQuery]);
 
+  useEffect(() => {
+    setSelectedIds(new Set());
+  }, [activeList, channelFilter, searchQuery]);
+
   useKeepAliveActivation(() => {
     void loadContacts({ silent: true });
   });
+
+  const allVisibleSelected =
+    contacts.length > 0 && contacts.every((c) => selectedIds.has(c.id));
+  const someVisibleSelected = contacts.some((c) => selectedIds.has(c.id));
+  const selectedCount = selectedIds.size;
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (allVisibleSelected) setSelectedIds(new Set());
+    else setSelectedIds(new Set(contacts.map((c) => c.id)));
+  };
 
   const countForList = (id: ContactListKey) => {
     if (id === 'all') return stats.all;
@@ -190,6 +215,12 @@ export const ContactsView: React.FC = () => {
     setDeletingContactId(contact.id);
     try {
       await api.deleteContact(contact.id);
+      setSelectedIds((prev) => {
+        if (!prev.has(contact.id)) return prev;
+        const next = new Set(prev);
+        next.delete(contact.id);
+        return next;
+      });
       setContacts((prev) => prev.filter((c) => c.id !== contact.id));
       await loadContacts({ silent: true });
     } catch (err) {
@@ -198,6 +229,30 @@ export const ContactsView: React.FC = () => {
     } finally {
       setDeletingContactId(null);
     }
+  };
+
+  const handleBulkDelete = async () => {
+    const ids = [...selectedIds];
+    if (ids.length === 0) return;
+    const confirmed = window.confirm(
+      `Delete ${ids.length} contact${ids.length === 1 ? '' : 's'}? This will also delete related conversations, messages, and journey history.`
+    );
+    if (!confirmed) return;
+    setBulkDeleting(true);
+    const failed = new Set<string>();
+    for (const id of ids) {
+      try {
+        await api.deleteContact(id);
+      } catch {
+        failed.add(id);
+      }
+    }
+    setSelectedIds(failed);
+    await loadContacts({ silent: true });
+    if (failed.size > 0) {
+      window.alert(`Failed to delete ${failed.size} of ${ids.length} contacts.`);
+    }
+    setBulkDeleting(false);
   };
 
   return (
@@ -209,7 +264,7 @@ export const ContactsView: React.FC = () => {
               <h2 className="text-base font-bold text-slate-900">Contacts</h2>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-[minmax(260px,1fr)_auto_auto_auto] gap-2 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-[minmax(260px,1fr)_auto_auto_auto_auto] gap-2 items-center">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                 <input
@@ -243,10 +298,22 @@ export const ContactsView: React.FC = () => {
                 Export
               </button>
 
+              {selectedCount > 0 && (
+                <button
+                  type="button"
+                  onClick={() => void handleBulkDelete()}
+                  disabled={bulkDeleting || loading}
+                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-100 disabled:opacity-50"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  {bulkDeleting ? 'Deleting…' : `Delete (${selectedCount})`}
+                </button>
+              )}
+
               <button
                 type="button"
                 onClick={openAddContact}
-                className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-white hover:bg-primary-hover"
+                className="inline-flex items-center justify-center gap-1.5 rounded-full bg-channel-green px-3 py-2 text-sm font-semibold text-white hover:bg-[#20bd5a]"
               >
                 <UserPlus className="w-4 h-4" />
                 Add contact
@@ -293,10 +360,34 @@ export const ContactsView: React.FC = () => {
               </div>
             ) : (
               <>
+                <div className="md:hidden flex items-center gap-2 px-3 py-2 border-b border-slate-200 bg-slate-50">
+                  <input
+                    type="checkbox"
+                    checked={allVisibleSelected}
+                    ref={(el) => {
+                      if (el) el.indeterminate = someVisibleSelected && !allVisibleSelected;
+                    }}
+                    onChange={toggleSelectAll}
+                    disabled={bulkDeleting}
+                    className="w-4 h-4 accent-sky-600 cursor-pointer"
+                    aria-label="Select all contacts"
+                  />
+                  <span className="text-xs font-semibold text-slate-600">
+                    {selectedCount > 0 ? `${selectedCount} selected` : 'Select all'}
+                  </span>
+                </div>
                 <ul className="md:hidden divide-y divide-slate-200/70">
                   {contacts.map((contact) => (
                     <li key={contact.id} className="px-3 py-2.5">
                       <div className="flex items-center gap-2.5">
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.has(contact.id)}
+                          onChange={() => toggleSelect(contact.id)}
+                          disabled={bulkDeleting}
+                          className="w-4 h-4 accent-sky-600 cursor-pointer shrink-0"
+                          aria-label={`Select ${contact.name}`}
+                        />
                         <div className="w-8 h-8 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center shrink-0">
                           {contact.name.charAt(0).toUpperCase()}
                         </div>
@@ -311,7 +402,7 @@ export const ContactsView: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => void handleDeleteContact(contact)}
-                          disabled={deletingContactId === contact.id}
+                          disabled={deletingContactId === contact.id || bulkDeleting}
                           className="inline-flex items-center justify-center p-2 rounded-md text-red-600 hover:text-red-700 hover:bg-red-50 disabled:opacity-50"
                           aria-label={`Delete ${contact.name}`}
                         >
@@ -326,6 +417,19 @@ export const ContactsView: React.FC = () => {
                   <table className="w-full min-w-[760px] text-left">
                     <thead className="sticky top-0 z-10 bg-slate-50 border-b border-slate-200">
                       <tr className="text-[11px] uppercase tracking-wider text-slate-500">
+                        <th className="px-4 py-2 font-bold w-10">
+                          <input
+                            type="checkbox"
+                            checked={allVisibleSelected}
+                            ref={(el) => {
+                              if (el) el.indeterminate = someVisibleSelected && !allVisibleSelected;
+                            }}
+                            onChange={toggleSelectAll}
+                            disabled={bulkDeleting}
+                            className="w-4 h-4 accent-sky-600 cursor-pointer"
+                            aria-label="Select all contacts"
+                          />
+                        </th>
                         <th className="px-4 py-2 font-bold">Contact</th>
                         <th className="px-4 py-2 font-bold">Phone</th>
                         <th className="px-4 py-2 font-bold">Email</th>
@@ -338,7 +442,20 @@ export const ContactsView: React.FC = () => {
                     </thead>
                     <tbody className="divide-y divide-slate-200/70 text-sm">
                       {contacts.map((contact) => (
-                        <tr key={contact.id} className="hover:bg-slate-50/70">
+                        <tr
+                          key={contact.id}
+                          className={`hover:bg-slate-50/70 ${selectedIds.has(contact.id) ? 'bg-sky-50/40' : ''}`}
+                        >
+                          <td className="px-4 py-2">
+                            <input
+                              type="checkbox"
+                              checked={selectedIds.has(contact.id)}
+                              onChange={() => toggleSelect(contact.id)}
+                              disabled={bulkDeleting}
+                              className="w-4 h-4 accent-sky-600 cursor-pointer"
+                              aria-label={`Select ${contact.name}`}
+                            />
+                          </td>
                           <td className="px-4 py-2">
                             <button
                               type="button"
@@ -389,7 +506,7 @@ export const ContactsView: React.FC = () => {
                             <button
                               type="button"
                               onClick={() => void handleDeleteContact(contact)}
-                              disabled={deletingContactId === contact.id}
+                              disabled={deletingContactId === contact.id || bulkDeleting}
                               className="inline-flex items-center justify-center p-1.5 rounded-md text-red-600 hover:text-red-700 hover:bg-red-50 disabled:opacity-50"
                               aria-label={`Delete ${contact.name}`}
                             >

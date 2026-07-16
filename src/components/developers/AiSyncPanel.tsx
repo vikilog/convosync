@@ -218,7 +218,7 @@ export function AiSyncPanel() {
             type="button"
             disabled={rebuilding || status === 'not_configured'}
             onClick={() => void rebuild()}
-            className="inline-flex items-center gap-1.5 text-sm font-bold px-4 py-2 rounded-lg bg-primary text-white disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 text-sm font-bold px-4 py-2 rounded-full bg-channel-green text-white disabled:opacity-50"
           >
             {rebuilding ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />

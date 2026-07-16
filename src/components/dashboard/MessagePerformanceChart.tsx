@@ -119,7 +119,7 @@ export const MessagePerformanceChart: React.FC<MessagePerformanceChartProps> = (
             <button
               type="button"
               onClick={onNewCampaign}
-              className="mt-4 inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-700"
+              className="mt-4 inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-channel-green px-4 py-2 text-sm font-medium text-white hover:bg-[#20bd5a]"
             >
               <Plus className="h-4 w-4" />
               Create campaign

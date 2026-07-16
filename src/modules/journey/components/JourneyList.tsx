@@ -20,7 +20,7 @@ export function JourneyList({ journeys, loading, onCreate, onOpen, onDelete }: P
         <button
           type="button"
           onClick={onCreate}
-          className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-white"
+          className="inline-flex items-center gap-2 rounded-full bg-channel-green px-4 py-2 text-sm font-bold text-white"
         >
           <Plus className="w-4 h-4" />
           New journey

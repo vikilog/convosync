@@ -4,6 +4,7 @@
  */
 
 import type { ReactElement, ReactNode } from 'react';
+import { createContext, useContext } from 'react';
 import {
   BarChart3,
   Bot,
@@ -36,25 +37,42 @@ export const HERO_MODULES: {
   { id: 'ads', label: 'Meta Ads', short: 'Meta Ads', icon: BarChart3 },
 ];
 
+type HeroPreviewStyle = 'chrome' | 'minimal';
+
+const HeroPreviewStyleContext = createContext<HeroPreviewStyle>('chrome');
+
 type HeroPlatformPreviewProps = {
   active: HeroModuleId;
+  variant?: HeroPreviewStyle;
 };
 
 function PreviewChrome({ title, children }: { title: string; children: ReactNode }) {
+  const variant = useContext(HeroPreviewStyleContext);
+
+  if (variant === 'minimal') {
+    return (
+      <div className="w-full rounded-2xl lg:rounded-3xl border border-gray-200/80 bg-white/90 backdrop-blur-sm shadow-2xl shadow-emerald-900/5 overflow-hidden">
+        <div className="p-4 sm:p-5 lg:p-6 bg-gradient-to-b from-white to-gray-50/40 min-h-[300px] sm:min-h-[360px] lg:min-h-[420px] xl:min-h-[460px]">
+          {children}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white shadow-xl shadow-gray-200/60 overflow-hidden">
-      <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-gray-100 bg-gray-50/80">
+    <div className="w-full rounded-2xl lg:rounded-3xl border border-gray-200 bg-white shadow-xl shadow-gray-200/60 overflow-hidden">
+      <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3 sm:py-3.5 border-b border-gray-100 bg-gray-50/80">
         <div className="flex items-center gap-2 min-w-0">
           <span className="w-2.5 h-2.5 rounded-full bg-red-400 shrink-0" aria-hidden />
           <span className="w-2.5 h-2.5 rounded-full bg-amber-400 shrink-0" aria-hidden />
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shrink-0" aria-hidden />
-          <p className="text-[11px] font-mono text-gray-500 truncate ml-1">{title}</p>
+          <p className="text-xs sm:text-sm font-mono text-gray-500 truncate ml-1">{title}</p>
         </div>
-        <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full shrink-0">
+        <span className="text-[10px] sm:text-xs font-semibold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full shrink-0">
           Live preview
         </span>
       </div>
-      <div className="p-4 sm:p-5 bg-gradient-to-b from-white to-gray-50/50 min-h-[280px] sm:min-h-[320px] lg:min-h-[360px]">
+      <div className="p-5 sm:p-6 lg:p-7 bg-gradient-to-b from-white to-gray-50/50 min-h-[340px] sm:min-h-[400px] lg:min-h-[480px] xl:min-h-[520px]">
         {children}
       </div>
     </div>
@@ -70,7 +88,7 @@ function InboxPreview() {
 
   return (
     <PreviewChrome title={`${PRODUCT_NAME} · Unified Inbox`}>
-      <div className="grid grid-cols-1 @min-[520px]:grid-cols-5 gap-3 h-full">
+      <div className="grid grid-cols-1 @min-[520px]:grid-cols-5 gap-3 h-full min-h-[260px] sm:min-h-[300px] lg:min-h-[360px]">
         <div className="@min-[520px]:col-span-2 space-y-2">
           {threads.map((t) => (
             <div
@@ -86,7 +104,7 @@ function InboxPreview() {
             </div>
           ))}
         </div>
-        <div className="@min-[520px]:col-span-3 rounded-xl border border-gray-100 bg-white p-3 flex flex-col min-h-[200px]">
+        <div className="@min-[520px]:col-span-3 rounded-xl border border-gray-100 bg-white p-3 sm:p-4 flex flex-col min-h-[220px] sm:min-h-[260px] lg:min-h-[300px]">
           <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
             <div className="w-7 h-7 rounded-full bg-brand-indigo/10 text-brand-indigo flex items-center justify-center text-xs font-bold">
               P
@@ -330,17 +348,19 @@ const PREVIEW_MAP: Record<HeroModuleId, () => ReactElement> = {
   ads: AdsPreview,
 };
 
-export function HeroPlatformPreview({ active }: HeroPlatformPreviewProps) {
+export function HeroPlatformPreview({ active, variant = 'chrome' }: HeroPlatformPreviewProps) {
   const Preview = PREVIEW_MAP[active];
+  const moduleLabel = HERO_MODULES.find((m) => m.id === active)?.label ?? 'Platform preview';
   return (
-    <div
-      key={active}
-      className="motion-safe:animate-fade-in"
-      role="tabpanel"
-      id={`hero-panel-${active}`}
-      aria-labelledby={`hero-tab-${active}`}
-    >
-      <Preview />
-    </div>
+    <HeroPreviewStyleContext.Provider value={variant}>
+      <div
+        key={active}
+        className="w-full motion-safe:animate-fade-in"
+        role="img"
+        aria-label={`${PRODUCT_NAME} ${moduleLabel} preview`}
+      >
+        <Preview />
+      </div>
+    </HeroPreviewStyleContext.Provider>
   );
 }

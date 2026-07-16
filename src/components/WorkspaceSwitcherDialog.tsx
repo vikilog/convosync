@@ -207,7 +207,7 @@ export const WorkspaceSwitcherDialog: React.FC<WorkspaceSwitcherDialogProps> = (
                 <button
                   type="submit"
                   disabled={creating || !newName.trim()}
-                  className="flex-1 py-2 text-sm font-bold text-white bg-primary rounded-xl disabled:opacity-50"
+                  className="flex-1 py-2 text-sm font-bold text-white rounded-full bg-channel-green disabled:opacity-50"
                 >
                   {creating ? 'Creating…' : 'Create'}
                 </button>

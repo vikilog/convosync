@@ -36,7 +36,7 @@ export const OnboardingFooter: FC<OnboardingFooterProps> = ({
           type="button"
           onClick={onStart}
           disabled={isStarting}
-          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl text-sm font-black text-white bg-primary hover:bg-primary-hover shadow-lg shadow-primary/25 transition-all disabled:opacity-60"
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full text-sm font-black text-white bg-channel-green hover:bg-[#20bd5a] shadow-lg shadow-emerald-600/20 transition-all disabled:opacity-60"
         >
           {isStarting ? 'Starting…' : startLabel}
           {!isStarting && <ArrowRight className="w-4 h-4" />}

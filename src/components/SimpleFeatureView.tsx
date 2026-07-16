@@ -60,7 +60,7 @@ export const SimpleFeatureView: FC<SimpleFeatureViewProps> = ({
         <button
           type="button"
           onClick={() => navigate(pathForTab('dashboard'))}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary-hover text-white text-sm font-bold rounded-xl shadow-sm transition-all"
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-channel-green hover:bg-[#20bd5a] text-white text-sm font-bold rounded-xl shadow-sm transition-all"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Home

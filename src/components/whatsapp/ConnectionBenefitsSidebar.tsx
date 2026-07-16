@@ -44,7 +44,7 @@ export const ConnectionBenefitsSidebar: FC<ConnectionBenefitsSidebarProps> = ({
           <button
             type="button"
             onClick={onTalkToExpert}
-            className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-black text-white bg-primary hover:bg-primary-hover shadow-md shadow-primary/20 transition-all"
+            className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-black text-white bg-channel-green hover:bg-[#20bd5a] shadow-md shadow-primary/20 transition-all"
           >
             <CalendarCheck className="w-4 h-4" />
             Talk to an Expert

@@ -282,6 +282,7 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
   };
 
   const handleGetStartedFromSelector = (type: WhatsAppConnectionType) => {
+    if (type === 'app_coexistence') return;
     setConnectionType(type);
     localStorage.setItem(CONNECTION_TYPE_STORAGE_KEY, type);
     if (type === 'business_api') {
@@ -491,7 +492,7 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
           <button
             type="button"
             onClick={() => navigate(pathForTab('integrations'))}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary-hover text-white rounded-xl text-sm font-black shadow-sm transition-all"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-channel-green hover:bg-[#20bd5a] text-white rounded-xl text-sm font-black shadow-sm transition-all"
           >
             Open Integrations
           </button>

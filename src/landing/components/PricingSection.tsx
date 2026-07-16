@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { Check, Info, Sparkles, Receipt, Coins } from 'lucide-react';
 import { PRICING_PLANS } from '../data';
 import { trackEvent } from '../../lib/analytics';
+import { LandingSection, LandingSectionHeader } from './landing-ui';
 
 interface PricingSectionProps {
   onSelectPlan: (planId: string, isAnnual: boolean) => void;
@@ -21,41 +22,32 @@ export default function PricingSection({ onSelectPlan }: PricingSectionProps) {
   };
 
   return (
-    <section id="pricing" className="bg-white border-b border-gray-100 py-24 text-gray-900 text-center relative z-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* Header */}
-        <div className="text-center max-w-2xl mx-auto mb-10">
-          <span className="text-xs uppercase font-extrabold text-brand-indigo tracking-widest font-mono">
-            Subscription Pricing
-          </span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold font-display tracking-tight text-gray-900 mt-2">
-            Start completely free. Scale with confidence.
-          </h2>
-          <p className="text-xs sm:text-sm text-gray-500 mt-3 font-sans leading-relaxed">
-            No expensive per-message markup from us. Pay your official Meta API costs directly. Setup in minutes.
-          </p>
-        </div>
+    <LandingSection id="pricing" tone="grid" className="text-center">
+      <LandingSectionHeader
+        badge="Pricing"
+        title="Start free."
+        titleAccent="Scale with confidence."
+        description="No per-message markup from us. Pay official Meta API costs directly."
+      />
 
-        {/* Pricing Toggle Switch (Annual Discount = 2 months free) */}
-        <div className="flex items-center justify-center space-x-4 mb-16">
-          <span className={`text-xs sm:text-sm font-semibold transition-colors ${!isAnnual ? 'text-gray-900' : 'text-gray-400'}`}>Billed Monthly</span>
-          <button
-            id="billing-frequency-toggle"
-            onClick={() => {
-              const next = !isAnnual;
-              trackEvent('pricing_billing_toggle', { billing: next ? 'annual' : 'monthly' });
-              setIsAnnual(next);
-            }}
-            className="w-14 h-7 bg-brand-indigo/10 rounded-full p-1 border border-brand-indigo/20 flex items-center justify-start cursor-pointer transition-all focus:outline-none"
-          >
-            <div className={`w-5 h-5 bg-brand-gradient rounded-full transition-transform transform ${isAnnual ? 'translate-x-7' : 'translate-x-0'}`} />
-          </button>
-          <div className="flex items-center space-x-1.5">
-            <span className={`text-xs sm:text-sm font-semibold transition-colors ${isAnnual ? 'text-brand-indigo font-extrabold' : 'text-gray-400'}`}>Billed Annually</span>
-            <span className="text-[10px] bg-emerald-100 text-emerald-800 font-extrabold px-2 py-0.5 rounded-full font-mono uppercase">2 months free 🔥</span>
-          </div>
+      <div className="flex items-center justify-center space-x-4 mb-14">
+        <span className={`text-sm font-semibold ${!isAnnual ? 'text-gray-900' : 'text-gray-400'}`}>Monthly</span>
+        <button
+          id="billing-frequency-toggle"
+          onClick={() => {
+            const next = !isAnnual;
+            trackEvent('pricing_billing_toggle', { billing: next ? 'annual' : 'monthly' });
+            setIsAnnual(next);
+          }}
+          className="w-14 h-7 bg-emerald-100 rounded-full p-1 border border-emerald-200 flex items-center cursor-pointer transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-channel-green"
+        >
+          <div className={`w-5 h-5 bg-channel-green rounded-full transition-transform ${isAnnual ? 'translate-x-7' : 'translate-x-0'}`} />
+        </button>
+        <div className="flex items-center gap-1.5">
+          <span className={`text-sm font-semibold ${isAnnual ? 'text-emerald-800' : 'text-gray-400'}`}>Annual</span>
+          <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">2 months free</span>
         </div>
+      </div>
 
         {/* 3 Main Pricing Plan Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto items-stretch">
@@ -66,15 +58,15 @@ export default function PricingSection({ onSelectPlan }: PricingSectionProps) {
             return (
               <div
                 key={plan.id}
-                className={`flex flex-col justify-between p-8 rounded-3xl transition-transform transform hover:-translate-y-1 ${
+                className={`flex flex-col justify-between p-8 rounded-3xl transition-transform hover:-translate-y-1 ${
                   isGrowth
-                    ? 'bg-[#FCFBFF] border-2 border-brand-indigo shadow-xl shadow-brand-indigo/10 relative scale-105'
-                    : 'bg-white border border-gray-100 shadow-xs'
+                    ? 'bg-white border-2 border-channel-green shadow-xl shadow-emerald-600/10 relative scale-105'
+                    : 'bg-white/90 border border-gray-200/80 shadow-sm'
                 }`}
               >
                 {/* Popular Pill badge */}
                 {isGrowth && (
-                  <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-brand-gradient text-white text-[10px] font-mono font-bold px-3 py-1.5 rounded-full uppercase tracking-widest flex items-center space-x-1">
+                  <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-channel-green text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-widest flex items-center space-x-1">
                     <Sparkles className="w-3.5 h-3.5" />
                     <span>Recommended Plan</span>
                   </span>
@@ -116,10 +108,10 @@ export default function PricingSection({ onSelectPlan }: PricingSectionProps) {
                   <button
                     id={`plan-cta-${plan.id}`}
                     onClick={() => onSelectPlan(plan.id, isAnnual)}
-                    className={`w-full font-bold text-xs py-3.5 rounded-xl transition-all flex items-center justify-center cursor-pointer shadow-md shadow-brand-indigo/5 ${
+                    className={`w-full font-bold text-xs py-3.5 rounded-full transition-all flex items-center justify-center cursor-pointer ${
                       isGrowth
-                        ? 'bg-brand-gradient hover:bg-brand-gradient-hover text-white shadow-brand-purple/25'
-                        : 'bg-gray-50 hover:bg-gray-100 text-gray-800'
+                        ? 'bg-channel-green hover:bg-[#20bd5a] text-white shadow-md shadow-emerald-600/15'
+                        : 'bg-gray-50 hover:bg-emerald-50 text-gray-800 border border-gray-200'
                     }`}
                   >
                     <span>{plan.ctaText}</span>
@@ -132,9 +124,9 @@ export default function PricingSection({ onSelectPlan }: PricingSectionProps) {
         </div>
 
         {/* Made for India localization disclosure bottom */}
-        <div className="mt-14 max-w-3xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-6 bg-gray-50 border border-gray-100 rounded-2xl p-5 text-left">
-          <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center text-lg shrink-0 select-none">
-            🇮🇳
+        <div className="mt-14 max-w-3xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-6 bg-white border border-gray-200/80 rounded-2xl p-5 text-left">
+          <div className="w-10 h-10 rounded-xl bg-orange-50 border border-orange-100 flex items-center justify-center text-sm font-bold shrink-0">
+            IN
           </div>
           <div>
             <p className="text-xs sm:text-sm font-bold text-gray-950 font-display">
@@ -145,8 +137,6 @@ export default function PricingSection({ onSelectPlan }: PricingSectionProps) {
             </p>
           </div>
         </div>
-
-      </div>
-    </section>
+    </LandingSection>
   );
 }

@@ -167,16 +167,22 @@ export function mapMessageFromApi(raw: Record<string, unknown>): ChatMessage {
   const createdAt = String(raw.createdAt ?? new Date().toISOString());
   const type = raw.type ? (String(raw.type) as ChatMessage['type']) : 'text';
   const media = mapMessageMediaFromApi(raw.metadata);
+  const metadata =
+    raw.metadata && typeof raw.metadata === 'object'
+      ? (raw.metadata as Record<string, unknown>)
+      : null;
+  const revoked = metadata?.revoked === true;
   return {
     id: String(raw.id),
     sender: raw.sender as ChatMessage['sender'],
     senderName: String(raw.senderName ?? ''),
-    content: String(raw.content),
-    type,
-    media,
+    content: revoked ? 'This message was deleted' : String(raw.content),
+    type: revoked ? 'text' : type,
+    media: revoked ? undefined : media,
     createdAt,
     timestamp: formatMessageTime(createdAt),
     status: raw.status as ChatMessage['status'],
+    revoked,
   };
 }
 

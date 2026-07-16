@@ -18,7 +18,7 @@ type SharedProps = {
 
 const categoryStyles: Record<AgentBot['category'], { badge: string; avatar: string }> = {
   ai_agent: {
-    badge: 'bg-sky-50 text-sky-700 ring-sky-100',
+    badge: 'bg-sky-50 text-sky-700 ring-emerald-100',
     avatar: 'bg-gradient-to-br from-sky-50 to-violet-50 text-sky-600',
   },
   responsive: {

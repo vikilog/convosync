@@ -41,6 +41,7 @@ export const WhatsappConnectionSelector: FC<WhatsappConnectionSelectorProps> = (
   const selected = value ?? 'business_api';
   const apiOption = WHATSAPP_CONNECTION_OPTIONS.find((o) => o.type === 'business_api')!;
   const coexistenceOption = WHATSAPP_CONNECTION_OPTIONS.find((o) => o.type === 'app_coexistence')!;
+  const coexistenceComingSoon = coexistenceOption.comingSoon === true;
 
   return (
     <div className={`w-full space-y-10 pb-8 animate-scale-up ${className}`.trim()}>
@@ -54,14 +55,14 @@ export const WhatsappConnectionSelector: FC<WhatsappConnectionSelectorProps> = (
             id="whatsapp-connect-hero-title"
             className="text-3xl sm:text-4xl font-black text-gray-950 tracking-tight leading-[1.1]"
           >
-            Connect WhatsApp Your Way
+            Connect WhatsApp Business API
           </h1>
           <p className="mt-3 text-lg sm:text-xl font-semibold text-gray-800">
-            Two powerful ways to bring WhatsApp into your workflow.
+            Official WhatsApp Business API for inbox, templates, and automation.
           </p>
           <p className="mt-2 text-sm sm:text-base text-gray-500 font-medium leading-relaxed max-w-2xl">
-            Choose the setup that best fits your business today. You can always add more numbers
-            later.
+            Link your Meta Business account to start messaging customers at scale. WhatsApp
+            Business App coexistence is coming soon.
           </p>
         </div>
       </header>
@@ -84,7 +85,7 @@ export const WhatsappConnectionSelector: FC<WhatsappConnectionSelectorProps> = (
         </div>
       </div>
 
-      <ConnectionComparisonTable />
+      {!coexistenceComingSoon && <ConnectionComparisonTable />}
     </div>
   );
 };

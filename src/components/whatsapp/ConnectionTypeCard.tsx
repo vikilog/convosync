@@ -65,41 +65,52 @@ export const ConnectionTypeCard: FC<ConnectionTypeCardProps> = ({
   onGetStarted,
 }) => {
   const isApi = data.type === 'business_api';
+  const isComingSoon = data.comingSoon === true;
 
   return (
     <article
-      role="button"
-      tabIndex={0}
-      aria-pressed={selected}
-      onClick={() => onSelect(data.type)}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onSelect(data.type);
-        }
-      }}
+      role={isComingSoon ? undefined : 'button'}
+      tabIndex={isComingSoon ? undefined : 0}
+      aria-pressed={isComingSoon ? undefined : selected}
+      onClick={isComingSoon ? undefined : () => onSelect(data.type)}
+      onKeyDown={
+        isComingSoon
+          ? undefined
+          : (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onSelect(data.type);
+              }
+            }
+      }
       className={[
         'group relative flex flex-col min-h-[550px] h-full rounded-2xl bg-white text-left',
-        'border-2 transition-all duration-200 cursor-pointer overflow-hidden',
-        'shadow-[0_2px_8px_rgba(25,26,43,0.04),0_12px_32px_rgba(65,44,221,0.06)]',
-        'hover:-translate-y-1',
-        selected
-          ? 'border-primary ring-4 ring-primary/15 shadow-[0_8px_40px_rgba(65,44,221,0.18)]'
-          : 'border-slate-200 hover:border-primary/40 hover:shadow-[0_8px_28px_rgba(65,44,221,0.1)]',
-      ].join(' ')}
+        'border-2 transition-all duration-200 overflow-hidden',
+        isComingSoon
+          ? 'border-slate-200 opacity-80 cursor-default'
+          : 'cursor-pointer shadow-[0_2px_8px_rgba(25,26,43,0.04),0_12px_32px_rgba(65,44,221,0.06)] hover:-translate-y-1',
+        !isComingSoon &&
+          (selected
+            ? 'border-primary ring-4 ring-primary/15 shadow-[0_8px_40px_rgba(65,44,221,0.18)]'
+            : 'border-slate-200 hover:border-primary/40 hover:shadow-[0_8px_28px_rgba(65,44,221,0.1)]'),
+      ]
+        .filter(Boolean)
+        .join(' ')}
     >
       <span
         className={[
           'absolute top-5 right-5 z-10 px-3 py-1 rounded-full text-sm font-black uppercase tracking-wider',
-          isApi
-            ? 'bg-sky-50 text-primary border border-primary/20'
-            : 'bg-[#e6f7ec] text-[#006d2f] border border-[#5dfd8a]/30',
+          isComingSoon
+            ? 'bg-slate-100 text-slate-500 border border-slate-200'
+            : isApi
+              ? 'bg-sky-50 text-primary border border-primary/20'
+              : 'bg-[#e6f7ec] text-[#006d2f] border border-[#5dfd8a]/30',
         ].join(' ')}
       >
-        {data.badge}
+        {isComingSoon ? 'Coming soon' : data.badge}
       </span>
 
-      {selected && (
+      {selected && !isComingSoon && (
         <span className="absolute top-5 left-5 z-10 flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white shadow-lg">
           <Check className="w-4 h-4" strokeWidth={3} />
         </span>
@@ -156,7 +167,9 @@ export const ConnectionTypeCard: FC<ConnectionTypeCardProps> = ({
 
         <button
           type="button"
+          disabled={isComingSoon}
           onClick={(e) => {
+            if (isComingSoon) return;
             e.stopPropagation();
             onSelect(data.type);
             onGetStarted(data.type);
@@ -164,13 +177,15 @@ export const ConnectionTypeCard: FC<ConnectionTypeCardProps> = ({
           className={[
             'mt-6 w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl',
             'text-sm font-black transition-all',
-            selected
-              ? 'bg-primary hover:bg-primary-hover text-white shadow-lg shadow-primary/25'
-              : 'bg-gray-900 hover:bg-gray-950 text-white shadow-md',
+            isComingSoon
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : selected
+                ? 'bg-channel-green hover:bg-[#20bd5a] text-white shadow-lg shadow-primary/25'
+                : 'bg-gray-900 hover:bg-gray-950 text-white shadow-md',
           ].join(' ')}
         >
-          {data.ctaLabel}
-          <ArrowRight className="w-4 h-4" />
+          {isComingSoon ? 'Coming soon' : data.ctaLabel}
+          {!isComingSoon && <ArrowRight className="w-4 h-4" />}
         </button>
       </div>
 

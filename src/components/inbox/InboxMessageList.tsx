@@ -19,6 +19,8 @@ type Props = {
   messageEndRef: React.RefObject<HTMLDivElement | null>;
 };
 
+const WA_DELETED_MESSAGE = 'This message was deleted';
+
 const MessageBubble: React.FC<{ message: ChatMessage; channel: Channel }> = ({
   message,
   channel,
@@ -27,18 +29,26 @@ const MessageBubble: React.FC<{ message: ChatMessage; channel: Channel }> = ({
   const isWhatsApp = channel === 'whatsapp';
   const isInstagram = channel === 'instagram';
   const time = formatMessageClock(message.createdAt);
+  const isDeleted =
+    message.revoked || message.content === WA_DELETED_MESSAGE;
 
   const isJourneyMessage = message.senderName === 'Journey' && !isContact;
   const messageType = message.type ?? 'text';
   const isRichMessage =
-    messageType !== 'text' && messageType !== 'template';
+    !isDeleted && messageType !== 'text' && messageType !== 'template';
 
+  // ✓ sent · ✓✓ delivered · blue ✓✓ read (WhatsApp semantics; ack values map to status)
   const deliveryStatusIcon = !isContact ? (
     message.status === 'sending' ? (
       <Loader2 className="w-[14px] h-[14px] animate-spin" strokeWidth={2.5} />
     ) : message.status === 'read' ? (
       <CheckCheck
         className={`w-[14px] h-[14px] ${isWhatsApp ? 'text-[#99d9ff]' : 'text-white/90'}`}
+        strokeWidth={2.5}
+      />
+    ) : message.status === 'delivered' ? (
+      <CheckCheck
+        className={`w-[14px] h-[14px] ${isWhatsApp ? '' : 'text-white/90'}`}
         strokeWidth={2.5}
       />
     ) : (
@@ -95,17 +105,19 @@ const MessageBubble: React.FC<{ message: ChatMessage; channel: Channel }> = ({
         }`}
       >
         <div
-          className={`relative px-2.5 pt-1.5 pb-1 text-sm leading-[19px] text-[#111b21] whitespace-pre-wrap break-words ${bubbleBase}`}
+          className={`relative px-2.5 pt-1.5 pb-1 text-sm leading-[19px] whitespace-pre-wrap break-words ${bubbleBase}`}
         >
-          <div className="pr-14">{message.content}</div>
-          {isJourneyMessage && (
+          <div className={`pr-14 ${isDeleted ? 'italic text-[#667781]' : 'text-[#111b21]'}`}>
+            {isDeleted ? WA_DELETED_MESSAGE : message.content}
+          </div>
+          {isJourneyMessage && !isDeleted && (
             <p className="text-xs text-[#667781] font-medium mt-1 leading-tight">
               Automated · Journey
             </p>
           )}
           <span className="absolute bottom-1 right-2 flex items-center gap-0.5 text-meta text-[#667781] leading-none">
             {time}
-            {deliveryStatusIcon}
+            {!isDeleted ? deliveryStatusIcon : null}
           </span>
         </div>
       </div>
@@ -117,7 +129,7 @@ const MessageBubble: React.FC<{ message: ChatMessage; channel: Channel }> = ({
       ? 'bg-gradient-to-br from-[#833AB4] to-[#E1306C] border-transparent text-white chat-bubble-out'
       : channel === 'messenger'
         ? 'bg-[#0084ff] border-[#0084ff] text-white chat-bubble-out'
-        : 'bg-sky-600 border-sky-600 text-white chat-bubble-out';
+        : 'bg-channel-green border-channel-green text-white chat-bubble-out';
 
   return (
     <div

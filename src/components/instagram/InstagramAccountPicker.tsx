@@ -97,7 +97,7 @@ export function InstagramAccountPicker({
 
                 <span
                   className={`h-4 w-4 rounded-full border shrink-0 ${
-                    selected ? 'border-sky-600 bg-sky-600' : 'border-slate-300 bg-white'
+                    selected ? 'border-channel-green bg-channel-green' : 'border-slate-300 bg-white'
                   }`}
                   aria-hidden
                 />
@@ -117,7 +117,7 @@ export function InstagramAccountPicker({
         type="button"
         disabled={!canConfirm}
         onClick={onConfirm}
-        className="mt-5 w-full rounded-xl bg-[#1877F2] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#166fe5] disabled:cursor-not-allowed disabled:opacity-60"
+        className="mt-5 w-full rounded-xl bg-channel-green px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#20bd5a] disabled:cursor-not-allowed disabled:opacity-60"
       >
         {confirming ? 'Connecting…' : 'Connect selected account'}
       </button>

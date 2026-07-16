@@ -581,7 +581,7 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
                                         className={`flex-1 border rounded-lg py-2.5 px-3 text-sm outline-none focus:ring-2 focus:ring-[#0284c7]/20 ${
                                           showError
                                             ? 'border-red-400 focus:border-red-400'
-                                            : 'border-slate-200 focus:border-sky-600'
+                                            : 'border-slate-200 focus:border-channel-green'
                                         }`}
                                       />
                                       <button
@@ -685,7 +685,7 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
                       <React.Fragment key={node.id}>
                         <FlowConnector onAdd={() => addNode(node.type)} />
                         <FlowNodeCard
-                          headerClass="bg-sky-600"
+                          headerClass="bg-channel-green"
                           title={node.title}
                           body={<span className="text-gray-400">Configure in next step</span>}
                         />

@@ -27,7 +27,7 @@ export function hasWorkspacePermission(
 export function settingsSectionPermission(section: string): WorkspacePermission | null {
   if (section === 'profile') return null;
   if (section === 'users') return 'users';
-  if (['subscription', 'billing', 'recharge', 'invoices'].includes(section)) return 'billing';
+  if (['wallet', 'subscription', 'billing', 'recharge', 'invoices'].includes(section)) return 'billing';
   if (section.startsWith('contact-')) return 'contacts';
   if (['inbox-tags', 'canned-response', 'calling-tags'].includes(section)) return 'inbox';
   if (['ai-copilot', 'ai-knowledge', 'ai-provider'].includes(section)) return 'ai';
@@ -62,6 +62,7 @@ export function tabPermission(tab: string): WorkspacePermission | null {
     case 'reports':
       return 'analytics';
     case 'usage-cost':
+    case 'wallet':
       return 'billing';
     case 'settings':
       return null;
@@ -118,7 +119,6 @@ const NAV_TAB_ORDER = [
   'google-tools',
   'developers',
   'reports',
-  'usage-cost',
   'settings',
 ] as const;
 
@@ -146,9 +146,7 @@ const SETTINGS_SECTION_ORDER = [
   // 'security',
   // 'holidays',
   // 'notifications',
-  'subscription',
-  'billing',
-  // 'recharge',
+  'wallet',
   'invoices',
   // 'contact-attributes',
   // 'contact-tags',

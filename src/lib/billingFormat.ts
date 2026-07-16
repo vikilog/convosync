@@ -51,6 +51,7 @@ export function formatTransactionType(type: string): string {
     addon_ai_tokens: 'AI tokens',
     addon_campaigns: 'Campaigns',
     addon_emails: 'Email sends',
+    wallet_topup: 'ConvoCoins recharge',
   };
   return labels[type] ?? type.replace(/_/g, ' ');
 }

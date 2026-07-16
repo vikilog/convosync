@@ -205,7 +205,7 @@ export function BillingAddonsPanel({ addonCatalog, fx, onPurchased }: BillingAdd
       <div>
         <p className="text-sm font-semibold text-slate-900">Add-ons</p>
         <p className="mt-1 text-xs text-slate-500">
-          Increase limits beyond your plan. Platform email is delivered via Resend at $1 per 1,000
+          Increase limits beyond your plan. Platform email is delivered via AWS SES at $1 per 1,000
           sends.
         </p>
         {fx && (

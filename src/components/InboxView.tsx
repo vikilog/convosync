@@ -12,9 +12,7 @@ import {
   Send,
   Paperclip,
   User,
-  LayoutGrid,
   Facebook,
-  RefreshCw,
   Plus,
   Loader2,
   ArrowLeft,
@@ -25,11 +23,9 @@ import { api, getUserId, getUserName } from '../lib/api';
 import { useWorkspaceAccess } from '../hooks/useWorkspaceAccess';
 import {
   isConversationInInboxScope,
-  isInboxChannelAllowed,
-  type InboxChannel,
-  type InboxScope,
 } from '../lib/inboxScope';
 import { mapContactFromApi, mapMessageFromApi } from '../lib/mappers';
+import { dedupeInboxConversations, dedupeInboxThreads } from '../lib/inboxDedupe';
 import { groupMessagesByDate } from '../lib/formatDates';
 import { getSocket } from '../lib/socket';
 import { setActiveInboxConversationId } from '../lib/inboxFocus';
@@ -107,50 +103,24 @@ function assigneeLabelFromValue(
   return 'Unassigned';
 }
 
-type InboxThread = Contact & { conversationId: string };
+type InboxThread = Contact & {
+  conversationId: string;
+};
 
-function inboxThreadKey(conv: Record<string, unknown>): string {
-  const contact = conv.contact as Record<string, unknown> | undefined;
-  const contactId = contact?.id ? String(contact.id) : '';
-  if (!contactId) return '';
-  const accountId = conv.channelAccountId ? String(conv.channelAccountId) : '';
-  return accountId ? `${contactId}:${accountId}` : `${contactId}:${String(conv.id)}`;
+function mapInboxThread(
+  contact: Record<string, unknown>,
+  conv: Record<string, unknown>,
+  conversationId: string
+): InboxThread {
+  return {
+    ...mapContactFromApi(contact, conv),
+    conversationId,
+  };
 }
 
-function dedupeInboxConversations(
-  convs: Array<Record<string, unknown>>
-): Array<Record<string, unknown>> {
-  const byKey = new Map<string, Record<string, unknown>>();
-
-  for (const conv of convs) {
-    const key = inboxThreadKey(conv);
-    if (!key) continue;
-
-    const existing = byKey.get(key);
-    if (!existing) {
-      byKey.set(key, conv);
-      continue;
-    }
-
-    const rank = (status: unknown) => (String(status) === 'resolved' ? 0 : 1);
-    const rankExisting = rank(existing.status);
-    const rankCurrent = rank(conv.status);
-    if (rankCurrent > rankExisting) {
-      byKey.set(key, conv);
-      continue;
-    }
-    if (rankCurrent < rankExisting) continue;
-
-    const time = (row: Record<string, unknown>) => {
-      const parsed = Date.parse(String(row.lastMessageAt ?? ''));
-      return Number.isNaN(parsed) ? 0 : parsed;
-    };
-    if (time(conv) >= time(existing)) {
-      byKey.set(key, conv);
-    }
-  }
-
-  return Array.from(byKey.values());
+function mergeInboxThreads(prev: InboxThread[], incoming: InboxThread): InboxThread[] {
+  const withoutDup = prev.filter((t) => t.conversationId !== incoming.conversationId);
+  return dedupeInboxThreads([incoming, ...withoutDup]);
 }
 
 function whatsappLineLabel(
@@ -207,6 +177,15 @@ function dedupeChatMessages(messages: ChatMessage[]): ChatMessage[] {
   }
 
   return result;
+}
+
+function normalizeMessagesResponse(res: unknown): {
+  messages: Record<string, unknown>[];
+  hasMore: boolean;
+} {
+  if (Array.isArray(res)) return { messages: res, hasMore: false };
+  const obj = res as { messages?: Record<string, unknown>[]; hasMore?: boolean };
+  return { messages: obj.messages ?? [], hasMore: Boolean(obj.hasMore) };
 }
 
 function mediaKindFromFile(file: File): ChatMessageType {
@@ -294,8 +273,6 @@ function InstagramIcon({ className }: { className?: string }) {
   );
 }
 
-type InboxChannelFilter = 'all' | 'whatsapp' | 'instagram' | 'messenger';
-
 interface WhatsAppInboxAccount {
   phoneNumberId: string;
   phoneNumber?: string;
@@ -303,60 +280,8 @@ interface WhatsAppInboxAccount {
   label?: string;
 }
 
-type InboxChannelButton = {
-  id: InboxChannelFilter;
-  label: string;
-  Icon: React.FC<{ className?: string }>;
-  accountLabel: string | null;
-};
-
 function whatsappAccountLabel(acc: WhatsAppInboxAccount): string {
   return acc.label || acc.displayName || acc.phoneNumber || 'WhatsApp';
-}
-
-function buildInboxChannelButtons(
-  whatsappAccounts: WhatsAppInboxAccount[],
-  inboxScope: InboxScope
-): InboxChannelButton[] {
-  const primary = whatsappAccounts[0];
-  const buttons: InboxChannelButton[] = [
-    {
-      id: 'all',
-      label: 'All channels',
-      Icon: LayoutGrid,
-      accountLabel: null,
-    },
-    {
-      id: 'whatsapp',
-      label: 'WhatsApp',
-      Icon: WhatsAppIcon,
-      accountLabel:
-        whatsappAccounts.length === 1 && primary ? whatsappAccountLabel(primary) : null,
-    },
-    {
-      id: 'instagram',
-      label: 'Instagram',
-      Icon: InstagramIcon,
-      accountLabel: null,
-    },
-    {
-      id: 'messenger',
-      label: 'Messenger',
-      Icon: Facebook,
-      accountLabel: null,
-    },
-  ];
-
-  if (inboxScope.mode === 'all') return buttons;
-
-  const allowedChannels = (['whatsapp', 'instagram', 'messenger'] as InboxChannel[]).filter(
-    (ch) => isInboxChannelAllowed(ch, inboxScope)
-  );
-
-  return buttons.filter((btn) => {
-    if (btn.id === 'all') return allowedChannels.length > 1;
-    return isInboxChannelAllowed(btn.id as InboxChannel, inboxScope);
-  });
 }
 
 function contactChannel(contact: Contact): 'whatsapp' | 'instagram' | 'messenger' {
@@ -398,14 +323,9 @@ export const InboxView: React.FC = () => {
   const [publishedJourneys, setPublishedJourneys] = useState<JourneyOption[]>([]);
 
   const [filterTab, setFilterTab] = useState<'all' | 'mine' | 'unassigned'>('all');
-  const [channelFilter, setChannelFilter] = useState<InboxChannelFilter>('all');
   const [whatsappAccounts, setWhatsappAccounts] = useState<WhatsAppInboxAccount[]>([]);
   const [instagramInboxLabel, setInstagramInboxLabel] = useState<string | null>(null);
   const [messengerInboxLabel, setMessengerInboxLabel] = useState<string | null>(null);
-  const [messengerSyncing, setMessengerSyncing] = useState(false);
-  const [messengerSyncHint, setMessengerSyncHint] = useState<string | null>(null);
-  const [instagramSyncing, setInstagramSyncing] = useState(false);
-  const [instagramSyncHint, setInstagramSyncHint] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   const [messageInput, setMessageInput] = useState<string>('');
@@ -425,24 +345,11 @@ export const InboxView: React.FC = () => {
   const [auditsOpen, setAuditsOpen] = useState(false);
   const [sendingMedia, setSendingMedia] = useState(false);
   const [composerActionsOpen, setComposerActionsOpen] = useState(false);
-
   const selectedConversationIdRef = useRef(selectedConversationId);
   selectedConversationIdRef.current = selectedConversationId;
 
   const inboxThreadsRef = useRef(inboxThreads);
   inboxThreadsRef.current = inboxThreads;
-
-  useEffect(() => {
-    if (inboxScope.mode === 'all') return;
-    const allowed = (['whatsapp', 'instagram', 'messenger'] as InboxChannel[]).filter((ch) =>
-      isInboxChannelAllowed(ch, inboxScope)
-    );
-    if (channelFilter !== 'all' && !isInboxChannelAllowed(channelFilter as InboxChannel, inboxScope)) {
-      setChannelFilter(allowed.length === 1 ? allowed[0] : allowed[0] ?? 'all');
-    } else if (channelFilter === 'all' && allowed.length === 1) {
-      setChannelFilter(allowed[0]);
-    }
-  }, [channelFilter, inboxScope]);
 
   const filteredThreads = inboxThreads.filter((thread) => {
     const handle = contactDisplayHandle(thread);
@@ -451,18 +358,17 @@ export const InboxView: React.FC = () => {
       thread.phone.includes(searchQuery) ||
       handle.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesChannel =
-      channelFilter === 'all' || contactChannel(thread) === channelFilter;
-
     const matchesScope = isConversationInInboxScope(
-      { channel: contactChannel(thread), channelAccountId: thread.channelAccountId },
+      {
+        channel: contactChannel(thread),
+        channelAccountId: thread.channelAccountId,
+      },
       inboxScope
     );
 
     if (filterTab === 'mine') {
       return (
         matchesSearch &&
-        matchesChannel &&
         matchesScope &&
         assignedToByConversationId[thread.conversationId] === `user:${currentUserId}`
       );
@@ -470,12 +376,11 @@ export const InboxView: React.FC = () => {
     if (filterTab === 'unassigned') {
       return (
         matchesSearch &&
-        matchesChannel &&
         matchesScope &&
         !assignedToByConversationId[thread.conversationId]
       );
     }
-    return matchesSearch && matchesChannel && matchesScope;
+    return matchesSearch && matchesScope;
   });
 
   const selectedThread =
@@ -531,10 +436,7 @@ export const InboxView: React.FC = () => {
     }
     setLoadError(null);
     try {
-      const channelParam =
-        channelFilter === 'all' ? undefined : { channel: channelFilter };
-
-      const convsRaw = (await api.getConversations(channelParam)) as Array<Record<string, unknown>>;
+      const convsRaw = (await api.getConversations()) as Array<Record<string, unknown>>;
       const convs = dedupeInboxConversations(convsRaw);
 
       const [team, me, igAccounts, waAccounts, fbAccounts, agentsRaw, journeysRaw] =
@@ -636,28 +538,32 @@ export const InboxView: React.FC = () => {
         const conversationId = String(conv.id);
         assignMap[conversationId] = encodeAssigneeFromConv(conv);
         const isActive = conversationId === activeConversationId;
-        mapped.push({
-          ...mapContactFromApi(contact, {
-            ...conv,
-            unreadCount: isActive ? 0 : conv.unreadCount,
-          }),
-          conversationId,
-        });
+        mapped.push(
+          mapInboxThread(
+            contact,
+            {
+              ...conv,
+              unreadCount: isActive ? 0 : conv.unreadCount,
+            },
+            conversationId
+          )
+        );
       });
 
-      setInboxThreads(mapped);
+      const deduped = dedupeInboxThreads(mapped);
+      setInboxThreads(deduped);
       setAssignedToByConversationId(assignMap);
 
       setSelectedConversationId((prev) => {
         const nextSelected =
-          prev && mapped.some((t) => t.conversationId === prev)
+          prev && deduped.some((t) => t.conversationId === prev)
             ? prev
-            : mapped[0]?.conversationId ?? '';
-        dispatchInboxUnreadTotal(sumUnreadForNav(mapped, nextSelected));
+            : deduped[0]?.conversationId ?? '';
+        dispatchInboxUnreadTotal(sumUnreadForNav(deduped, nextSelected));
         return nextSelected;
       });
 
-      return { mapped };
+      return { mapped: deduped };
     } catch (err) {
       setLoadError(err instanceof Error ? err.message : 'Failed to load inbox');
       return null;
@@ -666,54 +572,21 @@ export const InboxView: React.FC = () => {
         setLoading(false);
       }
     }
-  }, [channelFilter, sumUnreadForNav]);
+  }, [sumUnreadForNav]);
 
   const ingestConversation = useCallback(async (conversationId: string) => {
     try {
       const conv = (await api.getConversation(conversationId)) as Record<string, unknown>;
       const contact = conv.contact as Record<string, unknown>;
-      const mapped: InboxThread = {
-        ...mapContactFromApi(contact, conv),
-        conversationId,
-      };
+      const mapped = mapInboxThread(contact, conv, conversationId);
       const assignee = encodeAssigneeFromConv(conv);
 
       setAssignedToByConversationId((prev) => ({ ...prev, [conversationId]: assignee }));
-      setInboxThreads((prev) => {
-        const idx = prev.findIndex((t) => t.conversationId === conversationId);
-        if (idx === -1) return [mapped, ...prev];
-        const next = [...prev];
-        next[idx] = mapped;
-        return next;
-      });
+      setInboxThreads((prev) => mergeInboxThreads(prev, mapped));
       return conversationId;
     } catch (err) {
       console.error(err);
       return null;
-    }
-  }, []);
-
-  const handleMessengerSync = useCallback(async () => {
-    setMessengerSyncHint(null);
-    setMessengerSyncing(true);
-    try {
-      const res = await api.syncMessengerInbox();
-      setMessengerSyncHint(res.message || 'Syncing Messenger chats from Facebook…');
-    } catch (err) {
-      setMessengerSyncHint(err instanceof Error ? err.message : 'Messenger sync failed');
-      setMessengerSyncing(false);
-    }
-  }, []);
-
-  const handleInstagramSync = useCallback(async () => {
-    setInstagramSyncHint(null);
-    setInstagramSyncing(true);
-    try {
-      const res = await api.syncInstagramInbox();
-      setInstagramSyncHint(res.message || 'Syncing Instagram DMs from Meta…');
-    } catch (err) {
-      setInstagramSyncHint(err instanceof Error ? err.message : 'Instagram sync failed');
-      setInstagramSyncing(false);
     }
   }, []);
 
@@ -786,31 +659,20 @@ export const InboxView: React.FC = () => {
 
     api
       .getConversation(selectedConversationId)
-      .then((conv) => {
+      .then(async (conv) => {
         const contact = conv.contact as Record<string, unknown>;
-        const mapped: InboxThread = {
-          ...mapContactFromApi(contact, conv as Record<string, unknown>),
-          conversationId: selectedConversationId,
-        };
+        const mapped = mapInboxThread(contact, conv as Record<string, unknown>, selectedConversationId);
         setInboxThreads((prev) =>
-          prev.map((t) => (t.conversationId === selectedConversationId ? mapped : t))
+          dedupeInboxThreads(
+            prev.map((t) => (t.conversationId === selectedConversationId ? mapped : t))
+          )
         );
-      })
-      .catch((err) => {
-        const message = err instanceof Error ? err.message : String(err);
-        if (message.includes('404') || message.toLowerCase().includes('not found')) {
-          clearStaleSelection();
-          return;
-        }
-        console.error(err);
-      });
 
-    api
-      .getMessages(selectedConversationId)
-      .then((msgs: Record<string, unknown>[]) => {
+        const res = await api.getMessages(selectedConversationId);
+        const { messages } = normalizeMessagesResponse(res);
         setChatHistories((prev) => ({
           ...prev,
-          [selectedConversationId]: msgs.map((m) => mapMessageFromApi(m)),
+          [selectedConversationId]: messages.map((m) => mapMessageFromApi(m)),
         }));
         setInboxThreads((prev) =>
           prev.map((t) =>
@@ -885,8 +747,13 @@ export const InboxView: React.FC = () => {
       }
     };
 
-    const onContactUpdated = (payload: { contactId: string; tags?: string[]; name?: string }) => {
-      const { contactId, tags, name } = payload;
+    const onContactUpdated = (payload: {
+      contactId: string;
+      tags?: string[];
+      name?: string;
+      avatar?: string;
+    }) => {
+      const { contactId, tags, name, avatar } = payload;
       if (!contactId) return;
       setInboxThreads((prev) =>
         prev.map((t) =>
@@ -895,6 +762,7 @@ export const InboxView: React.FC = () => {
                 ...t,
                 ...(tags && { tags }),
                 ...(name && { name }),
+                ...(avatar && { avatar }),
               }
             : t
         )
@@ -915,20 +783,17 @@ export const InboxView: React.FC = () => {
         const conv = (await api.getConversation(conversationId)) as Record<string, unknown>;
         const isSelected = conversationId === selectedConversationIdRef.current;
         const contact = conv.contact as Record<string, unknown>;
-        const mapped: InboxThread = {
-          ...mapContactFromApi(contact, {
+        const mapped = mapInboxThread(
+          contact,
+          {
             ...conv,
             unreadCount: isSelected ? 0 : conv.unreadCount,
-          }),
-          conversationId,
-        };
+          },
+          conversationId
+        );
 
         setInboxThreads((prev) => {
-          const idx = prev.findIndex((t) => t.conversationId === conversationId);
-          const next =
-            idx === -1
-              ? [mapped, ...prev]
-              : prev.map((t) => (t.conversationId === conversationId ? mapped : t));
+          const next = mergeInboxThreads(prev, mapped);
           dispatchInboxUnreadTotal(
             sumUnreadForNav(next, selectedConversationIdRef.current)
           );
@@ -943,9 +808,32 @@ export const InboxView: React.FC = () => {
       }
     };
 
+    // Live delivery/read ticks (Meta status webhooks)
+    const onMessageStatus = (payload: { messageId: string; status: string }) => {
+      const { messageId, status } = payload;
+      if (!messageId || !status) return;
+      setChatHistories((prev) => {
+        let changed = false;
+        const next: Record<string, ChatMessage[]> = {};
+        for (const convId of Object.keys(prev)) {
+          const msgs = prev[convId] ?? [];
+          if (!msgs.some((m) => m.id === messageId)) {
+            next[convId] = msgs;
+            continue;
+          }
+          changed = true;
+          next[convId] = msgs.map((m) =>
+            m.id === messageId ? { ...m, status: status as ChatMessage['status'] } : m
+          );
+        }
+        return changed ? next : prev;
+      });
+    };
+
     socket.on('new_message', onNewMessage);
     socket.on('conversation_updated', onConversationUpdated);
     socket.on('contact_updated', onContactUpdated);
+    socket.on('message_status', onMessageStatus);
 
     const onMessengerSyncProgress = (payload: { phase?: string; message?: string }) => {
       if (payload.phase === 'completed') {
@@ -975,6 +863,7 @@ export const InboxView: React.FC = () => {
       socket.off('new_message', onNewMessage);
       socket.off('conversation_updated', onConversationUpdated);
       socket.off('contact_updated', onContactUpdated);
+      socket.off('message_status', onMessageStatus);
       socket.off('messenger_sync_progress', onMessengerSyncProgress);
       socket.off('instagram_sync_progress', onInstagramSyncProgress);
     };
@@ -1209,21 +1098,11 @@ export const InboxView: React.FC = () => {
       }
       const contact = conv.contact as Record<string, unknown>;
       const conversationId = String(conv.id);
-      const mapped: InboxThread = {
-        ...mapContactFromApi(contact, conv),
-        conversationId,
-      };
+      const mapped = mapInboxThread(contact, conv, conversationId);
       const assignee = encodeAssigneeFromConv(conv);
 
-      setChannelFilter('whatsapp');
       setAssignedToByConversationId((prev) => ({ ...prev, [conversationId]: assignee }));
-      setInboxThreads((prev) => {
-        const idx = prev.findIndex((t) => t.conversationId === conversationId);
-        if (idx === -1) return [mapped, ...prev];
-        const next = [...prev];
-        next[idx] = mapped;
-        return next;
-      });
+      setInboxThreads((prev) => mergeInboxThreads(prev, mapped));
       selectThread(conversationId);
       setNewChatOpen(false);
       setNewContactOpen(false);
@@ -1345,21 +1224,11 @@ export const InboxView: React.FC = () => {
     ? 'Loading conversations…'
     : loadError
       ? loadError
-      : channelFilter === 'instagram' && !instagramInboxLabel
-        ? 'Connect Instagram in Integrations to receive DMs here.'
-        : channelFilter === 'messenger' && !messengerInboxLabel
-          ? 'Enable Messenger in Integrations (uses your Instagram Page token).'
-          : channelFilter === 'whatsapp' && whatsappAccounts.length === 0
-          ? 'Connect WhatsApp in Integrations to receive messages here.'
-        : channelFilter === 'instagram'
-          ? 'No Instagram DMs yet. New messages will appear here automatically.'
-          : channelFilter === 'messenger'
-            ? 'No Messenger chats yet. New messages will appear here automatically.'
-          : filterTab === 'mine'
-            ? `No conversations assigned to ${currentUserName || 'you'}.`
-            : filterTab === 'unassigned'
-              ? 'No unassigned conversations.'
-              : 'No conversations match your search.';
+      : filterTab === 'mine'
+        ? `No conversations assigned to ${currentUserName || 'you'}.`
+        : filterTab === 'unassigned'
+          ? 'No unassigned conversations.'
+          : 'No conversations match your search.';
 
   return (
     <div className="flex flex-row h-full min-h-0 overflow-hidden bg-slate-50 border-t border-slate-200 selection:bg-sky-50">
@@ -1381,70 +1250,24 @@ export const InboxView: React.FC = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search chats..."
-                className="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 pl-9 pr-3 text-sm focus:ring-2 focus:ring-sky-200 focus:border-sky-500 outline-none focus:outline-none"
+                className="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 pl-9 pr-3 text-sm focus:ring-2 focus:ring-emerald-100 focus:border-channel-green outline-none focus:outline-none"
               />
             </div>
             <select
               value={filterTab}
               onChange={(e) => setFilterTab(e.target.value as 'all' | 'mine' | 'unassigned')}
-              className="shrink-0 bg-slate-50 border border-slate-200 rounded-lg py-2 pl-2 pr-7 text-sm font-bold text-gray-700 focus:ring-2 focus:ring-sky-200 focus:border-sky-500 outline-none cursor-pointer"
+              className="shrink-0 bg-slate-50 border border-slate-200 rounded-lg py-2 pl-2 pr-7 text-sm font-bold text-gray-700 focus:ring-2 focus:ring-emerald-100 focus:border-channel-green outline-none cursor-pointer"
               aria-label="Filter conversations"
             >
               <option value="all">All</option>
               <option value="mine">Mine</option>
               <option value="unassigned">Unassigned</option>
             </select>
-          </div>
-
-          <div className="flex gap-1.5 flex-wrap items-center">
-            {buildInboxChannelButtons(whatsappAccounts, inboxScope).map(({ id, label, Icon, accountLabel }) => {
-              const isActive = channelFilter === id;
-              const channelAccountLabel =
-                id === 'instagram'
-                  ? instagramInboxLabel
-                  : id === 'messenger'
-                    ? messengerInboxLabel
-                    : accountLabel;
-              const showChannelAccount = isActive && channelAccountLabel && id !== 'all';
-
-              return (
-                <button
-                  key={id}
-                  type="button"
-                  title={label}
-                  aria-label={
-                    showChannelAccount ? `${label}: ${channelAccountLabel}` : label
-                  }
-                  aria-pressed={isActive}
-                  onClick={() => setChannelFilter(id)}
-                  className={`rounded-full border transition-all inline-flex items-center gap-1.5 ${
-                    showChannelAccount ? 'px-2.5 py-1.5' : 'p-2'
-                  } ${
-                    isActive
-                      ? id === 'instagram'
-                        ? 'bg-[#fce8f0] text-[#C13584] border-[#E1306C]/30'
-                        : id === 'messenger'
-                          ? 'bg-[#e8f4ff] text-[#1877F2] border-[#1877F2]/30'
-                        : id === 'whatsapp'
-                          ? 'bg-[#e6f7ec] text-channel-green border-channel-green/20'
-                          : 'bg-sky-50 text-sky-600 border-sky-200'
-                      : 'bg-white text-slate-400 border-slate-200 hover:text-slate-600'
-                  }`}
-                >
-                  <Icon className="w-4 h-4 shrink-0" />
-                  {showChannelAccount && channelAccountLabel && (
-                    <span className="text-sm font-bold truncate max-w-[140px]">
-                      {channelAccountLabel}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
             {whatsappAccounts.length > 0 && (
               <button
                 type="button"
                 onClick={() => setNewChatOpen(true)}
-                className="rounded-full border p-2 bg-[#128C7E] hover:bg-[#0f7a6e] text-white border-[#128C7E]/30 transition-all shrink-0 shadow-sm"
+                className="rounded-lg border p-2 bg-[#128C7E] hover:bg-[#0f7a6e] text-white border-[#128C7E]/30 transition-all shrink-0 shadow-sm"
                 title="New WhatsApp chat"
                 aria-label="New WhatsApp chat"
               >
@@ -1452,40 +1275,6 @@ export const InboxView: React.FC = () => {
               </button>
             )}
           </div>
-
-          {messengerInboxLabel && channelFilter === 'messenger' && (
-            <div className="flex flex-col gap-1.5">
-              <button
-                type="button"
-                onClick={() => void handleMessengerSync()}
-                disabled={messengerSyncing}
-                className="inline-flex items-center justify-center gap-1.5 w-full py-1.5 rounded-lg text-sm font-black text-[#1877F2] bg-[#e8f4ff] border border-[#1877F2]/20 hover:bg-[#dbeafe] disabled:opacity-50 transition-colors"
-              >
-                <RefreshCw className={`w-3 h-3 ${messengerSyncing ? 'animate-spin' : ''}`} />
-                {messengerSyncing ? 'Syncing from Facebook…' : 'Sync Messenger chats'}
-              </button>
-              {messengerSyncHint && (
-                <p className="text-sm font-bold text-[#1877F2]/80 px-1">{messengerSyncHint}</p>
-              )}
-            </div>
-          )}
-
-          {instagramInboxLabel && channelFilter === 'instagram' && (
-            <div className="flex flex-col gap-1.5">
-              <button
-                type="button"
-                onClick={() => void handleInstagramSync()}
-                disabled={instagramSyncing}
-                className="inline-flex items-center justify-center gap-1.5 w-full py-1.5 rounded-lg text-sm font-black text-[#C13584] bg-[#fce8f0] border border-[#E1306C]/20 hover:bg-[#fad9e8] disabled:opacity-50 transition-colors"
-              >
-                <RefreshCw className={`w-3 h-3 ${instagramSyncing ? 'animate-spin' : ''}`} />
-                {instagramSyncing ? 'Syncing from Instagram…' : 'Sync Instagram chats'}
-              </button>
-              {instagramSyncHint && (
-                <p className="text-sm font-bold text-[#C13584]/80 px-1">{instagramSyncHint}</p>
-              )}
-            </div>
-          )}
         </div>
 
         <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
@@ -1525,25 +1314,36 @@ export const InboxView: React.FC = () => {
                   }}
                   className={`px-3 py-2.5 cursor-pointer transition-all border-l-3 text-left relative ${
                     isActive
-                      ? 'bg-slate-50 border-sky-600 shadow-[inset_2px_0_0_#0284c7]'
+                      ? 'bg-slate-50 border-channel-green shadow-[inset_2px_0_0_#0284c7]'
                       : 'border-transparent hover:bg-slate-50'
                   }`}
                 >
                   <div className="flex items-start gap-2 min-w-0">
-                    {thread.avatar ? (
-                      <img
-                        src={thread.avatar}
-                        alt={thread.name}
-                        className="w-9 h-9 rounded-full border border-gray-100 shrink-0"
-                      />
-                    ) : (
-                      <div className="w-9 h-9 rounded-full bg-sky-50 text-sky-600 font-black border border-border-subtle flex items-center justify-center text-xs shrink-0">
+                    <div className="relative shrink-0">
+                      {thread.avatar ? (
+                        <img
+                          src={thread.avatar}
+                          alt={thread.name}
+                          className="w-9 h-9 rounded-full border border-gray-100 object-cover bg-slate-50"
+                          referrerPolicy="no-referrer"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                            const fallback = e.currentTarget.nextElementSibling as HTMLElement | null;
+                            if (fallback) fallback.classList.remove('hidden');
+                          }}
+                        />
+                      ) : null}
+                      <div
+                        className={`w-9 h-9 rounded-full bg-sky-50 text-sky-600 font-black border border-border-subtle flex items-center justify-center text-xs ${
+                          thread.avatar ? 'hidden' : ''
+                        }`}
+                      >
                         {thread.name
                           .split(' ')
                           .map((n) => n[0])
                           .join('')}
                       </div>
-                    )}
+                    </div>
 
                     <div className="overflow-hidden min-w-0 flex-1 leading-tight">
                       <div className="flex items-center justify-between gap-1 min-w-0">
@@ -1584,7 +1384,7 @@ export const InboxView: React.FC = () => {
                           {thread.lastMessage}
                         </p>
                         {thread.unreadCount > 0 && !isActive && (
-                          <span className="bg-sky-600 text-white text-badge min-w-[18px] h-[18px] px-1 rounded-full font-black flex items-center justify-center leading-none shrink-0">
+                          <span className="bg-channel-green text-white text-badge min-w-[18px] h-[18px] px-1 rounded-full font-black flex items-center justify-center leading-none shrink-0">
                             {thread.unreadCount > 99 ? '99+' : thread.unreadCount}
                           </span>
                         )}
@@ -1626,20 +1426,29 @@ export const InboxView: React.FC = () => {
                     <img
                       src={selectedContact.avatar}
                       alt={selectedContact.name}
-                      className="w-10 h-10 rounded-full"
+                      className="w-10 h-10 rounded-full object-cover bg-slate-50"
+                      referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        const fallback = e.currentTarget.nextElementSibling as HTMLElement | null;
+                        if (fallback) fallback.classList.remove('hidden');
+                      }}
                     />
-                  ) : (
-                    <div className="w-10 h-10 rounded-full bg-sky-50 text-sky-600 font-black flex items-center justify-center text-xs">
-                      {selectedContact.name
-                        .split(' ')
-                        .map((n) => n[0])
-                        .join('')}
-                    </div>
-                  )}
+                  ) : null}
+                  <div
+                    className={`w-10 h-10 rounded-full bg-sky-50 text-sky-600 font-black flex items-center justify-center text-xs ${
+                      selectedContact.avatar ? 'hidden' : ''
+                    }`}
+                  >
+                    {selectedContact.name
+                      .split(' ')
+                      .map((n) => n[0])
+                      .join('')}
+                  </div>
                   <span className="absolute bottom-0 right-0 w-3 h-3 bg-secondary-fixed border-2 border-white rounded-full translate-x-1 translate-y-1" />
                 </div>
                 <div className="ml-3 min-w-0">
-                  <h3 className="font-bold text-gray-950 text-sm leading-tight truncate">
+                  <h3 className="font-bold text-gray-950 text-sm leading-tight truncate flex items-center gap-1.5">
                     {selectedContact.name}
                   </h3>
                   {selectedThread &&
@@ -1788,7 +1597,7 @@ export const InboxView: React.FC = () => {
               <div
                 className={`flex items-center min-h-[44px] gap-0.5 rounded-xl border bg-white px-1 transition-all ${
                   sendingMedia
-                    ? 'border-sky-300 ring-2 ring-sky-100'
+                    ? 'border-sky-300 ring-2 ring-emerald-100'
                     : 'border-slate-200 focus-within:ring-2 focus-within:ring-sky-200 focus-within:border-sky-500'
                 }`}
               >
@@ -1927,7 +1736,7 @@ export const InboxView: React.FC = () => {
                     type="button"
                     onClick={handleSendMessage}
                     disabled={(!messageInput.trim() && !pendingComposerFile) || sendingMedia}
-                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-sky-600 hover:bg-sky-700 disabled:opacity-40 text-white transition-all shadow-sm shadow-sky-200 ml-0.5"
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-channel-green hover:bg-[#20bd5a] disabled:opacity-40 text-white transition-all shadow-sm shadow-emerald-600/15 ml-0.5"
                     aria-label={sendingMedia ? 'Sending' : 'Send message'}
                   >
                     {sendingMedia ? (

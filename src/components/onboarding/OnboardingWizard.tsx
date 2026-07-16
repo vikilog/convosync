@@ -577,7 +577,7 @@ export function OnboardingWizard() {
                 type="button"
                 onClick={() => void handleNext()}
                 disabled={saving}
-                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-white hover:bg-primary-hover disabled:opacity-60"
+                className="inline-flex items-center justify-center gap-1.5 rounded-full bg-channel-green px-5 py-2.5 text-sm font-bold text-white hover:bg-[#20bd5a] disabled:opacity-60"
               >
                 {saving ? 'Saving…' : 'Continue'}
                 <ArrowRight className="h-4 w-4" />
@@ -587,7 +587,7 @@ export function OnboardingWizard() {
                 type="button"
                 onClick={() => void handleComplete()}
                 disabled={saving}
-                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-white hover:bg-primary-hover disabled:opacity-60"
+                className="inline-flex items-center justify-center gap-1.5 rounded-full bg-channel-green px-5 py-2.5 text-sm font-bold text-white hover:bg-[#20bd5a] disabled:opacity-60"
               >
                 {saving ? 'Finishing…' : 'Go to dashboard'}
               </button>

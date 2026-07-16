@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import {
   CAMPAIGN_CHANNELS,
+  SELECTABLE_CAMPAIGN_CHANNELS,
   DEFAULT_INSTIGRAM_CONFIG,
   CampaignChannel,
   CampaignRecord,
@@ -394,7 +395,7 @@ const CampaignListPanel: React.FC<{
           <button
             type="button"
             onClick={onCreate}
-            className="px-3 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-meta font-bold flex items-center gap-1.5 shadow-sm shadow-[#0284c7]/20"
+            className="px-3 py-2 bg-channel-green hover:bg-[#20bd5a] text-white rounded-xl text-meta font-bold flex items-center gap-1.5 shadow-sm shadow-[#0284c7]/20"
           >
             <Plus className="w-3.5 h-3.5" /> Create campaign
           </button>
@@ -426,7 +427,7 @@ const CampaignListPanel: React.FC<{
             <button
               type="button"
               onClick={onCreate}
-              className="mt-4 px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-sm font-bold inline-flex items-center gap-1.5"
+              className="mt-4 px-4 py-2 bg-channel-green hover:bg-[#20bd5a] text-white rounded-xl text-sm font-bold inline-flex items-center gap-1.5"
             >
               <Plus className="w-3.5 h-3.5" /> Create campaign
             </button>
@@ -815,7 +816,7 @@ const CampaignsWorkspace: React.FC = () => {
       const rate = activeTemplate?.category === 'Marketing' ? 0.0125 : 0.0084;
       return `$${(audienceCount() * rate).toFixed(2)} USD`;
     }
-    if (selectedChannel === 'email') return `₹${(audienceCount() * 0.02).toFixed(0)} (Resend API)`;
+    if (selectedChannel === 'email') return `₹${(audienceCount() * 0.02).toFixed(0)} (AWS SES)`;
     if (selectedChannel === 'instagram') return 'Free (Meta DM API)';
     return '—';
   };
@@ -957,9 +958,9 @@ const CampaignsWorkspace: React.FC = () => {
                   <span
                     className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold transition-all ${
                       currentStep > i
-                        ? 'bg-sky-600 text-white'
+                        ? 'bg-channel-green text-white'
                         : currentStep === i
-                          ? 'bg-sky-600 text-white ring-4 ring-sky-100'
+                          ? 'bg-channel-green text-white ring-4 ring-emerald-100'
                           : 'bg-slate-100 text-slate-400'
                     }`}
                   >
@@ -1055,7 +1056,7 @@ const CampaignsWorkspace: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => navigate(pathForCampaign(lastCreatedCampaignId))}
-                    className="px-6 py-2 bg-sky-600 hover:bg-sky-700 text-white text-sm font-bold rounded-xl"
+                    className="px-6 py-2 bg-channel-green hover:bg-[#20bd5a] text-white text-sm font-bold rounded-xl"
                   >
                     View insights
                   </button>
@@ -1077,53 +1078,58 @@ const CampaignsWorkspace: React.FC = () => {
                     <h3 className="font-bold text-gray-900 text-sm">Select Channel</h3>
                     <p className="text-xs text-gray-400 mt-0.5">Choose which channel to send your campaign through.</p>
                   </div>
-                  <div className="space-y-3">
-                    {CAMPAIGN_CHANNELS.map((ch) => (
-                      <div
-                        key={ch.id}
-                        onClick={() => setSelectedChannel(ch.id)}
-                        className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex items-center justify-between group ${
-                          selectedChannel === ch.id ? 'shadow-md' : 'border-slate-200 bg-white hover:border-gray-300'
-                        }`}
-                        style={
-                          selectedChannel === ch.id
-                            ? {
-                                borderColor: ch.color,
-                                background: ch.bgColor,
-                              }
-                            : {}
-                        }
-                      >
-                        <div className="flex items-center gap-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    {SELECTABLE_CAMPAIGN_CHANNELS.map((ch) => {
+                      const selected = selectedChannel === ch.id;
+                      return (
+                        <button
+                          key={ch.id}
+                          type="button"
+                          onClick={() => setSelectedChannel(ch.id)}
+                          className={`relative flex min-h-[168px] flex-col rounded-2xl border-2 p-4 text-left transition-all ${
+                            selected
+                              ? 'shadow-md'
+                              : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm'
+                          }`}
+                          style={
+                            selected
+                              ? {
+                                  borderColor: ch.color,
+                                  background: ch.bgColor,
+                                }
+                              : undefined
+                          }
+                        >
+                          {selected && (
+                            <div
+                              className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full"
+                              style={{ background: ch.color }}
+                            >
+                              <Check className="h-3 w-3 text-white" />
+                            </div>
+                          )}
                           <div
-                            className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
-                            style={{ background: selectedChannel === ch.id ? 'white' : ch.bgColor }}
+                            className="mb-3 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl"
+                            style={{ background: selected ? 'white' : ch.bgColor }}
                           >
-                            <ChannelIcon channel={ch.id} size={24} />
+                            <ChannelIcon channel={ch.id} size={22} />
                           </div>
-                          <div>
-                            <p className="text-sm font-black text-gray-900">{ch.name}</p>
-                            <p className="text-meta text-gray-500 font-medium mt-0.5">{ch.description}</p>
-                          </div>
-                        </div>
-                        <div className="text-right shrink-0 ml-4">
+                          <p className="pr-6 text-sm font-bold text-gray-900">{ch.name}</p>
+                          <p className="mt-1 line-clamp-2 flex-1 text-xs leading-relaxed text-gray-500">
+                            {ch.description}
+                          </p>
                           <span
-                            className="text-sm font-black px-2.5 py-1 rounded-xl"
-                            style={{ background: ch.bgColor, color: ch.color }}
+                            className="mt-3 inline-flex w-fit rounded-lg px-2 py-0.5 text-[11px] font-semibold"
+                            style={{
+                              background: selected ? 'white' : ch.bgColor,
+                              color: ch.color,
+                            }}
                           >
                             {ch.limit}
                           </span>
-                          {selectedChannel === ch.id && (
-                            <div
-                              className="w-5 h-5 rounded-full flex items-center justify-center mt-1.5 ml-auto"
-                              style={{ background: ch.color }}
-                            >
-                              <Check className="w-3 h-3 text-white" />
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -1203,7 +1209,7 @@ const CampaignsWorkspace: React.FC = () => {
                               <span
                                 className={`flex h-5 w-5 items-center justify-center rounded-full border ${
                                   selected
-                                    ? 'border-sky-600 bg-sky-600 text-white'
+                                    ? 'border-channel-green bg-channel-green text-white'
                                     : 'border-slate-300 bg-white'
                                 }`}
                               >
@@ -1235,7 +1241,7 @@ const CampaignsWorkspace: React.FC = () => {
                                         }}
                                         className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-all ${
                                           tagSelected
-                                            ? 'border-sky-600 bg-sky-50 text-sky-700'
+                                            ? 'border-channel-green bg-sky-50 text-sky-700'
                                             : 'border-slate-200 bg-white text-slate-700 hover:border-sky-200 hover:bg-sky-50/50'
                                         }`}
                                       >
@@ -1348,7 +1354,7 @@ const CampaignsWorkspace: React.FC = () => {
                             </select>
                           </div>
                           {activeTemplate && activeTemplate.variables.length > 0 && (
-                            <div className="space-y-3 bg-sky-50/10 p-4 border border-sky-600/5 rounded-xl">
+                            <div className="space-y-3 bg-sky-50/10 p-4 border border-channel-green/5 rounded-xl">
                               <h4 className="text-sm font-black text-sky-600 uppercase tracking-widest">
                                 Map Placeholder Variables
                               </h4>
@@ -1432,7 +1438,7 @@ const CampaignsWorkspace: React.FC = () => {
                             )}
                           </div>
                           {activeEmailTemplate && activeEmailTemplate.variables.length > 0 && (
-                            <div className="space-y-3 bg-sky-50/10 p-4 border border-sky-600/5 rounded-xl">
+                            <div className="space-y-3 bg-sky-50/10 p-4 border border-channel-green/5 rounded-xl">
                               <h4 className="text-sm font-black text-sky-600 uppercase tracking-widest">
                                 Template Variables
                               </h4>
@@ -1607,7 +1613,7 @@ const CampaignsWorkspace: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setCurrentStep((p) => p + 1)}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-sky-600 px-5 py-2 text-sm font-semibold text-white shadow-sm shadow-sky-200 transition-colors hover:bg-sky-700"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-channel-green px-5 py-2 text-sm font-semibold text-white shadow-sm shadow-emerald-600/15 transition-colors hover:bg-[#20bd5a]"
               >
                 Next step <ArrowRight className="h-4 w-4" />
               </button>
@@ -1616,7 +1622,7 @@ const CampaignsWorkspace: React.FC = () => {
                 type="button"
                 onClick={handleLaunchCampaign}
                 disabled={launching}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-sky-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-sky-200 transition-colors hover:bg-sky-700 disabled:opacity-60"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-channel-green px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-emerald-600/15 transition-colors hover:bg-[#20bd5a] disabled:opacity-60"
               >
                 <Play className="h-3.5 w-3.5 fill-white" />
                 {launching

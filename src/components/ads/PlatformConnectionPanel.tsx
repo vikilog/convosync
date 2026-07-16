@@ -10,7 +10,6 @@ type ConnectionCardProps = {
   pending?: boolean;
   account: AdAccount | null;
   linkedEmail?: string | null;
-  oauthRedirectUri?: string | null;
   connecting: boolean;
   syncing: boolean;
   onConnect: () => void;
@@ -27,7 +26,6 @@ function ConnectionCard({
   pending,
   account,
   linkedEmail,
-  oauthRedirectUri,
   connecting,
   syncing,
   onConnect,
@@ -99,7 +97,7 @@ function ConnectionCard({
               value={account.id}
               disabled={switchingAccount}
               onChange={(e) => onSwitchAccount(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-sm font-medium text-gray-700 rounded-xl hover:bg-white focus:border-sky-500 focus:ring-2 focus:ring-sky-100 outline-none cursor-pointer disabled:opacity-50"
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-sm font-medium text-gray-700 rounded-xl hover:bg-white focus:border-channel-green focus:ring-2 focus:ring-emerald-100 outline-none cursor-pointer disabled:opacity-50"
             >
               {metaAdAccounts.map((item) => (
                 <option key={item.id} value={item.id}>
@@ -183,12 +181,6 @@ function ConnectionCard({
         </div>
       </div>
 
-      {isMeta && oauthRedirectUri && (
-        <p className="text-xs text-gray-500 font-mono bg-white border border-slate-200 rounded-lg px-2.5 py-2 break-all">
-          OAuth redirect: {oauthRedirectUri}
-        </p>
-      )}
-
       <button
         type="button"
         onClick={onConnect}
@@ -208,7 +200,6 @@ export const PlatformConnectionPanel: React.FC<{
   metaConnected: boolean;
   metaAccount: AdAccount | null;
   metaAdAccounts: MetaAdAccountOption[];
-  metaOauthRedirectUri: string | null;
   metaConnecting: boolean;
   metaSyncing: boolean;
   metaSwitchingAccount: boolean;
@@ -250,7 +241,6 @@ export const PlatformConnectionPanel: React.FC<{
           platform="meta"
           connected={props.metaConnected}
           account={props.metaAccount}
-          oauthRedirectUri={props.metaOauthRedirectUri}
           connecting={props.metaConnecting}
           syncing={props.metaSyncing}
           onConnect={props.onMetaConnect}

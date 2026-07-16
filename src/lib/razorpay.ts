@@ -14,6 +14,8 @@ export interface RazorpayCheckoutOptions {
   description?: string;
   order_id?: string;
   subscription_id?: string;
+  customer_id?: string;
+  save?: boolean | 0 | 1 | '1';
   recurring?: boolean | 0 | 1;
   image?: string;
   prefill?: { name?: string; email?: string; contact?: string };
@@ -129,8 +131,10 @@ function buildCheckoutOptions(
     ...options,
     currency: options.currency ?? 'INR',
     prefill,
-    // Required for subscription auth / mandate flows
-    ...(isSubscription ? { recurring: true as const } : {}),
+    // Required for subscription auth / mandate flows, and for saving payment methods
+    ...(isSubscription || (options.save && options.customer_id)
+      ? { recurring: 1 as const }
+      : {}),
     config: {
       display: {
         language: 'en',

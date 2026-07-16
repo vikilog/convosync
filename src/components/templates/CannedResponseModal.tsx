@@ -124,7 +124,7 @@ export function CannedResponseModal({ open, item, saving, onClose, onSave }: Pro
                 <button
                   type="submit"
                   disabled={saving || !title.trim() || !content.trim()}
-                  className="px-4 py-2 bg-primary hover:bg-primary/90 disabled:opacity-60 text-white rounded-xl text-sm font-bold"
+                  className="px-4 py-2 bg-channel-green hover:bg-[#20bd5a] disabled:opacity-60 text-white rounded-xl text-sm font-bold"
                 >
                   {saving ? 'Saving…' : item ? 'Save changes' : 'Create'}
                 </button>

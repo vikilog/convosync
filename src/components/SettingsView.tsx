@@ -26,10 +26,11 @@ import { UsersTeamsPanel } from './settings/UsersTeamsPanel';
 import { SettingsPlaceholder } from './settings/SettingsPlaceholder';
 import { AiKnowledgePanel } from './settings/AiKnowledgePanel';
 import { AiCopilotPanel } from './settings/AiCopilotPanel';
-import { AiProviderPanel } from './settings/AiProviderPanel';
-import { BillingOverviewPanel } from './settings/BillingOverviewPanel';
+import { WalletPanel } from './settings/WalletPanel';
 import { InvoiceLogsPanel } from './settings/InvoiceLogsPanel';
-import { SubscriptionPanel } from './settings/SubscriptionPanel';
+import { fetchWalletBalanceCc, WALLET_BALANCE_EVENT } from '../lib/walletEvents';
+import { formatCc } from '../lib/convocoins';
+import { ConvoCoinIcon } from './ConvoCoinIcon';
 
 function SettingsPanel({ section }: { section: SettingsSection }) {
   if (section === 'profile') return <ProfilePanel />;
@@ -39,9 +40,7 @@ function SettingsPanel({ section }: { section: SettingsSection }) {
   if (section === 'users') return <UsersTeamsPanel />;
   if (section === 'ai-knowledge') return <AiKnowledgePanel />;
   if (section === 'ai-copilot') return <AiCopilotPanel />;
-  if (section === 'ai-provider') return <AiProviderPanel />;
-  if (section === 'subscription') return <SubscriptionPanel />;
-  if (section === 'billing') return <BillingOverviewPanel />;
+  if (section === 'wallet') return <WalletPanel />;
   if (section === 'invoices') return <InvoiceLogsPanel />;
   return <SettingsPlaceholder title={SETTINGS_SECTION_TITLES[section]} />;
 }
@@ -51,8 +50,13 @@ export function SettingsView() {
   const navigate = useNavigate();
   const section = settingsSectionFromPath(location.pathname);
   const title = SETTINGS_SECTION_TITLES[section];
+  const subtitle =
+    section === 'wallet'
+      ? 'Subscription, ConvoCoins balance, usage rates, and billing activity.'
+      : 'Manage your workspace preferences and account configuration.';
   const [role, setRole] = useState(getUserRole());
   const [permissions, setPermissions] = useState(getUserPermissions());
+  const [walletBalanceCc, setWalletBalanceCc] = useState<number | null>(null);
 
   useEffect(() => {
     void api.getMe().then((me) => {
@@ -63,8 +67,22 @@ export function SettingsView() {
   }, []);
 
   useEffect(() => {
+    const onWalletBalance = (event: Event) => {
+      const balanceCc = (event as CustomEvent<{ balanceCc: number }>).detail?.balanceCc;
+      if (typeof balanceCc === 'number') setWalletBalanceCc(balanceCc);
+    };
+
+    window.addEventListener(WALLET_BALANCE_EVENT, onWalletBalance);
+    void fetchWalletBalanceCc()
+      .then(setWalletBalanceCc)
+      .catch(() => setWalletBalanceCc(null));
+
+    return () => window.removeEventListener(WALLET_BALANCE_EVENT, onWalletBalance);
+  }, []);
+
+  useEffect(() => {
     if (SETTINGS_HIDDEN_SECTIONS.has(section)) {
-      navigate(pathForSettingsSection('profile'), { replace: true });
+      navigate(pathForSettingsSection('wallet'), { replace: true });
     }
   }, [navigate, section]);
 
@@ -103,7 +121,7 @@ export function SettingsView() {
           id="settings-section-mobile"
           value={section}
           onChange={(e) => navigate(pathForSettingsSection(e.target.value as SettingsSection))}
-          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-200"
+          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-200"
         >
           {flatNavItems.map((item) => (
             <option key={item.id} value={item.id}>
@@ -128,14 +146,20 @@ export function SettingsView() {
                       key={item.id}
                       to={pathForSettingsSection(item.id)}
                       className={({ isActive }) =>
-                        `block rounded-lg px-2.5 py-2 text-sm transition-colors ${
+                        `flex items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-sm transition-colors ${
                           isActive
-                            ? 'bg-sky-100 text-sky-800 font-semibold'
+                            ? 'bg-emerald-50 text-emerald-800 font-semibold ring-1 ring-emerald-100'
                             : 'text-slate-600 hover:bg-white hover:text-slate-900'
                         }`
                       }
                     >
-                      {item.label}
+                      <span>{item.label}</span>
+                      {item.id === 'wallet' && walletBalanceCc != null ? (
+                        <span className="inline-flex shrink-0 items-center gap-1 text-[11px] font-semibold tabular-nums text-amber-700">
+                          <ConvoCoinIcon size={12} />
+                          {formatCc(walletBalanceCc, { compact: true })}
+                        </span>
+                      ) : null}
                     </NavLink>
                   ))}
                 </nav>
@@ -147,9 +171,7 @@ export function SettingsView() {
         <div className="flex-1 min-w-0 overflow-y-auto bg-slate-50 p-3 md:p-4">
           <div className="mb-3 border border-slate-200 bg-white px-4 py-3 md:mb-4">
             <h2 className="text-base font-semibold text-slate-900 md:text-lg">{title}</h2>
-            <p className="mt-0.5 text-xs text-slate-500 md:text-sm">
-              Manage your workspace preferences and account configuration.
-            </p>
+            <p className="mt-0.5 text-xs text-slate-500 md:text-sm">{subtitle}</p>
           </div>
 
           {currentSectionAllowed ? (

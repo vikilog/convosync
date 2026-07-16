@@ -361,7 +361,7 @@ export function AiCopilotPanel() {
             <button
               type="submit"
               disabled={sending || !input.trim() || !knowledgeReady}
-              className="inline-flex items-center justify-center rounded-xl bg-primary hover:bg-primary-hover disabled:opacity-50 text-white px-4 py-2.5 transition-colors"
+              className="inline-flex items-center justify-center rounded-xl bg-channel-green hover:bg-[#20bd5a] disabled:opacity-50 text-white px-4 py-2.5 transition-colors"
               aria-label="Send message"
             >
               {sending ? (

@@ -212,7 +212,7 @@ export const PayView: React.FC = () => {
         </p>
         <Link
           to={pathForIntegrationsChannel('whatsapp')}
-          className="inline-flex mt-6 px-4 py-2.5 bg-sky-600 hover:bg-sky-700 text-white text-sm font-bold rounded-xl transition-colors"
+          className="inline-flex mt-6 px-4 py-2.5 bg-channel-green hover:bg-[#20bd5a] text-white text-sm font-bold rounded-xl transition-colors"
         >
           Connect WhatsApp
         </Link>

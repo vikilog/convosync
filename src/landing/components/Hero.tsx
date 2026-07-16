@@ -6,14 +6,14 @@
 import { useEffect, useState } from 'react';
 import {
   ArrowRight,
-  Instagram,
-  Mail,
+  Bot,
+  Megaphone,
   MessageSquare,
-  Send,
-  Sparkles,
+  Play,
+  ShieldCheck,
+  Zap,
 } from 'lucide-react';
 import { PRODUCT_NAME } from '../brand';
-import { trackEvent } from '../../lib/analytics';
 import {
   HERO_MODULES,
   HeroPlatformPreview,
@@ -24,14 +24,16 @@ interface HeroProps {
   onStartFree: () => void;
 }
 
-const CAPABILITY_HIGHLIGHTS = [
-  'Unified inbox across 5 channels',
-  'Custom AI agents with your docs',
-  'Broadcast campaigns & journeys',
-  'WhatsApp Pay in chat',
-  'Meta Ads from one dashboard',
-  'Reports & team performance',
-];
+const TRUST_ITEMS = [
+  { icon: MessageSquare, label: '5 channels' },
+  { icon: Bot, label: 'AI agents' },
+  { icon: Megaphone, label: 'Campaigns' },
+  { icon: ShieldCheck, label: 'Production ready' },
+] as const;
+
+function scrollToFeatures() {
+  document.getElementById('features')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 
 export default function Hero({ onStartFree }: HeroProps) {
   const [activeModule, setActiveModule] = useState<HeroModuleId>('inbox');
@@ -57,41 +59,52 @@ export default function Hero({ onStartFree }: HeroProps) {
     return () => window.clearInterval(interval);
   }, [reduceMotion]);
 
+  const activeLabel = HERO_MODULES.find((m) => m.id === activeModule)?.short ?? 'Preview';
+
   return (
     <section
       id="hero"
-      className="relative bg-white text-gray-900 pt-28 pb-16 sm:pb-20 overflow-hidden"
+      className="relative hero-grid-bg text-gray-900 pt-28 pb-20 sm:pb-24 overflow-hidden"
     >
       <div
-        className="absolute top-0 right-0 w-[480px] h-[480px] rounded-full bg-brand-indigo/8 blur-[120px] pointer-events-none"
-        aria-hidden
-      />
-      <div
-        className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-channel-green/8 blur-[100px] pointer-events-none"
+        className="absolute inset-0 bg-gradient-to-b from-white/40 via-transparent to-emerald-50/30 pointer-events-none"
         aria-hidden
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-14 items-center">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Copy */}
           <div className="text-center lg:text-left">
-            <div className="inline-flex flex-wrap items-center justify-center lg:justify-start gap-x-2 gap-y-1 bg-brand-indigo/5 border border-brand-indigo/15 rounded-full px-4 py-2 mb-6 text-[11px] sm:text-xs font-semibold text-gray-700 max-w-lg mx-auto lg:mx-0 text-center lg:text-left leading-snug">
-              <Sparkles className="w-3.5 h-3.5 text-brand-indigo shrink-0" aria-hidden />
-              <span>Inbox · AI · Campaigns · Pay · Meta Ads — one workspace</span>
+            <div className="inline-flex flex-wrap items-center justify-center lg:justify-start gap-x-3 gap-y-1 rounded-full border border-emerald-200/70 bg-white/80 backdrop-blur-sm px-4 py-2 mb-8 text-sm shadow-sm">
+              <span className="flex items-center gap-2 text-gray-700">
+                <span className="w-2 h-2 rounded-full bg-channel-green shrink-0" aria-hidden />
+                All-in-one customer ops
+              </span>
+              <span className="hidden sm:inline text-gray-300" aria-hidden>
+                |
+              </span>
+              <button
+                type="button"
+                onClick={scrollToFeatures}
+                className="inline-flex items-center gap-1 font-semibold text-emerald-700 hover:text-emerald-800 transition-colors duration-200 cursor-pointer"
+              >
+                What&apos;s new
+                <ArrowRight className="w-3.5 h-3.5" aria-hidden />
+              </button>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-[3.25rem] font-extrabold font-display tracking-tight leading-[1.08] text-gray-950">
-              The complete{' '}
-              <span className="bg-gradient-to-r from-brand-blue to-brand-purple bg-clip-text text-transparent">
-                customer ops
-              </span>{' '}
-              platform for growing teams
+            <h1 className="text-[2.75rem] sm:text-5xl lg:text-[3.5rem] xl:text-6xl font-extrabold font-display tracking-tight leading-[1.05] text-gray-950">
+              Customer ops
+              <br />
+              <span className="text-channel-green">for every channel</span>
             </h1>
 
-            <p className="mt-5 text-base sm:text-lg text-gray-600 leading-relaxed max-w-xl mx-auto lg:mx-0">
-              {PRODUCT_NAME} is more than a shared inbox. Run omnichannel support, train AI agents on
-              your business, launch campaigns, automate journeys, collect WhatsApp Pay, and manage Meta
-              ads — without switching between five different tools.
+            <p className="mt-6 text-base sm:text-lg text-gray-600 leading-relaxed max-w-xl mx-auto lg:mx-0">
+              Replace five tools with {PRODUCT_NAME}.{' '}
+              <strong className="font-semibold text-gray-900">One inbox</strong>, trained{' '}
+              <strong className="font-semibold text-gray-900">AI agents</strong>, and{' '}
+              <strong className="font-semibold text-gray-900">campaigns</strong> — without switching
+              tabs.
             </p>
 
             <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-center lg:justify-start gap-3">
@@ -99,84 +112,60 @@ export default function Hero({ onStartFree }: HeroProps) {
                 id="hero-start-btn"
                 type="button"
                 onClick={onStartFree}
-                className="inline-flex items-center justify-center gap-2 bg-brand-gradient hover:bg-brand-gradient-hover text-white font-semibold text-sm sm:text-base px-8 py-4 rounded-xl shadow-lg shadow-brand-purple/25 transition-all duration-200 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-purple"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-channel-green hover:bg-[#20bd5a] text-white font-bold text-sm sm:text-base px-8 py-3.5 shadow-lg shadow-emerald-600/20 transition-all duration-200 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-channel-green"
               >
-                <span>Start Free — No Credit Card</span>
-                <ArrowRight className="w-5 h-5" aria-hidden />
+                <Play className="w-4 h-4 fill-current" aria-hidden />
+                <span>Start free trial</span>
+              </button>
+              <button
+                type="button"
+                onClick={scrollToFeatures}
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-gray-300 bg-white/90 hover:bg-white text-gray-900 font-semibold text-sm sm:text-base px-8 py-3.5 transition-colors duration-200 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-400"
+              >
+                See how it works
               </button>
             </div>
 
-            <ul className="mt-8 grid grid-cols-1 min-[520px]:grid-cols-2 gap-x-6 gap-y-2.5 text-sm text-gray-600 max-w-xl mx-auto lg:mx-0 text-left">
-              {CAPABILITY_HIGHLIGHTS.map((item) => (
-                <li key={item} className="flex items-start gap-2">
-                  <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-brand-indigo shrink-0" aria-hidden />
-                  <span>{item}</span>
+            <ul className="mt-10 flex flex-wrap items-center justify-center lg:justify-start gap-x-6 gap-y-3 text-sm text-gray-600">
+              {TRUST_ITEMS.map(({ icon: Icon, label }) => (
+                <li key={label} className="flex items-center gap-2">
+                  <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-white border border-gray-200/80 shadow-sm">
+                    <Icon className="w-4 h-4 text-gray-700" aria-hidden />
+                  </span>
+                  <span className="font-medium text-gray-700">{label}</span>
                 </li>
               ))}
             </ul>
-
-            <div className="mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-3">
-              {[
-                { Icon: MessageSquare, className: 'bg-channel-green text-white' },
-                { Icon: Instagram, className: 'bg-gradient-to-tr from-yellow-500 via-channel-pink to-purple-600 text-white' },
-                { Icon: Send, className: 'bg-channel-sky text-white' },
-                { Icon: Mail, className: 'bg-gray-500 text-white' },
-              ].map(({ Icon, className }, i) => (
-                <div
-                  key={i}
-                  className={`w-9 h-9 rounded-full flex items-center justify-center shadow-sm ${className}`}
-                  aria-hidden
-                >
-                  <Icon className="w-4 h-4" />
-                </div>
-              ))}
-              <span className="text-xs text-gray-500 font-medium w-full sm:w-auto text-center lg:text-left">
-                WhatsApp, Instagram, Telegram, Email & more
-              </span>
-            </div>
           </div>
 
           {/* Product preview */}
-          <div className="@container w-full min-w-0 max-w-3xl mx-auto lg:max-w-none lg:mx-0">
+          <div className="relative w-full min-w-0">
             <div
-              className="grid grid-cols-2 sm:grid-cols-3 lg:flex lg:flex-nowrap gap-2 lg:overflow-x-auto lg:pb-2 scrollbar-none lg:-mx-1 lg:px-1"
-              role="tablist"
-              aria-label="Platform modules"
-            >
-              {HERO_MODULES.map(({ id, label, icon: Icon }) => {
-                const selected = activeModule === id;
-                return (
-                  <button
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[85%] h-[85%] rounded-full bg-channel-green/15 blur-3xl pointer-events-none"
+              aria-hidden
+            />
+            <div className="absolute -inset-4 rounded-[2rem] border border-dashed border-emerald-300/40 pointer-events-none hidden lg:block" aria-hidden />
+
+            <div className="relative">
+              <HeroPlatformPreview active={activeModule} variant="minimal" />
+            </div>
+
+            <div className="mt-5 flex flex-col items-center gap-3">
+              <div className="flex items-center gap-1.5" aria-hidden>
+                {HERO_MODULES.map(({ id }) => (
+                  <span
                     key={id}
-                    type="button"
-                    role="tab"
-                    id={`hero-tab-${id}`}
-                    aria-selected={selected}
-                    aria-controls={`hero-panel-${id}`}
-                    onClick={() => {
-                      trackEvent('hero_tab_change', { module_id: id, trigger: 'click' });
-                      setActiveModule(id);
-                    }}
-                    className={`flex items-center justify-center gap-1.5 w-full lg:w-auto lg:shrink-0 px-3 py-2.5 rounded-full text-xs font-semibold border transition-colors duration-200 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-indigo ${
-                      selected
-                        ? 'bg-brand-gradient text-white border-transparent shadow-sm'
-                        : 'bg-white text-gray-600 border-gray-200 hover:border-brand-indigo/40 hover:text-brand-indigo'
+                    className={`h-1.5 rounded-full transition-all duration-300 ${
+                      activeModule === id ? 'w-6 bg-channel-green' : 'w-1.5 bg-gray-300'
                     }`}
-                  >
-                    <Icon className="w-3.5 h-3.5 shrink-0" aria-hidden />
-                    <span className="truncate">{label}</span>
-                  </button>
-                );
-              })}
+                  />
+                ))}
+              </div>
+              <p className="text-xs font-medium text-gray-500 flex items-center gap-1.5">
+                <Zap className="w-3.5 h-3.5 text-channel-green" aria-hidden />
+                Live preview · {activeLabel}
+              </p>
             </div>
-
-            <div className="mt-3">
-              <HeroPlatformPreview active={activeModule} />
-            </div>
-
-            <p className="mt-3 text-center text-[11px] text-gray-500 font-mono">
-              Tap a module to explore · {PRODUCT_NAME} replaces inbox-only tools
-            </p>
           </div>
         </div>
       </div>

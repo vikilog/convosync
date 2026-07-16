@@ -123,7 +123,7 @@ export function JourneyNameDialog({
                 type="button"
                 onClick={submit}
                 disabled={loading}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-black text-white bg-primary rounded-lg disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-black text-white rounded-full bg-channel-green disabled:opacity-50"
               >
                 {loading && <Loader2 className="w-4 h-4 animate-spin" />}
                 {confirmLabel}

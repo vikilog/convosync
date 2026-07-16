@@ -5,6 +5,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Plug, Users, Brain, Activity, LineChart } from 'lucide-react';
+import { LandingSection, LandingSectionHeader } from './landing-ui';
 
 interface Step {
   id: number;
@@ -26,9 +27,9 @@ const ROADMAP_STEPS: Step[] = [
     emoji: '🔌',
     desc: 'One-click connect WhatsApp, Instagram, Messenger, Telegram, and Corporate Email via official secure channels.',
     technicalTip: 'Official Cloud API integrations setup completes in under 2 minutes.',
-    color: 'bg-brand-indigo/10 border-brand-indigo/30 text-brand-indigo',
-    ring: 'ring-brand-indigo/40',
-    icon: <Plug className="w-5 h-5 text-brand-indigo" />,
+    color: 'bg-emerald-50 border-emerald-200/30 text-emerald-700',
+    ring: 'ring-emerald-400/40',
+    icon: <Plug className="w-5 h-5 text-emerald-700" />,
   },
   {
     id: 2,
@@ -37,9 +38,9 @@ const ROADMAP_STEPS: Step[] = [
     emoji: '👥',
     desc: 'Upload standard CSV lists or map active Shopify/CRM segments. All historical details load instantly.',
     technicalTip: 'Direct synchronization supported for Zoho, HubSpot, and Salesforce.',
-    color: 'bg-indigo-100 border-indigo-200 text-brand-indigo',
-    ring: 'ring-brand-indigo/30',
-    icon: <Users className="w-5 h-5 text-brand-indigo" />,
+    color: 'bg-indigo-100 border-emerald-200 text-emerald-700',
+    ring: 'ring-emerald-400/30',
+    icon: <Users className="w-5 h-5 text-emerald-700" />,
   },
   {
     id: 3,
@@ -77,7 +78,7 @@ const ROADMAP_STEPS: Step[] = [
 ];
 
 export default function HowItWorks() {
-  const sectionRef = useRef<HTMLElement>(null);
+  const sectionRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [activeStep, setActiveStep] = useState(1);
 
@@ -117,46 +118,37 @@ export default function HowItWorks() {
   const steps = ROADMAP_STEPS;
 
   return (
-    <section
-      ref={sectionRef}
+    <LandingSection
       id="how-it-works"
-      className="bg-[#FAF9FF] border-b border-gray-100 py-24 text-gray-900 overflow-hidden relative"
+      tone="grid"
+      className="overflow-hidden relative"
+      containerClassName="relative"
     >
-      <div
-        className="absolute inset-0 dot-grid opacity-30 pointer-events-none"
-        aria-hidden
+      <div ref={sectionRef}>
+      <LandingSectionHeader
+        badge="How it works"
+        title="Zero to live in"
+        titleAccent="10 minutes."
+        description="A frictionless setup pipeline to move teams away from communication chaos."
       />
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-        <div className="text-center max-w-2xl mx-auto mb-16 lg:mb-20">
-          <span className="text-xs uppercase font-extrabold text-brand-indigo tracking-widest font-mono">
-            SETUP FOOTPRINT
-          </span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold font-display tracking-tight text-gray-900 mt-2">
-            Zero to live AI-resolution in 10 minutes
-          </h2>
-          <p className="text-xs sm:text-sm text-gray-500 mt-3 font-sans">
-            A frictionless setup pipeline engineered to transition teams away from communication chaos rapidly.
-          </p>
-        </div>
 
         {/* Desktop horizontal roadmap */}
         <div className="hidden lg:block relative mb-6">
           <div className="flex items-center justify-between text-[10px] font-mono font-bold uppercase tracking-widest text-gray-400 px-2 mb-3">
-            <span className="text-brand-blue">Start</span>
-            <span className="text-brand-purple">Go live</span>
+            <span className="text-emerald-700">Start</span>
+            <span className="text-emerald-700">Go live</span>
           </div>
 
           <div className="relative h-14 mx-8">
             <div className="absolute top-1/2 left-0 right-0 h-1 -translate-y-1/2 rounded-full bg-gray-200/80" />
             <div
-              className={`absolute top-1/2 left-0 right-0 h-1 -translate-y-1/2 rounded-full bg-brand-gradient ${
+              className={`absolute top-1/2 left-0 right-0 h-1 -translate-y-1/2 rounded-full bg-channel-green ${
                 isVisible ? 'roadmap-line-x' : 'scale-x-0'
               }`}
             />
             {isVisible && (
               <span
-                className="roadmap-travel-dot absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-white border-2 border-brand-purple shadow-md shadow-brand-purple/30"
+                className="roadmap-travel-dot absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-white border-2 border-emerald-300 shadow-md shadow-emerald-600/30"
                 aria-hidden
               />
             )}
@@ -181,8 +173,8 @@ export default function HowItWorks() {
                     <span
                       className={`w-11 h-11 rounded-full border-[3px] border-white bg-white shadow-md flex items-center justify-center font-mono text-xs font-bold transition-all duration-300 ${
                         isActive
-                          ? `bg-brand-gradient text-white scale-110 shadow-brand-purple/30 ring-4 ${st.ring}`
-                          : 'text-brand-indigo ring-2 ring-gray-100 group-hover:ring-brand-indigo/30'
+                          ? `bg-channel-green text-white scale-110 shadow-emerald-600/30 ring-4 ${st.ring}`
+                          : 'text-emerald-700 ring-2 ring-gray-100 group-hover:ring-emerald-400/30'
                       }`}
                     >
                       {st.num}
@@ -213,8 +205,8 @@ export default function HowItWorks() {
                     onClick={() => setActiveStep(st.id)}
                     className={`w-9 h-9 rounded-full border-[3px] border-white font-mono text-[10px] font-bold flex items-center justify-center shadow-md transition-all duration-300 cursor-pointer ${
                       isActive
-                        ? 'bg-brand-gradient text-white scale-110 ring-4 ring-brand-purple/20'
-                        : 'bg-white text-brand-indigo'
+                        ? 'bg-channel-green text-white scale-110 ring-4 ring-emerald-300/20'
+                        : 'bg-white text-emerald-700'
                     } ${isVisible ? 'roadmap-milestone-visible' : ''}`}
                     style={{ animationDelay: delay }}
                     aria-label={`Step ${st.num}: ${st.title}`}
@@ -224,7 +216,7 @@ export default function HowItWorks() {
                   {!isLast && (
                     <div className="relative w-0.5 flex-1 min-h-10 my-1.5 rounded-full bg-gray-200 overflow-hidden">
                       <div
-                        className={`absolute inset-0 origin-top bg-brand-gradient transition-transform duration-700 ${
+                        className={`absolute inset-0 origin-top bg-channel-green transition-transform duration-700 ${
                           isVisible && (isActive || index < activeStep - 1) ? 'scale-y-100' : 'scale-y-0'
                         }`}
                       />
@@ -236,7 +228,7 @@ export default function HowItWorks() {
                   onMouseEnter={() => setActiveStep(st.id)}
                   className={`flex-1 bg-white border rounded-2xl p-5 shadow-xs mb-4 transition-all duration-500 ${
                     isActive
-                      ? 'border-brand-indigo/25 shadow-lg shadow-brand-purple/10'
+                      ? 'border-emerald-200/25 shadow-lg shadow-emerald-600/10'
                       : 'border-gray-100'
                   }`}
                 >
@@ -281,12 +273,12 @@ export default function HowItWorks() {
                   isVisible ? 'roadmap-step-visible' : 'opacity-0 translate-y-5'
                 } ${
                   isActive
-                    ? 'border-brand-indigo/25 shadow-lg shadow-brand-purple/10 -translate-y-1 scale-[1.02]'
+                    ? 'border-emerald-200/25 shadow-lg shadow-emerald-600/10 -translate-y-1 scale-[1.02]'
                     : 'border-gray-100 hover:shadow-md hover:-translate-y-0.5'
                 }`}
                 style={{ animationDelay: delay }}
               >
-                <span className="absolute -top-3 left-6 font-mono text-[11px] font-bold bg-[#E6E2FF] text-brand-indigo px-2.5 py-1 rounded-full border border-white">
+                <span className="absolute -top-3 left-6 font-mono text-[11px] font-bold bg-emerald-50 text-emerald-800 px-2.5 py-1 rounded-full border border-emerald-100">
                   Step {st.num}
                 </span>
 
@@ -341,6 +333,6 @@ export default function HowItWorks() {
           </div>
         </div>
       </div>
-    </section>
+    </LandingSection>
   );
 }

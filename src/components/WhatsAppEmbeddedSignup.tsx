@@ -320,7 +320,7 @@ export default function WhatsAppEmbeddedSignup({
         type="button"
         onClick={() => void launchSignup()}
         disabled={!canConnect}
-        className="mt-6 inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#1877F2] hover:bg-[#166fe5] disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-xl text-sm font-black shadow-md transition-all"
+        className="mt-6 inline-flex items-center justify-center gap-2 px-6 py-3 bg-channel-green hover:bg-[#20bd5a] disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-xl text-sm font-black shadow-md transition-all"
       >
         {loading ? (
           <>
@@ -345,10 +345,6 @@ export default function WhatsAppEmbeddedSignup({
           'Continue with Facebook'
         )}
       </button>
-      <p className="mt-2 text-sm font-bold text-gray-400">
-        OAuth redirect URI:
-        <span className="block font-mono text-gray-500 mt-0.5">{redirectUriRef.current}</span>
-      </p>
     </div>
   );
 }

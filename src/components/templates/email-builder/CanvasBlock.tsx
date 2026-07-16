@@ -131,7 +131,7 @@ export function CanvasBlock({
           onSelect();
         }
       }}
-      className={`group relative rounded-lg transition-all ${
+      className={`group relative rounded-lg transition-all mx-1 ${
         selected
           ? 'ring-2 ring-primary shadow-md shadow-primary/10'
           : 'ring-1 ring-transparent hover:ring-slate-200 hover:shadow-sm'
@@ -147,7 +147,7 @@ export function CanvasBlock({
           <GripVertical className="w-3.5 h-3.5" />
         </button>
       </div>
-      <div className="absolute -right-2 -top-2 opacity-0 group-hover:opacity-100 flex gap-1 z-10">
+      <div className="absolute -right-1 top-1 opacity-0 group-hover:opacity-100 flex gap-1 z-10">
         <button
           type="button"
           onClick={(e) => {

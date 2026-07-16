@@ -45,7 +45,7 @@ function NodeAddButton({ nodeId, nodeType }: { nodeId: string; nodeType: Journey
           left: rect.left + rect.width / 2,
         });
       }}
-      className="absolute -bottom-4 left-1/2 z-10 flex h-8 w-8 -translate-x-1/2 items-center justify-center rounded-full border-2 border-white bg-primary text-white shadow-lg transition-all duration-200 hover:scale-105 hover:bg-primary-hover hover:shadow-xl cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+      className="absolute -bottom-4 left-1/2 z-10 flex h-8 w-8 -translate-x-1/2 items-center justify-center rounded-full border-2 border-white bg-primary text-white shadow-lg transition-all duration-200 hover:scale-105 hover:bg-[#20bd5a] hover:shadow-xl cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
       title="Add next step"
       aria-label="Add next step"
     >

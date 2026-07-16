@@ -148,12 +148,12 @@ const CommentItem: React.FC<{
                 onChange={(e) => setReplyText(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleReply()}
                 placeholder={`Reply to ${comment.from.name}...`}
-                className="flex-1 text-xs border border-slate-200 rounded-xl px-3 py-2 outline-none focus:border-sky-600 bg-white"
+                className="flex-1 text-xs border border-slate-200 rounded-xl px-3 py-2 outline-none focus:border-channel-green bg-white"
               />
               <button
                 type="button"
                 onClick={handleReply}
-                className="bg-sky-600 text-white p-2 rounded-xl hover:bg-[#4a3dd4] transition-all"
+                className="bg-channel-green text-white p-2 rounded-xl hover:bg-[#4a3dd4] transition-all"
               >
                 <Send className="w-3.5 h-3.5" />
               </button>
@@ -200,7 +200,7 @@ const PostCard: React.FC<{ post: FacebookPost }> = ({ post }) => {
   };
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden hover:border-sky-600/20 hover:shadow-lg transition-all">
+    <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden hover:border-channel-green/20 hover:shadow-lg transition-all">
       {post.fullPicture ? (
         <img src={post.fullPicture} alt="" className="w-full h-48 object-cover" />
       ) : (
@@ -238,7 +238,7 @@ const PostCard: React.FC<{ post: FacebookPost }> = ({ post }) => {
         <button
           type="button"
           onClick={() => setShowComments(!showComments)}
-          className="w-full flex items-center justify-between px-3 py-2 bg-[#fafaf9] border border-slate-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-sky-50 hover:text-sky-600 hover:border-sky-600/20 transition-all"
+          className="w-full flex items-center justify-between px-3 py-2 bg-[#fafaf9] border border-slate-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-sky-50 hover:text-sky-600 hover:border-channel-green/20 transition-all"
         >
           <span className="flex items-center gap-1.5">
             <MessageSquare className="w-3.5 h-3.5" />
@@ -315,14 +315,14 @@ const CreatePostModal: React.FC<{
             onChange={(e) => setMessage(e.target.value)}
             placeholder="What's on your mind? Share an update, announcement, or offer..."
             rows={5}
-            className="w-full text-sm border border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-sky-600 resize-none leading-relaxed"
+            className="w-full text-sm border border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-channel-green resize-none leading-relaxed"
           />
 
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => setScheduleMode(!scheduleMode)}
-              className={`flex items-center gap-2 text-sm font-bold px-3 py-2 rounded-xl border transition-all ${scheduleMode ? 'bg-sky-50 border-sky-600/30 text-sky-600' : 'bg-[#fafaf9] border-slate-200 text-gray-500'}`}
+              className={`flex items-center gap-2 text-sm font-bold px-3 py-2 rounded-xl border transition-all ${scheduleMode ? 'bg-sky-50 border-channel-green/30 text-sky-600' : 'bg-[#fafaf9] border-slate-200 text-gray-500'}`}
             >
               <Calendar className="w-3.5 h-3.5" />
               Schedule for later
@@ -332,7 +332,7 @@ const CreatePostModal: React.FC<{
                 type="datetime-local"
                 value={scheduledTime}
                 onChange={(e) => setScheduledTime(e.target.value)}
-                className="flex-1 text-xs border border-slate-200 rounded-xl px-3 py-2 outline-none focus:border-sky-600"
+                className="flex-1 text-xs border border-slate-200 rounded-xl px-3 py-2 outline-none focus:border-channel-green"
               />
             )}
           </div>
@@ -353,7 +353,7 @@ const CreatePostModal: React.FC<{
               onClose();
             }}
             disabled={!message.trim() || (scheduleMode && !scheduledTime)}
-            className="px-5 py-2 bg-sky-600 hover:bg-[#4a3dd4] disabled:bg-gray-200 disabled:cursor-not-allowed text-white text-sm font-bold rounded-xl transition-all flex items-center gap-2 shadow-md shadow-[#0284c7]/20"
+            className="px-5 py-2 bg-channel-green hover:bg-[#4a3dd4] disabled:bg-gray-200 disabled:cursor-not-allowed text-white text-sm font-bold rounded-xl transition-all flex items-center gap-2 shadow-md shadow-[#0284c7]/20"
           >
             {scheduleMode ? <><Calendar className="w-3.5 h-3.5" /> Schedule Post</> : <><Send className="w-3.5 h-3.5" /> Publish Now</>}
           </button>
@@ -546,7 +546,7 @@ export const FacebookPageView: React.FC = () => {
           <button
             type="button"
             onClick={() => setShowCreatePost(true)}
-            className="bg-sky-600 hover:bg-[#4a3dd4] text-white px-4 py-2 rounded-xl flex items-center gap-1.5 text-sm font-bold transition-all active:scale-95 shadow-md shadow-[#0284c7]/20"
+            className="bg-channel-green hover:bg-[#4a3dd4] text-white px-4 py-2 rounded-xl flex items-center gap-1.5 text-sm font-bold transition-all active:scale-95 shadow-md shadow-[#0284c7]/20"
           >
             <Plus className="w-3.5 h-3.5" /> Create Post
           </button>
@@ -652,7 +652,7 @@ export const FacebookPageView: React.FC = () => {
                 onClick={() => setActiveTab(tab)}
                 className={`px-4 py-2 text-sm font-bold transition-all border-b-2 mr-3 capitalize ${
                   activeTab === tab
-                    ? 'text-sky-600 border-sky-600 font-black'
+                    ? 'text-sky-600 border-channel-green font-black'
                     : 'text-gray-400 hover:text-gray-700 border-transparent'
                 }`}
               >

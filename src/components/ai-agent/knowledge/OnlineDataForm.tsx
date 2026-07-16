@@ -183,7 +183,7 @@ export const OnlineDataForm: React.FC<Props> = ({ agentId, onSaved }) => {
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="w-full py-2.5 bg-sky-600 hover:bg-sky-700 disabled:opacity-60 text-white rounded-xl text-sm font-bold"
+            className="w-full py-2.5 bg-channel-green hover:bg-[#20bd5a] disabled:opacity-60 text-white rounded-xl text-sm font-bold"
           >
             {saving ? 'Saving…' : 'Save to Knowledge Base'}
           </button>

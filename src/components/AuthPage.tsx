@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Lock, Mail } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import { PRODUCT_LOGO, PRODUCT_NAME } from '../lib/brand';
 import { api } from '../lib/api';
 import { applyAuthSession, userNeedsOnboarding } from '../lib/session';
@@ -20,6 +20,7 @@ export function AuthPage() {
   const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     trackEvent('login_started');
@@ -135,15 +136,23 @@ export function AuthPage() {
                 <div className="relative mt-1">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     autoComplete="current-password"
                     required
                     minLength={8}
-                    className="w-full pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    className="w-full pl-9 pr-10 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                     placeholder="Your password"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-primary cursor-pointer"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
                 </div>
               </label>
 
@@ -156,7 +165,7 @@ export function AuthPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 rounded-xl bg-brand-gradient hover:bg-brand-gradient-hover text-white text-sm font-bold transition-all disabled:opacity-60 shadow-sm cursor-pointer"
+                className="w-full py-3 rounded-full bg-channel-green hover:bg-[#20bd5a] text-white text-sm font-bold transition-all disabled:opacity-60 shadow-sm cursor-pointer"
               >
                 {loading ? 'Please wait…' : 'Log in'}
               </button>

@@ -11,4 +11,5 @@ export type ConnectionTypeCardData = {
   bestFor: string[];
   badge: string;
   ctaLabel: string;
+  comingSoon?: boolean;
 };

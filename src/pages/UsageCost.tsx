@@ -273,7 +273,7 @@ export const UsageCost: React.FC = () => {
               onChange={(e) => setSelectedMonth(e.target.value)}
               aria-label="Select billing month"
               disabled={loading}
-              className="cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-9 text-sm font-medium text-slate-800 shadow-sm transition-colors hover:border-slate-300 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-100 disabled:opacity-60"
+              className="cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-9 text-sm font-medium text-slate-800 shadow-sm transition-colors hover:border-slate-300 focus:border-channel-green focus:outline-none focus:ring-2 focus:ring-emerald-100 disabled:opacity-60"
             >
               {monthOptions.map((m) => (
                 <option key={m.value} value={m.value}>

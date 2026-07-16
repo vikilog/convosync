@@ -16,7 +16,6 @@ export const VALID_TABS = [
   'google-tools',
   'developers',
   'reports',
-  'usage-cost',
   'settings',
 ] as const;
 
@@ -29,6 +28,7 @@ export const SETTINGS_SECTIONS = [
   'security',
   'holidays',
   'notifications',
+  'wallet',
   'subscription',
   'billing',
   'recharge',
@@ -66,7 +66,12 @@ export function pathForGoogleTool(product: string): string {
 }
 
 export function settingsSectionFromPath(pathname: string): SettingsSection {
-  const segment = pathname.replace(/^\//, '').split('/')[1];
+  const parts = pathname.replace(/\/$/, '').split('/').filter(Boolean);
+  if (parts[0] !== 'settings') return 'profile';
+  const segment = parts[1];
+  if (segment === 'subscription' || segment === 'billing' || segment === 'recharge') {
+    return 'wallet';
+  }
   if (segment && SETTINGS_SECTIONS.includes(segment as SettingsSection)) {
     return segment as SettingsSection;
   }

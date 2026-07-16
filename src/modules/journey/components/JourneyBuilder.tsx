@@ -231,7 +231,7 @@ export function JourneyBuilder({ journey, onBack }: Props) {
             type="button"
             onClick={handlePublish}
             disabled={publish.isPending}
-            className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-hover disabled:opacity-50 cursor-pointer"
+            className="inline-flex items-center gap-2 rounded-full bg-channel-green px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#20bd5a] disabled:opacity-50 cursor-pointer"
           >
             {publish.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />

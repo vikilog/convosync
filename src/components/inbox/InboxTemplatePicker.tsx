@@ -246,7 +246,7 @@ export const InboxTemplatePicker: React.FC<Props> = ({
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Search templates…"
-                        className="w-full pl-8 pr-3 py-2 text-xs border border-slate-200 rounded-lg focus:ring-2 focus:ring-sky-200 focus:border-sky-500 outline-none"
+                        className="w-full pl-8 pr-3 py-2 text-xs border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-100 focus:border-channel-green outline-none"
                       />
                     </div>
                   </div>
@@ -396,7 +396,7 @@ export const InboxTemplatePicker: React.FC<Props> = ({
                                           return next;
                                         });
                                       }}
-                                      className="mt-1 w-full text-xs border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-200 focus:border-sky-500 outline-none"
+                                      className="mt-1 w-full text-xs border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-100 focus:border-channel-green outline-none"
                                       placeholder={`Value for {{${i + 1}}}`}
                                     />
                                   </label>
@@ -445,7 +445,7 @@ export const InboxTemplatePicker: React.FC<Props> = ({
                             (varCount > 0 && variableValues.some((v) => !v.trim()))
                           }
                           onClick={handleSend}
-                          className="flex items-center gap-2 px-4 py-2 text-sm font-black text-white bg-sky-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-sky-700"
+                          className="flex items-center gap-2 px-4 py-2 text-sm font-black text-white bg-channel-green rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#20bd5a]"
                         >
                           {sending ? (
                             <Loader2 className="w-4 h-4 animate-spin" />

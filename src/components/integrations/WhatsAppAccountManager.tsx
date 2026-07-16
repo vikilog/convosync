@@ -84,7 +84,7 @@ function ManagerTabs({
             role="tab"
             aria-selected={selected}
             onClick={() => onTabChange(tab.id)}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors duration-200 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors duration-200 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-channel-green ${
               selected
                 ? 'bg-white text-slate-900 shadow-sm'
                 : 'text-slate-500 hover:text-slate-800'
@@ -253,7 +253,7 @@ export function WhatsAppAccountManager({
                 type="button"
                 disabled={connectAnotherDisabled}
                 onClick={onConnectAnother}
-                className="inline-flex items-center gap-2 rounded-xl bg-brand-gradient px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-opacity duration-200 hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-purple"
+                className="inline-flex items-center gap-2 rounded-full bg-channel-green px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors duration-200 hover:bg-[#20bd5a] disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-channel-green"
               >
                 <Plus className="h-4 w-4" aria-hidden />
                 {connectAnotherLabel}
@@ -322,7 +322,7 @@ export function WhatsAppAccountManager({
               type="button"
               onClick={onSubscribeWebhooks}
               disabled={webhookSubscribing}
-              className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition-colors duration-200 hover:bg-primary-hover disabled:opacity-60 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              className="inline-flex items-center gap-2 rounded-full bg-channel-green px-4 py-2.5 text-sm font-semibold text-white transition-colors duration-200 hover:bg-[#20bd5a] disabled:opacity-60 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-channel-green"
             >
               <RefreshCw className={`h-4 w-4 ${webhookSubscribing ? 'animate-spin' : ''}`} aria-hidden />
               {webhookSubscribing ? 'Subscribing…' : 'Subscribe via API'}

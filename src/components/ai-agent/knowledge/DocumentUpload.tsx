@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { FileText, Upload, X } from 'lucide-react';
 
-const ACCEPTED = '.pdf,.doc,.docx,.txt';
+const ACCEPTED = '.pdf,.doc,.docx,.txt,.md,text/markdown';
 
 type Props = {
   onFilesChange: (files: File[]) => void;
@@ -13,7 +13,10 @@ export const DocumentUpload: React.FC<Props> = ({ onFilesChange }) => {
 
   const addFiles = (incoming: FileList | null) => {
     if (!incoming) return;
-    const next = [...files, ...Array.from(incoming)];
+    const allowed = /\.(pdf|doc|docx|txt|md)$/i;
+    const picked = Array.from(incoming).filter((f) => allowed.test(f.name));
+    if (!picked.length) return;
+    const next = [...files, ...picked];
     setFiles(next);
     onFilesChange(next);
   };
@@ -40,7 +43,7 @@ export const DocumentUpload: React.FC<Props> = ({ onFilesChange }) => {
       >
         <Upload className="w-8 h-8 text-sky-600 mx-auto mb-3" />
         <p className="text-sm font-medium text-[#111827]">Drag & drop or click to browse</p>
-        <p className="text-xs text-[#6B7280] mt-1">PDF, DOC, DOCX, TXT</p>
+        <p className="text-xs text-[#6B7280] mt-1">PDF, DOC, DOCX, TXT, MD</p>
         <input
           ref={inputRef}
           type="file"

@@ -12,12 +12,14 @@ export type CompanyForm = {
   postalCode: string;
   timezone: string;
   taxId: string;
+  logoUrl: string;
 };
 
 export type CompanySettingsResponse = {
   id?: string;
   slug?: string;
   name?: string | null;
+  logoUrl?: string | null;
   legalName?: string | null;
   industry?: string | null;
   website?: string | null;
@@ -58,6 +60,7 @@ export function mapWorkspaceToForm(
     postalCode: data.postalCode ?? '',
     timezone: data.timezone ?? 'Asia/Kolkata',
     taxId: data.taxId ?? '',
+    logoUrl: data.logoUrl ?? '',
   };
 }
 

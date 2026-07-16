@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Menu, X, ArrowRight } from 'lucide-react';
+import { Menu, X, ArrowRight, Play } from 'lucide-react';
 import { PRODUCT_LOGO, PRODUCT_NAME } from '../brand';
 
 interface NavbarProps {
@@ -18,13 +18,7 @@ export default function Navbar({ onNavigate, onLogin, onSignup }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 20) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -34,18 +28,20 @@ export default function Navbar({ onNavigate, onLogin, onSignup }: NavbarProps) {
     onNavigate(sectionId);
   };
 
+  const navLinkClass =
+    'transition-colors cursor-pointer text-gray-600 hover:text-emerald-700 font-medium';
+
   return (
     <nav
       id="main-nav"
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white/95 text-gray-900 backdrop-blur-md border-b ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled
-          ? 'shadow-sm border-gray-100 py-3'
-          : 'border-transparent py-5'
+          ? 'bg-white/95 backdrop-blur-md border-b border-gray-200/80 shadow-sm py-3'
+          : 'bg-[#f8faf9]/80 backdrop-blur-sm border-b border-transparent py-5'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
-          {/* Logo */}
           <button
             id="nav-logo"
             onClick={() => handleLinkClick('hero')}
@@ -54,56 +50,33 @@ export default function Navbar({ onNavigate, onLogin, onSignup }: NavbarProps) {
             <img
               src={PRODUCT_LOGO}
               alt={PRODUCT_NAME}
-              className="h-10 w-10 sm:h-12 sm:w-12 shrink-0 object-contain transition-transform group-hover:scale-[1.02]"
+              className="h-10 w-10 sm:h-11 sm:w-11 shrink-0 object-contain transition-transform group-hover:scale-[1.02]"
             />
-            <div className="min-w-0 hidden sm:block">
-              <span className="block text-xl font-bold font-display tracking-tight leading-tight text-gray-950">
-                {PRODUCT_NAME}
-              </span>
-            </div>
+            <span className="hidden sm:block text-xl font-bold font-display tracking-tight text-gray-950">
+              {PRODUCT_NAME}
+            </span>
           </button>
 
-          {/* Desktop Nav — hamburger until large screens (tablet-friendly) */}
-          <div className="hidden lg:flex items-center space-x-6 xl:space-x-8 text-sm font-medium">
-            <button
-              id="feature-nav-btn"
-              onClick={() => handleLinkClick('features')}
-              className="transition-colors cursor-pointer text-gray-600 hover:text-brand-indigo"
-            >
-              Features
-            </button>
-            <button
-              id="channels-nav-btn"
-              onClick={() => handleLinkClick('channels')}
-              className="transition-colors cursor-pointer text-gray-600 hover:text-brand-indigo"
-            >
-              Channels
-            </button>
-            <button
-              id="agents-nav-btn"
-              onClick={() => handleLinkClick('ai-agents')}
-              className="transition-colors cursor-pointer text-gray-600 hover:text-brand-indigo"
-            >
-              AI Agents
-            </button>
-            <button
-              id="pricing-nav-btn"
-              onClick={() => handleLinkClick('pricing')}
-              className="transition-colors cursor-pointer text-gray-600 hover:text-brand-indigo"
-            >
-              Pricing
-            </button>
-            <button
-              id="usecases-nav-btn"
-              onClick={() => handleLinkClick('usecases')}
-              className="transition-colors cursor-pointer text-gray-600 hover:text-brand-indigo"
-            >
-              Industry Solutions
-            </button>
+          <div className="hidden lg:flex items-center space-x-6 xl:space-x-8 text-sm">
+            {[
+              ['feature-nav-btn', 'features', 'Features'],
+              ['channels-nav-btn', 'channels', 'Channels'],
+              ['agents-nav-btn', 'ai-agents', 'AI Agents'],
+              ['pricing-nav-btn', 'pricing', 'Pricing'],
+              ['usecases-nav-btn', 'usecases', 'Industries'],
+            ].map(([id, section, label]) => (
+              <button
+                key={id}
+                id={id}
+                onClick={() => handleLinkClick(section)}
+                className={navLinkClass}
+              >
+                {label}
+              </button>
+            ))}
           </div>
 
-          {/* Right CTA buttons */}
-          <div className="hidden lg:flex items-center space-x-4">
+          <div className="hidden lg:flex items-center gap-3">
             <button
               id="nav-login-btn"
               type="button"
@@ -111,77 +84,62 @@ export default function Navbar({ onNavigate, onLogin, onSignup }: NavbarProps) {
                 setMobileMenuOpen(false);
                 onLogin?.();
               }}
-              className="text-sm font-medium px-4 py-2 hover:underline transition-all cursor-pointer text-gray-600 hover:text-brand-indigo"
+              className={`text-sm px-4 py-2 ${navLinkClass}`}
             >
               Login
             </button>
-            <button
-              id="nav-cta-btn"
-              type="button"
-              onClick={() => {
-                setMobileMenuOpen(false);
-                onSignup?.();
-              }}
-              className="bg-brand-gradient hover:bg-brand-gradient-hover text-white text-sm font-semibold px-5 py-2.5 rounded-xl shadow-lg shadow-brand-purple/25 hover:shadow-brand-purple/40 hover:-translate-y-0.5 transition-all flex items-center space-x-1.5 cursor-pointer"
-            >
-              <span>Start Free Trial</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
+            {isScrolled && (
+              <button
+                id="nav-cta-btn"
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onSignup?.();
+                }}
+                className="inline-flex items-center gap-1.5 rounded-full bg-channel-green hover:bg-[#20bd5a] text-white text-sm font-bold px-5 py-2.5 shadow-md shadow-emerald-600/15 transition-all cursor-pointer animate-fade-in"
+              >
+                <Play className="w-3.5 h-3.5 fill-current" aria-hidden />
+                <span>Start free trial</span>
+                <ArrowRight className="w-4 h-4" aria-hidden />
+              </button>
+            )}
           </div>
 
-          {/* Mobile menu button */}
           <div className="lg:hidden">
             <button
               id="mobile-menu-toggle"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-lg hover:bg-gray-100 text-gray-700 transition-colors focus:outline-none"
+              className="p-2 rounded-full border border-gray-200 bg-white/90 text-gray-700 transition-colors cursor-pointer"
             >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div id="mobile-drawer" className="lg:hidden bg-white text-gray-900 border-b border-gray-200 py-4 px-6 animate-fade-in shadow-xl">
-          <div className="flex flex-col space-y-4">
-            <button
-              id="mob-feat-btn"
-              onClick={() => handleLinkClick('features')}
-              className="text-left font-medium text-gray-700 hover:text-brand-indigo py-1.5"
-            >
-              Features
-            </button>
-            <button
-              id="mob-chan-btn"
-              onClick={() => handleLinkClick('channels')}
-              className="text-left font-medium text-gray-700 hover:text-brand-indigo py-1.5"
-            >
-              Channels
-            </button>
-            <button
-              id="mob-ag-btn"
-              onClick={() => handleLinkClick('ai-agents')}
-              className="text-left font-medium text-gray-700 hover:text-brand-indigo py-1.5"
-            >
-              AI Agents
-            </button>
-            <button
-              id="mob-pr-btn"
-              onClick={() => handleLinkClick('pricing')}
-              className="text-left font-medium text-gray-700 hover:text-brand-indigo py-1.5"
-            >
-              Pricing
-            </button>
-            <button
-              id="mob-uc-btn"
-              onClick={() => handleLinkClick('usecases')}
-              className="text-left font-medium text-gray-700 hover:text-brand-indigo py-1.5"
-            >
-              Industry Solutions
-            </button>
-            <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
+        <div
+          id="mobile-drawer"
+          className="lg:hidden bg-white border-b border-gray-200 py-4 px-6 animate-fade-in shadow-lg"
+        >
+          <div className="flex flex-col space-y-3">
+            {[
+              ['mob-feat-btn', 'features', 'Features'],
+              ['mob-chan-btn', 'channels', 'Channels'],
+              ['mob-ag-btn', 'ai-agents', 'AI Agents'],
+              ['mob-pr-btn', 'pricing', 'Pricing'],
+              ['mob-uc-btn', 'usecases', 'Industries'],
+            ].map(([id, section, label]) => (
+              <button
+                key={id}
+                id={id}
+                onClick={() => handleLinkClick(section)}
+                className="text-left font-medium text-gray-700 hover:text-emerald-700 py-1.5 cursor-pointer"
+              >
+                {label}
+              </button>
+            ))}
+            <div className="pt-4 border-t border-gray-100 flex items-center justify-between gap-3">
               <button
                 id="mob-login"
                 type="button"
@@ -189,7 +147,7 @@ export default function Navbar({ onNavigate, onLogin, onSignup }: NavbarProps) {
                   setMobileMenuOpen(false);
                   onLogin?.();
                 }}
-                className="text-gray-600 font-semibold text-sm hover:text-brand-indigo"
+                className="text-gray-600 font-semibold text-sm hover:text-emerald-700 cursor-pointer"
               >
                 Login
               </button>
@@ -200,9 +158,9 @@ export default function Navbar({ onNavigate, onLogin, onSignup }: NavbarProps) {
                   setMobileMenuOpen(false);
                   onSignup?.();
                 }}
-                className="bg-brand-gradient hover:bg-brand-gradient-hover text-white text-xs font-semibold px-4 py-2.5 rounded-lg flex items-center space-x-1 cursor-pointer"
+                className="inline-flex items-center gap-1 rounded-full bg-channel-green text-white text-xs font-bold px-4 py-2.5 cursor-pointer"
               >
-                <span>Free Trial</span>
+                <span>Free trial</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>

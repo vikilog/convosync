@@ -68,7 +68,7 @@ export function OnboardingProfileBanner() {
         <button
           type="button"
           onClick={() => navigate('/onboarding')}
-          className="inline-flex items-center justify-center gap-1.5 self-start rounded-xl bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-hover md:self-center"
+          className="inline-flex items-center justify-center gap-1.5 self-start rounded-full bg-channel-green px-4 py-2 text-sm font-bold text-white hover:bg-[#20bd5a] md:self-center"
         >
           Continue setup
           <ArrowRight className="h-3.5 w-3.5" />

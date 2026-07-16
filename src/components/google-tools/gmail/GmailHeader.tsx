@@ -65,7 +65,7 @@ export function GmailHeader({
             onClick={onCompose}
             title="Compose"
             aria-label="Compose"
-            className="inline-flex items-center justify-center gap-1.5 h-9 px-3.5 rounded-xl text-sm font-bold bg-primary text-white shadow-[0_2px_8px_rgba(91,76,245,0.25)] hover:bg-primary/90 transition-all whitespace-nowrap"
+            className="inline-flex items-center justify-center gap-1.5 h-9 px-3.5 rounded-xl text-sm font-bold bg-primary text-white shadow-[0_2px_8px_rgba(91,76,245,0.25)] hover:bg-[#20bd5a] transition-all whitespace-nowrap"
           >
             <PenSquare className="w-4 h-4 shrink-0" />
             <span>Compose</span>

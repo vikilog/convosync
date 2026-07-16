@@ -127,7 +127,7 @@ export const InboxCannedResponsePicker: React.FC<Props> = ({
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search canned responses..."
-                  className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-sky-200"
+                  className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
             </div>
@@ -196,7 +196,7 @@ export const InboxCannedResponsePicker: React.FC<Props> = ({
                 type="button"
                 disabled={!selected}
                 onClick={handleUse}
-                className="px-4 py-2 bg-sky-600 hover:bg-sky-700 disabled:opacity-50 text-white rounded-xl text-sm font-bold"
+                className="px-4 py-2 bg-channel-green hover:bg-[#20bd5a] disabled:opacity-50 text-white rounded-xl text-sm font-bold"
               >
                 Insert {selected?.hasMedia ? 'reply' : 'message'}
               </button>

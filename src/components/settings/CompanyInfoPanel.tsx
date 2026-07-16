@@ -1,7 +1,10 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import { Building2, Globe, Loader2, Mail, MapPin, Phone, Save } from 'lucide-react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Building2, Camera, Globe, Loader2, Mail, MapPin, Phone, Save, Trash2 } from 'lucide-react';
 import { api, getUserEmail, getWorkspaceId } from '../../lib/api';
+import { dispatchCompanyUpdated } from '../../lib/companyEvents';
+import { normalizeCompanySettingsResponse } from '../../lib/companySettings';
+import { compressImageFile } from '../../lib/imageUpload';
+import { useKeepAliveActivation } from '../KeepAlive';
 import {
   mapWorkspaceToForm,
   whatsappLinesFromSettings,
@@ -23,11 +26,12 @@ const emptyForm: CompanyForm = {
   postalCode: '',
   timezone: 'Asia/Kolkata',
   taxId: '',
+  logoUrl: '',
 };
 
 function payloadFromForm(form: CompanyForm) {
   return {
-    ...form,
+    name: form.name.trim(),
     legalName: form.legalName || null,
     industry: form.industry || null,
     website: form.website || null,
@@ -40,18 +44,20 @@ function payloadFromForm(form: CompanyForm) {
     postalCode: form.postalCode || null,
     timezone: form.timezone || null,
     taxId: form.taxId || null,
+    ...(form.logoUrl ? { logoUrl: form.logoUrl } : {}),
   };
 }
 
 export function CompanyInfoPanel() {
-  const location = useLocation();
   const activeWorkspaceId = getWorkspaceId();
+  const logoInputRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState<CompanyForm>(emptyForm);
   const [workspaceId, setWorkspaceId] = useState('');
   const [slug, setSlug] = useState('');
   const [whatsappLines, setWhatsappLines] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -66,10 +72,11 @@ export function CompanyInfoPanel() {
     setLoading(true);
     setError(null);
     try {
-      const [company, me] = await Promise.all([
-        api.getCompanySettings() as Promise<CompanySettingsResponse>,
+      const [companyRaw, me] = await Promise.all([
+        api.getCompanySettings(),
         api.getMe().catch(() => null) as Promise<{ email?: string } | null>,
       ]);
+      const company = normalizeCompanySettingsResponse(companyRaw);
       const fallbackEmail = company.email ? undefined : me?.email ?? getUserEmail() ?? undefined;
       applySettings(company, fallbackEmail);
     } catch (e) {
@@ -80,9 +87,12 @@ export function CompanyInfoPanel() {
   }, [applySettings]);
 
   useEffect(() => {
-    if (!location.pathname.includes('/settings/company-info')) return;
     void loadSettings();
-  }, [location.pathname, loadSettings, activeWorkspaceId]);
+  }, [loadSettings, activeWorkspaceId]);
+
+  useKeepAliveActivation(() => {
+    void loadSettings();
+  });
 
   const update = (field: keyof CompanyForm, value: string) => {
     setForm((f) => ({ ...f, [field]: value }));
@@ -95,15 +105,57 @@ export function CompanyInfoPanel() {
     setError(null);
     setMessage(null);
     try {
-      const saved = (await api.updateCompanySettings(
-        payloadFromForm(form)
-      )) as CompanySettingsResponse;
+      const saved = normalizeCompanySettingsResponse(
+        await api.updateCompanySettings(payloadFromForm(form))
+      );
       applySettings(saved);
+      dispatchCompanyUpdated({ name: saved.name, logoUrl: saved.logoUrl });
       setMessage('Company info saved.');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Save failed');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleLogoPick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+
+    setUploadingLogo(true);
+    setError(null);
+    setMessage(null);
+    try {
+      const compressed = await compressImageFile(file, 320, 0.88);
+      const saved = normalizeCompanySettingsResponse(
+        await api.updateCompanySettings({ logoUrl: compressed })
+      );
+      setForm((prev) => ({ ...prev, logoUrl: saved.logoUrl ?? compressed }));
+      dispatchCompanyUpdated({ name: saved.name ?? form.name, logoUrl: saved.logoUrl ?? compressed });
+      setMessage('Company logo updated.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to upload logo');
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
+
+  const handleRemoveLogo = async () => {
+    setUploadingLogo(true);
+    setError(null);
+    setMessage(null);
+    try {
+      const saved = normalizeCompanySettingsResponse(
+        await api.updateCompanySettings({ logoUrl: null })
+      );
+      setForm((prev) => ({ ...prev, logoUrl: '' }));
+      dispatchCompanyUpdated({ name: saved.name ?? form.name, logoUrl: null });
+      setMessage('Company logo removed.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to remove logo');
+    } finally {
+      setUploadingLogo(false);
     }
   };
 
@@ -126,6 +178,58 @@ export function CompanyInfoPanel() {
           Details for the active company workspace. Switch company from the sidebar if you manage
           multiple.
         </p>
+
+        <div className="mb-6 flex flex-wrap items-center gap-4 border-b border-slate-100 pb-6">
+          <div className="relative">
+            {form.logoUrl ? (
+              <img
+                src={form.logoUrl}
+                alt={form.name || 'Company logo'}
+                className="h-20 w-20 rounded-xl border border-slate-200 bg-white object-contain p-1"
+              />
+            ) : (
+              <div className="flex h-20 w-20 items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50 text-slate-400">
+                <Building2 className="h-8 w-8" aria-hidden />
+              </div>
+            )}
+            {uploadingLogo && (
+              <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/40">
+                <Loader2 className="h-5 w-5 animate-spin text-white" />
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <input
+              ref={logoInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={(e) => void handleLogoPick(e)}
+            />
+            <button
+              type="button"
+              onClick={() => logoInputRef.current?.click()}
+              disabled={uploadingLogo}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50"
+            >
+              <Camera className="h-4 w-4" aria-hidden />
+              {form.logoUrl ? 'Change logo' : 'Upload logo'}
+            </button>
+            {form.logoUrl ? (
+              <button
+                type="button"
+                onClick={() => void handleRemoveLogo()}
+                disabled={uploadingLogo}
+                className="ml-2 inline-flex items-center gap-1.5 rounded-xl border border-red-100 px-3 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50"
+              >
+                <Trash2 className="h-4 w-4" aria-hidden />
+                Remove
+              </button>
+            ) : null}
+            <p className="text-xs text-slate-500">Square PNG or JPG works best. Max 512 KB after resize.</p>
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label className="block md:col-span-2">
@@ -264,7 +368,7 @@ export function CompanyInfoPanel() {
           <button
             type="submit"
             disabled={saving}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white text-sm font-bold hover:bg-primary-hover disabled:opacity-60"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white text-sm font-bold hover:bg-[#20bd5a] disabled:opacity-60"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             Save changes

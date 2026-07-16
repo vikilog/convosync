@@ -401,7 +401,7 @@ export function AiKnowledgePanel() {
               type="button"
               onClick={() => void handleSyncAll()}
               disabled={syncing || loadingCollections}
-              className="inline-flex items-center gap-2 rounded-xl bg-primary hover:bg-primary-hover disabled:opacity-60 text-white text-sm font-bold px-4 py-2.5 transition-colors"
+              className="inline-flex items-center gap-2 rounded-xl bg-channel-green hover:bg-[#20bd5a] disabled:opacity-60 text-white text-sm font-bold px-4 py-2.5 transition-colors"
             >
               {syncingAll ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -452,7 +452,7 @@ export function AiKnowledgePanel() {
                       type="button"
                       onClick={() => void handleSyncCollection(col.name)}
                       disabled={syncing}
-                      className="inline-flex items-center gap-1 rounded-lg border border-primary/30 bg-sky-50 hover:bg-primary hover:text-white disabled:opacity-50 text-primary text-sm font-bold px-2.5 py-1.5 transition-colors"
+                      className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 hover:bg-channel-green hover:text-white disabled:opacity-50 text-emerald-800 text-sm font-bold px-2.5 py-1.5 transition-colors"
                     >
                       {isActive ? (
                         <Loader2 className="w-3 h-3 animate-spin" />

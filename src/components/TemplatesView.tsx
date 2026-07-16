@@ -392,7 +392,7 @@ export const TemplatesView: React.FC = () => {
           onClick={() => navigate(pathForTemplatesList('canned'))}
           className={`px-3 py-2 rounded-xl text-sm font-bold border inline-flex items-center gap-1.5 ${
             channel === 'canned'
-              ? 'bg-sky-600 text-white border-[#0284c7]'
+              ? 'bg-channel-green text-white border-[#0284c7]'
               : 'bg-white text-gray-700 border-slate-200'
           }`}
         >
@@ -463,7 +463,7 @@ export const TemplatesView: React.FC = () => {
             onClick={openCreate}
             className={`px-3 py-2 text-white rounded-xl text-meta font-bold flex items-center gap-1.5 shadow-sm ${
               channel === 'email'
-                ? 'bg-primary hover:bg-primary/90'
+                ? 'bg-channel-green hover:bg-[#20bd5a]'
                 : 'bg-[#008069] hover:bg-[#006e5b]'
             }`}
           >
@@ -538,7 +538,7 @@ function EmptyState({ channel, onCreate }: { channel: Channel; onCreate: () => v
         type="button"
         onClick={onCreate}
         className={`mt-4 px-4 py-2 text-white rounded-xl text-sm font-bold ${
-          channel === 'email' ? 'bg-primary' : channel === 'canned' ? 'bg-sky-600' : 'bg-[#008069]'
+          channel === 'email' ? 'bg-primary' : channel === 'canned' ? 'bg-channel-green' : 'bg-[#008069]'
         }`}
       >
         {channel === 'canned' ? 'Add canned response' : 'Create template'}

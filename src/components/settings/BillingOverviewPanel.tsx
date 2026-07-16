@@ -25,6 +25,7 @@ import {
   invoiceStatusStyles,
 } from '../../lib/billingFormat';
 import { pathForSettingsSection } from '../../routes';
+import { formatCc, inrToCc } from '../../lib/convocoins';
 import { BillingAddonsPanel, type AddonCatalogEntry } from './BillingAddonsPanel';
 
 type BillingTransaction = {
@@ -44,6 +45,12 @@ type BillingTransaction = {
 
 type BillingWorkspace = {
   subscriptionStatus: string;
+  wallet?: {
+    balancePaise: number;
+    balanceInr: number;
+    isLowBalance: boolean;
+    lowBalanceThresholdInr: number;
+  } | null;
   plan: { id: string; slug: string; name: string } | null;
   billingSubscription: {
     id: string;
@@ -241,7 +248,29 @@ export function BillingOverviewPanel() {
       )}
 
       <section className="rounded-xl border border-slate-200 bg-white p-4 md:p-5">
-        <div className="grid gap-3 md:grid-cols-3">
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+              ConvoCoins balance
+            </p>
+            <p className="mt-1 text-base font-semibold text-slate-900">
+              {formatCc(inrToCc(data.wallet?.balanceInr ?? 0))}
+            </p>
+            <p className="mt-0.5 text-xs text-slate-600">
+              {data.wallet?.isLowBalance ? (
+                <span className="text-amber-700">Low balance — recharge soon</span>
+              ) : (
+                formatInrAmount(data.wallet?.balanceInr ?? 0)
+              )}
+            </p>
+            <Link
+              to={pathForSettingsSection('recharge')}
+              className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-violet-700 hover:text-violet-800"
+            >
+              Add ConvoCoins
+              <ArrowRight className="h-3 w-3" />
+            </Link>
+          </div>
           <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
             <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
               Current plan

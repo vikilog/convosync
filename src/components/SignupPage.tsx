@@ -219,7 +219,7 @@ export function SignupPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 rounded-xl bg-brand-gradient hover:bg-brand-gradient-hover text-white text-sm font-bold transition-all disabled:opacity-60 shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-3 rounded-full bg-channel-green hover:bg-[#20bd5a] text-white text-sm font-bold transition-all disabled:opacity-60 shadow-sm flex items-center justify-center gap-2 cursor-pointer"
               >
                 {loading ? (
                   'Creating account…'

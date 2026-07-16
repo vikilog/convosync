@@ -165,7 +165,7 @@ export const SkillEditor: React.FC<Props> = ({ agentId, skillId, avatarUrl }) =>
               type="button"
               disabled={saving || skill.status === 'live'}
               onClick={() => void handlePublish()}
-              className="inline-flex items-center gap-1.5 px-4 py-2 bg-sky-600 hover:bg-sky-700 disabled:opacity-60 text-white rounded-xl text-sm font-bold"
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-channel-green hover:bg-[#20bd5a] disabled:opacity-60 text-white rounded-xl text-sm font-bold"
             >
               <Play className="w-4 h-4" />
               Set live

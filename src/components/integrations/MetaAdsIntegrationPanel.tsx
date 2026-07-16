@@ -35,7 +35,6 @@ export const MetaAdsIntegrationPanel: React.FC<MetaAdsIntegrationPanelProps> = (
   const [connected, setConnected] = useState(false);
   const [account, setAccount] = useState<AdAccount | null>(null);
   const [adAccounts, setAdAccounts] = useState<MetaAdAccountOption[]>([]);
-  const [oauthRedirectUri, setOauthRedirectUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [connecting, setConnecting] = useState(false);
   const [syncing, setSyncing] = useState(false);
@@ -63,12 +62,6 @@ export const MetaAdsIntegrationPanel: React.FC<MetaAdsIntegrationPanelProps> = (
         setConnected(false);
         setAccount(null);
         setAdAccounts([]);
-        try {
-          const oauth = await api.getMetaAdsOAuthState();
-          setOauthRedirectUri(oauth.redirectUri);
-        } catch {
-          setOauthRedirectUri(import.meta.env.VITE_META_ADS_REDIRECT_URI || null);
-        }
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load Meta Ads');
@@ -180,12 +173,6 @@ export const MetaAdsIntegrationPanel: React.FC<MetaAdsIntegrationPanelProps> = (
           </p>
         )}
 
-        {oauthRedirectUri && (
-          <p className="text-xs text-gray-500 font-mono bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 break-all">
-            OAuth redirect URI: {oauthRedirectUri}
-          </p>
-        )}
-
         {error && (
           <p className="text-sm font-medium text-red-700 bg-red-50 border border-red-100 rounded-xl px-4 py-2">
             {error}
@@ -196,7 +183,7 @@ export const MetaAdsIntegrationPanel: React.FC<MetaAdsIntegrationPanelProps> = (
           type="button"
           onClick={() => void handleConnect()}
           disabled={connecting || !hasValidAppId}
-          className="w-full px-4 py-2.5 bg-[#1877F2] hover:bg-[#166fe0] disabled:opacity-60 text-white text-sm font-bold rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-2"
+          className="w-full px-4 py-2.5 bg-channel-green hover:bg-[#20bd5a] disabled:opacity-60 text-white text-sm font-bold rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-2"
         >
           <Facebook className="w-4 h-4 fill-white" />
           {connecting ? 'Redirecting…' : 'Connect Meta Account'}

@@ -146,7 +146,7 @@ const DailyTrendChart: React.FC<{
                 className={`px-2.5 py-1 rounded-lg text-sm font-bold flex items-center gap-1 transition-all ${
                   active
                     ? 'text-white shadow-sm'
-                    : 'bg-[#fafaf9] text-gray-500 border border-slate-200 hover:border-sky-600/30'
+                    : 'bg-[#fafaf9] text-gray-500 border border-slate-200 hover:border-channel-green/30'
                 }`}
                 style={active ? { backgroundColor: m.color } : undefined}
               >
@@ -369,7 +369,7 @@ const PostEngagementChart: React.FC<{ posts: FacebookPost[] }> = ({ posts }) => 
                 title={`Comments: ${post.comments}`}
               />
               <div
-                className="h-full bg-sky-600"
+                className="h-full bg-channel-green"
                 style={{ width: `${(post.shares / maxTotal) * 100}%` }}
                 title={`Shares: ${post.shares}`}
               />
@@ -385,7 +385,7 @@ const PostEngagementChart: React.FC<{ posts: FacebookPost[] }> = ({ posts }) => 
       <div className="flex gap-4 mt-5 pt-4 border-t border-slate-200 text-sm font-bold text-gray-500">
         <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-pink-500" /> Likes</span>
         <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-500" /> Comments</span>
-        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-sky-600" /> Shares</span>
+        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-channel-green" /> Shares</span>
       </div>
     </div>
   );
