@@ -33,6 +33,13 @@ export function MessageAttachment({ message }: Props) {
   const hasFile = Boolean(media?.storageKey);
   const isSending = message.status === 'sending';
   const localPreviewUrl = message.localPreviewUrl;
+  const isMediaType =
+    type === 'image' ||
+    type === 'video' ||
+    type === 'audio' ||
+    type === 'document' ||
+    type === 'sticker' ||
+    type === 'location';
 
   useEffect(() => {
     if (localPreviewUrl || !hasFile || type === 'location') return;
@@ -84,9 +91,11 @@ export function MessageAttachment({ message }: Props) {
   }
 
   if (!hasFile && !localPreviewUrl) {
-    if (type === 'image' || type === 'video' || type === 'audio' || type === 'document' || type === 'sticker') {
+    if (isMediaType) {
       return (
-        <p className="text-sm text-[#667781] italic">{message.content}</p>
+        <p className="text-sm text-[#667781] italic px-1.5 py-2">
+          {message.content === '[media]' ? 'Media unavailable' : message.content}
+        </p>
       );
     }
     return null;

@@ -8,6 +8,7 @@ import { Check, Loader2 } from 'lucide-react';
 import { api, formatCatchError } from '../../lib/api';
 import { openRazorpayCheckout } from '../../lib/razorpay';
 import { BRAND_PURPLE } from '../../lib/convocoins';
+import { hasPaidSubscription, subscriptionStatusLabel } from '../../lib/billingSubscription';
 
 const PLAN_NAME = 'ConvoSync Pro';
 const PLAN_PRICE_INR = 1999;
@@ -47,19 +48,7 @@ function formatBillingDate(iso: string | null): string {
 }
 
 function subscriptionLabel(status: string, billingStatus?: string): string {
-  const normalized = (billingStatus ?? status).toLowerCase();
-  if (normalized === 'active' || normalized === 'authenticated') return 'Active';
-  if (normalized === 'trial' || status === 'trial') return 'Trial';
-  if (normalized === 'past_due') return 'Past due';
-  if (normalized === 'cancelled' || normalized === 'canceled') return 'Cancelled';
-  return 'Inactive';
-}
-
-function isActiveSubscription(data: BillingWorkspace): boolean {
-  const billingStatus = data.billingSubscription?.status?.toLowerCase();
-  if (billingStatus && ['active', 'authenticated'].includes(billingStatus)) return true;
-  const workspaceStatus = data.subscriptionStatus.toLowerCase();
-  return workspaceStatus === 'active' || workspaceStatus === 'authenticated';
+  return subscriptionStatusLabel(status, billingStatus);
 }
 
 export function SubscriptionPanel({
@@ -191,7 +180,7 @@ export function SubscriptionPanel({
     );
   }
 
-  const active = data ? isActiveSubscription(data) : false;
+  const active = data ? hasPaidSubscription(data) : false;
   const status = data
     ? subscriptionLabel(data.subscriptionStatus, data.billingSubscription?.status)
     : 'Inactive';

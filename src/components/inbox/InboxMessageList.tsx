@@ -34,8 +34,11 @@ const MessageBubble: React.FC<{ message: ChatMessage; channel: Channel }> = ({
 
   const isJourneyMessage = message.senderName === 'Journey' && !isContact;
   const messageType = message.type ?? 'text';
-  const isRichMessage =
-    !isDeleted && messageType !== 'text' && messageType !== 'template';
+  const hasMediaAttachment =
+    messageType !== 'text' &&
+    messageType !== 'template' &&
+    Boolean(message.media?.storageKey || message.localPreviewUrl || message.media?.latitude != null);
+  const isRichMessage = !isDeleted && hasMediaAttachment;
 
   // ✓ sent · ✓✓ delivered · blue ✓✓ read (WhatsApp semantics; ack values map to status)
   const deliveryStatusIcon = !isContact ? (
@@ -59,15 +62,19 @@ const MessageBubble: React.FC<{ message: ChatMessage; channel: Channel }> = ({
     )
   ) : null;
 
-  if ((isWhatsApp || isInstagram) && isRichMessage) {
+  if (isRichMessage) {
     const bubbleBase = isWhatsApp
       ? 'shadow-[0_1px_0.5px_rgba(11,20,26,0.13)] ' +
         (isContact
           ? 'bg-white rounded-lg rounded-tl-none'
           : 'bg-[#d9fdd3] rounded-lg rounded-tr-none')
-      : isContact
-        ? 'bg-white rounded-lg rounded-tl-none border border-slate-200/60 shadow-xs'
-        : 'bg-gradient-to-br from-[#833AB4] to-[#E1306C] rounded-lg rounded-tr-none shadow-xs';
+      : channel === 'messenger'
+        ? isContact
+          ? 'bg-white rounded-lg rounded-tl-none border border-slate-200/60 shadow-xs'
+          : 'bg-[#0084ff] rounded-lg rounded-tr-none shadow-xs'
+        : isContact
+          ? 'bg-white rounded-lg rounded-tl-none border border-slate-200/60 shadow-xs'
+          : 'bg-gradient-to-br from-[#833AB4] to-[#E1306C] rounded-lg rounded-tr-none shadow-xs';
 
     return (
       <div

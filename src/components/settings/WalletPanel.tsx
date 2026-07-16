@@ -28,6 +28,10 @@ import {
   inrToCc,
   paiseToCc,
 } from '../../lib/convocoins';
+import {
+  hasPaidSubscription,
+  subscriptionStatusLabel,
+} from '../../lib/billingSubscription';
 import { openRazorpayCheckout } from '../../lib/razorpay';
 import { computeWalletRechargeQuote, type WalletRechargeQuote } from '../../lib/walletRechargeQuote';
 import { RechargeConfirmDialog } from './RechargeConfirmDialog';
@@ -118,19 +122,7 @@ function formatTxDate(iso: string): string {
 }
 
 function subscriptionLabel(status: string, billingStatus?: string): string {
-  const normalized = (billingStatus ?? status).toLowerCase();
-  if (normalized === 'active' || normalized === 'authenticated') return 'Active';
-  if (normalized === 'trial' || status === 'trial') return 'Trial';
-  if (normalized === 'past_due') return 'Past due';
-  return 'Inactive';
-}
-
-function hasPaidSubscription(billing: BillingWorkspace | null): boolean {
-  if (!billing) return false;
-  const billingStatus = billing.billingSubscription?.status?.toLowerCase();
-  if (billingStatus && ['active', 'authenticated'].includes(billingStatus)) return true;
-  const workspaceStatus = billing.subscriptionStatus.toLowerCase();
-  return workspaceStatus === 'active' || workspaceStatus === 'authenticated';
+  return subscriptionStatusLabel(status, billingStatus);
 }
 
 function isOnTrial(billing: BillingWorkspace | null): boolean {

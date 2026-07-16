@@ -163,20 +163,62 @@ function mapMessageMediaFromApi(metadata: unknown): ChatMessage['media'] | undef
   };
 }
 
+function inferMessageTypeFromMedia(
+  type: ChatMessage['type'] | undefined,
+  media: ChatMessage['media'] | undefined
+): ChatMessage['type'] {
+  if (type && type !== 'text') return type;
+  if (!media) return type ?? 'text';
+  if (media.latitude != null && media.longitude != null) return 'location';
+  const mime = media.mimeType;
+  if (mime?.startsWith('image/')) return 'image';
+  if (mime?.startsWith('video/')) return 'video';
+  if (mime?.startsWith('audio/')) return 'audio';
+  if (media.storageKey || mime) return 'document';
+  return type ?? 'text';
+}
+
+function mediaPreviewLabel(type: ChatMessage['type']): string {
+  switch (type) {
+    case 'image':
+    case 'sticker':
+      return '📷 Photo';
+    case 'video':
+      return '🎥 Video';
+    case 'audio':
+      return '🎤 Audio';
+    case 'document':
+      return '📎 Document';
+    case 'location':
+      return '📍 Location';
+    default:
+      return 'Media';
+  }
+}
+
 export function mapMessageFromApi(raw: Record<string, unknown>): ChatMessage {
   const createdAt = String(raw.createdAt ?? new Date().toISOString());
-  const type = raw.type ? (String(raw.type) as ChatMessage['type']) : 'text';
   const media = mapMessageMediaFromApi(raw.metadata);
+  const type = inferMessageTypeFromMedia(
+    raw.type ? (String(raw.type) as ChatMessage['type']) : 'text',
+    media
+  );
   const metadata =
     raw.metadata && typeof raw.metadata === 'object'
       ? (raw.metadata as Record<string, unknown>)
       : null;
   const revoked = metadata?.revoked === true;
+  const rawContent = String(raw.content ?? '');
+  const content = revoked
+    ? 'This message was deleted'
+    : rawContent === '[media]' && type !== 'text'
+      ? mediaPreviewLabel(type)
+      : rawContent;
   return {
     id: String(raw.id),
     sender: raw.sender as ChatMessage['sender'],
     senderName: String(raw.senderName ?? ''),
-    content: revoked ? 'This message was deleted' : String(raw.content),
+    content,
     type: revoked ? 'text' : type,
     media: revoked ? undefined : media,
     createdAt,

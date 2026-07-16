@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import {
-  Search,
   Sparkles,
   FileText,
   MessageSquareText,
@@ -23,6 +22,8 @@ import { api, getUserId, getUserName } from '../lib/api';
 import { useWorkspaceAccess } from '../hooks/useWorkspaceAccess';
 import {
   isConversationInInboxScope,
+  isInboxChannelAllowed,
+  type InboxChannel,
 } from '../lib/inboxScope';
 import { mapContactFromApi, mapMessageFromApi } from '../lib/mappers';
 import { dedupeInboxConversations, dedupeInboxThreads } from '../lib/inboxDedupe';
@@ -284,6 +285,17 @@ function whatsappAccountLabel(acc: WhatsAppInboxAccount): string {
   return acc.label || acc.displayName || acc.phoneNumber || 'WhatsApp';
 }
 
+const FILTER_TABS = [
+  { id: 'all' as const, label: 'All' },
+  { id: 'mine' as const, label: 'Mine' },
+  { id: 'unassigned' as const, label: 'Unassigned' },
+];
+
+const CHANNEL_TABS: { id: InboxChannel; label: string }[] = [
+  { id: 'whatsapp', label: 'WhatsApp' },
+  { id: 'instagram', label: 'Instagram' },
+];
+
 function contactChannel(contact: Contact): 'whatsapp' | 'instagram' | 'messenger' {
   if (contact.channel === 'instagram') return 'instagram';
   if (contact.channel === 'messenger') return 'messenger';
@@ -323,10 +335,13 @@ export const InboxView: React.FC = () => {
   const [publishedJourneys, setPublishedJourneys] = useState<JourneyOption[]>([]);
 
   const [filterTab, setFilterTab] = useState<'all' | 'mine' | 'unassigned'>('all');
+  const [channelFilter, setChannelFilter] = useState<InboxChannel>('whatsapp');
   const [whatsappAccounts, setWhatsappAccounts] = useState<WhatsAppInboxAccount[]>([]);
   const [instagramInboxLabel, setInstagramInboxLabel] = useState<string | null>(null);
+  const [instagramConnected, setInstagramConnected] = useState(false);
+  const [instagramSyncing, setInstagramSyncing] = useState(false);
+  const [instagramSyncHint, setInstagramSyncHint] = useState<string | null>(null);
   const [messengerInboxLabel, setMessengerInboxLabel] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState<string>('');
 
   const [messageInput, setMessageInput] = useState<string>('');
   const [sendError, setSendError] = useState<string | null>(null);
@@ -351,16 +366,23 @@ export const InboxView: React.FC = () => {
   const inboxThreadsRef = useRef(inboxThreads);
   inboxThreadsRef.current = inboxThreads;
 
-  const filteredThreads = inboxThreads.filter((thread) => {
-    const handle = contactDisplayHandle(thread);
-    const matchesSearch =
-      thread.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      thread.phone.includes(searchQuery) ||
-      handle.toLowerCase().includes(searchQuery.toLowerCase());
+  const visibleChannelTabs = useMemo(
+    () => CHANNEL_TABS.filter((tab) => isInboxChannelAllowed(tab.id, inboxScope)),
+    [inboxScope]
+  );
 
+  useEffect(() => {
+    if (!visibleChannelTabs.some((tab) => tab.id === channelFilter)) {
+      setChannelFilter(visibleChannelTabs[0]?.id ?? 'whatsapp');
+    }
+  }, [channelFilter, visibleChannelTabs]);
+
+  const filteredThreads = inboxThreads.filter((thread) => {
+    const channel = contactChannel(thread);
+    const matchesChannel = channel === channelFilter;
     const matchesScope = isConversationInInboxScope(
       {
-        channel: contactChannel(thread),
+        channel,
         channelAccountId: thread.channelAccountId,
       },
       inboxScope
@@ -368,19 +390,15 @@ export const InboxView: React.FC = () => {
 
     if (filterTab === 'mine') {
       return (
-        matchesSearch &&
+        matchesChannel &&
         matchesScope &&
         assignedToByConversationId[thread.conversationId] === `user:${currentUserId}`
       );
     }
     if (filterTab === 'unassigned') {
-      return (
-        matchesSearch &&
-        matchesScope &&
-        !assignedToByConversationId[thread.conversationId]
-      );
+      return matchesChannel && matchesScope && !assignedToByConversationId[thread.conversationId];
     }
-    return matchesSearch && matchesScope;
+    return matchesChannel && matchesScope;
   });
 
   const selectedThread =
@@ -455,6 +473,7 @@ export const InboxView: React.FC = () => {
       ]);
 
       const igList = (igAccounts as { accounts?: Array<{ label?: string; username?: string }> }).accounts || [];
+      setInstagramConnected(igList.length > 0);
       if (igList.length > 0) {
         const primary = igList[0];
         setInstagramInboxLabel(
@@ -835,26 +854,26 @@ export const InboxView: React.FC = () => {
     socket.on('contact_updated', onContactUpdated);
     socket.on('message_status', onMessageStatus);
 
-    const onMessengerSyncProgress = (payload: { phase?: string; message?: string }) => {
-      if (payload.phase === 'completed') {
-        setMessengerSyncing(false);
-        setMessengerSyncHint(payload.message || 'Messenger sync complete.');
+    const onMessengerSyncProgress = (payload: { phase?: string }) => {
+      if (payload.phase === 'completed' || payload.phase === 'error') {
         void loadConversations();
-      } else if (payload.phase === 'error') {
-        setMessengerSyncing(false);
-        setMessengerSyncHint(payload.message || 'Messenger sync failed.');
       }
     };
     socket.on('messenger_sync_progress', onMessengerSyncProgress);
 
     const onInstagramSyncProgress = (payload: { phase?: string; message?: string }) => {
-      if (payload.phase === 'completed') {
+      if (payload.phase === 'started') {
+        setInstagramSyncing(true);
+        setInstagramSyncHint(payload.message || 'Syncing Instagram chats…');
+      } else if (payload.phase === 'completed') {
         setInstagramSyncing(false);
         setInstagramSyncHint(payload.message || 'Instagram sync complete.');
         void loadConversations();
       } else if (payload.phase === 'error') {
         setInstagramSyncing(false);
         setInstagramSyncHint(payload.message || 'Instagram sync failed.');
+      } else if (payload.message) {
+        setInstagramSyncHint(payload.message);
       }
     };
     socket.on('instagram_sync_progress', onInstagramSyncProgress);
@@ -1220,6 +1239,29 @@ export const InboxView: React.FC = () => {
     publishedJourneys
   );
 
+  const instagramThreadCount = inboxThreads.filter(
+    (thread) => contactChannel(thread) === 'instagram'
+  ).length;
+
+  const channelEmptyMessage =
+    channelFilter === 'whatsapp'
+      ? 'No WhatsApp conversations yet.'
+      : 'No Instagram conversations yet.';
+
+  async function handleInstagramSync() {
+    setInstagramSyncing(true);
+    setInstagramSyncHint('Starting Instagram sync…');
+    try {
+      const res = (await api.syncInstagramInbox()) as { message?: string };
+      setInstagramSyncHint(res.message || 'Instagram sync started…');
+    } catch (err) {
+      setInstagramSyncing(false);
+      setInstagramSyncHint(
+        err instanceof Error ? err.message : 'Failed to start Instagram sync'
+      );
+    }
+  }
+
   const listEmptyMessage = loading
     ? 'Loading conversations…'
     : loadError
@@ -1228,7 +1270,9 @@ export const InboxView: React.FC = () => {
         ? `No conversations assigned to ${currentUserName || 'you'}.`
         : filterTab === 'unassigned'
           ? 'No unassigned conversations.'
-          : 'No conversations match your search.';
+          : inboxThreads.some((t) => contactChannel(t) === channelFilter)
+            ? 'No conversations in this view.'
+            : channelEmptyMessage;
 
   return (
     <div className="flex flex-row h-full min-h-0 overflow-hidden bg-slate-50 border-t border-slate-200 selection:bg-sky-50">
@@ -1240,42 +1284,94 @@ export const InboxView: React.FC = () => {
         }`}
       >
         <div className="p-3 border-b border-slate-200 flex flex-col gap-2">
-          <div className="flex gap-2">
-            <div className="relative flex-1 min-w-0">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                <Search className="w-3.5 h-3.5" />
-              </span>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search chats..."
-                className="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 pl-9 pr-3 text-sm focus:ring-2 focus:ring-emerald-100 focus:border-channel-green outline-none focus:outline-none"
-              />
-            </div>
-            <select
-              value={filterTab}
-              onChange={(e) => setFilterTab(e.target.value as 'all' | 'mine' | 'unassigned')}
-              className="shrink-0 bg-slate-50 border border-slate-200 rounded-lg py-2 pl-2 pr-7 text-sm font-bold text-gray-700 focus:ring-2 focus:ring-emerald-100 focus:border-channel-green outline-none cursor-pointer"
-              aria-label="Filter conversations"
-            >
-              <option value="all">All</option>
-              <option value="mine">Mine</option>
-              <option value="unassigned">Unassigned</option>
-            </select>
-            {whatsappAccounts.length > 0 && (
+          <div
+            className="flex min-w-0 gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1"
+            role="tablist"
+            aria-label="Filter conversations"
+          >
+            {FILTER_TABS.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                role="tab"
+                aria-selected={filterTab === tab.id}
+                onClick={() => setFilterTab(tab.id)}
+                className={`flex-1 rounded-md py-1.5 text-xs font-bold transition-colors ${
+                  filterTab === tab.id
+                    ? 'bg-white text-emerald-800 shadow-sm ring-1 ring-emerald-100'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+          <div
+            className="flex min-w-0 gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1"
+            role="tablist"
+            aria-label="Channel"
+          >
+            {visibleChannelTabs.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                role="tab"
+                aria-selected={channelFilter === tab.id}
+                onClick={() => setChannelFilter(tab.id)}
+                className={`flex-1 rounded-md py-1.5 text-xs font-bold transition-colors ${
+                  channelFilter === tab.id
+                    ? 'bg-white text-emerald-800 shadow-sm ring-1 ring-emerald-100'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+            {channelFilter === 'whatsapp' && whatsappAccounts.length > 0 ? (
               <button
                 type="button"
                 onClick={() => setNewChatOpen(true)}
-                className="rounded-lg border p-2 bg-[#128C7E] hover:bg-[#0f7a6e] text-white border-[#128C7E]/30 transition-all shrink-0 shadow-sm"
+                className="shrink-0 rounded-md bg-[#128C7E] p-1.5 text-white transition-colors hover:bg-[#0f7a6e]"
                 title="New WhatsApp chat"
                 aria-label="New WhatsApp chat"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="h-3.5 w-3.5" />
               </button>
-            )}
+            ) : null}
           </div>
         </div>
+
+        {channelFilter === 'instagram' &&
+        instagramConnected &&
+        instagramThreadCount === 0 &&
+        !loading &&
+        filterTab === 'all' ? (
+          <div className="mx-3 mt-2 rounded-lg border border-[#E1306C]/20 bg-[#fce8f0] px-3 py-2.5">
+            <p className="text-xs font-semibold text-[#C13584]">Instagram connected — no chats yet</p>
+            <p className="mt-1 text-xs text-slate-600 leading-snug">
+              Sync imports recent DMs. Meta may block very old threads; new customer messages still
+              arrive live.
+            </p>
+            <button
+              type="button"
+              disabled={instagramSyncing}
+              onClick={() => void handleInstagramSync()}
+              className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-[#E1306C] px-3 py-1.5 text-xs font-semibold text-white hover:opacity-95 disabled:opacity-60"
+            >
+              {instagramSyncing ? (
+                <>
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  Syncing…
+                </>
+              ) : (
+                'Sync Instagram chats'
+              )}
+            </button>
+            {instagramSyncHint ? (
+              <p className="mt-2 text-[11px] text-slate-500 leading-snug">{instagramSyncHint}</p>
+            ) : null}
+          </div>
+        ) : null}
 
         <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
           {loading && inboxThreads.length === 0 ? (
@@ -1312,9 +1408,9 @@ export const InboxView: React.FC = () => {
                       selectThread(thread.conversationId);
                     }
                   }}
-                  className={`px-3 py-2.5 cursor-pointer transition-all border-l-3 text-left relative ${
+                  className={`group px-3 py-2.5 cursor-pointer transition-all border-l-3 text-left relative ${
                     isActive
-                      ? 'bg-slate-50 border-channel-green shadow-[inset_2px_0_0_#0284c7]'
+                      ? 'bg-emerald-50/80 border-l-channel-green shadow-[inset_3px_0_0_#25d366]'
                       : 'border-transparent hover:bg-slate-50'
                   }`}
                 >
@@ -1348,7 +1444,13 @@ export const InboxView: React.FC = () => {
                     <div className="overflow-hidden min-w-0 flex-1 leading-tight">
                       <div className="flex items-center justify-between gap-1 min-w-0">
                         <div className="flex items-center gap-1 min-w-0 flex-1">
-                          <h4 className="text-sm font-bold text-gray-900 group-hover:text-sky-600 truncate">
+                          <h4
+                            className={`text-sm font-bold truncate ${
+                              isActive
+                                ? 'text-emerald-900'
+                                : 'text-gray-900 group-hover:text-emerald-700'
+                            }`}
+                          >
                             {thread.name}
                           </h4>
                           <span
