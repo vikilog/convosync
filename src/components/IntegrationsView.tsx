@@ -60,6 +60,8 @@ function channelViewFromSearch(search: string): ChannelView {
   if (channel === 'email') return 'email';
   if (channel === 'google') return 'google';
   if (channel === 'whatsapp') return 'whatsapp';
+  if (channel === 'instagram') return 'instagram';
+  if (channel === 'messenger') return 'messenger';
   if (channel === 'meta-ads') return 'meta-ads';
   if (channel === 'google-ads') return 'google-ads';
   if (channel === 'ai') return 'ai';
@@ -1254,8 +1256,9 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
   }
 
   const whatsappConnected = whatsappAccounts.length > 0;
+  const instagramConnected = instagramAccounts.length > 0;
   const emailConnected = emailStatus.connected;
-  const hasConnectedChannels = whatsappConnected || emailConnected;
+  const hasConnectedChannels = whatsappConnected || instagramConnected || emailConnected;
 
   return (
     <div className="w-full space-y-5 pb-8 animate-scale-up">
@@ -1302,7 +1305,30 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
                 disconnecting={disconnectingKey === 'email'}
               />
             )}
+
+            {instagramAccounts.map((account) => (
+              <ConnectedChannelCard
+                key={account.instagramUserId}
+                channel="instagram"
+                channelLabel="Instagram"
+                title={account.displayName || account.username || account.pageName || 'Instagram'}
+                subtitle={
+                  account.username
+                    ? `@${account.username}`
+                    : account.pageName || account.pageId || 'Connected account'
+                }
+                avatarUrl={account.profilePicture}
+                onManage={() => setView('instagram')}
+                onDisconnect={() => void handleInstagramDisconnect(account.instagramUserId)}
+                onSync={() => void handleInstagramSync()}
+                syncing={instagramSyncing}
+                disconnecting={disconnectingKey === `ig:${account.instagramUserId}`}
+              />
+            ))}
           </div>
+          {instagramSyncMessage ? (
+            <p className="mt-2 text-xs font-medium text-gray-500">{instagramSyncMessage}</p>
+          ) : null}
         </section>
       )}
 
@@ -1319,6 +1345,19 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
               connectLabel={isChannelLimitReached ? 'Limit reached' : 'Connect'}
               connectDisabled={isChannelLimitReached}
               onConnect={openWhatsappChannel}
+            />
+          )}
+
+          {!instagramConnected && (
+            <IntegrationCard
+              title="Instagram"
+              description="Connect Instagram DMs for inbox, automation, and AI-powered replies."
+              icon={Instagram}
+              iconBgClass="bg-[#fce8f0]"
+              iconClass="text-[#C13584]"
+              connectLabel={isChannelLimitReached ? 'Limit reached' : 'Connect'}
+              connectDisabled={isChannelLimitReached}
+              onConnect={handleInstagramConnect}
             />
           )}
 

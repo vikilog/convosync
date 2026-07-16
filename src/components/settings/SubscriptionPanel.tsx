@@ -56,9 +56,10 @@ function subscriptionLabel(status: string, billingStatus?: string): string {
 }
 
 function isActiveSubscription(data: BillingWorkspace): boolean {
-  const status = data.billingSubscription?.status ?? data.subscriptionStatus;
-  const normalized = status.toLowerCase();
-  return ['active', 'authenticated', 'trial'].includes(normalized);
+  const billingStatus = data.billingSubscription?.status?.toLowerCase();
+  if (billingStatus && ['active', 'authenticated'].includes(billingStatus)) return true;
+  const workspaceStatus = data.subscriptionStatus.toLowerCase();
+  return workspaceStatus === 'active' || workspaceStatus === 'authenticated';
 }
 
 export function SubscriptionPanel({
