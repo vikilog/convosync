@@ -65,6 +65,7 @@ function encodeAssigneeFromConv(conv: Record<string, unknown>): string {
   }
   if (type === 'ai') return 'ai';
   if (type === 'user') return id ? `user:${id}` : '';
+  if (type === 'ai_agent') return id ? `ai_agent:${id}` : '';
   if (type === 'rule_based') return id ? `rule_based:${id}` : '';
   if (type === 'journey') return id ? `journey:${id}` : '';
   return '';
@@ -86,6 +87,7 @@ function decodeAssigneeValue(value: string): {
 function assigneeLabelFromValue(
   value: string,
   teamAgents: AgentOption[],
+  aiAgents: AgentOption[],
   ruleBasedBots: BotOption[],
   journeys: JourneyOption[]
 ): string {
@@ -94,6 +96,9 @@ function assigneeLabelFromValue(
   const { assigneeType, assigneeId } = decodeAssigneeValue(value);
   if (assigneeType === 'user') {
     return teamAgents.find((a) => a.id === assigneeId)?.name ?? 'Team member';
+  }
+  if (assigneeType === 'ai_agent') {
+    return aiAgents.find((a) => a.id === assigneeId)?.name ?? 'AI Agent';
   }
   if (assigneeType === 'rule_based') {
     return ruleBasedBots.find((b) => b.id === assigneeId)?.name ?? 'Rule-based bot';
@@ -331,6 +336,7 @@ export const InboxView: React.FC = () => {
   const [currentUserId, setCurrentUserId] = useState(getUserId() || '');
   const [currentUserName, setCurrentUserName] = useState(getUserName() || '');
   const [teamAgents, setTeamAgents] = useState<AgentOption[]>([]);
+  const [aiAgents, setAiAgents] = useState<AgentOption[]>([]);
   const [ruleBasedBots, setRuleBasedBots] = useState<BotOption[]>([]);
   const [publishedJourneys, setPublishedJourneys] = useState<JourneyOption[]>([]);
 
@@ -523,6 +529,18 @@ export const InboxView: React.FC = () => {
       setTeamAgents(team.map((a) => ({ id: a.id, name: a.name })));
 
       const agents = Array.isArray(agentsRaw) ? agentsRaw : [];
+      setAiAgents(
+        agents
+          .filter(
+            (a) =>
+              (a.category === 'ai_agent' || a.category === 'responsive') &&
+              a.isPublished === true &&
+              a.isEnabled !== false &&
+              typeof a.id === 'string' &&
+              typeof a.name === 'string'
+          )
+          .map((a) => ({ id: String(a.id), name: String(a.name) }))
+      );
       setRuleBasedBots(
         agents
           .filter(
@@ -953,6 +971,7 @@ export const InboxView: React.FC = () => {
       const label = assigneeLabelFromValue(
         assigneeValue,
         teamAgents,
+        aiAgents,
         ruleBasedBots,
         publishedJourneys
       );
@@ -1235,6 +1254,7 @@ export const InboxView: React.FC = () => {
   const activeAssigneeName = assigneeLabelFromValue(
     activeAssigneeValue,
     teamAgents,
+    aiAgents,
     ruleBasedBots,
     publishedJourneys
   );
@@ -1593,6 +1613,7 @@ export const InboxView: React.FC = () => {
                   <InboxAssigneePicker
                     value={activeAssigneeValue}
                     teamAgents={teamAgents}
+                    aiAgents={aiAgents}
                     ruleBasedBots={ruleBasedBots}
                     publishedJourneys={publishedJourneys}
                     onChange={(nextValue) => {

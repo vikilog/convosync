@@ -14,6 +14,7 @@ type JourneyOption = { id: string; name: string };
 type InboxAssigneePickerProps = {
   value: string;
   teamAgents: AgentOption[];
+  aiAgents: AgentOption[];
   ruleBasedBots: BotOption[];
   publishedJourneys: JourneyOption[];
   onChange: (value: string) => void;
@@ -36,6 +37,7 @@ function decodeAssigneeValue(value: string): {
 function assigneeLabelFromValue(
   value: string,
   teamAgents: AgentOption[],
+  aiAgents: AgentOption[],
   ruleBasedBots: BotOption[],
   journeys: JourneyOption[]
 ): string {
@@ -44,6 +46,9 @@ function assigneeLabelFromValue(
   const { assigneeType, assigneeId } = decodeAssigneeValue(value);
   if (assigneeType === 'user') {
     return teamAgents.find((a) => a.id === assigneeId)?.name ?? 'Team member';
+  }
+  if (assigneeType === 'ai_agent') {
+    return aiAgents.find((a) => a.id === assigneeId)?.name ?? 'AI Agent';
   }
   if (assigneeType === 'rule_based') {
     return ruleBasedBots.find((b) => b.id === assigneeId)?.name ?? 'Bot';
@@ -54,11 +59,12 @@ function assigneeLabelFromValue(
   return 'Unassigned';
 }
 
-type Submenu = 'main' | 'bots' | 'journeys';
+type Submenu = 'main' | 'ai_agents' | 'bots' | 'journeys';
 
 export function InboxAssigneePicker({
   value,
   teamAgents,
+  aiAgents,
   ruleBasedBots,
   publishedJourneys,
   onChange,
@@ -70,6 +76,7 @@ export function InboxAssigneePicker({
   const displayLabel = assigneeLabelFromValue(
     value,
     teamAgents,
+    aiAgents,
     ruleBasedBots,
     publishedJourneys
   );
@@ -90,10 +97,6 @@ export function InboxAssigneePicker({
     onChange(nextValue);
     setOpen(false);
     setSubmenu('main');
-  };
-
-  const openSubmenu = (next: Submenu) => {
-    setSubmenu(next);
   };
 
   const itemClass =
@@ -156,10 +159,24 @@ export function InboxAssigneePicker({
 
                 <button
                   type="button"
+                  onClick={() => openSubmenu('ai_agents')}
+                  className={`${itemClass} justify-between`}
+                >
+                  <span className="flex items-center gap-2.5 min-w-0">
+                    <Sparkles className="w-4 h-4 text-sky-600 shrink-0" />
+                    AI Agent
+                  </span>
+                  <span className="text-xs text-gray-400 font-bold shrink-0">
+                    {aiAgents.length}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
                   onClick={() => pick('ai')}
                   className={`${itemClass} ${value === 'ai' ? 'bg-sky-50 text-sky-600' : ''}`}
                 >
-                  <Sparkles className="w-4 h-4 text-sky-600 shrink-0" />
+                  <Sparkles className="w-4 h-4 text-violet-500 shrink-0" />
                   AI Copilot (FAQ)
                 </button>
 
@@ -190,6 +207,39 @@ export function InboxAssigneePicker({
                     {publishedJourneys.length}
                   </span>
                 </button>
+              </div>
+            )}
+
+            {submenu === 'ai_agents' && (
+              <div className="py-1">
+                <button
+                  type="button"
+                  onClick={() => setSubmenu('main')}
+                  className={`${itemClass} text-gray-500 border-b border-slate-200`}
+                >
+                  <ChevronLeft className="w-4 h-4 shrink-0" />
+                  Back
+                </button>
+                <div className="px-3 py-2 text-meta font-black uppercase tracking-wider text-gray-400">
+                  Select AI agent
+                </div>
+                {aiAgents.length === 0 ? (
+                  <p className="px-3 py-3 text-meta text-gray-400 font-medium">
+                    No published AI agents yet. Publish one from AI Agent.
+                  </p>
+                ) : (
+                  aiAgents.map((agent) => (
+                    <button
+                      key={agent.id}
+                      type="button"
+                      onClick={() => pick(`ai_agent:${agent.id}`)}
+                      className={`${itemClass} ${value === `ai_agent:${agent.id}` ? 'bg-sky-50 text-sky-600' : ''}`}
+                    >
+                      <Sparkles className="w-4 h-4 text-sky-600 shrink-0" />
+                      <span className="truncate">{agent.name}</span>
+                    </button>
+                  ))
+                )}
               </div>
             )}
 
