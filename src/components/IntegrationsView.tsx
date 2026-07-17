@@ -485,6 +485,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
   const [enablingEmail, setEnablingEmail] = useState(false);
   const [emailError, setEmailError] = useState('');
   const [channelUsage, setChannelUsage] = useState<ChannelUsageSummary | null>(null);
+  const [hubLoading, setHubLoading] = useState(true);
   const [metaAdsConnected, setMetaAdsConnected] = useState(false);
   const [googleAdsConnected, setGoogleAdsConnected] = useState(false);
   const [metaAdsAccountName, setMetaAdsAccountName] = useState<string | null>(null);
@@ -499,8 +500,8 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
       'Meta Ads connection failed. Please try again.'
     );
   });
-  const isChannelLimitReached =
-    channelUsage != null && channelUsage.pending != null && channelUsage.pending <= 0;
+  // ponytail: channel connect caps disabled (backend also no-ops assertChannelCreateAllowed)
+  const isChannelLimitReached = false;
 
   const goToHub = useCallback(() => {
     setView('hub');
@@ -658,10 +659,6 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
   }, []);
 
   const handleEnableEmail = useCallback(async () => {
-    if (channelUsage != null && channelUsage.pending != null && channelUsage.pending <= 0) {
-      setEmailError('Channel limit reached for your current plan. Upgrade to connect a new channel.');
-      return;
-    }
     setEnablingEmail(true);
     setEmailError('');
     try {
@@ -673,7 +670,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
     } finally {
       setEnablingEmail(false);
     }
-  }, [channelUsage, loadBillingUsage, loadEmailStatus, openEmailChannel]);
+  }, [loadBillingUsage, loadEmailStatus, openEmailChannel]);
 
   const handleEmailDisconnect = useCallback(async () => {
     if (
@@ -698,12 +695,20 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
 
   useEffect(() => {
     if (!isActive) return;
-    loadWhatsappAccounts();
-    loadInstagramAccounts();
+    let cancelled = false;
+    void Promise.all([
+      loadWhatsappAccounts(),
+      loadInstagramAccounts(),
+      loadEmailStatus(),
+    ]).finally(() => {
+      if (!cancelled) setHubLoading(false);
+    });
     loadMessengerAccounts();
-    loadEmailStatus();
     loadBillingUsage();
     loadAdsToolsStatus();
+    return () => {
+      cancelled = true;
+    };
   }, [
     isActive,
     loadWhatsappAccounts,
@@ -841,12 +846,6 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
   };
 
   const handleInstagramConnect = () => {
-    if (channelUsage != null && channelUsage.pending != null && channelUsage.pending <= 0) {
-      setInstagramConnectError(
-        'Channel limit reached for your current plan. Upgrade to connect a new channel.'
-      );
-      return;
-    }
     setInstagramConnectError('');
     setInstagramAutoLaunch(true);
     setView('instagram');
@@ -873,12 +872,6 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
 
   const handleMessengerConnect = () => {
     setMessengerConnectError('');
-    if (channelUsage != null && channelUsage.pending != null && channelUsage.pending <= 0) {
-      setMessengerConnectError(
-        'Channel limit reached for your current plan. Upgrade to connect a new channel.'
-      );
-      return;
-    }
     if (instagramAccounts.length === 0) {
       setMessengerConnectError(
         'Connect Instagram first. Messenger uses the same Meta Page access token.'
@@ -1222,8 +1215,6 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
           variant="integrations"
           onBackToHub={goToHub}
           onAccountsChanged={() => void loadWhatsappAccounts()}
-          channelLimitReached={isChannelLimitReached}
-          channelLimitMessage="Channel limit reached for your current plan. Upgrade plan or add-on to connect more channels."
         />
       </div>
     );
@@ -1259,6 +1250,71 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
   const instagramConnected = instagramAccounts.length > 0;
   const emailConnected = emailStatus.connected;
   const hasConnectedChannels = whatsappConnected || instagramConnected || emailConnected;
+
+  if (hubLoading) {
+    return (
+      <div className="w-full space-y-5 pb-8 animate-scale-up" aria-busy="true" aria-label="Loading integrations">
+        <section className="space-y-3">
+          <div className="h-4 w-40 rounded-md bg-slate-100 animate-pulse" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div
+                key={`connected-skel-${i}`}
+                className="rounded-xl border border-slate-200 bg-white p-3.5 space-y-3 animate-pulse"
+              >
+                <div className="flex items-start gap-2.5">
+                  <div className="h-9 w-9 rounded-lg bg-slate-100 shrink-0" />
+                  <div className="flex-1 space-y-2 pt-0.5">
+                    <div className="h-2.5 w-16 rounded bg-slate-100" />
+                    <div className="h-3.5 w-2/3 rounded bg-slate-100" />
+                    <div className="h-2.5 w-1/2 rounded bg-slate-100" />
+                  </div>
+                </div>
+                <div className="border-t border-slate-100 pt-2 flex justify-between">
+                  <div className="h-2.5 w-24 rounded bg-slate-100" />
+                  <div className="h-6 w-16 rounded-md bg-slate-100" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="space-y-3">
+          <div className="h-4 w-32 rounded-md bg-slate-100 animate-pulse" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div
+                key={`add-skel-${i}`}
+                className="rounded-2xl border border-slate-200 bg-white p-5 space-y-4 animate-pulse"
+              >
+                <div className="h-11 w-11 rounded-xl bg-slate-100" />
+                <div className="space-y-2">
+                  <div className="h-4 w-28 rounded bg-slate-100" />
+                  <div className="h-3 w-full rounded bg-slate-100" />
+                  <div className="h-3 w-4/5 rounded bg-slate-100" />
+                </div>
+                <div className="h-9 w-full rounded-xl bg-slate-100" />
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="space-y-3">
+          <div className="h-4 w-36 rounded-md bg-slate-100 animate-pulse" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 space-y-4 animate-pulse">
+              <div className="h-11 w-11 rounded-xl bg-slate-100" />
+              <div className="space-y-2">
+                <div className="h-4 w-24 rounded bg-slate-100" />
+                <div className="h-3 w-full rounded bg-slate-100" />
+              </div>
+              <div className="h-9 w-full rounded-xl bg-slate-100" />
+            </div>
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full space-y-5 pb-8 animate-scale-up">
@@ -1318,7 +1374,6 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
                     : account.pageName || account.pageId || 'Connected account'
                 }
                 avatarUrl={account.profilePicture}
-                onManage={() => setView('instagram')}
                 onDisconnect={() => void handleInstagramDisconnect(account.instagramUserId)}
                 onSync={() => void handleInstagramSync()}
                 syncing={instagramSyncing}
@@ -1332,49 +1387,51 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
         </section>
       )}
 
-      <section>
-        <h3 className="text-sm font-black text-gray-950 mb-3">Add a channel</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {!whatsappConnected && (
-            <IntegrationCard
-              title="WhatsApp"
-              description="Connect WhatsApp Business API for inbox, templates, broadcasts, and customer support."
-              icon={WhatsAppBrandIcon}
-              iconBgClass="bg-[#e6f7ec]"
-              iconClass="text-channel-green"
-              connectLabel={isChannelLimitReached ? 'Limit reached' : 'Connect'}
-              connectDisabled={isChannelLimitReached}
-              onConnect={openWhatsappChannel}
-            />
-          )}
+      {(!whatsappConnected || !instagramConnected || !emailConnected) && (
+        <section>
+          <h3 className="text-sm font-black text-gray-950 mb-3">Add a channel</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {!whatsappConnected && (
+              <IntegrationCard
+                title="WhatsApp"
+                description="Connect WhatsApp Business API for inbox, templates, broadcasts, and customer support."
+                icon={WhatsAppBrandIcon}
+                iconBgClass="bg-[#e6f7ec]"
+                iconClass="text-channel-green"
+                connectLabel={isChannelLimitReached ? 'Limit reached' : 'Connect'}
+                connectDisabled={isChannelLimitReached}
+                onConnect={openWhatsappChannel}
+              />
+            )}
 
-          {!instagramConnected && (
-            <IntegrationCard
-              title="Instagram"
-              description="Connect Instagram DMs for inbox, automation, and AI-powered replies."
-              icon={Instagram}
-              iconBgClass="bg-[#fce8f0]"
-              iconClass="text-[#C13584]"
-              connectLabel={isChannelLimitReached ? 'Limit reached' : 'Connect'}
-              connectDisabled={isChannelLimitReached}
-              onConnect={handleInstagramConnect}
-            />
-          )}
+            {!instagramConnected && (
+              <IntegrationCard
+                title="Instagram"
+                description="Connect Instagram DMs for inbox, automation, and AI-powered replies."
+                icon={Instagram}
+                iconBgClass="bg-[#fce8f0]"
+                iconClass="text-[#C13584]"
+                connectLabel={isChannelLimitReached ? 'Limit reached' : 'Connect'}
+                connectDisabled={isChannelLimitReached}
+                onConnect={handleInstagramConnect}
+              />
+            )}
 
-          {!emailConnected && (
-            <IntegrationCard
-              title="Email"
-              description={`Send transactional and marketing email. Enable to use the shared sender ${emailStatus.defaultSenderEmail ?? 'noreply@convosync.io'} or add your own domain later.`}
-              icon={Mail}
-              iconBgClass="bg-[#e8f4ff]"
-              iconClass="text-channel-blue"
-              connectLabel={isChannelLimitReached ? 'Limit reached' : enablingEmail ? 'Enabling…' : 'Enable'}
-              connectDisabled={enablingEmail || isChannelLimitReached}
-              onConnect={() => void handleEnableEmail()}
-            />
-          )}
-        </div>
-      </section>
+            {!emailConnected && (
+              <IntegrationCard
+                title="Email"
+                description={`Send transactional and marketing email. Enable to use the shared sender ${emailStatus.defaultSenderEmail ?? 'noreply@convosync.io'} or add your own domain later.`}
+                icon={Mail}
+                iconBgClass="bg-[#e8f4ff]"
+                iconClass="text-channel-blue"
+                connectLabel={isChannelLimitReached ? 'Limit reached' : enablingEmail ? 'Enabling…' : 'Enable'}
+                connectDisabled={enablingEmail || isChannelLimitReached}
+                onConnect={() => void handleEnableEmail()}
+              />
+            )}
+          </div>
+        </section>
+      )}
 
       <section>
         <h3 className="text-sm font-black text-gray-950 mb-3">AI & automation</h3>

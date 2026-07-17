@@ -1483,7 +1483,9 @@ export const InboxView: React.FC = () => {
                       )}
                       <div className="flex items-center justify-between gap-1 mt-0.5 min-w-0">
                         <p className="text-xs text-gray-500 truncate font-medium flex-1">
-                          {thread.lastMessage}
+                          {thread.lastMessage === '[media]'
+                            ? 'Media unavailable'
+                            : thread.lastMessage}
                         </p>
                         {thread.unreadCount > 0 && !isActive && (
                           <span className="bg-channel-green text-white text-badge min-w-[18px] h-[18px] px-1 rounded-full font-black flex items-center justify-center leading-none shrink-0">

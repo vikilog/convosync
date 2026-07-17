@@ -16,6 +16,7 @@ export const VALID_TABS = [
   'google-tools',
   'developers',
   'reports',
+  'usage-cost',
   'settings',
 ] as const;
 

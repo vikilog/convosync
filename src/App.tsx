@@ -37,6 +37,7 @@ import { IntegrationsView } from './components/IntegrationsView';
 import { GoogleToolsView } from './components/google-tools/GoogleToolsView';
 import { DevelopersView } from './components/DevelopersView';
 import { SettingsView } from './components/SettingsView';
+import { UsageCost } from './pages/UsageCost';
 import { motion } from 'motion/react';
 import { tabFromPath, pathForTab, pathForNewCampaign, isNewCampaignPath, type AppTab } from './routes';
 import { KeepAlive } from './components/KeepAlive';
@@ -94,12 +95,6 @@ function AppShell() {
       navigate(`/integrations?${params.toString()}`, { replace: true });
     }
   }, [location.pathname, location.search, navigate]);
-
-  useEffect(() => {
-    if (location.pathname === '/usage-cost' || location.pathname === '/usage-cost/') {
-      navigate('/settings/wallet', { replace: true });
-    }
-  }, [location.pathname, navigate]);
 
   useEffect(() => {
     if (activeTab === 'settings') {
@@ -269,6 +264,11 @@ function AppShellLayout({
             {mountedTabs.has('integrations') && (
               <KeepAlive active={activeTab === 'integrations'}>
                 <IntegrationsView isActive={activeTab === 'integrations'} />
+              </KeepAlive>
+            )}
+            {mountedTabs.has('usage-cost') && (
+              <KeepAlive active={activeTab === 'usage-cost'}>
+                <UsageCost />
               </KeepAlive>
             )}
             {mountedTabs.has('google-tools') && (

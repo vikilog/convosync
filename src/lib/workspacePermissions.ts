@@ -119,6 +119,7 @@ const NAV_TAB_ORDER = [
   'google-tools',
   'developers',
   'reports',
+  'usage-cost',
   'settings',
 ] as const;
 

@@ -35,10 +35,20 @@ const MessageBubble: React.FC<{ message: ChatMessage; channel: Channel }> = ({
   const isJourneyMessage = message.senderName === 'Journey' && !isContact;
   const messageType = message.type ?? 'text';
   const hasMediaAttachment =
+    !isDeleted &&
     messageType !== 'text' &&
     messageType !== 'template' &&
-    Boolean(message.media?.storageKey || message.localPreviewUrl || message.media?.latitude != null);
-  const isRichMessage = !isDeleted && hasMediaAttachment;
+    (Boolean(message.media?.storageKey) ||
+      Boolean(message.localPreviewUrl) ||
+      message.media?.latitude != null ||
+      // Show media bubble shell even when download failed (waMediaId present / typed media)
+      messageType === 'image' ||
+      messageType === 'video' ||
+      messageType === 'audio' ||
+      messageType === 'document' ||
+      messageType === 'sticker' ||
+      messageType === 'location');
+  const isRichMessage = hasMediaAttachment;
 
   // ✓ sent · ✓✓ delivered · blue ✓✓ read (WhatsApp semantics; ack values map to status)
   const deliveryStatusIcon = !isContact ? (
@@ -115,7 +125,11 @@ const MessageBubble: React.FC<{ message: ChatMessage; channel: Channel }> = ({
           className={`relative px-2.5 pt-1.5 pb-1 text-sm leading-[19px] whitespace-pre-wrap break-words ${bubbleBase}`}
         >
           <div className={`pr-14 ${isDeleted ? 'italic text-[#667781]' : 'text-[#111b21]'}`}>
-            {isDeleted ? WA_DELETED_MESSAGE : message.content}
+            {isDeleted
+              ? WA_DELETED_MESSAGE
+              : message.content === '[media]'
+                ? 'Media unavailable'
+                : message.content}
           </div>
           {isJourneyMessage && !isDeleted && (
             <p className="text-xs text-[#667781] font-medium mt-1 leading-tight">

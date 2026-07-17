@@ -22,18 +22,38 @@ import {
   Cpu,
   Download,
   Info,
-  Loader2,
   Mail,
   MessageCircle,
   Receipt,
 } from 'lucide-react';
 import { api } from '../lib/api';
 
-function formatInr(value: number, decimals = 2): string {
-  return `₹${value.toLocaleString('en-IN', {
+/** Wallet units (1:1 with INR) shown as tokens — never ₹. */
+function formatTokens(amount: number, decimals?: number): string {
+  const value = Number.isFinite(amount) ? amount : 0;
+  const d =
+    decimals ??
+    (Math.abs(value) >= 100 || Number.isInteger(value) ? 0 : Math.abs(value) >= 1 ? 2 : 4);
+  return `${value.toLocaleString('en-IN', {
+    minimumFractionDigits: d,
+    maximumFractionDigits: d,
+  })} tokens`;
+}
+
+function formatTokenRate(amountPerUnit: number, unit: string, decimals = 4): string {
+  return `${amountPerUnit.toLocaleString('en-IN', {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
-  })}`;
+  })} tokens/${unit}`;
+}
+
+/** Backend rate strings may include ₹ — normalize to tokens. */
+function formatApiRateAsTokens(rate: string): string {
+  return rate
+    .replace(/₹/g, '')
+    .replace(/\/conv/i, ' tokens/conv')
+    .replace(/\/1\s*K/i, ' tokens/1K')
+    .trim();
 }
 
 function formatCount(value: number): string {
@@ -117,11 +137,15 @@ type UsageCostResponse = {
     totalConversations: number;
   };
   ai: {
+    billingMode?: 'convosync' | 'byok';
     inputTokens: number;
     outputTokens: number;
     totalTokens: number;
     inputRateInrPer1k: number;
     outputRateInrPer1k: number;
+    rawCostInr?: number;
+    markupMultiplier?: number;
+    markupInr?: number;
     grossCostInr: number;
     includedTokens: number;
     includedCreditInr: number;
@@ -159,7 +183,7 @@ function WhatsAppPieTooltip({
   return (
     <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs shadow-lg">
       <p className="font-semibold text-slate-900">{row.name}</p>
-      <p className="mt-1 text-slate-600">{formatInr(row.value)}</p>
+      <p className="mt-1 text-slate-600">{formatTokens(row.value)}</p>
       <p className="text-slate-500">{formatCount(row.count)} conversations</p>
     </div>
   );
@@ -182,6 +206,100 @@ function DailyTokensTooltip({
 }
 
 const AGENT_BAR_COLORS = ['bg-blue-500', 'bg-sky-500', 'bg-indigo-500', 'bg-violet-500', 'bg-cyan-500'];
+
+function UsageCostSkeleton() {
+  return (
+    <div
+      className="mx-auto max-w-7xl space-y-6 pb-8"
+      aria-busy="true"
+      aria-label="Loading usage"
+    >
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-2">
+          <div className="h-7 w-48 rounded-md bg-slate-100 animate-pulse" />
+          <div className="h-4 w-72 max-w-full rounded-md bg-slate-100 animate-pulse" />
+        </div>
+        <div className="flex gap-2">
+          <div className="h-10 w-40 rounded-lg bg-slate-100 animate-pulse" />
+          <div className="h-10 w-32 rounded-lg bg-slate-100 animate-pulse" />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div
+            key={`usage-stat-${i}`}
+            className="rounded-xl border border-slate-200 bg-white p-4 space-y-3 animate-pulse"
+          >
+            <div className="flex items-start gap-3">
+              <div className="h-10 w-10 rounded-lg bg-slate-100 shrink-0" />
+              <div className="flex-1 space-y-2 pt-1">
+                <div className="h-2.5 w-24 rounded bg-slate-100" />
+                <div className="h-7 w-20 rounded bg-slate-100" />
+                <div className="h-2.5 w-16 rounded bg-slate-100" />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="rounded-xl border border-slate-200 bg-white p-5 space-y-4 animate-pulse">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-full bg-slate-100" />
+            <div className="space-y-2">
+              <div className="h-4 w-48 rounded bg-slate-100" />
+              <div className="h-3 w-36 rounded bg-slate-100" />
+            </div>
+          </div>
+          <div className="h-6 w-24 rounded bg-slate-100" />
+        </div>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div className="space-y-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={`wa-row-${i}`} className="h-8 w-full rounded bg-slate-100" />
+            ))}
+          </div>
+          <div className="flex items-center justify-center">
+            <div className="h-48 w-48 rounded-full bg-slate-100" />
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-slate-200 bg-white p-5 space-y-4 animate-pulse">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-full bg-slate-100" />
+            <div className="space-y-2">
+              <div className="h-4 w-44 rounded bg-slate-100" />
+              <div className="h-3 w-56 rounded bg-slate-100" />
+            </div>
+          </div>
+          <div className="h-6 w-24 rounded bg-slate-100" />
+        </div>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div className="space-y-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={`ai-row-${i}`} className="h-8 w-full rounded bg-slate-100" />
+            ))}
+            <div className="h-20 w-full rounded-xl bg-slate-100" />
+          </div>
+          <div className="space-y-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={`agent-${i}`} className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="h-7 w-7 rounded-full bg-slate-100" />
+                  <div className="h-3 flex-1 rounded bg-slate-100" />
+                </div>
+                <div className="h-1.5 w-full rounded-full bg-slate-100" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export const UsageCost: React.FC = () => {
   const monthOptions = useMemo(() => buildMonthOptions(6), []);
@@ -232,11 +350,7 @@ export const UsageCost: React.FC = () => {
   }, [pieData]);
 
   if (loading && !data) {
-    return (
-      <div className="flex items-center justify-center py-24 text-slate-400">
-        <Loader2 className="h-7 w-7 animate-spin" />
-      </div>
-    );
+    return <UsageCostSkeleton />;
   }
 
   if (error || !data) {
@@ -262,7 +376,7 @@ export const UsageCost: React.FC = () => {
         <div>
           <h1 className="text-xl font-bold text-slate-900 md:text-2xl">Usage &amp; Cost</h1>
           <p className="mt-1 max-w-xl text-sm text-slate-500">
-            Track your messaging, AI, and email usage with real-time cost breakdown.
+            WhatsApp, AI, and email usage — all amounts shown in tokens.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2 sm:justify-end">
@@ -293,12 +407,6 @@ export const UsageCost: React.FC = () => {
         </div>
       </div>
 
-      {loading ? (
-        <div className="flex justify-center py-4 text-slate-400">
-          <Loader2 className="h-5 w-5 animate-spin" />
-        </div>
-      ) : null}
-
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <SummaryCard
           bg="#FFF7ED"
@@ -306,8 +414,8 @@ export const UsageCost: React.FC = () => {
           iconBg="#FFEDD5"
           iconColor="#EA580C"
           icon={Receipt}
-          label="Total Cost This Month"
-          value={formatInr(summary.totalCostInr)}
+          label="Total Tokens This Month"
+          value={formatTokens(summary.totalCostInr)}
           badge={
             costChange !== 0 ? (
               <span
@@ -333,7 +441,7 @@ export const UsageCost: React.FC = () => {
           icon={MessageCircle}
           label="WhatsApp Messages Sent"
           value={formatCount(summary.whatsappMessagesSent)}
-          sub={`${formatInr(summary.whatsappCostInr)} charged`}
+          sub={`${formatTokens(summary.whatsappCostInr)} charged`}
         />
         <SummaryCard
           bg="#EFF6FF"
@@ -343,7 +451,7 @@ export const UsageCost: React.FC = () => {
           icon={Cpu}
           label="AI Tokens Used"
           value={formatCount(summary.aiTokensUsed)}
-          sub={`${formatInr(summary.aiCostInr)} charged`}
+          sub={`${formatTokens(summary.aiCostInr)} charged`}
         />
         <SummaryCard
           bg="#FAF5FF"
@@ -353,7 +461,7 @@ export const UsageCost: React.FC = () => {
           icon={Mail}
           label="Emails Sent"
           value={formatCount(summary.emailsSent)}
-          sub={`${formatInr(summary.emailCostInr)} charged`}
+          sub={`${formatTokens(summary.emailCostInr)} charged`}
         />
       </div>
 
@@ -369,7 +477,7 @@ export const UsageCost: React.FC = () => {
             </div>
           </div>
           <div className="text-left sm:text-right">
-            <p className="text-lg font-bold text-[#0F172A]">{formatInr(whatsappBilledTotal)}</p>
+            <p className="text-lg font-bold text-[#0F172A]">{formatTokens(whatsappBilledTotal)}</p>
             <p className="text-[11px] text-slate-400">{selectedMonthLabel}</p>
           </div>
         </div>
@@ -387,7 +495,7 @@ export const UsageCost: React.FC = () => {
             <table className="w-full min-w-[320px] text-left text-sm">
               <thead>
                 <tr className="border-b border-slate-100">
-                  {['Type', 'Conversations', 'Rate', 'Cost'].map((h) => (
+                  {['Type', 'Conversations', 'Rate', 'Tokens'].map((h) => (
                     <th
                       key={h}
                       className="pb-2 pr-3 text-[10px] font-semibold uppercase tracking-wide text-slate-400 last:pr-0"
@@ -413,9 +521,9 @@ export const UsageCost: React.FC = () => {
                     <td className="py-2.5 pr-3 tabular-nums text-slate-700">
                       {formatCount(row.conversations)}
                     </td>
-                    <td className="py-2.5 pr-3 text-slate-600">{row.rate}</td>
+                    <td className="py-2.5 pr-3 text-slate-600">{formatApiRateAsTokens(row.rate)}</td>
                     <td className="py-2.5 tabular-nums font-medium text-slate-900">
-                      {formatInr(row.billedCost)}
+                      {formatTokens(row.billedCost)}
                     </td>
                   </tr>
                 ))}
@@ -426,17 +534,16 @@ export const UsageCost: React.FC = () => {
                   </td>
                   <td className="pt-3 pr-3 text-slate-400">—</td>
                   <td className="pt-3 font-bold tabular-nums text-slate-900">
-                    {formatInr(grossWhatsAppCost)}
+                    {formatTokens(grossWhatsAppCost)}
                   </td>
                 </tr>
               </tbody>
             </table>
             <p className="mt-2 text-[11px] leading-relaxed text-slate-400">
-              * Service conversations are free within 1000/month. After that ₹0.12/conv
+              * Service conversations are free within 1000/month. After that 0.12 tokens/conv
             </p>
             <p className="mt-1 text-[11px] text-slate-500">
-              Billed amount for {selectedMonthLabel}: {formatInr(whatsappBilledTotal)} (after free
-              tier &amp; credits)
+              Billed for {selectedMonthLabel}: {formatTokens(whatsappBilledTotal)} (after free tier)
             </p>
           </div>
 
@@ -465,7 +572,7 @@ export const UsageCost: React.FC = () => {
                   <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
                     <div className="text-center">
                       <p className="text-lg font-bold text-slate-900">
-                        {formatInr(whatsappBilledTotal, 0)}
+                        {formatTokens(whatsappBilledTotal, 0)}
                       </p>
                       <p className="text-[11px] text-slate-500">Total</p>
                     </div>
@@ -499,21 +606,43 @@ export const UsageCost: React.FC = () => {
             </div>
             <div>
               <h2 className="text-[15px] font-bold text-slate-900">AI Agent Token Usage</h2>
-              <p className="text-xs text-slate-500">OpenAI consumption and estimated cost</p>
+              <p className="text-xs text-slate-500">
+                {ai.billingMode === 'byok'
+                  ? 'Bring-your-own-key mode — tokens logged, wallet not charged'
+                  : 'Logged from tokenUsageLog · provider cost + platform markup → tokens'}
+              </p>
             </div>
           </div>
           <div className="text-left sm:text-right">
-            <p className="text-lg font-bold text-[#0F172A]">{formatInr(ai.billedCostInr)}</p>
+            <p className="text-lg font-bold text-[#0F172A]">{formatTokens(ai.billedCostInr)}</p>
             <p className="text-[11px] text-slate-400">{selectedMonthLabel}</p>
           </div>
         </div>
+
+        {ai.billingMode === 'byok' ? (
+          <div className="mt-4 mb-2 flex gap-2.5 rounded-lg bg-amber-50 p-3">
+            <Info className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+            <p className="text-xs leading-relaxed text-amber-900">
+              This workspace uses your own OpenAI key. Token counts still appear below for monitoring,
+              but tokens are not deducted from the wallet for AI usage.
+            </p>
+          </div>
+        ) : (
+          <div className="mt-4 mb-2 flex gap-2.5 rounded-lg bg-[#EFF6FF] p-3">
+            <Info className="mt-0.5 h-4 w-4 shrink-0 text-cyan-600" />
+            <p className="text-xs leading-relaxed text-[#374151]">
+              AI usage is metered from live token logs. Charged tokens = provider usage ×{' '}
+              {(((ai.markupMultiplier ?? 1.35) - 1) * 100).toFixed(0)}% platform markup.
+            </p>
+          </div>
+        )}
 
         <div className="mt-5 grid grid-cols-1 gap-6 lg:grid-cols-2">
           <div>
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-slate-100">
-                  {['Type', 'Tokens', 'Rate', 'Cost'].map((h) => (
+                  {['Type', 'Tokens', 'Rate', 'Tokens charged'].map((h) => (
                     <th
                       key={h}
                       className="pb-2 pr-3 text-[10px] font-semibold uppercase tracking-wide text-slate-400 last:pr-0"
@@ -528,48 +657,66 @@ export const UsageCost: React.FC = () => {
                   <td className="py-2.5 pr-3 font-medium text-slate-900">Input Tokens</td>
                   <td className="py-2.5 pr-3 tabular-nums">{formatCount(ai.inputTokens)}</td>
                   <td className="py-2.5 pr-3 text-slate-600">
-                    ₹{ai.inputRateInrPer1k.toFixed(4)}/1K
+                    {formatTokenRate(ai.inputRateInrPer1k, '1K')}
                   </td>
                   <td className="py-2.5 tabular-nums font-medium text-slate-900">
-                    {formatInr((ai.inputTokens / 1000) * ai.inputRateInrPer1k)}
+                    {formatTokens((ai.inputTokens / 1000) * ai.inputRateInrPer1k)}
                   </td>
                 </tr>
                 <tr className="border-b border-slate-50">
                   <td className="py-2.5 pr-3 font-medium text-slate-900">Output Tokens</td>
                   <td className="py-2.5 pr-3 tabular-nums">{formatCount(ai.outputTokens)}</td>
                   <td className="py-2.5 pr-3 text-slate-600">
-                    ₹{ai.outputRateInrPer1k.toFixed(4)}/1K
+                    {formatTokenRate(ai.outputRateInrPer1k, '1K')}
                   </td>
                   <td className="py-2.5 tabular-nums font-medium text-slate-900">
-                    {formatInr((ai.outputTokens / 1000) * ai.outputRateInrPer1k)}
+                    {formatTokens((ai.outputTokens / 1000) * ai.outputRateInrPer1k)}
                   </td>
                 </tr>
-                <tr className="border-b border-slate-100">
-                  <td className="py-2.5 pr-3 font-bold text-slate-900">Total</td>
-                  <td className="py-2.5 pr-3 font-bold tabular-nums text-slate-900">
+                <tr className="border-b border-slate-50">
+                  <td className="py-2.5 pr-3 font-medium text-slate-900">Provider subtotal</td>
+                  <td className="py-2.5 pr-3 font-medium tabular-nums text-slate-900">
                     {formatCount(ai.totalTokens)}
                   </td>
                   <td className="py-2.5 pr-3" />
+                  <td className="py-2.5 font-medium tabular-nums text-slate-900">
+                    {formatTokens(ai.rawCostInr ?? (ai.inputTokens / 1000) * ai.inputRateInrPer1k + (ai.outputTokens / 1000) * ai.outputRateInrPer1k)}
+                  </td>
+                </tr>
+                {(ai.markupInr ?? 0) > 0 ? (
+                  <tr className="border-b border-slate-50 text-slate-500">
+                    <td className="py-2 pr-3 pl-2">
+                      Platform markup ({(((ai.markupMultiplier ?? 1.35) - 1) * 100).toFixed(0)}%)
+                    </td>
+                    <td className="py-2 pr-3" />
+                    <td className="py-2 pr-3" />
+                    <td className="py-2 tabular-nums">{formatTokens(ai.markupInr ?? 0)}</td>
+                  </tr>
+                ) : null}
+                <tr className="border-b border-slate-100">
+                  <td className="py-2.5 pr-3 font-bold text-slate-900">Token charge</td>
+                  <td className="py-2.5 pr-3" />
+                  <td className="py-2.5 pr-3" />
                   <td className="py-2.5 font-bold tabular-nums text-slate-900">
-                    {formatInr(ai.grossCostInr)}
+                    {formatTokens(ai.grossCostInr)}
                   </td>
                 </tr>
                 {ai.includedTokens > 0 ? (
                   <tr className="border-b border-slate-50 text-slate-500">
-                    <td className="py-2 pr-3 pl-2">Plan included</td>
+                    <td className="py-2 pr-3 pl-2">Included credit</td>
                     <td className="py-2 pr-3 tabular-nums">-{formatCount(ai.includedTokens)}</td>
                     <td className="py-2 pr-3" />
                     <td className="py-2 tabular-nums text-emerald-600">
-                      -{formatInr(ai.includedCreditInr)}
+                      -{formatTokens(ai.includedCreditInr)}
                     </td>
                   </tr>
                 ) : null}
                 <tr>
-                  <td className="pt-2 pr-3 font-bold text-slate-900">Final</td>
+                  <td className="pt-2 pr-3 font-bold text-slate-900">Final billed</td>
                   <td className="pt-2 pr-3" />
                   <td className="pt-2 pr-3" />
                   <td className="pt-2 font-bold tabular-nums text-slate-900">
-                    {formatInr(ai.billedCostInr)}
+                    {formatTokens(ai.billedCostInr)}
                   </td>
                 </tr>
               </tbody>
@@ -634,7 +781,7 @@ export const UsageCost: React.FC = () => {
             {ai.includedTokens > 0 ? (
               <div className="mt-6 rounded-lg border border-slate-100 bg-slate-50/80 p-4">
                 <div className="flex items-center justify-between gap-2">
-                  <p className="text-sm font-semibold text-slate-800">Monthly Quota</p>
+                  <p className="text-sm font-semibold text-slate-800">Included token credit</p>
                   <span
                     className={`text-xs font-bold ${
                       ai.quotaPct > 100 ? 'text-red-600' : 'text-slate-600'
@@ -656,8 +803,8 @@ export const UsageCost: React.FC = () => {
                   <div className="mt-2 flex items-start gap-1.5 text-xs text-red-600">
                     <ArrowUp className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                     <span>
-                      Over quota by {formatCount(ai.totalTokens - ai.includedTokens)} tokens —
-                      overage billed at plan rates
+                      Over included credit by {formatCount(ai.totalTokens - ai.includedTokens)}{' '}
+                      tokens — overage billed to wallet
                     </span>
                   </div>
                 )}

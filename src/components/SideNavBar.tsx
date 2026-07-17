@@ -238,6 +238,7 @@ export const SideNavBar: React.FC = () => {
       label: 'Systems',
       items: [
         { id: 'integrations', label: 'Integrations', icon: Plug },
+        { id: 'usage-cost', label: 'Usage', icon: Receipt },
         { id: 'wallet', label: 'Wallet', icon: Wallet, path: pathForSettingsSection('wallet') },
         { id: 'settings', label: 'Settings', icon: Settings },
       ],

@@ -104,6 +104,10 @@ const TAB_SEO: Record<AppTab, Omit<PageSeo, 'path'>> = {
     title: 'Reports',
     description: 'Agent performance, CSAT, and conversation analytics.',
   },
+  'usage-cost': {
+    title: 'Usage & Cost',
+    description: 'Token usage and messaging cost breakdown for your workspace.',
+  },
   settings: {
     title: 'Settings',
     description: 'Company profile, team, billing, and channel preferences.',

@@ -49,4 +49,7 @@ export const INSTAGRAM_SCOPES = [
   'pages_show_list',
   'pages_read_engagement',
   'business_management',
+  'pages_manage_metadata',
+  'pages_messaging'
+  
 ].join(',');

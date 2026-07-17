@@ -146,6 +146,8 @@ function mapMessageMediaFromApi(metadata: unknown): ChatMessage['media'] | undef
   const m = metadata as Record<string, unknown>;
   const hasMedia =
     m.storageKey ||
+    m.waMediaId ||
+    m.mediaUrl ||
     m.mimeType ||
     m.fileName ||
     m.latitude != null ||

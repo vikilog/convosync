@@ -30,7 +30,9 @@ import {
 } from '../../lib/convocoins';
 import {
   hasPaidSubscription,
+  resolveCheckoutPlan,
   subscriptionStatusLabel,
+  type BillingPlanOption,
 } from '../../lib/billingSubscription';
 import { openRazorpayCheckout } from '../../lib/razorpay';
 import { computeWalletRechargeQuote, type WalletRechargeQuote } from '../../lib/walletRechargeQuote';
@@ -164,6 +166,7 @@ export function WalletPanel() {
 
   const [checkoutBusy, setCheckoutBusy] = useState(false);
   const [subscribeBusy, setSubscribeBusy] = useState(false);
+  const [checkoutPlanSlug, setCheckoutPlanSlug] = useState(PLAN_SLUG);
   const [cancelBusy, setCancelBusy] = useState(false);
   const [settingsBusy, setSettingsBusy] = useState(false);
 
@@ -180,11 +183,17 @@ export function WalletPanel() {
     setLoading(true);
     setError(null);
     try {
-      const [billingRes, walletRes, txRes] = await Promise.all([
+      const [billingRes, walletRes, txRes, plansRes] = await Promise.all([
         api.getBillingWorkspace(),
         api.getBillingWallet(),
         api.getBillingWalletTransactions(5),
+        api.getBillingPlans().catch(() => []),
       ]);
+      const checkoutPlan = resolveCheckoutPlan(
+        (plansRes as BillingPlanOption[]) ?? [],
+        PLAN_SLUG
+      );
+      setCheckoutPlanSlug(checkoutPlan?.slug ?? PLAN_SLUG);
       const walletData = walletRes as WalletSummary;
       setBilling(billingRes as BillingWorkspace);
       setWallet(walletData);
@@ -344,7 +353,7 @@ export function WalletPanel() {
     setError(null);
     try {
       const created = (await api.createBillingSubscription({
-        planId: PLAN_SLUG,
+        planId: checkoutPlanSlug,
         billingCycle: 'monthly',
       })) as {
         checkoutMode?: 'subscription' | 'order';

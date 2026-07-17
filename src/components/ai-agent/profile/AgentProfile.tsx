@@ -135,13 +135,34 @@ export const AgentProfile: React.FC<Props> = ({
 
   return (
     <>
-      <div className="flex flex-col xl:flex-row gap-6 w-full pb-24">
+      <div className="flex flex-col xl:flex-row gap-6 w-full pb-6">
         <div className="flex-1 min-w-0 space-y-6">
-          <div>
-            <h2 className="text-xl font-bold text-[#111827]">Profile</h2>
-            <p className="text-sm text-[#6B7280] mt-1">
-              Setup the personality and the conversation rules of AI Agent
-            </p>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h2 className="text-xl font-bold text-[#111827]">Profile</h2>
+              <p className="text-sm text-[#6B7280] mt-1">
+                Setup the personality and the conversation rules of AI Agent
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+              <span
+                className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ${
+                  local.isPublished
+                    ? 'bg-emerald-50 text-emerald-700'
+                    : 'bg-amber-50 text-amber-700'
+                }`}
+              >
+                {local.isPublished ? 'Published · Live' : 'Draft · Unpublished'}
+              </span>
+              <button
+                type="button"
+                disabled={saving}
+                onClick={() => setShowPublishConfirm(true)}
+                className="inline-flex items-center rounded-xl bg-channel-green px-4 py-2 text-sm font-bold text-white hover:bg-[#20bd5a] disabled:opacity-60"
+              >
+                {local.isPublished ? 'Republish' : 'Publish'}
+              </button>
+            </div>
           </div>
 
           <section className="bg-white border border-[#E5E7EB] rounded-xl p-5 relative">
@@ -154,17 +175,27 @@ export const AgentProfile: React.FC<Props> = ({
               Edit
             </button>
             <div className="flex items-start gap-4">
-              {local.avatarUrl ? (
-                <img
-                  src={local.avatarUrl}
-                  alt=""
-                  className="w-16 h-16 rounded-full object-cover border border-[#E5E7EB]"
-                />
-              ) : (
-                <div className="w-16 h-16 rounded-full bg-[#F3F0FF] text-sky-600 flex items-center justify-center">
-                  <Bot className="w-8 h-8" />
-                </div>
-              )}
+              <button
+                type="button"
+                onClick={() => setShowEdit(true)}
+                className="group relative shrink-0"
+                aria-label="Change bot image"
+              >
+                {local.avatarUrl ? (
+                  <img
+                    src={local.avatarUrl}
+                    alt=""
+                    className="w-16 h-16 rounded-full object-cover border border-[#E5E7EB]"
+                  />
+                ) : (
+                  <div className="w-16 h-16 rounded-full bg-[#F3F0FF] text-sky-600 flex items-center justify-center border border-[#E5E7EB]">
+                    <Bot className="w-8 h-8" />
+                  </div>
+                )}
+                <span className="absolute inset-0 flex items-center justify-center rounded-full bg-black/0 text-white opacity-0 transition-opacity group-hover:bg-black/40 group-hover:opacity-100 text-[10px] font-bold">
+                  Edit
+                </span>
+              </button>
               <div className="pr-16">
                 <h3 className="text-lg font-bold text-[#111827]">{local.name}</h3>
                 <p className="text-sm text-[#6B7280] mt-1">{local.description}</p>
@@ -318,26 +349,8 @@ export const AgentProfile: React.FC<Props> = ({
         <ChatPreviewPanel agentId={local.id} avatarUrl={local.avatarUrl} />
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-[#E5E7EB] bg-white px-4 md:px-6 py-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-        <button
-          type="button"
-          disabled={saving}
-          onClick={() => setShowPublishConfirm(true)}
-          className="px-5 py-2.5 bg-[#111827] hover:bg-[#1f2937] disabled:opacity-60 text-white rounded-xl text-sm font-bold"
-        >
-          Publish
-        </button>
-        <span
-          className={`text-sm font-semibold ${
-            local.isPublished ? 'text-emerald-600' : 'text-amber-600'
-          }`}
-        >
-          {local.isPublished ? 'Published · Live' : 'Draft · Unpublished'}
-        </span>
-      </div>
-
       {toast && (
-        <div className="fixed bottom-20 right-6 z-50 bg-[#111827] text-white text-sm font-medium px-4 py-3 rounded-xl shadow-lg">
+        <div className="fixed bottom-6 right-6 z-50 bg-[#111827] text-white text-sm font-medium px-4 py-3 rounded-xl shadow-lg">
           {toast}
         </div>
       )}

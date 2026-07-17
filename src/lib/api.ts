@@ -523,6 +523,9 @@ export const api = {
     post(`/agents/${agentId}/knowledge`, data),
   fetchAgentKnowledgeUrl: (agentId: string, data: unknown) =>
     post(`/agents/${agentId}/knowledge/fetch-url`, data),
+  // ponytail: temp reindex UI — remove with KnowledgeBase upsert button
+  reindexAgentKnowledge: (agentId: string) =>
+    post(`/agents/${agentId}/knowledge/reindex`, {}),
   deleteAgentKnowledge: (agentId: string, kId: string) =>
     del(`/agents/${agentId}/knowledge/${kId}`),
 

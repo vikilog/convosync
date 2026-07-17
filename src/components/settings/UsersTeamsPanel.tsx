@@ -28,7 +28,10 @@ type Member = {
   inboxScope?: InboxScope;
   status: string;
   isOwner: boolean;
+  avatar?: string | null;
 };
+
+const MAX_TEAM_MEMBERS = 3;
 
 type InviteForm = {
   name: string;
@@ -94,9 +97,17 @@ export function UsersTeamsPanel() {
       m.name.toLowerCase().includes(search.toLowerCase()) ||
       m.email.toLowerCase().includes(search.toLowerCase())
   );
+  const atMemberLimit = members.length >= MAX_TEAM_MEMBERS;
+  const seatsLeft = Math.max(0, MAX_TEAM_MEMBERS - members.length);
 
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (atMemberLimit) {
+      setError(
+        `Team member limit reached (${MAX_TEAM_MEMBERS}). Remove a member to add someone else.`
+      );
+      return;
+    }
     setSaving(true);
     setError(null);
     setMessage(null);
@@ -209,7 +220,8 @@ export function UsersTeamsPanel() {
           <div>
             <h3 className="text-sm font-black text-gray-950">Team members</h3>
             <p className="text-meta text-gray-500 font-medium mt-0.5">
-              {members.length} user{members.length === 1 ? '' : 's'} in this company
+              {members.length} of {MAX_TEAM_MEMBERS} seats used
+              {seatsLeft > 0 ? ` · ${seatsLeft} left` : ' · limit reached'}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 flex-1 justify-end">
@@ -226,14 +238,20 @@ export function UsersTeamsPanel() {
             {canManageUsers && (
               <button
                 type="button"
+                disabled={atMemberLimit}
+                title={
+                  atMemberLimit
+                    ? `Max ${MAX_TEAM_MEMBERS} users including the owner`
+                    : undefined
+                }
                 onClick={() => {
                   setShowInvite(true);
                   setError(null);
                 }}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-channel-green hover:bg-[#20bd5a] text-white text-sm font-bold transition-colors"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-channel-green hover:bg-[#20bd5a] text-white text-sm font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <UserPlus className="w-3.5 h-3.5" />
-                Add user
+                {atMemberLimit ? 'Limit reached' : 'Add user'}
               </button>
             )}
           </div>
@@ -266,9 +284,17 @@ export function UsersTeamsPanel() {
                     >
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-[#c4c0ff] flex items-center justify-center font-bold text-primary text-sm">
-                            {m.name.charAt(0).toUpperCase()}
-                          </div>
+                          {m.avatar ? (
+                            <img
+                              src={m.avatar}
+                              alt=""
+                              className="h-9 w-9 shrink-0 rounded-full object-cover ring-1 ring-slate-200"
+                            />
+                          ) : (
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#c4c0ff] text-sm font-bold text-primary">
+                              {m.name.charAt(0).toUpperCase()}
+                            </div>
+                          )}
                           <div>
                             <p className="font-bold text-gray-900">
                               {m.name}
@@ -398,7 +424,8 @@ export function UsersTeamsPanel() {
               <div>
                 <h3 className="text-base font-black text-gray-950">Add team member</h3>
                 <p className="text-xs text-gray-500 font-medium mt-1">
-                  Assign a role and choose what this user can access in your workspace.
+                  Max {MAX_TEAM_MEMBERS} users including the owner · {seatsLeft} seat
+                  {seatsLeft === 1 ? '' : 's'} left.
                 </p>
               </div>
               <button

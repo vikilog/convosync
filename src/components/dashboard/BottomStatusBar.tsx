@@ -9,13 +9,10 @@ import {
   Upload,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { pathForSettingsSection, pathForTab } from '../../routes';
+import { pathForTab } from '../../routes';
 
 interface BottomStatusBarProps {
   whatsappConnected: boolean;
-  planName?: string | null;
-  isTrial?: boolean;
-  trialDaysLeft?: number | null;
   activeAgents: number;
   onNewCampaign: () => void;
   onNewJourney: () => void;
@@ -25,9 +22,6 @@ interface BottomStatusBarProps {
 
 export const BottomStatusBar: React.FC<BottomStatusBarProps> = ({
   whatsappConnected,
-  planName,
-  isTrial,
-  trialDaysLeft,
   activeAgents,
   onNewCampaign,
   onNewJourney,
@@ -50,20 +44,6 @@ export const BottomStatusBar: React.FC<BottomStatusBarProps> = ({
           />
           {whatsappConnected ? 'Connected' : 'Offline'}
         </span>
-      </Link>
-
-      <span className="hidden h-4 w-px bg-slate-200 sm:block" aria-hidden />
-
-      <Link
-        to={pathForSettingsSection('wallet')}
-        className="inline-flex cursor-pointer items-center gap-2 text-slate-600 transition-colors hover:text-slate-900"
-      >
-        <span className="font-medium text-slate-900">{planName || 'Starter Plan'}</span>
-        {isTrial && trialDaysLeft != null ? (
-          <span className="rounded-md bg-amber-50 px-1.5 py-0.5 text-xs font-medium text-amber-700">
-            {trialDaysLeft}d trial
-          </span>
-        ) : null}
       </Link>
 
       <span className="hidden h-4 w-px bg-slate-200 sm:block" aria-hidden />

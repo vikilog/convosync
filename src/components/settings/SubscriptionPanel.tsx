@@ -8,7 +8,7 @@ import { Check, Loader2 } from 'lucide-react';
 import { api, formatCatchError } from '../../lib/api';
 import { openRazorpayCheckout } from '../../lib/razorpay';
 import { BRAND_PURPLE } from '../../lib/convocoins';
-import { hasPaidSubscription, subscriptionStatusLabel } from '../../lib/billingSubscription';
+import { hasPaidSubscription, resolveCheckoutPlan, subscriptionStatusLabel, type BillingPlanOption } from '../../lib/billingSubscription';
 
 const PLAN_NAME = 'ConvoSync Pro';
 const PLAN_PRICE_INR = 1999;
@@ -62,6 +62,7 @@ export function SubscriptionPanel({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [checkoutBusy, setCheckoutBusy] = useState(false);
+  const [checkoutPlanSlug, setCheckoutPlanSlug] = useState(PLAN_SLUG);
   const [cancelBusy, setCancelBusy] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
 
@@ -69,8 +70,16 @@ export function SubscriptionPanel({
     setLoading(true);
     setError(null);
     try {
-      const res = (await api.getBillingWorkspace()) as BillingWorkspace;
-      setData(res);
+      const [res, plansRes] = await Promise.all([
+        api.getBillingWorkspace(),
+        api.getBillingPlans().catch(() => []),
+      ]);
+      const checkoutPlan = resolveCheckoutPlan(
+        (plansRes as BillingPlanOption[]) ?? [],
+        PLAN_SLUG
+      );
+      setCheckoutPlanSlug(checkoutPlan?.slug ?? PLAN_SLUG);
+      setData(res as BillingWorkspace);
     } catch (err) {
       setError(formatCatchError(err));
       setData(null);
@@ -89,7 +98,7 @@ export function SubscriptionPanel({
     setActionMessage(null);
     try {
       const created = (await api.createBillingSubscription({
-        planId: PLAN_SLUG,
+        planId: checkoutPlanSlug,
         billingCycle: 'monthly',
       })) as {
         checkoutMode?: 'subscription' | 'order';

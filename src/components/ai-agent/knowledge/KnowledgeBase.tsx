@@ -58,6 +58,8 @@ export const KnowledgeBase: React.FC<Props> = ({ agentId }) => {
   const [toast, setToast] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<KnowledgeItem | null>(null);
   const [deleting, setDeleting] = useState(false);
+  // ponytail: temp Pinecone upsert button — remove after backfill
+  const [reindexing, setReindexing] = useState(false);
 
   const loadItems = useCallback(async () => {
     setLoading(true);
@@ -120,6 +122,19 @@ export const KnowledgeBase: React.FC<Props> = ({ agentId }) => {
     }
   };
 
+  // ponytail: temp Pinecone upsert button — remove after backfill
+  const handleReindex = async () => {
+    setReindexing(true);
+    try {
+      const res = (await api.reindexAgentKnowledge(agentId)) as { queued?: number };
+      setToast(`Pinecone upsert queued for ${res.queued ?? 0} item(s) — check backend logs`);
+    } catch {
+      setToast('Reindex failed — check backend / Pinecone config');
+    } finally {
+      setReindexing(false);
+    }
+  };
+
   const filtered = items.filter((i) =>
     i.title.toLowerCase().includes(search.toLowerCase())
   );
@@ -139,13 +154,24 @@ export const KnowledgeBase: React.FC<Props> = ({ agentId }) => {
             Enable the AI to learn knowledge, automatically answer common questions…
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => setShowAdd(true)}
-          className="px-4 py-2 bg-[#1E1B2E] hover:bg-black text-white rounded-xl text-sm font-bold"
-        >
-          + Add knowledge
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          {/* ponytail: temp Pinecone upsert button — remove after backfill */}
+          <button
+            type="button"
+            disabled={reindexing || items.length === 0}
+            onClick={() => void handleReindex()}
+            className="px-4 py-2 border border-amber-300 bg-amber-50 hover:bg-amber-100 disabled:opacity-50 text-amber-900 rounded-xl text-sm font-bold"
+          >
+            {reindexing ? 'Upserting…' : 'Upsert to Pinecone'}
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowAdd(true)}
+            className="px-4 py-2 bg-[#1E1B2E] hover:bg-black text-white rounded-xl text-sm font-bold"
+          >
+            + Add knowledge
+          </button>
+        </div>
       </div>
 
       <div className="relative max-w-md mb-4">

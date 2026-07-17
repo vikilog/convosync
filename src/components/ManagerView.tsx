@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Blocks } from 'lucide-react';
 import { pathForTab } from '../routes';
@@ -58,8 +58,6 @@ type ManagerViewProps = {
   variant?: 'standalone' | 'integrations';
   onBackToHub?: () => void;
   onAccountsChanged?: () => void;
-  channelLimitReached?: boolean;
-  channelLimitMessage?: string;
 };
 
 export const ManagerView: React.FC<ManagerViewProps> = ({
@@ -67,16 +65,12 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
   variant = 'standalone',
   onBackToHub,
   onAccountsChanged,
-  channelLimitReached = false,
-  channelLimitMessage = 'Channel limit reached for your current plan. Upgrade to connect a new channel.',
 }) => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'numbers' | 'webhooks'>('numbers');
 
   const [whatsappAccounts, setWhatsappAccounts] = useState<WhatsAppPhoneAccount[]>([]);
   const [accountsLoading, setAccountsLoading] = useState(true);
   const [connectError, setConnectError] = useState('');
-  const [showAddNumber, setShowAddNumber] = useState(false);
   const hasWhatsappNumbers = whatsappAccounts.length > 0;
 
   const loadWhatsappAccounts = (options?: { silent?: boolean }) => {
@@ -132,13 +126,6 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
   const [isStartingApiSetup, setIsStartingApiSetup] = useState(false);
   const [isStartingCoexistenceSetup, setIsStartingCoexistenceSetup] = useState(false);
   const [autoLaunchSignup, setAutoLaunchSignup] = useState(false);
-  const [webhookUrl, setWebhookUrl] = useState('');
-  const [webhookVerifyToken, setWebhookVerifyToken] = useState('');
-  const [webhookSubscribed, setWebhookSubscribed] = useState<boolean | null>(null);
-  const [webhookOverrideUri, setWebhookOverrideUri] = useState('');
-  const [webhookSubscribeMessage, setWebhookSubscribeMessage] = useState('');
-  const [webhookSubscribing, setWebhookSubscribing] = useState(false);
-  const [copyHint, setCopyHint] = useState('');
   const accountsLoadedRef = useRef(false);
 
   useEffect(() => {
@@ -180,63 +167,6 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
     }
   }, [isActive, accountsLoading, hasWhatsappNumbers]);
 
-  const loadWebhookStatus = useCallback(async () => {
-    const status = (await api.getWhatsAppStatus()) as {
-      webhookUrl?: string;
-      webhookVerifyToken?: string;
-      webhookSubscription?: {
-        subscribed: boolean;
-        overrideCallbackUri?: string;
-      };
-    };
-    setWebhookUrl(status.webhookUrl || '');
-    setWebhookVerifyToken(status.webhookVerifyToken || '');
-    setWebhookSubscribed(status.webhookSubscription?.subscribed ?? null);
-    setWebhookOverrideUri(status.webhookSubscription?.overrideCallbackUri || '');
-    return status;
-  }, []);
-
-  useEffect(() => {
-    if (activeTab !== 'webhooks' || !hasWhatsappNumbers) return;
-    loadWebhookStatus().catch(console.error);
-  }, [activeTab, hasWhatsappNumbers, loadWebhookStatus]);
-
-  const handleSubscribeWebhooks = async () => {
-    setWebhookSubscribing(true);
-    setWebhookSubscribeMessage('');
-    try {
-      const res = (await api.subscribeWhatsAppWebhooks()) as {
-        webhookSubscribe?: { error?: string; details?: string; wabaSubscribed?: boolean };
-        webhookSubscription?: { subscribed: boolean; overrideCallbackUri?: string };
-      };
-      setWebhookSubscribed(res.webhookSubscription?.subscribed ?? res.webhookSubscribe?.wabaSubscribed ?? false);
-      setWebhookOverrideUri(res.webhookSubscription?.overrideCallbackUri || webhookUrl);
-      const sub = res.webhookSubscribe;
-      if (sub?.error) {
-        setWebhookSubscribeMessage(sub.error);
-      } else if (sub?.details) {
-        setWebhookSubscribeMessage(sub.details);
-      } else {
-        setWebhookSubscribeMessage('Webhooks subscribed via Meta API.');
-      }
-    } catch (err) {
-      setWebhookSubscribeMessage(err instanceof Error ? err.message : 'Subscription failed');
-    } finally {
-      setWebhookSubscribing(false);
-    }
-  };
-
-  const copyWebhookUrl = async () => {
-    if (!webhookUrl) return;
-    try {
-      await navigator.clipboard.writeText(webhookUrl);
-      setCopyHint('Copied!');
-      setTimeout(() => setCopyHint(''), 2000);
-    } catch {
-      setCopyHint('Copy failed');
-    }
-  };
-
   const clearWhatsappQueryFlag = (key: string) => {
     const params = new URLSearchParams(window.location.search);
     params.delete(key);
@@ -256,7 +186,6 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
     if (params.get('whatsapp_connected') === '1') {
       sessionStorage.removeItem('convosync_onboarding');
       loadWhatsappAccounts({ silent: true }).then((accounts) => {
-        setShowAddNumber(false);
         if (accounts.length > 0) {
           onAccountsChanged?.();
         }
@@ -326,7 +255,6 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
   }) => {
     setConnectError('');
     setAutoLaunchSignup(false);
-    setShowAddNumber(false);
     sessionStorage.removeItem(PENDING_SETUP_SESSION_KEY);
     localStorage.removeItem(BUSINESS_API_ONBOARDING_STEP_KEY);
     localStorage.removeItem(COEXISTENCE_ONBOARDING_STEP_KEY);
@@ -382,17 +310,6 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
     }
   };
 
-  const handleConnectAnotherAccount = () => {
-    if (channelLimitReached) {
-      setConnectError(channelLimitMessage);
-      return;
-    }
-    setConnectError('');
-    setConnectionType('business_api');
-    setShowAddNumber(true);
-    setAutoLaunchSignup(true);
-  };
-
   const showConnectionSelector =
     !hasWhatsappNumbers && numbersFlow === 'selector';
   const showBusinessApiGuide =
@@ -441,32 +358,7 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
       {hasWhatsappNumbers && (
         <WhatsAppAccountManager
           accounts={whatsappAccounts}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          showAddNumber={showAddNumber}
-          onConnectAnother={handleConnectAnotherAccount}
-          connectAnotherDisabled={channelLimitReached}
-          connectAnotherLabel={channelLimitReached ? 'Limit reached' : 'Connect number'}
-          onCancelAdd={() => {
-            setShowAddNumber(false);
-            setAutoLaunchSignup(false);
-            setConnectError('');
-          }}
           onDisconnect={handleDisconnectWhatsApp}
-          connectError={connectError}
-          autoLaunchSignup={autoLaunchSignup}
-          onAutoStartConsumed={() => setAutoLaunchSignup(false)}
-          onConnectSuccess={handleConnectSuccess}
-          onConnectError={(error) => setConnectError(error)}
-          webhookUrl={webhookUrl}
-          webhookVerifyToken={webhookVerifyToken}
-          webhookSubscribed={webhookSubscribed}
-          webhookOverrideUri={webhookOverrideUri}
-          webhookSubscribeMessage={webhookSubscribeMessage}
-          webhookSubscribing={webhookSubscribing}
-          onSubscribeWebhooks={handleSubscribeWebhooks}
-          copyHint={copyHint}
-          onCopyWebhookUrl={copyWebhookUrl}
         />
       )}
 

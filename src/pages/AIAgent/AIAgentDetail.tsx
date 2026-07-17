@@ -92,6 +92,7 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
   const buildProfilePayload = (patch: Partial<AgentProfileData>) => ({
     name: patch.name,
     description: patch.description,
+    avatarUrl: patch.avatarUrl,
     toneOfVoice: patch.toneOfVoice,
     fallbackLanguage: patch.fallbackLanguage,
     instructions: patch.instructions,
@@ -107,6 +108,8 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
     setAgent({
       ...agent,
       ...patch,
+      avatarUrl:
+        patch.avatarUrl !== undefined ? patch.avatarUrl : agent.avatarUrl,
       toneOfVoice: mergedProfile.toneOfVoice,
       fallbackLanguage: mergedProfile.fallbackLanguage,
       instructions: mergedProfile.instructions,
@@ -117,6 +120,7 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
     void persist({
       name: mergedProfile.name,
       description: mergedProfile.description,
+      avatarUrl: mergedProfile.avatarUrl,
       toneOfVoice: mergedProfile.toneOfVoice,
       fallbackLanguage: mergedProfile.fallbackLanguage,
       instructions: mergedProfile.instructions,
@@ -130,9 +134,13 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
 
   const handlePublish = async (patch: Partial<AgentProfileData>) => {
     if (!agent) return;
-    const merged = { ...agent, ...patch, isPublished: true };
+    const merged = { ...agent, ...patch, isPublished: true, isEnabled: true };
     setAgent(merged);
-    await persist({ ...buildProfilePayload(patch), isPublished: true, isEnabled: true });
+    await persist({
+      ...buildProfilePayload({ ...toProfileData(agent), ...patch }),
+      isPublished: true,
+      isEnabled: true,
+    });
     setLastAutoSavedAt(formatSavedTime(new Date()));
   };
 

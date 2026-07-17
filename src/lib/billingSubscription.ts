@@ -34,3 +34,21 @@ export function subscriptionStatusLabel(
   if (normalized === 'cancelled' || normalized === 'canceled') return 'Cancelled';
   return 'Inactive';
 }
+
+export type BillingPlanOption = {
+  id: string;
+  slug: string;
+  priceMonthlyPaise?: number | null;
+};
+
+export function resolveCheckoutPlan(
+  plans: BillingPlanOption[],
+  preferredSlug = 'starter'
+): BillingPlanOption | null {
+  if (!plans.length) return null;
+  return (
+    plans.find((p) => p.slug === preferredSlug) ??
+    plans.find((p) => p.priceMonthlyPaise === 199900) ??
+    plans[0]
+  );
+}
