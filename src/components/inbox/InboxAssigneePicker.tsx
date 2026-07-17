@@ -99,6 +99,10 @@ export function InboxAssigneePicker({
     setSubmenu('main');
   };
 
+  const openSubmenu = (next: Submenu) => {
+    setSubmenu(next);
+  };
+
   const itemClass =
     'w-full text-left px-3 py-2.5 text-sm font-bold text-gray-800 hover:bg-sky-50 transition-colors flex items-center gap-2.5';
 
