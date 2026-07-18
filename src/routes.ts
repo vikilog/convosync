@@ -86,6 +86,7 @@ export function pathForTab(tab: string): string {
 
 export type IntegrationsChannel =
   | 'whatsapp'
+  | 'whatsapp-coexistence'
   | 'email'
   | 'instagram'
   | 'google'

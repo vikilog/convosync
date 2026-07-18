@@ -16,25 +16,28 @@ import {
   Loader2,
   ArrowLeft,
   PanelRightOpen,
+  Phone,
 } from 'lucide-react';
 import { Contact, ChatMessage, type ChatMessageType } from '../types';
-import { api, getUserId, getUserName } from '../lib/api';
+import { api, formatCatchError, getUserName } from '../lib/api';
 import { useWorkspaceAccess } from '../hooks/useWorkspaceAccess';
+import { useInboxAssigneeMeta } from '../hooks/inbox/useInboxMeta';
 import {
   isConversationInInboxScope,
   isInboxChannelAllowed,
   type InboxChannel,
 } from '../lib/inboxScope';
 import { mapContactFromApi, mapMessageFromApi } from '../lib/mappers';
-import { dedupeInboxConversations, dedupeInboxThreads } from '../lib/inboxDedupe';
+import { dedupeInboxThreads } from '../lib/inboxDedupe';
+import { fetchInboxConversationRows } from '../lib/inboxConversations';
 import { groupMessagesByDate } from '../lib/formatDates';
 import { getSocket } from '../lib/socket';
-import { setActiveInboxConversationId } from '../lib/inboxFocus';
+import { setActiveInboxConversationId, setInboxVisible } from '../lib/inboxFocus';
 import {
   dispatchInboxUnreadTotal,
   INBOX_OPEN_CONVERSATION_EVENT,
 } from '../lib/inboxEvents';
-import { useKeepAliveActivation } from './KeepAlive';
+import { useKeepAliveActivation, useKeepAliveActive } from './KeepAlive';
 import { InboxAssigneePicker } from './inbox/InboxAssigneePicker';
 import { InboxNewChatPicker } from './inbox/InboxNewChatPicker';
 import { InboxTemplatePicker } from './inbox/InboxTemplatePicker';
@@ -218,7 +221,14 @@ function replaceChatMessage(
   const history = prev[conversationId] || [];
   return {
     ...prev,
-    [conversationId]: history.map((m) => (m.id === messageId ? next : m)),
+    [conversationId]: history.map((m) => {
+      if (m.id !== messageId) return m;
+      // Keep local blob preview so media doesn't flash to skeleton after send
+      return {
+        ...next,
+        localPreviewUrl: next.localPreviewUrl || m.localPreviewUrl,
+      };
+    }),
   };
 }
 
@@ -322,10 +332,23 @@ export const InboxView: React.FC = () => {
   const { inboxScope } = useWorkspaceAccess();
   const isLargeUp = useIsLargeUp();
   const isXLargeUp = useIsXLargeUp();
+  const {
+    currentUserId,
+    currentUserName,
+    teamAgents,
+    aiAgents,
+    ruleBasedBots,
+    publishedJourneys,
+    whatsappAccounts,
+    instagramConnected,
+    instagramInboxLabel,
+    messengerInboxLabel,
+  } = useInboxAssigneeMeta();
   const [mobilePane, setMobilePane] = useState<'list' | 'chat'>('list');
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [inboxThreads, setInboxThreads] = useState<InboxThread[]>([]);
   const [selectedConversationId, setSelectedConversationId] = useState<string>('');
+  const [callStarting, setCallStarting] = useState(false);
   const [chatHistories, setChatHistories] = useState<Record<string, ChatMessage[]>>({});
   const [assignedToByConversationId, setAssignedToByConversationId] = useState<
     Record<string, string>
@@ -333,21 +356,11 @@ export const InboxView: React.FC = () => {
 
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [currentUserId, setCurrentUserId] = useState(getUserId() || '');
-  const [currentUserName, setCurrentUserName] = useState(getUserName() || '');
-  const [teamAgents, setTeamAgents] = useState<AgentOption[]>([]);
-  const [aiAgents, setAiAgents] = useState<AgentOption[]>([]);
-  const [ruleBasedBots, setRuleBasedBots] = useState<BotOption[]>([]);
-  const [publishedJourneys, setPublishedJourneys] = useState<JourneyOption[]>([]);
 
   const [filterTab, setFilterTab] = useState<'all' | 'mine' | 'unassigned'>('all');
   const [channelFilter, setChannelFilter] = useState<InboxChannel>('whatsapp');
-  const [whatsappAccounts, setWhatsappAccounts] = useState<WhatsAppInboxAccount[]>([]);
-  const [instagramInboxLabel, setInstagramInboxLabel] = useState<string | null>(null);
-  const [instagramConnected, setInstagramConnected] = useState(false);
   const [instagramSyncing, setInstagramSyncing] = useState(false);
   const [instagramSyncHint, setInstagramSyncHint] = useState<string | null>(null);
-  const [messengerInboxLabel, setMessengerInboxLabel] = useState<string | null>(null);
 
   const [messageInput, setMessageInput] = useState<string>('');
   const [sendError, setSendError] = useState<string | null>(null);
@@ -366,11 +379,17 @@ export const InboxView: React.FC = () => {
   const [auditsOpen, setAuditsOpen] = useState(false);
   const [sendingMedia, setSendingMedia] = useState(false);
   const [composerActionsOpen, setComposerActionsOpen] = useState(false);
+  const inboxTabActive = useKeepAliveActive();
   const selectedConversationIdRef = useRef(selectedConversationId);
   selectedConversationIdRef.current = selectedConversationId;
+  const inboxTabActiveRef = useRef(inboxTabActive);
+  inboxTabActiveRef.current = inboxTabActive;
 
   const inboxThreadsRef = useRef(inboxThreads);
   inboxThreadsRef.current = inboxThreads;
+
+  /** Selected chat only counts as "reading" while Inbox tab is visible (KeepAlive). */
+  const viewingConversationId = inboxTabActive ? selectedConversationId : '';
 
   const visibleChannelTabs = useMemo(
     () => CHANNEL_TABS.filter((tab) => isInboxChannelAllowed(tab.id, inboxScope)),
@@ -460,110 +479,8 @@ export const InboxView: React.FC = () => {
     }
     setLoadError(null);
     try {
-      const convsRaw = (await api.getConversations()) as Array<Record<string, unknown>>;
-      const convs = dedupeInboxConversations(convsRaw);
-
-      const [team, me, igAccounts, waAccounts, fbAccounts, agentsRaw, journeysRaw] =
-        await Promise.all([
-        api.getTeamStats() as Promise<Array<{ id: string; name: string }>>,
-        api.getMe() as Promise<{ id: string; name: string }>,
-        api.getInstagramAccounts().catch(() => ({ accounts: [] as Array<{ label?: string; username?: string }> })),
-        api.getWhatsAppAccounts().catch(() => ({
-          accounts: [] as Array<{ label?: string; displayName?: string; phoneNumber?: string }>,
-        })),
-        api.getMessengerAccounts().catch(() => ({
-          accounts: [] as Array<{ label?: string; displayName?: string; pageName?: string }>,
-        })),
-        api.getAgents().catch(() => [] as Array<Record<string, unknown>>),
-        api.getJourneys().catch(() => [] as Array<Record<string, unknown>>),
-      ]);
-
-      const igList = (igAccounts as { accounts?: Array<{ label?: string; username?: string }> }).accounts || [];
-      setInstagramConnected(igList.length > 0);
-      if (igList.length > 0) {
-        const primary = igList[0];
-        setInstagramInboxLabel(
-          primary.label || (primary.username ? `@${primary.username}` : 'Instagram')
-        );
-      } else {
-        setInstagramInboxLabel(null);
-      }
-
-      const waList = (
-        waAccounts as {
-          accounts?: Array<{
-            phoneNumberId?: string;
-            label?: string;
-            displayName?: string;
-            phoneNumber?: string;
-          }>;
-        }
-      ).accounts || [];
-      setWhatsappAccounts(
-        waList
-          .filter((a): a is typeof a & { phoneNumberId: string } => Boolean(a.phoneNumberId))
-          .map((a) => ({
-            phoneNumberId: a.phoneNumberId,
-            phoneNumber: a.phoneNumber,
-            displayName: a.displayName,
-            label: a.label,
-          }))
-      );
-
-      const fbList = (
-        fbAccounts as {
-          accounts?: Array<{ label?: string; displayName?: string; pageName?: string }>;
-        }
-      ).accounts || [];
-      if (fbList.length > 0) {
-        const primary = fbList[0];
-        setMessengerInboxLabel(
-          primary.label || primary.displayName || primary.pageName || 'Messenger'
-        );
-      } else {
-        setMessengerInboxLabel(null);
-      }
-
-      setCurrentUserId(me.id);
-      setCurrentUserName(me.name);
-      setTeamAgents(team.map((a) => ({ id: a.id, name: a.name })));
-
-      const agents = Array.isArray(agentsRaw) ? agentsRaw : [];
-      setAiAgents(
-        agents
-          .filter(
-            (a) =>
-              (a.category === 'ai_agent' || a.category === 'responsive') &&
-              a.isPublished === true &&
-              a.isEnabled !== false &&
-              typeof a.id === 'string' &&
-              typeof a.name === 'string'
-          )
-          .map((a) => ({ id: String(a.id), name: String(a.name) }))
-      );
-      setRuleBasedBots(
-        agents
-          .filter(
-            (a) =>
-              a.category === 'rule_based' &&
-              a.isEnabled !== false &&
-              typeof a.id === 'string' &&
-              typeof a.name === 'string'
-          )
-          .map((a) => ({ id: String(a.id), name: String(a.name) }))
-      );
-
-      const journeyRows = Array.isArray(journeysRaw) ? journeysRaw : [];
-      setPublishedJourneys(
-        journeyRows
-          .filter(
-            (j) =>
-              j.status === 'published' &&
-              typeof j.id === 'string' &&
-              typeof j.name === 'string'
-          )
-          .map((j) => ({ id: String(j.id), name: String(j.name) }))
-      );
+      // Conversations only — assignee/channel metadata comes from React Query (useInboxAssigneeMeta)
+      const convs = await fetchInboxConversationRows();
 
       const mapped: InboxThread[] = [];
       const assignMap: Record<string, string> = {};
@@ -647,9 +564,18 @@ export const InboxView: React.FC = () => {
   });
 
   useEffect(() => {
+    setInboxVisible(inboxTabActive);
+  }, [inboxTabActive]);
+
+  useEffect(() => {
     setActiveInboxConversationId(selectedConversationId);
-    dispatchInboxUnreadTotal(sumUnreadForNav(inboxThreads, selectedConversationId));
-  }, [inboxThreads, selectedConversationId, sumUnreadForNav]);
+  }, [selectedConversationId]);
+
+  useEffect(() => {
+    dispatchInboxUnreadTotal(sumUnreadForNav(inboxThreads, viewingConversationId));
+  }, [inboxThreads, viewingConversationId, sumUnreadForNav]);
+
+  useEffect(() => () => setInboxVisible(false), []);
 
   useEffect(() => {
     const onOpenConversation = (event: Event) => {
@@ -670,14 +596,8 @@ export const InboxView: React.FC = () => {
       }
     };
     document.addEventListener('visibilitychange', refreshOnFocus);
-    const poll = window.setInterval(() => {
-      if (document.visibilityState === 'visible') {
-        void loadConversations({ silent: true });
-      }
-    }, 15000);
     return () => {
       document.removeEventListener('visibilitychange', refreshOnFocus);
-      window.clearInterval(poll);
     };
   }, [loadConversations]);
 
@@ -758,9 +678,33 @@ export const InboxView: React.FC = () => {
         }
       }
 
-      const isSelected = conversationId === selectedConversationIdRef.current;
+      // KeepAlive leaves Inbox mounted off-tab — don't treat selection as "reading" then
+      const isViewing =
+        inboxTabActiveRef.current && conversationId === selectedConversationIdRef.current;
 
-      setChatHistories((prev) => appendChatMessage(prev, conversationId, msg));
+      setChatHistories((prev) => {
+        const history = prev[conversationId] || [];
+        // Replace optimistic pending bubble when the server echo arrives
+        if (msg.sender === 'agent') {
+          const pendingIdx = history.findIndex(
+            (m) =>
+              m.id.startsWith('pending-') &&
+              m.sender === 'agent' &&
+              m.content === msg.content
+          );
+          if (pendingIdx >= 0) {
+            const pending = history[pendingIdx];
+            const next = [...history];
+            next[pendingIdx] = {
+              ...msg,
+              localPreviewUrl: msg.localPreviewUrl || pending.localPreviewUrl,
+              status: msg.status === 'sending' ? 'sent' : msg.status,
+            };
+            return { ...prev, [conversationId]: next };
+          }
+        }
+        return appendChatMessage(prev, conversationId, msg);
+      });
 
       setInboxThreads((prev) => {
         const idx = prev.findIndex((t) => t.conversationId === conversationId);
@@ -772,14 +716,17 @@ export const InboxView: React.FC = () => {
             lastMessage: msg.content,
             lastActive: 'Just now',
             unreadCount:
-              isIncoming && !isSelected ? t.unreadCount + 1 : isSelected ? 0 : t.unreadCount,
+              isIncoming && !isViewing ? t.unreadCount + 1 : isViewing ? 0 : t.unreadCount,
           };
         });
-        dispatchInboxUnreadTotal(sumUnreadForNav(next, selectedConversationIdRef.current));
+        const viewingId = inboxTabActiveRef.current
+          ? selectedConversationIdRef.current
+          : '';
+        dispatchInboxUnreadTotal(sumUnreadForNav(next, viewingId));
         return next;
       });
 
-      if (isSelected) {
+      if (isViewing) {
         setJourneyProgressRefresh((n) => n + 1);
       }
     };
@@ -818,26 +765,29 @@ export const InboxView: React.FC = () => {
 
       try {
         const conv = (await api.getConversation(conversationId)) as Record<string, unknown>;
-        const isSelected = conversationId === selectedConversationIdRef.current;
+        const isViewing =
+          inboxTabActiveRef.current && conversationId === selectedConversationIdRef.current;
         const contact = conv.contact as Record<string, unknown>;
         const mapped = mapInboxThread(
           contact,
           {
             ...conv,
-            unreadCount: isSelected ? 0 : conv.unreadCount,
+            unreadCount: isViewing ? 0 : conv.unreadCount,
           },
           conversationId
         );
 
         setInboxThreads((prev) => {
           const next = mergeInboxThreads(prev, mapped);
-          dispatchInboxUnreadTotal(
-            sumUnreadForNav(next, selectedConversationIdRef.current)
-          );
+          const viewingId = inboxTabActiveRef.current
+            ? selectedConversationIdRef.current
+            : '';
+          dispatchInboxUnreadTotal(sumUnreadForNav(next, viewingId));
           return next;
         });
 
-        if (isSelected) {
+        // getMessages marks the thread read — only while Inbox is on screen
+        if (isViewing) {
           await reloadMessagesForConversation(conversationId);
         }
       } catch (err) {
@@ -845,7 +795,7 @@ export const InboxView: React.FC = () => {
       }
     };
 
-    // Live delivery/read ticks (Meta status webhooks)
+    // Live delivery/read ticks (Meta status / Instagram messaging_seen webhooks)
     const onMessageStatus = (payload: { messageId: string; status: string }) => {
       const { messageId, status } = payload;
       if (!messageId || !status) return;
@@ -854,14 +804,27 @@ export const InboxView: React.FC = () => {
         const next: Record<string, ChatMessage[]> = {};
         for (const convId of Object.keys(prev)) {
           const msgs = prev[convId] ?? [];
-          if (!msgs.some((m) => m.id === messageId)) {
+          const anchor = msgs.find((m) => m.id === messageId);
+          if (!anchor) {
             next[convId] = msgs;
             continue;
           }
           changed = true;
-          next[convId] = msgs.map((m) =>
-            m.id === messageId ? { ...m, status: status as ChatMessage['status'] } : m
-          );
+          if (status === 'read') {
+            const cutoff = new Date(anchor.createdAt).getTime();
+            next[convId] = msgs.map((m) => {
+              if (m.sender === 'contact') return m;
+              if (m.status === 'read') return m;
+              if (m.id === messageId || new Date(m.createdAt).getTime() <= cutoff) {
+                return { ...m, status: 'read' };
+              }
+              return m;
+            });
+          } else {
+            next[convId] = msgs.map((m) =>
+              m.id === messageId ? { ...m, status: status as ChatMessage['status'] } : m
+            );
+          }
         }
         return changed ? next : prev;
       });
@@ -1026,10 +989,21 @@ export const InboxView: React.FC = () => {
     setMessageInput('');
     clearPendingComposerMedia();
     setChatHistories((prev) => appendChatMessage(prev, convId, pendingMessage));
+    setInboxThreads((prev) =>
+      prev.map((t) =>
+        t.conversationId === convId
+          ? { ...t, lastMessage: preview, unreadCount: 0, lastActive: 'Just now' }
+          : t
+      )
+    );
 
     try {
       const sent = await api.sendMediaMessage(convId, file, caption || undefined);
-      const newMessage = mapMessageFromApi(sent as Record<string, unknown>);
+      const newMessage = {
+        ...mapMessageFromApi(sent as Record<string, unknown>),
+        localPreviewUrl,
+        status: 'sent' as const,
+      };
       setChatHistories((prev) => replaceChatMessage(prev, convId, pendingId, newMessage));
       setInboxThreads((prev) =>
         prev.map((t) =>
@@ -1039,13 +1013,14 @@ export const InboxView: React.FC = () => {
         )
       );
       setJourneyProgressRefresh((n) => n + 1);
+      // Keep blob URL on the message so preview stays stable (no skeleton flash)
     } catch (err) {
       setChatHistories((prev) => removeChatMessage(prev, convId, pendingId));
       if (caption) setMessageInput(caption);
       setSendError(err instanceof Error ? err.message : 'Failed to send attachment');
       console.error(err);
-    } finally {
       URL.revokeObjectURL(localPreviewUrl);
+    } finally {
       setSendingMedia(false);
       if (mediaInputRef.current) mediaInputRef.current.value = '';
     }
@@ -1078,24 +1053,40 @@ export const InboxView: React.FC = () => {
     if (!messageInput.trim()) return;
 
     const content = messageInput.trim();
+    const convId = selectedThread.conversationId;
+    const pendingId = `pending-${Date.now()}`;
+    const pendingMessage: ChatMessage = {
+      id: pendingId,
+      sender: 'agent',
+      senderName: getUserName() || 'Agent',
+      content,
+      type: 'text',
+      createdAt: new Date().toISOString(),
+      timestamp: 'Just now',
+      status: 'sending',
+    };
+
     setMessageInput('');
     setSendError(null);
+    setChatHistories((prev) => appendChatMessage(prev, convId, pendingMessage));
+    setInboxThreads((prev) =>
+      prev.map((t) =>
+        t.conversationId === convId
+          ? { ...t, lastMessage: content, unreadCount: 0, lastActive: 'Just now' }
+          : t
+      )
+    );
 
     try {
-      const convId = selectedThread.conversationId;
-
       const sent = await api.sendMessage(convId, content);
-      const newMessage = mapMessageFromApi(sent as Record<string, unknown>);
-      setChatHistories((prev) => appendChatMessage(prev, convId, newMessage));
-      setInboxThreads((prev) =>
-        prev.map((t) =>
-          t.conversationId === convId
-            ? { ...t, lastMessage: content, unreadCount: 0, lastActive: 'Just now' }
-            : t
-        )
-      );
+      const newMessage = {
+        ...mapMessageFromApi(sent as Record<string, unknown>),
+        status: 'sent' as const,
+      };
+      setChatHistories((prev) => replaceChatMessage(prev, convId, pendingId, newMessage));
       setJourneyProgressRefresh((n) => n + 1);
     } catch (err) {
+      setChatHistories((prev) => removeChatMessage(prev, convId, pendingId));
       setMessageInput(content);
       setSendError(err instanceof Error ? err.message : 'Failed to send message');
       console.error(err);
@@ -1116,6 +1107,7 @@ export const InboxView: React.FC = () => {
         tags: (raw.tags as string[]) ?? [],
         customFields,
         channel: selectedContact.channel,
+        excludeFromInsights: Boolean(raw.excludeFromInsights),
       });
       setEditContactOpen(true);
     } catch (err) {
@@ -1606,6 +1598,47 @@ export const InboxView: React.FC = () => {
                   </button>
                 )}
 
+                <button
+                  type="button"
+                  disabled={callStarting || !selectedConversationId}
+                  title="Start voice call"
+                  onClick={() => {
+                    if (!selectedConversationId) return;
+                    setCallStarting(true);
+                    void api
+                      .createCall(selectedConversationId, 'outbound')
+                      .then(({ call, guestUrl, callPagePath }) => {
+                        // Shared across tabs — call opens in a new window
+                        if (guestUrl) {
+                          try {
+                            localStorage.setItem(`call-guest:${call.callId}`, guestUrl);
+                          } catch {
+                            /* ignore */
+                          }
+                        }
+                        const path = callPagePath || `/call/${call.callId}`;
+                        const opened = window.open(path, '_blank', 'noopener,noreferrer');
+                        if (!opened) {
+                          // Popup blocked — fall back to same tab
+                          window.location.assign(path);
+                        }
+                      })
+                      .catch((err) => {
+                        console.error(err);
+                        window.alert(formatCatchError(err));
+                      })
+                      .finally(() => setCallStarting(false));
+                  }}
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-channel-green hover:bg-emerald-50 transition-colors disabled:opacity-50 cursor-pointer"
+                  aria-label="Start voice call"
+                >
+                  {callStarting ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Phone className="h-4 w-4" />
+                  )}
+                </button>
+
                 <div className="hidden lg:flex items-center bg-slate-50 px-2.5 py-1.5 rounded-xl border border-slate-200">
                   <span className="text-sm font-bold text-gray-500 mr-1 flex items-center gap-1">
                     <User className="w-3.5 h-3.5 text-sky-600" /> Active :
@@ -1878,7 +1911,7 @@ export const InboxView: React.FC = () => {
       </section>
 
       {isXLargeUp && !selectedContact && (
-        <section className="hidden xl:flex h-full w-[300px] shrink-0 items-center justify-center border-l border-slate-200 bg-slate-50 p-4">
+        <section className="hidden xl:flex h-full w-[380px] shrink-0 items-center justify-center border-l border-slate-200 bg-slate-50 p-4">
           <EmptyChatPanel message="Contact details appear when you select a chat." />
         </section>
       )}
@@ -1886,6 +1919,7 @@ export const InboxView: React.FC = () => {
       {selectedContact && isXLargeUp && (
         <InboxContactSidebar
           contact={selectedContact}
+          conversationId={selectedConversationId}
           contactHandle={contactDisplayHandle(selectedContact)}
           assigneeLabel={activeAssigneeName}
           journeyProgress={journeyProgress}
@@ -1918,9 +1952,10 @@ export const InboxView: React.FC = () => {
             className="fixed inset-0 z-40 bg-black/35 xl:hidden"
             onClick={() => setDetailsOpen(false)}
           />
-          <div className="fixed inset-y-0 right-0 z-50 w-full max-w-[min(320px,92vw)] xl:hidden shadow-2xl">
+          <div className="fixed inset-y-0 right-0 z-50 w-full max-w-[min(400px,92vw)] xl:hidden shadow-2xl">
             <InboxContactSidebar
               contact={selectedContact}
+              conversationId={selectedConversationId}
               contactHandle={contactDisplayHandle(selectedContact)}
               assigneeLabel={activeAssigneeName}
               journeyProgress={journeyProgress}

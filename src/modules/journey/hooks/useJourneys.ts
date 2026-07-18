@@ -6,6 +6,8 @@ export function useJourneys() {
   return useQuery({
     queryKey: ['journeys'],
     queryFn: () => api.getJourneys() as Promise<JourneyRecord[]>,
+    staleTime: 60_000,
+    refetchOnWindowFocus: true,
   });
 }
 

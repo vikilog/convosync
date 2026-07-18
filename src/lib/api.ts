@@ -36,7 +36,50 @@ export function formatCatchError(err: unknown): string {
   return 'Request failed';
 }
 
+/** Prevent parallel 401s from stacking redirects. Reset on successful setToken. */
+let handlingUnauthorized = false;
+
+/**
+ * Session JWT rejected (expired / revoked / invalidated).
+ * Clears local auth synchronously (so ProtectedRoute flips) then hard-redirects to login.
+ */
+function forceLogoutToLogin() {
+  if (handlingUnauthorized) return;
+  handlingUnauthorized = true;
+
+  // Sync clear first — readLoggedIn() must flip before any catch() swallows the throw.
+  localStorage.removeItem('convosync_token');
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event('convosync:auth-changed'));
+  }
+
+  void import('./socket')
+    .then((m) => m.disconnectSocket())
+    .catch(() => {});
+  void import('./session')
+    .then((m) => m.clearAuthSession())
+    .catch(() => {});
+
+  if (typeof window === 'undefined') return;
+  const path = window.location.pathname;
+  if (path.startsWith('/login') || path.startsWith('/signup') || path.startsWith('/auth/')) {
+    handlingUnauthorized = false;
+    return;
+  }
+  window.location.replace('/login');
+}
+
+async function assertOk(res: Response): Promise<void> {
+  if (res.status === 401) {
+    const text = await res.text();
+    forceLogoutToLogin();
+    throw new Error(parseApiError(text) || 'Unauthorized');
+  }
+  if (!res.ok) throw new Error(parseApiError(await res.text()));
+}
+
 export function setToken(token: string) {
+  handlingUnauthorized = false;
   localStorage.setItem('convosync_token', token);
 }
 
@@ -139,7 +182,7 @@ async function get(path: string, params?: Record<string, string>) {
   const res = await fetch(url.toString(), {
     headers: authHeaders(),
   });
-  if (!res.ok) throw new Error(parseApiError(await res.text()));
+  await assertOk(res);
   return res.json();
 }
 
@@ -149,7 +192,7 @@ async function post(path: string, body?: unknown) {
     headers: authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(body ?? {}),
   });
-  if (!res.ok) throw new Error(parseApiError(await res.text()));
+  await assertOk(res);
   return res.json();
 }
 
@@ -159,6 +202,15 @@ async function postPublic(path: string, body?: unknown) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body ?? {}),
   });
+  // Login/register 401 must NOT clear session / redirect
+  if (!res.ok) throw new Error(parseApiError(await res.text()));
+  return res.json();
+}
+
+async function getPublic(path: string, params?: Record<string, string>) {
+  const url = new URL(apiUrl(path));
+  if (params) Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+  const res = await fetch(url.toString());
   if (!res.ok) throw new Error(parseApiError(await res.text()));
   return res.json();
 }
@@ -169,7 +221,7 @@ async function put(path: string, body?: unknown) {
     headers: authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(body),
   });
-  if (!res.ok) throw new Error(parseApiError(await res.text()));
+  await assertOk(res);
   return res.json();
 }
 
@@ -179,7 +231,7 @@ async function patch(path: string, body?: unknown) {
     headers: authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(body ?? {}),
   });
-  if (!res.ok) throw new Error(parseApiError(await res.text()));
+  await assertOk(res);
   return res.json();
 }
 
@@ -188,7 +240,7 @@ async function del(path: string) {
     method: 'DELETE',
     headers: authHeaders(),
   });
-  if (!res.ok) throw new Error(parseApiError(await res.text()));
+  await assertOk(res);
   return res.json();
 }
 
@@ -198,7 +250,7 @@ async function delJson(path: string, body?: unknown) {
     headers: authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(body ?? {}),
   });
-  if (!res.ok) throw new Error(parseApiError(await res.text()));
+  await assertOk(res);
   return res.json();
 }
 
@@ -210,6 +262,10 @@ export const api = {
   updateAvatar: (avatar: string | null) => patch('/auth/avatar', { avatar }),
   changePassword: (data: { currentPassword: string; newPassword: string }) =>
     post('/auth/change-password', data),
+  /** Blacklist this JWT jti (Redis). Throws if server asks to retry. */
+  logout: () => post('/auth/logout', {}),
+  /** Invalidate all sessions via tokenVersion bump. */
+  logoutAll: () => post('/auth/logout-all', {}),
   getCompanySettings: () => get('/workspace/company'),
   getSubscription: () => get('/workspace/subscription'),
   getSubscriptionQuote: (query: string) => get(`/workspace/subscription/quote?${query}`),
@@ -378,14 +434,14 @@ export const api = {
       headers: authHeaders(),
       body: form,
     });
-    if (!res.ok) throw new Error(parseApiError(await res.text()));
+    await assertOk(res);
     return res.json();
   },
   fetchCannedResponseMedia: async (id: string): Promise<Blob> => {
     const res = await fetch(`${resolveApiBaseUrl()}/canned-responses/${id}/media`, {
       headers: authHeaders(),
     });
-    if (!res.ok) throw new Error(parseApiError(await res.text()));
+    await assertOk(res);
     return res.blob();
   },
   cannedResponseMediaUrl: (id: string) => `${resolveApiBaseUrl()}/canned-responses/${id}/media`,
@@ -412,6 +468,17 @@ export const api = {
   getContacts: (params?: Record<string, string>) => get('/contacts', params),
   getContact: (id: string) => get(`/contacts/${id}`),
   getContactAudits: (id: string) => get(`/contacts/${id}/audits`),
+  getContactInsightLatest: (contactId: string) =>
+    get(`/contacts/${contactId}/insights/latest`) as Promise<{
+      insight: ContactInsightDto | null;
+      excludeFromInsights?: boolean;
+    }>,
+  queueContactInsight: (contactId: string) =>
+    post(`/contacts/${contactId}/insights/compute`, {}) as Promise<{
+      queued: boolean;
+      reason: string | null;
+      jobId: string | null;
+    }>,
   createContact: (data: unknown) => post('/contacts', data),
   updateContact: (id: string, data: unknown) => put(`/contacts/${id}`, data),
   deleteContact: (id: string) => del(`/contacts/${id}`),
@@ -447,14 +514,14 @@ export const api = {
       headers: authHeaders(),
       body: form,
     });
-    if (!res.ok) throw new Error(parseApiError(await res.text()));
+    await assertOk(res);
     return res.json();
   },
   fetchMessageAttachment: async (messageId: string): Promise<Blob> => {
     const res = await fetch(`${resolveApiBaseUrl()}/conversations/messages/${messageId}/attachment`, {
       headers: authHeaders(),
     });
-    if (!res.ok) throw new Error(parseApiError(await res.text()));
+    await assertOk(res);
     return res.blob();
   },
   sendTemplateMessage: async (
@@ -473,7 +540,7 @@ export const api = {
         headers: authHeaders(),
         body: form,
       });
-      if (!res.ok) throw new Error(parseApiError(await res.text()));
+      await assertOk(res);
       return res.json();
     }
     return post(`/conversations/${convId}/messages/template`, { templateId, variables });
@@ -533,7 +600,7 @@ export const api = {
   chatAgent: (agentId: string, data: unknown) => post(`/agents/${agentId}/chat`, data),
   getAgentConversation: (agentId: string, conversationId: string) =>
     get(`/agents/${agentId}/conversations/${conversationId}`),
-  getAgentTokenStats: (agentId: string, params?: { tenantId?: string }) =>
+  getAgentTokenStats: (agentId: string, params?: Record<string, string>) =>
     get(`/agents/${agentId}/token-stats`, params),
 
   getAiProviderConfig: () => get('/workspace/ai-provider'),
@@ -556,7 +623,7 @@ export const api = {
       headers: authHeaders(),
       body: form,
     });
-    if (!res.ok) throw new Error(parseApiError(await res.text()));
+    await assertOk(res);
     return res.json() as Promise<{
       headerFormat: 'IMAGE' | 'VIDEO' | 'DOCUMENT';
       headerMediaHandle: string;
@@ -1166,4 +1233,159 @@ export const api = {
     post(`/whatsapp-pay/requests/${id}/cancel`, {}) as Promise<{ request: { id: string; status: string } }>,
   refreshWhatsAppPayRequest: (id: string) =>
     post(`/whatsapp-pay/requests/${id}/refresh`, {}) as Promise<{ request: { id: string; status: string } }>,
+
+  createCall: (conversationId: string, direction?: 'inbound' | 'outbound') =>
+    post('/calls', { conversationId, direction }) as Promise<{
+      call: CallSessionDto;
+      guestUrl: string | null;
+      callPagePath: string;
+    }>,
+  listCalls: (params?: { conversationId?: string; limit?: string }) =>
+    get('/calls', params) as Promise<{ calls: CallSessionDto[] }>,
+  getCall: (callId: string) => get(`/calls/${callId}`) as Promise<{ call: CallSessionDto }>,
+  acceptCall: (callId: string) => post(`/calls/${callId}/accept`, {}) as Promise<{ call: CallSessionDto }>,
+  declineCall: (callId: string) =>
+    post(`/calls/${callId}/decline`, {}) as Promise<{ call: CallSessionDto }>,
+  endCall: (callId: string) => post(`/calls/${callId}/end`, {}) as Promise<{ call: CallSessionDto }>,
+  markCallConnected: (callId: string) =>
+    post(`/calls/${callId}/connected`, {}) as Promise<{ call: CallSessionDto }>,
+  getCallToken: (callId: string) =>
+    post(`/calls/${callId}/token`, {}) as Promise<{
+      token: string;
+      url: string;
+      expiresInSeconds: number;
+      callId: string;
+    }>,
+  refreshCallGuestLink: (callId: string) =>
+    post(`/calls/${callId}/guest-link`, {}) as Promise<{ guestUrl: string; expiresAt: string }>,
+  resendCallGuestLink: (callId: string) =>
+    post(`/calls/${callId}/resend-link`, {}) as Promise<{ guestUrl: string; sent: boolean }>,
+  saveCallAnalytics: (callId: string, analytics: Record<string, unknown>) =>
+    post(`/calls/${callId}/analytics`, analytics) as Promise<{ call: CallSessionDto }>,
+  getCallRecording: (callId: string) =>
+    get(`/calls/${callId}/recording`) as Promise<{
+      status: string | null;
+      url: string | null;
+      codec: string | null;
+      durationSeconds: number | null;
+      fileSize: number | null;
+    }>,
+  deleteCallRecording: (callId: string) =>
+    del(`/calls/${callId}/recording`) as Promise<{ call: CallSessionDto }>,
+  fetchCallRecordingBlob: async (callId: string): Promise<Blob> => {
+    const res = await fetch(`${resolveApiBaseUrl()}/calls/${callId}/recording/file`, {
+      headers: authHeaders(),
+    });
+    await assertOk(res);
+    return res.blob();
+  },
+  uploadCallRecording: async (
+    conversationId: string,
+    file: File,
+    opts?: { language?: string }
+  ) => {
+    const form = new FormData();
+    form.append('conversationId', conversationId);
+    form.append('file', file);
+    if (opts?.language) form.append('language', opts.language);
+    const res = await fetch(`${resolveApiBaseUrl()}/calls/upload-recording`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: form,
+    });
+    await assertOk(res);
+    return res.json() as Promise<{ call: CallSessionDto; queuedTranscript: boolean }>;
+  },
+  getCallTranscript: (callId: string) =>
+    get(`/calls/${callId}/transcript`) as Promise<{
+      callId: string;
+      status: string | null;
+      text: string | null;
+      language: string | null;
+      segments: Array<{ start: number; end: number; text: string }>;
+      error: string | null;
+      at: string | null;
+    }>,
+  queueCallTranscribe: (callId: string, opts?: { language?: string }) =>
+    post(`/calls/${callId}/transcribe`, opts?.language ? { language: opts.language } : {}) as Promise<{
+      queued: boolean;
+      callId: string;
+      language: string | null;
+    }>,
+  getGuestCallSession: (token: string) =>
+    getPublic('/calls/guest/session', { token }) as Promise<{
+      call: CallSessionDto;
+      role: 'customer';
+      workspaceName: string;
+      contactName: string | null;
+      ended: boolean;
+    }>,
+  resolveGuestShortCode: (code: string) =>
+    getPublic(`/calls/guest/r/${encodeURIComponent(code)}`) as Promise<{
+      callId: string;
+      redirectUrl: string;
+      token?: string;
+    }>,
+  getGuestCallToken: (token: string) =>
+    postPublic('/calls/guest/token', { token }) as Promise<{
+      token: string;
+      url: string;
+      expiresInSeconds: number;
+    }>,
+  endGuestCall: (token: string) =>
+    postPublic('/calls/guest/end', { token }) as Promise<{ call: CallSessionDto }>,
+};
+
+export type CallSessionDto = {
+  callId: string;
+  workspaceId: string;
+  conversationId: string | null;
+  contactId: string | null;
+  direction: string;
+  status: string;
+  roomName: string;
+  assignedTo: string | null;
+  initiatedByUserId?: string | null;
+  acceptedByUserId: string | null;
+  ringingAt: string | null;
+  ringingUntil: string | null;
+  acceptedAt: string | null;
+  connectedAt: string | null;
+  endedAt: string | null;
+  durationSeconds: number | null;
+  endReason: string | null;
+  guestTokenExpiresAt?: string | null;
+  guestJoinedAt?: string | null;
+  guestLinkSentAt?: string | null;
+  recordingStatus?: string | null;
+  recordingUrl?: string | null;
+  recordingStorageKey?: string | null;
+  recordingStartedAt?: string | null;
+  recordingEndedAt?: string | null;
+  recordingDurationSeconds?: number | null;
+  recordingCodec?: string | null;
+  recordingFileSize?: number | null;
+  transcriptStatus?: string | null;
+  transcriptLanguage?: string | null;
+  transcriptAt?: string | null;
+  createdAt: string;
+  contact?: { id: string; name: string; phone: string } | null;
+};
+
+export type ContactInsightDto = {
+  insightId: string;
+  contactId: string;
+  isGenuineCustomerInteraction: boolean;
+  healthScore: number | null;
+  churnRiskScore: number | null;
+  purchaseIntentScore: number | null;
+  sentimentScore: number | null;
+  summary: string;
+  painPoints: string[];
+  interests: string[];
+  recommendedAction: string | null;
+  modelVersion: string;
+  computedAt: string;
+  basedOnConversationIds: string[];
+  basedOnCallSessionIds: string[];
 };

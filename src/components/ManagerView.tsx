@@ -56,6 +56,8 @@ type ManagerViewProps = {
   isActive?: boolean;
   /** When embedded under Integrations → WhatsApp, shows selector inline and back to hub. */
   variant?: 'standalone' | 'integrations';
+  /** Skip chooser — open this mode’s guide/connect directly (separate Integrations channel). */
+  connectionMode?: WhatsAppConnectionType;
   onBackToHub?: () => void;
   onAccountsChanged?: () => void;
 };
@@ -63,10 +65,12 @@ type ManagerViewProps = {
 export const ManagerView: React.FC<ManagerViewProps> = ({
   isActive = true,
   variant = 'standalone',
+  connectionMode,
   onBackToHub,
   onAccountsChanged,
 }) => {
   const navigate = useNavigate();
+  const lockedMode = connectionMode ?? null;
 
   const [whatsappAccounts, setWhatsappAccounts] = useState<WhatsAppPhoneAccount[]>([]);
   const [accountsLoading, setAccountsLoading] = useState(true);
@@ -101,9 +105,17 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
           }));
           setWhatsappAccounts(mapped);
           if (mapped.length === 0) {
-            setNumbersFlow((flow) =>
-              flow === 'business_api_guide' || flow === 'coexistence_guide' ? 'selector' : flow
-            );
+            setNumbersFlow((flow) => {
+              if (lockedMode === 'app_coexistence') {
+                return flow === 'coexistence_connect' ? flow : 'coexistence_guide';
+              }
+              if (lockedMode === 'business_api') {
+                return flow === 'business_api_connect' ? flow : 'business_api_guide';
+              }
+              return flow === 'business_api_guide' || flow === 'coexistence_guide'
+                ? 'selector'
+                : flow;
+            });
           }
           return mapped;
         }
@@ -120,13 +132,43 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
   };
 
   const [connectionType, setConnectionType] = useState<WhatsAppConnectionType | null>(
-    loadStoredConnectionType
+    () => lockedMode ?? loadStoredConnectionType()
   );
-  const [numbersFlow, setNumbersFlow] = useState<NumbersFlowView>(resolveNumbersFlowFromStorage);
+  const [numbersFlow, setNumbersFlow] = useState<NumbersFlowView>(() => {
+    if (lockedMode === 'app_coexistence') return 'coexistence_guide';
+    if (lockedMode === 'business_api') return 'business_api_guide';
+    return resolveNumbersFlowFromStorage();
+  });
+  /** Coexistence channel: show instructions even if a WA number is already linked. */
+  const [coexistenceInstructionsOpen, setCoexistenceInstructionsOpen] = useState(
+    () => lockedMode === 'app_coexistence'
+  );
   const [isStartingApiSetup, setIsStartingApiSetup] = useState(false);
   const [isStartingCoexistenceSetup, setIsStartingCoexistenceSetup] = useState(false);
   const [autoLaunchSignup, setAutoLaunchSignup] = useState(false);
   const accountsLoadedRef = useRef(false);
+
+  useEffect(() => {
+    if (lockedMode !== 'app_coexistence') {
+      setCoexistenceInstructionsOpen(false);
+      if (!lockedMode) return;
+      setConnectionType(lockedMode);
+      localStorage.setItem(CONNECTION_TYPE_STORAGE_KEY, lockedMode);
+      setNumbersFlow((flow) =>
+        flow === 'business_api_connect' ? flow : 'business_api_guide'
+      );
+      return;
+    }
+
+    // Connect → always land on requirements / instructions page (not Meta popup).
+    setConnectionType('app_coexistence');
+    localStorage.setItem(CONNECTION_TYPE_STORAGE_KEY, 'app_coexistence');
+    localStorage.setItem(COEXISTENCE_ONBOARDING_STEP_KEY, '1');
+    sessionStorage.removeItem(PENDING_SETUP_SESSION_KEY);
+    setAutoLaunchSignup(false);
+    setCoexistenceInstructionsOpen(true);
+    setNumbersFlow('coexistence_guide');
+  }, [lockedMode]);
 
   useEffect(() => {
     if (!isActive) return;
@@ -141,6 +183,12 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
   /** KeepAlive keeps this view mounted — re-read Integrations → Manager handoff from storage. */
   useEffect(() => {
     if (!isActive || accountsLoading || hasWhatsappNumbers) return;
+
+    if (lockedMode) {
+      setConnectionType(lockedMode);
+      localStorage.setItem(CONNECTION_TYPE_STORAGE_KEY, lockedMode);
+      return;
+    }
 
     const storedType = loadStoredConnectionType();
     const pendingSetup = sessionStorage.getItem(PENDING_SETUP_SESSION_KEY) === '1';
@@ -165,13 +213,16 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
       setAutoLaunchSignup(true);
       sessionStorage.removeItem(PENDING_SETUP_SESSION_KEY);
     }
-  }, [isActive, accountsLoading, hasWhatsappNumbers]);
+  }, [isActive, accountsLoading, hasWhatsappNumbers, lockedMode]);
 
   const clearWhatsappQueryFlag = (key: string) => {
     const params = new URLSearchParams(window.location.search);
     params.delete(key);
     if (variant === 'integrations') {
-      params.set('channel', 'whatsapp');
+      params.set(
+        'channel',
+        lockedMode === 'app_coexistence' ? 'whatsapp-coexistence' : 'whatsapp'
+      );
     }
     const qs = params.toString();
     window.history.replaceState(
@@ -199,6 +250,10 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
   }, []);
 
   const handleChangeConnectionMethod = () => {
+    if (lockedMode) {
+      onBackToHub?.();
+      return;
+    }
     setConnectionType(null);
     localStorage.removeItem(CONNECTION_TYPE_STORAGE_KEY);
     localStorage.removeItem(BUSINESS_API_ONBOARDING_STEP_KEY);
@@ -211,7 +266,6 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
   };
 
   const handleGetStartedFromSelector = (type: WhatsAppConnectionType) => {
-    if (type === 'app_coexistence') return;
     setConnectionType(type);
     localStorage.setItem(CONNECTION_TYPE_STORAGE_KEY, type);
     if (type === 'business_api') {
@@ -255,6 +309,7 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
   }) => {
     setConnectError('');
     setAutoLaunchSignup(false);
+    setCoexistenceInstructionsOpen(false);
     sessionStorage.removeItem(PENDING_SETUP_SESSION_KEY);
     localStorage.removeItem(BUSINESS_API_ONBOARDING_STEP_KEY);
     localStorage.removeItem(COEXISTENCE_ONBOARDING_STEP_KEY);
@@ -302,32 +357,45 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
     const remaining = await loadWhatsappAccounts({ silent: true });
     onAccountsChanged?.();
     if (remaining.length === 0) {
-      setNumbersFlow('selector');
-      setConnectionType(null);
+      if (lockedMode === 'app_coexistence') {
+        setConnectionType('app_coexistence');
+        setCoexistenceInstructionsOpen(true);
+        setNumbersFlow('coexistence_guide');
+      } else if (lockedMode === 'business_api') {
+        setConnectionType('business_api');
+        setNumbersFlow('business_api_guide');
+      } else {
+        setNumbersFlow('selector');
+        setConnectionType(null);
+        localStorage.removeItem(CONNECTION_TYPE_STORAGE_KEY);
+      }
       setAutoLaunchSignup(false);
-      localStorage.removeItem(CONNECTION_TYPE_STORAGE_KEY);
       localStorage.removeItem(BUSINESS_API_ONBOARDING_STEP_KEY);
+      localStorage.removeItem(COEXISTENCE_ONBOARDING_STEP_KEY);
     }
   };
 
   const showConnectionSelector =
-    !hasWhatsappNumbers && numbersFlow === 'selector';
+    !lockedMode && !hasWhatsappNumbers && numbersFlow === 'selector';
   const showBusinessApiGuide =
     !hasWhatsappNumbers && numbersFlow === 'business_api_guide';
   const showCoexistenceGuide =
-    !hasWhatsappNumbers &&
     numbersFlow === 'coexistence_guide' &&
-    connectionType === 'app_coexistence';
+    connectionType === 'app_coexistence' &&
+    (!hasWhatsappNumbers || coexistenceInstructionsOpen);
   const showBusinessApiConnect =
     !hasWhatsappNumbers &&
     numbersFlow === 'business_api_connect' &&
     connectionType === 'business_api';
   const showCoexistenceConnect =
-    !hasWhatsappNumbers &&
     numbersFlow === 'coexistence_connect' &&
-    connectionType === 'app_coexistence';
+    connectionType === 'app_coexistence' &&
+    (!hasWhatsappNumbers || coexistenceInstructionsOpen);
 
-  const containerClass = hasWhatsappNumbers
+  const showAccountManager =
+    hasWhatsappNumbers && !coexistenceInstructionsOpen;
+
+  const containerClass = showAccountManager
     ? 'flex-1 space-y-6 max-w-7xl mx-auto pb-12 text-left selection:bg-sky-50'
     : 'flex-1 w-full max-w-none pb-12 text-left selection:bg-sky-50';
 
@@ -355,7 +423,7 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
         </button>
       )}
 
-      {hasWhatsappNumbers && (
+      {showAccountManager && (
         <WhatsAppAccountManager
           accounts={whatsappAccounts}
           onDisconnect={handleDisconnectWhatsApp}

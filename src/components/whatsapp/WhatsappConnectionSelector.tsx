@@ -55,14 +55,14 @@ export const WhatsappConnectionSelector: FC<WhatsappConnectionSelectorProps> = (
             id="whatsapp-connect-hero-title"
             className="text-3xl sm:text-4xl font-black text-gray-950 tracking-tight leading-[1.1]"
           >
-            Connect WhatsApp Business API
+            Connect WhatsApp
           </h1>
           <p className="mt-3 text-lg sm:text-xl font-semibold text-gray-800">
-            Official WhatsApp Business API for inbox, templates, and automation.
+            Choose Business API or keep using your WhatsApp Business App.
           </p>
           <p className="mt-2 text-sm sm:text-base text-gray-500 font-medium leading-relaxed max-w-2xl">
-            Link your Meta Business account to start messaging customers at scale. WhatsApp
-            Business App coexistence is coming soon.
+            Link your Meta Business account for inbox, templates, and automation — or enable
+            coexistence so the same number stays active on your phone.
           </p>
         </div>
       </header>

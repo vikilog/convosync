@@ -50,6 +50,5 @@ export const WHATSAPP_CONNECTION_OPTIONS: ConnectionTypeCardData[] = [
     ],
     badge: 'Easy Setup',
     ctaLabel: 'Get Started',
-    comingSoon: true,
   },
 ];

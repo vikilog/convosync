@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Camera, Loader2, Lock, LogOut, Save, Trash2, User } from 'lucide-react';
 import { api, getUserAvatar, getUserEmail, getUserName, setUserAvatar, setUserName } from '../../lib/api';
 import { compressImageFile } from '../../lib/imageUpload';
-import { clearAuthSession } from '../../lib/session';
+import { logoutThisDevice } from '../../lib/session';
 import { disconnectSocket } from '../../lib/socket';
 
 type ProfileUser = {
@@ -343,9 +343,11 @@ export function ProfilePanel() {
           <button
             type="button"
             onClick={() => {
-              disconnectSocket();
-              clearAuthSession();
-              navigate('/login', { replace: true });
+              void (async () => {
+                disconnectSocket();
+                await logoutThisDevice();
+                navigate('/login', { replace: true });
+              })();
             }}
             className="inline-flex h-10 cursor-pointer items-center gap-1.5 rounded-lg border border-red-200 bg-white px-3.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
           >

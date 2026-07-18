@@ -25,8 +25,16 @@ export function dispatchOpenInboxConversation(conversationId: string) {
   );
 }
 
-export async function fetchInboxUnreadTotal(): Promise<number> {
+export async function fetchInboxUnreadTotal(
+  excludeConversationId?: string
+): Promise<number> {
   const { api } = await import('./api');
-  const convs = (await api.getConversations()) as Array<{ unreadCount?: number }>;
-  return convs.reduce((sum, conv) => sum + Number(conv.unreadCount ?? 0), 0);
+  const convs = (await api.getConversations()) as Array<{
+    id?: string;
+    unreadCount?: number;
+  }>;
+  return convs.reduce((sum, conv) => {
+    if (excludeConversationId && conv.id === excludeConversationId) return sum;
+    return sum + Number(conv.unreadCount ?? 0);
+  }, 0);
 }

@@ -133,3 +133,24 @@ export function clearAuthSession() {
   sessionStorage.removeItem('convosync_onboarding');
   notifyAuthChanged();
 }
+
+/** Call server logout (blacklist jti) then clear local session. */
+export async function logoutThisDevice() {
+  try {
+    const { api } = await import('./api');
+    await api.logout();
+  } catch {
+    // Still clear local session; server may have failed Redis write (client can retry while token still works)
+  }
+  clearAuthSession();
+}
+
+export async function logoutEverywhere() {
+  try {
+    const { api } = await import('./api');
+    await api.logoutAll();
+  } catch {
+    // fall through to local clear
+  }
+  clearAuthSession();
+}

@@ -45,6 +45,7 @@ import { GoogleIcon } from './ads/GoogleIcon';
 type ChannelView =
   | 'hub'
   | 'whatsapp'
+  | 'whatsapp-coexistence'
   | 'instagram'
   | 'messenger'
   | 'sms'
@@ -60,6 +61,7 @@ function channelViewFromSearch(search: string): ChannelView {
   if (channel === 'email') return 'email';
   if (channel === 'google') return 'google';
   if (channel === 'whatsapp') return 'whatsapp';
+  if (channel === 'whatsapp-coexistence') return 'whatsapp-coexistence';
   if (channel === 'instagram') return 'instagram';
   if (channel === 'messenger') return 'messenger';
   if (channel === 'meta-ads') return 'meta-ads';
@@ -531,6 +533,13 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
     setSearchParams(next, { replace: true });
   }, [searchParams, setSearchParams]);
 
+  const openWhatsappCoexistenceChannel = useCallback(() => {
+    setView('whatsapp-coexistence');
+    const next = new URLSearchParams(searchParams);
+    next.set('channel', 'whatsapp-coexistence');
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
+
   const openMetaAdsChannel = useCallback(() => {
     setView('meta-ads');
     const next = new URLSearchParams(searchParams);
@@ -730,6 +739,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
     if (channel === 'email') setView('email');
     else if (channel === 'google') setView('google');
     else if (channel === 'whatsapp') setView('whatsapp');
+    else if (channel === 'whatsapp-coexistence') setView('whatsapp-coexistence');
     else if (channel === 'meta-ads') setView('meta-ads');
     else if (channel === 'google-ads') setView('google-ads');
     else if (channel === 'ai') setView('ai');
@@ -1213,6 +1223,21 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
         <ManagerView
           isActive={isActive}
           variant="integrations"
+          connectionMode="business_api"
+          onBackToHub={goToHub}
+          onAccountsChanged={() => void loadWhatsappAccounts()}
+        />
+      </div>
+    );
+  }
+
+  if (view === 'whatsapp-coexistence') {
+    return (
+      <div className="w-full pb-12 space-y-6 animate-scale-up">
+        <ManagerView
+          isActive={isActive}
+          variant="integrations"
+          connectionMode="app_coexistence"
           onBackToHub={goToHub}
           onAccountsChanged={() => void loadWhatsappAccounts()}
         />
@@ -1387,10 +1412,9 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
         </section>
       )}
 
-      {(!whatsappConnected || !instagramConnected || !emailConnected) && (
-        <section>
-          <h3 className="text-sm font-black text-gray-950 mb-3">Add a channel</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <section>
+        <h3 className="text-sm font-black text-gray-950 mb-3">Add a channel</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {!whatsappConnected && (
               <IntegrationCard
                 title="WhatsApp"
@@ -1403,6 +1427,17 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
                 onConnect={openWhatsappChannel}
               />
             )}
+
+            <IntegrationCard
+              title="WhatsApp Coexistence"
+              description="Keep using WhatsApp Business App on your phone while syncing the same number to ConvoSync."
+              icon={Phone}
+              iconBgClass="bg-[#e6f7ec]"
+              iconClass="text-channel-green"
+              connectLabel={isChannelLimitReached ? 'Limit reached' : 'Connect'}
+              connectDisabled={isChannelLimitReached}
+              onConnect={openWhatsappCoexistenceChannel}
+            />
 
             {!instagramConnected && (
               <IntegrationCard
@@ -1431,7 +1466,6 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
             )}
           </div>
         </section>
-      )}
 
       <section>
         <h3 className="text-sm font-black text-gray-950 mb-3">AI & automation</h3>

@@ -26,6 +26,7 @@ export type ContactEditPayload = {
   tags: string[];
   customFields?: Record<string, string>;
   channel?: 'whatsapp' | 'instagram' | 'messenger';
+  excludeFromInsights?: boolean;
 };
 
 type Props = {
@@ -86,6 +87,7 @@ export function AddContactDrawer({ open, onClose, onCreated, onSaved, editContac
   const [ownerId, setOwnerId] = useState('');
   const [tagInput, setTagInput] = useState('');
   const [tags, setTags] = useState<string[]>([]);
+  const [excludeFromInsights, setExcludeFromInsights] = useState(false);
   const [customAttrs, setCustomAttrs] = useState<{ key: string; value: string }[]>([]);
   const [showCustom, setShowCustom] = useState(false);
   const [members, setMembers] = useState<Member[]>([]);
@@ -111,6 +113,7 @@ export function AddContactDrawer({ open, onClose, onCreated, onSaved, editContac
     setPhone(local);
     setEmail(editContact.email ?? '');
     setTags(editContact.tags ?? []);
+    setExcludeFromInsights(Boolean(editContact.excludeFromInsights));
     const cf = editContact.customFields ?? {};
     setOwnerId(typeof cf.ownerId === 'string' ? cf.ownerId : '');
     const rows = customFieldsToRows(cf);
@@ -128,6 +131,7 @@ export function AddContactDrawer({ open, onClose, onCreated, onSaved, editContac
     setOwnerId('');
     setTagInput('');
     setTags([]);
+    setExcludeFromInsights(false);
     setCustomAttrs([]);
     setShowCustom(false);
     setError(null);
@@ -191,6 +195,7 @@ export function AddContactDrawer({ open, onClose, onCreated, onSaved, editContac
           ...(phoneLocked ? {} : { phone: fullPhone }),
           email: email.trim() || null,
           tags,
+          excludeFromInsights,
           customFields: Object.keys(customFields).length ? customFields : undefined,
         });
       } else {
@@ -384,6 +389,25 @@ export function AddContactDrawer({ open, onClose, onCreated, onSaved, editContac
                     className="w-full text-sm border border-slate-200 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
+
+                {isEdit && (
+                  <label className="mt-4 flex items-start gap-2.5 cursor-pointer rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2.5">
+                    <input
+                      type="checkbox"
+                      checked={excludeFromInsights}
+                      onChange={(e) => setExcludeFromInsights(e.target.checked)}
+                      className="mt-0.5 h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500"
+                    />
+                    <span>
+                      <span className="block text-sm font-bold text-gray-800">
+                        Exclude from AI insights
+                      </span>
+                      <span className="mt-0.5 block text-xs text-gray-500 leading-snug">
+                        For team/test numbers — never run customer insight scoring on this contact.
+                      </span>
+                    </span>
+                  </label>
+                )}
               </div>
 
               {!showCustom ? (

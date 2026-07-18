@@ -50,13 +50,15 @@ const MessageBubble: React.FC<{ message: ChatMessage; channel: Channel }> = ({
       messageType === 'location');
   const isRichMessage = hasMediaAttachment;
 
-  // ✓ sent · ✓✓ delivered · blue ✓✓ read (WhatsApp semantics; ack values map to status)
+  // ✓ sent · ✓✓ delivered · blue ✓✓ read (WhatsApp / Instagram / Messenger)
   const deliveryStatusIcon = !isContact ? (
     message.status === 'sending' ? (
       <Loader2 className="w-[14px] h-[14px] animate-spin" strokeWidth={2.5} />
     ) : message.status === 'read' ? (
       <CheckCheck
-        className={`w-[14px] h-[14px] ${isWhatsApp ? 'text-[#99d9ff]' : 'text-white/90'}`}
+        className={`w-[14px] h-[14px] ${
+          isWhatsApp ? 'text-[#99d9ff]' : isInstagram ? 'text-[#7dd3fc]' : 'text-sky-200'
+        }`}
         strokeWidth={2.5}
       />
     ) : message.status === 'delivered' ? (
@@ -156,7 +158,7 @@ const MessageBubble: React.FC<{ message: ChatMessage; channel: Channel }> = ({
     <div
       className={`flex flex-col max-w-[80%] ${
         isContact ? 'items-start text-left' : 'items-end ml-auto text-right'
-      }`}
+      } ${message.status === 'sending' ? 'opacity-90' : ''}`}
     >
       <div
         className={`p-3.5 shadow-xs border relative font-medium text-xs leading-relaxed whitespace-pre-wrap break-words ${
@@ -170,8 +172,16 @@ const MessageBubble: React.FC<{ message: ChatMessage; channel: Channel }> = ({
       <div className="flex items-center gap-1 mt-1 text-meta text-gray-400 font-bold font-mono px-1">
         <span>{time}</span>
         {!isContact &&
-          (message.status === 'read' ? (
-            <CheckCheck className="w-3.5 h-3.5 text-accent-green" />
+          (message.status === 'sending' ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          ) : message.status === 'read' ? (
+            <CheckCheck
+              className={`w-3.5 h-3.5 ${
+                channel === 'instagram' ? 'text-sky-500' : 'text-accent-green'
+              }`}
+            />
+          ) : message.status === 'delivered' ? (
+            <CheckCheck className="w-3.5 h-3.5 text-gray-400" />
           ) : (
             <Check className="w-3.5 h-3.5 text-gray-400" />
           ))}

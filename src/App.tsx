@@ -55,6 +55,9 @@ import { LandingPage } from './components/LandingPage';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsOfServicePage } from './pages/TermsOfServicePage';
 import { InboxRealtimeBridge } from './components/InboxRealtimeBridge';
+import { CallRealtimeBridge } from './components/calling/CallRealtimeBridge';
+import { CallPage } from './components/calling/CallPage';
+import { CallShortRedirectPage } from './components/calling/CallShortRedirectPage';
 import { OnboardingWizard } from './components/onboarding/OnboardingWizard';
 import { OnboardingGuard } from './components/onboarding/OnboardingGuard';
 
@@ -159,6 +162,7 @@ function AppShellLayout({
   return (
     <div className="flex min-h-screen app-grid-bg selection:bg-emerald-100">
       <InboxRealtimeBridge />
+      <CallRealtimeBridge />
       <SideNavBar />
 
       <div
@@ -359,6 +363,8 @@ export default function App() {
       <AnalyticsRoot />
       <Routes>
       <Route path="/login" element={<LoginRedirect />} />
+      <Route path="/c/:code" element={<CallShortRedirectPage />} />
+      <Route path="/call/:callId" element={<CallPage />} />
       <Route path="/auth/impersonate" element={<ImpersonatePage />} />
       <Route path="/signup" element={<SignupRedirect />} />
       <Route

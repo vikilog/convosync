@@ -7,6 +7,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { api } from '../lib/api';
 import type { ContactJourneyProgress } from '../components/inbox/ContactJourneyPanel';
 
+const FALLBACK_POLL_MS = 60_000;
+
 function progressSnapshot(p: ContactJourneyProgress | null): string {
   if (!p) return '';
   return JSON.stringify({
@@ -78,12 +80,23 @@ export function useContactJourneyProgress(contactId: string | null, refreshKey =
     void fetchProgress({ silent: true });
   }, [refreshKey, contactId, fetchProgress]);
 
+  // Fallback only — primary refresh is refreshKey (incoming messages). Pause when tab hidden.
   useEffect(() => {
     if (!contactId) return;
-    const timer = window.setInterval(() => {
-      void fetchProgress({ silent: true });
-    }, 15000);
-    return () => window.clearInterval(timer);
+    const tick = () => {
+      if (document.visibilityState === 'visible') {
+        void fetchProgress({ silent: true });
+      }
+    };
+    const timer = window.setInterval(tick, FALLBACK_POLL_MS);
+    const onVis = () => {
+      if (document.visibilityState === 'visible') tick();
+    };
+    document.addEventListener('visibilitychange', onVis);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener('visibilitychange', onVis);
+    };
   }, [contactId, fetchProgress]);
 
   return { progress, initialLoading, refetch: () => fetchProgress({ silent: true }) };

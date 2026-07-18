@@ -175,6 +175,7 @@ export const ContactsView: React.FC = () => {
         tags: (raw.tags as string[]) ?? [],
         customFields,
         channel: contact.channel,
+        excludeFromInsights: Boolean(raw.excludeFromInsights),
       });
       setDrawerOpen(true);
     } catch (err) {
