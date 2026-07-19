@@ -365,6 +365,8 @@ export interface AgentBot {
   instructions?: string;
   brandBackground?: string;
   actions?: AgentActionConfig[];
+  voiceAgentEnabled?: boolean;
+  voiceSttProvider?: string;
   isPublished?: boolean;
   publishedAt?: string | null;
   conversationsCount: number;

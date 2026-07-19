@@ -1256,6 +1256,21 @@ export const api = {
       expiresInSeconds: number;
       callId: string;
     }>,
+  listenInCall: (callId: string) =>
+    post(`/calls/${callId}/listen`, {}) as Promise<{
+      token: string;
+      url: string;
+      expiresInSeconds: number;
+      callId: string;
+      mode: 'listen';
+    }>,
+  takeOverCall: (callId: string) =>
+    post(`/calls/${callId}/take-over`, {}) as Promise<{
+      call: CallSessionDto;
+      token: string;
+      url: string;
+      expiresInSeconds: number;
+    }>,
   refreshCallGuestLink: (callId: string) =>
     post(`/calls/${callId}/guest-link`, {}) as Promise<{ guestUrl: string; expiresAt: string }>,
   resendCallGuestLink: (callId: string) =>
@@ -1368,6 +1383,9 @@ export type CallSessionDto = {
   transcriptStatus?: string | null;
   transcriptLanguage?: string | null;
   transcriptAt?: string | null;
+  currentHandler?: 'none' | 'ai' | 'human' | string;
+  takenOverAt?: string | null;
+  takenOverByUserId?: string | null;
   createdAt: string;
   contact?: { id: string; name: string; phone: string } | null;
 };

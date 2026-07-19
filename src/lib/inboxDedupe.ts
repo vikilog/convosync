@@ -74,7 +74,7 @@ export function dedupeInboxConversations<T extends Record<string, unknown>>(conv
     byKey.set(key, existing ? (pickPreferredConversation(existing, conv) as T) : conv);
   }
 
-  return Array.from(byKey.values());
+  return sortInboxByLatestMessage(Array.from(byKey.values()));
 }
 
 export type InboxDedupeThread = {
@@ -89,6 +89,20 @@ export type InboxDedupeThread = {
   unreadCount?: number;
   lastMessage?: string;
 };
+
+function latestMessageMs(row: { lastMessageAt?: unknown }): number {
+  if (row.lastMessageAt == null || row.lastMessageAt === '') return 0;
+  const parsed =
+    row.lastMessageAt instanceof Date
+      ? row.lastMessageAt.getTime()
+      : Date.parse(String(row.lastMessageAt));
+  return Number.isNaN(parsed) ? 0 : parsed;
+}
+
+/** Newest activity first — WhatsApp-style inbox order. */
+export function sortInboxByLatestMessage<T extends { lastMessageAt?: unknown }>(rows: T[]): T[] {
+  return [...rows].sort((a, b) => latestMessageMs(b) - latestMessageMs(a));
+}
 
 export function inboxThreadDedupeKey(thread: InboxDedupeThread): string {
   return whatsappInboxDedupeKey({
@@ -121,15 +135,10 @@ export function dedupeInboxThreads<T extends InboxDedupeThread>(threads: T[]): T
     }
     if (rankCurrent < rankExisting) continue;
 
-    const time = (row: InboxDedupeThread) => {
-      const fromAt = row.lastMessageAt ? Date.parse(row.lastMessageAt) : NaN;
-      if (!Number.isNaN(fromAt)) return fromAt;
-      return 0;
-    };
-    if (time(thread) >= time(existing)) {
+    if (latestMessageMs(thread) >= latestMessageMs(existing)) {
       byKey.set(key, thread);
     }
   }
 
-  return Array.from(byKey.values());
+  return sortInboxByLatestMessage(Array.from(byKey.values()));
 }

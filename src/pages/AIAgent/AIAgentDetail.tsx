@@ -41,6 +41,8 @@ function toProfileData(agent: AgentBot): AgentProfileData {
     instructions: agent.instructions ?? '',
     brandBackground: agent.brandBackground ?? '',
     actions: agent.actions ?? [],
+    voiceAgentEnabled: Boolean(agent.voiceAgentEnabled),
+    voiceSttProvider: agent.voiceSttProvider || 'cartesia',
   };
 }
 
@@ -98,6 +100,8 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
     instructions: patch.instructions,
     brandBackground: patch.brandBackground,
     actions: patch.actions,
+    voiceAgentEnabled: patch.voiceAgentEnabled,
+    voiceSttProvider: patch.voiceSttProvider,
     isPublished: patch.isPublished,
   });
 
@@ -115,6 +119,8 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
       instructions: mergedProfile.instructions,
       brandBackground: mergedProfile.brandBackground,
       actions: mergedProfile.actions,
+      voiceAgentEnabled: mergedProfile.voiceAgentEnabled,
+      voiceSttProvider: mergedProfile.voiceSttProvider,
       isPublished: mergedProfile.isPublished,
     });
     void persist({
@@ -126,6 +132,8 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
       instructions: mergedProfile.instructions,
       brandBackground: mergedProfile.brandBackground,
       actions: mergedProfile.actions,
+      voiceAgentEnabled: mergedProfile.voiceAgentEnabled,
+      voiceSttProvider: mergedProfile.voiceSttProvider,
       isPublished: mergedProfile.isPublished,
     }).then(() => {
       setLastAutoSavedAt(formatSavedTime(new Date()));

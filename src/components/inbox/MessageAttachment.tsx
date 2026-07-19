@@ -339,16 +339,6 @@ export function MessageAttachment({ message }: Props) {
             Sending…
           </div>
         )}
-        {previewUrl && !isSending && (
-          <button
-            type="button"
-            onClick={() => downloadFromUrl(previewUrl, fileName.includes('.') ? fileName : `${fileName}.ogg`)}
-            className="mt-1.5 inline-flex items-center gap-1 text-xs font-bold text-[#128C7E] hover:underline"
-          >
-            <Download className="w-3.5 h-3.5" />
-            Download
-          </button>
-        )}
       </div>
     );
   }

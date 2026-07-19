@@ -114,6 +114,7 @@ function assigneeLabelFromValue(
 
 type InboxThread = Contact & {
   conversationId: string;
+  lastMessageAt?: string;
 };
 
 function mapInboxThread(
@@ -121,10 +122,28 @@ function mapInboxThread(
   conv: Record<string, unknown>,
   conversationId: string
 ): InboxThread {
+  const lastMessageAt = conv.lastMessageAt ? String(conv.lastMessageAt) : undefined;
   return {
     ...mapContactFromApi(contact, conv),
     conversationId,
+    lastMessageAt,
   };
+}
+
+/** Move/update a thread to the top (latest activity). */
+function bumpInboxThread(
+  prev: InboxThread[],
+  conversationId: string,
+  patch: Partial<InboxThread>
+): InboxThread[] {
+  const idx = prev.findIndex((t) => t.conversationId === conversationId);
+  if (idx === -1) return prev;
+  const updated: InboxThread = {
+    ...prev[idx],
+    ...patch,
+    lastMessageAt: patch.lastMessageAt ?? new Date().toISOString(),
+  };
+  return [updated, ...prev.filter((_, i) => i !== idx)];
 }
 
 function mergeInboxThreads(prev: InboxThread[], incoming: InboxThread): InboxThread[] {
@@ -709,15 +728,11 @@ export const InboxView: React.FC = () => {
       setInboxThreads((prev) => {
         const idx = prev.findIndex((t) => t.conversationId === conversationId);
         if (idx === -1) return prev;
-        const next = prev.map((t) => {
-          if (t.conversationId !== conversationId) return t;
-          return {
-            ...t,
-            lastMessage: msg.content,
-            lastActive: 'Just now',
-            unreadCount:
-              isIncoming && !isViewing ? t.unreadCount + 1 : isViewing ? 0 : t.unreadCount,
-          };
+        const next = bumpInboxThread(prev, conversationId, {
+          lastMessage: msg.content,
+          lastActive: 'Just now',
+          unreadCount:
+            isIncoming && !isViewing ? prev[idx].unreadCount + 1 : isViewing ? 0 : prev[idx].unreadCount,
         });
         const viewingId = inboxTabActiveRef.current
           ? selectedConversationIdRef.current
@@ -990,11 +1005,11 @@ export const InboxView: React.FC = () => {
     clearPendingComposerMedia();
     setChatHistories((prev) => appendChatMessage(prev, convId, pendingMessage));
     setInboxThreads((prev) =>
-      prev.map((t) =>
-        t.conversationId === convId
-          ? { ...t, lastMessage: preview, unreadCount: 0, lastActive: 'Just now' }
-          : t
-      )
+      bumpInboxThread(prev, convId, {
+        lastMessage: preview,
+        unreadCount: 0,
+        lastActive: 'Just now',
+      })
     );
 
     try {
@@ -1006,11 +1021,11 @@ export const InboxView: React.FC = () => {
       };
       setChatHistories((prev) => replaceChatMessage(prev, convId, pendingId, newMessage));
       setInboxThreads((prev) =>
-        prev.map((t) =>
-          t.conversationId === convId
-            ? { ...t, lastMessage: newMessage.content, unreadCount: 0, lastActive: 'Just now' }
-            : t
-        )
+        bumpInboxThread(prev, convId, {
+          lastMessage: newMessage.content,
+          unreadCount: 0,
+          lastActive: 'Just now',
+        })
       );
       setJourneyProgressRefresh((n) => n + 1);
       // Keep blob URL on the message so preview stays stable (no skeleton flash)
@@ -1070,11 +1085,11 @@ export const InboxView: React.FC = () => {
     setSendError(null);
     setChatHistories((prev) => appendChatMessage(prev, convId, pendingMessage));
     setInboxThreads((prev) =>
-      prev.map((t) =>
-        t.conversationId === convId
-          ? { ...t, lastMessage: content, unreadCount: 0, lastActive: 'Just now' }
-          : t
-      )
+      bumpInboxThread(prev, convId, {
+        lastMessage: content,
+        unreadCount: 0,
+        lastActive: 'Just now',
+      })
     );
 
     try {
@@ -1231,11 +1246,11 @@ export const InboxView: React.FC = () => {
       const newMessage = mapMessageFromApi(sent as Record<string, unknown>);
       setChatHistories((prev) => appendChatMessage(prev, convId, newMessage));
       setInboxThreads((prev) =>
-        prev.map((t) =>
-          t.conversationId === convId
-            ? { ...t, lastMessage: newMessage.content, unreadCount: 0, lastActive: 'Just now' }
-            : t
-        )
+        bumpInboxThread(prev, convId, {
+          lastMessage: newMessage.content,
+          unreadCount: 0,
+          lastActive: 'Just now',
+        })
       );
     } catch (err) {
       setSendError(err instanceof Error ? err.message : 'Failed to send template');

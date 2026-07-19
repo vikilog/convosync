@@ -45,6 +45,8 @@ export interface AgentProfileData {
   instructions: string;
   brandBackground: string;
   actions: AgentActionConfig[];
+  voiceAgentEnabled: boolean;
+  voiceSttProvider: string;
 }
 
 export interface AgentSkill {

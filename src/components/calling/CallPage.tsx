@@ -10,12 +10,15 @@ import {
   Check,
   Circle,
   Copy,
+  Bot,
+  Headphones,
   Loader2,
   Mic,
   MicOff,
   Phone,
   PhoneOff,
   Send,
+  User,
 } from 'lucide-react';
 import {
   api,
@@ -27,7 +30,7 @@ import { PRODUCT_LOGO, PRODUCT_NAME } from '../../lib/brand';
 import { dispatchOpenInboxConversation } from '../../lib/inboxEvents';
 import { connectSocket, getSocket } from '../../lib/socket';
 import { pathForTab } from '../../routes';
-
+import { CallLiveTranscript } from './CallLiveTranscript';
 type Role = 'agent' | 'customer';
 type Phase =
   | 'loading'
@@ -74,6 +77,8 @@ export function CallPage() {
   const [speakerId, setSpeakerId] = useState<string>('');
   const [recordingPlaybackUrl, setRecordingPlaybackUrl] = useState<string | null>(null);
   const [resendOk, setResendOk] = useState(false);
+  /** When AI is on the call: idle | listening | speaking (human took over). */
+  const [agentMode, setAgentMode] = useState<'idle' | 'listening' | 'speaking'>('idle');
 
   const roomRef = useRef<Room | null>(null);
   const attachedAudioRef = useRef<HTMLMediaElement[]>([]);
@@ -81,6 +86,7 @@ export function CallPage() {
   phaseRef.current = phase;
   const reconnectCountRef = useRef(0);
   const joinAtRef = useRef<string | null>(null);
+  const intentionalDisconnectRef = useRef(false);
 
   const markLiveWithCustomer = useCallback((next?: CallSessionDto) => {
     if (next) {
@@ -105,11 +111,13 @@ export function CallPage() {
     const room = roomRef.current;
     roomRef.current = null;
     if (room) {
+      intentionalDisconnectRef.current = true;
       try {
         await room.disconnect();
       } catch {
         /* ignore */
       }
+      intentionalDisconnectRef.current = false;
     }
   }, []);
 
@@ -169,12 +177,23 @@ export function CallPage() {
             }
           }
           setGuestUrl(link);
-          if (c.status === 'connected' || c.guestJoinedAt) {
-            setPhase('connected');
+          if (c.currentHandler === 'ai') {
+            setAgentMode('idle');
+            if (c.status === 'connected' || c.guestJoinedAt) {
+              setPhase('connected');
+            } else {
+              setPhase('waiting');
+            }
+            // Do not auto-join with mic — Listen In / Take Over first
           } else {
-            setPhase('waiting');
+            setAgentMode('speaking');
+            if (c.status === 'connected' || c.guestJoinedAt) {
+              setPhase('connected');
+            } else {
+              setPhase('waiting');
+            }
+            void joinAsAgent(callId);
           }
-          void joinAsAgent(callId);
         }
       } catch (err) {
         if (!cancelled) {
@@ -216,6 +235,26 @@ export function CallPage() {
       markLiveWithCustomer(payload);
     };
 
+    const onHandlerChanged = (payload: CallSessionDto & { currentHandler?: string }) => {
+      if (payload.callId && payload.callId !== callId) return;
+      setCall((prev) =>
+        prev
+          ? { ...prev, ...payload, currentHandler: payload.currentHandler || prev.currentHandler }
+          : ({ ...payload, callId } as CallSessionDto)
+      );
+      if (payload.currentHandler === 'ai') {
+        setAgentMode((m) => {
+          if (m === 'speaking') {
+            void roomRef.current?.localParticipant.setMicrophoneEnabled(false);
+            setMuted(true);
+            return 'listening';
+          }
+          return m === 'listening' ? m : 'idle';
+        });
+      }
+      if (payload.currentHandler === 'human') setAgentMode('speaking');
+    };
+
     const onTerminal = (payload: CallSessionDto) => {
       if (!onSameCall(payload)) return;
       void teardownRoom();
@@ -225,6 +264,7 @@ export function CallPage() {
 
     socket.on('call_participant_joined', onParticipantJoined);
     socket.on('call_connected', onConnected);
+    socket.on('call_handler_changed', onHandlerChanged);
     socket.on('call_ended', onTerminal);
     socket.on('call_missed', onTerminal);
     socket.on('call_declined', onTerminal);
@@ -233,6 +273,7 @@ export function CallPage() {
     return () => {
       socket.off('call_participant_joined', onParticipantJoined);
       socket.off('call_connected', onConnected);
+      socket.off('call_handler_changed', onHandlerChanged);
       socket.off('call_ended', onTerminal);
       socket.off('call_missed', onTerminal);
       socket.off('call_declined', onTerminal);
@@ -247,7 +288,11 @@ export function CallPage() {
     return () => clearInterval(t);
   }, [phase]);
 
-  const joinLiveKit = async (token: string, url: string, mode: 'agent' | 'customer') => {
+  const joinLiveKit = async (
+    token: string,
+    url: string,
+    mode: 'agent' | 'customer' | 'listen'
+  ) => {
     if (mode === 'customer') setPhase('connecting');
     else if (phaseRef.current !== 'connected') setPhase('connecting');
 
@@ -269,7 +314,7 @@ export function CallPage() {
       }
     });
 
-    if (mode === 'agent') {
+    if (mode === 'agent' || mode === 'listen') {
       room.on(RoomEvent.ParticipantConnected, () => {
         markLiveWithCustomer();
       });
@@ -290,22 +335,29 @@ export function CallPage() {
 
     room.on(RoomEvent.Disconnected, () => {
       setReconnecting(false);
+      if (intentionalDisconnectRef.current) return;
       setPhase((p) => (p === 'ended' ? p : 'ended'));
     });
 
     await room.connect(url, token);
-    await room.localParticipant.setMicrophoneEnabled(true);
-    if (micId) {
-      await room.switchActiveDevice('audioinput', micId).catch(() => {});
-    }
 
-    try {
-      const devices = await Room.getLocalDevices('audioinput');
-      setMics(devices);
-      const outs = await Room.getLocalDevices('audiooutput').catch(() => [] as MediaDeviceInfo[]);
-      setSpeakers(outs);
-    } catch {
-      /* ignore */
+    if (mode === 'listen') {
+      await room.localParticipant.setMicrophoneEnabled(false);
+      setMuted(true);
+      setAgentMode('listening');
+    } else {
+      await room.localParticipant.setMicrophoneEnabled(true);
+      if (micId) {
+        await room.switchActiveDevice('audioinput', micId).catch(() => {});
+      }
+      try {
+        const devices = await Room.getLocalDevices('audioinput');
+        setMics(devices);
+        const outs = await Room.getLocalDevices('audiooutput').catch(() => [] as MediaDeviceInfo[]);
+        setSpeakers(outs);
+      } catch {
+        /* ignore */
+      }
     }
 
     if (mode === 'customer') {
@@ -327,10 +379,44 @@ export function CallPage() {
     try {
       const { token, url } = await api.getCallToken(id);
       await joinLiveKit(token, url, 'agent');
-      // Do not markCallConnected — connected only when customer joins
+      setAgentMode('speaking');
     } catch (err) {
       setError(formatCatchError(err));
       if (phaseRef.current !== 'connected') setPhase('waiting');
+    }
+  };
+
+  const handleListenIn = async () => {
+    if (!callId || busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const { token, url } = await api.listenInCall(callId);
+      await joinLiveKit(token, url, 'listen');
+    } catch (err) {
+      setError(formatCatchError(err));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleTakeOver = async () => {
+    if (!callId || busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      // Mic permission before signaling stop — fail early if denied
+      await navigator.mediaDevices.getUserMedia({ audio: true }).then((s) => {
+        s.getTracks().forEach((t) => t.stop());
+      });
+      const result = await api.takeOverCall(callId);
+      setCall(result.call);
+      setAgentMode('speaking');
+      await joinLiveKit(result.token, result.url, 'agent');
+    } catch (err) {
+      setError(formatCatchError(err));
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -488,12 +574,18 @@ export function CallPage() {
   }, [phase, role, call?.conversationId, navigate, recordingPlaybackUrl]);
 
   const statusLabel =
-    phase === 'waiting' && role === 'agent'
+    phase === 'waiting' && role === 'agent' && call?.currentHandler === 'ai'
+      ? 'AI Agent will talk to the customer…'
+      : phase === 'waiting' && role === 'agent'
       ? 'Waiting for customer…'
       : phase === 'ready' && role === 'customer'
         ? 'Tap Join Call to allow microphone access'
         : phase === 'connecting'
           ? 'Connecting…'
+          : phase === 'connected' && call?.currentHandler === 'ai' && agentMode !== 'speaking'
+            ? agentMode === 'listening'
+              ? 'Listening to AI call…'
+              : 'AI Agent is handling this call'
           : phase === 'connected'
             ? 'Connected'
             : null;
@@ -701,6 +793,19 @@ export function CallPage() {
                 {statusLabel && (
                   <p className="mt-2 text-sm text-slate-500 font-medium">{statusLabel}</p>
                 )}
+                {call?.currentHandler === 'ai' && (
+                  <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">
+                    <Bot className="h-3.5 w-3.5" />
+                    AI Agent is on this call
+                  </p>
+                )}
+                {(call?.currentHandler === 'human' || agentMode === 'speaking') &&
+                  call?.currentHandler !== 'ai' && (
+                    <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-slate-100 border border-slate-200 px-3 py-1 text-xs font-bold text-slate-700">
+                      <User className="h-3.5 w-3.5" />
+                      You are on this call
+                    </p>
+                  )}
                 {phase === 'connected' && (
                   <p className="mt-3 font-mono text-2xl font-bold text-slate-800 tabular-nums">
                     {formatTimer(elapsed)}
@@ -735,6 +840,49 @@ export function CallPage() {
                 </p>
               )}
 
+              {call?.currentHandler === 'ai' && (
+                <div className="mb-4 space-y-3">
+                  <CallLiveTranscript callId={callId} />
+                  <div className="flex flex-col gap-2">
+                    {agentMode === 'idle' && (
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => void handleListenIn()}
+                        className="w-full min-h-11 rounded-xl border border-slate-200 text-sm font-bold text-slate-800 hover:bg-slate-50 cursor-pointer inline-flex items-center justify-center gap-2 disabled:opacity-60"
+                      >
+                        {busy ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Headphones className="h-4 w-4" />
+                        )}
+                        Listen In
+                      </button>
+                    )}
+                    {(agentMode === 'idle' || agentMode === 'listening') && (
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => void handleTakeOver()}
+                        className="w-full min-h-11 rounded-xl bg-channel-green text-white text-sm font-bold hover:opacity-95 cursor-pointer inline-flex items-center justify-center gap-2 disabled:opacity-60"
+                      >
+                        {busy ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Mic className="h-4 w-4" />
+                        )}
+                        Take Over Call
+                      </button>
+                    )}
+                    {agentMode === 'listening' && (
+                      <p className="text-center text-xs text-slate-500">
+                        Listening only — mic is off. Take over to speak.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {guestUrl && phase === 'waiting' && (
                 <div className="mb-4 space-y-2">
                   <p className="text-meta font-bold text-slate-500 uppercase tracking-wide">
@@ -767,7 +915,9 @@ export function CallPage() {
                 </div>
               )}
 
-              {(phase === 'connected' || phase === 'waiting') && (mics.length > 0 || speakers.length > 0) && (
+              {(phase === 'connected' || phase === 'waiting') &&
+                agentMode === 'speaking' &&
+                (mics.length > 0 || speakers.length > 0) && (
                 <div className="mb-4 space-y-2">
                   {mics.length > 0 && (
                     <label className="block text-xs font-semibold text-slate-500">
@@ -805,7 +955,8 @@ export function CallPage() {
               )}
 
               <div className="flex flex-col gap-2">
-                {(phase === 'connected' || phase === 'waiting' || phase === 'connecting') && (
+                {(phase === 'connected' || phase === 'waiting' || phase === 'connecting') &&
+                  agentMode === 'speaking' && (
                   <button
                     type="button"
                     onClick={() => void toggleMute()}

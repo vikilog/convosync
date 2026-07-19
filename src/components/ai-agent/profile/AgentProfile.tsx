@@ -35,6 +35,12 @@ const TONE_ICONS: Record<ToneOfVoice, React.ReactNode> = {
   friendly: <Handshake className="w-4 h-4" />,
 };
 
+/** Add providers here later — dropdown maps this list. */
+const VOICE_STT_PROVIDERS: { value: string; label: string }[] = [
+  { value: 'cartesia', label: 'Cartesia' },
+  { value: 'deepgram', label: 'Deepgram' },
+];
+
 function profilesEqual(a: AgentProfileData, b: AgentProfileData): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
 }
@@ -308,6 +314,57 @@ export const AgentProfile: React.FC<Props> = ({
             </button>
             {actionsOpen && (
               <div className="space-y-4">
+                <div className="bg-white border border-[#E5E7EB] rounded-xl p-5">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <h4 className="text-sm font-bold text-[#111827]">Answer calls with AI Agent</h4>
+                      <p className="text-xs text-[#6B7280] mt-1">
+                        When a call link is sent on a conversation assigned to this agent, join the
+                        LiveKit room and talk to the customer using this agent&apos;s Skills and
+                        Knowledge Base.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={local.voiceAgentEnabled}
+                      onClick={() =>
+                        patchLocal({ voiceAgentEnabled: !local.voiceAgentEnabled })
+                      }
+                      className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${
+                        local.voiceAgentEnabled ? 'bg-channel-green' : 'bg-[#D1D5DB]'
+                      }`}
+                    >
+                      <span
+                        className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                          local.voiceAgentEnabled ? 'translate-x-5' : 'translate-x-0'
+                        }`}
+                      />
+                    </button>
+                  </div>
+                  {local.voiceAgentEnabled && (
+                    <div className="mt-4 pt-4 border-t border-[#E5E7EB]">
+                      <label
+                        htmlFor="voice-stt-provider"
+                        className="block text-sm font-medium text-[#111827] mb-1.5"
+                      >
+                        Speech-to-Text provider
+                      </label>
+                      <select
+                        id="voice-stt-provider"
+                        value={local.voiceSttProvider || VOICE_STT_PROVIDERS[0]?.value}
+                        onChange={(e) => patchLocal({ voiceSttProvider: e.target.value })}
+                        className="w-full max-w-xs rounded-lg border border-[#E5E7EB] bg-white px-3 py-2 text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-channel-green/30"
+                      >
+                        {VOICE_STT_PROVIDERS.map((opt) => (
+                          <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
                 {actions.map((action) => (
                   <ActionCard
                     key={action.type}
@@ -321,8 +378,7 @@ export const AgentProfile: React.FC<Props> = ({
                   />
                 ))}
               </div>
-            )}
-          </section>
+            )}          </section>
 
           <section className="bg-white border border-[#E5E7EB] rounded-xl p-5">
             <label className="block text-sm font-medium text-[#111827] mb-2">
