@@ -205,7 +205,7 @@ export function UsersTeamsPanel() {
   return (
     <div className="space-y-4">
       {message && (
-        <p className="text-sm font-bold text-accent-green bg-accent-green-bg border border-accent-green/15 rounded-xl px-4 py-2">
+        <p className="text-sm font-bold text-primary bg-primary/10 border border-primary/20 rounded-xl px-4 py-2">
           {message}
         </p>
       )}
@@ -215,8 +215,8 @@ export function UsersTeamsPanel() {
         </p>
       )}
 
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-5 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
+      <div className="bg-surface rounded-2xl border border-black/5 shadow-sm overflow-hidden">
+        <div className="p-5 border-b border-black/5 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h3 className="text-sm font-black text-gray-950">Team members</h3>
             <p className="text-meta text-gray-500 font-medium mt-0.5">
@@ -232,7 +232,7 @@ export function UsersTeamsPanel() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search by name or email"
-                className="w-full pl-9 pr-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
+                className="w-full pl-9 pr-3 py-2 text-xs border border-black/5 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
             {canManageUsers && (
@@ -248,7 +248,7 @@ export function UsersTeamsPanel() {
                   setShowInvite(true);
                   setError(null);
                 }}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-channel-green hover:bg-[#20bd5a] text-white text-sm font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary hover:bg-primary-hover text-white text-sm font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <UserPlus className="w-3.5 h-3.5" />
                 {atMemberLimit ? 'Limit reached' : 'Add user'}
@@ -265,7 +265,7 @@ export function UsersTeamsPanel() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="bg-slate-50 text-gray-500 font-bold border-b border-slate-200">
+                <tr className="bg-surface-muted text-gray-500 font-bold border-b border-black/5">
                   <th className="px-5 py-3">User</th>
                   <th className="px-5 py-3">Role</th>
                   <th className="px-5 py-3">Access</th>
@@ -280,7 +280,7 @@ export function UsersTeamsPanel() {
                   return (
                     <tr
                       key={m.id}
-                      className="border-b border-slate-200 last:border-0 hover:bg-slate-50/50"
+                      className="border-b border-black/5 last:border-0 hover:bg-surface-muted/50"
                     >
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
@@ -314,7 +314,7 @@ export function UsersTeamsPanel() {
                             onChange={(e) =>
                               void handleRoleChange(m, e.target.value as 'admin' | 'agent')
                             }
-                            className="text-sm font-bold border border-slate-200 rounded-lg px-2 py-1.5 bg-white capitalize focus:outline-none focus:ring-2 focus:ring-primary/20"
+                            className="text-sm font-bold border border-black/5 rounded-lg px-2 py-1.5 bg-surface capitalize focus:outline-none focus:ring-2 focus:ring-primary/20"
                           >
                             <option value="admin">Admin</option>
                             <option value="agent">Agent</option>
@@ -365,8 +365,8 @@ export function UsersTeamsPanel() {
                         </div>
                       </td>
                       <td className="px-5 py-4">
-                        <span className="inline-flex items-center gap-1.5 text-accent-green font-bold capitalize">
-                          <span className="w-2 h-2 rounded-full bg-accent-green" />
+                        <span className="inline-flex items-center gap-1.5 text-primary font-bold capitalize">
+                          <span className="w-2 h-2 rounded-full bg-primary" />
                           {m.status}
                         </span>
                       </td>
@@ -418,7 +418,7 @@ export function UsersTeamsPanel() {
           />
           <form
             onSubmit={(e) => void handleInvite(e)}
-            className="relative w-full max-w-lg bg-white rounded-2xl border border-slate-200 shadow-xl p-6 space-y-4 max-h-[90vh] overflow-y-auto"
+            className="relative w-full max-w-lg bg-surface rounded-2xl border border-black/5 shadow-xl p-6 space-y-4 max-h-[90vh] overflow-y-auto"
           >
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -446,7 +446,7 @@ export function UsersTeamsPanel() {
                 type="email"
                 value={invite.email}
                 onChange={(e) => setInvite((prev) => ({ ...prev, email: e.target.value }))}
-                className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
+                className="w-full px-3 py-2 text-xs border border-black/5 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </label>
 
@@ -459,7 +459,7 @@ export function UsersTeamsPanel() {
                 value={invite.name}
                 onChange={(e) => setInvite((prev) => ({ ...prev, name: e.target.value }))}
                 placeholder="Required if email is not registered yet"
-                className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
+                className="w-full px-3 py-2 text-xs border border-black/5 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </label>
 
@@ -472,7 +472,7 @@ export function UsersTeamsPanel() {
                 value={invite.password}
                 onChange={(e) => setInvite((prev) => ({ ...prev, password: e.target.value }))}
                 placeholder="Min 8 characters"
-                className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
+                className="w-full px-3 py-2 text-xs border border-black/5 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </label>
 
@@ -486,7 +486,7 @@ export function UsersTeamsPanel() {
                     role: e.target.value as 'admin' | 'agent',
                   }))
                 }
-                className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"
+                className="w-full px-3 py-2 text-xs border border-black/5 rounded-xl bg-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
               >
                 <option value="agent">Agent — custom permissions</option>
                 <option value="admin">Admin — full access</option>
@@ -537,7 +537,7 @@ export function UsersTeamsPanel() {
             onClick={() => !saving && setEditingMember(null)}
             aria-hidden
           />
-          <div className="relative w-full max-w-lg bg-white rounded-2xl border border-slate-200 shadow-xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+          <div className="relative w-full max-w-lg bg-surface rounded-2xl border border-black/5 shadow-xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h3 className="text-base font-black text-gray-950">Edit permissions</h3>

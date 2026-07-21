@@ -64,6 +64,7 @@ export default function Navbar({ onNavigate, onLogin, onSignup }: NavbarProps) {
               ['agents-nav-btn', 'ai-agents', 'AI Agents'],
               ['pricing-nav-btn', 'pricing', 'Pricing'],
               ['usecases-nav-btn', 'usecases', 'Industries'],
+              ['demo-nav-btn', 'book-demo', 'Book a demo'],
             ].map(([id, section, label]) => (
               <button
                 key={id}
@@ -129,6 +130,7 @@ export default function Navbar({ onNavigate, onLogin, onSignup }: NavbarProps) {
               ['mob-ag-btn', 'ai-agents', 'AI Agents'],
               ['mob-pr-btn', 'pricing', 'Pricing'],
               ['mob-uc-btn', 'usecases', 'Industries'],
+              ['mob-demo-btn', 'book-demo', 'Book a demo'],
             ].map(([id, section, label]) => (
               <button
                 key={id}

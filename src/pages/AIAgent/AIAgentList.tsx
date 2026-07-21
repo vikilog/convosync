@@ -1,14 +1,13 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, ChevronDown, LayoutGrid, List, Sparkles } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { AnimatePresence } from 'motion/react';
+import { Plus, LayoutGrid, List, Sparkles } from 'lucide-react';
 import type { AgentBot } from '../../types';
 import type { AgentType } from '../../components/ai-agent/types';
 import { api } from '../../lib/api';
 import { mapAgentFromApi } from '../../lib/mappers';
 import { pathForAgent } from '../../routes';
 import { useKeepAliveActivation } from '../../components/KeepAlive';
-import { AgentTypeSelector } from '../../components/ai-agent/AgentTypeSelector';
 import { AgentListRow, AgentGridCard } from '../../components/ai-agent/AgentCard';
 import { CreateAgentModal } from './CreateAgentModal';
 import { DeleteAgentDialog } from './DeleteAgentDialog';
@@ -26,7 +25,6 @@ export const AIAgentList: React.FC = () => {
   const [agents, setAgents] = useState<AgentBot[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>(loadViewMode);
-  const [showCreateMenu, setShowCreateMenu] = useState(false);
   const [showNameModal, setShowNameModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<AgentType | null>(null);
   const [newAgentName, setNewAgentName] = useState('');
@@ -34,7 +32,6 @@ export const AIAgentList: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<AgentBot | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
 
   const loadAgents = useCallback(async (options?: { silent?: boolean }) => {
     if (!options?.silent) setLoading(true);
@@ -59,24 +56,13 @@ export const AIAgentList: React.FC = () => {
     void loadAgents({ silent: true });
   });
 
-  useEffect(() => {
-    const onClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setShowCreateMenu(false);
-      }
-    };
-    if (showCreateMenu) document.addEventListener('mousedown', onClickOutside);
-    return () => document.removeEventListener('mousedown', onClickOutside);
-  }, [showCreateMenu]);
-
   const setView = (mode: ViewMode) => {
     setViewMode(mode);
     localStorage.setItem(VIEW_STORAGE_KEY, mode);
   };
 
-  const openCreateForCategory = (category: AgentType) => {
-    setSelectedCategory(category);
-    setShowCreateMenu(false);
+  const openCreateAgent = () => {
+    setSelectedCategory('ai_agent');
     setNewAgentName('');
     setShowNameModal(true);
   };
@@ -131,7 +117,7 @@ export const AIAgentList: React.FC = () => {
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <h1 className="font-bold text-slate-900 text-xl leading-tight">AI Agent</h1>
+            <h1 className="font-display font-bold text-slate-900 text-xl leading-tight">AI Agent</h1>
             {!loading && agents.length > 0 && (
               <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
                 {agents.length} total · {liveCount} live
@@ -145,14 +131,14 @@ export const AIAgentList: React.FC = () => {
 
         <div className="flex items-center gap-2">
           {agents.length > 0 && (
-            <div className="inline-flex items-center rounded-lg border border-slate-200 bg-white p-0.5">
+            <div className="inline-flex items-center rounded-lg border border-black/5 bg-surface p-0.5">
               <button
                 type="button"
                 onClick={() => setView('list')}
                 className={`p-1.5 rounded-md transition-colors cursor-pointer ${
                   viewMode === 'list'
                     ? 'bg-slate-900 text-white'
-                    : 'text-slate-500 hover:bg-slate-50'
+                    : 'text-slate-500 hover:bg-surface-muted'
                 }`}
                 aria-label="List view"
                 title="List view"
@@ -165,7 +151,7 @@ export const AIAgentList: React.FC = () => {
                 className={`p-1.5 rounded-md transition-colors cursor-pointer ${
                   viewMode === 'grid'
                     ? 'bg-slate-900 text-white'
-                    : 'text-slate-500 hover:bg-slate-50'
+                    : 'text-slate-500 hover:bg-surface-muted'
                 }`}
                 aria-label="Card view"
                 title="Card view"
@@ -175,32 +161,14 @@ export const AIAgentList: React.FC = () => {
             </div>
           )}
 
-          <div className="relative" ref={menuRef}>
-            <button
-              type="button"
-              onClick={() => setShowCreateMenu((open) => !open)}
-              className="bg-slate-900 hover:bg-black text-white px-3.5 py-2 rounded-lg flex items-center gap-1.5 text-sm font-semibold transition-colors cursor-pointer"
-            >
-              <Plus className="w-4 h-4" />
-              Create Agent
-              <ChevronDown
-                className={`w-4 h-4 transition-transform ${showCreateMenu ? 'rotate-180' : ''}`}
-              />
-            </button>
-
-            <AnimatePresence>
-              {showCreateMenu && (
-                <motion.div
-                  initial={{ opacity: 0, y: -4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -4 }}
-                  className="absolute right-0 mt-2 z-30"
-                >
-                  <AgentTypeSelector onSelect={openCreateForCategory} />
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+          <button
+            type="button"
+            onClick={openCreateAgent}
+            className="bg-primary hover:bg-primary-hover text-white px-3.5 py-2 rounded-lg flex items-center gap-1.5 text-sm font-semibold transition-colors cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            Create Agent
+          </button>
         </div>
       </div>
 
@@ -212,29 +180,29 @@ export const AIAgentList: React.FC = () => {
 
       {/* Content */}
       {loading ? (
-        <div className="rounded-xl border border-slate-200 bg-white px-4 py-10 text-center text-sm text-slate-500">
+        <div className="rounded-xl border border-black/5 bg-surface px-4 py-10 text-center text-sm text-slate-500">
           Loading agents…
         </div>
       ) : agents.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 px-6 py-10 text-center">
-          <div className="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center mx-auto mb-3">
-            <Sparkles className="w-6 h-6 text-sky-500" />
+        <div className="rounded-xl border border-dashed border-black/10 bg-surface-muted/50 px-6 py-10 text-center">
+          <div className="w-12 h-12 rounded-2xl bg-surface border border-black/5 flex items-center justify-center mx-auto mb-3">
+            <Sparkles className="w-6 h-6 text-primary" />
           </div>
           <p className="text-sm font-semibold text-slate-900">No agents yet</p>
           <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-            Create your first AI or rule-based agent to automate customer conversations.
+            Create your first AI agent to automate customer conversations.
           </p>
           <button
             type="button"
-            onClick={() => setShowCreateMenu(true)}
-            className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-channel-green hover:bg-[#20bd5a] rounded-lg transition-colors cursor-pointer"
+            onClick={openCreateAgent}
+            className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-primary hover:bg-primary-hover rounded-lg transition-colors cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             Create Agent
           </button>
         </div>
       ) : viewMode === 'list' ? (
-        <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+        <div className="rounded-xl border border-black/5 bg-surface overflow-hidden">
           {agents.map((agent) => (
             <AgentListRow
               key={agent.id}

@@ -47,7 +47,7 @@ const PLAN_SLUG = 'starter';
 const AUTO_RECHARGE_CC = 1000;
 
 const CARD_CLASS =
-  'rounded-xl border border-[#E5E7EB] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]';
+  'rounded-xl border border-black/5 bg-surface p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]';
 
 const INCLUDED_FEATURES = [
   'WhatsApp Inbox (unlimited)',
@@ -462,7 +462,7 @@ export function WalletPanel() {
         </div>
       ) : null}
       {actionMessage ? (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm text-emerald-800">
+        <div className="rounded-xl border border-primary/20 bg-primary/10 px-4 py-2.5 text-sm text-primary">
           {actionMessage}
         </div>
       ) : null}
@@ -477,7 +477,7 @@ export function WalletPanel() {
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="text-base font-bold text-slate-900">{PLAN_NAME}</span>
                   {paid ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-[#10B981] ring-1 ring-emerald-200">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary ring-1 ring-primary/20">
                       <Check className="h-3 w-3" aria-hidden />
                       {status}
                     </span>
@@ -486,7 +486,7 @@ export function WalletPanel() {
                       Trial
                     </span>
                   ) : (
-                    <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600 ring-1 ring-slate-200">
+                    <span className="inline-flex items-center rounded-full bg-surface-muted px-2 py-0.5 text-xs font-semibold text-slate-600 ring-1 ring-black/5">
                       {status}
                     </span>
                   )}
@@ -514,8 +514,7 @@ export function WalletPanel() {
                       type="button"
                       disabled={subscribeBusy}
                       onClick={() => void handleSubscribe()}
-                      className="mt-2 inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
-                      style={{ backgroundColor: BRAND_PURPLE }}
+                      className="mt-2 inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {subscribeBusy ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -580,7 +579,7 @@ export function WalletPanel() {
                           lowBalanceThresholdPaise: ccToPaise(Math.round(parsed)),
                         }).then(() => setEditingAlert(false));
                       }}
-                      className="cursor-pointer text-xs font-semibold text-violet-700 hover:underline disabled:opacity-50"
+                      className="cursor-pointer text-xs font-semibold text-primary hover:underline disabled:opacity-50"
                     >
                       Save
                     </button>
@@ -601,7 +600,7 @@ export function WalletPanel() {
                     <button
                       type="button"
                       onClick={() => setEditingAlert(true)}
-                      className="cursor-pointer text-xs font-semibold text-violet-700 hover:underline"
+                      className="cursor-pointer text-xs font-semibold text-primary hover:underline"
                     >
                       (Edit)
                     </button>
@@ -631,14 +630,13 @@ export function WalletPanel() {
                     }}
                     className={`cursor-pointer rounded-lg border px-2 py-2 text-center transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
                       selected
-                        ? 'border-transparent text-white'
-                        : 'border-[#E5E7EB] bg-white text-slate-800 hover:border-violet-300'
+                        ? 'border-transparent bg-primary text-white hover:bg-primary-hover'
+                        : 'border-black/5 bg-surface text-slate-800 hover:border-primary/30'
                     }`}
-                    style={selected ? { backgroundColor: BRAND_PURPLE } : undefined}
                   >
                     <span className="block text-xs font-bold sm:text-sm">{formatCc(cc)}</span>
                     <span
-                      className={`mt-0.5 block text-[10px] ${selected ? 'text-violet-100' : 'text-slate-500'}`}
+                      className={`mt-0.5 block text-[10px] ${selected ? 'text-white/80' : 'text-slate-500'}`}
                     >
                       ₹{inr.toLocaleString('en-IN')}
                     </span>
@@ -671,8 +669,7 @@ export function WalletPanel() {
                   }
                   openRechargeConfirm(Math.round(parsed));
                 }}
-                className="inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50 sm:shrink-0"
-                style={{ backgroundColor: BRAND_PURPLE }}
+                className="inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50 sm:shrink-0"
               >
                 {checkoutBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                 Recharge Now
@@ -742,7 +739,7 @@ export function WalletPanel() {
                     return (
                       <tr
                         key={row.key}
-                        className={index % 2 === 0 ? 'bg-white' : 'bg-slate-50/80'}
+                        className={index % 2 === 0 ? 'bg-surface' : 'bg-surface-muted/80'}
                       >
                         <td className="px-3 py-2 font-medium text-slate-900">
                           <span className="inline-flex items-center gap-1.5">
@@ -780,7 +777,7 @@ export function WalletPanel() {
                   key={feature}
                   className="flex items-start gap-2 text-xs leading-snug text-slate-700 sm:text-[13px]"
                 >
-                  <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#10B981]" aria-hidden />
+                  <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" aria-hidden />
                   <span>{feature}</span>
                 </li>
               ))}
@@ -805,8 +802,7 @@ export function WalletPanel() {
                   type="button"
                   disabled={subscribeBusy}
                   onClick={() => void handleSubscribe()}
-                  className="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg px-3 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
-                  style={{ backgroundColor: BRAND_PURPLE }}
+                  className="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-primary px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {subscribeBusy ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -845,7 +841,7 @@ export function WalletPanel() {
           <button
             type="button"
             onClick={() => void openAllTransactions()}
-            className="inline-flex cursor-pointer items-center gap-1 text-xs font-semibold text-violet-700 hover:underline"
+            className="inline-flex cursor-pointer items-center gap-1 text-xs font-semibold text-primary hover:underline"
           >
             View all transactions
             <ArrowRight className="h-3 w-3" />
@@ -862,7 +858,7 @@ export function WalletPanel() {
               return (
                 <li
                   key={tx.id}
-                  className="flex items-center justify-between gap-4 bg-white px-4 py-3 sm:px-5"
+                  className="flex items-center justify-between gap-4 bg-surface px-4 py-3 sm:px-5"
                 >
                   <div className="flex min-w-0 flex-1 items-center gap-3">
                     {isCredit ? (
@@ -882,7 +878,7 @@ export function WalletPanel() {
                   </div>
                   <p
                     className={`shrink-0 text-sm font-bold tabular-nums ${
-                      isCredit ? 'text-[#10B981]' : 'text-[#EF4444]'
+                      isCredit ? 'text-primary' : 'text-[#EF4444]'
                     }`}
                   >
                     {isCredit ? '+' : '−'}
@@ -914,7 +910,7 @@ export function WalletPanel() {
       {showAllModal ? (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
           <div
-            className="flex max-h-[85vh] w-full max-w-lg flex-col rounded-xl border border-[#E5E7EB] bg-white shadow-xl"
+            className="flex max-h-[85vh] w-full max-w-lg flex-col rounded-xl border border-black/5 bg-surface shadow-xl"
             role="dialog"
             aria-modal="true"
             aria-labelledby="wallet-all-tx-title"
@@ -962,7 +958,7 @@ export function WalletPanel() {
                         </div>
                         <p
                           className={`shrink-0 text-sm font-bold ${
-                            isCredit ? 'text-[#10B981]' : 'text-[#EF4444]'
+                            isCredit ? 'text-primary' : 'text-[#EF4444]'
                           }`}
                         >
                           {isCredit ? '+' : '−'}

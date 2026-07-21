@@ -356,6 +356,11 @@ export function mapAgentFromApi(raw: Record<string, unknown>): AgentBot {
     actions: parseAgentActions(raw.actions),
     voiceAgentEnabled: Boolean(raw.voiceAgentEnabled),
     voiceSttProvider: String(raw.voiceSttProvider || 'cartesia'),
+    voiceTtsProvider: String(raw.voiceTtsProvider || 'cartesia'),
+    voiceTtsVoiceId:
+      raw.voiceTtsVoiceId == null || raw.voiceTtsVoiceId === ''
+        ? null
+        : String(raw.voiceTtsVoiceId),
     isPublished: Boolean(raw.isPublished),
     publishedAt: raw.publishedAt ? String(raw.publishedAt) : null,
     conversationsCount: Number(raw.conversationsCount ?? 0),

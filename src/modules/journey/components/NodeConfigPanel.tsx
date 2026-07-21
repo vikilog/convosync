@@ -344,7 +344,7 @@ export function NodeConfigPanel({ node, onUpdate, onDelete }: Props) {
         type === 'SEND_TIKTOK' ||
         type === 'GOOGLE_SHEETS' ||
         type === 'AI_OBJECTIVE') && (
-        <p className="rounded-lg bg-sky-50 px-3 py-2 text-sm text-sky-800">
+        <p className="rounded-lg bg-primary/5 px-3 py-2 text-sm text-primary">
           This step can be added to your workflow now. Runtime execution is coming soon — the journey
           will skip this node until the integration is enabled.
         </p>

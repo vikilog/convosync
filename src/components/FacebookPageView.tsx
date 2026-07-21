@@ -61,7 +61,7 @@ const InsightsBar: React.FC<{ insights: PageInsights }> = ({ insights }) => (
       { label: 'Page Views', value: formatNum(insights.pageViews), delta: 'last 28 days', icon: <BarChart2 className="w-4 h-4" />, color: 'text-orange-600', bg: 'bg-orange-50' },
       { label: 'Engagement Rate', value: `${insights.pageImpressions ? ((insights.pageEngagedUsers / insights.pageImpressions) * 100).toFixed(1) : '0.0'}%`, delta: 'of total reach', icon: <BarChart2 className="w-4 h-4" />, color: 'text-sky-600', bg: 'bg-sky-50' },
     ].map((stat) => (
-      <div key={stat.label} className="bg-white border border-slate-200 rounded-2xl p-4 hover:shadow-md transition-all">
+      <div key={stat.label} className="bg-surface border border-black/5 rounded-2xl p-4 hover:shadow-md transition-all">
         <div className={`${stat.bg} ${stat.color} w-8 h-8 rounded-xl flex items-center justify-center mb-2`}>
           {stat.icon}
         </div>
@@ -200,7 +200,7 @@ const PostCard: React.FC<{ post: FacebookPost }> = ({ post }) => {
   };
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden hover:border-channel-green/20 hover:shadow-lg transition-all">
+    <div className="bg-surface border border-black/5 rounded-2xl overflow-hidden hover:border-primary/20 hover:shadow-lg transition-all">
       {post.fullPicture ? (
         <img src={post.fullPicture} alt="" className="w-full h-48 object-cover" />
       ) : (
@@ -285,8 +285,8 @@ const CreatePostModal: React.FC<{
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl border border-slate-200">
-        <div className="flex items-center justify-between p-5 border-b border-slate-200">
+      <div className="bg-surface rounded-2xl w-full max-w-lg shadow-2xl border border-black/5">
+        <div className="flex items-center justify-between p-5 border-b border-black/5">
           <h3 className="font-black text-gray-900 text-sm flex items-center gap-2">
             <Facebook className="w-4 h-4 text-[#0084FF]" /> Create Facebook Post
           </h3>
@@ -353,7 +353,7 @@ const CreatePostModal: React.FC<{
               onClose();
             }}
             disabled={!message.trim() || (scheduleMode && !scheduledTime)}
-            className="px-5 py-2 bg-channel-green hover:bg-[#4a3dd4] disabled:bg-gray-200 disabled:cursor-not-allowed text-white text-sm font-bold rounded-xl transition-all flex items-center gap-2 shadow-md shadow-[#0284c7]/20"
+            className="px-5 py-2 bg-primary hover:bg-primary-hover disabled:bg-gray-200 disabled:cursor-not-allowed text-white text-sm font-bold rounded-xl transition-all flex items-center gap-2 shadow-md shadow-primary/20"
           >
             {scheduleMode ? <><Calendar className="w-3.5 h-3.5" /> Schedule Post</> : <><Send className="w-3.5 h-3.5" /> Publish Now</>}
           </button>
@@ -537,7 +537,7 @@ export const FacebookPageView: React.FC = () => {
     <div className="flex-1 space-y-6 max-w-7xl mx-auto pb-12 text-left selection:bg-sky-50">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h3 className="font-sans font-black text-gray-900 text-lg leading-none">Facebook Page Manager</h3>
+          <h3 className="font-display font-black text-gray-900 text-lg leading-none">Facebook Page Manager</h3>
           <p className="text-xs text-gray-400 mt-1.5 font-medium">
             Manage posts, reply to comments, and track page performance — all from one place.
           </p>
@@ -546,7 +546,7 @@ export const FacebookPageView: React.FC = () => {
           <button
             type="button"
             onClick={() => setShowCreatePost(true)}
-            className="bg-channel-green hover:bg-[#4a3dd4] text-white px-4 py-2 rounded-xl flex items-center gap-1.5 text-sm font-bold transition-all active:scale-95 shadow-md shadow-[#0284c7]/20"
+            className="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-xl flex items-center gap-1.5 text-sm font-bold transition-all active:scale-95 shadow-md shadow-primary/20"
           >
             <Plus className="w-3.5 h-3.5" /> Create Post
           </button>
@@ -602,14 +602,14 @@ export const FacebookPageView: React.FC = () => {
               type="button"
               onClick={() => void loadPostsAndInsights()}
               disabled={syncing}
-              className="px-3 py-1.5 bg-white border border-slate-200 text-sm font-bold text-gray-600 rounded-xl hover:bg-gray-50 flex items-center gap-1.5 disabled:opacity-50"
+              className="px-3 py-1.5 bg-surface border border-black/5 text-sm font-bold text-gray-600 rounded-xl hover:bg-surface-muted flex items-center gap-1.5 disabled:opacity-50"
             >
               <RefreshCw className={`w-3 h-3 ${syncing ? 'animate-spin' : ''}`} /> Sync
             </button>
             <button
               type="button"
               onClick={() => void handleDisconnect()}
-              className="px-3 py-1.5 bg-white border border-slate-200 text-sm font-bold text-red-500 rounded-xl hover:bg-red-50 hover:border-red-200"
+              className="px-3 py-1.5 bg-surface border border-black/5 text-sm font-bold text-red-500 rounded-xl hover:bg-red-50 hover:border-red-200"
             >
               Disconnect
             </button>
@@ -664,7 +664,7 @@ export const FacebookPageView: React.FC = () => {
           {activeTab === 'posts' && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {posts.length === 0 ? (
-                <div className="col-span-full bg-white border border-slate-200 rounded-2xl p-8 text-center">
+                <div className="col-span-full bg-surface border border-black/5 rounded-2xl p-8 text-center">
                   <p className="text-sm font-bold text-gray-600">No posts yet</p>
                   <p className="text-xs text-gray-400 mt-1">Create your first post or sync from Facebook</p>
                 </div>
@@ -685,7 +685,7 @@ export const FacebookPageView: React.FC = () => {
           )}
 
           {activeTab === 'insights' && !insights && (
-            <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center">
+            <div className="bg-surface border border-black/5 rounded-2xl p-8 text-center">
               <BarChart2 className="w-10 h-10 text-sky-600/30 mx-auto mb-3" />
               <p className="text-sm font-bold text-gray-600">Insights unavailable</p>
               <p className="text-xs text-gray-400 mt-1">

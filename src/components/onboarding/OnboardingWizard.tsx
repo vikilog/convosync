@@ -76,11 +76,17 @@ function validateStep(step: number, form: FormState): string | null {
     case 3:
       if (form.accountType === 'company') {
         if (!form.companyName.trim()) return 'Company name is required.';
+        if (/https?:\/\//i.test(form.companyName) || /^www\./i.test(form.companyName.trim())) {
+          return 'Company name cannot be a URL.';
+        }
         if (!form.companySize) return 'Company size is required.';
         if (!form.industry) return 'Industry is required.';
         if (!form.country) return 'Country is required.';
       } else {
         if (!form.displayName.trim()) return 'Display or business name is required.';
+        if (/https?:\/\//i.test(form.displayName) || /^www\./i.test(form.displayName.trim())) {
+          return 'Business name cannot be a URL.';
+        }
         if (!form.country) return 'Country is required.';
       }
       return null;
@@ -262,7 +268,7 @@ export function OnboardingWizard() {
 
         <OnboardingStepIndicator currentStep={currentStep} />
 
-        <div className="mt-8 flex-1 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+        <div className="mt-8 flex-1 rounded-2xl border border-black/5 bg-surface p-6 shadow-sm md:p-8">
           {currentStep === 1 && (
             <div className="space-y-5">
               <div>
@@ -577,7 +583,7 @@ export function OnboardingWizard() {
                 type="button"
                 onClick={() => void handleNext()}
                 disabled={saving}
-                className="inline-flex items-center justify-center gap-1.5 rounded-full bg-channel-green px-5 py-2.5 text-sm font-bold text-white hover:bg-[#20bd5a] disabled:opacity-60"
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-white hover:bg-primary-hover disabled:opacity-60"
               >
                 {saving ? 'Saving…' : 'Continue'}
                 <ArrowRight className="h-4 w-4" />
@@ -587,7 +593,7 @@ export function OnboardingWizard() {
                 type="button"
                 onClick={() => void handleComplete()}
                 disabled={saving}
-                className="inline-flex items-center justify-center gap-1.5 rounded-full bg-channel-green px-5 py-2.5 text-sm font-bold text-white hover:bg-[#20bd5a] disabled:opacity-60"
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-white hover:bg-primary-hover disabled:opacity-60"
               >
                 {saving ? 'Finishing…' : 'Go to dashboard'}
               </button>

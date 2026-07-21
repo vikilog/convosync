@@ -160,7 +160,7 @@ export function AiProviderPanel() {
 
   return (
     <div className="mx-auto w-full max-w-2xl space-y-6">
-      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm text-center">
+      <div className="rounded-2xl border border-black/5 bg-surface p-5 shadow-sm text-center">
         <div className="flex flex-col items-center gap-3">
           <div className="rounded-xl bg-violet-50 p-2 text-violet-600">
             <Sparkles className="h-5 w-5" />
@@ -189,7 +189,7 @@ export function AiProviderPanel() {
       )}
 
       <form
-        className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm space-y-5"
+        className="rounded-2xl border border-black/5 bg-surface p-5 shadow-sm space-y-5"
         onSubmit={(e) => void handleSave(e)}
       >
         <div>
@@ -218,8 +218,8 @@ export function AiProviderPanel() {
                 onClick={() => setMode(opt.id)}
                 className={`rounded-xl border p-4 text-left transition ${
                   mode === opt.id
-                    ? 'border-emerald-400 bg-emerald-50 ring-1 ring-emerald-200'
-                    : 'border-slate-200 hover:border-slate-300'
+                    ? 'border-primary bg-primary/10 ring-1 ring-primary/20'
+                    : 'border-black/5 hover:border-black/10'
                 } ${!isAdmin ? 'opacity-60 cursor-not-allowed' : ''}`}
               >
                 <p className="font-semibold text-gray-900">{opt.title}</p>
@@ -247,7 +247,7 @@ export function AiProviderPanel() {
                   setProvider(next);
                   setModel(PLATFORM_MODELS[next][0] ?? 'gpt-4o-mini');
                 }}
-                className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
+                className="w-full rounded-xl border border-black/5 px-3 py-2.5 text-sm"
               >
                 {(Object.keys(PLATFORM_LABELS) as AiProviderType[]).map((p) => (
                   <option key={p} value={p}>
@@ -269,7 +269,7 @@ export function AiProviderPanel() {
                 disabled={!isAdmin}
                 value={model}
                 onChange={(e) => setModel(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
+                className="w-full rounded-xl border border-black/5 px-3 py-2.5 text-sm"
               >
                 {modelOptions.map((m) => (
                   <option key={m} value={m}>
@@ -294,7 +294,7 @@ export function AiProviderPanel() {
                   placeholder="https://your-api.example.com/v1"
                   value={baseUrl}
                   onChange={(e) => setBaseUrl(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"
+                  className="w-full rounded-xl border border-black/5 px-3 py-2.5 text-sm"
                 />
               </div>
             )}
@@ -312,7 +312,7 @@ export function AiProviderPanel() {
                   placeholder={config?.hasApiKey ? 'Leave blank to keep current key' : 'Paste your API key'}
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 py-2.5 pl-10 pr-3 text-sm"
+                  className="w-full rounded-xl border border-black/5 py-2.5 pl-10 pr-3 text-sm"
                 />
               </div>
             </div>
@@ -320,7 +320,7 @@ export function AiProviderPanel() {
         )}
 
         {mode === 'convosync' && (
-          <div className="rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          <div className="rounded-xl border border-primary/20 bg-primary/10 px-4 py-3 text-sm text-primary">
             Managed AI is ready to use for agents, inbox copilot, and journeys.
           </div>
         )}
@@ -332,7 +332,7 @@ export function AiProviderPanel() {
           </div>
         )}
         {success && (
-          <div className="flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+          <div className="flex items-start gap-2 rounded-xl border border-primary/20 bg-primary/10 px-3 py-2 text-sm text-primary">
             <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
             {success}
           </div>
@@ -343,7 +343,7 @@ export function AiProviderPanel() {
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center gap-2 rounded-xl bg-channel-green px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#20bd5a] disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover disabled:opacity-60"
             >
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
               Save settings
@@ -352,7 +352,7 @@ export function AiProviderPanel() {
               type="button"
               onClick={(e) => void handleTest(e)}
               disabled={testing || !canTest}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-slate-50 disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-xl border border-black/5 bg-surface px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-surface-muted disabled:opacity-60"
             >
               {testing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plug className="h-4 w-4" />}
               Test connection
@@ -360,7 +360,7 @@ export function AiProviderPanel() {
             <button
               type="button"
               onClick={() => void load()}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-gray-600 hover:bg-slate-50"
+              className="inline-flex items-center gap-2 rounded-xl border border-black/5 bg-surface px-4 py-2.5 text-sm text-gray-600 hover:bg-surface-muted"
             >
               <RefreshCw className="h-4 w-4" />
               Refresh

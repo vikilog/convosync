@@ -16,7 +16,7 @@ import {
 } from '../../lib/walletUsageRates';
 
 const CARD_CLASS =
-  'rounded-xl border border-[#E5E7EB] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)] h-full flex flex-col';
+  'rounded-xl border border-black/5 bg-surface p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)] h-full flex flex-col';
 
 type WalletUsageCalculatorProps = {
   balanceCc?: number;
@@ -61,7 +61,7 @@ export function WalletUsageCalculator({
       <div className="flex items-start justify-between gap-3 shrink-0">
         <div>
           <h3 className="text-sm font-bold text-slate-900 inline-flex items-center gap-1.5">
-            <Calculator className="h-4 w-4 text-emerald-600" aria-hidden />
+            <Calculator className="h-4 w-4 text-primary" aria-hidden />
             Usage calculator
           </h3>
           <p className="mt-0.5 text-xs text-slate-500">
@@ -127,7 +127,7 @@ export function WalletUsageCalculator({
         })}
       </div>
 
-      <div className="mt-4 shrink-0 rounded-lg border border-emerald-100 bg-emerald-50/60 p-3.5">
+      <div className="mt-4 shrink-0 rounded-lg border border-primary/20 bg-primary/10 p-3.5">
         {hasUsage ? (
           <ul className="space-y-1 text-[11px] text-slate-700 max-h-28 overflow-y-auto">
             {breakdown.map((row) => (
@@ -146,7 +146,7 @@ export function WalletUsageCalculator({
           <p className="text-xs text-slate-500">Adjust sliders to estimate monthly usage.</p>
         )}
 
-        <div className="mt-3 border-t border-emerald-100/80 pt-3">
+        <div className="mt-3 border-t border-primary/20 pt-3">
           <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
             Estimated total
           </p>

@@ -453,6 +453,14 @@ export const api = {
   register: (name: string, email: string, password: string, workspaceName?: string) =>
     postPublic('/auth/register', { name, email, password, workspaceName }),
 
+  submitDemoRequest: (data: {
+    name: string;
+    email: string;
+    phone?: string;
+    message?: string;
+    source?: string;
+  }) => postPublic('/demo-requests', data) as Promise<{ ok: boolean; id: string }>,
+
   getOnboarding: () => get('/onboarding'),
   saveOnboardingStep: (step: number, data: Record<string, unknown>, skip = false) =>
     patch('/onboarding/step', { step, data, skip }),
@@ -492,7 +500,11 @@ export const api = {
 
   getConversations: (params?: Record<string, string>) => get('/conversations', params),
   getConversation: (id: string) => get(`/conversations/${id}`),
-  openConversation: (contactId: string) => post('/conversations/open', { contactId }),
+  openConversation: (contactId: string, phoneNumberId?: string) =>
+    post('/conversations/open', {
+      contactId,
+      ...(phoneNumberId ? { phoneNumberId } : {}),
+    }),
   getMessages: (
     convId: string,
     params?: { limit?: number; before?: string }
@@ -590,14 +602,53 @@ export const api = {
     post(`/agents/${agentId}/knowledge`, data),
   fetchAgentKnowledgeUrl: (agentId: string, data: unknown) =>
     post(`/agents/${agentId}/knowledge/fetch-url`, data),
-  // ponytail: temp reindex UI — remove with KnowledgeBase upsert button
-  reindexAgentKnowledge: (agentId: string) =>
-    post(`/agents/${agentId}/knowledge/reindex`, {}),
   deleteAgentKnowledge: (agentId: string, kId: string) =>
     del(`/agents/${agentId}/knowledge/${kId}`),
 
   testAgent: (agentId: string, data: unknown) => post(`/agents/${agentId}/test`, data),
   chatAgent: (agentId: string, data: unknown) => post(`/agents/${agentId}/chat`, data),
+  /** Voice preview: upload MediaRecorder blob → agent's STT provider → text */
+  transcribeAgentVoicePreview: async (
+    agentId: string,
+    blob: Blob,
+    opts?: { language?: string }
+  ) => {
+    const form = new FormData();
+    const ext = blob.type.includes('ogg') ? 'ogg' : blob.type.includes('mp4') ? 'm4a' : 'webm';
+    form.append('file', blob, `preview.${ext}`);
+    if (opts?.language) form.append('language', opts.language);
+    const res = await fetch(apiUrl(`/agents/${agentId}/voice-preview/stt`), {
+      method: 'POST',
+      headers: authHeaders(),
+      body: form,
+    });
+    const text = await res.text();
+    if (!res.ok) throw new Error(parseApiError(text));
+    const json = JSON.parse(text) as {
+      success?: boolean;
+      data?: { text: string; language: string | null; sttMs: number; provider?: string };
+      message?: string;
+    };
+    if (!json.data?.text) throw new Error(json.message || 'Empty transcript');
+    return json.data;
+  },
+  /** Voice preview: text → agent's TTS provider → audio blob */
+  synthesizeAgentVoicePreview: async (agentId: string, text: string) => {
+    const res = await fetch(apiUrl(`/agents/${agentId}/voice-preview/tts`), {
+      method: 'POST',
+      headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text }),
+    });
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(parseApiError(errText));
+    }
+    const buf = await res.arrayBuffer();
+    const mime = res.headers.get('content-type') || 'audio/mpeg';
+    const ttsMs = parseInt(res.headers.get('X-TTS-Ms') || '0', 10) || 0;
+    const provider = res.headers.get('X-TTS-Provider') || '';
+    return { blob: new Blob([buf], { type: mime }), ttsMs, provider };
+  },
   getAgentConversation: (agentId: string, conversationId: string) =>
     get(`/agents/${agentId}/conversations/${conversationId}`),
   getAgentTokenStats: (agentId: string, params?: Record<string, string>) =>
@@ -613,6 +664,7 @@ export const api = {
   createTemplate: (data: unknown) => post('/templates', data),
   updateTemplate: (id: string, data: unknown) => put(`/templates/${id}`, data),
   submitTemplate: (id: string) => post(`/templates/${id}/submit`),
+  refreshTemplateStatus: (id: string) => post(`/templates/${id}/refresh-status`),
   deleteTemplate: (id: string) => del(`/templates/${id}`),
   syncTemplates: () => post('/templates/sync'),
   uploadTemplateHeaderMedia: async (file: File) => {
@@ -667,6 +719,40 @@ export const api = {
         ? `/whatsapp/disconnect?phoneNumberId=${encodeURIComponent(phoneNumberId)}`
         : '/whatsapp/disconnect'
     ),
+  getWhatsAppBusinessProfile: (phoneNumberId: string) =>
+    get(
+      `/whatsapp/accounts/${encodeURIComponent(phoneNumberId)}/business-profile`
+    ) as Promise<{
+      phoneNumberId: string;
+      displayPhoneNumber: string | null;
+      verifiedName: string | null;
+      qualityRating: string | null;
+      nameStatus: string | null;
+      profile: {
+        about: string;
+        address: string;
+        description: string;
+        email: string;
+        websites: string[];
+        vertical: string;
+        profilePictureUrl: string | null;
+      };
+      verticals: string[];
+    }>,
+  updateWhatsAppBusinessProfile: (
+    phoneNumberId: string,
+    data: {
+      about?: string;
+      address?: string;
+      description?: string;
+      email?: string;
+      websites?: string[];
+      vertical?: string;
+    }
+  ) =>
+    post(`/whatsapp/accounts/${encodeURIComponent(phoneNumberId)}/business-profile`, data) as Promise<{
+      success: boolean;
+    }>,
 
   getInstagramOAuthState: () =>
     get('/instagram/oauth/state') as Promise<{
@@ -1347,6 +1433,8 @@ export const api = {
       url: string;
       expiresInSeconds: number;
     }>,
+  markGuestCallConnected: (token: string) =>
+    postPublic('/calls/guest/connected', { token }) as Promise<{ call: CallSessionDto }>,
   endGuestCall: (token: string) =>
     postPublic('/calls/guest/end', { token }) as Promise<{ call: CallSessionDto }>,
 };
@@ -1387,7 +1475,14 @@ export type CallSessionDto = {
   takenOverAt?: string | null;
   takenOverByUserId?: string | null;
   createdAt: string;
-  contact?: { id: string; name: string; phone: string } | null;
+  contact?: { id: string; name: string; phone: string; avatarUrl?: string | null } | null;
+  handler?: {
+    type: 'ai' | 'human' | 'none';
+    name: string | null;
+    avatarUrl: string | null;
+  };
+  aiAgent?: { id: string; name: string; avatarUrl: string | null } | null;
+  humanAgent?: { id: string; name: string; avatarUrl: string | null } | null;
 };
 
 export type ContactInsightDto = {

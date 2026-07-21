@@ -28,7 +28,7 @@ export const SimpleFeatureView: FC<SimpleFeatureViewProps> = ({
 
   return (
     <div className="max-w-3xl mx-auto space-y-6 pb-12">
-      <div className="bg-white rounded-xl border border-slate-200 p-6 md:p-8 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+      <div className="bg-surface rounded-xl border border-black/5 p-6 md:p-8 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
         <div className="flex flex-col sm:flex-row sm:items-start gap-5">
           <div className="w-14 h-14 rounded-2xl bg-sky-50 text-primary flex items-center justify-center shrink-0">
             <Icon className="w-7 h-7" />
@@ -45,7 +45,7 @@ export const SimpleFeatureView: FC<SimpleFeatureViewProps> = ({
         </div>
 
         {highlights.length > 0 && (
-          <ul className="mt-6 pt-6 border-t border-slate-200 space-y-3">
+          <ul className="mt-6 pt-6 border-t border-black/5 space-y-3">
             {highlights.map((item) => (
               <li key={item} className="flex items-start gap-3 text-sm text-gray-600">
                 <Sparkles className="w-4 h-4 text-primary shrink-0 mt-0.5" />
@@ -60,7 +60,7 @@ export const SimpleFeatureView: FC<SimpleFeatureViewProps> = ({
         <button
           type="button"
           onClick={() => navigate(pathForTab('dashboard'))}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-channel-green hover:bg-[#20bd5a] text-white text-sm font-bold rounded-xl shadow-sm transition-all"
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary-hover text-white text-sm font-bold rounded-xl shadow-sm transition-all"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Home
@@ -68,7 +68,7 @@ export const SimpleFeatureView: FC<SimpleFeatureViewProps> = ({
         <button
           type="button"
           onClick={() => navigate(pathForTab('inbox'))}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 text-sm font-bold rounded-xl transition-all"
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-surface text-slate-700 border border-black/5 hover:bg-surface-muted text-sm font-bold rounded-xl transition-all"
         >
           Open Inbox
         </button>

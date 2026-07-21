@@ -6,7 +6,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useKeepAliveActivation } from './KeepAlive';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Plus, Search, RefreshCw, Pencil, Trash2, Send, Loader2, Mail, MessageCircle, MessageSquareText } from 'lucide-react';
+import { Plus, Search, Pencil, Trash2, Send, Loader2, Mail, MessageCircle, MessageSquareText, RefreshCw } from 'lucide-react';
 import { CampaignTemplate, EmailTemplateRecord } from '../types';
 import { api } from '../lib/api';
 import { mapTemplateFromApi } from '../lib/mappers';
@@ -77,17 +77,14 @@ export const TemplatesView: React.FC = () => {
   const [cannedSaving, setCannedSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [editorLoading, setEditorLoading] = useState(false);
-  const [syncing, setSyncing] = useState(false);
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [editingWa, setEditingWa] = useState<CampaignTemplate | null>(null);
   const [editingEmail, setEditingEmail] = useState<EmailTemplateRecord | null>(null);
   const [actionError, setActionError] = useState('');
 
-  const loadWhatsApp = useCallback(async (sync = false) => {
-    const raw = sync
-      ? ((await api.syncTemplates()) as { templates?: Record<string, unknown>[] }).templates
-      : await api.getTemplates();
+  const loadWhatsApp = useCallback(async () => {
+    const raw = await api.getTemplates();
     const list = (raw ?? []) as Record<string, unknown>[];
     setWaTemplates(list.map((t) => mapTemplateFromApi(t)));
   }, []);
@@ -106,11 +103,11 @@ export const TemplatesView: React.FC = () => {
   isBuilderRef.current = isBuilder;
 
   const loadAll = useCallback(
-    async (syncWa = false, options?: { silent?: boolean }) => {
+    async (options?: { silent?: boolean }) => {
       if (!options?.silent) setLoading(true);
       if (!options?.silent) setActionError('');
       try {
-        await Promise.all([loadWhatsApp(syncWa), loadEmail(), loadCanned()]);
+        await Promise.all([loadWhatsApp(), loadEmail(), loadCanned()]);
       } catch (err) {
         if (!options?.silent) {
           setActionError(err instanceof Error ? err.message : 'Failed to load templates');
@@ -127,7 +124,7 @@ export const TemplatesView: React.FC = () => {
   }, [loadAll, isBuilder]);
 
   useKeepAliveActivation(() => {
-    if (!isBuilderRef.current) void loadAll(false, { silent: true });
+    if (!isBuilderRef.current) void loadAll({ silent: true });
   });
 
   useEffect(() => {
@@ -264,18 +261,6 @@ export const TemplatesView: React.FC = () => {
     );
   }
 
-  const handleSync = async () => {
-    setSyncing(true);
-    setActionError('');
-    try {
-      await loadWhatsApp(true);
-    } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Sync failed');
-    } finally {
-      setSyncing(false);
-    }
-  };
-
   const handleDeleteWa = async (t: CampaignTemplate) => {
     if (!t.id) return;
     if (!window.confirm(`Delete template "${t.name}" from Meta and this workspace?`)) return;
@@ -294,6 +279,24 @@ export const TemplatesView: React.FC = () => {
       await loadWhatsApp();
     } catch (err) {
       setActionError(err instanceof Error ? err.message : 'Submit failed');
+    }
+  };
+
+  const handleRefreshWaStatus = async (t: CampaignTemplate) => {
+    if (!t.id) return;
+    try {
+      const res = (await api.refreshTemplateStatus(t.id)) as {
+        message?: string;
+        metaFound?: boolean;
+      };
+      await loadWhatsApp();
+      if (res.metaFound === false && res.message) {
+        setActionError(res.message);
+      } else {
+        setActionError('');
+      }
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'Status refresh failed');
     }
   };
 
@@ -369,7 +372,7 @@ export const TemplatesView: React.FC = () => {
           className={`px-3 py-2 rounded-xl text-sm font-bold border inline-flex items-center gap-1.5 ${
             channel === 'whatsapp'
               ? 'bg-[#008069] text-white border-[#008069]'
-              : 'bg-white text-gray-700 border-slate-200'
+              : 'bg-surface text-gray-700 border-black/5'
           }`}
         >
           <MessageCircle className="w-3.5 h-3.5" />
@@ -381,7 +384,7 @@ export const TemplatesView: React.FC = () => {
           className={`px-3 py-2 rounded-xl text-sm font-bold border inline-flex items-center gap-1.5 ${
             channel === 'email'
               ? 'bg-primary text-white border-primary'
-              : 'bg-white text-gray-700 border-slate-200'
+              : 'bg-surface text-gray-700 border-black/5'
           }`}
         >
           <Mail className="w-3.5 h-3.5" />
@@ -392,8 +395,8 @@ export const TemplatesView: React.FC = () => {
           onClick={() => navigate(pathForTemplatesList('canned'))}
           className={`px-3 py-2 rounded-xl text-sm font-bold border inline-flex items-center gap-1.5 ${
             channel === 'canned'
-              ? 'bg-channel-green text-white border-[#0284c7]'
-              : 'bg-white text-gray-700 border-slate-200'
+              ? 'bg-primary text-white border-primary'
+              : 'bg-surface text-gray-700 border-black/5'
           }`}
         >
           <MessageSquareText className="w-3.5 h-3.5" />
@@ -412,7 +415,7 @@ export const TemplatesView: React.FC = () => {
         />
       ) : (
         <>
-      <div className="p-4 bg-white border border-slate-200 rounded-2xl flex flex-wrap items-center justify-between gap-4">
+      <div className="p-4 bg-surface border border-black/5 rounded-2xl flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-2.5">
           {channel === 'whatsapp' && (
             <div className="flex items-center gap-1 bg-slate-50 px-2.5 py-1.5 rounded-xl border border-slate-200">
@@ -443,27 +446,12 @@ export const TemplatesView: React.FC = () => {
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          {channel === 'whatsapp' && (
-            <button
-              type="button"
-              onClick={() => void handleSync()}
-              disabled={syncing}
-              className="px-3 py-2 bg-white border border-slate-200 hover:bg-gray-50 text-gray-800 rounded-xl text-meta font-bold flex items-center gap-1.5 disabled:opacity-60"
-            >
-              {syncing ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              ) : (
-                <RefreshCw className="w-3.5 h-3.5" />
-              )}
-              Sync from Meta
-            </button>
-          )}
           <button
             type="button"
             onClick={openCreate}
             className={`px-3 py-2 text-white rounded-xl text-meta font-bold flex items-center gap-1.5 shadow-sm ${
               channel === 'email'
-                ? 'bg-channel-green hover:bg-[#20bd5a]'
+                ? 'bg-primary hover:bg-primary-hover'
                 : 'bg-[#008069] hover:bg-[#006e5b]'
             }`}
           >
@@ -494,6 +482,7 @@ export const TemplatesView: React.FC = () => {
                 onOpen={() => openWaBuilder(template)}
                 onEdit={() => openWaBuilder(template)}
                 onSubmit={() => void handleSubmitWa(template)}
+                onRefreshStatus={() => handleRefreshWaStatus(template)}
                 onDelete={() => void handleDeleteWa(template)}
               />
             ))}
@@ -525,7 +514,7 @@ function EmptyState({ channel, onCreate }: { channel: Channel; onCreate: () => v
   const label =
     channel === 'whatsapp' ? 'WhatsApp' : channel === 'email' ? 'email' : 'canned response';
   return (
-    <div className="bg-white border border-dashed border-slate-200 rounded-2xl p-12 text-center">
+    <div className="bg-surface border border-dashed border-black/10 rounded-2xl p-12 text-center">
       <p className="text-sm font-bold text-gray-600">No {label} templates</p>
       <p className="text-xs text-gray-400 mt-1 max-w-md mx-auto">
         {channel === 'whatsapp'
@@ -538,7 +527,9 @@ function EmptyState({ channel, onCreate }: { channel: Channel; onCreate: () => v
         type="button"
         onClick={onCreate}
         className={`mt-4 px-4 py-2 text-white rounded-xl text-sm font-bold ${
-          channel === 'email' ? 'bg-primary' : channel === 'canned' ? 'bg-channel-green' : 'bg-[#008069]'
+          channel === 'email' || channel === 'canned'
+            ? 'bg-primary hover:bg-primary-hover'
+            : 'bg-[#008069]'
         }`}
       >
         {channel === 'canned' ? 'Add canned response' : 'Create template'}
@@ -552,17 +543,31 @@ function WhatsAppCard({
   onOpen,
   onEdit,
   onSubmit,
+  onRefreshStatus,
   onDelete,
 }: {
   template: CampaignTemplate;
   onOpen: () => void;
   onEdit: () => void;
   onSubmit: () => void;
+  onRefreshStatus: () => Promise<void>;
   onDelete: () => void;
 }) {
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setRefreshing(true);
+    try {
+      await onRefreshStatus();
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   return (
     <div
-      className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col text-left hover:border-[#008069]/30 transition-all cursor-pointer"
+      className="bg-surface border border-black/5 rounded-2xl p-4 flex flex-col text-left hover:border-[#008069]/30 transition-all cursor-pointer"
       onClick={onOpen}
       onKeyDown={(e) => e.key === 'Enter' && onOpen()}
       role="button"
@@ -573,7 +578,20 @@ function WhatsAppCard({
           <span className={CATEGORY_BADGE_CLASS}>{template.category}</span>
           <h5 className="font-bold text-gray-900 text-sm truncate font-mono">{template.name}</h5>
         </div>
-        <TemplateStatusBadge status={statusUiToSlug(template.status)} />
+        <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+          {template.id ? (
+            <button
+              type="button"
+              title="Refresh status from Meta"
+              onClick={(e) => void handleRefresh(e)}
+              disabled={refreshing}
+              className="p-1.5 rounded-lg hover:bg-surface-muted text-slate-500 hover:text-primary disabled:opacity-50 cursor-pointer"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+            </button>
+          ) : null}
+          <TemplateStatusBadge status={statusUiToSlug(template.status)} />
+        </div>
       </div>
       {template.header && (
         <p className="text-sm font-bold text-gray-500 mb-1">{template.header}</p>
@@ -636,7 +654,7 @@ function EmailCard({
   const preview = stripHtmlToText(template.htmlBody);
   return (
     <div
-      className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-col text-left hover:border-primary/30 transition-all cursor-pointer"
+      className="bg-surface border border-black/5 rounded-2xl p-4 flex flex-col text-left hover:border-primary/30 transition-all cursor-pointer"
       onClick={onOpen}
       onKeyDown={(e) => e.key === 'Enter' && onOpen()}
       role="button"
@@ -647,7 +665,7 @@ function EmailCard({
         <span
           className={`text-sm font-bold uppercase px-2 py-0.5 rounded border ${
             template.status === 'active'
-              ? 'bg-[#e6f7ec] text-[#006d2f] border-[#5dfd8a]/40'
+              ? 'bg-primary/10 text-primary border-primary/20'
               : 'bg-gray-50 text-gray-500 border-gray-200'
           }`}
         >
@@ -661,7 +679,7 @@ function EmailCard({
       {template.variables.length > 0 && (
         <div className="flex flex-wrap gap-1 mt-2">
           {template.variables.slice(0, 4).map((v) => (
-            <span key={v} className="text-meta font-mono bg-[#eef2ff] text-primary px-1.5 py-0.5 rounded">
+            <span key={v} className="text-meta font-mono bg-primary/10 text-primary px-1.5 py-0.5 rounded">
               {`{{${v}}}`}
             </span>
           ))}

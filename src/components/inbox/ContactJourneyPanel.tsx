@@ -147,7 +147,7 @@ function StepDot({ state }: { state: JourneyProgressStep['state'] }) {
   if (state === 'current') {
     return (
       <span className="absolute -left-[21px] top-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-channel-green ring-2 ring-emerald-100">
-        <span className="h-1 w-1 animate-pulse rounded-full bg-white" />
+        <span className="h-1 w-1 animate-pulse rounded-full bg-surface" />
       </span>
     );
   }
@@ -238,7 +238,7 @@ export const ContactJourneyPanel: React.FC<Props> = ({
 
   if (initialLoading && !progress) {
     return (
-      <div className="animate-pulse rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="animate-pulse rounded-2xl border border-black/5 bg-surface p-4 shadow-sm">
         <div className="mb-2 h-3 w-28 rounded bg-gray-200" />
         <div className="h-4 w-full rounded bg-gray-200" />
       </div>
@@ -249,14 +249,14 @@ export const ContactJourneyPanel: React.FC<Props> = ({
 
   return (
     <article
-      className={`overflow-hidden rounded-2xl border bg-white shadow-sm transition-colors ${
-        isActive ? 'border-sky-200' : 'border-slate-200'
+      className={`overflow-hidden rounded-2xl border bg-surface shadow-sm transition-colors ${
+        isActive ? 'border-sky-200' : 'border-black/5'
       }`}
     >
       <button
         type="button"
         onClick={() => setExpanded((open) => !open)}
-        className="flex w-full cursor-pointer items-start gap-2 p-3 text-left transition-colors hover:bg-slate-50"
+        className="flex w-full cursor-pointer items-start gap-2 p-3 text-left transition-colors hover:bg-surface-muted"
         aria-expanded={expanded}
       >
         <span
@@ -316,7 +316,7 @@ export const ContactJourneyPanel: React.FC<Props> = ({
       </button>
 
       {expanded && (
-        <div className="border-t border-slate-200 px-3 pb-3">
+        <div className="border-t border-black/5 px-3 pb-3">
           {!progress ? (
             <div className="py-4 text-center">
               <Route className="mx-auto mb-2 h-5 w-5 text-gray-300" />
@@ -333,12 +333,12 @@ export const ContactJourneyPanel: React.FC<Props> = ({
       )}
 
       {onAssignJourney && publishedJourneys.length > 0 && (
-        <div className="space-y-2 border-t border-slate-200 bg-slate-50/50 p-3">
+        <div className="space-y-2 border-t border-black/5 bg-surface-muted/50 p-3">
           <p className="text-xs font-bold text-gray-500">Assign journey</p>
           <select
             value={selectedJourneyId}
             onChange={(e) => setSelectedJourneyId(e.target.value)}
-            className="w-full cursor-pointer rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-gray-800 outline-none transition-colors focus:border-channel-green/40 focus:ring-2 focus:ring-emerald-100"
+            className="w-full cursor-pointer rounded-xl border border-black/5 bg-surface px-3 py-2 text-sm font-semibold text-gray-800 outline-none transition-colors focus:border-channel-green/40 focus:ring-2 focus:ring-emerald-100"
           >
             <option value="">Select a journey…</option>
             {publishedJourneys.map((journey) => (

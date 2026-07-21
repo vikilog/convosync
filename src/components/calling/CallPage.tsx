@@ -31,6 +31,9 @@ import { dispatchOpenInboxConversation } from '../../lib/inboxEvents';
 import { connectSocket, getSocket } from '../../lib/socket';
 import { pathForTab } from '../../routes';
 import { CallLiveTranscript } from './CallLiveTranscript';
+import { CallAvatar } from './CallAvatar';
+import { formatCallTimer, useCallDuration } from '../../lib/callDuration';
+import { getAiAgentName, getHumanHandlerName } from './callLabels';
 type Role = 'agent' | 'customer';
 type Phase =
   | 'loading'
@@ -40,12 +43,6 @@ type Phase =
   | 'connected'
   | 'ended'
   | 'error';
-
-function formatTimer(seconds: number) {
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return `${m}:${s.toString().padStart(2, '0')}`;
-}
 
 function isTerminalStatus(status: string) {
   return ['ended', 'missed', 'declined', 'failed'].includes(status);
@@ -65,7 +62,6 @@ export function CallPage() {
   const [phase, setPhase] = useState<Phase>('loading');
   const [error, setError] = useState<string | null>(null);
   const [muted, setMuted] = useState(false);
-  const [elapsed, setElapsed] = useState(0);
   const [copied, setCopied] = useState(false);
   const [busy, setBusy] = useState(false);
   const [recordingOn, setRecordingOn] = useState(false);
@@ -85,17 +81,22 @@ export function CallPage() {
   const phaseRef = useRef(phase);
   phaseRef.current = phase;
   const reconnectCountRef = useRef(0);
-  const joinAtRef = useRef<string | null>(null);
   const intentionalDisconnectRef = useRef(false);
+
+  const elapsed = useCallDuration(call?.connectedAt, {
+    active: phase === 'connected',
+    endedAt: phase === 'ended' ? call?.endedAt : null,
+  });
+
+  const handlerAvatarUrl = call?.handler?.avatarUrl ?? call?.aiAgent?.avatarUrl ?? null;
+  const handlerName = getAiAgentName(call) ?? call?.handler?.name ?? null;
+  const humanHandlerName = getHumanHandlerName(call);
+  const contactAvatarUrl = call?.contact?.avatarUrl ?? null;
 
   const markLiveWithCustomer = useCallback((next?: CallSessionDto) => {
     if (next) {
       setCall(next);
       if (next.recordingStatus === 'recording') setRecordingOn(true);
-    }
-    if (phaseRef.current !== 'connected' && phaseRef.current !== 'ended' && phaseRef.current !== 'error') {
-      setElapsed(0);
-      joinAtRef.current = new Date().toISOString();
     }
     setPhase((p) => {
       if (p === 'ended' || p === 'error') return p;
@@ -281,13 +282,6 @@ export function CallPage() {
     };
   }, [role, callId, markLiveWithCustomer, teardownRoom]);
 
-  // Timer only after customer has joined (connected)
-  useEffect(() => {
-    if (phase !== 'connected') return;
-    const t = setInterval(() => setElapsed((e) => e + 1), 1000);
-    return () => clearInterval(t);
-  }, [phase]);
-
   const joinLiveKit = async (
     token: string,
     url: string,
@@ -361,9 +355,15 @@ export function CallPage() {
     }
 
     if (mode === 'customer') {
-      joinAtRef.current = new Date().toISOString();
+      if (guestToken) {
+        try {
+          const { call: connectedCall } = await api.markGuestCallConnected(guestToken);
+          setCall(connectedCall);
+        } catch (err) {
+          setError(formatCatchError(err));
+        }
+      }
       setPhase('connected');
-      setElapsed(0);
       return;
     }
 
@@ -448,7 +448,7 @@ export function CallPage() {
         : undefined;
     const micLabel = mics.find((d) => d.deviceId === micId)?.label || mics[0]?.label || null;
     const analytics = {
-      joinTime: joinAtRef.current,
+      joinTime: call?.connectedAt ?? null,
       leaveTime: new Date().toISOString(),
       durationSeconds: elapsed,
       reconnectCount: reconnectCountRef.current,
@@ -639,11 +639,18 @@ export function CallPage() {
                   Reconnecting…
                 </div>
               )}
-              <div className="h-24 w-24 rounded-full bg-emerald-500/15 border border-emerald-400/30 flex items-center justify-center mb-6">
+              <div className="h-24 w-24 rounded-full bg-emerald-500/15 border border-emerald-400/30 flex items-center justify-center mb-6 overflow-hidden">
                 {phase === 'connecting' ? (
                   <Loader2 className="h-10 w-10 animate-spin text-emerald-400" />
                 ) : (
-                  <Phone className="h-10 w-10 text-emerald-400" />
+                  <CallAvatar
+                    size="xl"
+                    kind="agent"
+                    name={handlerName || workspaceName}
+                    avatarUrl={handlerAvatarUrl}
+                    fallbackIcon="phone"
+                    className="border-0 bg-transparent h-24 w-24 text-2xl"
+                  />
                 )}
               </div>
               <h1 className="text-2xl font-bold tracking-tight mb-2">
@@ -652,7 +659,7 @@ export function CallPage() {
               {statusLabel && <p className="text-sm text-slate-400 mb-1">{statusLabel}</p>}
               {phase === 'connected' && (
                 <p className="mt-3 font-mono text-4xl font-bold tabular-nums tracking-tight">
-                  {formatTimer(elapsed)}
+                  {formatCallTimer(elapsed)}
                 </p>
               )}
               {recordingOn && phase === 'connected' && (
@@ -780,11 +787,18 @@ export function CallPage() {
               )}
 
               <div className="text-center mb-6">
-                <div className="mx-auto h-16 w-16 rounded-full bg-emerald-50 text-channel-green flex items-center justify-center mb-4">
+                <div className="mx-auto h-16 w-16 rounded-full bg-emerald-50 text-channel-green flex items-center justify-center mb-4 overflow-hidden">
                   {phase === 'waiting' ? (
                     <Loader2 className="h-7 w-7 animate-spin" />
                   ) : (
-                    <Phone className="h-7 w-7" />
+                    <CallAvatar
+                      size="lg"
+                      kind="customer"
+                      name={contactName || call?.contact?.name}
+                      avatarUrl={contactAvatarUrl}
+                      fallbackIcon="user"
+                      className="border-0 bg-transparent h-16 w-16"
+                    />
                   )}
                 </div>
                 <h1 className="text-xl font-bold text-slate-900 tracking-tight">
@@ -796,19 +810,19 @@ export function CallPage() {
                 {call?.currentHandler === 'ai' && (
                   <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">
                     <Bot className="h-3.5 w-3.5" />
-                    AI Agent is on this call
+                    Handled by {handlerName || 'AI Agent'}
                   </p>
                 )}
                 {(call?.currentHandler === 'human' || agentMode === 'speaking') &&
                   call?.currentHandler !== 'ai' && (
                     <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-slate-100 border border-slate-200 px-3 py-1 text-xs font-bold text-slate-700">
                       <User className="h-3.5 w-3.5" />
-                      You are on this call
+                      {humanHandlerName ? `${humanHandlerName} on call` : 'You are on this call'}
                     </p>
                   )}
                 {phase === 'connected' && (
                   <p className="mt-3 font-mono text-2xl font-bold text-slate-800 tabular-nums">
-                    {formatTimer(elapsed)}
+                    {formatCallTimer(elapsed)}
                   </p>
                 )}
                 <div className="mt-3 flex items-center justify-center gap-3 text-xs font-semibold text-slate-500">
@@ -840,9 +854,15 @@ export function CallPage() {
                 </p>
               )}
 
-              {call?.currentHandler === 'ai' && (
+                {call?.currentHandler === 'ai' && (
                 <div className="mb-4 space-y-3">
-                  <CallLiveTranscript callId={callId} />
+                  <CallLiveTranscript
+                    callId={callId}
+                    agentAvatarUrl={handlerAvatarUrl}
+                    agentName={handlerName}
+                    contactAvatarUrl={contactAvatarUrl}
+                    contactName={contactName || call?.contact?.name}
+                  />
                   <div className="flex flex-col gap-2">
                     {agentMode === 'idle' && (
                       <button

@@ -11,7 +11,7 @@ interface RecentCampaignsPanelProps {
 function statusClass(status: QuickCampaignStatus): string {
   switch (status) {
     case 'Completed':
-      return 'text-emerald-700 bg-emerald-50';
+      return 'text-primary bg-[#e8f0ec]';
     case 'Running':
     case 'Active':
       return 'text-sky-700 bg-sky-50';
@@ -28,7 +28,7 @@ function statusClass(status: QuickCampaignStatus): string {
 
 function ChannelIcon({ channel }: { channel: QuickCampaign['channel'] }) {
   if (channel === 'whatsapp') {
-    return <MessageCircle className="h-3.5 w-3.5 text-emerald-600" />;
+    return <MessageCircle className="h-3.5 w-3.5 text-channel-green" />;
   }
   return <Mail className="h-3.5 w-3.5 text-sky-600" />;
 }
@@ -47,13 +47,13 @@ export const RecentCampaignsPanel: React.FC<RecentCampaignsPanelProps> = ({
   const items = campaigns.slice(0, 4);
 
   return (
-    <div className="flex h-full flex-col rounded-xl bg-white p-5 ring-1 ring-slate-200/80">
+    <div className="flex h-full flex-col rounded-xl border border-black/5 bg-surface p-5">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-base font-semibold text-slate-900">Recent campaigns</h2>
+        <h2 className="font-display text-lg font-medium text-neutral-900">Recent campaigns</h2>
         <button
           type="button"
           onClick={onViewAll}
-          className="inline-flex cursor-pointer items-center gap-1 text-sm font-medium text-sky-600 hover:text-sky-700"
+          className="inline-flex cursor-pointer items-center gap-1 text-sm font-medium text-primary hover:text-primary-hover"
         >
           View all
           <ArrowUpRight className="h-3.5 w-3.5" />
@@ -62,18 +62,18 @@ export const RecentCampaignsPanel: React.FC<RecentCampaignsPanelProps> = ({
 
       {items.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center py-8 text-center">
-          <p className="text-sm font-medium text-slate-800">No campaigns yet</p>
+          <p className="text-sm font-medium text-neutral-800">No campaigns yet</p>
           <button
             type="button"
             onClick={onNewCampaign}
-            className="mt-3 inline-flex cursor-pointer items-center gap-1.5 text-sm font-medium text-sky-600 hover:text-sky-700"
+            className="mt-3 inline-flex cursor-pointer items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-hover"
           >
             <Plus className="h-4 w-4" />
             Start your first campaign
           </button>
         </div>
       ) : (
-        <ul className="divide-y divide-slate-100">
+        <ul className="divide-y divide-black/5">
           {items.map((campaign) => {
             const sent = campaign.sentCount || Number(campaign.audienceCount) || 0;
             const delivered = campaign.deliveredCount || 0;
@@ -81,12 +81,12 @@ export const RecentCampaignsPanel: React.FC<RecentCampaignsPanelProps> = ({
 
             return (
               <li key={campaign.id} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-50">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-muted">
                   <ChannelIcon channel={campaign.channel} />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-slate-900">{campaign.name}</p>
-                  <p className="text-xs text-slate-500">
+                  <p className="truncate text-sm font-medium text-neutral-900">{campaign.name}</p>
+                  <p className="text-xs text-neutral-500">
                     {campaign.date} · {channelLabel(campaign.channel)}
                   </p>
                 </div>
@@ -96,7 +96,7 @@ export const RecentCampaignsPanel: React.FC<RecentCampaignsPanelProps> = ({
                   >
                     {campaign.status}
                   </span>
-                  <p className="mt-1 text-xs tabular-nums text-slate-500">{pct}% delivered</p>
+                  <p className="mt-1 text-xs tabular-nums text-neutral-500">{pct}% delivered</p>
                 </div>
               </li>
             );

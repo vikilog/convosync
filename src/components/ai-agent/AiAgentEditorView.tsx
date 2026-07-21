@@ -102,7 +102,7 @@ export const AiAgentEditorView: React.FC<Props> = ({ agentId, pathname }) => {
         <button
           type="button"
           onClick={() => navigate(pathForTab('ai-agent'))}
-          className="mt-4 text-sm font-bold text-sky-600 hover:underline"
+          className="mt-4 text-sm font-bold text-primary hover:underline"
         >
           Back to agents
         </button>
@@ -123,8 +123,8 @@ export const AiAgentEditorView: React.FC<Props> = ({ agentId, pathname }) => {
         AI Agent
       </button>
 
-      <div className="flex w-full min-h-[calc(100vh-12rem)] rounded-xl overflow-hidden border border-slate-200 bg-white shadow-sm">
-        <aside className="w-[148px] shrink-0 border-r border-slate-200 bg-slate-50 py-3">
+      <div className="flex w-full min-h-[calc(100vh-12rem)] rounded-xl overflow-hidden border border-black/5 bg-surface shadow-sm">
+        <aside className="w-[148px] shrink-0 border-r border-black/5 bg-surface-muted py-3">
           <p className="px-3 text-sm font-bold text-gray-900 truncate mb-3" title={agent.name}>
             {agent.name}
           </p>
@@ -137,8 +137,8 @@ export const AiAgentEditorView: React.FC<Props> = ({ agentId, pathname }) => {
               className={({ isActive }) =>
                 `block px-2.5 py-1.5 rounded-md text-meta transition-all ${
                   isActive
-                    ? 'bg-white text-sky-600 font-bold shadow-sm border border-sky-100'
-                    : 'text-gray-600 hover:bg-white/80'
+                    ? 'bg-surface text-primary font-bold shadow-sm border border-primary/15'
+                    : 'text-gray-600 hover:bg-surface/80'
                 }`
               }
             >
@@ -149,8 +149,8 @@ export const AiAgentEditorView: React.FC<Props> = ({ agentId, pathname }) => {
               className={({ isActive }) =>
                 `block px-2.5 py-1.5 rounded-md text-meta transition-all ${
                   isActive
-                    ? 'bg-white text-sky-600 font-bold shadow-sm border border-sky-100'
-                    : 'text-gray-600 hover:bg-white/80'
+                    ? 'bg-surface text-primary font-bold shadow-sm border border-primary/15'
+                    : 'text-gray-600 hover:bg-surface/80'
                 }`
               }
             >
@@ -159,7 +159,7 @@ export const AiAgentEditorView: React.FC<Props> = ({ agentId, pathname }) => {
           </nav>
         </aside>
 
-        <div className="flex-1 min-w-0 w-full flex flex-col bg-slate-50 min-h-0 relative">
+        <div className="flex-1 min-w-0 w-full flex flex-col bg-surface-muted min-h-0 relative">
           {(saving || savedHint) && (
             <span className="absolute top-4 right-6 z-10 text-meta font-bold text-gray-400">
               {saving ? 'Saving…' : 'Saved'}
@@ -179,7 +179,7 @@ export const AiAgentEditorView: React.FC<Props> = ({ agentId, pathname }) => {
           >
             {section === 'flows' ? (
               showFlowBuilder ? (
-                <div className="h-full min-h-[520px] w-full rounded-xl border border-slate-200 overflow-hidden bg-[#eef0f3]">
+                <div className="h-full min-h-[520px] w-full rounded-xl border border-black/5 overflow-hidden bg-[#eef0f3]">
                   <RuleBasedFlowBuilder
                     flow={agent.flowDefinition ?? defaultAgentFlowDefinition()}
                     saving={saving}
@@ -187,7 +187,7 @@ export const AiAgentEditorView: React.FC<Props> = ({ agentId, pathname }) => {
                   />
                 </div>
               ) : (
-                <div className="bg-white border border-slate-200 rounded-xl p-8 text-center">
+                <div className="bg-surface border border-black/5 rounded-xl p-8 text-center">
                   <p className="text-sm font-bold text-gray-800">Flow builder</p>
                   <p className="text-xs text-gray-500 mt-2 max-w-sm mx-auto">
                     Flow builder is available for rule-based agents.
@@ -196,7 +196,7 @@ export const AiAgentEditorView: React.FC<Props> = ({ agentId, pathname }) => {
               )
             ) : (
               <div className="w-full space-y-4 overflow-y-auto max-h-[calc(100vh-14rem)] pr-1">
-                <section className="bg-white border border-slate-200 rounded-xl p-5">
+                <section className="bg-surface border border-black/5 rounded-xl p-5">
                   <h3 className="text-sm font-bold text-gray-900">Basic</h3>
                   <p className="text-xs text-gray-500 mt-1 mb-5">
                     Customize your AI Agent experience by setting up the Avatar and AI Agent Name.
@@ -204,7 +204,7 @@ export const AiAgentEditorView: React.FC<Props> = ({ agentId, pathname }) => {
 
                   <div className="grid grid-cols-1 sm:grid-cols-[120px_1fr] gap-6 items-start">
                     <div>
-                      <label className="block w-[120px] h-[120px] border-2 border-dashed border-slate-200 rounded-xl bg-gray-50 cursor-pointer overflow-hidden hover:border-channel-green/40 transition-colors">
+                      <label className="block w-[120px] h-[120px] border-2 border-dashed border-black/5 rounded-xl bg-gray-50 cursor-pointer overflow-hidden hover:border-primary/40 transition-colors">
                         {agent.avatarUrl ? (
                           <img src={agent.avatarUrl} alt="" className="w-full h-full object-cover" />
                         ) : (
@@ -238,7 +238,7 @@ export const AiAgentEditorView: React.FC<Props> = ({ agentId, pathname }) => {
                             setAgent((prev) => (prev ? { ...prev, name } : prev));
                             scheduleSave({ name });
                           }}
-                          className="w-full border border-slate-200 rounded-lg py-2.5 px-3 text-sm focus:ring-2 focus:ring-[#0284c7]/20 focus:border-channel-green outline-none"
+                          className="w-full border border-black/5 rounded-lg py-2.5 px-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
                         />
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-mono">
                           {agent.name.length}/250
@@ -248,7 +248,7 @@ export const AiAgentEditorView: React.FC<Props> = ({ agentId, pathname }) => {
                   </div>
                 </section>
 
-                <section className="bg-white border border-slate-200 rounded-xl p-5 flex items-start justify-between gap-4">
+                <section className="bg-surface border border-black/5 rounded-xl p-5 flex items-start justify-between gap-4">
                   <div>
                     <h3 className="text-sm font-bold text-gray-900">Welcome Message</h3>
                     <p className="text-xs text-gray-500 mt-1 max-w-lg">
@@ -263,7 +263,7 @@ export const AiAgentEditorView: React.FC<Props> = ({ agentId, pathname }) => {
                           scheduleSave({ welcomeMessageText });
                         }}
                         placeholder="Hi! How can we help you today?"
-                        className="mt-3 w-full max-w-lg border border-slate-200 rounded-lg py-2 px-3 text-sm min-h-[72px] resize-none focus:ring-2 focus:ring-[#0284c7]/20 outline-none"
+                        className="mt-3 w-full max-w-lg border border-black/5 rounded-lg py-2 px-3 text-sm min-h-[72px] resize-none focus:ring-2 focus:ring-primary/20 outline-none"
                       />
                     )}
                   </div>
@@ -278,11 +278,11 @@ export const AiAgentEditorView: React.FC<Props> = ({ agentId, pathname }) => {
                       }}
                       className="sr-only peer"
                     />
-                    <div className="w-10 h-5 bg-gray-200 rounded-full peer peer-checked:bg-channel-green after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:after:translate-x-5" />
+                    <div className="w-10 h-5 bg-gray-200 rounded-full peer peer-checked:bg-primary after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:after:translate-x-5" />
                   </label>
                 </section>
 
-                <section className="bg-white border border-slate-200 rounded-xl p-5">
+                <section className="bg-surface border border-black/5 rounded-xl p-5">
                   <h3 className="text-sm font-bold text-gray-900">Intent Fallback Behavior</h3>
                   <p className="text-xs text-gray-500 mt-1 mb-1">
                     What should the AI Agent do when it doesn&apos;t understand the user&apos;s intent?
@@ -304,7 +304,7 @@ export const AiAgentEditorView: React.FC<Props> = ({ agentId, pathname }) => {
                             setAgent((prev) => (prev ? { ...prev, intentFallback: option.id } : prev));
                             void persist({ intentFallback: option.id });
                           }}
-                          className="w-4 h-4 text-sky-600 border-gray-300 focus:ring-[#0284c7]"
+                          className="w-4 h-4 text-primary border-gray-300 focus:ring-primary"
                         />
                         {option.label}
                       </label>
@@ -312,7 +312,7 @@ export const AiAgentEditorView: React.FC<Props> = ({ agentId, pathname }) => {
                   </div>
                 </section>
 
-                <section className="bg-white border border-slate-200 rounded-xl p-5">
+                <section className="bg-surface border border-black/5 rounded-xl p-5">
                   <h3 className="text-sm font-bold text-gray-900">
                     AI Agent Conversation Closing Wait Time
                   </h3>
@@ -332,7 +332,7 @@ export const AiAgentEditorView: React.FC<Props> = ({ agentId, pathname }) => {
                         setAgent((prev) => (prev ? { ...prev, conversationCloseWaitMins } : prev));
                         scheduleSave({ conversationCloseWaitMins });
                       }}
-                      className="w-20 border border-slate-200 rounded-lg py-2 px-3 text-sm text-center focus:ring-2 focus:ring-[#0284c7]/20 outline-none"
+                      className="w-20 border border-black/5 rounded-lg py-2 px-3 text-sm text-center focus:ring-2 focus:ring-primary/20 outline-none"
                     />
                     <span className="text-sm text-gray-600 font-medium">mins</span>
                   </div>

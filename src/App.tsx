@@ -160,7 +160,7 @@ function AppShellLayout({
   const campaignCreateWizard = activeTab === 'campaigns' && isNewCampaignPath(location.pathname);
 
   return (
-    <div className="flex min-h-screen app-grid-bg selection:bg-emerald-100">
+    <div className="flex min-h-screen bg-surface-muted selection:bg-primary/15">
       <InboxRealtimeBridge />
       <CallRealtimeBridge />
       <SideNavBar />

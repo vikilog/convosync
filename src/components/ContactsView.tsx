@@ -50,7 +50,7 @@ const CHANNEL_NAV: {
     id: 'all',
     label: 'All channels',
     icon: <LayoutGrid className="w-4 h-4" />,
-    activeClass: 'bg-sky-50 text-primary',
+    activeClass: 'bg-primary/15 text-primary',
   },
   {
     id: 'whatsapp',
@@ -73,7 +73,7 @@ const CHANNEL_NAV: {
 ];
 
 const SELECT_FIELD_CLASS =
-  'w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-gray-800 appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary';
+  'w-full rounded-xl border border-black/5 bg-surface px-3 py-2.5 text-sm font-semibold text-gray-800 appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary';
 
 export const ContactsView: React.FC = () => {
   const [contacts, setContacts] = useState<Contact[]>([]);
@@ -257,10 +257,10 @@ export const ContactsView: React.FC = () => {
   };
 
   return (
-    <div className="h-full min-h-0 border border-slate-200 bg-slate-50/60 overflow-hidden">
+    <div className="h-full min-h-0 border border-black/5 bg-surface-muted overflow-hidden">
       <div className="h-full min-h-0">
         <section className="min-h-0 h-full flex flex-col">
-          <div className="border-b border-slate-200 bg-white px-3 md:px-4 py-3 space-y-3">
+          <div className="border-b border-black/5 bg-surface px-3 md:px-4 py-3 space-y-3">
             <div>
               <h2 className="text-base font-bold text-slate-900">Contacts</h2>
             </div>
@@ -273,7 +273,7 @@ export const ContactsView: React.FC = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search name, phone, email..."
-                  className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  className="w-full rounded-lg border border-black/5 bg-surface py-2 pl-9 pr-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 />
               </div>
 
@@ -293,7 +293,7 @@ export const ContactsView: React.FC = () => {
                 type="button"
                 onClick={handleExport}
                 disabled={contacts.length === 0 || loading}
-                className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-black/5 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-surface-muted disabled:opacity-50"
               >
                 <Download className="w-4 h-4" />
                 Export
@@ -314,7 +314,7 @@ export const ContactsView: React.FC = () => {
               <button
                 type="button"
                 onClick={openAddContact}
-                className="inline-flex items-center justify-center gap-1.5 rounded-full bg-channel-green px-3 py-2 text-sm font-semibold text-white hover:bg-[#20bd5a]"
+                className="inline-flex items-center justify-center gap-1.5 rounded-full bg-primary px-3 py-2 text-sm font-semibold text-white hover:bg-primary-hover"
               >
                 <UserPlus className="w-4 h-4" />
                 Add contact
@@ -331,8 +331,8 @@ export const ContactsView: React.FC = () => {
                     onClick={() => setChannelFilter(item.id)}
                     className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 py-1.5 text-xs font-semibold border transition-colors cursor-pointer ${
                       active
-                        ? 'bg-sky-50 text-primary border-primary/20'
-                        : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                        ? 'bg-primary/15 text-primary border-primary/20'
+                        : 'bg-surface text-slate-600 border-black/5 hover:bg-surface-muted'
                     }`}
                   >
                     <span className={active ? 'text-primary' : 'text-slate-400'}>{item.icon}</span>
@@ -344,14 +344,14 @@ export const ContactsView: React.FC = () => {
 
           </div>
 
-          <div className="flex-1 min-h-0 overflow-auto bg-white">
+          <div className="flex-1 min-h-0 overflow-auto bg-surface">
             {loading ? (
               <div className="flex items-center justify-center h-full text-sm text-slate-500">
                 Loading contacts...
               </div>
             ) : contacts.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center px-6 text-center">
-                <div className="w-16 h-16 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center mb-3">
+                <div className="w-16 h-16 rounded-xl border border-black/5 bg-surface-muted flex items-center justify-center mb-3">
                   <Users className="w-7 h-7 text-slate-400" />
                 </div>
                 <p className="text-sm font-semibold text-slate-700">No contacts found</p>
@@ -361,7 +361,7 @@ export const ContactsView: React.FC = () => {
               </div>
             ) : (
               <>
-                <div className="md:hidden flex items-center gap-2 px-3 py-2 border-b border-slate-200 bg-slate-50">
+                <div className="md:hidden flex items-center gap-2 px-3 py-2 border-b border-black/5 bg-surface-muted">
                   <input
                     type="checkbox"
                     checked={allVisibleSelected}
@@ -416,7 +416,7 @@ export const ContactsView: React.FC = () => {
 
                 <div className="hidden md:block">
                   <table className="w-full min-w-[760px] text-left">
-                    <thead className="sticky top-0 z-10 bg-slate-50 border-b border-slate-200">
+                    <thead className="sticky top-0 z-10 bg-surface-muted border-b border-black/5">
                       <tr className="text-[11px] uppercase tracking-wider text-slate-500">
                         <th className="px-4 py-2 font-bold w-10">
                           <input
@@ -445,7 +445,7 @@ export const ContactsView: React.FC = () => {
                       {contacts.map((contact) => (
                         <tr
                           key={contact.id}
-                          className={`hover:bg-slate-50/70 ${selectedIds.has(contact.id) ? 'bg-sky-50/40' : ''}`}
+                          className={`hover:bg-surface-muted/70 ${selectedIds.has(contact.id) ? 'bg-primary/15' : ''}`}
                         >
                           <td className="px-4 py-2">
                             <input
@@ -481,7 +481,7 @@ export const ContactsView: React.FC = () => {
                                 {contact.tags.slice(0, 2).map((tag) => (
                                   <span
                                     key={tag}
-                                    className="rounded-md bg-sky-50 px-1.5 py-0.5 text-[11px] font-semibold text-primary"
+                                    className="rounded-md bg-primary/15 px-1.5 py-0.5 text-[11px] font-semibold text-primary"
                                   >
                                     {tag}
                                   </span>
@@ -499,7 +499,7 @@ export const ContactsView: React.FC = () => {
                             <button
                               type="button"
                               onClick={() => void openEditContact(contact)}
-                              className="inline-flex items-center justify-center p-1.5 rounded-md text-slate-400 hover:text-primary hover:bg-sky-50"
+                              className="inline-flex items-center justify-center p-1.5 rounded-md text-slate-400 hover:text-primary hover:bg-primary/15"
                               aria-label={`Edit ${contact.name}`}
                             >
                               <Pencil className="w-4 h-4" />

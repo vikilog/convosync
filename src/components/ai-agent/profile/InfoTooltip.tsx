@@ -12,7 +12,7 @@ export const InfoTooltip: React.FC<Props> = ({ text }) => {
       <button
         type="button"
         aria-describedby={id}
-        className="text-[#6B7280] hover:text-sky-600 transition-colors"
+        className="text-[#6B7280] hover:text-primary transition-colors"
       >
         <HelpCircle className="w-4 h-4" />
       </button>

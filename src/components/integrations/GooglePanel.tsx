@@ -120,7 +120,7 @@ function GoogleProductCard({
   }, [product.connectionId, connections]);
 
   return (
-    <article className="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col h-full shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+    <article className="bg-surface rounded-2xl border border-black/5 p-5 flex flex-col h-full shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
       <div className="flex items-start gap-3 min-w-0">
         <div
           className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${meta.bg}`}
@@ -176,7 +176,7 @@ function GoogleProductCard({
             type="button"
             disabled={busy || connections.length === 0}
             onClick={() => selectedConnection && onConnect(selectedConnection)}
-            className="flex-1 min-w-[80px] px-3 py-2 rounded-lg text-sm font-bold bg-channel-green hover:bg-[#20bd5a] text-white disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 min-w-[80px] px-3 py-2 rounded-lg text-sm font-bold bg-primary hover:bg-primary-hover text-white disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Connect
           </button>
@@ -186,7 +186,7 @@ function GoogleProductCard({
               type="button"
               disabled={busy}
               onClick={onSync}
-              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-sm font-black border border-channel-green/20 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 disabled:opacity-50"
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-sm font-black border border-primary/20 text-primary bg-primary/10 hover:bg-primary/20 disabled:opacity-50"
             >
               <RefreshCw className={`w-3 h-3 ${busy ? 'animate-spin' : ''}`} />
               Sync
@@ -346,7 +346,7 @@ export function GooglePanel() {
         </p>
       )}
 
-      <section className="bg-white border border-slate-200 rounded-2xl p-5">
+      <section className="bg-surface border border-black/5 rounded-2xl p-5">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h3 className="text-sm font-black text-gray-950">Google accounts</h3>
@@ -358,7 +358,7 @@ export function GooglePanel() {
             type="button"
             onClick={() => void handleConnectAccount()}
             disabled={connectingAccount}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold bg-channel-green hover:bg-[#20bd5a] text-white disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold bg-primary hover:bg-primary-hover text-white disabled:opacity-50"
           >
             {connectingAccount ? <Loader2 className="w-4 h-4 animate-spin" /> : <FolderOpen className="w-4 h-4" />}
             {connectingAccount ? 'Redirecting…' : 'Connect Google account'}
@@ -443,7 +443,7 @@ export function GooglePanel() {
 
       {manageProduct && manageSummary && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30">
-          <div className="bg-white rounded-2xl border border-slate-200 max-w-lg w-full p-6 shadow-xl max-h-[80vh] overflow-auto">
+          <div className="bg-surface rounded-2xl border border-black/5 max-w-lg w-full p-6 shadow-xl max-h-[80vh] overflow-auto">
             <h3 className="text-lg font-black text-gray-950">{manageSummary.label}</h3>
             <p className="text-xs text-gray-500 mt-1 font-medium">
               Integration config and sync metadata (for Journey Engine, AI Agent, and webhooks).
@@ -455,7 +455,7 @@ export function GooglePanel() {
               <button
                 type="button"
                 onClick={() => setManageProduct(null)}
-                className="px-4 py-2 rounded-lg text-sm font-bold bg-channel-green hover:bg-[#20bd5a] text-white"
+                className="px-4 py-2 rounded-lg text-sm font-bold bg-primary hover:bg-primary-hover text-white"
               >
                 Close
               </button>

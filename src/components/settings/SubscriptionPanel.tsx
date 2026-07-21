@@ -204,12 +204,12 @@ export function SubscriptionPanel({
         </div>
       ) : null}
       {actionMessage ? (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+        <div className="rounded-xl border border-primary/20 bg-primary/10 px-4 py-3 text-sm text-primary">
           {actionMessage}
         </div>
       ) : null}
 
-      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+      <section className="rounded-xl border border-black/5 bg-surface p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
         <p className="text-xl font-bold text-slate-900">{PLAN_NAME}</p>
         <p className="mt-1 text-2xl font-bold text-slate-900">
           ₹{PLAN_PRICE_INR.toLocaleString('en-IN')}
@@ -220,8 +220,8 @@ export function SubscriptionPanel({
           <span
             className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold ${
               active
-                ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
-                : 'bg-slate-100 text-slate-600 ring-1 ring-slate-200'
+                ? 'bg-primary/10 text-primary ring-1 ring-primary/20'
+                : 'bg-surface-muted text-slate-600 ring-1 ring-black/5'
             }`}
           >
             {active ? <Check className="h-3.5 w-3.5" /> : null}
@@ -256,8 +256,7 @@ export function SubscriptionPanel({
             type="button"
             disabled={checkoutBusy}
             onClick={() => void handleSubscribe()}
-            className="mt-5 inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:opacity-95 disabled:opacity-60"
-            style={{ backgroundColor: BRAND_PURPLE }}
+            className="mt-5 inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-hover disabled:opacity-60"
           >
             {checkoutBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
             Subscribe to {PLAN_NAME}
@@ -265,14 +264,14 @@ export function SubscriptionPanel({
         )}
       </section>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+      <section className="rounded-xl border border-black/5 bg-surface p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
         <h3 className="text-sm font-bold uppercase tracking-wide text-slate-500">
           What&apos;s included
         </h3>
         <ul className="mt-4 space-y-2.5">
           {INCLUDED_FEATURES.map((feature) => (
             <li key={feature} className="flex items-start gap-2.5 text-sm text-slate-700">
-              <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+              <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
               <span>{feature}</span>
             </li>
           ))}

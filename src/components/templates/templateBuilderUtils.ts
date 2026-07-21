@@ -50,6 +50,27 @@ export function sanitizeDisplayName(raw: string): string {
     .replace(/^_|_$/g, '');
 }
 
+/** Reject website URLs as template / channel names (sanitize alone would turn them into underscores). */
+export function isUrlLikeName(raw: string): boolean {
+  const t = raw.trim();
+  if (!t) return false;
+  if (/https?:\/\//i.test(t) || /^www\./i.test(t)) return true;
+  // domain.tld or domain.tld/path without spaces
+  if (/^[a-z0-9.-]+\.[a-z]{2,}(\/[\w./?%&=-]*)?$/i.test(t)) return true;
+  return false;
+}
+
+export function assertValidTemplateName(raw: string): string {
+  if (isUrlLikeName(raw)) {
+    throw new Error('Name cannot be a URL. Use letters, numbers, and underscores only.');
+  }
+  const safe = sanitizeDisplayName(raw);
+  if (!safe || safe.includes('http') || safe.includes('www')) {
+    throw new Error('Enter a valid name (letters, numbers, underscores).');
+  }
+  return safe;
+}
+
 export const BODY_MAX = 1024;
 export const HEADER_MAX = 60;
 export const FOOTER_MAX = 60;

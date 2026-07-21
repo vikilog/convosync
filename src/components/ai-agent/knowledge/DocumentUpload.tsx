@@ -39,9 +39,9 @@ export const DocumentUpload: React.FC<Props> = ({ onFilesChange }) => {
           e.preventDefault();
           addFiles(e.dataTransfer.files);
         }}
-        className="border-2 border-dashed border-[#E5E7EB] rounded-xl p-8 text-center hover:border-[#0284c7] hover:bg-[#F3F0FF]/30 transition-colors cursor-pointer"
+        className="border-2 border-dashed border-black/5 rounded-xl p-8 text-center hover:border-primary hover:bg-primary/5 transition-colors cursor-pointer"
       >
-        <Upload className="w-8 h-8 text-sky-600 mx-auto mb-3" />
+        <Upload className="w-8 h-8 text-primary mx-auto mb-3" />
         <p className="text-sm font-medium text-[#111827]">Drag & drop or click to browse</p>
         <p className="text-xs text-[#6B7280] mt-1">PDF, DOC, DOCX, TXT, MD</p>
         <input
@@ -59,10 +59,10 @@ export const DocumentUpload: React.FC<Props> = ({ onFilesChange }) => {
           {files.map((file, i) => (
             <li
               key={`${file.name}-${i}`}
-              className="flex items-center justify-between gap-3 px-3 py-2 bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl"
+              className="flex items-center justify-between gap-3 px-3 py-2 bg-surface-muted border border-black/5 rounded-xl"
             >
               <div className="flex items-center gap-2 min-w-0">
-                <FileText className="w-4 h-4 text-sky-600 shrink-0" />
+                <FileText className="w-4 h-4 text-primary shrink-0" />
                 <span className="text-sm text-[#111827] truncate">{file.name}</span>
               </div>
               <button

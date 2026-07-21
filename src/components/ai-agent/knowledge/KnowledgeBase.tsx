@@ -58,8 +58,6 @@ export const KnowledgeBase: React.FC<Props> = ({ agentId }) => {
   const [toast, setToast] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<KnowledgeItem | null>(null);
   const [deleting, setDeleting] = useState(false);
-  // ponytail: temp Pinecone upsert button — remove after backfill
-  const [reindexing, setReindexing] = useState(false);
 
   const loadItems = useCallback(async () => {
     setLoading(true);
@@ -122,19 +120,6 @@ export const KnowledgeBase: React.FC<Props> = ({ agentId }) => {
     }
   };
 
-  // ponytail: temp Pinecone upsert button — remove after backfill
-  const handleReindex = async () => {
-    setReindexing(true);
-    try {
-      const res = (await api.reindexAgentKnowledge(agentId)) as { queued?: number };
-      setToast(`Pinecone upsert queued for ${res.queued ?? 0} item(s) — check backend logs`);
-    } catch {
-      setToast('Reindex failed — check backend / Pinecone config');
-    } finally {
-      setReindexing(false);
-    }
-  };
-
   const filtered = items.filter((i) =>
     i.title.toLowerCase().includes(search.toLowerCase())
   );
@@ -142,7 +127,7 @@ export const KnowledgeBase: React.FC<Props> = ({ agentId }) => {
   return (
     <div className="w-full relative">
       {toast && (
-        <div className="fixed top-6 right-6 z-50 bg-[#1E1B2E] text-white text-sm font-medium px-4 py-3 rounded-xl shadow-lg">
+        <div className="fixed top-6 right-6 z-50 bg-primary text-white text-sm font-medium px-4 py-3 rounded-xl shadow-lg">
           {toast}
         </div>
       )}
@@ -154,24 +139,13 @@ export const KnowledgeBase: React.FC<Props> = ({ agentId }) => {
             Enable the AI to learn knowledge, automatically answer common questions…
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          {/* ponytail: temp Pinecone upsert button — remove after backfill */}
-          <button
-            type="button"
-            disabled={reindexing || items.length === 0}
-            onClick={() => void handleReindex()}
-            className="px-4 py-2 border border-amber-300 bg-amber-50 hover:bg-amber-100 disabled:opacity-50 text-amber-900 rounded-xl text-sm font-bold"
-          >
-            {reindexing ? 'Upserting…' : 'Upsert to Pinecone'}
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowAdd(true)}
-            className="px-4 py-2 bg-[#1E1B2E] hover:bg-black text-white rounded-xl text-sm font-bold"
-          >
-            + Add knowledge
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => setShowAdd(true)}
+          className="px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-xl text-sm font-bold"
+        >
+          + Add knowledge
+        </button>
       </div>
 
       <div className="relative max-w-md mb-4">
@@ -181,7 +155,7 @@ export const KnowledgeBase: React.FC<Props> = ({ agentId }) => {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search knowledge"
-          className="w-full pl-10 pr-3 py-2 border border-[#E5E7EB] rounded-xl text-sm focus:ring-2 focus:ring-[#0284c7]/20 focus:border-[#0284c7] outline-none"
+          className="w-full pl-10 pr-3 py-2 border border-black/5 rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
         />
       </div>
 
@@ -193,8 +167,8 @@ export const KnowledgeBase: React.FC<Props> = ({ agentId }) => {
         <p className="text-sm text-[#6B7280] text-center py-12">Loading knowledge…</p>
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="w-16 h-16 rounded-full bg-[#F3F0FF] flex items-center justify-center mb-4">
-            <HelpCircle className="w-8 h-8 text-sky-600" />
+          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+            <HelpCircle className="w-8 h-8 text-primary" />
           </div>
           <p className="text-sm font-medium text-[#6B7280]">No data</p>
         </div>
@@ -203,10 +177,10 @@ export const KnowledgeBase: React.FC<Props> = ({ agentId }) => {
           {filtered.map((item) => (
             <div
               key={item.id}
-              className="flex items-center justify-between gap-4 bg-white border border-[#E5E7EB] rounded-xl p-4"
+              className="flex items-center justify-between gap-4 bg-surface border border-black/5 rounded-xl p-4"
             >
               <div className="flex items-center gap-3 min-w-0">
-                <div className="p-2 rounded-lg bg-[#F3F0FF] text-sky-600 shrink-0">
+                <div className="p-2 rounded-lg bg-primary/10 text-primary shrink-0">
                   {TYPE_ICONS[item.type]}
                 </div>
                 <div className="min-w-0">
@@ -249,7 +223,7 @@ export const KnowledgeBase: React.FC<Props> = ({ agentId }) => {
 
       {deleteTarget && (
         <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-sm border border-[#E5E7EB] p-6 shadow-2xl">
+          <div className="bg-surface rounded-2xl w-full max-w-sm border border-black/5 p-6 shadow-2xl">
             <h3 className="text-base font-bold text-[#111827] mb-2">Delete knowledge item?</h3>
             <p className="text-sm text-[#6B7280] mb-6">
               &ldquo;{deleteTarget.title}&rdquo; will be permanently removed from this agent.

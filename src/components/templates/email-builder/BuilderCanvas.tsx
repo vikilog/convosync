@@ -77,7 +77,7 @@ export function BuilderCanvas() {
                 e.stopPropagation();
                 addBlock('text');
               }}
-              className="mt-4 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-channel-green text-white text-sm font-bold"
+              className="mt-4 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-primary hover:bg-primary-hover text-white text-sm font-bold"
             >
               <Plus className="w-3.5 h-3.5" /> Add text block
             </button>

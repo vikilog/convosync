@@ -79,7 +79,7 @@ type NavSection = {
 function SectionLabel({ label, collapsed }: { label: string; collapsed: boolean }) {
   if (collapsed) return null;
   return (
-    <p className="px-3 pb-1 pt-3 text-[11px] font-medium uppercase tracking-wide text-slate-400">
+    <p className="px-3 pb-1 pt-3 text-[11px] font-medium uppercase tracking-wide text-neutral-400">
       {label}
     </p>
   );
@@ -275,12 +275,12 @@ export const SideNavBar: React.FC = () => {
     canTab('google-tools');
 
   const navLinkClass = (active: boolean, collapsed: boolean) =>
-    `w-full flex items-center ${
+    `relative w-full flex items-center ${
       collapsed ? 'justify-center px-2 py-2.5' : 'gap-2.5 px-3 py-2'
     } rounded-lg text-sm transition-colors duration-200 ${
       active
-        ? `bg-emerald-50 font-semibold text-emerald-800 ${collapsed ? 'ring-1 ring-emerald-100' : ''}`
-        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+        ? 'bg-[#e8ece8] font-semibold text-primary'
+        : 'text-neutral-600 hover:bg-black/[0.04] hover:text-neutral-900'
     }`;
 
   return (
@@ -289,7 +289,7 @@ export const SideNavBar: React.FC = () => {
         <button
           type="button"
           onClick={toggleMobile}
-          className="fixed left-3 top-3 z-40 inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-sm transition-colors hover:bg-slate-50 hover:text-emerald-700 lg:hidden"
+          className="fixed left-3 top-3 z-40 inline-flex h-10 w-10 items-center justify-center rounded-lg border border-black/10 bg-surface text-neutral-600 shadow-sm transition-colors hover:bg-surface-muted hover:text-primary lg:hidden"
           aria-label="Open navigation menu"
         >
           <Menu className="h-5 w-5" />
@@ -308,7 +308,7 @@ export const SideNavBar: React.FC = () => {
       <aside
         className={`${
           sidebarCollapsed && isLargeScreen ? 'w-[72px]' : 'w-[min(260px,85vw)] lg:w-[220px]'
-        } fixed left-0 top-0 z-50 flex h-screen flex-col overflow-x-hidden overflow-y-auto border-r border-gray-200/80 bg-white/95 backdrop-blur-sm transition-transform duration-200 ease-out selection:bg-emerald-100 lg:transition-[width] ${
+        } fixed left-0 top-0 z-50 flex h-screen flex-col overflow-x-hidden overflow-y-auto border-r border-black/5 bg-surface-muted transition-transform duration-200 ease-out selection:bg-primary/15 lg:transition-[width] ${
           isLargeScreen || mobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -321,7 +321,7 @@ export const SideNavBar: React.FC = () => {
               title={sidebarCollapsed ? displayCompanyName : undefined}
               className={`flex min-w-0 items-center gap-2 ${sidebarCollapsed ? 'justify-center' : ''}`}
             >
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-emerald-100 text-emerald-800">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#e8f0ec] text-primary">
                 {companyLogoUrl ? (
                   <img src={companyLogoUrl} alt="" className="h-full w-full object-cover" />
                 ) : (
@@ -329,7 +329,7 @@ export const SideNavBar: React.FC = () => {
                 )}
               </div>
               {!sidebarCollapsed && (
-                <h1 className="truncate font-sans text-base font-semibold tracking-tight text-slate-900">
+                <h1 className="truncate font-sans text-base font-semibold tracking-tight text-neutral-900">
                   {displayCompanyName}
                 </h1>
               )}
@@ -339,7 +339,7 @@ export const SideNavBar: React.FC = () => {
               onClick={toggleCollapsed}
               title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
               aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-              className="hidden rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 lg:inline-flex"
+              className="hidden rounded-lg p-1.5 text-neutral-400 transition-colors hover:bg-black/5 hover:text-neutral-700 lg:inline-flex"
             >
               {sidebarCollapsed ? (
                 <PanelLeft className="h-4 w-4" />
@@ -351,7 +351,7 @@ export const SideNavBar: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setMobileOpen(false)}
-                className="inline-flex rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 lg:hidden"
+                className="inline-flex rounded-lg p-1.5 text-neutral-400 transition-colors hover:bg-black/5 hover:text-neutral-700 lg:hidden"
                 aria-label="Close navigation menu"
               >
                 <X className="h-4 w-4" />
@@ -410,6 +410,12 @@ export const SideNavBar: React.FC = () => {
                         const active = isItemActive(isActive);
                         return (
                           <>
+                            {active ? (
+                              <span
+                                className="pointer-events-none absolute inset-y-1.5 right-0 w-0.5 rounded-full bg-primary"
+                                aria-hidden
+                              />
+                            ) : null}
                             <div
                               className={`relative flex min-w-0 flex-1 items-center ${
                                 sidebarCollapsed ? '' : 'gap-2'
@@ -417,12 +423,12 @@ export const SideNavBar: React.FC = () => {
                             >
                               <Icon
                                 className={`h-4 w-4 shrink-0 ${
-                                  active ? 'text-emerald-700' : 'text-slate-400'
+                                  active ? 'text-primary' : 'text-neutral-400'
                                 }`}
                               />
                               {!sidebarCollapsed && <span className="truncate">{item.label}</span>}
                               {item.pulse ? (
-                                <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full border-2 border-white bg-red-500 animate-pulse" />
+                                <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full border-2 border-surface-muted bg-red-500 animate-pulse" />
                               ) : null}
                               {sidebarCollapsed && item.badge ? (
                                 <span className="absolute -right-1 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-channel-green px-1 text-[10px] font-bold text-white">
@@ -472,17 +478,23 @@ export const SideNavBar: React.FC = () => {
                 }}
                 className={navLinkClass(isGoogleToolsRoute, sidebarCollapsed)}
               >
+                {isGoogleToolsRoute ? (
+                  <span
+                    className="pointer-events-none absolute inset-y-1.5 right-0 w-0.5 rounded-full bg-primary"
+                    aria-hidden
+                  />
+                ) : null}
                 <div className={`flex items-center ${sidebarCollapsed ? '' : 'gap-2'}`}>
                   <CalendarDays
                     className={`h-4 w-4 shrink-0 ${
-                      isGoogleToolsRoute ? 'text-emerald-700' : 'text-slate-400'
+                      isGoogleToolsRoute ? 'text-primary' : 'text-neutral-400'
                     }`}
                   />
                   {!sidebarCollapsed && <span>Google Tools</span>}
                 </div>
                 {!sidebarCollapsed && (
                   <ChevronDown
-                    className={`h-3.5 w-3.5 shrink-0 text-slate-400 transition-transform ${
+                    className={`h-3.5 w-3.5 shrink-0 text-neutral-400 transition-transform ${
                       googleToolsOpen ? 'rotate-180' : ''
                     }`}
                   />
@@ -490,7 +502,7 @@ export const SideNavBar: React.FC = () => {
               </button>
 
               {googleToolsOpen && !sidebarCollapsed && (
-                <div className="ml-2 mt-0.5 space-y-0.5 border-l border-slate-200 pl-2">
+                <div className="ml-2 mt-0.5 space-y-0.5 border-l border-black/10 pl-2">
                   {connectedMainGoogleTools.map((tool) => {
                     const meta = GOOGLE_TOOL_META[tool];
                     const ToolIcon = meta.icon;
@@ -500,14 +512,20 @@ export const SideNavBar: React.FC = () => {
                       <NavLink
                         key={tool}
                         to={toolPath}
-                        className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm transition-colors ${
+                        className={`relative flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm transition-colors ${
                           isActive
-                            ? 'bg-emerald-50 font-semibold text-emerald-800'
-                            : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                            ? 'bg-[#e8ece8] font-semibold text-primary'
+                            : 'text-neutral-600 hover:bg-black/[0.04] hover:text-neutral-900'
                         }`}
                       >
+                        {isActive ? (
+                          <span
+                            className="pointer-events-none absolute inset-y-1 right-0 w-0.5 rounded-full bg-primary"
+                            aria-hidden
+                          />
+                        ) : null}
                         <ToolIcon
-                          className={`h-4 w-4 shrink-0 ${isActive ? 'text-emerald-700' : 'text-slate-400'}`}
+                          className={`h-4 w-4 shrink-0 ${isActive ? 'text-primary' : 'text-neutral-400'}`}
                         />
                         <span>{meta.shortLabel}</span>
                       </NavLink>
@@ -531,9 +549,15 @@ export const SideNavBar: React.FC = () => {
                   >
                     {({ isActive }) => (
                       <>
+                        {isActive ? (
+                          <span
+                            className="pointer-events-none absolute inset-y-1.5 right-0 w-0.5 rounded-full bg-primary"
+                            aria-hidden
+                          />
+                        ) : null}
                         <Icon
                           className={`h-4 w-4 shrink-0 ${
-                            isActive ? 'text-emerald-700' : 'text-slate-400'
+                            isActive ? 'text-primary' : 'text-neutral-400'
                           }`}
                         />
                         {!sidebarCollapsed && <span>{item.label}</span>}

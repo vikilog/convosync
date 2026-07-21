@@ -53,7 +53,9 @@ export function SettingsView() {
   const subtitle =
     section === 'wallet'
       ? 'Subscription, ConvoCoins balance, usage rates, and billing activity.'
-      : 'Manage your workspace preferences and account configuration.';
+      : section === 'invoices'
+        ? 'Razorpay payment and order IDs for charges, renewals, and add-ons.'
+        : 'Manage your workspace preferences and account configuration.';
   const [role, setRole] = useState(getUserRole());
   const [permissions, setPermissions] = useState(getUserPermissions());
   const [walletBalanceCc, setWalletBalanceCc] = useState<number | null>(null);
@@ -112,8 +114,8 @@ export function SettingsView() {
   }, [permissions, role, section]);
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden border border-slate-200 bg-white">
-      <div className="border-b border-slate-200 bg-slate-50 px-3 py-2.5 md:hidden">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden border border-black/5 bg-surface-muted selection:bg-primary/15">
+      <div className="border-b border-black/5 bg-surface px-3 py-2.5 md:hidden">
         <label htmlFor="settings-section-mobile" className="sr-only">
           Settings section
         </label>
@@ -121,7 +123,7 @@ export function SettingsView() {
           id="settings-section-mobile"
           value={section}
           onChange={(e) => navigate(pathForSettingsSection(e.target.value as SettingsSection))}
-          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+          className="w-full rounded-lg border border-black/5 bg-surface px-3 py-2 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20"
         >
           {flatNavItems.map((item) => (
             <option key={item.id} value={item.id}>
@@ -132,7 +134,7 @@ export function SettingsView() {
       </div>
 
       <div className="flex min-h-0 flex-1">
-        <aside className="hidden w-[230px] shrink-0 overflow-y-auto border-r border-slate-200 bg-slate-50 md:block">
+        <aside className="hidden w-[230px] shrink-0 overflow-y-auto border-r border-black/5 bg-surface md:block">
           <div className="px-3 py-3">
             <p className="px-2 pb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
               Workspace settings
@@ -148,8 +150,8 @@ export function SettingsView() {
                       className={({ isActive }) =>
                         `flex items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-sm transition-colors ${
                           isActive
-                            ? 'bg-emerald-50 text-emerald-800 font-semibold ring-1 ring-emerald-100'
-                            : 'text-slate-600 hover:bg-white hover:text-slate-900'
+                            ? 'bg-primary/10 text-primary font-semibold ring-1 ring-primary/20'
+                            : 'text-slate-600 hover:bg-surface-muted hover:text-slate-900'
                         }`
                       }
                     >
@@ -168,16 +170,16 @@ export function SettingsView() {
           </div>
         </aside>
 
-        <div className="flex-1 min-w-0 overflow-y-auto bg-slate-50 p-3 md:p-4">
-          <div className="mb-3 border border-slate-200 bg-white px-4 py-3 md:mb-4">
-            <h2 className="text-base font-semibold text-slate-900 md:text-lg">{title}</h2>
+        <div className="flex-1 min-w-0 overflow-y-auto bg-surface-muted p-3 md:p-4">
+          <div className="mb-3 border border-black/5 bg-surface px-4 py-3 md:mb-4">
+            <h1 className="font-display text-3xl font-medium tracking-tight text-neutral-900">{title}</h1>
             <p className="mt-0.5 text-xs text-slate-500 md:text-sm">{subtitle}</p>
           </div>
 
           {currentSectionAllowed ? (
             <SettingsPanel section={section} />
           ) : (
-            <div className="border border-slate-200 bg-white p-4">
+            <div className="border border-black/5 bg-surface p-4">
               <p className="text-sm text-slate-600">
                 You do not have permission to view this settings section. Ask an admin to update
                 your access under Users and teams.

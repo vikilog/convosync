@@ -94,7 +94,7 @@ const RecipientsTable: React.FC<{
     <div className="overflow-x-auto">
       <table className="w-full text-left border-collapse min-w-[640px]">
         <thead>
-          <tr className="bg-slate-50 border-b border-slate-200">
+          <tr className="bg-surface-muted border-b border-black/5">
             <th className="px-5 py-2.5 text-sm font-black uppercase tracking-wider text-gray-400">
               Contact
             </th>
@@ -212,19 +212,19 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
 
   if (loading) {
     return (
-      <div className="flex-1 h-[calc(100vh-64px)] flex items-center justify-center bg-slate-50">
-        <Loader2 className="w-8 h-8 animate-spin text-sky-600" />
+      <div className="flex-1 h-[calc(100vh-64px)] flex items-center justify-center bg-surface-muted">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
 
   if (error || !detail) {
     return (
-      <div className="flex-1 h-[calc(100vh-64px)] overflow-y-auto bg-slate-50 p-6">
+      <div className="flex-1 h-[calc(100vh-64px)] overflow-y-auto bg-surface-muted p-6">
         <button
           type="button"
           onClick={() => navigate(pathForTab('campaigns'))}
-          className="flex items-center gap-1.5 text-sm font-bold text-gray-600 hover:text-sky-600 mb-4"
+          className="flex items-center gap-1.5 text-sm font-bold text-gray-600 hover:text-primary mb-4"
         >
           <ArrowLeft className="w-4 h-4" /> Campaigns
         </button>
@@ -245,12 +245,12 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
       <button
         type="button"
         onClick={() => navigate(pathForTab('campaigns'))}
-        className="flex items-center gap-1.5 text-sm font-bold text-gray-500 hover:text-sky-600"
+        className="flex items-center gap-1.5 text-sm font-bold text-gray-500 hover:text-primary"
       >
         <ArrowLeft className="w-4 h-4" /> Campaigns
       </button>
 
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3">
+      <div className="bg-surface border border-black/5 rounded-2xl p-5 space-y-3">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h2 className="text-base font-black text-gray-900">{detail.name}</h2>
@@ -277,13 +277,13 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
           <button
             type="button"
             onClick={loadDetail}
-            className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 hover:bg-white text-gray-600 rounded-xl text-sm font-bold flex items-center gap-1"
+            className="px-2.5 py-1.5 bg-surface-muted border border-black/5 hover:bg-surface text-gray-600 rounded-xl text-sm font-bold flex items-center gap-1"
           >
             <RefreshCw className="w-3 h-3" /> Refresh
           </button>
         </div>
 
-        <div className="flex flex-wrap gap-x-4 gap-y-1 text-meta font-bold text-gray-500 pt-1 border-t border-slate-200">
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-meta font-bold text-gray-500 pt-1 border-t border-black/5">
           <span>
             <span className="text-gray-400">Recipients </span>
             {insights.totalRecipients.toLocaleString()}
@@ -323,7 +323,7 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 lg:col-span-1">
+        <div className="bg-surface border border-black/5 rounded-2xl p-5 lg:col-span-1">
           <h3 className="text-sm font-black text-gray-900 uppercase tracking-wider mb-3">Details</h3>
           <dl className="divide-y divide-slate-200">
             {detailRows.map(([label, value]) => (
@@ -335,8 +335,8 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
           </dl>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden lg:col-span-2 flex flex-col min-h-[280px]">
-          <div className="px-5 py-3 border-b border-slate-200 flex items-center justify-between shrink-0">
+        <div className="bg-surface border border-black/5 rounded-2xl overflow-hidden lg:col-span-2 flex flex-col min-h-[280px]">
+          <div className="px-5 py-3 border-b border-black/5 flex items-center justify-between shrink-0">
             <h3 className="text-sm font-black text-gray-900 uppercase tracking-wider">Recipients</h3>
             <span className="text-sm font-bold text-gray-400">
               {detail.recipients.length > 0
@@ -359,18 +359,18 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
 
   if (!showWhatsAppPreview) {
     return (
-      <div className="flex-1 h-[calc(100vh-64px)] overflow-y-auto bg-slate-50 selection:bg-sky-50">
+      <div className="flex-1 h-[calc(100vh-64px)] overflow-y-auto bg-surface-muted selection:bg-primary/15">
         {mainContent}
       </div>
     );
   }
 
   return (
-    <div className="flex-1 flex flex-col xl:flex-row h-[calc(100vh-64px)] overflow-hidden bg-slate-50 selection:bg-sky-50">
-      <section className="flex-1 flex flex-col min-w-0 min-h-0 overflow-y-auto border-r border-slate-200">
+    <div className="flex-1 flex flex-col xl:flex-row h-[calc(100vh-64px)] overflow-hidden bg-surface-muted selection:bg-primary/15">
+      <section className="flex-1 flex flex-col min-w-0 min-h-0 overflow-y-auto border-r border-black/5">
         {mainContent}
       </section>
-      <section className="w-full xl:w-[380px] shrink-0 p-6 flex flex-col items-center justify-start bg-gray-50/50 overflow-y-auto">
+      <section className="w-full xl:w-[380px] shrink-0 p-6 flex flex-col items-center justify-start bg-surface-muted overflow-y-auto">
         <p className="text-sm font-black text-gray-400 uppercase tracking-widest mb-4">Message sent</p>
         <WhatsAppMessagePreview body={messageBody} />
         {detail.template?.name && (

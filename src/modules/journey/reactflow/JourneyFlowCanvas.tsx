@@ -241,10 +241,11 @@ export function JourneyFlowCanvas({
             className="!rounded-xl !border-slate-200 !shadow-md"
             maskColor="rgba(248, 250, 252, 0.75)"
             nodeColor={(n) => {
-              if (n.type === 'TRIGGER') return '#8b5cf6';
+              if (n.type === 'TRIGGER') return '#064e3b';
               if (n.type === 'END') return '#475569';
-              if (n.type === 'SEND_MESSAGE') return '#10b981';
-              return '#0284c7';
+              if (n.type === 'SEND_MESSAGE') return '#25d366';
+              if (n.type === 'WAIT') return '#d97706';
+              return '#0a5c46';
             }}
           />
         </ReactFlow>

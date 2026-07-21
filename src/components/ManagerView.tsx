@@ -19,11 +19,16 @@ import {
   WhatsAppAccountManager,
   type WhatsAppPhoneAccount,
 } from './integrations/WhatsAppAccountManager';
+import {
+  WhatsAppProfileSideSheet,
+  type WhatsAppProfileTarget,
+} from './integrations/WhatsAppProfileSideSheet';
 
 const CONNECTION_TYPE_STORAGE_KEY = 'convosync_whatsapp_connection_type';
 const BUSINESS_API_ONBOARDING_STEP_KEY = 'convosync_business_api_onboarding_step';
 const COEXISTENCE_ONBOARDING_STEP_KEY = 'convosync_coexistence_onboarding_step';
 const PENDING_SETUP_SESSION_KEY = 'convosync_whatsapp_pending_setup';
+const COEXISTENCE_CONNECTED_KEY = 'convosync_whatsapp_coexistence_connected';
 
 type NumbersFlowView =
   | 'selector'
@@ -75,6 +80,7 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
   const [whatsappAccounts, setWhatsappAccounts] = useState<WhatsAppPhoneAccount[]>([]);
   const [accountsLoading, setAccountsLoading] = useState(true);
   const [connectError, setConnectError] = useState('');
+  const [profileTarget, setProfileTarget] = useState<WhatsAppProfileTarget | null>(null);
   const hasWhatsappNumbers = whatsappAccounts.length > 0;
 
   const loadWhatsappAccounts = (options?: { silent?: boolean }) => {
@@ -91,6 +97,7 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
             phoneNumber?: string;
             displayName?: string;
             label?: string;
+            connectionMode?: string;
           }>;
         }) => {
           const mapped = (data.accounts || []).map((a) => ({
@@ -102,6 +109,7 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
             qosRating: 'Synced',
             status: 'Connected',
             verified: true,
+            connectionMode: a.connectionMode || 'business_api',
           }));
           setWhatsappAccounts(mapped);
           if (mapped.length === 0) {
@@ -163,6 +171,7 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
     // Connect → always land on requirements / instructions page (not Meta popup).
     setConnectionType('app_coexistence');
     localStorage.setItem(CONNECTION_TYPE_STORAGE_KEY, 'app_coexistence');
+    localStorage.setItem(COEXISTENCE_CONNECTED_KEY, '1');
     localStorage.setItem(COEXISTENCE_ONBOARDING_STEP_KEY, '1');
     sessionStorage.removeItem(PENDING_SETUP_SESSION_KEY);
     setAutoLaunchSignup(false);
@@ -317,6 +326,13 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
     if (accounts.length > 0) {
       onAccountsChanged?.();
     }
+    if (
+      data?.connectionMode === 'app_coexistence' ||
+      connectionType === 'app_coexistence' ||
+      lockedMode === 'app_coexistence'
+    ) {
+      localStorage.setItem(COEXISTENCE_CONNECTED_KEY, '1');
+    }
 
     const sub = data?.webhookSubscribe;
     if (sub && (!sub.wabaSubscribed || sub.error)) {
@@ -427,8 +443,23 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
         <WhatsAppAccountManager
           accounts={whatsappAccounts}
           onDisconnect={handleDisconnectWhatsApp}
+          onEditProfile={(account) =>
+            setProfileTarget({
+              phoneNumberId: account.phoneNumberId,
+              phoneNumber: account.phone,
+              displayName: account.label,
+              connectionMode: account.connectionMode,
+            })
+          }
         />
       )}
+
+      <WhatsAppProfileSideSheet
+        open={Boolean(profileTarget)}
+        account={profileTarget}
+        onClose={() => setProfileTarget(null)}
+        onSaved={() => void loadWhatsappAccounts({ silent: true })}
+      />
 
       {showConnectionSelector && variant === 'integrations' && (
         <WhatsappConnectionSelector
@@ -452,7 +483,7 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
           <button
             type="button"
             onClick={() => navigate(pathForTab('integrations'))}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-channel-green hover:bg-[#20bd5a] text-white rounded-xl text-sm font-black shadow-sm transition-all"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary-hover text-white rounded-xl text-sm font-black shadow-sm transition-all"
           >
             Open Integrations
           </button>

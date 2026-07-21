@@ -41,6 +41,58 @@ const VOICE_STT_PROVIDERS: { value: string; label: string }[] = [
   { value: 'deepgram', label: 'Deepgram' },
 ];
 
+const VOICE_TTS_PROVIDERS: { value: string; label: string }[] = [
+  { value: 'cartesia', label: 'Cartesia' },
+  { value: 'openai', label: 'OpenAI' },
+  { value: 'deepgram', label: 'Deepgram' },
+];
+
+/** Curated Cartesia voice IDs (play.cartesia.ai / public docs). API list later. */
+const CARTESIA_TTS_VOICES: { value: string; label: string }[] = [
+  { value: 'db6b0ed5-d5d3-463d-ae85-518a07d3c2b4', label: 'Default (Cartesia)' },
+  { value: 'a0e99841-438c-4a64-b679-ae501e7d6091', label: 'Katie' },
+  { value: '79a125e8-cd45-465c-985b-b9dfbfdb32fe', label: 'British Lady' },
+  { value: 'a167e0f3-df7e-4d52-a9c3-f949145efdab', label: 'Customer Support Man' },
+  { value: '3b554273-4299-48b9-9aaf-eefd438e3941', label: 'Indian Lady' },
+  { value: 'e00d0e4c-a5c8-443f-a8a3-473eb9a62355', label: 'Friendly Sidekick' },
+];
+
+/** OpenAI built-in TTS voices (tts-1 / tts-1-hd subset; gpt-4o-mini-tts adds more). */
+const OPENAI_TTS_VOICES: { value: string; label: string }[] = [
+  { value: 'alloy', label: 'Alloy' },
+  { value: 'ash', label: 'Ash' },
+  { value: 'ballad', label: 'Ballad' },
+  { value: 'coral', label: 'Coral' },
+  { value: 'echo', label: 'Echo' },
+  { value: 'fable', label: 'Fable' },
+  { value: 'onyx', label: 'Onyx' },
+  { value: 'nova', label: 'Nova' },
+  { value: 'sage', label: 'Sage' },
+  { value: 'shimmer', label: 'Shimmer' },
+];
+
+/** Deepgram Aura-2 voices (model id = aura-2-{name}-en). Curated subset; see Deepgram TTS docs. */
+const DEEPGRAM_TTS_VOICES: { value: string; label: string }[] = [
+  { value: 'aura-2-helena-en', label: 'Helena (US, caring)' },
+  { value: 'aura-2-thalia-en', label: 'Thalia (US, energetic)' },
+  { value: 'aura-2-andromeda-en', label: 'Andromeda (US, expressive)' },
+  { value: 'aura-2-apollo-en', label: 'Apollo (US, casual)' },
+  { value: 'aura-2-arcas-en', label: 'Arcas (US, smooth)' },
+  { value: 'aura-2-aries-en', label: 'Aries (US, warm)' },
+  { value: 'aura-2-harmonia-en', label: 'Harmonia (US, customer service)' },
+  { value: 'aura-2-orpheus-en', label: 'Orpheus (US, professional)' },
+  { value: 'aura-2-luna-en', label: 'Luna (US, friendly)' },
+  { value: 'aura-2-electra-en', label: 'Electra (US, engaging)' },
+  { value: 'aura-2-draco-en', label: 'Draco (British)' },
+  { value: 'aura-2-hyperion-en', label: 'Hyperion (Australian)' },
+];
+
+function defaultVoiceForTtsProvider(provider: string): string | null {
+  if (provider === 'openai') return OPENAI_TTS_VOICES[0]?.value || null;
+  if (provider === 'deepgram') return DEEPGRAM_TTS_VOICES[0]?.value || null;
+  return CARTESIA_TTS_VOICES[0]?.value || null;
+}
+
 function profilesEqual(a: AgentProfileData, b: AgentProfileData): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
 }
@@ -154,7 +206,7 @@ export const AgentProfile: React.FC<Props> = ({
               <span
                 className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ${
                   local.isPublished
-                    ? 'bg-emerald-50 text-emerald-700'
+                    ? 'bg-primary/10 text-primary'
                     : 'bg-amber-50 text-amber-700'
                 }`}
               >
@@ -164,18 +216,18 @@ export const AgentProfile: React.FC<Props> = ({
                 type="button"
                 disabled={saving}
                 onClick={() => setShowPublishConfirm(true)}
-                className="inline-flex items-center rounded-xl bg-channel-green px-4 py-2 text-sm font-bold text-white hover:bg-[#20bd5a] disabled:opacity-60"
+                className="inline-flex items-center rounded-xl bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-hover disabled:opacity-60"
               >
                 {local.isPublished ? 'Republish' : 'Publish'}
               </button>
             </div>
           </div>
 
-          <section className="bg-white border border-[#E5E7EB] rounded-xl p-5 relative">
+          <section className="bg-surface border border-black/5 rounded-xl p-5 relative">
             <button
               type="button"
               onClick={() => setShowEdit(true)}
-              className="absolute top-4 right-4 inline-flex items-center gap-1.5 text-sm font-bold text-[#6B7280] hover:text-sky-600 transition-colors"
+              className="absolute top-4 right-4 inline-flex items-center gap-1.5 text-sm font-bold text-[#6B7280] hover:text-primary transition-colors"
             >
               <Pencil className="w-4 h-4" />
               Edit
@@ -191,14 +243,14 @@ export const AgentProfile: React.FC<Props> = ({
                   <img
                     src={local.avatarUrl}
                     alt=""
-                    className="w-16 h-16 rounded-full object-cover border border-[#E5E7EB]"
+                    className="w-16 h-16 rounded-full object-cover border border-black/5"
                   />
                 ) : (
-                  <div className="w-16 h-16 rounded-full bg-[#F3F0FF] text-sky-600 flex items-center justify-center border border-[#E5E7EB]">
+                  <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center border border-black/5">
                     <Bot className="w-8 h-8" />
                   </div>
                 )}
-                <span className="absolute inset-0 flex items-center justify-center rounded-full bg-black/0 text-white opacity-0 transition-opacity group-hover:bg-black/40 group-hover:opacity-100 text-[10px] font-bold">
+                <span className="absolute inset-0 flex items-center justify-center rounded-full bg-black/0 text-white opacity-0 transition-opacity group-hover:bg-primary-hover/40 group-hover:opacity-100 text-[10px] font-bold">
                   Edit
                 </span>
               </button>
@@ -209,7 +261,7 @@ export const AgentProfile: React.FC<Props> = ({
             </div>
           </section>
 
-          <section className="bg-white border border-[#E5E7EB] rounded-xl p-5">
+          <section className="bg-surface border border-black/5 rounded-xl p-5">
             <p className="text-sm font-medium text-[#111827] mb-3">Tone of voice</p>
             <div className="flex flex-wrap gap-2">
               {TONE_OPTIONS.map((opt) => {
@@ -221,8 +273,8 @@ export const AgentProfile: React.FC<Props> = ({
                     onClick={() => patchLocal({ toneOfVoice: opt.id })}
                     className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold border transition-colors ${
                       selected
-                        ? 'border-[#0284c7] bg-[#F3F0FF] text-sky-600'
-                        : 'border-[#E5E7EB] bg-white text-[#6B7280] hover:border-[#D1D5DB]'
+                        ? 'border-primary/30 bg-primary/10 text-primary'
+                        : 'border-black/5 bg-surface text-[#6B7280] hover:border-black/10'
                     }`}
                   >
                     {TONE_ICONS[opt.id]}
@@ -233,7 +285,7 @@ export const AgentProfile: React.FC<Props> = ({
             </div>
           </section>
 
-          <section className="bg-white border border-[#E5E7EB] rounded-xl p-5">
+          <section className="bg-surface border border-black/5 rounded-xl p-5">
             <div className="flex items-center gap-2 mb-2">
               <label className="text-sm font-medium text-[#111827]">Fallback language</label>
               <InfoTooltip text="Language used when AI cannot detect user's language" />
@@ -246,7 +298,7 @@ export const AgentProfile: React.FC<Props> = ({
                     fallbackLanguage: e.target.value as AgentProfileData['fallbackLanguage'],
                   })
                 }
-                className="w-full appearance-none border border-[#E5E7EB] rounded-lg py-2.5 pl-3 pr-9 text-sm text-[#111827] focus:ring-2 focus:ring-[#0284c7]/20 focus:border-[#0284c7] outline-none bg-white"
+                className="w-full appearance-none border border-black/5 rounded-lg py-2.5 pl-3 pr-9 text-sm text-[#111827] focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none bg-surface"
               >
                 {(Object.keys(LANGUAGE_LABELS) as Array<keyof typeof LANGUAGE_LABELS>).map(
                   (key) => (
@@ -260,7 +312,7 @@ export const AgentProfile: React.FC<Props> = ({
             </div>
           </section>
 
-          <section className="bg-white border border-[#E5E7EB] rounded-xl p-5 space-y-3">
+          <section className="bg-surface border border-black/5 rounded-xl p-5 space-y-3">
             <div className="flex items-center gap-2">
               <label className="text-sm font-medium text-[#111827]">Instructions</label>
               <InfoTooltip text="Main instructions that define how your AI Agent behaves in all conversations" />
@@ -272,7 +324,7 @@ export const AgentProfile: React.FC<Props> = ({
                 onChange={(e) => patchLocal({ instructions: e.target.value.slice(0, 5000) })}
                 placeholder={INSTRUCTIONS_PLACEHOLDER}
                 rows={10}
-                className="w-full border border-[#E5E7EB] rounded-lg py-3 px-3 text-sm resize-y min-h-[200px] max-h-[400px] focus:ring-2 focus:ring-[#0284c7]/20 focus:border-[#0284c7] outline-none"
+                className="w-full border border-black/5 rounded-lg py-3 px-3 text-sm resize-y min-h-[200px] max-h-[400px] focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
               />
               <span className="absolute bottom-3 right-3 text-xs text-[#6B7280]">
                 {local.instructions.length}/5000
@@ -314,7 +366,9 @@ export const AgentProfile: React.FC<Props> = ({
             </button>
             {actionsOpen && (
               <div className="space-y-4">
-                <div className="bg-white border border-[#E5E7EB] rounded-xl p-5">
+                {/* ponytail: voice/call agent UI parked — set true to show again */}
+                {false && (
+                <div className="bg-surface border border-black/5 rounded-xl p-5">
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <h4 className="text-sm font-bold text-[#111827]">Answer calls with AI Agent</h4>
@@ -332,7 +386,7 @@ export const AgentProfile: React.FC<Props> = ({
                         patchLocal({ voiceAgentEnabled: !local.voiceAgentEnabled })
                       }
                       className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${
-                        local.voiceAgentEnabled ? 'bg-channel-green' : 'bg-[#D1D5DB]'
+                        local.voiceAgentEnabled ? 'bg-primary' : 'bg-[#D1D5DB]'
                       }`}
                     >
                       <span
@@ -343,28 +397,135 @@ export const AgentProfile: React.FC<Props> = ({
                     </button>
                   </div>
                   {local.voiceAgentEnabled && (
-                    <div className="mt-4 pt-4 border-t border-[#E5E7EB]">
-                      <label
-                        htmlFor="voice-stt-provider"
-                        className="block text-sm font-medium text-[#111827] mb-1.5"
-                      >
-                        Speech-to-Text provider
-                      </label>
-                      <select
-                        id="voice-stt-provider"
-                        value={local.voiceSttProvider || VOICE_STT_PROVIDERS[0]?.value}
-                        onChange={(e) => patchLocal({ voiceSttProvider: e.target.value })}
-                        className="w-full max-w-xs rounded-lg border border-[#E5E7EB] bg-white px-3 py-2 text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-channel-green/30"
-                      >
-                        {VOICE_STT_PROVIDERS.map((opt) => (
-                          <option key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </option>
-                        ))}
-                      </select>
+                    <div className="mt-4 pt-4 border-t border-black/5 space-y-4">
+                      <div>
+                        <label
+                          htmlFor="voice-stt-provider"
+                          className="block text-sm font-medium text-[#111827] mb-1.5"
+                        >
+                          Speech-to-Text provider
+                        </label>
+                        <select
+                          id="voice-stt-provider"
+                          value={local.voiceSttProvider || VOICE_STT_PROVIDERS[0]?.value}
+                          onChange={(e) => patchLocal({ voiceSttProvider: e.target.value })}
+                          className="w-full max-w-xs rounded-lg border border-black/5 bg-surface px-3 py-2 text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/30"
+                        >
+                          {VOICE_STT_PROVIDERS.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="voice-tts-provider"
+                          className="block text-sm font-medium text-[#111827] mb-1.5"
+                        >
+                          Text-to-Speech provider
+                        </label>
+                        <select
+                          id="voice-tts-provider"
+                          value={local.voiceTtsProvider || VOICE_TTS_PROVIDERS[0]?.value}
+                          onChange={(e) => {
+                            const provider = e.target.value;
+                            patchLocal({
+                              voiceTtsProvider: provider,
+                              voiceTtsVoiceId: defaultVoiceForTtsProvider(provider),
+                            });
+                          }}
+                          className="w-full max-w-xs rounded-lg border border-black/5 bg-surface px-3 py-2 text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/30"
+                        >
+                          {VOICE_TTS_PROVIDERS.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      {(local.voiceTtsProvider || 'cartesia') === 'cartesia' && (
+                        <div>
+                          <label
+                            htmlFor="voice-tts-voice-id"
+                            className="block text-sm font-medium text-[#111827] mb-1.5"
+                          >
+                            Cartesia voice
+                          </label>
+                          <select
+                            id="voice-tts-voice-id"
+                            value={
+                              local.voiceTtsVoiceId || CARTESIA_TTS_VOICES[0]?.value || ''
+                            }
+                            onChange={(e) =>
+                              patchLocal({ voiceTtsVoiceId: e.target.value || null })
+                            }
+                            className="w-full max-w-xs rounded-lg border border-black/5 bg-surface px-3 py-2 text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/30"
+                          >
+                            {CARTESIA_TTS_VOICES.map((opt) => (
+                              <option key={opt.value} value={opt.value}>
+                                {opt.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
+                      {(local.voiceTtsProvider || 'cartesia') === 'openai' && (
+                        <div>
+                          <label
+                            htmlFor="voice-tts-voice-id-openai"
+                            className="block text-sm font-medium text-[#111827] mb-1.5"
+                          >
+                            OpenAI voice
+                          </label>
+                          <select
+                            id="voice-tts-voice-id-openai"
+                            value={
+                              local.voiceTtsVoiceId || OPENAI_TTS_VOICES[0]?.value || ''
+                            }
+                            onChange={(e) =>
+                              patchLocal({ voiceTtsVoiceId: e.target.value || null })
+                            }
+                            className="w-full max-w-xs rounded-lg border border-black/5 bg-surface px-3 py-2 text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/30"
+                          >
+                            {OPENAI_TTS_VOICES.map((opt) => (
+                              <option key={opt.value} value={opt.value}>
+                                {opt.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
+                      {(local.voiceTtsProvider || 'cartesia') === 'deepgram' && (
+                        <div>
+                          <label
+                            htmlFor="voice-tts-voice-id-deepgram"
+                            className="block text-sm font-medium text-[#111827] mb-1.5"
+                          >
+                            Deepgram Aura voice
+                          </label>
+                          <select
+                            id="voice-tts-voice-id-deepgram"
+                            value={
+                              local.voiceTtsVoiceId || DEEPGRAM_TTS_VOICES[0]?.value || ''
+                            }
+                            onChange={(e) =>
+                              patchLocal({ voiceTtsVoiceId: e.target.value || null })
+                            }
+                            className="w-full max-w-xs rounded-lg border border-black/5 bg-surface px-3 py-2 text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/30"
+                          >
+                            {DEEPGRAM_TTS_VOICES.map((opt) => (
+                              <option key={opt.value} value={opt.value}>
+                                {opt.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
+                )}
                 {actions.map((action) => (
                   <ActionCard
                     key={action.type}
@@ -380,7 +541,7 @@ export const AgentProfile: React.FC<Props> = ({
               </div>
             )}          </section>
 
-          <section className="bg-white border border-[#E5E7EB] rounded-xl p-5">
+          <section className="bg-surface border border-black/5 rounded-xl p-5">
             <label className="block text-sm font-medium text-[#111827] mb-2">
               Brand&apos;s background <span className="text-[#6B7280] font-normal">(Optional)</span>
             </label>
@@ -390,7 +551,7 @@ export const AgentProfile: React.FC<Props> = ({
                 onChange={(e) => patchLocal({ brandBackground: e.target.value.slice(0, 1200) })}
                 placeholder="Enter brand information"
                 rows={5}
-                className="w-full border border-[#E5E7EB] rounded-xl py-3 px-3 text-sm resize-none focus:ring-2 focus:ring-[#0284c7]/20 focus:border-[#0284c7] outline-none"
+                className="w-full border border-black/5 rounded-xl py-3 px-3 text-sm resize-none focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
               />
               <span className="absolute bottom-3 right-3 text-xs text-[#6B7280]">
                 {local.brandBackground.length}/1200
@@ -402,7 +563,15 @@ export const AgentProfile: React.FC<Props> = ({
           </section>
         </div>
 
-        <ChatPreviewPanel agentId={local.id} avatarUrl={local.avatarUrl} />
+        <ChatPreviewPanel
+          agentId={local.id}
+          agentName={local.name}
+          avatarUrl={local.avatarUrl}
+          welcomeMessage={
+            local.welcomeMessageEnabled ? local.welcomeMessageText : null
+          }
+          language={local.fallbackLanguage}
+        />
       </div>
 
       {toast && (
@@ -413,7 +582,7 @@ export const AgentProfile: React.FC<Props> = ({
 
       {showPublishConfirm && (
         <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-md border border-[#E5E7EB] shadow-2xl p-6">
+          <div className="bg-surface rounded-2xl w-full max-w-md border border-black/5 shadow-2xl p-6">
             <h3 className="text-base font-bold text-[#111827]">Publish agent?</h3>
             <p className="text-sm text-[#6B7280] mt-2">
               Are you sure you want to publish this agent? It will start responding to real
@@ -431,7 +600,7 @@ export const AgentProfile: React.FC<Props> = ({
                 type="button"
                 disabled={saving}
                 onClick={() => void handlePublish()}
-                className="px-4 py-2 bg-channel-green hover:bg-[#20bd5a] disabled:opacity-60 text-white rounded-xl text-sm font-bold"
+                className="px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-60 text-white rounded-xl text-sm font-bold"
               >
                 Publish
               </button>

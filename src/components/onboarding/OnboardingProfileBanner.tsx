@@ -46,7 +46,7 @@ export function OnboardingProfileBanner() {
   if (!visible) return null;
 
   return (
-    <div className="mb-6 overflow-hidden rounded-2xl border border-primary/15 bg-gradient-to-r from-sky-50 to-white p-4 md:p-5">
+    <div className="mb-6 overflow-hidden rounded-2xl border border-primary/15 bg-gradient-to-r from-[#e8f0ec] to-surface p-4 md:p-5">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex items-start gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -68,7 +68,7 @@ export function OnboardingProfileBanner() {
         <button
           type="button"
           onClick={() => navigate('/onboarding')}
-          className="inline-flex items-center justify-center gap-1.5 self-start rounded-full bg-channel-green px-4 py-2 text-sm font-bold text-white hover:bg-[#20bd5a] md:self-center"
+          className="inline-flex items-center justify-center gap-1.5 self-start rounded-xl bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-hover md:self-center"
         >
           Continue setup
           <ArrowRight className="h-3.5 w-3.5" />

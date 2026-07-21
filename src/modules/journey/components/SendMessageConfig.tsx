@@ -211,7 +211,7 @@ export function SendMessageConfig({ local, patch, patchMany }: Props) {
                           onClick={() => selectTemplate(t)}
                           className={`w-full text-left rounded-lg px-2.5 py-2 transition-colors ${
                             active
-                              ? 'bg-sky-50 border border-primary/25'
+                              ? 'bg-primary/10 border border-primary/25'
                               : 'hover:bg-white border border-transparent'
                           }`}
                         >

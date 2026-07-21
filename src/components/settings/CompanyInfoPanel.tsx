@@ -169,7 +169,7 @@ export function CompanyInfoPanel() {
 
   return (
     <form onSubmit={handleSave} className="max-w-3xl">
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+      <div className="bg-surface rounded-2xl border border-black/5 p-6 shadow-sm">
         <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2 mb-1">
           <Building2 className="w-4 h-4 text-primary" />
           Company profile
@@ -368,7 +368,7 @@ export function CompanyInfoPanel() {
           <button
             type="submit"
             disabled={saving}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white text-sm font-bold hover:bg-[#20bd5a] disabled:opacity-60"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white text-sm font-bold hover:bg-primary-hover disabled:opacity-60"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             Save changes

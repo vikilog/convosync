@@ -367,6 +367,8 @@ export interface AgentBot {
   actions?: AgentActionConfig[];
   voiceAgentEnabled?: boolean;
   voiceSttProvider?: string;
+  voiceTtsProvider?: string;
+  voiceTtsVoiceId?: string | null;
   isPublished?: boolean;
   publishedAt?: string | null;
   conversationsCount: number;
@@ -1161,9 +1163,9 @@ export const CAMPAIGN_CHANNELS: ChannelConfig[] = [
     id: 'email',
     name: 'Email',
     icon: 'mail',
-    color: '#0284c7',
-    bgColor: '#EEEDFE',
-    borderColor: '#C4B9FA',
+    color: '#064e3b',
+    bgColor: '#e8f0ec',
+    borderColor: '#a7c4b8',
     description: 'Send rich HTML email campaigns with subject lines and custom content.',
     limit: 'Unlimited volume',
     available: true,

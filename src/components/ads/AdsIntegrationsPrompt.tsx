@@ -6,7 +6,7 @@ import { GoogleIcon } from './GoogleIcon';
 
 export const AdsIntegrationsPrompt: React.FC = () => (
   <div className="flex-1 max-w-2xl mx-auto pb-12">
-    <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center">
+    <div className="bg-surface border border-black/5 rounded-2xl p-8 text-center">
       <div className="mx-auto w-14 h-14 rounded-2xl bg-sky-50 border border-sky-100 flex items-center justify-center mb-4">
         <Plug className="w-7 h-7 text-sky-600" />
       </div>

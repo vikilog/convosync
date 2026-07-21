@@ -68,6 +68,7 @@ export default function Footer({ onNavigate }: FooterProps) {
                 { label: 'Campaign Broadcasts', section: 'features' },
                 { label: 'Journey Automation', section: 'features' },
                 { label: 'Analytics & Reports', section: 'features' },
+                { label: 'Book a demo', section: 'book-demo' },
               ].map((item) => (
                 <li key={item.label}>
                   <button type="button" onClick={() => onNavigate(item.section)} className={linkClass}>

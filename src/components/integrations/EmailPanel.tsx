@@ -392,7 +392,7 @@ export function EmailPanel() {
               <Loader2 className="w-6 h-6 animate-spin" />
             </div>
           ) : sharedSenders[0] ? (
-            <div className="bg-white rounded-2xl border border-slate-200 p-4">
+            <div className="bg-surface rounded-2xl border border-black/5 p-4">
               <h4 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
                 <Globe className="w-4 h-4 text-primary" />
                 Your domain
@@ -439,7 +439,7 @@ export function EmailPanel() {
 
 
           {customSenders.length > 0 && (
-            <div className="bg-white rounded-2xl border border-slate-200 p-4">
+            <div className="bg-surface rounded-2xl border border-black/5 p-4">
               <h4 className="text-sm font-bold text-gray-900 mb-3">Your senders</h4>
               <ul className="space-y-2">
                 {customSenders.map((s) => (
@@ -474,7 +474,7 @@ export function EmailPanel() {
             </div>
           )}
 
-          <div className="bg-white rounded-2xl border border-slate-200 p-4 space-y-3">
+          <div className="bg-surface rounded-2xl border border-black/5 p-4 space-y-3">
             <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
               <Send className="w-4 h-4 text-primary" />
               Send test email
@@ -489,7 +489,7 @@ export function EmailPanel() {
               type="button"
               disabled={saving || !testSend.to.trim()}
               onClick={() => void handleTestSend()}
-              className="px-4 py-2 rounded-lg bg-channel-green hover:bg-[#20bd5a] text-white text-sm font-bold disabled:opacity-50"
+              className="px-4 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-sm font-bold disabled:opacity-50"
             >
               Send test
             </button>
@@ -499,7 +499,7 @@ export function EmailPanel() {
 
       {tab === 'providers' && (
         <div className="space-y-4">
-          <div className="bg-white rounded-2xl border border-slate-200 p-4">
+          <div className="bg-surface rounded-2xl border border-black/5 p-4">
             <div className="flex items-center justify-between gap-2 mb-3">
               <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
                 <Settings className="w-4 h-4 text-primary" />
@@ -515,7 +515,7 @@ export function EmailPanel() {
                       provider: availableProviderTypes[0] ?? 'RESEND',
                     }));
                   }}
-                  className="px-3 py-1.5 rounded-full bg-channel-green text-white text-sm font-bold inline-flex items-center gap-1"
+                  className="px-3 py-1.5 rounded-full bg-primary hover:bg-primary-hover text-white text-sm font-bold inline-flex items-center gap-1"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   Add provider
@@ -712,7 +712,7 @@ export function EmailPanel() {
                             type="button"
                             disabled={saving}
                             onClick={() => void handleUpdateProvider(p.id)}
-                            className="px-3 py-1.5 rounded-full bg-channel-green text-white text-sm font-bold disabled:opacity-50"
+                            className="px-3 py-1.5 rounded-full bg-primary hover:bg-primary-hover text-white text-sm font-bold disabled:opacity-50"
                           >
                             Save
                           </button>
@@ -733,7 +733,7 @@ export function EmailPanel() {
           </div>
 
           {showAddProvider && (
-            <div className="bg-white rounded-2xl border border-slate-200 p-4 space-y-3">
+            <div className="bg-surface rounded-2xl border border-black/5 p-4 space-y-3">
               <h4 className="text-sm font-bold text-gray-900">Add provider</h4>
               <select
                 value={providerForm.provider}
@@ -852,7 +852,7 @@ export function EmailPanel() {
                   type="button"
                   disabled={saving}
                   onClick={() => void handleCreateProvider()}
-                  className="px-4 py-2 rounded-full bg-channel-green text-white text-sm font-bold disabled:opacity-50"
+                  className="px-4 py-2 rounded-full bg-primary hover:bg-primary-hover text-white text-sm font-bold disabled:opacity-50"
                 >
                   Add provider
                 </button>
@@ -870,7 +870,7 @@ export function EmailPanel() {
       )}
 
       {tab === 'logs' && (
-        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+        <div className="bg-surface rounded-2xl border border-black/5 overflow-hidden">
           {logs.length === 0 ? (
             <p className="text-xs text-gray-500 text-center py-10">No emails sent yet.</p>
           ) : (

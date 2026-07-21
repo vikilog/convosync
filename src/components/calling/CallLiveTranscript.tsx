@@ -2,22 +2,73 @@
  * Live subtitle panel for AI-handled calls (Socket.IO call_transcript_chunk).
  */
 import { useEffect, useRef, useState } from 'react';
-import { Bot, User } from 'lucide-react';
 import { connectSocket, getSocket } from '../../lib/socket';
 import { getWorkspaceId } from '../../lib/api';
+import { CallAvatar } from './CallAvatar';
+
+export type TranscriptTurnLatency = {
+  sttMs?: number;
+  llmMs?: number;
+  ttsMs?: number;
+  totalMs?: number;
+};
 
 export type LiveTranscriptTurn = {
   role: 'customer' | 'agent';
   text: string;
   at: string;
+  turnId?: string;
+  latency?: TranscriptTurnLatency;
 };
 
 type Props = {
   callId: string;
   className?: string;
+  agentAvatarUrl?: string | null;
+  agentName?: string | null;
+  contactAvatarUrl?: string | null;
+  contactName?: string | null;
 };
 
-export function CallLiveTranscript({ callId, className = '' }: Props) {
+function formatTurnTime(at: string): string {
+  try {
+    return new Date(at).toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    });
+  } catch {
+    return '';
+  }
+}
+
+function LatencyBadges({ latency, role }: { latency?: TranscriptTurnLatency; role: 'customer' | 'agent' }) {
+  if (!latency) return null;
+  const items: string[] = [];
+  if (role === 'customer' && latency.sttMs != null) items.push(`STT ${latency.sttMs}ms`);
+  if (role === 'agent') {
+    if (latency.llmMs != null) items.push(`LLM ${latency.llmMs}ms`);
+    if (latency.ttsMs != null) items.push(`TTS ${latency.ttsMs}ms`);
+    if (latency.totalMs != null) items.push(`Total ${latency.totalMs}ms`);
+  }
+  if (items.length === 0) return null;
+  return (
+    <p className="mt-1 flex flex-wrap gap-x-2 gap-y-0.5 text-[10px] font-medium text-slate-400">
+      {items.map((item) => (
+        <span key={item}>{item}</span>
+      ))}
+    </p>
+  );
+}
+
+export function CallLiveTranscript({
+  callId,
+  className = '',
+  agentAvatarUrl,
+  agentName,
+  contactAvatarUrl,
+  contactName,
+}: Props) {
   const [turns, setTurns] = useState<LiveTranscriptTurn[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -31,16 +82,37 @@ export function CallLiveTranscript({ callId, className = '' }: Props) {
       role?: string;
       text?: string;
       at?: string;
+      turnId?: string;
+      latency?: TranscriptTurnLatency;
+      patch?: boolean;
     }) => {
       if (payload?.callId !== callId) return;
       const text = (payload.text || '').trim();
       if (!text) return;
       const role: 'customer' | 'agent' =
         payload.role === 'agent' || payload.role === 'assistant' ? 'agent' : 'customer';
-      setTurns((prev) => [
-        ...prev,
-        { role, text, at: payload.at || new Date().toISOString() },
-      ]);
+      const turn: LiveTranscriptTurn = {
+        role,
+        text,
+        at: payload.at || new Date().toISOString(),
+        turnId: payload.turnId,
+        latency: payload.latency,
+      };
+
+      setTurns((prev) => {
+        if (payload.patch && payload.turnId) {
+          const idx = prev.findIndex((t) => t.turnId === payload.turnId);
+          if (idx >= 0) {
+            const next = [...prev];
+            next[idx] = {
+              ...next[idx],
+              latency: { ...next[idx].latency, ...payload.latency },
+            };
+            return next;
+          }
+        }
+        return [...prev, turn];
+      });
     };
 
     socket.on('call_transcript_chunk', onChunk);
@@ -69,25 +141,30 @@ export function CallLiveTranscript({ callId, className = '' }: Props) {
     >
       {turns.map((t, i) => (
         <div
-          key={`${t.at}-${i}`}
+          key={t.turnId || `${t.at}-${i}`}
           className={`flex gap-2 text-sm ${t.role === 'agent' ? 'flex-row-reverse text-right' : ''}`}
         >
-          <span
-            className={`mt-0.5 shrink-0 h-6 w-6 rounded-full flex items-center justify-center ${
-              t.role === 'agent' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'
-            }`}
-          >
-            {t.role === 'agent' ? <Bot className="h-3.5 w-3.5" /> : <User className="h-3.5 w-3.5" />}
-          </span>
-          <p
-            className={`rounded-lg px-2.5 py-1.5 max-w-[85%] ${
-              t.role === 'agent'
-                ? 'bg-emerald-50 text-emerald-950'
-                : 'bg-white text-slate-800 border border-slate-100'
-            }`}
-          >
-            {t.text}
-          </p>
+          <CallAvatar
+            size="sm"
+            kind={t.role === 'agent' ? 'agent' : 'customer'}
+            name={t.role === 'agent' ? agentName : contactName}
+            avatarUrl={t.role === 'agent' ? agentAvatarUrl : contactAvatarUrl}
+            fallbackIcon={t.role === 'agent' ? 'bot' : 'user'}
+            className="mt-0.5"
+          />
+          <div className={`max-w-[85%] ${t.role === 'agent' ? 'items-end' : ''}`}>
+            <p className="text-[10px] font-medium text-slate-400 mb-0.5">{formatTurnTime(t.at)}</p>
+            <p
+              className={`rounded-lg px-2.5 py-1.5 ${
+                t.role === 'agent'
+                  ? 'bg-emerald-50 text-emerald-950'
+                  : 'bg-white text-slate-800 border border-slate-100'
+              }`}
+            >
+              {t.text}
+            </p>
+            <LatencyBadges latency={t.latency} role={t.role} />
+          </div>
         </div>
       ))}
       <div ref={bottomRef} />

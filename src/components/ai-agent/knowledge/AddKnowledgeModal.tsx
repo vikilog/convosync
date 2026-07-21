@@ -122,8 +122,8 @@ export const AddKnowledgeModal: React.FC<Props> = ({
 
   return (
     <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-2xl border border-[#E5E7EB] shadow-2xl max-h-[90vh] flex flex-col">
-        <div className="flex justify-between items-center px-6 py-4 border-b border-[#E5E7EB] shrink-0">
+      <div className="bg-surface rounded-2xl w-full max-w-2xl border border-black/5 shadow-2xl max-h-[90vh] flex flex-col">
+        <div className="flex justify-between items-center px-6 py-4 border-b border-black/5 shrink-0">
           <h3 className="text-base font-bold text-[#111827]">Add knowledge</h3>
           <button type="button" onClick={onClose} className="text-[#6B7280] hover:text-[#111827]">
             <X className="w-5 h-5" />
@@ -140,12 +140,12 @@ export const AddKnowledgeModal: React.FC<Props> = ({
                   onClick={() => setSelected(opt.id)}
                   className={`text-left p-5 rounded-xl border-2 transition-colors ${
                     selected === opt.id
-                      ? 'border-[#0284c7] bg-[#F3F0FF]'
-                      : 'border-[#E5E7EB] hover:border-[#0284c7] hover:bg-[#F3F0FF]/50'
+                      ? 'border-primary bg-primary/10'
+                      : 'border-black/5 hover:border-primary hover:bg-primary/5'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2 mb-3">
-                    <div className="p-2 rounded-lg bg-[#F3F0FF] text-sky-600">{opt.icon}</div>
+                    <div className="p-2 rounded-lg bg-primary/10 text-primary">{opt.icon}</div>
                     {opt.badge && (
                       <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-green-100 text-green-700">
                         {opt.badge}
@@ -173,7 +173,7 @@ export const AddKnowledgeModal: React.FC<Props> = ({
         </div>
 
         {showFooter && (
-          <div className="flex justify-between items-center px-6 py-4 border-t border-[#E5E7EB] shrink-0">
+          <div className="flex justify-between items-center px-6 py-4 border-t border-black/5 shrink-0">
             {step === 'form' ? (
               <button
                 type="button"
@@ -195,7 +195,7 @@ export const AddKnowledgeModal: React.FC<Props> = ({
                   handleSubmit();
                 }
               }}
-              className="px-6 py-2.5 bg-channel-green hover:bg-[#20bd5a] disabled:opacity-50 text-white rounded-xl text-sm font-bold"
+              className="px-6 py-2.5 bg-primary hover:bg-primary-hover disabled:opacity-50 text-white rounded-xl text-sm font-bold"
             >
               {step === 'select' ? 'Next' : submitting ? 'Adding…' : 'Add knowledge'}
             </button>

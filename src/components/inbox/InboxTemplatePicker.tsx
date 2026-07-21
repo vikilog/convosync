@@ -193,13 +193,13 @@ export const InboxTemplatePicker: React.FC<Props> = ({
           <motion.div
             role="dialog"
             aria-labelledby="inbox-template-picker-title"
-            className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden border border-slate-200"
+            className="bg-surface rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden border border-black/5"
             initial={{ scale: 0.96, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.96, opacity: 0 }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-black/5">
               <div>
                 <h2 id="inbox-template-picker-title" className="text-sm font-black text-gray-900">
                   WhatsApp templates
@@ -237,8 +237,8 @@ export const InboxTemplatePicker: React.FC<Props> = ({
               </p>
             ) : (
               <div className="flex flex-1 min-h-0 flex-col md:flex-row">
-                <div className="md:w-[280px] border-b md:border-b-0 md:border-r border-slate-200 flex flex-col min-h-0">
-                  <div className="p-3 border-b border-slate-200">
+                <div className="md:w-[280px] border-b md:border-b-0 md:border-r border-black/5 flex flex-col min-h-0">
+                  <div className="p-3 border-b border-black/5">
                     <div className="relative">
                       <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
                       <input
@@ -246,7 +246,7 @@ export const InboxTemplatePicker: React.FC<Props> = ({
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Search templates…"
-                        className="w-full pl-8 pr-3 py-2 text-xs border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-100 focus:border-channel-green outline-none"
+                        className="w-full pl-8 pr-3 py-2 text-xs border border-black/5 rounded-lg focus:ring-2 focus:ring-emerald-100 focus:border-channel-green outline-none"
                       />
                     </div>
                   </div>
@@ -283,7 +283,7 @@ export const InboxTemplatePicker: React.FC<Props> = ({
                 <div className="flex-1 flex flex-col min-h-0 overflow-y-auto">
                   {selected ? (
                     <>
-                      <div className="p-4 border-b border-slate-200 grid md:grid-cols-2 gap-4">
+                      <div className="p-4 border-b border-black/5 grid md:grid-cols-2 gap-4">
                         <div className="space-y-3">
                           <div>
                             <p className="text-sm font-bold text-gray-400 uppercase tracking-wide">
@@ -317,7 +317,7 @@ export const InboxTemplatePicker: React.FC<Props> = ({
                                   e.target.value = '';
                                 }}
                               />
-                              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-2">
+                              <div className="rounded-xl border border-black/5 bg-slate-50 p-3 space-y-2">
                                 {headerFormat === 'image' && headerMediaPreviewUrl ? (
                                   <img
                                     src={headerMediaPreviewUrl}
@@ -351,7 +351,7 @@ export const InboxTemplatePicker: React.FC<Props> = ({
                                   <button
                                     type="button"
                                     onClick={() => headerMediaInputRef.current?.click()}
-                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-sky-700 bg-white border border-sky-200 rounded-lg hover:bg-sky-50"
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-sky-700 bg-surface border border-sky-200 rounded-lg hover:bg-sky-50"
                                   >
                                     <Upload className="w-3.5 h-3.5" />
                                     {headerMediaFile ? 'Change media' : 'Upload media'}
@@ -360,7 +360,7 @@ export const InboxTemplatePicker: React.FC<Props> = ({
                                     <button
                                       type="button"
                                       onClick={() => handleHeaderMediaChange(null)}
-                                      className="px-3 py-1.5 text-xs font-bold text-gray-600 bg-white border border-slate-200 rounded-lg hover:bg-gray-50"
+                                      className="px-3 py-1.5 text-xs font-bold text-gray-600 bg-surface border border-black/5 rounded-lg hover:bg-gray-50"
                                     >
                                       Use template sample
                                     </button>
@@ -396,7 +396,7 @@ export const InboxTemplatePicker: React.FC<Props> = ({
                                           return next;
                                         });
                                       }}
-                                      className="mt-1 w-full text-xs border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-100 focus:border-channel-green outline-none"
+                                      className="mt-1 w-full text-xs border border-black/5 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-100 focus:border-channel-green outline-none"
                                       placeholder={`Value for {{${i + 1}}}`}
                                     />
                                   </label>
@@ -430,11 +430,11 @@ export const InboxTemplatePicker: React.FC<Props> = ({
                           />
                         </div>
                       </div>
-                      <div className="p-4 border-t border-slate-200 flex justify-end gap-2">
+                      <div className="p-4 border-t border-black/5 flex justify-end gap-2">
                         <button
                           type="button"
                           onClick={onClose}
-                          className="px-4 py-2 text-sm font-bold text-gray-600 rounded-lg border border-slate-200 hover:bg-gray-50"
+                          className="px-4 py-2 text-sm font-bold text-gray-600 rounded-lg border border-black/5 hover:bg-gray-50"
                         >
                           Cancel
                         </button>

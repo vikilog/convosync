@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Workflow } from 'lucide-react';
+import { X } from 'lucide-react';
 import { motion } from 'motion/react';
 import type { AgentType } from '../../components/ai-agent/types';
 import { CATEGORY_LABELS } from '../../components/ai-agent/types';
@@ -27,11 +27,11 @@ export const CreateAgentModal: React.FC<Props> = ({
       initial={{ scale: 0.96, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       exit={{ scale: 0.96, opacity: 0 }}
-      className="bg-white rounded-2xl w-full max-w-md border border-[#E5E7EB] p-6 shadow-2xl"
+      className="bg-surface rounded-2xl w-full max-w-md border border-black/5 p-6 shadow-2xl"
     >
       <div className="flex justify-between items-start pb-4 border-b border-gray-100">
         <div>
-          <p className="text-sm font-black uppercase tracking-wider text-sky-600 mb-1">
+          <p className="text-sm font-black uppercase tracking-wider text-primary mb-1">
             {CATEGORY_LABELS[category]}
           </p>
           <h4 className="font-bold text-[#111827] text-sm">Name your agent</h4>
@@ -56,23 +56,14 @@ export const CreateAgentModal: React.FC<Props> = ({
             value={name}
             onChange={(e) => onNameChange(e.target.value)}
             placeholder="e.g. Support Bot"
-            className="w-full bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-[#0284c7]/20 focus:border-[#0284c7] outline-none"
+            className="w-full bg-surface-muted border border-black/5 rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
           />
         </div>
-
-        {category === 'rule_based' && (
-          <div className="flex items-start gap-2 p-3 bg-blue-50 border border-blue-100 rounded-xl">
-            <Workflow className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
-            <p className="text-xs text-blue-800 leading-relaxed">
-              A default flow will be created. You can edit steps after saving.
-            </p>
-          </div>
-        )}
 
         <button
           type="submit"
           disabled={creating || !name.trim()}
-          className="w-full py-2.5 bg-[#1E1B2E] hover:bg-black disabled:opacity-60 text-white rounded-xl text-sm font-bold transition-all"
+          className="w-full py-2.5 bg-primary hover:bg-primary-hover disabled:opacity-60 text-white rounded-xl text-sm font-bold transition-all"
         >
           {creating ? 'Creating…' : 'Create Agent'}
         </button>

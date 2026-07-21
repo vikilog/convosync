@@ -169,12 +169,12 @@ export function JourneyBuilder({ journey, onBack }: Props) {
 
   return (
     <div className="flex h-[calc(100vh-7rem)] min-h-[580px] flex-col gap-3">
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200/80 bg-white px-4 py-3 shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-black/5 bg-surface px-4 py-3 shadow-sm">
         <div className="flex min-w-0 items-center gap-3">
           <button
             type="button"
             onClick={onBack}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-slate-200 text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900 cursor-pointer"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-black/5 text-slate-600 transition-colors hover:bg-surface-muted hover:text-slate-900 cursor-pointer"
             aria-label="Back to journeys"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -197,7 +197,7 @@ export function JourneyBuilder({ journey, onBack }: Props) {
               <span
                 className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
                   isPublished
-                    ? 'bg-emerald-100 text-emerald-700'
+                    ? 'bg-primary/10 text-primary'
                     : 'bg-amber-100 text-amber-800'
                 }`}
               >
@@ -218,7 +218,7 @@ export function JourneyBuilder({ journey, onBack }: Props) {
             type="button"
             onClick={handleSave}
             disabled={saveGraph.isPending || !graph}
-            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50 cursor-pointer"
+            className="inline-flex items-center gap-2 rounded-xl border border-black/5 bg-surface px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-surface-muted disabled:opacity-50 cursor-pointer"
           >
             {saveGraph.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -231,7 +231,7 @@ export function JourneyBuilder({ journey, onBack }: Props) {
             type="button"
             onClick={handlePublish}
             disabled={publish.isPending}
-            className="inline-flex items-center gap-2 rounded-full bg-channel-green px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#20bd5a] disabled:opacity-50 cursor-pointer"
+            className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-hover disabled:opacity-50 cursor-pointer"
           >
             {publish.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -252,7 +252,7 @@ export function JourneyBuilder({ journey, onBack }: Props) {
       <div className="grid min-h-0 flex-1 grid-cols-12 gap-3">
         <div className="col-span-8 min-h-0 lg:col-span-9">
           {isLoading && !graph ? (
-            <div className="flex h-full items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-sm text-slate-500">
+            <div className="flex h-full items-center justify-center rounded-2xl border border-black/5 bg-surface-muted text-sm text-slate-500">
               <Loader2 className="mr-2 h-5 w-5 animate-spin text-primary" />
               Loading workflow…
             </div>
@@ -272,7 +272,7 @@ export function JourneyBuilder({ journey, onBack }: Props) {
             onUpdate={onNodeUpdate}
             onDelete={handleDeleteNode}
           />
-          <div className="mt-3 rounded-xl border border-dashed border-slate-200 bg-slate-50/80 px-3 py-3">
+          <div className="mt-3 rounded-xl border border-dashed border-black/10 bg-surface-muted/80 px-3 py-3">
             <div className="flex items-start gap-2.5">
               <MousePointerClick className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
               <p className="text-xs leading-relaxed text-slate-500">

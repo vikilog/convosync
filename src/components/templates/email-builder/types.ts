@@ -35,7 +35,7 @@ export type EmailDesignDocument = {
 export type LeftPanelTab = 'blocks' | 'gallery' | 'sections' | 'variables' | 'brand';
 
 export const DEFAULT_BRAND: BrandSettings = {
-  primaryColor: '#0284c7',
+  primaryColor: '#064e3b',
   textColor: '#1c1e21',
   backgroundColor: '#ffffff',
   fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",

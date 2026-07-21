@@ -33,13 +33,13 @@ export const VariablesDropdown: React.FC<Props> = ({ onSelect }) => {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold border border-[#E5E7EB] rounded-lg text-[#111827] hover:bg-[#F8FAFC]"
+        className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold border border-black/5 rounded-lg text-[#111827] hover:bg-surface-muted"
       >
         <Plus className="w-3.5 h-3.5" />
         Variables
       </button>
       {open && (
-        <div className="absolute left-0 bottom-full mb-1 w-52 bg-white border border-[#E5E7EB] rounded-xl shadow-lg z-20 py-1 max-h-56 overflow-y-auto">
+        <div className="absolute left-0 bottom-full mb-1 w-52 bg-surface border border-black/5 rounded-xl shadow-lg z-20 py-1 max-h-56 overflow-y-auto">
           {VARIABLES.map((v) => (
             <button
               key={v.value}
@@ -48,7 +48,7 @@ export const VariablesDropdown: React.FC<Props> = ({ onSelect }) => {
                 onSelect(v.value);
                 setOpen(false);
               }}
-              className="w-full text-left px-3 py-2 text-xs hover:bg-[#F3F0FF] transition-colors"
+              className="w-full text-left px-3 py-2 text-xs hover:bg-primary/10 transition-colors"
             >
               <span className="font-semibold text-[#111827]">{v.label}</span>
               <span className="block text-[#6B7280] font-mono mt-0.5">{v.value}</span>

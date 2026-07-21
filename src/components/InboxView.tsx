@@ -16,7 +16,6 @@ import {
   Loader2,
   ArrowLeft,
   PanelRightOpen,
-  Phone,
 } from 'lucide-react';
 import { Contact, ChatMessage, type ChatMessageType } from '../types';
 import { api, formatCatchError, getUserName } from '../lib/api';
@@ -367,7 +366,6 @@ export const InboxView: React.FC = () => {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [inboxThreads, setInboxThreads] = useState<InboxThread[]>([]);
   const [selectedConversationId, setSelectedConversationId] = useState<string>('');
-  const [callStarting, setCallStarting] = useState(false);
   const [chatHistories, setChatHistories] = useState<Record<string, ChatMessage[]>>({});
   const [assignedToByConversationId, setAssignedToByConversationId] = useState<
     Record<string, string>
@@ -395,6 +393,7 @@ export const InboxView: React.FC = () => {
   const [editContactData, setEditContactData] = useState<ContactEditPayload | null>(null);
   const [newChatOpen, setNewChatOpen] = useState(false);
   const [newContactOpen, setNewContactOpen] = useState(false);
+  const [newChatPhoneNumberId, setNewChatPhoneNumberId] = useState<string | undefined>();
   const [auditsOpen, setAuditsOpen] = useState(false);
   const [sendingMedia, setSendingMedia] = useState(false);
   const [composerActionsOpen, setComposerActionsOpen] = useState(false);
@@ -413,6 +412,17 @@ export const InboxView: React.FC = () => {
   const visibleChannelTabs = useMemo(
     () => CHANNEL_TABS.filter((tab) => isInboxChannelAllowed(tab.id, inboxScope)),
     [inboxScope]
+  );
+
+  const newChatWhatsAppAccounts = useMemo(
+    () =>
+      whatsappAccounts.filter((acc) =>
+        isConversationInInboxScope(
+          { channel: 'whatsapp', channelAccountId: acc.phoneNumberId },
+          inboxScope
+        )
+      ),
+    [whatsappAccounts, inboxScope]
   );
 
   useEffect(() => {
@@ -1131,11 +1141,11 @@ export const InboxView: React.FC = () => {
   };
 
   const startWhatsAppChat = useCallback(
-    async (contactId: string) => {
+    async (contactId: string, phoneNumberId?: string) => {
       setSendError(null);
       let conv: Record<string, unknown>;
       try {
-        conv = (await api.openConversation(contactId)) as Record<string, unknown>;
+        conv = (await api.openConversation(contactId, phoneNumberId)) as Record<string, unknown>;
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Could not start chat';
         setSendError(message);
@@ -1151,6 +1161,7 @@ export const InboxView: React.FC = () => {
       selectThread(conversationId);
       setNewChatOpen(false);
       setNewContactOpen(false);
+      setNewChatPhoneNumberId(undefined);
     },
     [selectThread]
   );
@@ -1302,17 +1313,17 @@ export const InboxView: React.FC = () => {
             : channelEmptyMessage;
 
   return (
-    <div className="flex flex-row h-full min-h-0 overflow-hidden bg-slate-50 border-t border-slate-200 selection:bg-sky-50">
+    <div className="flex flex-row h-full min-h-0 overflow-hidden bg-surface-muted border-t border-black/5 selection:bg-sky-50">
       <section
         className={`${
           isLargeUp ? 'w-[280px] xl:w-[300px]' : 'w-full'
-        } shrink-0 flex-col bg-white border-r border-slate-200 h-full text-left ${
+        } shrink-0 flex-col bg-surface border-r border-black/5 h-full text-left ${
           !isLargeUp && mobilePane !== 'list' ? 'hidden' : 'flex'
         }`}
       >
-        <div className="p-3 border-b border-slate-200 flex flex-col gap-2">
+        <div className="p-3 border-b border-black/5 flex flex-col gap-2">
           <div
-            className="flex min-w-0 gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1"
+            className="flex min-w-0 gap-1 rounded-lg border border-black/5 bg-surface-muted p-1"
             role="tablist"
             aria-label="Filter conversations"
           >
@@ -1325,7 +1336,7 @@ export const InboxView: React.FC = () => {
                 onClick={() => setFilterTab(tab.id)}
                 className={`flex-1 rounded-md py-1.5 text-xs font-bold transition-colors ${
                   filterTab === tab.id
-                    ? 'bg-white text-emerald-800 shadow-sm ring-1 ring-emerald-100'
+                    ? 'bg-surface text-emerald-800 shadow-sm ring-1 ring-emerald-100'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
@@ -1334,7 +1345,7 @@ export const InboxView: React.FC = () => {
             ))}
           </div>
           <div
-            className="flex min-w-0 gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1"
+            className="flex min-w-0 gap-1 rounded-lg border border-black/5 bg-surface-muted p-1"
             role="tablist"
             aria-label="Channel"
           >
@@ -1347,7 +1358,7 @@ export const InboxView: React.FC = () => {
                 onClick={() => setChannelFilter(tab.id)}
                 className={`flex-1 rounded-md py-1.5 text-xs font-bold transition-colors ${
                   channelFilter === tab.id
-                    ? 'bg-white text-emerald-800 shadow-sm ring-1 ring-emerald-100'
+                    ? 'bg-surface text-emerald-800 shadow-sm ring-1 ring-emerald-100'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
@@ -1437,8 +1448,8 @@ export const InboxView: React.FC = () => {
                   }}
                   className={`group px-3 py-2.5 cursor-pointer transition-all border-l-3 text-left relative ${
                     isActive
-                      ? 'bg-emerald-50/80 border-l-channel-green shadow-[inset_3px_0_0_#25d366]'
-                      : 'border-transparent hover:bg-slate-50'
+                      ? 'bg-primary/10 border-l-primary'
+                      : 'border-transparent hover:bg-surface-muted'
                   }`}
                 >
                   <div className="flex items-start gap-2 min-w-0">
@@ -1447,7 +1458,7 @@ export const InboxView: React.FC = () => {
                         <img
                           src={thread.avatar}
                           alt={thread.name}
-                          className="w-9 h-9 rounded-full border border-gray-100 object-cover bg-slate-50"
+                          className="w-9 h-9 rounded-full border border-gray-100 object-cover bg-surface-muted"
                           referrerPolicy="no-referrer"
                           onError={(e) => {
                             e.currentTarget.style.display = 'none';
@@ -1474,8 +1485,8 @@ export const InboxView: React.FC = () => {
                           <h4
                             className={`text-sm font-bold truncate ${
                               isActive
-                                ? 'text-emerald-900'
-                                : 'text-gray-900 group-hover:text-emerald-700'
+                                ? 'text-primary'
+                                : 'text-gray-900 group-hover:text-primary'
                             }`}
                           >
                             {thread.name}
@@ -1530,7 +1541,7 @@ export const InboxView: React.FC = () => {
       </section>
 
       <section
-        className={`flex-1 flex-col bg-slate-50 h-full overflow-hidden relative ${
+        className={`flex-1 flex-col bg-surface-muted h-full overflow-hidden relative ${
           !isLargeUp && mobilePane !== 'chat' ? 'hidden' : 'flex'
         }`}
       >
@@ -1540,7 +1551,7 @@ export const InboxView: React.FC = () => {
           <EmptyChatPanel message="Select a conversation from the list, or wait for new chats to arrive." />
         ) : (
           <>
-            <div className="h-16 flex items-center justify-between gap-2 px-3 md:px-4 border-b border-slate-200 bg-white">
+            <div className="h-16 flex items-center justify-between gap-2 px-3 md:px-4 border-b border-black/5 bg-surface">
               <div className="flex items-center min-w-0 text-left">
                 {!isLargeUp && (
                   <button
@@ -1557,7 +1568,7 @@ export const InboxView: React.FC = () => {
                     <img
                       src={selectedContact.avatar}
                       alt={selectedContact.name}
-                      className="w-10 h-10 rounded-full object-cover bg-slate-50"
+                      className="w-10 h-10 rounded-full object-cover bg-surface-muted"
                       referrerPolicy="no-referrer"
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
@@ -1613,48 +1624,9 @@ export const InboxView: React.FC = () => {
                   </button>
                 )}
 
-                <button
-                  type="button"
-                  disabled={callStarting || !selectedConversationId}
-                  title="Start voice call"
-                  onClick={() => {
-                    if (!selectedConversationId) return;
-                    setCallStarting(true);
-                    void api
-                      .createCall(selectedConversationId, 'outbound')
-                      .then(({ call, guestUrl, callPagePath }) => {
-                        // Shared across tabs — call opens in a new window
-                        if (guestUrl) {
-                          try {
-                            localStorage.setItem(`call-guest:${call.callId}`, guestUrl);
-                          } catch {
-                            /* ignore */
-                          }
-                        }
-                        const path = callPagePath || `/call/${call.callId}`;
-                        const opened = window.open(path, '_blank', 'noopener,noreferrer');
-                        if (!opened) {
-                          // Popup blocked — fall back to same tab
-                          window.location.assign(path);
-                        }
-                      })
-                      .catch((err) => {
-                        console.error(err);
-                        window.alert(formatCatchError(err));
-                      })
-                      .finally(() => setCallStarting(false));
-                  }}
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-channel-green hover:bg-emerald-50 transition-colors disabled:opacity-50 cursor-pointer"
-                  aria-label="Start voice call"
-                >
-                  {callStarting ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Phone className="h-4 w-4" />
-                  )}
-                </button>
+                {/* ponytail: inbox voice-call button parked for later release — restore Phone import + createCall handler */}
 
-                <div className="hidden lg:flex items-center bg-slate-50 px-2.5 py-1.5 rounded-xl border border-slate-200">
+                <div className="hidden lg:flex items-center bg-surface-muted px-2.5 py-1.5 rounded-xl border border-black/5">
                   <span className="text-sm font-bold text-gray-500 mr-1 flex items-center gap-1">
                     <User className="w-3.5 h-3.5 text-sky-600" /> Active :
                   </span>
@@ -1708,7 +1680,7 @@ export const InboxView: React.FC = () => {
               messageEndRef={messageEndRef}
             />
 
-            <div className="p-2.5 bg-white border-t border-slate-200 text-left">
+            <div className="p-2.5 bg-surface border-t border-black/5 text-left">
               {selectedContact && contactChannel(selectedContact) === 'instagram' && (
                 <p className="mb-2 text-sm font-bold text-[#C13584] bg-[#fce8f0] border border-[#E1306C]/15 rounded-lg px-3 py-2">
                   Replying via Instagram DM
@@ -1732,12 +1704,12 @@ export const InboxView: React.FC = () => {
               )}
 
               {pendingComposerFile && (
-                <div className="mb-2 flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                <div className="mb-2 flex items-center gap-2 rounded-lg border border-black/5 bg-surface-muted px-3 py-2">
                   {pendingComposerFile.type.startsWith('image/') && pendingComposerPreview ? (
                     <img
                       src={pendingComposerPreview}
                       alt={pendingComposerFile.name}
-                      className="w-10 h-10 rounded object-cover border border-slate-200"
+                      className="w-10 h-10 rounded object-cover border border-black/5"
                     />
                   ) : (
                     <Paperclip className="w-4 h-4 text-sky-600 shrink-0" />
@@ -1768,10 +1740,10 @@ export const InboxView: React.FC = () => {
               />
 
               <div
-                className={`flex items-center min-h-[44px] gap-0.5 rounded-xl border bg-white px-1 transition-all ${
+                className={`flex items-center min-h-[44px] gap-0.5 rounded-xl border bg-surface px-1 transition-all ${
                   sendingMedia
                     ? 'border-sky-300 ring-2 ring-emerald-100'
-                    : 'border-slate-200 focus-within:ring-2 focus-within:ring-sky-200 focus-within:border-sky-500'
+                    : 'border-black/5 focus-within:ring-2 focus-within:ring-sky-200 focus-within:border-sky-500'
                 }`}
               >
                 <textarea
@@ -1818,7 +1790,7 @@ export const InboxView: React.FC = () => {
                     {composerActionsOpen && selectedContact && (
                       <div
                         role="menu"
-                        className="absolute bottom-full right-0 mb-2 w-[min(240px,calc(100vw-2rem))] rounded-xl border border-slate-200 bg-white py-1.5 shadow-lg shadow-black/10 z-50"
+                        className="absolute bottom-full right-0 mb-2 w-[min(240px,calc(100vw-2rem))] rounded-xl border border-black/5 bg-surface py-1.5 shadow-lg shadow-black/10 z-50"
                       >
                         {(contactChannel(selectedContact) === 'whatsapp' ||
                           contactChannel(selectedContact) === 'instagram') && (
@@ -1879,7 +1851,7 @@ export const InboxView: React.FC = () => {
                               Templates
                             </button>
                           )}
-                        <div className="border-t border-slate-200 mt-1 pt-2 px-3 pb-1">
+                        <div className="border-t border-black/5 mt-1 pt-2 px-3 pb-1">
                           <p className="text-[11px] font-bold uppercase tracking-wide text-gray-400 mb-2">
                             Emoji
                           </p>
@@ -1926,7 +1898,7 @@ export const InboxView: React.FC = () => {
       </section>
 
       {isXLargeUp && !selectedContact && (
-        <section className="hidden xl:flex h-full w-[380px] shrink-0 items-center justify-center border-l border-slate-200 bg-slate-50 p-4">
+        <section className="hidden xl:flex h-full w-[380px] shrink-0 items-center justify-center border-l border-black/5 bg-surface-muted p-4">
           <EmptyChatPanel message="Contact details appear when you select a chat." />
         </section>
       )}
@@ -2025,7 +1997,9 @@ export const InboxView: React.FC = () => {
         open={newChatOpen}
         onClose={() => setNewChatOpen(false)}
         onSelectContact={startWhatsAppChat}
-        onAddNewContact={() => {
+        whatsappAccounts={newChatWhatsAppAccounts}
+        onAddNewContact={(phoneNumberId) => {
+          setNewChatPhoneNumberId(phoneNumberId);
           setNewChatOpen(false);
           setNewContactOpen(true);
         }}
@@ -2044,10 +2018,13 @@ export const InboxView: React.FC = () => {
 
       <AddContactDrawer
         open={newContactOpen}
-        onClose={() => setNewContactOpen(false)}
+        onClose={() => {
+          setNewContactOpen(false);
+          setNewChatPhoneNumberId(undefined);
+        }}
         onCreated={(contact) => {
           if (contact?.id) {
-            void startWhatsAppChat(contact.id).catch((err) => {
+            void startWhatsAppChat(contact.id, newChatPhoneNumberId).catch((err) => {
               setSendError(err instanceof Error ? err.message : 'Could not start chat');
             });
           }

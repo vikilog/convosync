@@ -143,6 +143,8 @@ type UsageCostResponse = {
     totalTokens: number;
     inputRateInrPer1k: number;
     outputRateInrPer1k: number;
+    inputCostInr?: number;
+    outputCostInr?: number;
     rawCostInr?: number;
     markupMultiplier?: number;
     markupInr?: number;
@@ -181,7 +183,7 @@ function WhatsAppPieTooltip({
   if (!active || !payload?.length) return null;
   const row = payload[0].payload;
   return (
-    <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs shadow-lg">
+    <div className="rounded-lg border border-black/5 bg-surface px-3 py-2 text-xs shadow-lg">
       <p className="font-semibold text-slate-900">{row.name}</p>
       <p className="mt-1 text-slate-600">{formatTokens(row.value)}</p>
       <p className="text-slate-500">{formatCount(row.count)} conversations</p>
@@ -199,7 +201,7 @@ function DailyTokensTooltip({
   if (!active || !payload?.length) return null;
   const row = payload[0].payload;
   return (
-    <div className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs shadow-md">
+    <div className="rounded-lg border border-black/5 bg-surface px-2.5 py-1.5 text-xs shadow-md">
       Day {row.day}: {formatCount(row.tokens)} tokens
     </div>
   );
@@ -216,12 +218,12 @@ function UsageCostSkeleton() {
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-2">
-          <div className="h-7 w-48 rounded-md bg-slate-100 animate-pulse" />
-          <div className="h-4 w-72 max-w-full rounded-md bg-slate-100 animate-pulse" />
+          <div className="h-7 w-48 rounded-md skel animate-pulse" />
+          <div className="h-4 w-72 max-w-full rounded-md skel animate-pulse" />
         </div>
         <div className="flex gap-2">
-          <div className="h-10 w-40 rounded-lg bg-slate-100 animate-pulse" />
-          <div className="h-10 w-32 rounded-lg bg-slate-100 animate-pulse" />
+          <div className="h-10 w-40 rounded-lg skel animate-pulse" />
+          <div className="h-10 w-32 rounded-lg skel animate-pulse" />
         </div>
       </div>
 
@@ -229,69 +231,69 @@ function UsageCostSkeleton() {
         {Array.from({ length: 4 }).map((_, i) => (
           <div
             key={`usage-stat-${i}`}
-            className="rounded-xl border border-slate-200 bg-white p-4 space-y-3 animate-pulse"
+            className="rounded-xl border border-black/5 bg-surface p-4 space-y-3 animate-pulse"
           >
             <div className="flex items-start gap-3">
-              <div className="h-10 w-10 rounded-lg bg-slate-100 shrink-0" />
+              <div className="h-10 w-10 rounded-lg skel shrink-0" />
               <div className="flex-1 space-y-2 pt-1">
-                <div className="h-2.5 w-24 rounded bg-slate-100" />
-                <div className="h-7 w-20 rounded bg-slate-100" />
-                <div className="h-2.5 w-16 rounded bg-slate-100" />
+                <div className="h-2.5 w-24 rounded skel" />
+                <div className="h-7 w-20 rounded skel" />
+                <div className="h-2.5 w-16 rounded skel" />
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-5 space-y-4 animate-pulse">
+      <div className="rounded-xl border border-black/5 bg-surface p-5 space-y-4 animate-pulse">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-slate-100" />
+            <div className="h-10 w-10 rounded-full skel" />
             <div className="space-y-2">
-              <div className="h-4 w-48 rounded bg-slate-100" />
-              <div className="h-3 w-36 rounded bg-slate-100" />
+              <div className="h-4 w-48 rounded skel" />
+              <div className="h-3 w-36 rounded skel" />
             </div>
           </div>
-          <div className="h-6 w-24 rounded bg-slate-100" />
+          <div className="h-6 w-24 rounded skel" />
         </div>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <div className="space-y-3">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={`wa-row-${i}`} className="h-8 w-full rounded bg-slate-100" />
+              <div key={`wa-row-${i}`} className="h-8 w-full rounded skel" />
             ))}
           </div>
           <div className="flex items-center justify-center">
-            <div className="h-48 w-48 rounded-full bg-slate-100" />
+            <div className="h-48 w-48 rounded-full skel" />
           </div>
         </div>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-5 space-y-4 animate-pulse">
+      <div className="rounded-xl border border-black/5 bg-surface p-5 space-y-4 animate-pulse">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-slate-100" />
+            <div className="h-10 w-10 rounded-full skel" />
             <div className="space-y-2">
-              <div className="h-4 w-44 rounded bg-slate-100" />
-              <div className="h-3 w-56 rounded bg-slate-100" />
+              <div className="h-4 w-44 rounded skel" />
+              <div className="h-3 w-56 rounded skel" />
             </div>
           </div>
-          <div className="h-6 w-24 rounded bg-slate-100" />
+          <div className="h-6 w-24 rounded skel" />
         </div>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <div className="space-y-3">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={`ai-row-${i}`} className="h-8 w-full rounded bg-slate-100" />
+              <div key={`ai-row-${i}`} className="h-8 w-full rounded skel" />
             ))}
-            <div className="h-20 w-full rounded-xl bg-slate-100" />
+            <div className="h-20 w-full rounded-xl skel" />
           </div>
           <div className="space-y-4">
             {Array.from({ length: 3 }).map((_, i) => (
               <div key={`agent-${i}`} className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <div className="h-7 w-7 rounded-full bg-slate-100" />
-                  <div className="h-3 flex-1 rounded bg-slate-100" />
+                  <div className="h-7 w-7 rounded-full skel" />
+                  <div className="h-3 flex-1 rounded skel" />
                 </div>
-                <div className="h-1.5 w-full rounded-full bg-slate-100" />
+                <div className="h-1.5 w-full rounded-full skel" />
               </div>
             ))}
           </div>
@@ -374,7 +376,7 @@ export const UsageCost: React.FC = () => {
     <div className="mx-auto max-w-7xl space-y-6 pb-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-xl font-bold text-slate-900 md:text-2xl">Usage &amp; Cost</h1>
+          <h1 className="font-display text-xl font-bold text-slate-900 md:text-2xl">Usage &amp; Cost</h1>
           <p className="mt-1 max-w-xl text-sm text-slate-500">
             WhatsApp, AI, and email usage — all amounts shown in tokens.
           </p>
@@ -387,7 +389,7 @@ export const UsageCost: React.FC = () => {
               onChange={(e) => setSelectedMonth(e.target.value)}
               aria-label="Select billing month"
               disabled={loading}
-              className="cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-9 text-sm font-medium text-slate-800 shadow-sm transition-colors hover:border-slate-300 focus:border-channel-green focus:outline-none focus:ring-2 focus:ring-emerald-100 disabled:opacity-60"
+              className="cursor-pointer appearance-none rounded-lg border border-black/5 bg-surface py-2 pl-9 pr-9 text-sm font-medium text-slate-800 shadow-sm transition-colors hover:border-black/10 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10 disabled:opacity-60"
             >
               {monthOptions.map((m) => (
                 <option key={m.value} value={m.value}>
@@ -399,7 +401,7 @@ export const UsageCost: React.FC = () => {
           </div>
           <button
             type="button"
-            className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50"
+            className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-black/5 bg-surface px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:border-black/10 hover:bg-surface-muted"
           >
             <Download className="h-4 w-4" />
             Export Report
@@ -420,7 +422,7 @@ export const UsageCost: React.FC = () => {
             costChange !== 0 ? (
               <span
                 className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[11px] font-semibold ${
-                  costChangeUp ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-600'
+                  costChangeUp ? 'bg-red-50 text-red-600' : 'bg-primary/10 text-primary'
                 }`}
               >
                 {costChangeUp ? (
@@ -465,7 +467,7 @@ export const UsageCost: React.FC = () => {
         />
       </div>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-4 md:p-5">
+      <section className="rounded-xl border border-black/5 bg-surface p-4 md:p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-start gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#25D366]/10 text-[#128C7E]">
@@ -598,7 +600,7 @@ export const UsageCost: React.FC = () => {
         </div>
       </section>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-4 md:p-5">
+      <section className="rounded-xl border border-black/5 bg-surface p-4 md:p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-start gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-600">
@@ -614,8 +616,13 @@ export const UsageCost: React.FC = () => {
             </div>
           </div>
           <div className="text-left sm:text-right">
-            <p className="text-lg font-bold text-[#0F172A]">{formatTokens(ai.billedCostInr)}</p>
-            <p className="text-[11px] text-slate-400">{selectedMonthLabel}</p>
+            <p className="text-lg font-bold text-[#0F172A]">{formatTokens(ai.grossCostInr)}</p>
+            <p className="text-[11px] text-slate-400">
+              {selectedMonthLabel}
+              {ai.includedCreditInr > 0
+                ? ` · billed ${formatTokens(ai.billedCostInr)} after credit`
+                : ''}
+            </p>
           </div>
         </div>
 
@@ -631,8 +638,9 @@ export const UsageCost: React.FC = () => {
           <div className="mt-4 mb-2 flex gap-2.5 rounded-lg bg-[#EFF6FF] p-3">
             <Info className="mt-0.5 h-4 w-4 shrink-0 text-cyan-600" />
             <p className="text-xs leading-relaxed text-[#374151]">
-              AI usage is metered from live token logs. Charged tokens = provider usage ×{' '}
-              {(((ai.markupMultiplier ?? 1.35) - 1) * 100).toFixed(0)}% platform markup.
+              Charged tokens = provider subtotal +{' '}
+              {(((ai.markupMultiplier ?? 1.35) - 1) * 100).toFixed(0)}% platform markup
+              {ai.includedCreditInr > 0 ? ', minus included credit' : ''}.
             </p>
           </div>
         )}
@@ -660,7 +668,9 @@ export const UsageCost: React.FC = () => {
                     {formatTokenRate(ai.inputRateInrPer1k, '1K')}
                   </td>
                   <td className="py-2.5 tabular-nums font-medium text-slate-900">
-                    {formatTokens((ai.inputTokens / 1000) * ai.inputRateInrPer1k)}
+                    {formatTokens(
+                      ai.inputCostInr ?? (ai.inputTokens / 1000) * ai.inputRateInrPer1k
+                    )}
                   </td>
                 </tr>
                 <tr className="border-b border-slate-50">
@@ -670,7 +680,9 @@ export const UsageCost: React.FC = () => {
                     {formatTokenRate(ai.outputRateInrPer1k, '1K')}
                   </td>
                   <td className="py-2.5 tabular-nums font-medium text-slate-900">
-                    {formatTokens((ai.outputTokens / 1000) * ai.outputRateInrPer1k)}
+                    {formatTokens(
+                      ai.outputCostInr ?? (ai.outputTokens / 1000) * ai.outputRateInrPer1k
+                    )}
                   </td>
                 </tr>
                 <tr className="border-b border-slate-50">
@@ -680,7 +692,13 @@ export const UsageCost: React.FC = () => {
                   </td>
                   <td className="py-2.5 pr-3" />
                   <td className="py-2.5 font-medium tabular-nums text-slate-900">
-                    {formatTokens(ai.rawCostInr ?? (ai.inputTokens / 1000) * ai.inputRateInrPer1k + (ai.outputTokens / 1000) * ai.outputRateInrPer1k)}
+                    {formatTokens(
+                      ai.rawCostInr ??
+                        (ai.inputCostInr != null && ai.outputCostInr != null
+                          ? ai.inputCostInr + ai.outputCostInr
+                          : (ai.inputTokens / 1000) * ai.inputRateInrPer1k +
+                            (ai.outputTokens / 1000) * ai.outputRateInrPer1k)
+                    )}
                   </td>
                 </tr>
                 {(ai.markupInr ?? 0) > 0 ? (
@@ -706,7 +724,7 @@ export const UsageCost: React.FC = () => {
                     <td className="py-2 pr-3 pl-2">Included credit</td>
                     <td className="py-2 pr-3 tabular-nums">-{formatCount(ai.includedTokens)}</td>
                     <td className="py-2 pr-3" />
-                    <td className="py-2 tabular-nums text-emerald-600">
+                    <td className="py-2 tabular-nums text-primary">
                       -{formatTokens(ai.includedCreditInr)}
                     </td>
                   </tr>
@@ -765,7 +783,7 @@ export const UsageCost: React.FC = () => {
                         {formatCount(agent.tokens)} tokens ({agent.pct}%)
                       </span>
                     </div>
-                    <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-100">
+                    <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-black/10">
                       <div
                         className={`h-full rounded-full ${AGENT_BAR_COLORS[index % AGENT_BAR_COLORS.length]}`}
                         style={{ width: `${Math.max(agent.pct, 2)}%` }}
@@ -779,7 +797,7 @@ export const UsageCost: React.FC = () => {
             )}
 
             {ai.includedTokens > 0 ? (
-              <div className="mt-6 rounded-lg border border-slate-100 bg-slate-50/80 p-4">
+              <div className="mt-6 rounded-lg border border-black/5 bg-surface-muted/80 p-4">
                 <div className="flex items-center justify-between gap-2">
                   <p className="text-sm font-semibold text-slate-800">Included token credit</p>
                   <span
@@ -787,7 +805,9 @@ export const UsageCost: React.FC = () => {
                       ai.quotaPct > 100 ? 'text-red-600' : 'text-slate-600'
                     }`}
                   >
-                    {ai.quotaPct}% used
+                    {ai.quotaPct > 100
+                      ? `${formatCount(ai.quotaPct)}% of included (over)`
+                      : `${ai.quotaPct}% used`}
                   </span>
                 </div>
                 <p className="mt-1 text-xs text-slate-500">

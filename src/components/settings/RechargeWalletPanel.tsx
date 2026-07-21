@@ -52,7 +52,7 @@ const PRICING_ROWS = WALLET_PRICING_ROWS.map((row) => ({
 
 function SectionCard({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] md:p-6">
+    <section className="rounded-xl border border-black/5 bg-surface p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] md:p-6">
       <h3 className="text-base font-semibold text-slate-900">{title}</h3>
       <div className="mt-4">{children}</div>
     </section>
@@ -293,7 +293,7 @@ export function RechargeWalletPanel({
       ) : null}
 
       {/* Section 1 — Balance */}
-      <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] md:p-6">
+      <section className="rounded-xl border border-black/5 bg-surface p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] md:p-6">
         <div className="flex items-center gap-2.5">
           <ConvoCoinMark size={32} />
           <h3 className="text-lg font-bold text-slate-900">ConvoCoins</h3>
@@ -500,7 +500,7 @@ export function RechargeWalletPanel({
       {showAllModal ? (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
           <div
-            className="flex max-h-[85vh] w-full max-w-lg flex-col rounded-2xl border border-slate-200 bg-white shadow-xl"
+            className="flex max-h-[85vh] w-full max-w-lg flex-col rounded-2xl border border-black/5 bg-surface shadow-xl"
             role="dialog"
             aria-modal="true"
             aria-labelledby="convocoin-tx-title"

@@ -22,7 +22,7 @@ export const ActionCard: React.FC<Props> = ({
   const placeholder = ACTION_PLACEHOLDERS[action.type];
 
   return (
-    <div className="bg-white border border-[#E5E7EB] rounded-xl p-5">
+    <div className="bg-surface border border-black/5 rounded-xl p-5">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h4 className="text-sm font-bold text-[#111827]">{meta.title}</h4>
@@ -34,7 +34,7 @@ export const ActionCard: React.FC<Props> = ({
           aria-checked={action.enabled}
           onClick={() => onChange({ enabled: !action.enabled })}
           className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${
-            action.enabled ? 'bg-channel-green' : 'bg-[#D1D5DB]'
+            action.enabled ? 'bg-primary' : 'bg-[#D1D5DB]'
           }`}
         >
           <span
@@ -57,7 +57,7 @@ export const ActionCard: React.FC<Props> = ({
               onChange={(e) => onChange({ instruction: e.target.value.slice(0, 1000) })}
               placeholder={placeholder}
               rows={6}
-              className="w-full border border-[#E5E7EB] rounded-lg py-3 px-3 pr-10 text-sm resize-y min-h-[120px] focus:ring-2 focus:ring-[#0284c7]/20 focus:border-[#0284c7] outline-none"
+              className="w-full border border-black/5 bg-surface-muted rounded-lg py-3 px-3 pr-10 text-sm resize-y min-h-[120px] focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
             />
             <span className="absolute bottom-3 right-3 text-xs text-[#6B7280]">
               {action.instruction.length}/1000

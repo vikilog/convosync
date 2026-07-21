@@ -27,7 +27,7 @@ function blockToSimpleHtml(block: EmailBlock): string {
       return link ? `<a href="${link}">${img}</a>` : img;
     }
     case 'button':
-      return `<a href="${String(p.url ?? '#')}" style="display:inline-block;background:#0284c7;color:#fff;text-decoration:none;padding:12px 24px;border-radius:8px;font-weight:600;">${String(p.label ?? 'Button')}</a>`;
+      return `<a href="${String(p.url ?? '#')}" style="display:inline-block;background:#064e3b;color:#fff;text-decoration:none;padding:12px 24px;border-radius:8px;font-weight:600;">${String(p.label ?? 'Button')}</a>`;
     case 'columns':
       return `<table width="100%"><tr><td width="50%" valign="top">${String(p.left ?? '')}</td><td width="50%" valign="top">${String(p.right ?? '')}</td></tr></table>`;
     case 'divider':

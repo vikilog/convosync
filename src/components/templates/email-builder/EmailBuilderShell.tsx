@@ -180,7 +180,7 @@ export function EmailBuilderShell({ template, onBack, onSaved }: Props) {
             type="button"
             disabled={saving}
             onClick={() => handleSave(true)}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-channel-green text-white text-sm font-bold hover:opacity-95 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary hover:bg-primary-hover text-white text-sm font-bold disabled:opacity-50"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
             Publish

@@ -122,7 +122,7 @@ export const SkillEditor: React.FC<Props> = ({ agentId, skillId, avatarUrl }) =>
         <button
           type="button"
           onClick={() => navigate(pathForAgent(agentId, 'skills'))}
-          className="mt-3 text-sm font-bold text-sky-600 hover:underline"
+          className="mt-3 text-sm font-bold text-primary hover:underline"
         >
           Back to skills
         </button>
@@ -144,7 +144,7 @@ export const SkillEditor: React.FC<Props> = ({ agentId, skillId, avatarUrl }) =>
             <button
               type="button"
               onClick={() => navigate(pathForAgent(agentId, 'skills'))}
-              className="p-1.5 rounded-lg text-[#6B7280] hover:bg-[#F8FAFC]"
+              className="p-1.5 rounded-lg text-[#6B7280] hover:bg-surface-muted"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
@@ -157,7 +157,7 @@ export const SkillEditor: React.FC<Props> = ({ agentId, skillId, avatarUrl }) =>
           <div className="flex items-center gap-2 shrink-0">
             <button
               type="button"
-              className="p-2 rounded-lg text-[#6B7280] hover:bg-[#F8FAFC]"
+              className="p-2 rounded-lg text-[#6B7280] hover:bg-surface-muted"
             >
               <MoreHorizontal className="w-5 h-5" />
             </button>
@@ -165,7 +165,7 @@ export const SkillEditor: React.FC<Props> = ({ agentId, skillId, avatarUrl }) =>
               type="button"
               disabled={saving || skill.status === 'live'}
               onClick={() => void handlePublish()}
-              className="inline-flex items-center gap-1.5 px-4 py-2 bg-channel-green hover:bg-[#20bd5a] disabled:opacity-60 text-white rounded-xl text-sm font-bold"
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-60 text-white rounded-xl text-sm font-bold"
             >
               <Play className="w-4 h-4" />
               Set live
@@ -181,7 +181,7 @@ export const SkillEditor: React.FC<Props> = ({ agentId, skillId, avatarUrl }) =>
           className="w-full text-2xl font-bold text-[#111827] placeholder:text-gray-300 bg-transparent outline-none mb-8"
         />
 
-        <section className="mb-8 pb-8 border-b border-[#E5E7EB]">
+        <section className="mb-8 pb-8 border-b border-black/5">
           <h3 className="text-sm font-bold text-[#111827] mb-1">Start trigger</h3>
           <p className="text-xs text-[#6B7280] mb-4">
             Set the conditions to trigger this skill. Tell AI when and when not to use.
@@ -206,19 +206,19 @@ export const SkillEditor: React.FC<Props> = ({ agentId, skillId, avatarUrl }) =>
             onChange={(e) => handleInstructionsChange(e.target.value)}
             placeholder="Type '/' for commands"
             rows={12}
-            className="w-full border border-[#E5E7EB] rounded-xl p-4 text-sm text-[#111827] placeholder:text-[#6B7280] resize-none focus:ring-2 focus:ring-[#0284c7]/20 focus:border-[#0284c7] outline-none"
+            className="w-full border border-black/5 rounded-xl p-4 text-sm text-[#111827] placeholder:text-[#6B7280] resize-none focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
           />
 
           {showSlashMenu && filteredCommands.length > 0 && (
-            <div className="absolute left-0 mt-1 w-64 bg-white border border-[#E5E7EB] rounded-xl shadow-lg z-10 overflow-hidden">
+            <div className="absolute left-0 mt-1 w-64 bg-surface border border-black/5 rounded-xl shadow-lg z-10 overflow-hidden">
               {filteredCommands.map((cmd) => (
                 <button
                   key={cmd.id}
                   type="button"
                   onClick={() => insertSlashCommand(cmd.label)}
-                  className="w-full text-left px-4 py-2.5 hover:bg-[#F3F0FF] transition-colors"
+                  className="w-full text-left px-4 py-2.5 hover:bg-primary/10 transition-colors"
                 >
-                  <p className="text-sm font-bold text-sky-600">{cmd.label}</p>
+                  <p className="text-sm font-bold text-primary">{cmd.label}</p>
                   <p className="text-xs text-[#6B7280]">{cmd.description}</p>
                 </button>
               ))}

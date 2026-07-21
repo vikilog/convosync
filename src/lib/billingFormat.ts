@@ -30,8 +30,8 @@ export function formatBillingDate(iso: string | null): string {
 }
 
 export const invoiceStatusStyles: Record<string, string> = {
-  paid: 'bg-emerald-50 text-emerald-800 border-emerald-200',
-  created: 'bg-slate-50 text-slate-700 border-slate-200',
+  paid: 'bg-primary/10 text-primary border-primary/20',
+  created: 'bg-surface-muted text-slate-700 border-black/5',
   pending: 'bg-amber-50 text-amber-800 border-amber-200',
   failed: 'bg-red-50 text-red-800 border-red-200',
   refunded: 'bg-violet-50 text-violet-800 border-violet-200',

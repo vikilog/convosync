@@ -37,7 +37,7 @@ function StepRow({
         <div className="flex items-center gap-2">
           <span className="text-sm font-semibold text-slate-900">{item.label}</span>
           {item.comingSoon ? (
-            <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-sky-700">
+            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
               Soon
             </span>
           ) : null}

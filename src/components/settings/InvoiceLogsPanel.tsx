@@ -53,7 +53,7 @@ export function InvoiceLogsPanel() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20 text-gray-400">
+      <div className="flex items-center justify-center py-20 text-neutral-400">
         <Loader2 className="h-6 w-6 animate-spin" />
       </div>
     );
@@ -61,11 +61,10 @@ export function InvoiceLogsPanel() {
 
   return (
     <div className="max-w-5xl space-y-4">
-      <div className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-gray-600">
-        <Receipt className="mt-0.5 h-4 w-4 shrink-0 text-sky-600" />
+      <div className="flex items-start gap-3 rounded-xl border border-primary/15 bg-primary/[0.06] px-4 py-3 text-sm text-neutral-700">
+        <Receipt className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
         <p>
-          Invoice log with Razorpay payment and order IDs for every charge, renewal, and add-on
-          purchase.
+          Every charge, renewal, and add-on purchase with Razorpay payment and order IDs.
         </p>
       </div>
 
@@ -76,15 +75,15 @@ export function InvoiceLogsPanel() {
       )}
 
       {transactions.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-slate-200 bg-white py-16 text-center text-sm text-gray-400">
+        <div className="rounded-2xl border border-dashed border-black/10 bg-surface py-16 text-center text-sm text-neutral-400">
           No invoices or transactions yet.
         </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="overflow-hidden rounded-2xl border border-black/5 bg-surface">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[720px] text-left text-xs">
               <thead>
-                <tr className="border-b border-slate-200 bg-slate-50 text-sm font-bold uppercase tracking-wider text-gray-400">
+                <tr className="border-b border-black/5 bg-surface-muted text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
                   <th className="px-4 py-3">Date</th>
                   <th className="px-4 py-3">Description</th>
                   <th className="px-4 py-3">Type</th>
@@ -94,17 +93,17 @@ export function InvoiceLogsPanel() {
                   <th className="px-4 py-3">Order ID</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200">
+              <tbody className="divide-y divide-black/5">
                 {transactions.map((row) => (
-                  <tr key={`${row.source}-${row.id}`} className="hover:bg-slate-50/80">
-                    <td className="whitespace-nowrap px-4 py-3 text-gray-600">
+                  <tr key={`${row.source}-${row.id}`} className="hover:bg-surface-muted/70">
+                    <td className="whitespace-nowrap px-4 py-3 text-neutral-600">
                       {formatBillingDate(row.paidAt ?? row.createdAt)}
                     </td>
-                    <td className="max-w-[200px] px-4 py-3 font-medium text-gray-900">
+                    <td className="max-w-[200px] px-4 py-3 font-medium text-neutral-900">
                       {row.description ?? '—'}
                     </td>
-                    <td className="px-4 py-3 text-gray-600">{formatTransactionType(row.type)}</td>
-                    <td className="whitespace-nowrap px-4 py-3 font-semibold text-gray-900">
+                    <td className="px-4 py-3 text-neutral-600">{formatTransactionType(row.type)}</td>
+                    <td className="whitespace-nowrap px-4 py-3 font-semibold text-neutral-900">
                       {formatInrPaise(row.amountPaise, row.currency)}
                     </td>
                     <td className="px-4 py-3">
@@ -116,10 +115,10 @@ export function InvoiceLogsPanel() {
                         {row.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-gray-500">
+                    <td className="px-4 py-3 font-mono text-xs text-neutral-500">
                       {row.razorpayPaymentId ?? '—'}
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-gray-500">
+                    <td className="px-4 py-3 font-mono text-xs text-neutral-500">
                       {row.razorpayOrderId ?? '—'}
                     </td>
                   </tr>

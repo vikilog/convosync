@@ -62,7 +62,7 @@ export function PropertyPanel() {
             className={`flex-1 py-1.5 text-sm font-semibold rounded-md capitalize ${
               (p.align ?? 'left') === a
                 ? 'bg-primary text-white'
-                : 'bg-[#f4f5f7] text-gray-600 hover:bg-[#eef2ff]'
+                : 'bg-[#f4f5f7] text-gray-600 hover:bg-primary/10'
             }`}
           >
             {a}
@@ -182,7 +182,7 @@ export function PropertyPanel() {
                   { id: 'primary', bg: brand.primaryColor, fg: '#ffffff' },
                   { id: 'outline', bg: '#ffffff', fg: brand.primaryColor },
                   { id: 'dark', bg: '#1c1e21', fg: '#ffffff' },
-                  { id: 'soft', bg: '#eef2ff', fg: brand.primaryColor },
+                  { id: 'soft', bg: '#e8f0ec', fg: brand.primaryColor },
                 ].map((v) => (
                   <button
                     key={v.id}

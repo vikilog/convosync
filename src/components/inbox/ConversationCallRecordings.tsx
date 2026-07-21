@@ -117,10 +117,10 @@ function CallDetailDialog({
         role="dialog"
         aria-modal="true"
         aria-labelledby="call-detail-title"
-        className="flex max-h-[92vh] w-full max-w-2xl flex-col overflow-hidden rounded-t-2xl border border-slate-200 bg-white shadow-2xl sm:rounded-2xl"
+        className="flex max-h-[92vh] w-full max-w-2xl flex-col overflow-hidden rounded-t-2xl border border-black/5 bg-surface shadow-2xl sm:rounded-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-slate-200 px-5 py-4">
+        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-black/5 px-5 py-4">
           <div className="min-w-0">
             <h2 id="call-detail-title" className="text-base font-bold text-gray-900">
               Call recording
@@ -134,7 +134,7 @@ function CallDetailDialog({
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-400 hover:bg-slate-50 hover:text-gray-700 cursor-pointer"
+            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-400 hover:bg-surface-muted hover:text-gray-700 cursor-pointer"
             aria-label="Close"
           >
             <X className="h-4 w-4" />
@@ -143,7 +143,7 @@ function CallDetailDialog({
 
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-5 py-4">
           {row.playUrl ? (
-            <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-3">
+            <div className="rounded-xl border border-black/5 bg-surface-muted px-3 py-3">
               <p className="mb-2 text-[11px] font-bold uppercase tracking-wide text-gray-400">
                 Recording
               </p>
@@ -210,7 +210,7 @@ function CallDetailDialog({
                 </button>
               )}
             </div>
-            <div className="max-h-[40vh] overflow-y-auto rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm leading-relaxed text-slate-800 whitespace-pre-wrap">
+            <div className="max-h-[40vh] overflow-y-auto rounded-xl border border-black/5 bg-surface px-4 py-3 text-sm leading-relaxed text-slate-800 whitespace-pre-wrap">
               {row.transcriptStatus === 'failed' ? (
                 <span className="text-red-600">{row.transcriptError || 'Failed'}</span>
               ) : row.transcriptText ? (
@@ -466,7 +466,7 @@ export function ConversationCallRecordings({ conversationId }: { conversationId:
   };
 
   return (
-    <article className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+    <article className="rounded-2xl border border-black/5 bg-surface p-3 shadow-sm">
       <div className="flex items-center justify-between gap-2 px-1">
         <h4 className="text-xs font-bold text-gray-500 flex items-center gap-1.5">
           <Phone className="h-3.5 w-3.5 text-emerald-600" />
@@ -478,7 +478,7 @@ export function ConversationCallRecordings({ conversationId }: { conversationId:
             onChange={(e) => setSttLanguage(e.target.value)}
             title="STT language"
             aria-label="Transcript language"
-            className="h-7 max-w-[7.5rem] rounded-lg border border-slate-200 bg-white px-1.5 text-[10px] font-semibold text-slate-600"
+            className="h-7 max-w-[7.5rem] rounded-lg border border-black/5 bg-surface px-1.5 text-[10px] font-semibold text-slate-600"
           >
             {STT_LANGUAGES.map((l) => (
               <option key={l.value} value={l.value}>
@@ -541,7 +541,7 @@ export function ConversationCallRecordings({ conversationId }: { conversationId:
                       setSelectedId(row.callId);
                     }
                   }}
-                  className="w-full rounded-xl border border-slate-100 bg-slate-50/80 px-2.5 py-2.5 text-left transition-colors hover:border-emerald-200 hover:bg-emerald-50/40 cursor-pointer"
+                  className="w-full rounded-xl border border-slate-100 bg-surface-muted/80 px-2.5 py-2.5 text-left transition-colors hover:border-emerald-200 hover:bg-emerald-50/40 cursor-pointer"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-[11px] font-bold text-slate-700 truncate">{row.label}</p>

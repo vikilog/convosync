@@ -213,7 +213,7 @@ export function PlanCustomizer({ pricingRules, initialQuote, onSaved }: PlanCust
   }
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <section className="rounded-2xl border border-black/5 bg-surface p-6 shadow-sm">
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-sm font-bold uppercase tracking-widest text-sky-600">
@@ -352,7 +352,7 @@ export function PlanCustomizer({ pricingRules, initialQuote, onSaved }: PlanCust
       )}
 
       {savedMessage && (
-        <div className="mt-4 flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+        <div className="mt-4 flex items-start gap-2 rounded-xl border border-primary/20 bg-primary/10 px-3 py-2 text-sm text-primary">
           <Check className="mt-0.5 h-4 w-4 shrink-0" />
           {savedMessage}
         </div>
@@ -364,7 +364,7 @@ export function PlanCustomizer({ pricingRules, initialQuote, onSaved }: PlanCust
             type="button"
             disabled={paying || quoting || !quote}
             onClick={() => void handlePayCustomPlan()}
-            className="inline-flex items-center gap-2 rounded-xl bg-channel-green px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#20bd5a] disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover disabled:opacity-50"
           >
             {paying ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
             Pay with Razorpay

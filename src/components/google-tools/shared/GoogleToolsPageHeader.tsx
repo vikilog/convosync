@@ -33,7 +33,7 @@ export function GoogleToolsPageHeader({
   const navigate = useNavigate();
 
   return (
-    <header className="shrink-0 flex items-center justify-between gap-3 px-4 py-3 border-b border-[#E2E8F0] bg-white min-w-0">
+    <header className="shrink-0 flex items-center justify-between gap-3 px-4 py-3 border-b border-black/5 bg-surface min-w-0">
       <div className="flex items-center gap-3 min-w-0">
         <div
           className={`w-9 h-9 rounded-lg flex items-center justify-center text-sm font-bold shrink-0 ${avatarClassName}`}
@@ -56,7 +56,7 @@ export function GoogleToolsPageHeader({
             type="button"
             onClick={onRefresh}
             title="Refresh"
-            className="inline-flex items-center justify-center h-9 w-9 rounded-lg text-[#64748B] border border-[#E2E8F0] bg-white hover:bg-[#F8FAFC] transition-colors"
+            className="inline-flex items-center justify-center h-9 w-9 rounded-lg text-[#64748B] border border-black/5 bg-surface hover:bg-surface-muted transition-colors"
           >
             <RefreshCw className="w-4 h-4" />
           </button>
@@ -66,7 +66,7 @@ export function GoogleToolsPageHeader({
           type="button"
           disabled={syncing}
           onClick={onSync}
-          className="inline-flex items-center gap-2 h-9 px-3 rounded-lg text-sm font-semibold border border-[#E2E8F0] text-[#0F172A] bg-white hover:bg-[#F8FAFC] disabled:opacity-50 transition-colors"
+          className="inline-flex items-center gap-2 h-9 px-3 rounded-lg text-sm font-semibold border border-black/5 text-[#0F172A] bg-surface hover:bg-surface-muted disabled:opacity-50 transition-colors"
         >
           {syncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
           Sync
@@ -78,7 +78,7 @@ export function GoogleToolsPageHeader({
           type="button"
           onClick={() => navigate(`${pathForTab('integrations')}?channel=google`)}
           title="Settings"
-          className="inline-flex items-center justify-center h-9 w-9 rounded-lg text-[#64748B] border border-[#E2E8F0] bg-white hover:bg-[#F8FAFC] transition-colors"
+          className="inline-flex items-center justify-center h-9 w-9 rounded-lg text-[#64748B] border border-black/5 bg-surface hover:bg-surface-muted transition-colors"
         >
           <Settings className="w-4 h-4" />
         </button>

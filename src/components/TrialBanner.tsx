@@ -53,11 +53,11 @@ export function TrialBanner() {
         className={`shrink-0 border-b px-6 py-2.5 flex items-center justify-between gap-4 ${
           urgent
             ? 'bg-amber-50 border-amber-200 text-amber-900'
-            : 'bg-emerald-50 border-gray-200 text-emerald-800'
+            : 'bg-primary/10 border-black/5 text-primary'
         }`}
       >
         <div className="flex items-center gap-2.5 min-w-0">
-          <Clock className={`h-4 w-4 shrink-0 ${urgent ? 'text-amber-600' : 'text-emerald-700'}`} />
+          <Clock className={`h-4 w-4 shrink-0 ${urgent ? 'text-amber-600' : 'text-primary'}`} />
           <p className="text-sm">
             <span className="font-semibold">Free trial</span>
             {' — '}
@@ -72,7 +72,7 @@ export function TrialBanner() {
           className={`shrink-0 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors ${
             urgent
               ? 'bg-amber-600 text-white hover:bg-amber-700'
-              : 'bg-channel-green text-white hover:bg-[#20bd5a]'
+              : 'bg-primary text-white hover:bg-primary-hover'
           }`}
         >
           <Sparkles className="h-3.5 w-3.5" />

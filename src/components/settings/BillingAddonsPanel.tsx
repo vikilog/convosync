@@ -98,7 +98,7 @@ export function BillingAddonsPanel({ addonCatalog, fx, onPurchased }: BillingAdd
       <div
         key={entry.type}
         className={`rounded-xl border p-4 transition-colors ${
-          highlight ? 'border-sky-200 bg-sky-50/40' : 'border-slate-200 bg-white'
+          highlight ? 'border-sky-200 bg-sky-50/40' : 'border-black/5 bg-surface'
         }`}
       >
         <div className="flex items-start justify-between gap-2">
@@ -201,7 +201,7 @@ export function BillingAddonsPanel({ addonCatalog, fx, onPurchased }: BillingAdd
   if (addonCatalog.length === 0) return null;
 
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-5">
+    <section className="rounded-xl border border-black/5 bg-surface p-5">
       <div>
         <p className="text-sm font-semibold text-slate-900">Add-ons</p>
         <p className="mt-1 text-xs text-slate-500">

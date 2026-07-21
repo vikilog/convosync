@@ -28,6 +28,10 @@ import {
 import { api } from '../lib/api';
 import { useKeepAliveActivation } from './KeepAlive';
 import { ManagerView } from './ManagerView';
+import {
+  WhatsAppProfileSideSheet,
+  type WhatsAppProfileTarget,
+} from './integrations/WhatsAppProfileSideSheet';
 import { InstagramConnectPanel } from './instagram';
 import { MessengerConnectPanel } from './messenger';
 import { EmailPanel } from './integrations/EmailPanel';
@@ -94,6 +98,7 @@ type IntegrationCardProps = {
   iconClass: string;
   connectLabel?: string;
   connectDisabled?: boolean;
+  connectBtnClass?: string;
   onConnect: () => void;
 };
 
@@ -105,10 +110,11 @@ function IntegrationCard({
   iconClass,
   connectLabel = 'Connect',
   connectDisabled,
+  connectBtnClass = 'bg-primary hover:bg-primary-hover',
   onConnect,
 }: IntegrationCardProps) {
   return (
-    <article className="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col h-full shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+    <article className="bg-surface rounded-2xl border border-black/5 p-5 flex flex-col h-full shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
       <div className="flex items-center gap-3 min-w-0">
         <div
           className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${iconBgClass}`}
@@ -126,10 +132,12 @@ function IntegrationCard({
           type="button"
           disabled={connectDisabled}
           onClick={onConnect}
-          className={`w-full px-3 py-2 rounded-lg text-sm font-bold transition-all ${
+          className={`w-full px-3 py-2 rounded-lg text-sm font-bold transition-all border border-transparent ${
             connectDisabled
               ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              : 'bg-channel-green hover:bg-[#20bd5a] text-white'
+              : /\btext-/.test(connectBtnClass)
+                ? connectBtnClass
+                : `${connectBtnClass} text-white`
           }`}
         >
           {connectLabel}
@@ -154,6 +162,7 @@ type WhatsAppAccountSummary = {
   displayName?: string;
   label?: string;
   wabaId?: string;
+  connectionMode?: 'business_api' | 'app_coexistence' | string;
 };
 
 type InstagramAccountSummary = {
@@ -244,23 +253,35 @@ function ConnectedChannelCard({
   const syncBtnClass =
     channel === 'instagram'
       ? 'text-[#C13584] bg-[#fce8f0] border-[#E1306C]/20 hover:bg-[#fad9e8]'
-      : 'text-emerald-700 bg-emerald-50 border-channel-green/20 hover:bg-emerald-100';
+      : channel === 'messenger'
+        ? 'text-[#1877F2] bg-[#e8f4ff] border-[#1877F2]/20 hover:bg-[#d9ecff]'
+        : 'text-channel-green bg-[#e6f7ec] border-channel-green/20 hover:bg-[#d4f5df]';
   const manageBtnClass =
-    'text-channel-green bg-[#e6f7ec] border-channel-green/20 hover:bg-[#d4f5df]';
+    channel === 'email'
+      ? 'text-channel-blue bg-[#e8f4ff] border-channel-blue/25 hover:bg-[#d9ecff]'
+      : channel === 'messenger'
+        ? 'text-[#1877F2] bg-[#e8f4ff] border-[#1877F2]/20 hover:bg-[#d9ecff]'
+        : 'text-channel-green bg-[#e6f7ec] border-channel-green/20 hover:bg-[#d4f5df]';
+  const liveBadgeClass =
+    channel === 'whatsapp'
+      ? 'bg-[#e6f7ec] text-channel-green border-channel-green/20'
+      : channel === 'email' || channel === 'messenger'
+        ? 'bg-[#e8f4ff] text-channel-blue border-channel-blue/25'
+        : 'bg-[#fce8f0] text-[#C13584] border-[#E1306C]/20';
   const statusText =
     channel === 'email' ? 'Connected · Ready to send' : 'Connected · Inbox ready';
   const metaLine = [subtitle, detail].filter(Boolean).join(' · ');
 
   return (
     <article
-      className={`bg-white rounded-xl border ${borderAccent} p-3.5 flex flex-col gap-2.5 h-full shadow-[0_1px_2px_rgba(0,0,0,0.04)]`}
+      className={`bg-surface rounded-xl border ${borderAccent} p-3.5 flex flex-col gap-2.5 h-full shadow-[0_1px_2px_rgba(0,0,0,0.04)]`}
     >
       <div className="flex items-start gap-2.5 min-w-0">
         {avatarUrl ? (
           <img
             src={avatarUrl}
             alt=""
-            className="w-9 h-9 rounded-lg object-cover border border-slate-200 shrink-0"
+            className="w-9 h-9 rounded-lg object-cover border border-black/5 shrink-0"
           />
         ) : (
           <div
@@ -283,7 +304,9 @@ function ConnectedChannelCard({
             <span className="text-[11px] font-black uppercase tracking-wide text-gray-500 truncate">
               {channelLabel}
             </span>
-            <span className="shrink-0 inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-accent-green-bg text-accent-green border border-accent-green/10">
+            <span
+              className={`shrink-0 inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full border ${liveBadgeClass}`}
+            >
               Live
             </span>
           </div>
@@ -301,7 +324,7 @@ function ConnectedChannelCard({
               type="button"
               onClick={onManage}
               aria-label={`Manage ${title}`}
-              className="p-1 rounded-md text-gray-400 hover:text-primary hover:bg-sky-50 transition-colors cursor-pointer"
+              className="p-1 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition-colors cursor-pointer"
             >
               <Settings className="w-3.5 h-3.5" />
             </button>
@@ -356,13 +379,14 @@ function ConnectedChannelCard({
 type WhatsAppGroupedCardProps = {
   accounts: WhatsAppAccountSummary[];
   onManage: () => void;
+  onEditProfile?: (account: WhatsAppAccountSummary) => void;
 };
 
-function WhatsAppGroupedCard({ accounts, onManage }: WhatsAppGroupedCardProps) {
+function WhatsAppGroupedCard({ accounts, onManage, onEditProfile }: WhatsAppGroupedCardProps) {
   const shownAccounts = accounts.slice(0, 3);
   const remainingCount = accounts.length - shownAccounts.length;
   return (
-    <article className="bg-white rounded-xl border border-channel-green/20 p-3 flex flex-col gap-2.5 h-full shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+    <article className="bg-surface rounded-xl border border-channel-green/20 p-3 flex flex-col gap-2.5 h-full shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-[#e6f7ec]">
@@ -397,7 +421,21 @@ function WhatsAppGroupedCard({ accounts, onManage }: WhatsAppGroupedCardProps) {
         {shownAccounts.map((account) => {
           const title = account.label || account.displayName || 'WhatsApp Business';
           const phone = account.phoneNumber || account.phoneNumberId;
-          return (
+          const isBusinessApi = (account.connectionMode || 'business_api') !== 'app_coexistence';
+          const canEdit = isBusinessApi && Boolean(onEditProfile);
+          return canEdit ? (
+            <button
+              key={account.id}
+              type="button"
+              onClick={() => onEditProfile?.(account)}
+              className="inline-flex max-w-full items-center gap-1 rounded-md bg-slate-50 border border-slate-100 px-2 py-1 text-[10px] leading-none hover:border-channel-green/40 hover:bg-[#e6f7ec] transition-colors cursor-pointer"
+              title={`Edit business profile · ${title} · ${phone}`}
+            >
+              <span className="font-semibold text-gray-800 truncate">{title}</span>
+              <span className="text-gray-400">•</span>
+              <span className="text-gray-600 truncate">{phone}</span>
+            </button>
+          ) : (
             <div
               key={account.id}
               className="inline-flex max-w-full items-center gap-1 rounded-md bg-slate-50 border border-slate-100 px-2 py-1 text-[10px] leading-none"
@@ -434,9 +472,9 @@ function ConnectedAdsToolCard({
   onManage: () => void;
 }) {
   return (
-    <article className="bg-white rounded-xl border border-sky-200/60 p-3.5 flex flex-col gap-2.5 h-full shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+    <article className="bg-surface rounded-xl border border-black/5 p-3.5 flex flex-col gap-2.5 h-full shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
       <div className="flex items-start gap-2.5 min-w-0">
-        <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-sky-50 border border-slate-200">
+        <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-sky-50 border border-black/5">
           {icon}
         </div>
         <div className="min-w-0 flex-1">
@@ -448,7 +486,7 @@ function ConnectedAdsToolCard({
       <button
         type="button"
         onClick={onManage}
-        className="mt-auto w-full px-3 py-2 rounded-lg text-sm font-bold text-channel-green bg-[#e6f7ec] border border-channel-green/20 hover:bg-[#d4f5df] transition-colors cursor-pointer"
+        className="mt-auto w-full px-3 py-2 rounded-lg text-sm font-bold text-primary bg-primary/10 border border-primary/20 hover:bg-primary/15 transition-colors cursor-pointer"
       >
         Manage
       </button>
@@ -488,6 +526,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
   const [emailError, setEmailError] = useState('');
   const [channelUsage, setChannelUsage] = useState<ChannelUsageSummary | null>(null);
   const [hubLoading, setHubLoading] = useState(true);
+  const [waProfileTarget, setWaProfileTarget] = useState<WhatsAppProfileTarget | null>(null);
   const [metaAdsConnected, setMetaAdsConnected] = useState(false);
   const [googleAdsConnected, setGoogleAdsConnected] = useState(false);
   const [metaAdsAccountName, setMetaAdsAccountName] = useState<string | null>(null);
@@ -1024,7 +1063,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
             Back to integrations
           </button>
 
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4">
+          <div className="bg-surface border border-black/5 rounded-2xl p-6 space-y-4">
             <div className="flex items-center gap-3">
               <div className="w-11 h-11 rounded-xl bg-[#e8f4ff] text-channel-blue flex items-center justify-center">
                 <Mail className="w-5 h-5" />
@@ -1053,7 +1092,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
               type="button"
               disabled={enablingEmail || isChannelLimitReached}
               onClick={() => void handleEnableEmail()}
-              className="w-full px-4 py-2.5 bg-channel-green hover:bg-[#20bd5a] disabled:opacity-60 text-white text-sm font-bold rounded-xl transition-all"
+              className="w-full px-4 py-2.5 bg-primary hover:bg-primary-hover disabled:opacity-60 text-white text-sm font-bold rounded-xl transition-all"
             >
               {isChannelLimitReached ? 'Channel limit reached' : enablingEmail ? 'Enabling…' : 'Enable Email'}
             </button>
@@ -1145,7 +1184,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
           <ArrowLeft className="w-3.5 h-3.5" />
           Back to integrations
         </button>
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 text-center space-y-3">
+        <div className="bg-surface border border-black/5 rounded-2xl p-6 text-center space-y-3">
           <h3 className="text-lg font-black text-gray-950">{channel.title}</h3>
           <p className="text-sm text-gray-500 font-medium">{channel.description}</p>
           <span className="inline-block text-sm font-black uppercase tracking-wider px-3 py-1 rounded-full bg-[#f3eeff] text-primary">
@@ -1272,32 +1311,38 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
   }
 
   const whatsappConnected = whatsappAccounts.length > 0;
+  const coexistenceConnected =
+    whatsappAccounts.some((a) => a.connectionMode === 'app_coexistence') ||
+    (typeof window !== 'undefined' &&
+      localStorage.getItem('convosync_whatsapp_coexistence_connected') === '1');
   const instagramConnected = instagramAccounts.length > 0;
   const emailConnected = emailStatus.connected;
   const hasConnectedChannels = whatsappConnected || instagramConnected || emailConnected;
+  const hasAddableChannels =
+    !whatsappConnected || !coexistenceConnected || !instagramConnected || !emailConnected;
 
   if (hubLoading) {
     return (
       <div className="w-full space-y-5 pb-8 animate-scale-up" aria-busy="true" aria-label="Loading integrations">
         <section className="space-y-3">
-          <div className="h-4 w-40 rounded-md bg-slate-100 animate-pulse" />
+          <div className="h-4 w-40 rounded-md skel animate-pulse" />
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
             {Array.from({ length: 3 }).map((_, i) => (
               <div
                 key={`connected-skel-${i}`}
-                className="rounded-xl border border-slate-200 bg-white p-3.5 space-y-3 animate-pulse"
+                className="rounded-xl border border-black/5 bg-surface p-3.5 space-y-3 animate-pulse"
               >
                 <div className="flex items-start gap-2.5">
-                  <div className="h-9 w-9 rounded-lg bg-slate-100 shrink-0" />
+                  <div className="h-9 w-9 rounded-lg skel shrink-0" />
                   <div className="flex-1 space-y-2 pt-0.5">
-                    <div className="h-2.5 w-16 rounded bg-slate-100" />
-                    <div className="h-3.5 w-2/3 rounded bg-slate-100" />
-                    <div className="h-2.5 w-1/2 rounded bg-slate-100" />
+                    <div className="h-2.5 w-16 rounded skel" />
+                    <div className="h-3.5 w-2/3 rounded skel" />
+                    <div className="h-2.5 w-1/2 rounded skel" />
                   </div>
                 </div>
                 <div className="border-t border-slate-100 pt-2 flex justify-between">
-                  <div className="h-2.5 w-24 rounded bg-slate-100" />
-                  <div className="h-6 w-16 rounded-md bg-slate-100" />
+                  <div className="h-2.5 w-24 rounded skel" />
+                  <div className="h-6 w-16 rounded-md skel" />
                 </div>
               </div>
             ))}
@@ -1305,35 +1350,35 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
         </section>
 
         <section className="space-y-3">
-          <div className="h-4 w-32 rounded-md bg-slate-100 animate-pulse" />
+          <div className="h-4 w-32 rounded-md skel animate-pulse" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {Array.from({ length: 3 }).map((_, i) => (
               <div
                 key={`add-skel-${i}`}
-                className="rounded-2xl border border-slate-200 bg-white p-5 space-y-4 animate-pulse"
+                className="rounded-2xl border border-black/5 bg-surface p-5 space-y-4 animate-pulse"
               >
-                <div className="h-11 w-11 rounded-xl bg-slate-100" />
+                <div className="h-11 w-11 rounded-xl skel" />
                 <div className="space-y-2">
-                  <div className="h-4 w-28 rounded bg-slate-100" />
-                  <div className="h-3 w-full rounded bg-slate-100" />
-                  <div className="h-3 w-4/5 rounded bg-slate-100" />
+                  <div className="h-4 w-28 rounded skel" />
+                  <div className="h-3 w-full rounded skel" />
+                  <div className="h-3 w-4/5 rounded skel" />
                 </div>
-                <div className="h-9 w-full rounded-xl bg-slate-100" />
+                <div className="h-9 w-full rounded-xl skel" />
               </div>
             ))}
           </div>
         </section>
 
         <section className="space-y-3">
-          <div className="h-4 w-36 rounded-md bg-slate-100 animate-pulse" />
+          <div className="h-4 w-36 rounded-md skel animate-pulse" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 space-y-4 animate-pulse">
-              <div className="h-11 w-11 rounded-xl bg-slate-100" />
+            <div className="rounded-2xl border border-black/5 bg-surface p-5 space-y-4 animate-pulse">
+              <div className="h-11 w-11 rounded-xl skel" />
               <div className="space-y-2">
-                <div className="h-4 w-24 rounded bg-slate-100" />
-                <div className="h-3 w-full rounded bg-slate-100" />
+                <div className="h-4 w-24 rounded skel" />
+                <div className="h-3 w-full rounded skel" />
               </div>
-              <div className="h-9 w-full rounded-xl bg-slate-100" />
+              <div className="h-9 w-full rounded-xl skel" />
             </div>
           </div>
         </section>
@@ -1365,6 +1410,14 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
               <WhatsAppGroupedCard
                 accounts={whatsappAccounts}
                 onManage={openWhatsappChannel}
+                onEditProfile={(account) =>
+                  setWaProfileTarget({
+                    phoneNumberId: account.phoneNumberId,
+                    phoneNumber: account.phoneNumber,
+                    displayName: account.displayName || account.label,
+                    connectionMode: account.connectionMode,
+                  })
+                }
               />
             )}
 
@@ -1412,6 +1465,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
         </section>
       )}
 
+      {hasAddableChannels && (
       <section>
         <h3 className="text-sm font-black text-gray-950 mb-3">Add a channel</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1424,21 +1478,24 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
                 iconClass="text-channel-green"
                 connectLabel={isChannelLimitReached ? 'Limit reached' : 'Connect'}
                 connectDisabled={isChannelLimitReached}
+                connectBtnClass="bg-channel-green hover:bg-[#20bd5a]"
                 onConnect={openWhatsappChannel}
               />
             )}
 
-            <IntegrationCard
-              title="WhatsApp Coexistence"
-              description="Keep using WhatsApp Business App on your phone while syncing the same number to ConvoSync."
-              icon={Phone}
-              iconBgClass="bg-[#e6f7ec]"
-              iconClass="text-channel-green"
-              connectLabel={isChannelLimitReached ? 'Limit reached' : 'Connect'}
-              connectDisabled={isChannelLimitReached}
-              onConnect={openWhatsappCoexistenceChannel}
-            />
-
+            {!coexistenceConnected && (
+              <IntegrationCard
+                title="WhatsApp Coexistence"
+                description="Keep using WhatsApp Business App on your phone while syncing the same number to ConvoSync."
+                icon={Phone}
+                iconBgClass="bg-[#e6f7ec]"
+                iconClass="text-channel-green"
+                connectLabel={isChannelLimitReached ? 'Limit reached' : 'Connect'}
+                connectDisabled={isChannelLimitReached}
+                connectBtnClass="bg-channel-green hover:bg-[#20bd5a]"
+                onConnect={openWhatsappCoexistenceChannel}
+              />
+            )}
             {!instagramConnected && (
               <IntegrationCard
                 title="Instagram"
@@ -1466,6 +1523,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
             )}
           </div>
         </section>
+      )}
 
       <section>
         <h3 className="text-sm font-black text-gray-950 mb-3">AI & automation</h3>
@@ -1477,10 +1535,18 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
             iconBgClass="bg-violet-50"
             iconClass="text-violet-600"
             connectLabel="Manage"
+            connectBtnClass="text-violet-700 bg-violet-50 border-violet-200 hover:bg-violet-100"
             onConnect={openAiChannel}
           />
         </div>
       </section>
+
+      <WhatsAppProfileSideSheet
+        open={Boolean(waProfileTarget)}
+        account={waProfileTarget}
+        onClose={() => setWaProfileTarget(null)}
+        onSaved={() => void loadWhatsappAccounts()}
+      />
     </div>
   );
 };

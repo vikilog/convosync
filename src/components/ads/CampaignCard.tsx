@@ -36,7 +36,7 @@ const InsightsRow: React.FC<{
       ? [{ label: 'WA Convos', value: fmt(waConversations || 0), icon: <MessageSquare className="w-3.5 h-3.5" />, color: 'text-green-700 bg-green-50' }]
       : []),
     ...(insights.roas
-      ? [{ label: 'ROAS', value: `${insights.roas}x`, icon: <TrendingUp className="w-3.5 h-3.5" />, color: 'text-emerald-600 bg-emerald-50' }]
+      ? [{ label: 'ROAS', value: `${insights.roas}x`, icon: <TrendingUp className="w-3.5 h-3.5" />, color: 'text-primary bg-primary/10' }]
       : []),
   ];
 
@@ -72,10 +72,10 @@ export const CampaignCard: React.FC<{
 
   return (
     <article
-      className={`bg-white rounded-2xl border overflow-hidden flex flex-col transition-all duration-200 ${
+      className={`bg-surface rounded-2xl border overflow-hidden flex flex-col transition-all duration-200 ${
         campaign.status === 'PAUSED'
           ? 'border-yellow-200 opacity-90'
-          : 'border-slate-200 hover:border-sky-200 hover:shadow-md'
+          : 'border-black/5 hover:border-sky-200 hover:shadow-md'
       }`}
     >
       <div className="h-44 bg-slate-100 flex items-center justify-center relative overflow-hidden">

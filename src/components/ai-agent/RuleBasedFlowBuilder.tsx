@@ -302,7 +302,7 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
   return (
     <div className="flex flex-col h-full min-h-0 bg-[#eef0f3] overflow-hidden">
       {/* Top bar */}
-      <div className="h-14 shrink-0 bg-white border-b border-slate-200 px-5 grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+      <div className="h-14 shrink-0 bg-surface border-b border-slate-200 px-5 grid grid-cols-[1fr_auto_1fr] items-center gap-4">
         <div className="flex items-center gap-2 min-w-0">
           <input
             type="text"
@@ -351,7 +351,7 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
             <button
               type="button"
               onClick={() => loadSample(SAMPLE_AGENT_FLOW)}
-              className="px-3 py-2 text-sm font-bold text-sky-600 bg-[#f0f9ff] border border-sky-100 rounded-lg hover:bg-sky-50"
+              className="px-3 py-2 text-sm font-bold text-primary bg-primary/5 border border-primary/20 rounded-lg hover:bg-primary/5"
               title={SAMPLE_FLOW_TEST_HINTS.join(' ')}
             >
               Sample: Support
@@ -406,7 +406,7 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
                     key={item.type}
                     type="button"
                     onClick={() => addNode(item.type)}
-                    className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-medium text-gray-700 rounded-lg hover:bg-[#f0f9ff] hover:text-sky-600 transition-colors text-left"
+                    className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-medium text-gray-700 rounded-lg hover:bg-primary/5 hover:text-primary transition-colors text-left"
                   >
                     <span className="text-gray-400">{item.icon}</span>
                     <span className="truncate">{item.label}</span>
@@ -432,7 +432,7 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
               <button
                 type="button"
                 onClick={() => addNode('branch')}
-                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-medium text-gray-700 rounded-lg hover:bg-[#f0f9ff] hover:text-sky-600 transition-colors text-left"
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-medium text-gray-700 rounded-lg hover:bg-primary/5 hover:text-primary transition-colors text-left"
               >
                 <GitBranch className="w-4 h-4 shrink-0 text-gray-400" />
                 Branch
@@ -494,9 +494,9 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
                           onClick={() =>
                             type === 'keyword' ? startKeywordConfig() : setPanelMode('click_button')
                           }
-                          className="w-full text-left p-4 rounded-xl border-2 border-slate-200 bg-white hover:border-[#c4b5fd] transition-all"
+                          className="w-full text-left p-4 rounded-xl border-2 border-slate-200 bg-white hover:border-primary/40 transition-all"
                         >
-                          <p className="text-sm font-bold text-sky-600 mb-1">
+                          <p className="text-sm font-bold text-primary mb-1">
                             {TRIGGER_LABELS[type]}
                           </p>
                           <p className="text-xs text-gray-500 leading-relaxed">
@@ -510,7 +510,7 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
                   {panelMode === 'click_button' && (
                     <div className="p-5">
                       <div className="p-4 rounded-xl border-2 border-[#7c3aed] bg-[#faf5ff]">
-                        <p className="text-sm font-bold text-sky-600 mb-1">
+                        <p className="text-sm font-bold text-primary mb-1">
                           {TRIGGER_LABELS.click_button}
                         </p>
                         <p className="text-xs text-gray-500 leading-relaxed">
@@ -557,7 +557,7 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
                                 onChange={(e) =>
                                   setDraftMatchRule(e.target.value as KeywordMatchRule)
                                 }
-                                className="w-full border border-slate-200 rounded-lg py-2.5 px-3 text-sm bg-white focus:ring-2 focus:ring-[#0284c7]/20 outline-none"
+                                className="w-full border border-slate-200 rounded-lg py-2.5 px-3 text-sm bg-white focus:ring-2 focus:ring-primary/20 outline-none"
                               >
                                 {MATCH_RULE_OPTIONS.map((opt) => (
                                   <option key={opt.value} value={opt.value}>
@@ -578,10 +578,10 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
                                         value={keyword}
                                         onChange={(e) => updateDraftKeyword(index, e.target.value)}
                                         placeholder="Please enter"
-                                        className={`flex-1 border rounded-lg py-2.5 px-3 text-sm outline-none focus:ring-2 focus:ring-[#0284c7]/20 ${
+                                        className={`flex-1 border rounded-lg py-2.5 px-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 ${
                                           showError
                                             ? 'border-red-400 focus:border-red-400'
-                                            : 'border-slate-200 focus:border-channel-green'
+                                            : 'border-slate-200 focus:border-primary'
                                         }`}
                                       />
                                       <button
@@ -604,7 +604,7 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
                             <button
                               type="button"
                               onClick={addDraftKeyword}
-                              className="flex items-center gap-1.5 text-sm font-bold text-sky-600 hover:text-[#4a3de0]"
+                              className="flex items-center gap-1.5 text-sm font-bold text-primary hover:text-primary-hover"
                             >
                               <Plus className="w-3.5 h-3.5" />
                               Keyword
@@ -685,7 +685,7 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
                       <React.Fragment key={node.id}>
                         <FlowConnector onAdd={() => addNode(node.type)} />
                         <FlowNodeCard
-                          headerClass="bg-channel-green"
+                          headerClass="bg-primary"
                           title={node.title}
                           body={<span className="text-gray-400">Configure in next step</span>}
                         />

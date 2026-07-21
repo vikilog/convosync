@@ -9,6 +9,7 @@ import { Loader2, Plus, Search, User, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { api } from '../../lib/api';
 import { mapContactFromApi } from '../../lib/mappers';
+import type { WhatsAppInboxAccount } from '../../hooks/inbox/useInboxMeta';
 
 type WhatsAppContactRow = {
   id: string;
@@ -23,11 +24,17 @@ function isWhatsAppPhone(phone: string): boolean {
   return /^\+[1-9]\d{6,14}$/.test(normalized);
 }
 
+function accountLabel(acc: WhatsAppInboxAccount): string {
+  return acc.label || acc.displayName || acc.phoneNumber || acc.phoneNumberId;
+}
+
 type Props = {
   open: boolean;
   onClose: () => void;
-  onSelectContact: (contactId: string) => Promise<void>;
-  onAddNewContact: () => void;
+  onSelectContact: (contactId: string, phoneNumberId?: string) => Promise<void>;
+  onAddNewContact: (phoneNumberId?: string) => void;
+  /** Connected WhatsApp lines the user can send from (already scope-filtered). */
+  whatsappAccounts?: WhatsAppInboxAccount[];
   error?: string | null;
 };
 
@@ -36,6 +43,7 @@ export function InboxNewChatPicker({
   onClose,
   onSelectContact,
   onAddNewContact,
+  whatsappAccounts = [],
   error,
 }: Props) {
   const [search, setSearch] = useState('');
@@ -43,6 +51,13 @@ export function InboxNewChatPicker({
   const [loadError, setLoadError] = useState<string | null>(null);
   const [contacts, setContacts] = useState<WhatsAppContactRow[]>([]);
   const [selectingId, setSelectingId] = useState<string | null>(null);
+  const [fromPhoneNumberId, setFromPhoneNumberId] = useState('');
+
+  const needsFromPick = whatsappAccounts.length > 1;
+  const resolvedFromId = needsFromPick
+    ? fromPhoneNumberId
+    : whatsappAccounts[0]?.phoneNumberId || undefined;
+  const canProceed = !needsFromPick || Boolean(fromPhoneNumberId);
 
   const loadContacts = useCallback(async () => {
     setLoading(true);
@@ -74,6 +89,7 @@ export function InboxNewChatPicker({
     setSearch('');
     setLoadError(null);
     setSelectingId(null);
+    setFromPhoneNumberId('');
   }, [open]);
 
   useEffect(() => {
@@ -91,9 +107,10 @@ export function InboxNewChatPicker({
   }, [loadError, search]);
 
   const handleSelect = async (contactId: string) => {
+    if (!canProceed) return;
     setSelectingId(contactId);
     try {
-      await onSelectContact(contactId);
+      await onSelectContact(contactId, resolvedFromId);
     } catch {
       // Parent surfaces error
     } finally {
@@ -123,9 +140,9 @@ export function InboxNewChatPicker({
             initial={{ opacity: 0, scale: 0.98, y: 8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.98, y: 8 }}
-            className="fixed left-1/2 top-[12%] z-[100] w-[min(100vw-2rem,400px)] -translate-x-1/2 bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden"
+            className="fixed left-1/2 top-[12%] z-[100] w-[min(100vw-2rem,400px)] -translate-x-1/2 bg-surface border border-black/5 rounded-2xl shadow-2xl overflow-hidden"
           >
-            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-black/5">
               <div>
                 <h2 id="new-wa-chat-title" className="text-sm font-black text-gray-900">
                   New WhatsApp chat
@@ -144,7 +161,31 @@ export function InboxNewChatPicker({
               </button>
             </div>
 
-            <div className="p-3 border-b border-slate-200">
+            {needsFromPick && (
+              <div className="px-4 py-3 border-b border-black/5 bg-slate-50">
+                <label
+                  htmlFor="new-wa-chat-from"
+                  className="block text-xs font-bold text-gray-700 mb-1.5"
+                >
+                  Send from which number?
+                </label>
+                <select
+                  id="new-wa-chat-from"
+                  value={fromPhoneNumberId}
+                  onChange={(e) => setFromPhoneNumberId(e.target.value)}
+                  className="w-full bg-surface border border-black/5 rounded-lg py-2 px-3 text-sm font-medium text-gray-900 focus:ring-2 focus:ring-sky-200 focus:border-sky-500 outline-none"
+                >
+                  <option value="">Select a WhatsApp number…</option>
+                  {whatsappAccounts.map((acc) => (
+                    <option key={acc.phoneNumberId} value={acc.phoneNumberId}>
+                      {accountLabel(acc)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <div className="p-3 border-b border-black/5">
               <div className="relative">
                 <Search className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
@@ -152,8 +193,8 @@ export function InboxNewChatPicker({
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search by name or phone…"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 pl-9 pr-3 text-sm focus:ring-2 focus:ring-sky-200 focus:border-sky-500 outline-none"
-                  autoFocus
+                  className="w-full bg-slate-50 border border-black/5 rounded-lg py-2 pl-9 pr-3 text-sm focus:ring-2 focus:ring-sky-200 focus:border-sky-500 outline-none"
+                  autoFocus={!needsFromPick}
                 />
               </div>
             </div>
@@ -179,9 +220,10 @@ export function InboxNewChatPicker({
                     <button
                       key={contact.id}
                       type="button"
-                      disabled={Boolean(selectingId)}
+                      disabled={Boolean(selectingId) || !canProceed}
                       onClick={() => void handleSelect(contact.id)}
                       className="w-full text-left px-4 py-3 hover:bg-sky-50 transition-colors flex items-center gap-3 disabled:opacity-60"
+                      title={!canProceed ? 'Select a WhatsApp number first' : undefined}
                     >
                       <div className="w-9 h-9 rounded-full bg-[#e6f7ec] text-[#128C7E] flex items-center justify-center shrink-0">
                         <User className="w-4 h-4" />
@@ -202,11 +244,13 @@ export function InboxNewChatPicker({
               )}
             </div>
 
-            <div className="p-3 border-t border-slate-200 bg-slate-50">
+            <div className="p-3 border-t border-black/5 bg-slate-50">
               <button
                 type="button"
-                onClick={onAddNewContact}
-                className="w-full py-2.5 rounded-xl bg-gray-950 hover:bg-black text-white text-sm font-bold flex items-center justify-center gap-2 transition-colors"
+                disabled={!canProceed}
+                onClick={() => onAddNewContact(resolvedFromId)}
+                className="w-full py-2.5 rounded-xl bg-gray-950 hover:bg-black text-white text-sm font-bold flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                title={!canProceed ? 'Select a WhatsApp number first' : undefined}
               >
                 <Plus className="w-4 h-4" />
                 Add new contact

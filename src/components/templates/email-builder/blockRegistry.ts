@@ -91,7 +91,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
     defaultProps: {
       rawHtml: `<h2 style="margin:0 0 12px;font-size:22px;">Hello {{first_name}},</h2>
 <p style="margin:0 0 16px;line-height:1.6;color:#374151;">Your custom HTML content goes here.</p>
-<a href="{{cta_url}}" style="display:inline-block;background:#0284c7;color:#fff;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:600;">Get started</a>`,
+<a href="{{cta_url}}" style="display:inline-block;background:#064e3b;color:#fff;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:600;">Get started</a>`,
     },
   },
 ];

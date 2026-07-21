@@ -156,7 +156,7 @@ export function ProfilePanel() {
   return (
     <div className="mx-auto w-full max-w-4xl space-y-3">
       {message && (
-        <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700">
+        <p className="rounded-lg border border-primary/20 bg-primary/10 px-3 py-2 text-sm font-medium text-primary">
           {message}
         </p>
       )}
@@ -166,7 +166,7 @@ export function ProfilePanel() {
         </p>
       )}
 
-      <div className="border border-slate-200 bg-white p-4 md:p-5">
+      <div className="border border-black/5 bg-surface p-4 md:p-5">
         <h3 className="mb-3 text-sm font-semibold text-slate-900">Profile photo</h3>
         <div className="flex flex-wrap items-center gap-4">
           <div className="relative">
@@ -225,7 +225,7 @@ export function ProfilePanel() {
 
       <form
         onSubmit={(e) => void handleSaveName(e)}
-        className="space-y-4 border border-slate-200 bg-white p-4 md:p-5"
+        className="space-y-4 border border-black/5 bg-surface p-4 md:p-5"
       >
         <div className="mb-1 flex items-center gap-2">
           <User className="w-4 h-4 text-primary" />
@@ -274,7 +274,7 @@ export function ProfilePanel() {
 
       <form
         onSubmit={(e) => void handleChangePassword(e)}
-        className="space-y-4 border border-slate-200 bg-white p-4 md:p-5"
+        className="space-y-4 border border-black/5 bg-surface p-4 md:p-5"
       >
         <div className="mb-1 flex items-center gap-2">
           <Lock className="w-4 h-4 text-primary" />
@@ -331,7 +331,7 @@ export function ProfilePanel() {
         </div>
       </form>
 
-      <section className="border border-slate-200 bg-white p-4 md:p-5">
+      <section className="border border-black/5 bg-surface p-4 md:p-5">
         <div className="mb-1 flex items-center gap-2">
           <LogOut className="h-4 w-4 text-slate-500" aria-hidden />
           <h3 className="text-sm font-semibold text-slate-900">Sign out</h3>

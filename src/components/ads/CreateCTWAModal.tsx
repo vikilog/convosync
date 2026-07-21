@@ -35,7 +35,7 @@ export const CreateCTWAModal: React.FC<{
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl w-full max-w-xl shadow-2xl border border-slate-200">
+      <div className="bg-surface rounded-2xl w-full max-w-xl shadow-2xl border border-black/5">
         <div className="flex items-center justify-between p-5 border-b border-slate-200">
           <div>
             <h3 className="font-black text-gray-900 text-sm flex items-center gap-2">
@@ -263,7 +263,7 @@ export const CreateCTWAModal: React.FC<{
             type="button"
             onClick={step === 3 ? () => void onCreate(form) : () => setStep((s) => s + 1)}
             disabled={(step === 1 && !form.campaignName) || creating}
-            className="px-5 py-2 bg-channel-green hover:bg-[#20bd5a] disabled:bg-gray-200 disabled:cursor-not-allowed text-white text-sm font-bold rounded-xl flex items-center gap-2 cursor-pointer transition-colors"
+            className="px-5 py-2 bg-primary hover:bg-primary-hover disabled:bg-gray-200 disabled:cursor-not-allowed text-white text-sm font-bold rounded-xl flex items-center gap-2 cursor-pointer transition-colors"
           >
             {creating ? (
               'Launching…'

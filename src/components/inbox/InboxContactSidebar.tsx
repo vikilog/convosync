@@ -9,7 +9,6 @@ import {
   History,
   MessageSquare,
   Pencil,
-  Phone,
   Sparkles,
   Tag,
   Trash2,
@@ -22,12 +21,12 @@ import {
   ContactJourneyPanel,
   type ContactJourneyProgress,
 } from './ContactJourneyPanel';
-import { ConversationCallRecordings } from './ConversationCallRecordings';
 import { ContactInsightPanel } from './ContactInsightPanel';
 
 type JourneyOption = { id: string; name: string };
 
-type SidebarTab = 'profile' | 'calls' | 'ai';
+// ponytail: 'calls' parked for later release — re-add Phone + ConversationCallRecordings
+type SidebarTab = 'profile' | 'ai';
 
 type Props = {
   contact: Contact;
@@ -47,7 +46,6 @@ type Props = {
 
 const TABS: { id: SidebarTab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { id: 'profile', label: 'Profile', icon: User },
-  { id: 'calls', label: 'Calls', icon: Phone },
   { id: 'ai', label: 'AI Summary', icon: Sparkles },
 ];
 
@@ -62,7 +60,7 @@ function tagStyles(tag: string): string {
   if (normalized.includes('cold')) {
     return 'bg-sky-50 text-sky-600 border-sky-100';
   }
-  return 'bg-slate-50 text-slate-600 border-slate-200';
+  return 'bg-surface-muted text-slate-600 border-black/5';
 }
 
 function DetailRow({
@@ -96,7 +94,7 @@ function DetailRow({
 
 export const InboxContactSidebar: React.FC<Props> = ({
   contact,
-  conversationId,
+  conversationId: _conversationId, // ponytail: used by Calls tab when re-enabled
   assigneeLabel,
   journeyProgress,
   journeyInitialLoading,
@@ -120,9 +118,9 @@ export const InboxContactSidebar: React.FC<Props> = ({
     .toUpperCase();
 
   return (
-    <section className="flex h-full w-full xl:w-[380px] shrink-0 flex-col border-l border-slate-200 bg-slate-50 text-left">
+    <section className="flex h-full w-full xl:w-[380px] shrink-0 flex-col border-l border-black/5 bg-surface-muted text-left">
       {onClose && (
-        <div className="flex items-center justify-between border-b border-slate-200 bg-white px-3 py-2.5 xl:hidden">
+        <div className="flex items-center justify-between border-b border-black/5 bg-surface px-3 py-2.5 xl:hidden">
           <p className="text-sm font-bold text-gray-900">Contact details</p>
           <button
             type="button"
@@ -138,7 +136,7 @@ export const InboxContactSidebar: React.FC<Props> = ({
       <div
         role="tablist"
         aria-label="Contact sidebar"
-        className="shrink-0 flex border-b border-slate-200 bg-white px-2 pt-2 gap-0.5"
+        className="shrink-0 flex border-b border-black/5 bg-surface px-2 pt-2 gap-0.5"
       >
         {TABS.map(({ id, label, icon: Icon }) => {
           const active = tab === id;
@@ -151,8 +149,8 @@ export const InboxContactSidebar: React.FC<Props> = ({
               onClick={() => setTab(id)}
               className={`flex flex-1 items-center justify-center gap-1.5 rounded-t-lg px-2 py-2 text-[11px] font-bold transition-colors cursor-pointer ${
                 active
-                  ? 'bg-slate-50 text-sky-700 border border-b-0 border-slate-200'
-                  : 'text-gray-500 hover:text-gray-800 hover:bg-slate-50/80'
+                  ? 'bg-surface-muted text-sky-700 border border-b-0 border-black/5'
+                  : 'text-gray-500 hover:text-gray-800 hover:bg-surface-muted/80'
               }`}
             >
               <Icon className={`h-3.5 w-3.5 shrink-0 ${active ? 'text-sky-600' : ''}`} />
@@ -168,7 +166,7 @@ export const InboxContactSidebar: React.FC<Props> = ({
           hidden={tab !== 'profile'}
           className={tab === 'profile' ? 'space-y-3' : 'hidden'}
         >
-            <article className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <article className="rounded-2xl border border-black/5 bg-surface p-4 shadow-sm">
               <div className="flex flex-col items-center text-center">
                 {contact.avatar ? (
                   <img
@@ -215,7 +213,7 @@ export const InboxContactSidebar: React.FC<Props> = ({
                 (contact.instagramBio ||
                   contact.instagramFollowerCount ||
                   contact.instagramVerified) && (
-                  <div className="mt-4 border-t border-slate-200 pt-3 text-left">
+                  <div className="mt-4 border-t border-black/5 pt-3 text-left">
                     {contact.instagramBio && (
                       <p className="text-xs leading-relaxed text-gray-600 whitespace-pre-wrap">
                         {contact.instagramBio}
@@ -258,7 +256,7 @@ export const InboxContactSidebar: React.FC<Props> = ({
                 )}
             </article>
 
-            <article className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+            <article className="rounded-2xl border border-black/5 bg-surface p-3 shadow-sm">
               <h4 className="px-1 text-xs font-bold text-gray-500">Contact details</h4>
               <div className="mt-1 divide-y divide-slate-100">
                 <DetailRow icon={MessageSquare} label="Source" value={contact.source || '—'} />
@@ -296,18 +294,13 @@ export const InboxContactSidebar: React.FC<Props> = ({
             />
         </div>
 
-        {/* Keep mounted so tab switches don't remount / re-fetch; prefetch while on Profile */}
-        <div role="tabpanel" hidden={tab !== 'calls'} className={tab === 'calls' ? '' : 'hidden'}>
-          <ConversationCallRecordings conversationId={conversationId} />
-        </div>
-
         <div role="tabpanel" hidden={tab !== 'ai'} className={tab === 'ai' ? '' : 'hidden'}>
           <ContactInsightPanel contactId={contact.id} />
         </div>
       </div>
 
       {tab === 'profile' && (
-        <div className="shrink-0 border-t border-slate-200 bg-white/90 p-3 backdrop-blur-sm">
+        <div className="shrink-0 border-t border-black/5 bg-surface/90 p-3 backdrop-blur-sm">
           <p className="mb-2 px-1 text-[11px] font-bold uppercase tracking-wide text-gray-400">
             Actions
           </p>
@@ -315,7 +308,7 @@ export const InboxContactSidebar: React.FC<Props> = ({
             <button
               type="button"
               onClick={onEditContact}
-              className="flex cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-bold text-gray-800 transition-colors hover:border-sky-200 hover:bg-slate-50"
+              className="flex cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-black/5 bg-surface px-3 py-2.5 text-xs font-bold text-gray-800 transition-colors hover:border-sky-200 hover:bg-surface-muted"
             >
               <Pencil className="h-3.5 w-3.5 text-sky-600" />
               Edit
@@ -323,7 +316,7 @@ export const InboxContactSidebar: React.FC<Props> = ({
             <button
               type="button"
               onClick={onViewAudits}
-              className="flex cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-bold text-gray-800 transition-colors hover:border-sky-200 hover:bg-slate-50"
+              className="flex cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-black/5 bg-surface px-3 py-2.5 text-xs font-bold text-gray-800 transition-colors hover:border-sky-200 hover:bg-surface-muted"
             >
               <History className="h-3.5 w-3.5 text-gray-500" />
               Audits

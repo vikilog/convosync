@@ -16,7 +16,7 @@ function ScorePill({
   accent: string;
 }) {
   return (
-    <div className="rounded-xl border border-slate-100 bg-slate-50/80 px-2.5 py-2 text-center">
+    <div className="rounded-xl border border-slate-100 bg-surface-muted/80 px-2.5 py-2 text-center">
       <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">{label}</p>
       <p className={`mt-0.5 text-lg font-black tabular-nums ${accent}`}>
         {value == null ? '—' : value}
@@ -140,7 +140,7 @@ export function ContactInsightPanel({ contactId }: { contactId: string }) {
       )}
 
       {!loading && !insight && !error && !excludeFromInsights && (
-        <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm text-center">
+        <article className="rounded-2xl border border-black/5 bg-surface p-5 shadow-sm text-center">
           <span className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-sky-50 text-sky-600">
             <Sparkles className="h-5 w-5" />
           </span>
@@ -153,7 +153,7 @@ export function ContactInsightPanel({ contactId }: { contactId: string }) {
       )}
 
       {!loading && insight && (
-        <article className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm space-y-3">
+        <article className="rounded-2xl border border-black/5 bg-surface p-3 shadow-sm space-y-3">
           <p className="text-[10px] font-semibold text-slate-400">
             {new Date(insight.computedAt).toLocaleString()} · {insight.modelVersion}
             {insight.basedOnCallSessionIds.length

@@ -268,7 +268,7 @@ export const CannedResponsesPanel: React.FC<Props> = ({
             {selectedId === 'new' && (
               <button
                 type="button"
-                className="w-full text-left px-4 py-3.5 border-b border-slate-200/80 bg-[#faf9ff] relative"
+                className="w-full text-left px-4 py-3.5 border-b border-slate-200/80 bg-primary/[0.04] relative"
               >
                 <span className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-r" />
                 <p className="text-sm font-bold text-gray-900 pl-2">New Canned Response</p>
@@ -282,7 +282,7 @@ export const CannedResponsesPanel: React.FC<Props> = ({
                   type="button"
                   onClick={() => setSelectedId(item.id)}
                   className={`w-full text-left px-4 py-3.5 border-b border-slate-200/80 transition-colors relative ${
-                    active ? 'bg-[#faf9ff]' : 'hover:bg-gray-50'
+                    active ? 'bg-primary/[0.04]' : 'hover:bg-gray-50'
                   }`}
                 >
                   {active && (
@@ -454,7 +454,7 @@ export const CannedResponsesPanel: React.FC<Props> = ({
                     type="button"
                     disabled={!canSave}
                     onClick={() => void handleSave()}
-                    className="px-5 py-2 bg-channel-green hover:bg-[#20bd5a] disabled:opacity-50 text-white rounded-lg text-sm font-bold"
+                    className="px-5 py-2 bg-primary hover:bg-primary-hover disabled:opacity-50 text-white rounded-lg text-sm font-bold"
                   >
                     {saving ? 'Saving…' : selectedId === 'new' ? 'Create' : 'Save'}
                   </button>

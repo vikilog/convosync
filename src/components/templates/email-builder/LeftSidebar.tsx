@@ -49,7 +49,7 @@ function BlockPaletteItem({
       }}
       className="flex items-start gap-3 p-3 rounded-xl border border-slate-200 bg-white hover:border-primary/40 hover:shadow-sm cursor-grab active:cursor-grabbing transition-all"
     >
-      <span className="shrink-0 w-9 h-9 rounded-lg bg-[#eef2ff] text-primary text-sm font-black flex items-center justify-center">
+      <span className="shrink-0 w-9 h-9 rounded-lg bg-primary/10 text-primary text-sm font-black flex items-center justify-center">
         {icon}
       </span>
       <div className="min-w-0">
@@ -126,7 +126,7 @@ export function LeftSidebar() {
               >
                 <p className="text-sm font-semibold text-gray-900">{t.name}</p>
                 <p className="text-xs text-gray-500 mt-0.5">{t.description}</p>
-                <span className="inline-block mt-2 text-sm font-bold uppercase tracking-wide text-primary bg-[#eef2ff] px-2 py-0.5 rounded">
+                <span className="inline-block mt-2 text-sm font-bold uppercase tracking-wide text-primary bg-primary/10 px-2 py-0.5 rounded">
                   {t.category}
                 </span>
               </button>

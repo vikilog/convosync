@@ -45,7 +45,7 @@ function NodeAddButton({ nodeId, nodeType }: { nodeId: string; nodeType: Journey
           left: rect.left + rect.width / 2,
         });
       }}
-      className="absolute -bottom-4 left-1/2 z-10 flex h-8 w-8 -translate-x-1/2 items-center justify-center rounded-full border-2 border-white bg-primary text-white shadow-lg transition-all duration-200 hover:scale-105 hover:bg-[#20bd5a] hover:shadow-xl cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+      className="absolute -bottom-4 left-1/2 z-10 flex h-8 w-8 -translate-x-1/2 items-center justify-center rounded-full border-2 border-white bg-primary text-white shadow-lg transition-all duration-200 hover:scale-105 hover:bg-primary-hover hover:shadow-xl cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
       title="Add next step"
       aria-label="Add next step"
     >
@@ -117,7 +117,7 @@ function NodeShell({
               type="source"
               position={Position.Right}
               style={{ top: '42%' }}
-              className="!h-2.5 !w-2.5 !border-2 !border-white !bg-emerald-500"
+              className="!h-2.5 !w-2.5 !border-2 !border-white !bg-primary"
             />
             <Handle
               id="no"
@@ -127,7 +127,7 @@ function NodeShell({
               className="!h-2.5 !w-2.5 !border-2 !border-white !bg-rose-500"
             />
             <div className="flex justify-end gap-4 border-t border-slate-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-400">
-              <span className="text-emerald-600">Yes</span>
+              <span className="text-primary">Yes</span>
               <span className="text-rose-500">No</span>
             </div>
           </>

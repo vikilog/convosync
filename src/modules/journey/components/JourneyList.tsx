@@ -14,13 +14,13 @@ export function JourneyList({ journeys, loading, onCreate, onOpen, onDelete }: P
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-black text-gray-950">Journeys</h2>
+          <h2 className="font-display text-lg font-black text-gray-950">Journeys</h2>
           <p className="text-xs text-gray-500">Automate WhatsApp workflows with triggers, delays, and branches.</p>
         </div>
         <button
           type="button"
           onClick={onCreate}
-          className="inline-flex items-center gap-2 rounded-full bg-channel-green px-4 py-2 text-sm font-bold text-white"
+          className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-hover transition-colors"
         >
           <Plus className="w-4 h-4" />
           New journey
@@ -33,15 +33,15 @@ export function JourneyList({ journeys, loading, onCreate, onOpen, onDelete }: P
           Loading journeys…
         </div>
       ) : journeys.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-10 text-center">
+        <div className="rounded-2xl border border-dashed border-black/10 bg-surface p-10 text-center">
           <Workflow className="w-8 h-8 text-primary mx-auto mb-3" />
           <p className="font-bold text-gray-900">No journeys yet</p>
           <p className="text-sm text-gray-500 mt-1">Create your first automation workflow.</p>
         </div>
       ) : (
-        <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
+        <div className="rounded-2xl border border-black/5 bg-surface overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-left text-xs uppercase tracking-wider text-gray-400">
+            <thead className="bg-surface-muted text-left text-xs uppercase tracking-wider text-gray-400">
               <tr>
                 <th className="px-4 py-3 font-bold">Name</th>
                 <th className="px-4 py-3 font-bold">Status</th>
@@ -52,7 +52,7 @@ export function JourneyList({ journeys, loading, onCreate, onOpen, onDelete }: P
             </thead>
             <tbody>
               {journeys.map((j) => (
-                <tr key={j.id} className="border-t border-slate-200 hover:bg-slate-50">
+                <tr key={j.id} className="border-t border-black/5 hover:bg-surface-muted">
                   <td className="px-4 py-3">
                     <button
                       type="button"
@@ -66,7 +66,7 @@ export function JourneyList({ journeys, loading, onCreate, onOpen, onDelete }: P
                     <span
                       className={`text-sm font-black uppercase px-2 py-0.5 rounded-full ${
                         j.status === 'published'
-                          ? 'bg-emerald-50 text-emerald-700'
+                          ? 'bg-primary/10 text-primary'
                           : 'bg-gray-100 text-gray-600'
                       }`}
                     >

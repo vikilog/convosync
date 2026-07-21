@@ -146,7 +146,7 @@ export function UsageMeteringSection({ refreshKey = 0 }: { refreshKey?: number }
   }, [load, refreshKey]);
 
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] md:p-6">
+    <section className="rounded-xl border border-black/5 bg-surface p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] md:p-6">
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-start gap-3">
           <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-violet-50 text-violet-600">
@@ -185,7 +185,7 @@ export function UsageMeteringSection({ refreshKey = 0 }: { refreshKey?: number }
             </thead>
             <tbody className="divide-y divide-slate-100">
               {rows.map((row) => (
-                <tr key={row.feature} className="bg-white">
+                <tr key={row.feature} className="bg-surface">
                   <td className="px-4 py-3 font-medium text-slate-900">{row.feature}</td>
                   <td className="px-4 py-3 text-slate-600">{row.billing}</td>
                   <td className={`px-4 py-3 text-slate-600 ${row.usageClass ?? ''}`}>

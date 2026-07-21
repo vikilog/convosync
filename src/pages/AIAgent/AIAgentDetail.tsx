@@ -43,6 +43,8 @@ function toProfileData(agent: AgentBot): AgentProfileData {
     actions: agent.actions ?? [],
     voiceAgentEnabled: Boolean(agent.voiceAgentEnabled),
     voiceSttProvider: agent.voiceSttProvider || 'cartesia',
+    voiceTtsProvider: agent.voiceTtsProvider || 'cartesia',
+    voiceTtsVoiceId: agent.voiceTtsVoiceId ?? null,
   };
 }
 
@@ -102,6 +104,8 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
     actions: patch.actions,
     voiceAgentEnabled: patch.voiceAgentEnabled,
     voiceSttProvider: patch.voiceSttProvider,
+    voiceTtsProvider: patch.voiceTtsProvider,
+    voiceTtsVoiceId: patch.voiceTtsVoiceId,
     isPublished: patch.isPublished,
   });
 
@@ -121,6 +125,8 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
       actions: mergedProfile.actions,
       voiceAgentEnabled: mergedProfile.voiceAgentEnabled,
       voiceSttProvider: mergedProfile.voiceSttProvider,
+      voiceTtsProvider: mergedProfile.voiceTtsProvider,
+      voiceTtsVoiceId: mergedProfile.voiceTtsVoiceId,
       isPublished: mergedProfile.isPublished,
     });
     void persist({
@@ -134,6 +140,8 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
       actions: mergedProfile.actions,
       voiceAgentEnabled: mergedProfile.voiceAgentEnabled,
       voiceSttProvider: mergedProfile.voiceSttProvider,
+      voiceTtsProvider: mergedProfile.voiceTtsProvider,
+      voiceTtsVoiceId: mergedProfile.voiceTtsVoiceId,
       isPublished: mergedProfile.isPublished,
     }).then(() => {
       setLastAutoSavedAt(formatSavedTime(new Date()));
@@ -163,7 +171,7 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
         <button
           type="button"
           onClick={() => navigate(pathForTab('ai-agent'))}
-          className="mt-4 text-sm font-bold text-sky-600 hover:underline"
+          className="mt-4 text-sm font-bold text-primary hover:underline"
         >
           Back to agents
         </button>
@@ -174,15 +182,15 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
     `block px-3 py-2 rounded-lg text-sm transition-colors ${
       isActive
-        ? 'bg-[#F3F0FF] text-sky-600 font-bold'
-        : 'text-[#6B7280] hover:bg-[#F8FAFC] hover:text-[#111827]'
+        ? 'bg-primary/10 text-primary font-bold'
+        : 'text-[#6B7280] hover:bg-surface-muted hover:text-[#111827]'
     }`;
 
   const subNavLinkClass = ({ isActive }: { isActive: boolean }) =>
     `block pl-8 pr-3 py-2 rounded-lg text-sm transition-colors ${
       isActive
-        ? 'bg-[#F3F0FF] text-sky-600 font-bold'
-        : 'text-[#6B7280] hover:bg-[#F8FAFC] hover:text-[#111827]'
+        ? 'bg-primary/10 text-primary font-bold'
+        : 'text-[#6B7280] hover:bg-surface-muted hover:text-[#111827]'
     }`;
 
   const mobileNavOptions = [
@@ -210,7 +218,7 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
             id="agent-section-mobile"
             value={mobileNavValue}
             onChange={(e) => navigate(e.target.value)}
-            className="w-full rounded-xl border border-[#E5E7EB] bg-white px-3 py-2.5 text-sm font-semibold text-[#111827]"
+            className="w-full rounded-xl border border-black/5 bg-surface px-3 py-2.5 text-sm font-semibold text-[#111827]"
           >
             {mobileNavOptions.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -220,7 +228,7 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
           </select>
         </div>
 
-        <aside className="hidden lg:block w-[280px] shrink-0 border border-[#E5E7EB] rounded-xl bg-white p-4 h-fit sticky top-6">
+        <aside className="hidden lg:block w-[280px] shrink-0 border border-black/5 rounded-xl bg-surface p-4 h-fit sticky top-6">
           <button
             type="button"
             onClick={() => navigate(pathForTab('ai-agent'))}
@@ -233,7 +241,7 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
           </button>
           {lastAutoSavedAt && section === 'profile' && (
             <p className="flex items-center gap-1.5 text-xs text-[#6B7280] mb-4 pl-6">
-              <CloudCheck className="w-3.5 h-3.5 text-sky-600" />
+              <CloudCheck className="w-3.5 h-3.5 text-primary" />
               Auto Saved at {lastAutoSavedAt}
             </p>
           )}
@@ -289,7 +297,7 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
           ) : section === 'knowledge' ? (
             <KnowledgeBase agentId={agentId} />
           ) : section === 'flows' && agent.category === 'rule_based' ? (
-            <div className="h-full min-h-[520px] w-full rounded-xl border border-[#E5E7EB] overflow-hidden bg-[#eef0f3]">
+            <div className="h-full min-h-[520px] w-full rounded-xl border border-black/5 overflow-hidden bg-[#eef0f3]">
               <RuleBasedFlowBuilder
                 flow={agent.flowDefinition ?? defaultAgentFlowDefinition()}
                 saving={saving}

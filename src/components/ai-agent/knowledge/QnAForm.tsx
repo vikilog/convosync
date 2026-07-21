@@ -78,8 +78,8 @@ export const QnAForm: React.FC<Props> = ({ onChange }) => {
           }}
           className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-bold border transition-colors ${
             bulkMode === 'paste'
-              ? 'border-[#0284c7] bg-[#F3F0FF] text-sky-700'
-              : 'border-[#E5E7EB] text-[#111827] hover:border-[#0284c7]'
+              ? 'border-primary bg-primary/10 text-primary'
+              : 'border-black/5 text-[#111827] hover:border-primary'
           }`}
         >
           <ClipboardPaste className="w-4 h-4" />
@@ -92,7 +92,7 @@ export const QnAForm: React.FC<Props> = ({ onChange }) => {
             setBulkError(null);
             fileRef.current?.click();
           }}
-          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-bold border border-[#E5E7EB] text-[#111827] hover:border-[#0284c7]"
+          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-bold border border-black/5 text-[#111827] hover:border-primary"
         >
           <FileUp className="w-4 h-4" />
           Import file
@@ -116,7 +116,7 @@ export const QnAForm: React.FC<Props> = ({ onChange }) => {
             onChange={(e) => setPasteText(e.target.value)}
             rows={8}
             placeholder={`Paste FAQs here, e.g.\n\nQ: What are your hours?\nA: Mon–Fri 9 AM–6 PM.\n\nQ: Do you ship internationally?\nA: Yes, to most countries.`}
-            className="w-full border border-[#E5E7EB] rounded-xl py-2.5 px-3 text-sm font-mono resize-y focus:ring-2 focus:ring-[#0284c7]/20 focus:border-[#0284c7] outline-none"
+            className="w-full border border-black/5 rounded-xl py-2.5 px-3 text-sm font-mono resize-y focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
           />
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <p className="text-xs text-[#6B7280]">
@@ -126,7 +126,7 @@ export const QnAForm: React.FC<Props> = ({ onChange }) => {
               type="button"
               disabled={!pasteText.trim()}
               onClick={() => applyParsed(pasteText)}
-              className="px-4 py-2 bg-[#1E1B2E] hover:bg-black disabled:opacity-50 text-white rounded-xl text-sm font-bold"
+              className="px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-50 text-white rounded-xl text-sm font-bold"
             >
               Load FAQs
             </button>
@@ -140,7 +140,7 @@ export const QnAForm: React.FC<Props> = ({ onChange }) => {
       )}
 
       {pairs.map((pair, index) => (
-        <div key={index} className="p-4 border border-[#E5E7EB] rounded-xl space-y-3 relative">
+        <div key={index} className="p-4 border border-black/5 rounded-xl space-y-3 relative">
           {pairs.length > 1 && (
             <button
               type="button"
@@ -159,7 +159,7 @@ export const QnAForm: React.FC<Props> = ({ onChange }) => {
               value={pair.question}
               onChange={(e) => updatePair(index, { question: e.target.value })}
               placeholder="What are your business hours?"
-              className="w-full border border-[#E5E7EB] rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-[#0284c7]/20 focus:border-[#0284c7] outline-none"
+              className="w-full border border-black/5 rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
             />
           </div>
           <div>
@@ -169,7 +169,7 @@ export const QnAForm: React.FC<Props> = ({ onChange }) => {
               onChange={(e) => updatePair(index, { answer: e.target.value })}
               placeholder="We are open Monday to Friday, 9 AM to 6 PM."
               rows={3}
-              className="w-full border border-[#E5E7EB] rounded-xl py-2.5 px-3 text-sm resize-none focus:ring-2 focus:ring-[#0284c7]/20 focus:border-[#0284c7] outline-none"
+              className="w-full border border-black/5 rounded-xl py-2.5 px-3 text-sm resize-none focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
             />
           </div>
         </div>
@@ -178,7 +178,7 @@ export const QnAForm: React.FC<Props> = ({ onChange }) => {
       <button
         type="button"
         onClick={addPair}
-        className="inline-flex items-center gap-1.5 text-sm font-bold text-sky-600 hover:text-[#5a52e0]"
+        className="inline-flex items-center gap-1.5 text-sm font-bold text-primary hover:text-primary-hover"
       >
         <Plus className="w-4 h-4" />
         Add another Q&A

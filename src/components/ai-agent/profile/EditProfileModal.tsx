@@ -45,8 +45,8 @@ export const EditProfileModal: React.FC<Props> = ({ profile, onClose, onSave, sa
 
   return (
     <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-lg border border-[#E5E7EB] shadow-2xl">
-        <div className="flex justify-between items-center px-6 py-4 border-b border-[#E5E7EB]">
+      <div className="bg-surface rounded-2xl w-full max-w-lg border border-black/5 shadow-2xl">
+        <div className="flex justify-between items-center px-6 py-4 border-b border-black/5">
           <h3 className="text-base font-bold text-[#111827]">Edit profile</h3>
           <button type="button" onClick={onClose} className="text-[#6B7280] hover:text-[#111827]">
             <X className="w-5 h-5" />
@@ -61,13 +61,13 @@ export const EditProfileModal: React.FC<Props> = ({ profile, onClose, onSave, sa
                 type="button"
                 onClick={() => fileRef.current?.click()}
                 disabled={uploading || saving}
-                className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border border-[#E5E7EB] bg-[#F3F0FF] focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+                className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border border-black/5 bg-primary/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                 aria-label="Upload bot image"
               >
                 {avatarUrl ? (
                   <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
                 ) : (
-                  <span className="flex h-full w-full items-center justify-center text-sky-600">
+                  <span className="flex h-full w-full items-center justify-center text-primary">
                     <Camera className="h-6 w-6" />
                   </span>
                 )}
@@ -82,7 +82,7 @@ export const EditProfileModal: React.FC<Props> = ({ profile, onClose, onSave, sa
                   type="button"
                   onClick={() => fileRef.current?.click()}
                   disabled={uploading || saving}
-                  className="rounded-xl border border-[#E5E7EB] bg-white px-3 py-2 text-sm font-bold text-[#111827] hover:bg-slate-50 disabled:opacity-60"
+                  className="rounded-xl border border-black/5 bg-surface px-3 py-2 text-sm font-bold text-[#111827] hover:bg-surface-muted disabled:opacity-60"
                 >
                   {avatarUrl ? 'Change image' : 'Upload image'}
                 </button>
@@ -120,7 +120,7 @@ export const EditProfileModal: React.FC<Props> = ({ profile, onClose, onSave, sa
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full border border-[#E5E7EB] rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-[#0284c7]/20 focus:border-[#0284c7] outline-none"
+              className="w-full border border-black/5 rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
             />
           </div>
 
@@ -130,7 +130,7 @@ export const EditProfileModal: React.FC<Props> = ({ profile, onClose, onSave, sa
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-              className="w-full border border-[#E5E7EB] rounded-xl py-2.5 px-3 text-sm resize-none focus:ring-2 focus:ring-[#0284c7]/20 focus:border-[#0284c7] outline-none"
+              className="w-full border border-black/5 rounded-xl py-2.5 px-3 text-sm resize-none focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
             />
           </div>
 
@@ -145,7 +145,7 @@ export const EditProfileModal: React.FC<Props> = ({ profile, onClose, onSave, sa
             <button
               type="submit"
               disabled={saving || uploading}
-              className="px-4 py-2 bg-channel-green hover:bg-[#20bd5a] disabled:opacity-60 text-white rounded-xl text-sm font-bold"
+              className="px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-60 text-white rounded-xl text-sm font-bold"
             >
               {saving ? 'Saving…' : 'Save'}
             </button>

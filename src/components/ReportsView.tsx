@@ -31,14 +31,14 @@ export const ReportsView: React.FC = () => {
     <div className="flex-1 space-y-6 max-w-7xl mx-auto pb-12 text-left selection:bg-sky-50">
       
       {/* HEADER CONTROLS WITH DATE RANGE SELECTORS */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-white border border-slate-200 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.01)] select-none">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-surface border border-black/5 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.01)] select-none">
         <div>
-          <h3 className="font-sans font-black text-gray-900 text-base leading-none">Reports & Operational Intelligence</h3>
+          <h3 className="font-display font-black text-gray-900 text-base leading-none">Reports & Operational Intelligence</h3>
           <p className="text-xs text-gray-400 mt-1.5 font-medium">Analyze conversation metrics, response times, and agent resolution ratings.</p>
         </div>
 
         {/* Date Selector range select */}
-        <div className="flex items-center gap-2 bg-slate-50 p-1.5 rounded-xl border border-border-subtle">
+        <div className="flex items-center gap-2 bg-surface-muted p-1.5 rounded-xl border border-black/5">
           <Calendar className="w-3.5 h-3.5 text-gray-400 ml-1.5" />
           <select className="bg-transparent border-none text-sm font-bold text-gray-800 focus:ring-0 cursor-pointer focus:outline-none">
             <option>Today: Oct 24, 2026</option>
@@ -53,7 +53,7 @@ export const ReportsView: React.FC = () => {
         {reportsData.map((data, idx) => {
           const Icon = data.icon;
           return (
-            <div key={idx} className="bg-white p-5 rounded-2xl border border-border-subtle hover:border-primary/10 hover:shadow-md transition-all">
+            <div key={idx} className="bg-surface p-5 rounded-2xl border border-black/5 hover:border-primary/10 hover:shadow-md transition-all">
               <div className="flex justify-between items-start mb-3">
                 <div className={`p-2 rounded-xl ${data.color}`}>
                   <Icon className="w-5 h-5" />
@@ -73,7 +73,7 @@ export const ReportsView: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         {/* Weekly Hour density */}
-        <div className="lg:col-span-8 bg-white border border-slate-200 p-6 rounded-2xl flex flex-col text-left">
+        <div className="lg:col-span-8 bg-surface border border-black/5 p-6 rounded-2xl flex flex-col text-left">
           <div className="mb-6">
             <h4 className="font-bold text-gray-950 text-sm">Response loops hourly density</h4>
             <p className="text-xs text-gray-400">Activity volume distributed across corporate operating hours</p>
@@ -117,8 +117,8 @@ export const ReportsView: React.FC = () => {
         </div>
 
         {/* Leaderboard details columns */}
-        <div className="lg:col-span-4 bg-white border border-slate-200 rounded-2xl flex flex-col overflow-hidden h-[360px]">
-          <div className="p-4 border-b border-slate-200 bg-gray-50 text-left">
+        <div className="lg:col-span-4 bg-surface border border-black/5 rounded-2xl flex flex-col overflow-hidden h-[360px]">
+          <div className="p-4 border-b border-black/5 bg-surface-muted text-left">
             <h4 className="font-bold text-gray-900 text-xs uppercase tracking-wider">Agent Lead Conversion</h4>
           </div>
           <div className="flex-1 overflow-y-auto divide-y divide-gray-55">

@@ -85,7 +85,7 @@ export function InstagramConnectPanel({
   const canConnect = hasValidAppId && !loading;
 
   return (
-    <div className="bg-white border-2 border-[#E1306C]/25 rounded-2xl p-6 sm:p-8 shadow-[0_8px_32px_rgba(225,48,108,0.1)]">
+    <div className="bg-surface border-2 border-[#E1306C]/25 rounded-2xl p-6 sm:p-8 shadow-[0_8px_32px_rgba(225,48,108,0.1)]">
       <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-black uppercase tracking-wider bg-[#fce8f0] text-[#C13584] border border-[#E1306C]/20 mb-4">
         <Instagram className="w-3 h-3" />
         Instagram Business
@@ -107,7 +107,7 @@ export function InstagramConnectPanel({
         type="button"
         onClick={() => void handleConnect()}
         disabled={!canConnect}
-        className="mt-6 inline-flex items-center justify-center gap-2 px-6 py-3 bg-channel-green hover:bg-[#20bd5a] disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-xl text-sm font-black shadow-md transition-all"
+        className="mt-6 inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary-hover disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-xl text-sm font-black shadow-md transition-all"
       >
         {loading ? 'Redirecting to Meta…' : 'Continue with Facebook'}
       </button>

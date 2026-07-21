@@ -34,8 +34,11 @@ export function whatsappInboxDedupeKey(conv: {
 
   const contactPhone = conv.contact?.phone ?? '';
   if (contactPhone && !contactPhone.startsWith('lid:') && !contactPhone.startsWith('group:')) {
-    const key = whatsappInboxPhoneKey(contactPhone);
-    if (key) return key;
+    const phoneKey = whatsappInboxPhoneKey(contactPhone);
+    if (phoneKey) {
+      const accountId = (conv.channelAccountId || '').trim();
+      return accountId ? `${phoneKey}:${accountId}` : phoneKey;
+    }
   }
 
   return conversationInboxKey(conv);

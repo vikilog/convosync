@@ -129,7 +129,7 @@ export function InboxAssigneePicker({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.15 }}
-            className="absolute right-0 top-full mt-2 z-40 w-64 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden"
+            className="absolute right-0 top-full mt-2 z-40 w-64 bg-surface border border-black/5 rounded-xl shadow-xl overflow-hidden"
           >
             {submenu === 'main' && (
               <div className="py-1">
@@ -219,7 +219,7 @@ export function InboxAssigneePicker({
                 <button
                   type="button"
                   onClick={() => setSubmenu('main')}
-                  className={`${itemClass} text-gray-500 border-b border-slate-200`}
+                  className={`${itemClass} text-gray-500 border-b border-black/5`}
                 >
                   <ChevronLeft className="w-4 h-4 shrink-0" />
                   Back
@@ -252,7 +252,7 @@ export function InboxAssigneePicker({
                 <button
                   type="button"
                   onClick={() => setSubmenu('main')}
-                  className={`${itemClass} text-gray-500 border-b border-slate-200`}
+                  className={`${itemClass} text-gray-500 border-b border-black/5`}
                 >
                   <ChevronLeft className="w-4 h-4 shrink-0" />
                   Back
@@ -285,7 +285,7 @@ export function InboxAssigneePicker({
                 <button
                   type="button"
                   onClick={() => setSubmenu('main')}
-                  className={`${itemClass} text-gray-500 border-b border-slate-200`}
+                  className={`${itemClass} text-gray-500 border-b border-black/5`}
                 >
                   <ChevronLeft className="w-4 h-4 shrink-0" />
                   Back

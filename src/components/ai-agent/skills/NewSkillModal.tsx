@@ -31,8 +31,8 @@ export const NewSkillModal: React.FC<Props> = ({ onClose, onCreate, creating }) 
 
   return (
     <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-md border border-[#E5E7EB] shadow-2xl">
-        <div className="flex justify-between items-center px-6 py-4 border-b border-[#E5E7EB]">
+      <div className="bg-surface rounded-2xl w-full max-w-md border border-black/5 shadow-2xl">
+        <div className="flex justify-between items-center px-6 py-4 border-b border-black/5">
           <h3 className="text-base font-bold text-[#111827]">New Skill</h3>
           <button type="button" onClick={onClose} className="text-[#6B7280] hover:text-[#111827]">
             <X className="w-5 h-5" />
@@ -47,7 +47,7 @@ export const NewSkillModal: React.FC<Props> = ({ onClose, onCreate, creating }) 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search skills or enter a name"
-              className="w-full pl-10 pr-3 py-2.5 border border-[#E5E7EB] rounded-xl text-sm focus:ring-2 focus:ring-[#0284c7]/20 focus:border-[#0284c7] outline-none"
+              className="w-full pl-10 pr-3 py-2.5 border border-black/5 rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
             />
           </div>
 
@@ -58,7 +58,7 @@ export const NewSkillModal: React.FC<Props> = ({ onClose, onCreate, creating }) 
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Enter title here"
-              className="w-full border border-[#E5E7EB] rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-[#0284c7]/20 focus:border-[#0284c7] outline-none"
+              className="w-full border border-black/5 rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
             />
           </div>
 
@@ -70,7 +70,7 @@ export const NewSkillModal: React.FC<Props> = ({ onClose, onCreate, creating }) 
                   key={s}
                   type="button"
                   onClick={() => setTitle(s)}
-                  className="w-full text-left px-3 py-2 rounded-lg text-sm text-[#111827] hover:bg-[#F3F0FF] transition-colors"
+                  className="w-full text-left px-3 py-2 rounded-lg text-sm text-[#111827] hover:bg-primary/10 transition-colors"
                 >
                   {s}
                 </button>
@@ -82,7 +82,7 @@ export const NewSkillModal: React.FC<Props> = ({ onClose, onCreate, creating }) 
             type="button"
             disabled={creating || (!title.trim() && !search.trim())}
             onClick={handleCreate}
-            className="w-full py-2.5 bg-[#1E1B2E] hover:bg-black disabled:opacity-60 text-white rounded-xl text-sm font-bold"
+            className="w-full py-2.5 bg-primary hover:bg-primary-hover disabled:opacity-60 text-white rounded-xl text-sm font-bold"
           >
             {creating ? 'Creating…' : 'Create Skill'}
           </button>

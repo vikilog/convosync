@@ -50,7 +50,7 @@ export const DevelopersView: FC = () => {
             <Code2 className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-sm font-bold text-gray-900">Developers</h2>
+            <h2 className="font-display text-sm font-bold text-gray-900">Developers</h2>
             <p className="text-xs text-gray-500">Integrations & automation</p>
           </div>
         </div>
@@ -66,7 +66,7 @@ export const DevelopersView: FC = () => {
                 className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left text-sm font-semibold transition-colors ${
                   isActive
                     ? 'bg-primary text-white shadow-sm'
-                    : 'text-gray-600 hover:bg-slate-50 hover:text-primary'
+                    : 'text-gray-600 hover:bg-surface-muted hover:text-primary'
                 }`}
               >
                 <Icon className="w-4 h-4 shrink-0" />

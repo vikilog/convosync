@@ -75,13 +75,13 @@ export const SkillsList: React.FC<Props> = ({ agentId }) => {
           <button
             type="button"
             onClick={() => setShowNew(true)}
-            className="px-4 py-2 bg-[#1E1B2E] hover:bg-black text-white rounded-xl text-sm font-bold"
+            className="px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-xl text-sm font-bold"
           >
             + New Skill
           </button>
           <button
             type="button"
-            className="px-4 py-2 border border-[#E5E7EB] text-[#111827] rounded-xl text-sm font-bold hover:bg-[#F8FAFC]"
+            className="px-4 py-2 border border-black/5 text-[#111827] rounded-xl text-sm font-bold hover:bg-surface-muted"
           >
             Learn more
           </button>
@@ -96,12 +96,12 @@ export const SkillsList: React.FC<Props> = ({ agentId }) => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name"
-            className="w-full pl-10 pr-3 py-2 border border-[#E5E7EB] rounded-xl text-sm focus:ring-2 focus:ring-[#0284c7]/20 focus:border-[#0284c7] outline-none"
+            className="w-full pl-10 pr-3 py-2 border border-black/5 rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
           />
         </div>
         <button
           type="button"
-          className="inline-flex items-center gap-1.5 px-3 py-2 border border-[#E5E7EB] rounded-xl text-sm font-medium text-[#6B7280] hover:bg-[#F8FAFC]"
+          className="inline-flex items-center gap-1.5 px-3 py-2 border border-black/5 rounded-xl text-sm font-medium text-[#6B7280] hover:bg-surface-muted"
         >
           Status
           <Info className="w-4 h-4" />
@@ -112,8 +112,8 @@ export const SkillsList: React.FC<Props> = ({ agentId }) => {
         <p className="text-sm text-[#6B7280] text-center py-12">Loading skills…</p>
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="w-16 h-16 rounded-full bg-[#F3F0FF] flex items-center justify-center mb-4">
-            <HelpCircle className="w-8 h-8 text-sky-600" />
+          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+            <HelpCircle className="w-8 h-8 text-primary" />
           </div>
           <p className="text-sm font-medium text-[#6B7280]">No data</p>
         </div>
@@ -124,7 +124,7 @@ export const SkillsList: React.FC<Props> = ({ agentId }) => {
               key={skill.id}
               type="button"
               onClick={() => navigate(pathForAgentSkill(agentId, skill.id))}
-              className="w-full text-left bg-white border border-[#E5E7EB] rounded-xl p-4 hover:border-[#0284c7] hover:bg-[#F3F0FF]/30 transition-colors"
+              className="w-full text-left bg-surface border border-black/5 rounded-xl p-4 hover:border-primary hover:bg-primary/5 transition-colors"
             >
               <div className="flex items-center justify-between gap-3">
                 <p className="text-sm font-bold text-[#111827]">{skill.title}</p>

@@ -16,6 +16,7 @@ import HowItWorks from './components/HowItWorks';
 import UseCases from './components/UseCases';
 import Testimonials from './components/Testimonials';
 import PricingSection from './components/PricingSection';
+import BookDemoSection from './components/BookDemoSection';
 import FinalCta from './components/FinalCta';
 import Footer from './components/Footer';
 
@@ -77,6 +78,8 @@ export default function LandingView() {
       <PricingSection
         onSelectPlan={(planId, isAnnual) => handleStartSignup(planId, isAnnual, 'pricing')}
       />
+
+      <BookDemoSection />
 
       <FinalCta onStartFree={() => handleStartSignup('growth', false, 'final_cta')} />
 

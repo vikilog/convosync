@@ -124,38 +124,39 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         aria-busy="true"
         aria-label="Loading dashboard"
       >
-        <div className="h-14 rounded-xl bg-white ring-1 ring-slate-200/80 animate-pulse" />
+        <div className="h-10 w-48 rounded-lg skel animate-pulse" />
+        <div className="h-14 rounded-xl border border-black/5 bg-surface animate-pulse" />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <div
               key={`stat-skel-${i}`}
-              className="relative overflow-hidden rounded-xl bg-white p-4 ring-1 ring-slate-200/80 animate-pulse"
+              className="relative overflow-hidden rounded-xl border border-black/5 bg-surface p-4 animate-pulse"
             >
-              <div className="absolute inset-x-0 top-0 h-0.5 bg-slate-100" />
+              <div className="absolute inset-x-0 top-0 h-0.5 skel" />
               <div className="flex items-start justify-between gap-3">
                 <div className="space-y-3 flex-1 pt-1">
-                  <div className="h-3 w-24 rounded bg-slate-100" />
-                  <div className="h-8 w-20 rounded bg-slate-100" />
+                  <div className="h-3 w-24 rounded skel" />
+                  <div className="h-8 w-20 rounded skel" />
                 </div>
-                <div className="h-10 w-10 rounded-xl bg-slate-100 shrink-0" />
+                <div className="h-10 w-10 rounded-xl skel shrink-0" />
               </div>
             </div>
           ))}
         </div>
 
-        <div className="rounded-xl bg-white p-5 ring-1 ring-slate-200/80 space-y-4 animate-pulse">
+        <div className="rounded-xl border border-black/5 bg-surface p-5 space-y-4 animate-pulse">
           <div className="flex items-center justify-between gap-3">
-            <div className="h-4 w-44 rounded bg-slate-100" />
-            <div className="h-8 w-28 rounded-lg bg-slate-100" />
+            <div className="h-4 w-44 rounded skel" />
+            <div className="h-8 w-28 rounded-lg skel" />
           </div>
           <div className="space-y-3">
             {Array.from({ length: 3 }).map((_, i) => (
               <div key={`upcoming-skel-${i}`} className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-slate-100 shrink-0" />
+                <div className="h-10 w-10 rounded-xl skel shrink-0" />
                 <div className="flex-1 space-y-2">
-                  <div className="h-3 w-1/2 rounded bg-slate-100" />
-                  <div className="h-2.5 w-1/3 rounded bg-slate-100" />
+                  <div className="h-3 w-1/2 rounded skel" />
+                  <div className="h-2.5 w-1/3 rounded skel" />
                 </div>
               </div>
             ))}
@@ -163,42 +164,42 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
-          <div className="lg:col-span-3 rounded-xl bg-white p-5 ring-1 ring-slate-200/80 space-y-4 animate-pulse">
+          <div className="lg:col-span-3 rounded-xl border border-black/5 bg-surface p-5 space-y-4 animate-pulse">
             <div className="flex items-center justify-between gap-3">
-              <div className="h-4 w-48 rounded bg-slate-100" />
+              <div className="h-4 w-48 rounded skel" />
               <div className="flex gap-2">
-                <div className="h-8 w-12 rounded-lg bg-slate-100" />
-                <div className="h-8 w-12 rounded-lg bg-slate-100" />
-                <div className="h-8 w-12 rounded-lg bg-slate-100" />
+                <div className="h-8 w-12 rounded-lg skel" />
+                <div className="h-8 w-12 rounded-lg skel" />
+                <div className="h-8 w-12 rounded-lg skel" />
               </div>
             </div>
-            <div className="h-56 rounded-xl bg-slate-100" />
+            <div className="h-56 rounded-xl skel" />
           </div>
-          <div className="lg:col-span-2 rounded-xl bg-white p-5 ring-1 ring-slate-200/80 space-y-4 animate-pulse">
-            <div className="h-4 w-36 rounded bg-slate-100" />
+          <div className="lg:col-span-2 rounded-xl border border-black/5 bg-surface p-5 space-y-4 animate-pulse">
+            <div className="h-4 w-36 rounded skel" />
             <div className="space-y-3">
               {Array.from({ length: 4 }).map((_, i) => (
                 <div key={`recent-skel-${i}`} className="space-y-2">
-                  <div className="h-3 w-3/4 rounded bg-slate-100" />
-                  <div className="h-2.5 w-1/2 rounded bg-slate-100" />
+                  <div className="h-3 w-3/4 rounded skel" />
+                  <div className="h-2.5 w-1/2 rounded skel" />
                 </div>
               ))}
             </div>
           </div>
         </div>
 
-        <div className="rounded-xl bg-white p-5 ring-1 ring-slate-200/80 space-y-4 animate-pulse">
+        <div className="rounded-xl border border-black/5 bg-surface p-5 space-y-4 animate-pulse">
           <div className="flex items-center justify-between gap-3">
-            <div className="h-4 w-40 rounded bg-slate-100" />
-            <div className="h-8 w-24 rounded-lg bg-slate-100" />
+            <div className="h-4 w-40 rounded skel" />
+            <div className="h-8 w-24 rounded-lg skel" />
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={`team-skel-${i}`} className="flex items-center gap-3 rounded-xl border border-slate-100 p-3">
-                <div className="h-10 w-10 rounded-full bg-slate-100 shrink-0" />
+              <div key={`team-skel-${i}`} className="flex items-center gap-3 rounded-xl border border-black/5 p-3">
+                <div className="h-10 w-10 rounded-full skel shrink-0" />
                 <div className="flex-1 space-y-2">
-                  <div className="h-3 w-2/3 rounded bg-slate-100" />
-                  <div className="h-2.5 w-1/2 rounded bg-slate-100" />
+                  <div className="h-3 w-2/3 rounded skel" />
+                  <div className="h-2.5 w-1/2 rounded skel" />
                 </div>
               </div>
             ))}
@@ -242,7 +243,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           icon={Clock}
           value={
             <span>
-              4m <span className="text-lg font-medium text-slate-400">32s</span>
+              4m <span className="text-lg font-medium text-neutral-400">32s</span>
             </span>
           }
           label="Avg response time"

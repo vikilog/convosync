@@ -18,8 +18,8 @@ type SharedProps = {
 
 const categoryStyles: Record<AgentBot['category'], { badge: string; avatar: string }> = {
   ai_agent: {
-    badge: 'bg-sky-50 text-sky-700 ring-emerald-100',
-    avatar: 'bg-gradient-to-br from-sky-50 to-violet-50 text-sky-600',
+    badge: 'bg-primary/10 text-primary ring-primary/20',
+    avatar: 'bg-gradient-to-br from-primary/5 to-primary/10 text-primary',
   },
   responsive: {
     badge: 'bg-violet-50 text-violet-700 ring-violet-100',
@@ -41,7 +41,7 @@ function AgentAvatar({ agent, size = 'md' }: { agent: AgentBot; size?: 'md' | 'l
       <img
         src={agent.avatarUrl}
         alt=""
-        className={`${dim} rounded-xl object-cover border border-slate-200 shrink-0`}
+        className={`${dim} rounded-xl object-cover border border-black/5 shrink-0`}
       />
     );
   }
@@ -76,8 +76,8 @@ function StatusBadge({ enabled }: { enabled: boolean }) {
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600">
-      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary">
+      <span className="w-1.5 h-1.5 rounded-full bg-primary" />
       Live
     </span>
   );
@@ -92,7 +92,7 @@ function AgentActionButtons({ onEdit, onDelete, deleting }: AgentActionsProps) {
           e.stopPropagation();
           onEdit();
         }}
-        className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-slate-500 hover:text-sky-600 hover:bg-sky-50 transition-colors cursor-pointer"
+        className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-slate-500 hover:text-primary hover:bg-primary/5 transition-colors cursor-pointer"
         aria-label="Edit agent"
         title="Edit"
       >
@@ -134,7 +134,7 @@ function AgentMeta({ agent }: { agent: AgentBot }) {
 
 export const AgentListRow: React.FC<SharedProps> = ({ agent, onEdit, onDelete, deleting }) => {
   return (
-    <div className="group flex items-center gap-3 px-4 py-3 border-b border-slate-100 last:border-b-0 hover:bg-slate-50/80 transition-colors">
+    <div className="group flex items-center gap-3 px-4 py-3 border-b border-black/5 last:border-b-0 hover:bg-surface-muted/80 transition-colors">
       <button
         type="button"
         onClick={onEdit}
@@ -158,7 +158,7 @@ export const AgentListRow: React.FC<SharedProps> = ({ agent, onEdit, onDelete, d
 
 export const AgentGridCard: React.FC<SharedProps> = ({ agent, onEdit, onDelete, deleting }) => {
   return (
-    <div className="group relative flex flex-col rounded-xl border border-slate-200 bg-white p-4 hover:border-sky-200 hover:shadow-sm transition-all duration-200">
+    <div className="group relative flex flex-col rounded-xl border border-black/5 bg-surface p-4 hover:border-primary/20 hover:shadow-sm transition-all duration-200">
       <div className="flex items-start justify-between gap-2">
         <button type="button" onClick={onEdit} className="flex items-start gap-3 min-w-0 flex-1 text-left cursor-pointer">
           <AgentAvatar agent={agent} size="lg" />
