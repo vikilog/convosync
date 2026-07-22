@@ -14,6 +14,9 @@ type ProfileUser = {
   role?: string;
 };
 
+const inputClass =
+  'mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20';
+
 export function ProfilePanel() {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -148,26 +151,26 @@ export function ProfilePanel() {
   if (loading) {
     return (
       <div className="flex justify-center py-16">
-        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-3">
-      {message && (
-        <p className="rounded-lg border border-primary/20 bg-primary/10 px-3 py-2 text-sm font-medium text-primary">
+    <div className="mx-auto w-full max-w-3xl space-y-4">
+      {message ? (
+        <p className="rounded-xl border border-primary/20 bg-primary/10 px-3 py-2 text-sm font-medium text-primary">
           {message}
         </p>
-      )}
-      {error && (
-        <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
+      ) : null}
+      {error ? (
+        <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
           {error}
         </p>
-      )}
+      ) : null}
 
-      <div className="border border-black/5 bg-surface p-4 md:p-5">
-        <h3 className="mb-3 text-sm font-semibold text-slate-900">Profile photo</h3>
+      <div className="rounded-2xl border border-black/5 bg-surface p-5 shadow-sm md:p-6">
+        <h3 className="mb-4 text-sm font-semibold text-slate-900">Profile photo</h3>
         <div className="flex flex-wrap items-center gap-4">
           <div className="relative">
             {avatarUrl ? (
@@ -177,15 +180,15 @@ export function ProfilePanel() {
                 className="h-20 w-20 rounded-full border border-slate-200 object-cover"
               />
             ) : (
-              <div className="flex h-20 w-20 items-center justify-center rounded-full border border-slate-200 bg-sky-100 text-2xl font-semibold text-sky-700">
+              <div className="flex h-20 w-20 items-center justify-center rounded-full border border-slate-200 bg-primary/10 text-2xl font-semibold text-primary">
                 {initials}
               </div>
             )}
-            {uploadingAvatar && (
-              <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center">
-                <Loader2 className="w-5 h-5 animate-spin text-white" />
+            {uploadingAvatar ? (
+              <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40">
+                <Loader2 className="h-5 w-5 animate-spin text-white" />
               </div>
-            )}
+            ) : null}
           </div>
 
           <div className="space-y-2">
@@ -200,22 +203,22 @@ export function ProfilePanel() {
               type="button"
               disabled={uploadingAvatar}
               onClick={() => fileInputRef.current?.click()}
-              className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-sky-700 px-3.5 text-sm font-medium text-white transition-colors hover:bg-sky-800 disabled:opacity-50"
+              className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50"
             >
-              <Camera className="w-3.5 h-3.5" />
+              <Camera className="h-4 w-4" aria-hidden />
               Upload photo
             </button>
-            {avatarUrl && (
+            {avatarUrl ? (
               <button
                 type="button"
                 disabled={uploadingAvatar}
                 onClick={() => void handleRemoveAvatar()}
-                className="ml-2 inline-flex h-10 items-center gap-1.5 rounded-lg px-3.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50"
+                className="ml-2 inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-red-100 px-3 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50"
               >
-                <Trash2 className="w-3.5 h-3.5" />
+                <Trash2 className="h-4 w-4" aria-hidden />
                 Remove
               </button>
-            )}
+            ) : null}
             <p className="text-xs text-slate-500">
               JPEG, PNG, or WebP. We resize to 256px for faster loading.
             </p>
@@ -225,48 +228,53 @@ export function ProfilePanel() {
 
       <form
         onSubmit={(e) => void handleSaveName(e)}
-        className="space-y-4 border border-black/5 bg-surface p-4 md:p-5"
+        className="space-y-4 rounded-2xl border border-black/5 bg-surface p-5 shadow-sm md:p-6"
       >
         <div className="mb-1 flex items-center gap-2">
-          <User className="w-4 h-4 text-primary" />
+          <User className="h-4 w-4 text-primary" aria-hidden />
           <h3 className="text-sm font-semibold text-slate-900">Basic info</h3>
         </div>
 
-        <label className="block space-y-1">
-          <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Full name</span>
+        <label className="block">
+          <span className="text-meta font-bold uppercase text-gray-500">Full name</span>
           <input
             required
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-200"
+            className={inputClass}
           />
         </label>
 
-        <label className="block space-y-1">
-          <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Email</span>
+        <label className="block">
+          <span className="text-meta font-bold uppercase text-gray-500">Email</span>
           <input
             type="email"
             value={profile.email}
             disabled
-            className="w-full cursor-not-allowed rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500"
+            className={`${inputClass} cursor-not-allowed bg-slate-50 text-slate-500`}
           />
-          <p className="text-xs text-slate-500">Email cannot be changed here.</p>
+          <p className="mt-1 text-xs text-slate-500">Email cannot be changed here.</p>
         </label>
 
-        {profile.role && (
+        {profile.role ? (
           <p className="text-xs font-medium capitalize text-slate-600">
-            Role in this company: <span className="font-semibold text-slate-800">{profile.role}</span>
+            Role in this company:{' '}
+            <span className="font-semibold text-slate-800">{profile.role}</span>
           </p>
-        )}
+        ) : null}
 
         <div className="flex justify-end pt-1">
           <button
             type="submit"
             disabled={savingName || name.trim() === profile.name}
-            className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-sky-700 px-3.5 text-sm font-medium text-white transition-colors hover:bg-sky-800 disabled:opacity-50"
+            className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-primary-hover disabled:opacity-60"
           >
-            {savingName ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+            {savingName ? (
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+            ) : (
+              <Save className="h-4 w-4" aria-hidden />
+            )}
             Save name
           </button>
         </div>
@@ -274,27 +282,27 @@ export function ProfilePanel() {
 
       <form
         onSubmit={(e) => void handleChangePassword(e)}
-        className="space-y-4 border border-black/5 bg-surface p-4 md:p-5"
+        className="space-y-4 rounded-2xl border border-black/5 bg-surface p-5 shadow-sm md:p-6"
       >
         <div className="mb-1 flex items-center gap-2">
-          <Lock className="w-4 h-4 text-primary" />
+          <Lock className="h-4 w-4 text-primary" aria-hidden />
           <h3 className="text-sm font-semibold text-slate-900">Change password</h3>
         </div>
 
-        <label className="block space-y-1">
-          <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Current password</span>
+        <label className="block">
+          <span className="text-meta font-bold uppercase text-gray-500">Current password</span>
           <input
             required
             type="password"
             value={currentPassword}
             onChange={(e) => setCurrentPassword(e.target.value)}
             autoComplete="current-password"
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-200"
+            className={inputClass}
           />
         </label>
 
-        <label className="block space-y-1">
-          <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">New password</span>
+        <label className="block">
+          <span className="text-meta font-bold uppercase text-gray-500">New password</span>
           <input
             required
             type="password"
@@ -302,12 +310,12 @@ export function ProfilePanel() {
             onChange={(e) => setNewPassword(e.target.value)}
             autoComplete="new-password"
             minLength={8}
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-200"
+            className={inputClass}
           />
         </label>
 
-        <label className="block space-y-1">
-          <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Confirm new password</span>
+        <label className="block">
+          <span className="text-meta font-bold uppercase text-gray-500">Confirm new password</span>
           <input
             required
             type="password"
@@ -315,7 +323,7 @@ export function ProfilePanel() {
             onChange={(e) => setConfirmPassword(e.target.value)}
             autoComplete="new-password"
             minLength={8}
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-200"
+            className={inputClass}
           />
         </label>
 
@@ -323,15 +331,19 @@ export function ProfilePanel() {
           <button
             type="submit"
             disabled={savingPassword}
-            className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-sky-700 px-3.5 text-sm font-medium text-white transition-colors hover:bg-sky-800 disabled:opacity-50"
+            className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-primary-hover disabled:opacity-60"
           >
-            {savingPassword ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Lock className="w-3.5 h-3.5" />}
+            {savingPassword ? (
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+            ) : (
+              <Lock className="h-4 w-4" aria-hidden />
+            )}
             Update password
           </button>
         </div>
       </form>
 
-      <section className="border border-black/5 bg-surface p-4 md:p-5">
+      <section className="rounded-2xl border border-black/5 bg-surface p-5 shadow-sm md:p-6">
         <div className="mb-1 flex items-center gap-2">
           <LogOut className="h-4 w-4 text-slate-500" aria-hidden />
           <h3 className="text-sm font-semibold text-slate-900">Sign out</h3>
@@ -349,7 +361,7 @@ export function ProfilePanel() {
                 navigate('/login', { replace: true });
               })();
             }}
-            className="inline-flex h-10 cursor-pointer items-center gap-1.5 rounded-lg border border-red-200 bg-white px-3.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
+            className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-red-200 bg-white px-3.5 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50"
           >
             <LogOut className="h-4 w-4" aria-hidden />
             Log out

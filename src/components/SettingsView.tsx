@@ -171,15 +171,15 @@ export function SettingsView() {
         </aside>
 
         <div className="flex-1 min-w-0 overflow-y-auto bg-surface-muted p-3 md:p-4">
-          <div className="mb-3 border border-black/5 bg-surface px-4 py-3 md:mb-4">
-            <h1 className="font-display text-3xl font-medium tracking-tight text-neutral-900">{title}</h1>
+          <div className="mb-3 rounded-2xl border border-black/5 bg-surface px-4 py-3 shadow-sm md:mb-4 md:px-5">
+            <h1 className="text-xl font-bold tracking-tight text-slate-900 md:text-2xl">{title}</h1>
             <p className="mt-0.5 text-xs text-slate-500 md:text-sm">{subtitle}</p>
           </div>
 
           {currentSectionAllowed ? (
             <SettingsPanel section={section} />
           ) : (
-            <div className="border border-black/5 bg-surface p-4">
+            <div className="rounded-2xl border border-black/5 bg-surface p-4 shadow-sm">
               <p className="text-sm text-slate-600">
                 You do not have permission to view this settings section. Ask an admin to update
                 your access under Users and teams.
