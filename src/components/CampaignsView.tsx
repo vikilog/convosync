@@ -208,7 +208,52 @@ const ChannelIcon: React.FC<{ channel: CampaignChannel; size?: number }> = ({ ch
   return null;
 };
 
-const CONTACT_AUTO_EMAIL_VARIABLES = new Set(['first_name', 'last_name', 'name', 'email', 'phone']);
+const CONTACT_AUTO_EMAIL_VARIABLES = new Set([
+  'first_name',
+  'last_name',
+  'name',
+  'email',
+  'phone',
+  'contact.name',
+  'contact.first_name',
+  'contact.last_name',
+  'contact.email',
+  'contact.phone',
+]);
+
+const WA_CONTACT_FIELD_OPTIONS = [
+  { value: '{{contact.name}}', label: 'Contact name' },
+  { value: '{{contact.first_name}}', label: 'First name' },
+  { value: '{{contact.phone}}', label: 'Phone' },
+  { value: '{{contact.email}}', label: 'Email' },
+] as const;
+
+const WA_PREVIEW_SAMPLES: Record<string, string> = {
+  '{{contact.name}}': 'Alex',
+  '{{contact.first_name}}': 'Alex',
+  '{{contact.phone}}': '+919999999999',
+  '{{contact.email}}': 'alex@example.com',
+};
+
+function defaultWaVariableMappings(
+  variables: string[],
+  prev: Record<string, string> = {}
+): Record<string, string> {
+  const next: Record<string, string> = {};
+  variables.forEach((v, i) => {
+    if (prev[v]?.trim()) {
+      next[v] = prev[v];
+      return;
+    }
+    const lower = v.toLowerCase();
+    if (i === 0 || lower.includes('name') || lower === 'var_1') {
+      next[v] = '{{contact.name}}';
+      return;
+    }
+    next[v] = '';
+  });
+  return next;
+}
 
 // ─── Email Preview ─────────────────────────────────────────
 const EmailTemplatePreview: React.FC<{
@@ -709,13 +754,7 @@ const CampaignsWorkspace: React.FC = () => {
         setTemplates(mapped);
         if (mapped[0]) {
           setSelectedTemplateName(mapped[0].name);
-          setVariableMappings((prev) => {
-            const next: Record<string, string> = {};
-            for (const v of mapped[0].variables) {
-              next[v] = prev[v] ?? '';
-            }
-            return next;
-          });
+          setVariableMappings((prev) => defaultWaVariableMappings(mapped[0].variables, prev));
         }
       })
       .catch((err) => {
@@ -825,7 +864,12 @@ const CampaignsWorkspace: React.FC = () => {
     if (!activeTemplate) return '';
     let text = activeTemplate.bodyPattern;
     activeTemplate.variables.forEach((v, i) => {
-      text = text.replace(`{{${i + 1}}}`, variableMappings[v] || `[${v}]`);
+      const mapped = variableMappings[v]?.trim() || '';
+      const sample =
+        WA_PREVIEW_SAMPLES[mapped] ||
+        (mapped.includes('{{') ? 'Alex' : mapped) ||
+        `[${v}]`;
+      text = text.replace(`{{${i + 1}}}`, sample);
     });
     return text;
   };
@@ -1335,13 +1379,9 @@ const CampaignsWorkspace: React.FC = () => {
                                 setSelectedTemplateName(name);
                                 const tpl = templates.find((t) => t.name === name);
                                 if (tpl) {
-                                  setVariableMappings((prev) => {
-                                    const next: Record<string, string> = {};
-                                    for (const v of tpl.variables) {
-                                      next[v] = prev[v] ?? '';
-                                    }
-                                    return next;
-                                  });
+                                  setVariableMappings((prev) =>
+                                    defaultWaVariableMappings(tpl.variables, prev)
+                                  );
                                 }
                               }}
                               className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm font-bold text-gray-800 outline-none focus:ring-2 focus:ring-primary/15 cursor-pointer"
@@ -1358,24 +1398,54 @@ const CampaignsWorkspace: React.FC = () => {
                               <h4 className="text-sm font-black text-primary uppercase tracking-widest">
                                 Map Placeholder Variables
                               </h4>
-                              {activeTemplate.variables.map((v, i) => (
-                                <div key={i} className="grid grid-cols-3 items-center gap-2">
-                                  <span className="text-sm font-bold text-gray-500 font-mono">
-                                    {'{{' + (i + 1) + '}}'} ({v})
-                                  </span>
-                                  <div className="col-span-2">
-                                    <input
-                                      type="text"
-                                      value={variableMappings[v] || ''}
-                                      onChange={(e) =>
-                                        setVariableMappings((p) => ({ ...p, [v]: e.target.value }))
-                                      }
-                                      placeholder={`Input ${v}`}
-                                      className="w-full bg-white border border-slate-200 rounded-xl py-1.5 px-3 text-xs outline-none focus:ring-2 focus:ring-primary/15 font-bold"
-                                    />
+                              <p className="text-xs text-gray-500 font-medium">
+                                Pick a contact field — each recipient gets their own value. Or choose
+                                custom text for everyone.
+                              </p>
+                              {activeTemplate.variables.map((v, i) => {
+                                const current = variableMappings[v] || '';
+                                const isKnownField = WA_CONTACT_FIELD_OPTIONS.some(
+                                  (o) => o.value === current
+                                );
+                                return (
+                                  <div key={i} className="grid grid-cols-3 items-start gap-2">
+                                    <span className="text-sm font-bold text-gray-500 font-mono pt-1.5">
+                                      {'{{' + (i + 1) + '}}'} ({v})
+                                    </span>
+                                    <div className="col-span-2 space-y-1.5">
+                                      <select
+                                        value={isKnownField ? current : '__custom__'}
+                                        onChange={(e) => {
+                                          const next = e.target.value;
+                                          setVariableMappings((p) => ({
+                                            ...p,
+                                            [v]: next === '__custom__' ? '' : next,
+                                          }));
+                                        }}
+                                        className="w-full bg-white border border-slate-200 rounded-xl py-1.5 px-3 text-xs outline-none focus:ring-2 focus:ring-primary/15 font-bold cursor-pointer"
+                                      >
+                                        {WA_CONTACT_FIELD_OPTIONS.map((o) => (
+                                          <option key={o.value} value={o.value}>
+                                            {o.label}
+                                          </option>
+                                        ))}
+                                        <option value="__custom__">Custom text…</option>
+                                      </select>
+                                      {!isKnownField && (
+                                        <input
+                                          type="text"
+                                          value={current}
+                                          onChange={(e) =>
+                                            setVariableMappings((p) => ({ ...p, [v]: e.target.value }))
+                                          }
+                                          placeholder="Fixed text for all recipients"
+                                          className="w-full bg-white border border-slate-200 rounded-xl py-1.5 px-3 text-xs outline-none focus:ring-2 focus:ring-primary/15 font-bold"
+                                        />
+                                      )}
+                                    </div>
                                   </div>
-                                </div>
-                              ))}
+                                );
+                              })}
                             </div>
                           )}
                         </>

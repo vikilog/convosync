@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useMemo, useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Check, Lock, Mail, User } from 'lucide-react';
 import { PRODUCT_LOGO, PRODUCT_NAME } from '../lib/brand';
 import { api } from '../lib/api';
@@ -12,27 +12,12 @@ import { applyAuthSession, userNeedsOnboarding } from '../lib/session';
 import { connectSocket } from '../lib/socket';
 import { trackEvent } from '../lib/analytics';
 
-const PLAN_LABELS: Record<string, string> = {
-  starter: 'Starter',
-  growth: 'Growth',
-  pro: 'Pro',
-  enterprise: 'Enterprise',
-};
-
 export function SignupPage() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const search = useMemo(() => new URLSearchParams(location.search), [location.search]);
-  const selectedPlan = search.get('plan') ?? 'growth';
-  const billing = search.get('billing') === 'annual' ? 'annual' : 'monthly';
-  const planLabel = PLAN_LABELS[selectedPlan] ?? 'Growth';
 
   useEffect(() => {
-    trackEvent('signup_started', {
-      plan_id: selectedPlan,
-      billing,
-    });
-  }, [selectedPlan, billing]);
+    trackEvent('signup_started', { billing: 'monthly' });
+  }, []);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,10 +38,7 @@ export function SignupPage() {
     activeWorkspaceId?: string;
   }) => {
     applyAuthSession(res);
-    trackEvent('signup_complete', {
-      plan_id: selectedPlan,
-      billing,
-    });
+    trackEvent('signup_complete', { billing: 'monthly' });
     const wsId = res.activeWorkspaceId ?? res.workspace?.id;
     if (wsId) connectSocket(wsId);
     if (userNeedsOnboarding(res.user)) {
@@ -140,12 +122,6 @@ export function SignupPage() {
           <div className="w-full max-w-[420px]">
             <div className="flex items-center gap-2 mb-6 lg:hidden">
               <img src={PRODUCT_LOGO} alt={PRODUCT_NAME} className="h-12 w-12 object-contain" />
-            </div>
-
-            <div className="inline-flex items-center gap-2 rounded-full border border-sky-100 bg-sky-50 px-3 py-1 text-sm font-bold uppercase tracking-wider text-primary mb-4">
-              <span>{planLabel} plan</span>
-              <span className="text-gray-400">·</span>
-              <span className="text-gray-500 normal-case">{billing} billing after trial</span>
             </div>
 
             <h2 className="text-2xl font-bold text-gray-900">Create your free account</h2>

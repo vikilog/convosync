@@ -93,6 +93,8 @@ export interface PricingPlan {
   priceAnnual: number;
   description: string;
   features: string[];
+  /** Short trust / value lines shown beside the feature list */
+  proPoints?: string[];
   ctaText: string;
   isPopular?: boolean;
 }

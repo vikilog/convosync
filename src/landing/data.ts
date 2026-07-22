@@ -395,53 +395,24 @@ export const PRICING_PLANS: PricingPlan[] = [
     id: 'starter',
     name: 'Starter',
     priceMonthly: 1999,
-    priceAnnual: 1599, // 2 months free equivalent approx (1,999 * 10 / 12)
-    description: 'Perfect for small teams and direct storefronts getting started.',
+    priceAnnual: 1999,
+    description: 'Everything a growing team needs to run WhatsApp, Instagram, and email from one inbox.',
     features: [
-      '2,000 m-synced Contacts',
-      '3 core Channels (WA + IG + 1 more)',
+      '2,000 synced Contacts',
+      '4 channels — 2 WhatsApp, 1 Instagram, 1 Email',
       '3 human Team Agents',
-      '1 active AI Agent role',
-      'Basic broadcast campaigns',
+      '1 active AI Agent',
+      'Broadcast campaigns',
       'Visual Journey Builder',
-      'Email and chat support'
+      'Email and chat support',
     ],
-    ctaText: 'Start 14-day Free Trial'
-  },
-  {
-    id: 'growth',
-    name: 'Growth',
-    priceMonthly: 4999,
-    priceAnnual: 3999, // 2 months free equivalent approx (4,999 * 10 / 12)
-    description: 'Optimized for high-volume scale-ups and customer service centers.',
-    features: [
-      '10,000 sync-safe Contacts',
-      'All 5 Channels connected simultanously',
-      '10 human Team Agents included',
-      '3 AI Agents with custom training',
-      'Advanced Campaign builders + CTWA ads integration',
-      'Custom Journey automation + real-time diagnostics',
-      'WhatsApp + Instagram bulk broadcasts',
-      'Priority assistance support (4hr SLA)'
+    proPoints: [
+      'No hidden fees — flat monthly price',
+      'Use as much as you want within plan limits',
+      'No per-message markup from us',
+      'Cancel anytime during the free trial',
     ],
     ctaText: 'Start 14-day Free Trial',
-    isPopular: true
+    isPopular: true,
   },
-  {
-    id: 'enterprise',
-    name: 'Enterprise',
-    priceMonthly: 0, // Treated specially
-    priceAnnual: 0,
-    description: 'Custom configurations, high-security limits, and agency white-labels.',
-    features: [
-      'Unlimited contacts & volume sync',
-      'Unlimited human human agents & permissions',
-      'Unlimited custom AI Agents',
-      'Custom CRM integrations & full agency white-labeling',
-      'Dedicated Customer Success Account Manager',
-      '99.9% guaranteed uptime SLA response',
-      'On-premise hybrid cloud hosting'
-    ],
-    ctaText: 'Talk to Sales'
-  }
 ];

@@ -308,7 +308,7 @@ export const SideNavBar: React.FC = () => {
       <aside
         className={`${
           sidebarCollapsed && isLargeScreen ? 'w-[72px]' : 'w-[min(260px,85vw)] lg:w-[220px]'
-        } fixed left-0 top-0 z-50 flex h-screen flex-col overflow-x-hidden overflow-y-auto border-r border-black/5 bg-surface-muted transition-transform duration-200 ease-out selection:bg-primary/15 lg:transition-[width] ${
+        } fixed left-0 top-0 z-50 flex h-screen shrink-0 flex-col overflow-x-hidden overflow-y-auto border-r border-black/5 bg-surface-muted transition-transform duration-200 ease-out selection:bg-primary/15 lg:static lg:z-0 lg:translate-x-0 lg:transition-[width] ${
           isLargeScreen || mobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -381,13 +381,15 @@ export const SideNavBar: React.FC = () => {
                     !onNotificationsPage &&
                     !onWalletPage;
 
+                  const isIntegrations = item.id === 'integrations';
                   const isItemActive = (isActive: boolean) => {
                     if (isNotifications) return onNotificationsPage;
                     if (isWallet) return onWalletPage;
                     if (isSettings) return onSettingsPage;
                     return (
                       isActive ||
-                      (isCampaigns && location.pathname.startsWith('/campaigns/'))
+                      (isCampaigns && location.pathname.startsWith('/campaigns/')) ||
+                      (isIntegrations && location.pathname.startsWith('/integrations'))
                     );
                   };
 
@@ -438,7 +440,7 @@ export const SideNavBar: React.FC = () => {
                               {sidebarCollapsed && isWallet && walletBalanceCc != null ? (
                                 <span className="absolute -right-1 -top-1 inline-flex max-w-[2.75rem] items-center gap-0.5 truncate rounded-full bg-amber-50 py-0.5 pl-0.5 pr-1 text-[9px] font-bold tabular-nums text-amber-800 ring-1 ring-amber-200">
                                   <ConvoCoinIcon size={10} />
-                                  {walletBalanceCc > 999 ? '999+' : walletBalanceCc}
+                                  {walletBalanceCc > 999 ? '999+' : walletBalanceCc.toFixed(2)}
                                 </span>
                               ) : null}
                             </div>

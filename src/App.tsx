@@ -6,10 +6,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { SideNavBar } from './components/SideNavBar';
-import {
-  SidebarProvider,
-  useSidebarOffset,
-} from './contexts/SidebarContext';
+import { SidebarProvider } from './contexts/SidebarContext';
 import { TrialBanner } from './components/TrialBanner';
 import { ImpersonatePage } from './components/ImpersonatePage';
 import { AuthPage } from './components/AuthPage';
@@ -126,6 +123,9 @@ function AppShell() {
     if (activeTab === 'google-tools' && location.pathname.startsWith('/google-tools/')) {
       return;
     }
+    if (activeTab === 'integrations' && location.pathname.startsWith('/integrations/')) {
+      return;
+    }
     const expected = pathForTab(activeTab);
     if (location.pathname !== expected && location.pathname !== '/') {
       navigate(expected, { replace: true });
@@ -155,7 +155,6 @@ function AppShellLayout({
   mountedTabs: Set<string>;
   navigate: ReturnType<typeof useNavigate>;
 }) {
-  const sidebarPadding = useSidebarOffset();
   const location = useLocation();
   const campaignCreateWizard = activeTab === 'campaigns' && isNewCampaignPath(location.pathname);
 
@@ -165,19 +164,17 @@ function AppShellLayout({
       <CallRealtimeBridge />
       <SideNavBar />
 
-      <div
-        className="flex h-screen min-h-0 min-w-0 flex-1 flex-col overflow-hidden transition-[padding-left] duration-200 ease-out"
-        style={{ paddingLeft: sidebarPadding }}
-      >
+      {/* ponytail: sidebar is lg:static in-flow — no paddingLeft offset (was causing a gutter gap) */}
+      <div className="flex h-screen min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <TrialBanner />
 
         <main
           className={
             activeTab === 'inbox' || activeTab === 'contacts' || campaignCreateWizard
-              ? 'min-h-0 flex-1 overflow-hidden px-1 md:px-2'
+              ? 'min-h-0 flex-1 overflow-hidden px-0'
               : activeTab === 'google-tools'
-                ? 'px-1 md:px-2 py-2 md:py-3 flex-1 min-h-0 min-w-0 overflow-hidden'
-                : 'flex-1 min-h-0 overflow-x-hidden overflow-y-auto px-1 md:px-2 pt-2 md:pt-3'
+                ? 'px-2 md:px-4 py-2 md:py-3 flex-1 min-h-0 min-w-0 overflow-hidden'
+                : 'flex-1 min-h-0 overflow-x-hidden overflow-y-auto px-2 md:px-4 pt-2 md:pt-3'
           }
         >
           <motion.div
@@ -191,7 +188,9 @@ function AppShellLayout({
               activeTab === 'google-tools' ||
               campaignCreateWizard
                 ? 'h-full min-h-0 min-w-0 overflow-hidden'
-                : 'h-full min-h-0'
+                : activeTab === 'integrations'
+                  ? 'mx-auto h-full min-h-0 w-full max-w-6xl'
+                  : 'h-full min-h-0'
             }
           >
             {mountedTabs.has('dashboard') && (
@@ -460,6 +459,16 @@ export default function App() {
       />
       <Route
         path="/google-tools/*"
+        element={
+          <ProtectedRoute>
+            <OnboardingGuard>
+              <AppShell />
+            </OnboardingGuard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/integrations/*"
         element={
           <ProtectedRoute>
             <OnboardingGuard>

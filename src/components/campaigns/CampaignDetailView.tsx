@@ -5,7 +5,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCheck, Loader2, RefreshCw, Smartphone } from 'lucide-react';
+import { ArrowLeft, CheckCheck, Loader2, RefreshCw } from 'lucide-react';
 import {
   CAMPAIGN_CHANNELS,
   CampaignDetail,
@@ -48,12 +48,12 @@ function formatDate(iso: string | null): string {
 }
 
 const WhatsAppMessagePreview: React.FC<{ body: string }> = ({ body }) => (
-  <div className="w-full max-w-[300px] mx-auto bg-[#efeae2] rounded-2xl p-4 border border-slate-200">
+  <div className="w-full bg-[#efeae2] rounded-2xl p-4 border border-slate-200">
     <div className="bg-white p-3 rounded-r-xl rounded-bl-xl shadow-sm border border-gray-100 space-y-1">
       <p className="text-xs text-stone-800 leading-relaxed whitespace-pre-wrap">{body}</p>
       <div className="text-meta text-gray-400 text-right flex justify-end gap-0.5">
         <span>{formatDate(new Date().toISOString()).split(',')[1]?.trim() ?? ''}</span>
-        <CheckCheck className="w-3 h-3 text-cyan-600" />
+        <CheckCheck className="w-3 h-3 text-cyan-600" aria-hidden />
       </div>
     </div>
   </div>
@@ -79,20 +79,29 @@ const RecipientsTable: React.FC<{
 
   if (recipients.length === 0) {
     return (
-      <div className="p-10 text-center">
-        <p className="text-sm font-bold text-gray-600">No delivery logs yet</p>
-        <p className="text-xs text-gray-400 mt-1 max-w-md mx-auto">
-          {status === 'Draft'
-            ? 'This campaign has not been sent.'
-            : 'Recipient records appear after the broadcast runs. Try Refresh if you just sent.'}
-        </p>
+      <div className="flex-1 flex items-center justify-center p-10 text-center min-h-[220px]">
+        <div>
+          <p className="text-sm font-bold text-gray-600">No delivery logs yet</p>
+          <p className="text-xs text-gray-400 mt-1 max-w-md mx-auto">
+            {status === 'Draft'
+              ? 'This campaign has not been sent.'
+              : 'Recipient records appear after the broadcast runs. Try Refresh if you just sent.'}
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-left border-collapse min-w-[640px]">
+    <div className="flex-1 min-h-0 overflow-x-auto">
+      <table className="w-full table-fixed text-left border-collapse">
+        <colgroup>
+          <col className={isEmail ? 'w-[18%]' : 'w-[28%]'} />
+          <col className={isEmail ? 'w-[22%]' : 'w-[28%]'} />
+          {isEmail && <col className="w-[28%]" />}
+          <col className="w-[16%]" />
+          <col className="w-[18%]" />
+        </colgroup>
         <thead>
           <tr className="bg-surface-muted border-b border-black/5">
             <th className="px-5 py-2.5 text-sm font-black uppercase tracking-wider text-gray-400">
@@ -118,11 +127,15 @@ const RecipientsTable: React.FC<{
           {recipients.map((row) => {
             const statusKey = row.status.toLowerCase();
             return (
-              <tr key={row.messageId} className="hover:bg-[#fdfcff]">
-                <td className="px-5 py-3 text-sm font-bold text-gray-900">{row.contactName}</td>
-                <td className="px-5 py-3 text-meta font-mono text-gray-600">{resolveDest(row)}</td>
+              <tr key={row.messageId} className="hover:bg-surface-muted/60 transition-colors duration-200">
+                <td className="px-5 py-3 text-sm font-bold text-gray-900 truncate">
+                  {row.contactName}
+                </td>
+                <td className="px-5 py-3 text-meta font-mono text-gray-600 truncate">
+                  {resolveDest(row)}
+                </td>
                 {isEmail && (
-                  <td className="px-5 py-3 text-meta text-gray-500 max-w-[200px] truncate">
+                  <td className="px-5 py-3 text-meta text-gray-500 truncate">
                     {row.content || '—'}
                   </td>
                 )}
@@ -135,7 +148,7 @@ const RecipientsTable: React.FC<{
                     {row.status}
                   </span>
                   {row.errorMessage && (
-                    <p className="text-xs text-red-600 mt-1 font-medium max-w-[180px]">
+                    <p className="text-xs text-red-600 mt-1 font-medium truncate" title={row.errorMessage}>
                       {row.errorMessage}
                     </p>
                   )}
@@ -241,19 +254,19 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
   const showWhatsAppPreview = detail.channel === 'whatsapp' && Boolean(messageBody);
 
   const mainContent = (
-    <div className={`p-6 w-full space-y-5 ${showWhatsAppPreview ? 'max-w-3xl' : 'max-w-6xl'}`}>
+    <div className="p-6 w-full max-w-none space-y-5">
       <button
         type="button"
         onClick={() => navigate(pathForTab('campaigns'))}
-        className="flex items-center gap-1.5 text-sm font-bold text-gray-500 hover:text-primary"
+        className="flex items-center gap-1.5 text-sm font-bold text-gray-500 hover:text-primary cursor-pointer transition-colors duration-200"
       >
-        <ArrowLeft className="w-4 h-4" /> Campaigns
+        <ArrowLeft className="w-4 h-4" aria-hidden /> Campaigns
       </button>
 
       <div className="bg-surface border border-black/5 rounded-2xl p-5 space-y-3">
         <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h2 className="text-base font-black text-gray-900">{detail.name}</h2>
+          <div className="min-w-0">
+            <h2 className="text-base font-black text-gray-900 break-words">{detail.name}</h2>
             <div className="flex flex-wrap items-center gap-2 mt-2">
               <span
                 className={`inline-flex text-sm font-black px-2 py-0.5 rounded-lg border ${STATUS_STYLE[detail.status]}`}
@@ -277,13 +290,13 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
           <button
             type="button"
             onClick={loadDetail}
-            className="px-2.5 py-1.5 bg-surface-muted border border-black/5 hover:bg-surface text-gray-600 rounded-xl text-sm font-bold flex items-center gap-1"
+            className="cursor-pointer px-2.5 py-1.5 bg-surface-muted border border-black/5 hover:bg-surface text-gray-600 rounded-xl text-sm font-bold flex items-center gap-1 transition-colors duration-200"
           >
-            <RefreshCw className="w-3 h-3" /> Refresh
+            <RefreshCw className="w-3 h-3" aria-hidden /> Refresh
           </button>
         </div>
 
-        <div className="flex flex-wrap gap-x-4 gap-y-1 text-meta font-bold text-gray-500 pt-1 border-t border-black/5">
+        <div className="flex flex-wrap gap-x-5 gap-y-1 text-meta font-bold text-gray-500 pt-1 border-t border-black/5">
           <span>
             <span className="text-gray-400">Recipients </span>
             {insights.totalRecipients.toLocaleString()}
@@ -322,37 +335,35 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div className="bg-surface border border-black/5 rounded-2xl p-5 lg:col-span-1">
-          <h3 className="text-sm font-black text-gray-900 uppercase tracking-wider mb-3">Details</h3>
-          <dl className="divide-y divide-slate-200">
-            {detailRows.map(([label, value]) => (
-              <div key={label} className="flex justify-between gap-4 py-2.5 text-xs">
-                <dt className="text-gray-400 font-bold shrink-0">{label}</dt>
-                <dd className="text-gray-900 font-bold text-right break-words max-w-[55%]">{value}</dd>
-              </div>
-            ))}
-          </dl>
-        </div>
+      <div className="bg-surface border border-black/5 rounded-2xl p-5">
+        <h3 className="text-sm font-black text-gray-900 uppercase tracking-wider mb-3">Details</h3>
+        <dl className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-3">
+          {detailRows.map(([label, value]) => (
+            <div key={label} className="min-w-0">
+              <dt className="text-xs text-gray-400 font-bold">{label}</dt>
+              <dd className="mt-0.5 text-sm text-gray-900 font-bold break-words">{value}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
 
-        <div className="bg-surface border border-black/5 rounded-2xl overflow-hidden lg:col-span-2 flex flex-col min-h-[280px]">
-          <div className="px-5 py-3 border-b border-black/5 flex items-center justify-between shrink-0">
-            <h3 className="text-sm font-black text-gray-900 uppercase tracking-wider">Recipients</h3>
-            <span className="text-sm font-bold text-gray-400">
-              {detail.recipients.length > 0
-                ? `${detail.recipients.length} logged`
-                : detail.sentCount > 0
-                  ? `${detail.sentCount} sent`
-                  : '0 contacts'}
-            </span>
-          </div>
-          <RecipientsTable
-            channel={detail.channel}
-            recipients={detail.recipients}
-            sentCount={detail.sentCount}
-            status={detail.status}
-          />
+      <div className="bg-surface border border-black/5 rounded-2xl overflow-hidden flex flex-col min-h-[320px]">
+        <div className="px-5 py-3 border-b border-black/5 flex items-center justify-between shrink-0">
+          <h3 className="text-sm font-black text-gray-900 uppercase tracking-wider">Recipients</h3>
+          <span className="text-sm font-bold text-gray-400">
+            {detail.recipients.length > 0
+              ? `${detail.recipients.length} logged`
+              : detail.sentCount > 0
+                ? `${detail.sentCount} sent`
+                : '0 contacts'}
+          </span>
         </div>
+        <RecipientsTable
+          channel={detail.channel}
+          recipients={detail.recipients}
+          sentCount={detail.sentCount}
+          status={detail.status}
+        />
       </div>
     </div>
   );
@@ -360,7 +371,7 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
   if (!showWhatsAppPreview) {
     return (
       <div className="flex-1 h-[calc(100vh-64px)] overflow-y-auto bg-surface-muted selection:bg-primary/15">
-        {mainContent}
+        <div className="max-w-7xl">{mainContent}</div>
       </div>
     );
   }
@@ -370,15 +381,17 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
       <section className="flex-1 flex flex-col min-w-0 min-h-0 overflow-y-auto border-r border-black/5">
         {mainContent}
       </section>
-      <section className="w-full xl:w-[380px] shrink-0 p-6 flex flex-col items-center justify-start bg-surface-muted overflow-y-auto">
-        <p className="text-sm font-black text-gray-400 uppercase tracking-widest mb-4">Message sent</p>
+      <aside className="w-full xl:w-[320px] shrink-0 p-5 flex flex-col bg-surface border-t xl:border-t-0 xl:border-l border-black/5 overflow-y-auto">
+        <p className="text-sm font-black text-gray-400 uppercase tracking-widest mb-4">
+          Message sent
+        </p>
         <WhatsAppMessagePreview body={messageBody} />
         {detail.template?.name && (
-          <p className="text-xs text-gray-400 font-bold mt-4 text-center">
-            Template: {detail.template.name}
+          <p className="text-xs text-gray-400 font-bold mt-4">
+            Template: <span className="text-gray-600">{detail.template.name}</span>
           </p>
         )}
-      </section>
+      </aside>
     </div>
   );
 };

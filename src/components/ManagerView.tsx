@@ -412,12 +412,12 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
     hasWhatsappNumbers && !coexistenceInstructionsOpen;
 
   const containerClass = showAccountManager
-    ? 'flex-1 space-y-6 max-w-7xl mx-auto pb-12 text-left selection:bg-sky-50'
-    : 'flex-1 w-full max-w-none pb-12 text-left selection:bg-sky-50';
+    ? 'flex-1 space-y-6 max-w-7xl mx-auto pb-12 text-left selection:bg-primary/15'
+    : 'flex-1 w-full max-w-none pb-12 text-left selection:bg-primary/15';
 
   if (accountsLoading) {
     return (
-      <div className="flex-1 w-full pb-12 text-left selection:bg-sky-50">
+      <div className="flex-1 w-full pb-12 text-left selection:bg-primary/15">
         <div className="flex flex-col items-center justify-center py-24 text-center">
           <div className="w-10 h-10 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
           <p className="mt-4 text-sm font-bold text-gray-500">Checking WhatsApp numbers…</p>
@@ -471,7 +471,7 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
 
       {showConnectionSelector && variant !== 'integrations' && (
         <div className="max-w-lg mx-auto py-16 text-center space-y-5 animate-scale-up">
-          <div className="w-14 h-14 rounded-2xl bg-sky-50 text-primary flex items-center justify-center mx-auto">
+          <div className="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto">
             <Blocks className="w-7 h-7" />
           </div>
           <div className="space-y-2">
@@ -524,8 +524,8 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
               Back to requirements
             </button>
 
-            <div className="bg-white border-2 border-primary/20 rounded-2xl p-6 sm:p-8 shadow-[0_8px_32px_rgba(65,44,221,0.08)]">
-              <span className="inline-block px-3 py-1 rounded-full text-sm font-black uppercase tracking-wider bg-sky-50 text-primary border border-primary/20 mb-4">
+            <div className="bg-surface border border-black/5 rounded-2xl p-6 sm:p-8 shadow-sm">
+              <span className="inline-block px-3 py-1 rounded-full text-sm font-black uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 mb-4">
                 Step 2 — Connect Meta Account
               </span>
               <h4 className="text-xl font-black text-gray-950">Connect with Meta Business</h4>
@@ -559,8 +559,8 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
               Back to requirements
             </button>
 
-            <div className="bg-white border-2 border-[#25D366]/30 rounded-2xl p-6 sm:p-8 shadow-[0_8px_32px_rgba(37,211,102,0.12)]">
-              <span className="inline-block px-3 py-1 rounded-full text-sm font-black uppercase tracking-wider bg-[#e6f7ec] text-[#006d2f] border border-[#5dfd8a]/30 mb-4">
+            <div className="bg-surface border border-black/5 rounded-2xl p-6 sm:p-8 shadow-sm">
+              <span className="inline-block px-3 py-1 rounded-full text-sm font-black uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 mb-4">
                 Step 2 — Connect WhatsApp
               </span>
               <h4 className="text-xl font-black text-gray-950">Connect with Meta</h4>

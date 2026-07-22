@@ -88,13 +88,25 @@ export type IntegrationsChannel =
   | 'whatsapp'
   | 'whatsapp-coexistence'
   | 'email'
+  | 'ai'
   | 'instagram'
   | 'google'
   | 'meta-ads'
-  | 'google-ads';
+  | 'google-ads'
+  | 'messenger';
 
+/** Email + AI use path pages; WhatsApp / Instagram (and others for now) use ?channel=. */
 export function pathForIntegrationsChannel(channel: IntegrationsChannel): string {
+  if (channel === 'email') return '/integrations/email';
+  if (channel === 'ai') return '/integrations/ai';
   return `/integrations?channel=${channel}`;
+}
+
+export function integrationsSubpageFromPath(pathname: string): 'email' | 'ai' | null {
+  const parts = pathname.replace(/^\//, '').split('/').filter(Boolean);
+  if (parts[0] !== 'integrations') return null;
+  if (parts[1] === 'email' || parts[1] === 'ai') return parts[1];
+  return null;
 }
 
 export type AgentEditorSection = 'profile' | 'skills' | 'knowledge' | 'flows';

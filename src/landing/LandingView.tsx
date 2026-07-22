@@ -31,19 +31,13 @@ export default function LandingView() {
     }
   };
 
-  const handleStartSignup = (
-    planId: string = 'growth',
-    isAnnual = false,
-    source = 'landing'
-  ) => {
+  const handleStartSignup = (planId: string = 'starter', source = 'landing') => {
     trackEvent('cta_click', {
       source,
       plan_id: planId,
-      billing: isAnnual ? 'annual' : 'monthly',
+      billing: 'monthly',
     });
-    const params = new URLSearchParams({ plan: planId });
-    if (isAnnual) params.set('billing', 'annual');
-    navigate(`/signup?${params.toString()}`);
+    navigate(`/signup?plan=${encodeURIComponent(planId)}`);
   };
 
   return (
@@ -54,10 +48,10 @@ export default function LandingView() {
           trackEvent('cta_click', { source: 'navbar_login' });
           navigate('/login');
         }}
-        onSignup={() => handleStartSignup('growth', false, 'navbar')}
+        onSignup={() => handleStartSignup('starter', 'navbar')}
       />
 
-      <Hero onStartFree={() => handleStartSignup('growth', false, 'hero')} />
+      <Hero onStartFree={() => handleStartSignup('starter', 'hero')} />
 
       <ChannelLogosBar />
 
@@ -67,7 +61,7 @@ export default function LandingView() {
 
       <FeaturesDeepDive />
 
-      <AiAgentsSpotlight onStartAgentDemo={() => handleStartSignup('growth', false, 'ai_agents')} />
+      <AiAgentsSpotlight onStartAgentDemo={() => handleStartSignup('starter', 'ai_agents')} />
 
       <HowItWorks />
 
@@ -75,13 +69,11 @@ export default function LandingView() {
 
       <Testimonials />
 
-      <PricingSection
-        onSelectPlan={(planId, isAnnual) => handleStartSignup(planId, isAnnual, 'pricing')}
-      />
+      <PricingSection onSelectPlan={(planId) => handleStartSignup(planId, 'pricing')} />
 
       <BookDemoSection />
 
-      <FinalCta onStartFree={() => handleStartSignup('growth', false, 'final_cta')} />
+      <FinalCta onStartFree={() => handleStartSignup('starter', 'final_cta')} />
 
       <Footer onNavigate={handleNavigate} />
     </div>

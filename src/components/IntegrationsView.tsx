@@ -5,7 +5,12 @@
 
 import type { FC, ReactNode } from 'react';
 import { useCallback, useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import {
+  integrationsSubpageFromPath,
+  pathForIntegrationsChannel,
+  pathForTab,
+} from '../routes';
 import {
   ArrowLeft,
   Database,
@@ -60,9 +65,15 @@ type ChannelView =
   | 'voice'
   | 'ai';
 
-function channelViewFromSearch(search: string): ChannelView {
+function channelViewFromLocation(pathname: string, search: string): ChannelView {
+  const sub = integrationsSubpageFromPath(pathname);
+  if (sub === 'email') return 'email';
+  if (sub === 'ai') return 'ai';
+
   const channel = new URLSearchParams(search).get('channel');
+  // Legacy query → treated as page views until redirect runs
   if (channel === 'email') return 'email';
+  if (channel === 'ai') return 'ai';
   if (channel === 'google') return 'google';
   if (channel === 'whatsapp') return 'whatsapp';
   if (channel === 'whatsapp-coexistence') return 'whatsapp-coexistence';
@@ -70,7 +81,6 @@ function channelViewFromSearch(search: string): ChannelView {
   if (channel === 'messenger') return 'messenger';
   if (channel === 'meta-ads') return 'meta-ads';
   if (channel === 'google-ads') return 'google-ads';
-  if (channel === 'ai') return 'ai';
   return 'hub';
 }
 
@@ -499,9 +509,11 @@ type IntegrationsViewProps = {
 };
 
 export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [view, setView] = useState<ChannelView>(() =>
-    channelViewFromSearch(window.location.search)
+    channelViewFromLocation(window.location.pathname, window.location.search)
   );
   const [whatsappAccounts, setWhatsappAccounts] = useState<WhatsAppAccountSummary[]>([]);
   const [instagramAccounts, setInstagramAccounts] = useState<InstagramAccountSummary[]>([]);
@@ -546,59 +558,43 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
 
   const goToHub = useCallback(() => {
     setView('hub');
-    const next = new URLSearchParams(searchParams);
-    next.delete('channel');
-    setSearchParams(next, { replace: true });
-  }, [searchParams, setSearchParams]);
+    navigate(pathForTab('integrations'), { replace: true });
+  }, [navigate]);
 
   const openEmailChannel = useCallback(() => {
     setView('email');
-    const next = new URLSearchParams(searchParams);
-    next.set('channel', 'email');
-    setSearchParams(next, { replace: true });
-  }, [searchParams, setSearchParams]);
+    navigate(pathForIntegrationsChannel('email'));
+  }, [navigate]);
 
   const openGoogleChannel = useCallback(() => {
     setView('google');
-    const next = new URLSearchParams(searchParams);
-    next.set('channel', 'google');
-    setSearchParams(next, { replace: true });
-  }, [searchParams, setSearchParams]);
+    navigate(pathForIntegrationsChannel('google'));
+  }, [navigate]);
 
   const openWhatsappChannel = useCallback(() => {
     setView('whatsapp');
-    const next = new URLSearchParams(searchParams);
-    next.set('channel', 'whatsapp');
-    setSearchParams(next, { replace: true });
-  }, [searchParams, setSearchParams]);
+    navigate(pathForIntegrationsChannel('whatsapp'));
+  }, [navigate]);
 
   const openWhatsappCoexistenceChannel = useCallback(() => {
     setView('whatsapp-coexistence');
-    const next = new URLSearchParams(searchParams);
-    next.set('channel', 'whatsapp-coexistence');
-    setSearchParams(next, { replace: true });
-  }, [searchParams, setSearchParams]);
+    navigate(pathForIntegrationsChannel('whatsapp-coexistence'));
+  }, [navigate]);
 
   const openMetaAdsChannel = useCallback(() => {
     setView('meta-ads');
-    const next = new URLSearchParams(searchParams);
-    next.set('channel', 'meta-ads');
-    setSearchParams(next, { replace: true });
-  }, [searchParams, setSearchParams]);
+    navigate(pathForIntegrationsChannel('meta-ads'));
+  }, [navigate]);
 
   const openGoogleAdsChannel = useCallback(() => {
     setView('google-ads');
-    const next = new URLSearchParams(searchParams);
-    next.set('channel', 'google-ads');
-    setSearchParams(next, { replace: true });
-  }, [searchParams, setSearchParams]);
+    navigate(pathForIntegrationsChannel('google-ads'));
+  }, [navigate]);
 
   const openAiChannel = useCallback(() => {
     setView('ai');
-    const next = new URLSearchParams(searchParams);
-    next.set('channel', 'ai');
-    setSearchParams(next, { replace: true });
-  }, [searchParams, setSearchParams]);
+    navigate(pathForIntegrationsChannel('ai'));
+  }, [navigate]);
 
   const loadAdsToolsStatus = useCallback(() => {
     if (!localStorage.getItem('convosync_token')) return Promise.resolve();
@@ -774,15 +770,20 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
 
   useEffect(() => {
     if (!isActive) return;
+
+    // Legacy query bookmarks → dedicated pages
     const channel = searchParams.get('channel');
-    if (channel === 'email') setView('email');
-    else if (channel === 'google') setView('google');
-    else if (channel === 'whatsapp') setView('whatsapp');
-    else if (channel === 'whatsapp-coexistence') setView('whatsapp-coexistence');
-    else if (channel === 'meta-ads') setView('meta-ads');
-    else if (channel === 'google-ads') setView('google-ads');
-    else if (channel === 'ai') setView('ai');
-  }, [isActive, searchParams]);
+    if (channel === 'email') {
+      navigate(pathForIntegrationsChannel('email'), { replace: true });
+      return;
+    }
+    if (channel === 'ai') {
+      navigate(pathForIntegrationsChannel('ai'), { replace: true });
+      return;
+    }
+
+    setView(channelViewFromLocation(location.pathname, location.search));
+  }, [isActive, location.pathname, location.search, navigate, searchParams]);
 
   useEffect(() => {
     if (!isActive) return;
@@ -898,6 +899,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
     setInstagramConnectError('');
     setInstagramAutoLaunch(true);
     setView('instagram');
+    navigate(pathForIntegrationsChannel('instagram'));
   };
 
   const handleInstagramConnectSuccess = async () => {
@@ -929,6 +931,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
     }
     setMessengerAutoLaunch(true);
     setView('messenger');
+    navigate(pathForIntegrationsChannel('messenger'));
   };
 
   const handleMessengerConnectSuccess = async () => {
@@ -974,7 +977,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
 
   if (view === 'messenger') {
     return (
-      <div className="w-full pb-12 space-y-6 animate-scale-up max-w-3xl">
+      <div className="w-full pb-12 space-y-6 animate-scale-up max-w-3xl mx-auto">
         <button
           type="button"
           onClick={() => {
@@ -1020,7 +1023,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
 
   if (view === 'instagram') {
     return (
-      <div className="w-full pb-12 space-y-6 animate-scale-up max-w-3xl">
+      <div className="w-full pb-12 space-y-6 animate-scale-up max-w-3xl mx-auto">
         <button
           type="button"
           onClick={() => {
@@ -1053,7 +1056,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
 
     if (!emailStatus.connected) {
       return (
-        <div className="w-full pb-12 space-y-6 animate-scale-up max-w-lg">
+        <div className="w-full pb-12 space-y-6 animate-scale-up max-w-lg mx-auto">
           <button
             type="button"
             onClick={goToHub}
@@ -1102,7 +1105,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
     }
 
     return (
-      <div className="w-full pb-12 space-y-6 animate-scale-up max-w-6xl">
+      <div className="w-full pb-12 space-y-6 animate-scale-up max-w-6xl mx-auto">
         <button
           type="button"
           onClick={goToHub}
@@ -1144,7 +1147,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
 
   if (view === 'google') {
     return (
-      <div className="w-full pb-12 space-y-6 animate-scale-up max-w-6xl">
+      <div className="w-full pb-12 space-y-6 animate-scale-up max-w-6xl mx-auto">
         <button
           type="button"
           onClick={goToHub}
@@ -1175,7 +1178,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
   if (view === 'sms' || view === 'voice') {
     const channel = COMING_SOON_CHANNELS[view];
     return (
-      <div className="w-full pb-12 space-y-6 animate-scale-up max-w-lg">
+      <div className="w-full pb-12 space-y-6 animate-scale-up max-w-lg mx-auto">
         <button
           type="button"
           onClick={goToHub}
@@ -1197,7 +1200,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
 
   if (view === 'meta-ads') {
     return (
-      <div className="w-full pb-12 space-y-6 animate-scale-up max-w-6xl">
+      <div className="w-full pb-12 space-y-6 animate-scale-up max-w-6xl mx-auto">
         <button
           type="button"
           onClick={goToHub}
@@ -1230,7 +1233,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
 
   if (view === 'google-ads') {
     return (
-      <div className="w-full pb-12 space-y-6 animate-scale-up max-w-6xl">
+      <div className="w-full pb-12 space-y-6 animate-scale-up max-w-6xl mx-auto">
         <button
           type="button"
           onClick={goToHub}
@@ -1286,8 +1289,8 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
 
   if (view === 'ai') {
     return (
-      <div className="w-full pb-12 animate-scale-up flex justify-center">
-        <div className="w-full max-w-2xl space-y-6">
+      <div className="w-full pb-12 animate-scale-up flex justify-center mx-auto">
+        <div className="w-full max-w-2xl mx-auto space-y-6">
           <button
             type="button"
             onClick={goToHub}
@@ -1323,7 +1326,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
 
   if (hubLoading) {
     return (
-      <div className="w-full space-y-5 pb-8 animate-scale-up" aria-busy="true" aria-label="Loading integrations">
+      <div className="w-full max-w-6xl mx-auto space-y-5 pb-8 animate-scale-up" aria-busy="true" aria-label="Loading integrations">
         <section className="space-y-3">
           <div className="h-4 w-40 rounded-md skel animate-pulse" />
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
@@ -1387,7 +1390,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
   }
 
   return (
-    <div className="w-full space-y-5 pb-8 animate-scale-up">
+    <div className="w-full max-w-6xl mx-auto space-y-5 pb-8 animate-scale-up">
       {emailError && (
         <p className="text-sm font-bold text-red-600 bg-red-50 border border-red-100 rounded-xl px-4 py-2">
           {emailError}

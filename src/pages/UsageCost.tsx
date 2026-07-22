@@ -14,8 +14,6 @@ import {
   Tooltip,
 } from 'recharts';
 import {
-  ArrowDown,
-  ArrowUp,
   Bot,
   Calendar,
   ChevronDown,
@@ -28,19 +26,16 @@ import {
 } from 'lucide-react';
 import { api } from '../lib/api';
 
-/** Wallet units (1:1 with INR) shown as tokens — never ₹. */
-function formatTokens(amount: number, decimals?: number): string {
+/** Wallet units (1:1 with INR) shown as tokens — never ₹. Always 2 decimal places. */
+function formatTokens(amount: number, decimals = 2): string {
   const value = Number.isFinite(amount) ? amount : 0;
-  const d =
-    decimals ??
-    (Math.abs(value) >= 100 || Number.isInteger(value) ? 0 : Math.abs(value) >= 1 ? 2 : 4);
   return `${value.toLocaleString('en-IN', {
-    minimumFractionDigits: d,
-    maximumFractionDigits: d,
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
   })} tokens`;
 }
 
-function formatTokenRate(amountPerUnit: number, unit: string, decimals = 4): string {
+function formatTokenRate(amountPerUnit: number, unit: string, decimals = 2): string {
   return `${amountPerUnit.toLocaleString('en-IN', {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
@@ -120,6 +115,11 @@ type UsageCostResponse = {
     emailsSent: number;
     emailCostInr: number;
   };
+  wallet?: {
+    balanceInr: number;
+    monthSpentInr: number;
+    isLowBalance?: boolean;
+  };
   whatsapp: {
     rows: Array<{
       key: string;
@@ -159,7 +159,12 @@ type UsageCostResponse = {
   email: {
     sent: number;
     included: number;
+    unlimited?: boolean;
+    rateInrPerSend?: number;
+    grossCostInr?: number;
+    includedCreditInr?: number;
     billedCostInr: number;
+    quotaPct?: number;
   };
 };
 
@@ -365,12 +370,18 @@ export const UsageCost: React.FC = () => {
     );
   }
 
-  const { summary, whatsapp, ai } = data;
+  const { summary, whatsapp, ai, email, wallet } = data;
+  const emailRate = email.rateInrPerSend ?? 1;
+  const emailGross = email.grossCostInr ?? email.sent * emailRate;
+  const emailBilledTotal = email.billedCostInr ?? emailGross;
   const totalConversations = whatsapp.rows.reduce((s, r) => s + r.conversations, 0);
   const grossWhatsAppCost = whatsapp.grossCostInr;
   const whatsappBilledTotal = whatsapp.billedCostInr;
-  const costChange = summary.costChangePct;
-  const costChangeUp = costChange >= 0;
+  const aiBilledTotal = ai.billedCostInr;
+  const walletBalance = wallet?.balanceInr ?? null;
+  const monthChargedTotal =
+    summary.totalCostInr ??
+    Math.round((whatsappBilledTotal + aiBilledTotal + emailBilledTotal) * 100) / 100;
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 pb-8">
@@ -378,7 +389,8 @@ export const UsageCost: React.FC = () => {
         <div>
           <h1 className="font-display text-xl font-bold text-slate-900 md:text-2xl">Usage &amp; Cost</h1>
           <p className="mt-1 max-w-xl text-sm text-slate-500">
-            WhatsApp, AI, and email usage — all amounts shown in tokens.
+            Wallet token balance is the main balance. WhatsApp, AI, and email charges are deducted
+            from it — nothing is free.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2 sm:justify-end">
@@ -410,31 +422,22 @@ export const UsageCost: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <SummaryCard
-          bg="#FFF7ED"
-          border="#F97316"
-          iconBg="#FFEDD5"
-          iconColor="#EA580C"
-          icon={Receipt}
-          label="Total Tokens This Month"
-          value={formatTokens(summary.totalCostInr)}
-          badge={
-            costChange !== 0 ? (
-              <span
-                className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[11px] font-semibold ${
-                  costChangeUp ? 'bg-red-50 text-red-600' : 'bg-primary/10 text-primary'
-                }`}
-              >
-                {costChangeUp ? (
-                  <ArrowUp className="h-3 w-3" />
-                ) : (
-                  <ArrowDown className="h-3 w-3" />
-                )}
-                {Math.abs(costChange)}% vs last month
-              </span>
-            ) : undefined
-          }
-        />
+        {walletBalance != null ? (
+          <SummaryCard
+            bg="#F8FAFC"
+            border="#64748B"
+            iconBg="#E2E8F0"
+            iconColor="#334155"
+            icon={Receipt}
+            label="Wallet balance"
+            value={formatTokens(walletBalance)}
+            sub={
+              wallet?.isLowBalance
+                ? `Low balance · ${formatTokens(monthChargedTotal)} charged this month`
+                : `${formatTokens(monthChargedTotal)} charged this month`
+            }
+          />
+        ) : null}
         <SummaryCard
           bg="#F0FDF4"
           border="#10B981"
@@ -443,7 +446,7 @@ export const UsageCost: React.FC = () => {
           icon={MessageCircle}
           label="WhatsApp Messages Sent"
           value={formatCount(summary.whatsappMessagesSent)}
-          sub={`${formatTokens(summary.whatsappCostInr)} charged`}
+          sub={`${formatTokens(whatsappBilledTotal)} charged`}
         />
         <SummaryCard
           bg="#EFF6FF"
@@ -453,7 +456,7 @@ export const UsageCost: React.FC = () => {
           icon={Cpu}
           label="AI Tokens Used"
           value={formatCount(summary.aiTokensUsed)}
-          sub={`${formatTokens(summary.aiCostInr)} charged`}
+          sub={`${formatTokens(aiBilledTotal)} charged`}
         />
         <SummaryCard
           bg="#FAF5FF"
@@ -463,7 +466,7 @@ export const UsageCost: React.FC = () => {
           icon={Mail}
           label="Emails Sent"
           value={formatCount(summary.emailsSent)}
-          sub={`${formatTokens(summary.emailCostInr)} charged`}
+          sub={`${formatTokens(emailBilledTotal)} charged`}
         />
       </div>
 
@@ -542,10 +545,10 @@ export const UsageCost: React.FC = () => {
               </tbody>
             </table>
             <p className="mt-2 text-[11px] leading-relaxed text-slate-400">
-              * Service conversations are free within 1000/month. After that 0.12 tokens/conv
+              * Service (inbox) conversations: 0 tokens. Marketing / Utility / Auth bill per conversation.
             </p>
             <p className="mt-1 text-[11px] text-slate-500">
-              Billed for {selectedMonthLabel}: {formatTokens(whatsappBilledTotal)} (after free tier)
+              Billed for {selectedMonthLabel}: {formatTokens(whatsappBilledTotal)}
             </p>
           </div>
 
@@ -574,7 +577,7 @@ export const UsageCost: React.FC = () => {
                   <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
                     <div className="text-center">
                       <p className="text-lg font-bold text-slate-900">
-                        {formatTokens(whatsappBilledTotal, 0)}
+                        {formatTokens(whatsappBilledTotal)}
                       </p>
                       <p className="text-[11px] text-slate-500">Total</p>
                     </div>
@@ -616,13 +619,8 @@ export const UsageCost: React.FC = () => {
             </div>
           </div>
           <div className="text-left sm:text-right">
-            <p className="text-lg font-bold text-[#0F172A]">{formatTokens(ai.grossCostInr)}</p>
-            <p className="text-[11px] text-slate-400">
-              {selectedMonthLabel}
-              {ai.includedCreditInr > 0
-                ? ` · billed ${formatTokens(ai.billedCostInr)} after credit`
-                : ''}
-            </p>
+            <p className="text-lg font-bold text-[#0F172A]">{formatTokens(aiBilledTotal)}</p>
+            <p className="text-[11px] text-slate-400">{selectedMonthLabel}</p>
           </div>
         </div>
 
@@ -639,8 +637,8 @@ export const UsageCost: React.FC = () => {
             <Info className="mt-0.5 h-4 w-4 shrink-0 text-cyan-600" />
             <p className="text-xs leading-relaxed text-[#374151]">
               Charged tokens = provider subtotal +{' '}
-              {(((ai.markupMultiplier ?? 1.35) - 1) * 100).toFixed(0)}% platform markup
-              {ai.includedCreditInr > 0 ? ', minus included credit' : ''}.
+              {(((ai.markupMultiplier ?? 1.35) - 1) * 100).toFixed(0)}% platform markup. Full amount
+              is deducted from the wallet.
             </p>
           </div>
         )}
@@ -722,7 +720,7 @@ export const UsageCost: React.FC = () => {
                 {ai.includedTokens > 0 ? (
                   <tr className="border-b border-slate-50 text-slate-500">
                     <td className="py-2 pr-3 pl-2">Included credit</td>
-                    <td className="py-2 pr-3 tabular-nums">-{formatCount(ai.includedTokens)}</td>
+                    <td className="py-2 pr-3" />
                     <td className="py-2 pr-3" />
                     <td className="py-2 tabular-nums text-primary">
                       -{formatTokens(ai.includedCreditInr)}
@@ -795,42 +793,71 @@ export const UsageCost: React.FC = () => {
             ) : (
               <p className="mt-3 text-sm text-slate-400">No AI agent usage this month</p>
             )}
-
-            {ai.includedTokens > 0 ? (
-              <div className="mt-6 rounded-lg border border-black/5 bg-surface-muted/80 p-4">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="text-sm font-semibold text-slate-800">Included token credit</p>
-                  <span
-                    className={`text-xs font-bold ${
-                      ai.quotaPct > 100 ? 'text-red-600' : 'text-slate-600'
-                    }`}
-                  >
-                    {ai.quotaPct > 100
-                      ? `${formatCount(ai.quotaPct)}% of included (over)`
-                      : `${ai.quotaPct}% used`}
-                  </span>
-                </div>
-                <p className="mt-1 text-xs text-slate-500">
-                  {formatCount(ai.totalTokens)} used / {formatCount(ai.includedTokens)} included
-                </p>
-                <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-slate-200">
-                  <div
-                    className={`h-full rounded-full ${ai.quotaPct > 100 ? 'bg-red-500' : 'bg-blue-500'}`}
-                    style={{ width: `${Math.min(ai.quotaPct, 100)}%` }}
-                  />
-                </div>
-                {ai.quotaPct > 100 && (
-                  <div className="mt-2 flex items-start gap-1.5 text-xs text-red-600">
-                    <ArrowUp className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                    <span>
-                      Over included credit by {formatCount(ai.totalTokens - ai.includedTokens)}{' '}
-                      tokens — overage billed to wallet
-                    </span>
-                  </div>
-                )}
-              </div>
-            ) : null}
           </div>
+        </div>
+      </section>
+
+      <section className="rounded-xl border border-black/5 bg-surface p-4 md:p-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-violet-50 text-violet-600">
+              <Mail className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="text-[15px] font-bold text-slate-900">Email Send Usage</h2>
+              <p className="text-xs text-slate-500">1 token (CC) per email — billed on every send</p>
+            </div>
+          </div>
+          <div className="text-left sm:text-right">
+            <p className="text-lg font-bold text-[#0F172A]">{formatTokens(emailBilledTotal)}</p>
+            <p className="text-[11px] text-slate-400">{selectedMonthLabel}</p>
+          </div>
+        </div>
+
+        <div className="mt-4 mb-2 flex gap-2.5 rounded-lg bg-[#EFF6FF] p-3">
+          <Info className="mt-0.5 h-4 w-4 shrink-0 text-cyan-600" />
+          <p className="text-xs leading-relaxed text-[#374151]">
+            Charged tokens = emails sent × 1 token. Full amount is deducted from the wallet.
+          </p>
+        </div>
+
+        <div className="mt-5 min-w-0 overflow-x-auto">
+            <table className="w-full max-w-2xl min-w-[280px] text-left text-sm">
+              <thead>
+                <tr className="border-b border-slate-100">
+                  {['Line', 'Emails', 'Rate', 'Tokens Charged'].map((h) => (
+                    <th
+                      key={h}
+                      className="pb-2 pr-3 text-[10px] font-semibold uppercase tracking-wide text-slate-400 last:pr-0"
+                    >
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b border-slate-50">
+                  <td className="py-2.5 pr-3 text-slate-700">Emails sent</td>
+                  <td className="py-2.5 pr-3 tabular-nums text-slate-700">
+                    {formatCount(email.sent)}
+                  </td>
+                  <td className="py-2.5 pr-3 text-slate-600">
+                    {formatTokenRate(emailRate, 'email', 0)}
+                  </td>
+                  <td className="py-2.5 tabular-nums font-medium text-slate-900">
+                    {formatTokens(emailGross)}
+                  </td>
+                </tr>
+                <tr>
+                  <td className="pt-2 pr-3 font-bold text-slate-900">Final billed</td>
+                  <td className="pt-2 pr-3" />
+                  <td className="pt-2 pr-3" />
+                  <td className="pt-2 font-bold tabular-nums text-slate-900">
+                    {formatTokens(emailBilledTotal)}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
         </div>
       </section>
     </div>

@@ -28,11 +28,11 @@ function AccountMetric({
   tone?: 'default' | 'success';
 }) {
   return (
-    <div className="rounded-xl border border-slate-100 bg-slate-50/80 px-3 py-2.5 min-w-[7.5rem]">
+    <div className="rounded-xl border border-black/5 bg-surface-muted px-3 py-2.5 min-w-[7.5rem]">
       <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">{label}</p>
       <p
         className={`mt-0.5 text-sm font-semibold truncate ${
-          tone === 'success' ? 'text-emerald-700' : 'text-slate-800'
+          tone === 'success' ? 'text-primary' : 'text-slate-800'
         }`}
       >
         {value}
@@ -50,11 +50,11 @@ export function WhatsAppAccountManager({
   const verifiedCount = accounts.filter((a) => a.verified).length;
 
   return (
-    <div className="space-y-6 max-w-5xl">
-      <header className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-white to-[#f4fbf6] p-5 sm:p-6">
+    <div className="space-y-6 max-w-5xl mx-auto">
+      <header className="rounded-2xl border border-black/5 bg-surface p-5 sm:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-channel-green text-white shadow-sm">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#25D366] text-white shadow-sm">
               <MessageCircle className="h-6 w-6" aria-hidden />
             </div>
             <div>
@@ -66,17 +66,17 @@ export function WhatsAppAccountManager({
             </div>
           </div>
           <div className="flex flex-wrap gap-2 sm:justify-end">
-            <div className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-center min-w-[5.5rem]">
+            <div className="rounded-xl border border-black/5 bg-surface-muted px-3 py-2 text-center min-w-[5.5rem]">
               <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
                 Connected
               </p>
               <p className="text-lg font-bold text-slate-900">{connectedCount}</p>
             </div>
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50/80 px-3 py-2 text-center min-w-[5.5rem]">
-              <p className="text-[11px] font-medium uppercase tracking-wide text-emerald-700">
+            <div className="rounded-xl border border-primary/20 bg-primary/10 px-3 py-2 text-center min-w-[5.5rem]">
+              <p className="text-[11px] font-medium uppercase tracking-wide text-primary">
                 Verified
               </p>
-              <p className="text-lg font-bold text-emerald-800">{verifiedCount}</p>
+              <p className="text-lg font-bold text-primary">{verifiedCount}</p>
             </div>
           </div>
         </div>
@@ -96,11 +96,11 @@ export function WhatsAppAccountManager({
             return (
               <article
                 key={account.id}
-                className="group rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 transition-colors duration-200 hover:border-slate-300 hover:shadow-sm"
+                className="group rounded-2xl border border-black/5 bg-surface p-4 sm:p-5 transition-colors duration-200 hover:border-black/10 hover:bg-surface-muted/40"
               >
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div className="flex gap-4 min-w-0">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#e8f8ee] text-channel-green ring-1 ring-[#25D366]/15">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#e8f8ee] text-[#25D366] ring-1 ring-[#25D366]/20">
                       <MessageCircle className="h-6 w-6" aria-hidden />
                     </div>
                     <div className="min-w-0">
@@ -109,13 +109,13 @@ export function WhatsAppAccountManager({
                           {account.label}
                         </h3>
                         {account.verified ? (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-200/80">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary ring-1 ring-primary/20">
                             <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
                             Meta verified
                           </span>
                         ) : null}
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
-                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden />
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+                          <span className="h-1.5 w-1.5 rounded-full bg-primary" aria-hidden />
                           {account.status}
                         </span>
                       </div>
@@ -133,7 +133,7 @@ export function WhatsAppAccountManager({
                       <button
                         type="button"
                         onClick={() => onEditProfile(account)}
-                        className="inline-flex items-center gap-2 rounded-xl border border-primary/20 bg-primary/10 px-3.5 py-2 text-sm font-semibold text-primary transition-colors duration-200 hover:bg-primary/15 cursor-pointer"
+                        className="inline-flex items-center gap-2 rounded-xl border border-black/5 bg-surface-muted px-3.5 py-2 text-sm font-semibold text-slate-800 transition-colors duration-200 hover:bg-primary/10 hover:text-primary hover:border-primary/20 cursor-pointer"
                       >
                         <Settings2 className="h-4 w-4" aria-hidden />
                         Edit profile
@@ -142,7 +142,7 @@ export function WhatsAppAccountManager({
                     <button
                       type="button"
                       onClick={() => onDisconnect(account.phoneNumberId)}
-                      className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-white px-3.5 py-2 text-sm font-semibold text-red-600 transition-colors duration-200 hover:bg-red-50 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-500"
+                      className="inline-flex items-center gap-2 rounded-xl border border-[#fecaca] bg-[#fffafa] px-3.5 py-2 text-sm font-semibold text-[#ba1a1a] transition-colors duration-200 hover:bg-[#fef2f2] cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ba1a1a]"
                     >
                       <Unplug className="h-4 w-4" aria-hidden />
                       Disconnect
