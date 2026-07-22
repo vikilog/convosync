@@ -5,7 +5,7 @@ import {
   PRODUCT_DOMAIN,
   PRODUCT_NAME,
   SUPPORT_EMAIL,
-} from '../../landing/brand';
+} from '../../lib/brand';
 import type { LegalDocument } from './types';
 
 const EFFECTIVE = 'June 15, 2026';

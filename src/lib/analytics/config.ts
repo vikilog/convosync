@@ -27,7 +27,7 @@ export function hasAnalyticsConfig(config = getAnalyticsConfig()): boolean {
   return Boolean(config.gtmId || config.ga4Id || config.metaPixelId || config.clarityProjectId);
 }
 
-export const PUBLIC_MARKETING_PATHS = ['/', '/privacy', '/terms', '/signup', '/login'] as const;
+export const PUBLIC_MARKETING_PATHS = ['/signup', '/login'] as const;
 
 export function isPublicMarketingPath(pathname: string): boolean {
   return (PUBLIC_MARKETING_PATHS as readonly string[]).includes(pathname);

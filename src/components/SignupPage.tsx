@@ -8,6 +8,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Check, Lock, Mail, User } from 'lucide-react';
 import { PRODUCT_LOGO, PRODUCT_NAME } from '../lib/brand';
 import { api } from '../lib/api';
+import { landingPath } from '../lib/publicUrls';
 import { applyAuthSession, userNeedsOnboarding } from '../lib/session';
 import { connectSocket } from '../lib/socket';
 import { trackEvent } from '../lib/analytics';
@@ -210,13 +211,23 @@ export function SignupPage() {
 
             <p className="text-meta text-gray-400 text-center mt-4 leading-relaxed">
               No credit card required. By signing up you agree to our{' '}
-              <Link to="/terms" className="text-primary hover:underline">
+              <a
+                href={landingPath('/terms', '/terms')}
+                className="text-primary hover:underline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 Terms of Service
-              </Link>{' '}
+              </a>{' '}
               and{' '}
-              <Link to="/privacy" className="text-primary hover:underline">
+              <a
+                href={landingPath('/privacy', '/privacy')}
+                className="text-primary hover:underline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 Privacy Policy
-              </Link>
+              </a>
               .
             </p>
 

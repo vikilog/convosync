@@ -4,7 +4,6 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import {
   getAnalyticsConsent,
   hasAnalyticsConfig,
@@ -12,6 +11,7 @@ import {
   setAnalyticsConsent,
   trackPageView,
 } from '../../lib/analytics';
+import { landingPath } from '../../lib/publicUrls';
 
 export function CookieConsentBanner() {
   const [visible, setVisible] = useState(false);
@@ -45,9 +45,14 @@ export function CookieConsentBanner() {
         <p className="text-sm text-gray-600 leading-relaxed flex-1">
           We use cookies and analytics (Google Analytics, Meta, Microsoft Clarity) to measure traffic and
           improve ConvoSync. See our{' '}
-          <Link to="/privacy" className="text-brand-indigo font-semibold hover:underline">
+          <a
+            href={landingPath('/privacy', '/privacy')}
+            className="text-brand-indigo font-semibold hover:underline"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             Privacy Policy
-          </Link>
+          </a>
           .
         </p>
         <div className="flex shrink-0 gap-2 sm:gap-3">

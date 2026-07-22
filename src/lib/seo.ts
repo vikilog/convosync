@@ -1,6 +1,6 @@
 import { settingsSectionFromPath, tabFromPath, type AppTab } from '../routes';
 import { SETTINGS_SECTION_TITLES } from '../components/settings/settingsNav';
-import { PRODUCT_DOMAIN, PRODUCT_NAME } from '../landing/brand';
+import { PRODUCT_DOMAIN, PRODUCT_NAME } from './brand';
 
 export const SITE_NAME = PRODUCT_NAME;
 export const SITE_DESCRIPTION =
@@ -12,7 +12,7 @@ export const SEO_IMAGE_HEIGHT = 909;
 export const DEFAULT_SITE_ORIGIN = `https://${PRODUCT_DOMAIN}`;
 
 /** Public routes that get static HTML meta at build time for link-preview crawlers. */
-export const PUBLIC_PRERENDER_PATHS = ['/', '/privacy', '/terms', '/signup', '/login'] as const;
+export const PUBLIC_PRERENDER_PATHS = ['/signup', '/login'] as const;
 
 export type PageSeo = {
   title: string;

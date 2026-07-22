@@ -48,9 +48,7 @@ import {
 } from './lib/workspacePermissions';
 import { DocumentSeo } from './components/DocumentSeo';
 import { AnalyticsRoot } from './components/analytics/AnalyticsRoot';
-import { LandingPage } from './components/LandingPage';
-import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
-import { TermsOfServicePage } from './pages/TermsOfServicePage';
+import { landingPath } from './lib/publicUrls';
 import { InboxRealtimeBridge } from './components/InboxRealtimeBridge';
 import { CallRealtimeBridge } from './components/calling/CallRealtimeBridge';
 import { CallPage } from './components/calling/CallPage';
@@ -296,6 +294,25 @@ function AppShellLayout({
   );
 }
 
+function MarketingRedirect({ path }: { path: string }) {
+  // Without VITE_LANDING_URL, fall back to console login (avoid redirect loops).
+  const href = landingPath(path, '/login');
+  useEffect(() => {
+    if (href.startsWith('http')) {
+      window.location.replace(href);
+    }
+  }, [href]);
+
+  if (href.startsWith('http')) {
+    return (
+      <div className="flex min-h-screen items-center justify-center text-sm text-slate-600">
+        Redirecting…
+      </div>
+    );
+  }
+  return <Navigate to={href} replace />;
+}
+
 function HomeRoute() {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
@@ -311,7 +328,7 @@ function HomeRoute() {
       <Navigate to={firstAccessibleTabPath(getUserPermissions(), getUserRole())} replace />
     );
   }
-  return <LandingPage />;
+  return <Navigate to="/login" replace />;
 }
 
 function LoginRedirect() {
@@ -415,8 +432,8 @@ export default function App() {
         }
       />
       <Route path="/" element={<HomeRoute />} />
-      <Route path="/privacy" element={<PrivacyPolicyPage />} />
-      <Route path="/terms" element={<TermsOfServicePage />} />
+      <Route path="/privacy" element={<MarketingRedirect path="/privacy" />} />
+      <Route path="/terms" element={<MarketingRedirect path="/terms" />} />
       <Route
         path="/ai-agent/*"
         element={

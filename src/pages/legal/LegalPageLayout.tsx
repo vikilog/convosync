@@ -11,7 +11,7 @@ import {
   PRODUCT_LOGO,
   PRODUCT_NAME,
   PRIVACY_EMAIL,
-} from '../../landing/brand';
+} from '../../lib/brand';
 import type { LegalBlock, LegalDocument } from './types';
 
 type LegalPageLayoutProps = {

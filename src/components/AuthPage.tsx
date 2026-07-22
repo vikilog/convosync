@@ -6,7 +6,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import { ArrowLeft, Eye, EyeOff, Loader2, Lock, Mail, MessageSquare, ShieldCheck } from 'lucide-react';
+import { Eye, EyeOff, Loader2, Lock, Mail, MessageSquare, ShieldCheck } from 'lucide-react';
 import { PRODUCT_LOGO, PRODUCT_NAME } from '../lib/brand';
 import { api } from '../lib/api';
 import { applyAuthSession, userNeedsOnboarding } from '../lib/session';
@@ -178,16 +178,6 @@ export function AuthPage() {
         }}
       >
         <div className="absolute inset-0 app-grid-bg opacity-60 pointer-events-none" />
-
-        <div className="relative z-10 px-6 pt-6 md:px-10">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 min-h-11 text-sm font-semibold text-slate-500 hover:text-emerald-700 transition-colors duration-200 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-channel-green rounded-lg"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to home
-          </Link>
-        </div>
 
         <div className="relative z-10 flex-1 flex items-center justify-center p-6 md:p-10">
           <motion.div

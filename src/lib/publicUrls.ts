@@ -70,3 +70,24 @@ export function resolveAppUrl(): string {
 
   return window.location.origin;
 }
+
+/** Marketing site origin (separate Vercel app). */
+export function resolveLandingUrl(): string {
+  const envUrl = import.meta.env.VITE_LANDING_URL
+    ? trimTrailingSlash(import.meta.env.VITE_LANDING_URL)
+    : undefined;
+
+  if (envUrl) return envUrl;
+
+  if (import.meta.env.DEV) return 'http://localhost:3001';
+
+  return '';
+}
+
+/** Absolute URL on the marketing site, or fallback path on this origin. */
+export function landingPath(path: string, fallbackPath: string): string {
+  const base = resolveLandingUrl();
+  const p = path.startsWith('/') ? path : `/${path}`;
+  if (base) return `${base}${p}`;
+  return fallbackPath;
+}
