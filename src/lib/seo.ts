@@ -72,6 +72,10 @@ const TAB_SEO: Record<AppTab, Omit<PageSeo, 'path'>> = {
     title: 'AI agents',
     description: 'Configure autonomous WhatsApp bots with knowledge and handoff rules.',
   },
+  'media-gallery': {
+    title: 'Media Gallery',
+    description: 'Upload and manage shared images and documents for AI agents and other features.',
+  },
   ctwa: {
     title: 'Ads Manager',
     description: 'Connect Meta and Google Ads, run Click-to-WhatsApp campaigns, and track performance.',

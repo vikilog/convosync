@@ -19,6 +19,7 @@ import { CampaignsView } from './components/CampaignsView';
 import { TemplatesView } from './components/TemplatesView';
 import { JourneyView } from './components/JourneyView';
 import { AiAgentView } from './components/AiAgentView';
+import { MediaGalleryView } from './components/MediaGalleryView';
 import { ReportsView } from './components/ReportsView';
 import { AdsView } from './components/AdsView';
 import { FacebookPageView } from './components/FacebookPageView';
@@ -230,6 +231,11 @@ function AppShellLayout({
             {mountedTabs.has('ai-agent') && (
               <KeepAlive active={activeTab === 'ai-agent'}>
                 <AiAgentView />
+              </KeepAlive>
+            )}
+            {mountedTabs.has('media-gallery') && (
+              <KeepAlive active={activeTab === 'media-gallery'}>
+                <MediaGalleryView />
               </KeepAlive>
             )}
             {mountedTabs.has('ctwa') && (

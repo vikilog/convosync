@@ -6,6 +6,8 @@ import { api } from '../../../lib/api';
 import { pathForAgent } from '../../../routes';
 import { ChatPreviewPanel } from '../ChatPreviewPanel';
 
+type SaveState = 'idle' | 'saving' | 'saved' | 'error';
+
 type Props = {
   agentId: string;
   skillId: string;
@@ -36,6 +38,8 @@ export const SkillEditor: React.FC<Props> = ({ agentId, skillId, avatarUrl }) =>
   const [skill, setSkill] = useState<AgentSkill | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [saveState, setSaveState] = useState<SaveState>('idle');
+  const [menuOpen, setMenuOpen] = useState(false);
   const [showSlashMenu, setShowSlashMenu] = useState(false);
   const [slashFilter, setSlashFilter] = useState('');
   const instructionsRef = useRef<HTMLTextAreaElement>(null);
@@ -60,13 +64,17 @@ export const SkillEditor: React.FC<Props> = ({ agentId, skillId, avatarUrl }) =>
     if (!skill) return;
     const next = { ...skill, ...patch };
     setSkill(next);
+    setSaveState('saving');
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
-      void api.updateAgentSkill(agentId, skillId, {
-        title: next.title,
-        trigger: next.trigger,
-        instructions: next.instructions,
-      });
+      void api
+        .updateAgentSkill(agentId, skillId, {
+          title: next.title,
+          trigger: next.trigger,
+          instructions: next.instructions,
+        })
+        .then(() => setSaveState('saved'))
+        .catch(() => setSaveState('error'));
     }, 500);
   };
 
@@ -75,6 +83,30 @@ export const SkillEditor: React.FC<Props> = ({ agentId, skillId, avatarUrl }) =>
     try {
       const updated = await api.publishAgentSkill(agentId, skillId);
       setSkill(mapSkill(updated as Record<string, unknown>));
+      setSaveState('saved');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSetDraft = async () => {
+    setMenuOpen(false);
+    setSaving(true);
+    try {
+      const updated = await api.updateAgentSkill(agentId, skillId, { status: 'draft' });
+      setSkill(mapSkill(updated as Record<string, unknown>));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm('Delete this skill? This cannot be undone.')) return;
+    setMenuOpen(false);
+    setSaving(true);
+    try {
+      await api.deleteAgentSkill(agentId, skillId);
+      navigate(pathForAgent(agentId, 'skills'));
     } finally {
       setSaving(false);
     }
@@ -155,12 +187,45 @@ export const SkillEditor: React.FC<Props> = ({ agentId, skillId, avatarUrl }) =>
             </span>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <button
-              type="button"
-              className="p-2 rounded-lg text-[#6B7280] hover:bg-surface-muted"
-            >
-              <MoreHorizontal className="w-5 h-5" />
-            </button>
+            <span className="text-xs text-[#6B7280] min-w-[4.5rem] text-right">
+              {saveState === 'saving'
+                ? 'Saving…'
+                : saveState === 'saved'
+                  ? 'Saved'
+                  : saveState === 'error'
+                    ? 'Save failed'
+                    : ''}
+            </span>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setMenuOpen((o) => !o)}
+                className="p-2 rounded-lg text-[#6B7280] hover:bg-surface-muted"
+                aria-label="Skill actions"
+              >
+                <MoreHorizontal className="w-5 h-5" />
+              </button>
+              {menuOpen && (
+                <div className="absolute right-0 mt-1 w-44 bg-surface border border-black/5 rounded-xl shadow-lg z-20 overflow-hidden">
+                  {skill.status === 'live' && (
+                    <button
+                      type="button"
+                      onClick={() => void handleSetDraft()}
+                      className="w-full text-left px-4 py-2.5 text-sm font-medium text-[#111827] hover:bg-surface-muted"
+                    >
+                      Revert to draft
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => void handleDelete()}
+                    className="w-full text-left px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50"
+                  >
+                    Delete skill
+                  </button>
+                </div>
+              )}
+            </div>
             <button
               type="button"
               disabled={saving || skill.status === 'live'}

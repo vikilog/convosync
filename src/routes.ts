@@ -8,6 +8,7 @@ export const VALID_TABS = [
   'templates',
   'journey',
   'ai-agent',
+  'media-gallery',
   'ctwa',
   'facebook',
   'pay',

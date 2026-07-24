@@ -1,32 +1,79 @@
 import React, { useState } from 'react';
 import { X, Search } from 'lucide-react';
 
+export type SkillDraft = {
+  title: string;
+  trigger: string;
+  instructions: string;
+};
+
 type Props = {
   onClose: () => void;
-  onCreate: (title: string) => void;
+  onCreate: (draft: SkillDraft) => void;
   creating?: boolean;
 };
 
-const SUGGESTED_SKILLS = [
-  'Order tracking',
-  'Refund request',
-  'Product inquiry',
-  'Appointment booking',
-  'FAQ handling',
+const SUGGESTED_SKILLS: SkillDraft[] = [
+  {
+    title: 'Send media',
+    trigger:
+      'User asks for a brochure, catalog, menu, price list, PDF, image, photo, flyer, document, sample, download, or says file bhejo / send me the …',
+    instructions: `When the user wants a file, image, brochure, catalog, menu, price list, or document — or when related media may help:
+1. Answer the question briefly first.
+2. Pricing / explicit "bhejo/send" requests: the system may attach the file automatically — keep text short.
+3. Feature/product questions with related media: the system may ask "Bhej doon?" — do not invent files or fake links.
+4. If nothing relevant is available, do not invent a file; offer human help if needed.
+5. Reply in the user's language (English or Hinglish).`,
+  },
+  {
+    title: 'Order tracking',
+    trigger: 'User asks where their order is, tracking status, delivery ETA, or shipment update.',
+    instructions:
+      'Ask for the order ID if missing. Share tracking status from knowledge/CRM only. Never invent a tracking number or ETA.',
+  },
+  {
+    title: 'Refund request',
+    trigger: 'User wants a refund, return, chargeback, or money back.',
+    instructions:
+      'Collect order ID and reason. Explain the refund policy from knowledge only. Escalate billing disputes or angry customers.',
+  },
+  {
+    title: 'Product inquiry',
+    trigger: 'User asks about a product, features, availability, or how something works.',
+    instructions:
+      'Answer from knowledge base only. Keep replies short. Offer Send media when a brochure/catalog would help.',
+  },
+  {
+    title: 'Appointment booking',
+    trigger: 'User wants to book, reschedule, or cancel an appointment or demo call.',
+    instructions:
+      'Collect name, preferred time, and use-case. Confirm next steps. Escalate if calendar is unavailable.',
+  },
+  {
+    title: 'FAQ handling',
+    trigger: 'User asks a common FAQ covered in the knowledge base.',
+    instructions:
+      'Answer briefly from knowledge. If not covered, say so and offer human handoff — do not invent facts.',
+  },
 ];
 
 export const NewSkillModal: React.FC<Props> = ({ onClose, onCreate, creating }) => {
   const [search, setSearch] = useState('');
   const [title, setTitle] = useState('');
+  const [selected, setSelected] = useState<SkillDraft | null>(null);
 
   const filtered = SUGGESTED_SKILLS.filter((s) =>
-    s.toLowerCase().includes(search.toLowerCase())
+    s.title.toLowerCase().includes(search.toLowerCase())
   );
 
   const handleCreate = () => {
     const name = title.trim() || search.trim();
     if (!name) return;
-    onCreate(name);
+    if (selected && selected.title === name) {
+      onCreate(selected);
+      return;
+    }
+    onCreate({ title: name, trigger: '', instructions: '' });
   };
 
   return (
@@ -56,7 +103,10 @@ export const NewSkillModal: React.FC<Props> = ({ onClose, onCreate, creating }) 
             <input
               type="text"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => {
+                setTitle(e.target.value);
+                setSelected(null);
+              }}
               placeholder="Enter title here"
               className="w-full border border-black/5 rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
             />
@@ -67,12 +117,19 @@ export const NewSkillModal: React.FC<Props> = ({ onClose, onCreate, creating }) 
               <p className="text-xs font-bold text-[#6B7280] uppercase tracking-wide">Suggestions</p>
               {filtered.map((s) => (
                 <button
-                  key={s}
+                  key={s.title}
                   type="button"
-                  onClick={() => setTitle(s)}
-                  className="w-full text-left px-3 py-2 rounded-lg text-sm text-[#111827] hover:bg-primary/10 transition-colors"
+                  onClick={() => {
+                    setTitle(s.title);
+                    setSelected(s);
+                  }}
+                  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                    selected?.title === s.title
+                      ? 'bg-primary/15 text-[#111827] font-medium'
+                      : 'text-[#111827] hover:bg-primary/10'
+                  }`}
                 >
-                  {s}
+                  {s.title}
                 </button>
               ))}
             </div>

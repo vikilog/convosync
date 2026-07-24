@@ -45,6 +45,13 @@ function mapFetchError(err: unknown): string {
   if (message.includes('file') || message.includes('Document upload')) {
     return 'This URL contains a file. Please use Document upload instead.';
   }
+  if (
+    message.includes('No readable text') ||
+    message.includes('JavaScript-rendered') ||
+    message.includes('Document or Q&A')
+  ) {
+    return message;
+  }
   if (message.includes('recently') || message.includes('hour')) {
     return message;
   }

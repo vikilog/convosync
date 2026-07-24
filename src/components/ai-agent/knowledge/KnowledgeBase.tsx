@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Search, HelpCircle, FileText, Link2, Paperclip, Trash2 } from 'lucide-react';
+import { Search, HelpCircle, FileText, Link2, Paperclip, Trash2, Pencil } from 'lucide-react';
 import type { KnowledgeItem, KnowledgeStatus, KnowledgeType } from '../types';
 import { api } from '../../../lib/api';
 import { AddKnowledgeModal } from './AddKnowledgeModal';
+import { EditKnowledgeModal, type KnowledgeEditPayload } from './EditKnowledgeModal';
 
 type Props = {
   agentId: string;
@@ -54,6 +55,7 @@ export const KnowledgeBase: React.FC<Props> = ({ agentId }) => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [showAdd, setShowAdd] = useState(false);
+  const [editTarget, setEditTarget] = useState<KnowledgeItem | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<KnowledgeItem | null>(null);
@@ -108,6 +110,22 @@ export const KnowledgeBase: React.FC<Props> = ({ agentId }) => {
     setToast('Online data added successfully');
   };
 
+  const handleEditSave = async (data: KnowledgeEditPayload) => {
+    if (!editTarget) return;
+    setSubmitting(true);
+    try {
+      const updated = await api.updateAgentKnowledge(agentId, editTarget.id, data);
+      const item = mapItem(updated as Record<string, unknown>);
+      setItems((prev) => prev.map((i) => (i.id === item.id ? item : i)));
+      setEditTarget(null);
+      setToast('Knowledge updated — vectors will reindex shortly');
+    } catch {
+      setToast('Could not save knowledge item');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const handleDelete = async () => {
     if (!deleteTarget) return;
     setDeleting(true);
@@ -136,7 +154,7 @@ export const KnowledgeBase: React.FC<Props> = ({ agentId }) => {
         <div>
           <h2 className="text-xl font-bold text-[#111827]">Knowledge</h2>
           <p className="text-sm text-[#6B7280] mt-1">
-            Enable the AI to learn knowledge, automatically answer common questions…
+            Add, edit, or remove knowledge anytime — the agent reindexes after updates.
           </p>
         </div>
         <button
@@ -179,7 +197,11 @@ export const KnowledgeBase: React.FC<Props> = ({ agentId }) => {
               key={item.id}
               className="flex items-center justify-between gap-4 bg-surface border border-black/5 rounded-xl p-4"
             >
-              <div className="flex items-center gap-3 min-w-0">
+              <button
+                type="button"
+                onClick={() => setEditTarget(item)}
+                className="flex items-center gap-3 min-w-0 text-left flex-1 hover:opacity-90"
+              >
                 <div className="p-2 rounded-lg bg-primary/10 text-primary shrink-0">
                   {TYPE_ICONS[item.type]}
                 </div>
@@ -194,18 +216,28 @@ export const KnowledgeBase: React.FC<Props> = ({ agentId }) => {
                   </div>
                   <p className="text-xs text-[#6B7280] mt-1">
                     {TYPE_LABELS[item.type]} · Added{' '}
-                    {new Date(item.createdAt).toLocaleDateString()}
+                    {new Date(item.createdAt).toLocaleDateString()} · Click to edit
                   </p>
                 </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setDeleteTarget(item)}
-                className="inline-flex items-center gap-1 text-xs font-bold text-red-500 hover:text-red-600 shrink-0"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-                Delete
               </button>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setEditTarget(item)}
+                  className="inline-flex items-center gap-1 text-xs font-bold text-primary hover:text-primary-hover"
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDeleteTarget(item)}
+                  className="inline-flex items-center gap-1 text-xs font-bold text-red-500 hover:text-red-600"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  Delete
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -217,6 +249,15 @@ export const KnowledgeBase: React.FC<Props> = ({ agentId }) => {
           onClose={() => setShowAdd(false)}
           onSubmit={(data) => void handleAdd(data)}
           onItemAdded={handleItemAdded}
+          submitting={submitting}
+        />
+      )}
+
+      {editTarget && (
+        <EditKnowledgeModal
+          item={editTarget}
+          onClose={() => setEditTarget(null)}
+          onSave={(data) => void handleEditSave(data)}
           submitting={submitting}
         />
       )}

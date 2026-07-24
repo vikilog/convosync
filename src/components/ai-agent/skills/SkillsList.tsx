@@ -4,7 +4,7 @@ import { Search, Info, HelpCircle } from 'lucide-react';
 import type { AgentSkill } from '../types';
 import { api } from '../../../lib/api';
 import { pathForAgentSkill } from '../../../routes';
-import { NewSkillModal } from './NewSkillModal';
+import { NewSkillModal, type SkillDraft } from './NewSkillModal';
 
 type Props = {
   agentId: string;
@@ -46,10 +46,14 @@ export const SkillsList: React.FC<Props> = ({ agentId }) => {
     void loadSkills();
   }, [loadSkills]);
 
-  const handleCreate = async (title: string) => {
+  const handleCreate = async (draft: SkillDraft) => {
     setCreating(true);
     try {
-      const created = await api.createAgentSkill(agentId, { title, trigger: '', instructions: '' });
+      const created = await api.createAgentSkill(agentId, {
+        title: draft.title,
+        trigger: draft.trigger,
+        instructions: draft.instructions,
+      });
       const skill = mapSkill(created as Record<string, unknown>);
       setShowNew(false);
       navigate(pathForAgentSkill(agentId, skill.id));
@@ -149,7 +153,7 @@ export const SkillsList: React.FC<Props> = ({ agentId }) => {
       {showNew && (
         <NewSkillModal
           onClose={() => setShowNew(false)}
-          onCreate={(title) => void handleCreate(title)}
+          onCreate={(draft) => void handleCreate(draft)}
           creating={creating}
         />
       )}

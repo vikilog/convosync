@@ -602,10 +602,63 @@ export const api = {
   getAgentKnowledge: (agentId: string) => get(`/agents/${agentId}/knowledge`),
   createAgentKnowledge: (agentId: string, data: unknown) =>
     post(`/agents/${agentId}/knowledge`, data),
+  updateAgentKnowledge: (agentId: string, kId: string, data: unknown) =>
+    put(`/agents/${agentId}/knowledge/${kId}`, data),
   fetchAgentKnowledgeUrl: (agentId: string, data: unknown) =>
     post(`/agents/${agentId}/knowledge/fetch-url`, data),
   deleteAgentKnowledge: (agentId: string, kId: string) =>
     del(`/agents/${agentId}/knowledge/${kId}`),
+
+  getMediaGallery: (params?: {
+    activeOnly?: boolean;
+    scope?: string;
+    usage?: string;
+    tag?: string;
+  }) => {
+    const q: Record<string, string> = {};
+    if (params?.activeOnly) q.activeOnly = 'true';
+    if (params?.scope) q.scope = params.scope;
+    if (params?.usage) q.usage = params.usage;
+    if (params?.tag) q.tag = params.tag;
+    return get('/media-gallery', Object.keys(q).length ? q : undefined);
+  },
+  createMediaGalleryItem: async (data: {
+    title: string;
+    description: string;
+    scope?: string;
+    usage?: string[];
+    tags?: string[];
+    type?: string;
+    file: File;
+  }) => {
+    const form = new FormData();
+    form.append('title', data.title);
+    form.append('description', data.description);
+    form.append('scope', data.scope ?? 'customer');
+    if (data.type) form.append('type', data.type);
+    if (data.usage?.length) form.append('usage', JSON.stringify(data.usage));
+    if (data.tags?.length) form.append('tags', JSON.stringify(data.tags));
+    form.append('file', data.file);
+    const res = await fetch(`${resolveApiBaseUrl()}/media-gallery`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: form,
+    });
+    await assertOk(res);
+    return res.json();
+  },
+  updateMediaGalleryItem: (mediaId: string, data: unknown) =>
+    patch(`/media-gallery/${mediaId}`, data),
+  deleteMediaGalleryItem: (mediaId: string) => del(`/media-gallery/${mediaId}`),
+  mediaGalleryFileUrl: (mediaId: string) =>
+    `${resolveApiBaseUrl()}/media-gallery/${mediaId}/file`,
+  fetchMediaGalleryFile: async (mediaId: string): Promise<Blob> => {
+    const res = await fetch(`${resolveApiBaseUrl()}/media-gallery/${mediaId}/file`, {
+      headers: authHeaders(),
+    });
+    await assertOk(res);
+    return res.blob();
+  },
 
   testAgent: (agentId: string, data: unknown) => post(`/agents/${agentId}/test`, data),
   chatAgent: (agentId: string, data: unknown) => post(`/agents/${agentId}/chat`, data),

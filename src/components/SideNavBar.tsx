@@ -15,6 +15,7 @@ import {
   FileText,
   GitBranch,
   Bot,
+  Images,
   Plug,
   CalendarDays,
   Code2,
@@ -232,6 +233,7 @@ export const SideNavBar: React.FC = () => {
         { id: 'templates', label: 'Templates', icon: FileText },
         { id: 'journey', label: 'Journeys', icon: GitBranch },
         { id: 'ai-agent', label: 'AI Agent', icon: Bot },
+        { id: 'media-gallery', label: 'Media Gallery', icon: Images },
       ],
     },
     {
