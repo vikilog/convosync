@@ -51,6 +51,8 @@ function assigneeDisplayFromConv(conv?: Record<string, unknown>): string {
   switch (type) {
     case 'ai':
       return 'AI Copilot';
+    case 'ai_agent':
+      return (conv?.agent as { name?: string })?.name || 'AI Agent';
     case 'rule_based':
       return 'Rule-based bot';
     case 'journey':

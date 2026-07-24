@@ -71,6 +71,8 @@ function isFullHtmlDocument(html: string): boolean {
   return /<!DOCTYPE\s+html/i.test(trimmed) || /<html[\s>]/i.test(trimmed);
 }
 
+export { isFullHtmlDocument };
+
 /** Full email HTML document for sending / preview. */
 export function renderDesignToFullHtml(design: EmailDesignDocument): string {
   const { brand, blocks } = design;

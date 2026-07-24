@@ -558,6 +558,8 @@ export const api = {
     return post(`/conversations/${convId}/messages/template`, { templateId, variables });
   },
   updateConversation: (id: string, data: unknown) => put(`/conversations/${id}`, data),
+  takeoverConversation: (id: string) => post(`/conversations/${id}/takeover`),
+  releaseConversationToAi: (id: string) => post(`/conversations/${id}/release-to-ai`),
   deleteConversation: (id: string) => del(`/conversations/${id}`),
 
   getCampaigns: () => get('/campaigns'),

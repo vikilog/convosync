@@ -47,7 +47,7 @@ function BlockPaletteItem({
         e.dataTransfer.setData(PALETTE_TYPE, type);
         e.dataTransfer.effectAllowed = 'copy';
       }}
-      className="flex items-start gap-3 p-3 rounded-xl border border-slate-200 bg-white hover:border-primary/40 hover:shadow-sm cursor-grab active:cursor-grabbing transition-all"
+      className="flex items-start gap-3 p-3 rounded-xl border border-black/5 bg-surface hover:border-primary/40 hover:shadow-sm cursor-grab active:cursor-grabbing transition-all"
     >
       <span className="shrink-0 w-9 h-9 rounded-lg bg-primary/10 text-primary text-sm font-black flex items-center justify-center">
         {icon}
@@ -85,8 +85,8 @@ export function LeftSidebar() {
   };
 
   return (
-    <aside className="w-[300px] shrink-0 border-r border-slate-200 bg-[#fafbfc] flex flex-col min-h-0">
-      <div className="grid grid-cols-5 border-b border-slate-200 bg-white">
+    <aside className="w-[300px] shrink-0 border-r border-black/5 bg-surface flex flex-col min-h-0">
+      <div className="grid grid-cols-5 border-b border-black/5 bg-surface">
         {TABS.map((tab) => (
           <button
             key={tab.id}
@@ -95,8 +95,8 @@ export function LeftSidebar() {
             title={tab.label}
             className={`min-w-0 py-2 px-0.5 flex flex-col items-center justify-center gap-1 text-[10px] font-semibold leading-tight ${
               leftTab === tab.id
-                ? 'text-primary border-b-2 border-primary bg-primary/[0.04]'
-                : 'text-gray-500 hover:text-gray-700 border-b-2 border-transparent'
+                ? 'text-primary border-b-2 border-primary bg-primary/[0.06]'
+                : 'text-gray-500 hover:text-gray-700 border-b-2 border-transparent hover:bg-surface-muted'
             }`}
           >
             {tab.icon}
@@ -105,7 +105,7 @@ export function LeftSidebar() {
         ))}
       </div>
 
-      <div className="flex-1 overflow-y-auto p-3">
+      <div className="flex-1 overflow-y-auto p-3 bg-surface-muted/40">
         {leftTab === 'blocks' && (
           <div className="space-y-2">
             <p className="text-xs text-gray-500 px-1 mb-2">Drag blocks onto the canvas</p>
@@ -122,7 +122,7 @@ export function LeftSidebar() {
                 key={t.id}
                 type="button"
                 onClick={() => applyGallery(t.design, t.subject)}
-                className="w-full text-left p-3 rounded-xl border border-slate-200 bg-white hover:border-primary/40 hover:shadow-sm transition-all"
+                className="w-full text-left p-3 rounded-xl border border-black/5 bg-surface hover:border-primary/40 hover:shadow-sm transition-all"
               >
                 <p className="text-sm font-semibold text-gray-900">{t.name}</p>
                 <p className="text-xs text-gray-500 mt-0.5">{t.description}</p>

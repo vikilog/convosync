@@ -17,9 +17,46 @@ type Props = {
   messages: Array<{ dateKey: string; label: string; messages: ChatMessage[] }>;
   channel: Channel;
   messageEndRef: React.RefObject<HTMLDivElement | null>;
+  loading?: boolean;
 };
 
 const WA_DELETED_MESSAGE = 'This message was deleted';
+
+export function InboxMessageListSkeleton({ channel }: { channel: Channel }) {
+  const isWhatsApp = channel === 'whatsapp';
+  return (
+    <div
+      className={`flex-1 overflow-y-auto px-3 py-3 space-y-3 ${isWhatsApp ? '' : 'p-4'}`}
+      style={isWhatsApp ? { backgroundColor: WA_CHAT_BG } : undefined}
+      aria-busy="true"
+      aria-label="Loading messages"
+    >
+      <div className="flex justify-center py-2">
+        <span className="h-5 w-16 rounded-md skel animate-pulse" />
+      </div>
+      {[0, 1, 2, 3, 4, 5].map((i) => {
+        const fromContact = i % 2 === 0;
+        return (
+          <div
+            key={i}
+            className={`flex ${fromContact ? 'justify-start' : 'justify-end'}`}
+          >
+            <div
+              className={`skel animate-pulse rounded-lg ${
+                fromContact ? 'rounded-tl-none' : 'rounded-tr-none'
+              }`}
+              style={{
+                width: `${42 + (i % 3) * 14}%`,
+                height: i % 3 === 1 ? 56 : 36,
+                maxWidth: 280,
+              }}
+            />
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 const MessageBubble: React.FC<{ message: ChatMessage; channel: Channel }> = ({
   message,
@@ -190,8 +227,17 @@ const MessageBubble: React.FC<{ message: ChatMessage; channel: Channel }> = ({
   );
 };
 
-export const InboxMessageList: React.FC<Props> = ({ messages, channel, messageEndRef }) => {
+export const InboxMessageList: React.FC<Props> = ({
+  messages,
+  channel,
+  messageEndRef,
+  loading = false,
+}) => {
   const isWhatsApp = channel === 'whatsapp';
+
+  if (loading) {
+    return <InboxMessageListSkeleton channel={channel} />;
+  }
 
   if (messages.length === 0) {
     return (

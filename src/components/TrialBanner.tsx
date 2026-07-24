@@ -59,12 +59,12 @@ export function TrialBanner() {
         <div className="flex items-center gap-2.5 min-w-0">
           <Clock className={`h-4 w-4 shrink-0 ${urgent ? 'text-amber-600' : 'text-primary'}`} />
           <p className="text-sm">
-            <span className="font-semibold">Free trial</span>
+            <span className="font-semibold">14-day free trial</span>
             {' — '}
             {trial.trialDaysLeft === 0
               ? 'ends today'
               : `${trial.trialDaysLeft} day${trial.trialDaysLeft === 1 ? '' : 's'} left`}
-            {trial.planName ? ` · ${trial.planName}` : ' · no plan selected yet'}
+            {trial.planName ? ` · ${trial.planName}` : ''}
           </p>
         </div>
         <a

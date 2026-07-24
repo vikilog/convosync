@@ -18,18 +18,25 @@ import {
 } from '../routes';
 import { WhatsAppTemplateBuilder } from './templates/WhatsAppTemplateBuilder';
 import { EmailTemplateBuilder } from './templates/EmailTemplateBuilder';
+import { WhatsAppTemplatePreview } from './templates/WhatsAppTemplatePreview';
 import { TemplateStatusBadge } from './templates/TemplateStatusBadge';
 import {
   TEMPLATE_CATEGORIES,
   CATEGORY_BADGE_CLASS,
   statusUiToSlug,
 } from '../lib/templateLabels';
-import { stripHtmlToText } from './templates/emailTemplateUtils';
+import { stripHtmlToText, wrapPreviewHtml, applyEmailTemplateVariables, buildSampleVariables } from './templates/emailTemplateUtils';
+import { headerFormatFromApi, type ButtonKind } from './templates/templateBuilderUtils';
 import {
   mapCannedResponseFromApi,
   type CannedResponseRecord,
 } from './templates/CannedResponseModal';
 import { CannedResponsesPanel } from './templates/CannedResponsesPanel';
+
+function waButtonKind(raw?: string): '' | ButtonKind {
+  if (raw === 'URL' || raw === 'QUICK_REPLY' || raw === 'PHONE_NUMBER') return raw;
+  return '';
+}
 
 type Channel = TemplateChannel;
 
@@ -474,7 +481,7 @@ export const TemplatesView: React.FC = () => {
         filteredWa.length === 0 ? (
           <EmptyState channel="whatsapp" onCreate={openCreate} />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {filteredWa.map((template) => (
               <WhatsAppCard
                 key={template.id ?? template.name}
@@ -491,7 +498,7 @@ export const TemplatesView: React.FC = () => {
       ) : filteredEmail.length === 0 ? (
         <EmptyState channel="email" onCreate={openCreate} />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {filteredEmail.map((template) => (
             <EmailCard
               key={template.id ?? template.name}
@@ -565,73 +572,86 @@ function WhatsAppCard({
     }
   };
 
+  const headerFormat = headerFormatFromApi(template.headerFormat, Boolean(template.header?.trim()));
+  const headerMediaPreviewUrl = template.headerMediaStorageKey
+    ? api.templateHeaderMediaUrl(template.headerMediaStorageKey)
+    : undefined;
+
   return (
     <div
-      className="bg-surface border border-black/5 rounded-2xl p-4 flex flex-col text-left hover:border-[#008069]/30 transition-all cursor-pointer"
+      className="bg-surface border border-black/5 rounded-xl p-3 flex flex-col text-left hover:border-[#008069]/30 transition-all cursor-pointer"
       onClick={onOpen}
       onKeyDown={(e) => e.key === 'Enter' && onOpen()}
       role="button"
       tabIndex={0}
     >
-      <div className="flex items-start justify-between gap-2 mb-3">
-        <div className="flex items-center gap-2 min-w-0">
-          <span className={CATEGORY_BADGE_CLASS}>{template.category}</span>
-          <h5 className="font-bold text-gray-900 text-sm truncate font-mono">{template.name}</h5>
+      <div className="flex items-start justify-between gap-1.5 mb-2">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span className={`${CATEGORY_BADGE_CLASS} !text-[10px] !px-1.5 !py-0.5`}>{template.category}</span>
+          <h5 className="font-bold text-gray-900 text-xs truncate font-mono">{template.name}</h5>
         </div>
-        <div className="flex items-center gap-1.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
           {template.id ? (
             <button
               type="button"
               title="Refresh status from Meta"
               onClick={(e) => void handleRefresh(e)}
               disabled={refreshing}
-              className="p-1.5 rounded-lg hover:bg-surface-muted text-slate-500 hover:text-primary disabled:opacity-50 cursor-pointer"
+              className="p-1 rounded-md hover:bg-surface-muted text-slate-500 hover:text-primary disabled:opacity-50 cursor-pointer"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-3 h-3 ${refreshing ? 'animate-spin' : ''}`} />
             </button>
           ) : null}
           <TemplateStatusBadge status={statusUiToSlug(template.status)} />
         </div>
       </div>
-      {template.header && (
-        <p className="text-sm font-bold text-gray-500 mb-1">{template.header}</p>
-      )}
       {template.status === 'Draft' && (
-        <p className="text-xs font-semibold text-amber-800 bg-amber-50 border border-amber-100 rounded-lg px-2.5 py-1.5 mb-2">
+        <p className="text-[11px] font-semibold text-amber-800 bg-amber-50 border border-amber-100 rounded-md px-2 py-1 mb-2">
           Not in Meta yet — open template and click Submit, or use the send icon below.
         </p>
       )}
       {template.status === 'Rejected' && template.rejectionReason && (
-        <p className="text-xs text-red-700 bg-red-50 border border-red-100 rounded-lg px-2.5 py-1.5 mb-2 line-clamp-2">
+        <p className="text-[11px] text-red-700 bg-red-50 border border-red-100 rounded-md px-2 py-1 mb-2 line-clamp-2">
           Meta rejected: {template.rejectionReason}
         </p>
       )}
-      <p className="text-xs text-gray-700 leading-normal bg-[#f0f2f5] p-3 rounded-xl border border-gray-100 font-medium whitespace-pre-wrap flex-1 line-clamp-4">
-        {template.bodyPattern}
-      </p>
+      <div className="flex-1 min-h-0 pointer-events-none">
+        <WhatsAppTemplatePreview
+          compact
+          headerFormat={headerFormat}
+          header={template.header ?? ''}
+          headerMediaPreviewUrl={headerMediaPreviewUrl}
+          headerMediaFileName={template.headerMediaFileName}
+          body={template.bodyPattern}
+          footer={template.footer ?? ''}
+          variableSamples={template.variables}
+          buttonType={waButtonKind(template.buttonType)}
+          buttonText={template.buttonText ?? template.buttons[0] ?? ''}
+        />
+      </div>
       <div
-        className="pt-3 border-t border-gray-50 mt-4 flex flex-wrap justify-between items-center gap-2"
+        className="pt-2 border-t border-gray-50 mt-2.5 flex flex-wrap justify-between items-center gap-1.5"
         onClick={(e) => e.stopPropagation()}
       >
-        <span className="text-sm font-bold text-gray-400">{template.lastUpdated}</span>
-        <div className="flex gap-1.5">
+        <span className="text-xs font-bold text-gray-400">{template.lastUpdated}</span>
+        <div className="flex gap-1">
           {template.status !== 'Approved' && template.id && (
             <>
-              <button type="button" title="Edit" onClick={onEdit} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-600">
-                <Pencil className="w-3.5 h-3.5" />
+              <button type="button" title="Edit" onClick={onEdit} className="p-1 rounded-md hover:bg-gray-100 text-gray-600">
+                <Pencil className="w-3 h-3" />
               </button>
               {(template.status === 'Draft' ||
                 template.status === 'Rejected' ||
                 template.status === 'Paused') && (
-                <button type="button" title="Submit to Meta" onClick={onSubmit} className="p-1.5 rounded-lg hover:bg-[#e7f5f0] text-[#008069]">
-                  <Send className="w-3.5 h-3.5" />
+                <button type="button" title="Submit to Meta" onClick={onSubmit} className="p-1 rounded-md hover:bg-[#e7f5f0] text-[#008069]">
+                  <Send className="w-3 h-3" />
                 </button>
               )}
             </>
           )}
           {template.id && (
-            <button type="button" title="Delete" onClick={onDelete} className="p-1.5 rounded-lg hover:bg-red-50 text-red-500">
-              <Trash2 className="w-3.5 h-3.5" />
+            <button type="button" title="Delete" onClick={onDelete} className="p-1 rounded-md hover:bg-red-50 text-red-500">
+              <Trash2 className="w-3 h-3" />
             </button>
           )}
         </div>
@@ -651,19 +671,24 @@ function EmailCard({
   onEdit: () => void;
   onDelete: () => void;
 }) {
-  const preview = stripHtmlToText(template.htmlBody);
+  const sampleVars = buildSampleVariables(template.variables);
+  const previewSubject = applyEmailTemplateVariables(template.subject, sampleVars);
+  const previewHtml = wrapPreviewHtml(
+    applyEmailTemplateVariables(template.htmlBody || '', sampleVars)
+  );
+
   return (
     <div
-      className="bg-surface border border-black/5 rounded-2xl p-4 flex flex-col text-left hover:border-primary/30 transition-all cursor-pointer"
+      className="bg-surface border border-black/5 rounded-xl p-3 flex flex-col text-left hover:border-primary/30 transition-all cursor-pointer"
       onClick={onOpen}
       onKeyDown={(e) => e.key === 'Enter' && onOpen()}
       role="button"
       tabIndex={0}
     >
-      <div className="flex items-start justify-between gap-2 mb-2">
-        <h5 className="font-bold text-gray-900 text-sm truncate font-mono">{template.name}</h5>
+      <div className="flex items-start justify-between gap-1.5 mb-2">
+        <h5 className="font-bold text-gray-900 text-xs truncate font-mono min-w-0">{template.name}</h5>
         <span
-          className={`text-sm font-bold uppercase px-2 py-0.5 rounded border ${
+          className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded border shrink-0 ${
             template.status === 'active'
               ? 'bg-primary/10 text-primary border-primary/20'
               : 'bg-gray-50 text-gray-500 border-gray-200'
@@ -672,33 +697,39 @@ function EmailCard({
           {template.status}
         </span>
       </div>
-      <p className="text-meta font-semibold text-gray-700 mb-2 truncate">{template.subject}</p>
-      <p className="text-xs text-gray-600 leading-normal bg-slate-50 p-3 rounded-xl border border-gray-100 flex-1 line-clamp-4">
-        {preview}
-      </p>
-      {template.variables.length > 0 && (
-        <div className="flex flex-wrap gap-1 mt-2">
-          {template.variables.slice(0, 4).map((v) => (
-            <span key={v} className="text-meta font-mono bg-primary/10 text-primary px-1.5 py-0.5 rounded">
-              {`{{${v}}}`}
-            </span>
-          ))}
+      <div className="flex-1 min-h-0 rounded-lg overflow-hidden border border-slate-200 bg-white pointer-events-none">
+        <div className="bg-[#f5f5f5] px-2 py-1.5 border-b border-gray-200">
+          <div className="flex items-center gap-1 mb-1">
+            <div className="w-1.5 h-1.5 rounded-full bg-red-400" />
+            <div className="w-1.5 h-1.5 rounded-full bg-yellow-400" />
+            <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
+          </div>
+          <p className="text-[9px] font-bold uppercase text-gray-400 leading-none">Subject</p>
+          <p className="text-[11px] font-semibold text-gray-900 truncate mt-0.5">
+            {previewSubject || 'Your subject line…'}
+          </p>
         </div>
-      )}
+        <iframe
+          title={`${template.name} preview`}
+          srcDoc={previewHtml}
+          className="w-full h-[160px] border-0 bg-white"
+          sandbox=""
+        />
+      </div>
       <div
-        className="pt-3 border-t border-gray-50 mt-4 flex flex-wrap justify-between items-center gap-2"
+        className="pt-2 border-t border-gray-50 mt-2.5 flex flex-wrap justify-between items-center gap-1.5"
         onClick={(e) => e.stopPropagation()}
       >
-        <span className="text-sm font-bold text-gray-400">
+        <span className="text-xs font-bold text-gray-400">
           Updated {formatUpdated(template.updatedAt)}
         </span>
-        <div className="flex gap-1.5">
-          <button type="button" title="Edit" onClick={onEdit} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-600">
-            <Pencil className="w-3.5 h-3.5" />
+        <div className="flex gap-1">
+          <button type="button" title="Edit" onClick={onEdit} className="p-1 rounded-md hover:bg-gray-100 text-gray-600">
+            <Pencil className="w-3 h-3" />
           </button>
           {template.id && (
-            <button type="button" title="Delete" onClick={onDelete} className="p-1.5 rounded-lg hover:bg-red-50 text-red-500">
-              <Trash2 className="w-3.5 h-3.5" />
+            <button type="button" title="Delete" onClick={onDelete} className="p-1 rounded-md hover:bg-red-50 text-red-500">
+              <Trash2 className="w-3 h-3" />
             </button>
           )}
         </div>

@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Copy, GripVertical, Trash2 } from 'lucide-react';
 import type { BrandSettings, EmailBlock } from './types';
+import { isFullHtmlDocument } from './renderHtml';
 
 type Props = {
   block: EmailBlock;
@@ -26,6 +27,9 @@ export function CanvasBlock({
   dragHandlers,
 }: Props) {
   const primary = brand.primaryColor;
+  const htmlRaw = block.type === 'html' ? String(block.props.rawHtml ?? '') : '';
+  const fullHtmlDoc = block.type === 'html' && isFullHtmlDocument(htmlRaw);
+  const htmlSrcDoc = useMemo(() => (fullHtmlDoc ? htmlRaw : ''), [fullHtmlDoc, htmlRaw]);
 
   const renderContent = () => {
     const p = block.props;
@@ -63,7 +67,7 @@ export function CanvasBlock({
             <img
               src={String(p.src ?? '')}
               alt={String(p.alt ?? '')}
-              className="max-w-full h-auto rounded-lg border border-gray-100"
+              className="max-w-full h-auto rounded-lg border border-black/5"
             />
           </div>
         );
@@ -103,14 +107,21 @@ export function CanvasBlock({
           </p>
         );
       case 'html':
-        return (
-          <div className="space-y-1">
-            <span className="text-sm font-bold uppercase tracking-wide text-gray-400">Custom HTML</span>
-            <div
-              className="prose prose-sm max-w-none text-gray-700"
-              dangerouslySetInnerHTML={{ __html: String(p.rawHtml ?? '') }}
+        if (fullHtmlDoc) {
+          return (
+            <iframe
+              title="Email HTML preview"
+              srcDoc={htmlSrcDoc}
+              className="w-full min-h-[calc(100dvh-7rem)] h-full border-0 bg-white block"
+              sandbox=""
             />
-          </div>
+          );
+        }
+        return (
+          <div
+            className="prose prose-sm max-w-none text-gray-700"
+            dangerouslySetInnerHTML={{ __html: htmlRaw }}
+          />
         );
       default:
         return null;
@@ -131,30 +142,32 @@ export function CanvasBlock({
           onSelect();
         }
       }}
-      className={`group relative rounded-lg transition-all mx-1 ${
+      className={`group relative rounded-xl transition-all ${
+        fullHtmlDoc ? 'mx-0 overflow-hidden' : 'mx-1'
+      } ${
         selected
           ? 'ring-2 ring-primary shadow-md shadow-primary/10'
-          : 'ring-1 ring-transparent hover:ring-slate-200 hover:shadow-sm'
+          : 'ring-1 ring-transparent hover:ring-black/10 hover:shadow-sm'
       }`}
     >
       <div className="absolute left-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 flex flex-col gap-0.5 z-10">
         <button
           type="button"
           {...dragHandlers}
-          className="p-1 rounded bg-white border border-slate-200 text-gray-400 cursor-grab active:cursor-grabbing"
+          className="p-1 rounded-md bg-surface border border-black/5 text-gray-400 cursor-grab active:cursor-grabbing"
           aria-label="Drag block"
         >
           <GripVertical className="w-3.5 h-3.5" />
         </button>
       </div>
-      <div className="absolute -right-1 top-1 opacity-0 group-hover:opacity-100 flex gap-1 z-10">
+      <div className="absolute right-1 top-1 opacity-0 group-hover:opacity-100 flex gap-1 z-10">
         <button
           type="button"
           onClick={(e) => {
             e.stopPropagation();
             onDuplicate();
           }}
-          className="p-1 rounded-full bg-white border border-slate-200 text-gray-500 hover:text-primary"
+          className="p-1 rounded-full bg-surface border border-black/5 text-gray-500 hover:text-primary"
           aria-label="Duplicate"
         >
           <Copy className="w-3 h-3" />
@@ -165,13 +178,13 @@ export function CanvasBlock({
             e.stopPropagation();
             onRemove();
           }}
-          className="p-1 rounded-full bg-white border border-red-100 text-red-500"
+          className="p-1 rounded-full bg-surface border border-red-100 text-red-500"
           aria-label="Delete"
         >
           <Trash2 className="w-3 h-3" />
         </button>
       </div>
-      <div className="px-6 py-4 bg-white">{renderContent()}</div>
+      <div className={fullHtmlDoc ? 'bg-surface' : 'px-6 py-4 bg-surface'}>{renderContent()}</div>
     </div>
   );
 }

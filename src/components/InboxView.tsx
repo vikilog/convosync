@@ -11,6 +11,7 @@ import {
   Send,
   Paperclip,
   User,
+  Bot,
   Facebook,
   Plus,
   Loader2,
@@ -27,6 +28,11 @@ import {
   type InboxChannel,
 } from '../lib/inboxScope';
 import { mapContactFromApi, mapMessageFromApi } from '../lib/mappers';
+import {
+  mapConversationEventToMessage,
+  mergeMessagesAndEvents,
+  type ConversationEventApi,
+} from '../lib/conversationEvents';
 import { dedupeInboxThreads } from '../lib/inboxDedupe';
 import { fetchInboxConversationRows } from '../lib/inboxConversations';
 import { groupMessagesByDate } from '../lib/formatDates';
@@ -208,11 +214,37 @@ function dedupeChatMessages(messages: ChatMessage[]): ChatMessage[] {
 
 function normalizeMessagesResponse(res: unknown): {
   messages: Record<string, unknown>[];
+  events: ConversationEventApi[];
   hasMore: boolean;
 } {
-  if (Array.isArray(res)) return { messages: res, hasMore: false };
-  const obj = res as { messages?: Record<string, unknown>[]; hasMore?: boolean };
-  return { messages: obj.messages ?? [], hasMore: Boolean(obj.hasMore) };
+  if (Array.isArray(res)) return { messages: res, events: [], hasMore: false };
+  const obj = res as {
+    messages?: Record<string, unknown>[];
+    events?: ConversationEventApi[];
+    hasMore?: boolean;
+  };
+  return {
+    messages: obj.messages ?? [],
+    events: Array.isArray(obj.events) ? obj.events : [],
+    hasMore: Boolean(obj.hasMore),
+  };
+}
+
+function historyFromMessagesResponse(res: unknown): ChatMessage[] {
+  const { messages, events } = normalizeMessagesResponse(res);
+  return mergeMessagesAndEvents(
+    messages.map((m) => mapMessageFromApi(m)),
+    events
+  );
+}
+
+function isAiAssigneeValue(value: string | undefined): boolean {
+  if (!value) return false;
+  return value === 'ai' || value.startsWith('ai_agent:');
+}
+
+function isHumanAssigneeValue(value: string | undefined): boolean {
+  return Boolean(value?.startsWith('user:'));
 }
 
 function mediaKindFromFile(file: File): ChatMessageType {
@@ -367,6 +399,7 @@ export const InboxView: React.FC = () => {
   const [inboxThreads, setInboxThreads] = useState<InboxThread[]>([]);
   const [selectedConversationId, setSelectedConversationId] = useState<string>('');
   const [chatHistories, setChatHistories] = useState<Record<string, ChatMessage[]>>({});
+  const [messagesLoading, setMessagesLoading] = useState(false);
   const [assignedToByConversationId, setAssignedToByConversationId] = useState<
     Record<string, string>
   >({});
@@ -381,6 +414,9 @@ export const InboxView: React.FC = () => {
 
   const [messageInput, setMessageInput] = useState<string>('');
   const [sendError, setSendError] = useState<string | null>(null);
+  const [takeoverLoading, setTakeoverLoading] = useState(false);
+  const [releaseLoading, setReleaseLoading] = useState(false);
+  const [handoverToast, setHandoverToast] = useState<string | null>(null);
   const [showTemplatePicker, setShowTemplatePicker] = useState(false);
   const [showCannedPicker, setShowCannedPicker] = useState(false);
   const [pendingComposerFile, setPendingComposerFile] = useState<File | null>(null);
@@ -405,6 +441,8 @@ export const InboxView: React.FC = () => {
 
   const inboxThreadsRef = useRef(inboxThreads);
   inboxThreadsRef.current = inboxThreads;
+  const chatHistoriesRef = useRef(chatHistories);
+  chatHistoriesRef.current = chatHistories;
 
   /** Selected chat only counts as "reading" while Inbox tab is visible (KeepAlive). */
   const viewingConversationId = inboxTabActive ? selectedConversationId : '';
@@ -463,6 +501,10 @@ export const InboxView: React.FC = () => {
     ? dedupeChatMessages(chatHistories[selectedThread.conversationId] || [])
     : [];
   const messageGroups = groupMessagesByDate(activeHistory);
+  const showMessageSkeleton =
+    messagesLoading &&
+    Boolean(selectedConversationId) &&
+    chatHistories[selectedConversationId] === undefined;
   const { progress: journeyProgress, initialLoading: journeyInitialLoading } =
     useContactJourneyProgress(selectedThread?.id ?? null, journeyProgressRefresh);
 
@@ -583,14 +625,20 @@ export const InboxView: React.FC = () => {
     if (!conversationId) return;
     void api
       .getMessages(conversationId)
-      .then((msgs: Record<string, unknown>[]) => {
+      .then((res) => {
         setChatHistories((prev) => ({
           ...prev,
-          [conversationId]: msgs.map((m) => mapMessageFromApi(m)),
+          [conversationId]: historyFromMessagesResponse(res),
         }));
       })
       .catch(console.error);
   });
+
+  useEffect(() => {
+    if (!handoverToast) return;
+    const t = window.setTimeout(() => setHandoverToast(null), 3000);
+    return () => window.clearTimeout(t);
+  }, [handoverToast]);
 
   useEffect(() => {
     setInboxVisible(inboxTabActive);
@@ -631,7 +679,10 @@ export const InboxView: React.FC = () => {
   }, [loadConversations]);
 
   useEffect(() => {
-    if (!selectedConversationId) return;
+    if (!selectedConversationId) {
+      setMessagesLoading(false);
+      return;
+    }
 
     const clearStaleSelection = () => {
       setInboxThreads((prev) => prev.filter((t) => t.conversationId !== selectedConversationId));
@@ -643,9 +694,15 @@ export const InboxView: React.FC = () => {
       setSelectedConversationId('');
     };
 
+    let cancelled = false;
+    if (chatHistoriesRef.current[selectedConversationId] === undefined) {
+      setMessagesLoading(true);
+    }
+
     api
       .getConversation(selectedConversationId)
       .then(async (conv) => {
+        if (cancelled) return;
         const contact = conv.contact as Record<string, unknown>;
         const mapped = mapInboxThread(contact, conv as Record<string, unknown>, selectedConversationId);
         setInboxThreads((prev) =>
@@ -655,10 +712,14 @@ export const InboxView: React.FC = () => {
         );
 
         const res = await api.getMessages(selectedConversationId);
-        const { messages } = normalizeMessagesResponse(res);
+        if (cancelled) return;
         setChatHistories((prev) => ({
           ...prev,
-          [selectedConversationId]: messages.map((m) => mapMessageFromApi(m)),
+          [selectedConversationId]: historyFromMessagesResponse(res),
+        }));
+        setAssignedToByConversationId((prev) => ({
+          ...prev,
+          [selectedConversationId]: encodeAssigneeFromConv(conv as Record<string, unknown>),
         }));
         setInboxThreads((prev) =>
           prev.map((t) =>
@@ -667,13 +728,21 @@ export const InboxView: React.FC = () => {
         );
       })
       .catch((err) => {
+        if (cancelled) return;
         const message = err instanceof Error ? err.message : String(err);
         if (message.includes('404') || message.toLowerCase().includes('not found')) {
           clearStaleSelection();
           return;
         }
         console.error(err);
+      })
+      .finally(() => {
+        if (!cancelled) setMessagesLoading(false);
       });
+
+    return () => {
+      cancelled = true;
+    };
   }, [selectedConversationId]);
 
   useEffect(() => {
@@ -681,10 +750,10 @@ export const InboxView: React.FC = () => {
 
     const reloadMessagesForConversation = async (conversationId: string) => {
       try {
-        const msgs = (await api.getMessages(conversationId)) as Record<string, unknown>[];
+        const res = await api.getMessages(conversationId);
         setChatHistories((prev) => ({
           ...prev,
-          [conversationId]: msgs.map((m) => mapMessageFromApi(m)),
+          [conversationId]: historyFromMessagesResponse(res),
         }));
       } catch (err) {
         console.error(err);
@@ -811,6 +880,11 @@ export const InboxView: React.FC = () => {
           return next;
         });
 
+        setAssignedToByConversationId((prev) => ({
+          ...prev,
+          [conversationId]: encodeAssigneeFromConv(conv),
+        }));
+
         // getMessages marks the thread read — only while Inbox is on screen
         if (isViewing) {
           await reloadMessagesForConversation(conversationId);
@@ -860,6 +934,30 @@ export const InboxView: React.FC = () => {
     socket.on('contact_updated', onContactUpdated);
     socket.on('message_status', onMessageStatus);
 
+    const onConversationEvent = (payload: {
+      conversationId: string;
+      event: ConversationEventApi;
+    }) => {
+      if (!payload?.conversationId || !payload.event) return;
+      const isViewing =
+        inboxTabActiveRef.current &&
+        payload.conversationId === selectedConversationIdRef.current;
+      if (!isViewing) return;
+      const sys = mapConversationEventToMessage(payload.event);
+      setChatHistories((prev) => {
+        const history = prev[payload.conversationId] || [];
+        if (history.some((m) => m.id === sys.id)) return prev;
+        return {
+          ...prev,
+          [payload.conversationId]: [...history, sys].sort(
+            (a, b) =>
+              new Date(a.createdAt ?? 0).getTime() - new Date(b.createdAt ?? 0).getTime()
+          ),
+        };
+      });
+    };
+    socket.on('conversation_event', onConversationEvent);
+
     const onMessengerSyncProgress = (payload: { phase?: string }) => {
       if (payload.phase === 'completed' || payload.phase === 'error') {
         void loadConversations();
@@ -889,6 +987,7 @@ export const InboxView: React.FC = () => {
       socket.off('conversation_updated', onConversationUpdated);
       socket.off('contact_updated', onContactUpdated);
       socket.off('message_status', onMessageStatus);
+      socket.off('conversation_event', onConversationEvent);
       socket.off('messenger_sync_progress', onMessengerSyncProgress);
       socket.off('instagram_sync_progress', onInstagramSyncProgress);
     };
@@ -985,6 +1084,78 @@ export const InboxView: React.FC = () => {
     } catch (err) {
       console.error(err);
       setSendError(err instanceof Error ? err.message : 'Failed to update assignment');
+    }
+  };
+
+  const handleTakeover = async () => {
+    if (!selectedThread || takeoverLoading) return;
+    const convId = selectedThread.conversationId;
+    setTakeoverLoading(true);
+    setSendError(null);
+    try {
+      const updated = (await api.takeoverConversation(convId)) as Record<string, unknown>;
+      const assigneeValue = encodeAssigneeFromConv(updated);
+      const label = assigneeLabelFromValue(
+        assigneeValue,
+        teamAgents,
+        aiAgents,
+        ruleBasedBots,
+        publishedJourneys
+      );
+      setAssignedToByConversationId((prev) => ({ ...prev, [convId]: assigneeValue }));
+      setActiveAssigneeValue(assigneeValue);
+      setInboxThreads((prev) =>
+        prev.map((t) =>
+          t.conversationId === convId ? { ...t, assignedAgent: label } : t
+        )
+      );
+      const res = await api.getMessages(convId);
+      setChatHistories((prev) => ({
+        ...prev,
+        [convId]: historyFromMessagesResponse(res),
+      }));
+      setHandoverToast('You took over this chat');
+    } catch (err) {
+      console.error(err);
+      setSendError(formatCatchError(err) || 'Failed to take over chat');
+    } finally {
+      setTakeoverLoading(false);
+    }
+  };
+
+  const handleReleaseToAi = async () => {
+    if (!selectedThread || releaseLoading) return;
+    const convId = selectedThread.conversationId;
+    setReleaseLoading(true);
+    setSendError(null);
+    try {
+      const updated = (await api.releaseConversationToAi(convId)) as Record<string, unknown>;
+      const assigneeValue = encodeAssigneeFromConv(updated);
+      const label = assigneeLabelFromValue(
+        assigneeValue,
+        teamAgents,
+        aiAgents,
+        ruleBasedBots,
+        publishedJourneys
+      );
+      setAssignedToByConversationId((prev) => ({ ...prev, [convId]: assigneeValue }));
+      setActiveAssigneeValue(assigneeValue);
+      setInboxThreads((prev) =>
+        prev.map((t) =>
+          t.conversationId === convId ? { ...t, assignedAgent: label } : t
+        )
+      );
+      const res = await api.getMessages(convId);
+      setChatHistories((prev) => ({
+        ...prev,
+        [convId]: historyFromMessagesResponse(res),
+      }));
+      setHandoverToast('Chat released to AI');
+    } catch (err) {
+      console.error(err);
+      setSendError(formatCatchError(err) || 'Failed to release chat to AI');
+    } finally {
+      setReleaseLoading(false);
     }
   };
 
@@ -1509,6 +1680,39 @@ export const InboxView: React.FC = () => {
                               <WhatsAppIcon className="w-3.5 h-3.5" />
                             )}
                           </span>
+                          {(() => {
+                            const assignee = assignedToByConversationId[thread.conversationId];
+                            if (isAiAssigneeValue(assignee)) {
+                              return (
+                                <span
+                                  className="shrink-0 inline-flex items-center justify-center w-4 h-4 rounded-full bg-violet-50 text-violet-600"
+                                  title="AI handling"
+                                  aria-label="AI handling"
+                                >
+                                  <Bot className="w-2.5 h-2.5" />
+                                </span>
+                              );
+                            }
+                            if (isHumanAssigneeValue(assignee)) {
+                              const humanId = assignee.slice('user:'.length);
+                              const human =
+                                teamAgents.find((a) => a.id === humanId) ??
+                                (humanId === currentUserId
+                                  ? { name: currentUserName || 'You' }
+                                  : null);
+                              const initial = (human?.name || 'A').charAt(0).toUpperCase();
+                              return (
+                                <span
+                                  className="shrink-0 inline-flex items-center justify-center w-4 h-4 rounded-full bg-sky-50 text-sky-700 text-[9px] font-black"
+                                  title={human?.name || 'Human agent'}
+                                  aria-label={human?.name || 'Human agent'}
+                                >
+                                  {initial}
+                                </span>
+                              );
+                            }
+                            return null;
+                          })()}
                         </div>
                         <span className="text-meta text-gray-400 font-bold font-mono leading-none shrink-0">
                           {thread.lastActive}
@@ -1678,9 +1882,52 @@ export const InboxView: React.FC = () => {
               messages={messageGroups}
               channel={contactChannel(selectedContact)}
               messageEndRef={messageEndRef}
+              loading={showMessageSkeleton}
             />
 
             <div className="p-2.5 bg-surface border-t border-black/5 text-left">
+              {isAiAssigneeValue(activeAssigneeValue) ? (
+                <div className="mb-2 flex items-center justify-between gap-2 rounded-xl border border-violet-200 bg-violet-50/80 px-3 py-2">
+                  <span className="inline-flex items-center gap-1.5 text-sm font-bold text-violet-700 min-w-0">
+                    <Bot className="w-3.5 h-3.5 shrink-0" />
+                    <span className="truncate">AI is handling this chat</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => void handleTakeover()}
+                    disabled={takeoverLoading}
+                    className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg border border-violet-300 bg-white text-violet-700 text-xs font-bold hover:bg-violet-100 disabled:opacity-60 transition-colors shrink-0"
+                  >
+                    {takeoverLoading ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <User className="w-3.5 h-3.5" />
+                    )}
+                    Take Over
+                  </button>
+                </div>
+              ) : activeAssigneeValue === `user:${currentUserId}` ? (
+                <div className="mb-2 flex items-center justify-between gap-2 rounded-xl border border-sky-200 bg-sky-50/80 px-3 py-2">
+                  <span className="inline-flex items-center gap-1.5 text-sm font-bold text-sky-700 min-w-0">
+                    <User className="w-3.5 h-3.5 shrink-0" />
+                    <span className="truncate">You&apos;re handling this chat</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => void handleReleaseToAi()}
+                    disabled={releaseLoading}
+                    className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg border border-black/5 bg-white text-gray-600 text-xs font-bold hover:bg-gray-100 disabled:opacity-60 transition-colors shrink-0"
+                  >
+                    {releaseLoading ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Bot className="w-3.5 h-3.5" />
+                    )}
+                    Release to AI
+                  </button>
+                </div>
+              ) : null}
+
               {selectedContact && contactChannel(selectedContact) === 'instagram' && (
                 <p className="mb-2 text-sm font-bold text-[#C13584] bg-[#fce8f0] border border-[#E1306C]/15 rounded-lg px-3 py-2">
                   Replying via Instagram DM
@@ -2030,6 +2277,12 @@ export const InboxView: React.FC = () => {
           }
         }}
       />
+
+      {handoverToast && (
+        <div className="fixed bottom-6 right-6 z-50 max-w-sm rounded-xl border border-black/5 bg-gray-900 px-4 py-3 text-sm font-bold text-white shadow-lg">
+          {handoverToast}
+        </div>
+      )}
     </div>
   );
 };

@@ -5,7 +5,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Bot, ChevronDown, ChevronLeft, Route, Sparkles, User, UserX } from 'lucide-react';
+import { ChevronDown, ChevronLeft, Route, Sparkles, User, UserX } from 'lucide-react';
 
 type AgentOption = { id: string; name: string };
 type BotOption = { id: string; name: string };
@@ -59,7 +59,7 @@ function assigneeLabelFromValue(
   return 'Unassigned';
 }
 
-type Submenu = 'main' | 'ai_agents' | 'bots' | 'journeys';
+type Submenu = 'main' | 'ai_agents' | 'journeys';
 
 export function InboxAssigneePicker({
   value,
@@ -97,10 +97,6 @@ export function InboxAssigneePicker({
     onChange(nextValue);
     setOpen(false);
     setSubmenu('main');
-  };
-
-  const openSubmenu = (next: Submenu) => {
-    setSubmenu(next);
   };
 
   const itemClass =
@@ -163,7 +159,7 @@ export function InboxAssigneePicker({
 
                 <button
                   type="button"
-                  onClick={() => openSubmenu('ai_agents')}
+                  onClick={() => setSubmenu('ai_agents')}
                   className={`${itemClass} justify-between`}
                 >
                   <span className="flex items-center gap-2.5 min-w-0">
@@ -177,30 +173,7 @@ export function InboxAssigneePicker({
 
                 <button
                   type="button"
-                  onClick={() => pick('ai')}
-                  className={`${itemClass} ${value === 'ai' ? 'bg-sky-50 text-sky-600' : ''}`}
-                >
-                  <Sparkles className="w-4 h-4 text-violet-500 shrink-0" />
-                  AI Copilot (FAQ)
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => openSubmenu('bots')}
-                  className={`${itemClass} justify-between`}
-                >
-                  <span className="flex items-center gap-2.5 min-w-0">
-                    <Bot className="w-4 h-4 text-sky-600 shrink-0" />
-                    Bot
-                  </span>
-                  <span className="text-xs text-gray-400 font-bold shrink-0">
-                    {ruleBasedBots.length}
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => openSubmenu('journeys')}
+                  onClick={() => setSubmenu('journeys')}
                   className={`${itemClass} justify-between`}
                 >
                   <span className="flex items-center gap-2.5 min-w-0">
@@ -241,39 +214,6 @@ export function InboxAssigneePicker({
                     >
                       <Sparkles className="w-4 h-4 text-sky-600 shrink-0" />
                       <span className="truncate">{agent.name}</span>
-                    </button>
-                  ))
-                )}
-              </div>
-            )}
-
-            {submenu === 'bots' && (
-              <div className="py-1">
-                <button
-                  type="button"
-                  onClick={() => setSubmenu('main')}
-                  className={`${itemClass} text-gray-500 border-b border-black/5`}
-                >
-                  <ChevronLeft className="w-4 h-4 shrink-0" />
-                  Back
-                </button>
-                <div className="px-3 py-2 text-meta font-black uppercase tracking-wider text-gray-400">
-                  Select bot
-                </div>
-                {ruleBasedBots.length === 0 ? (
-                  <p className="px-3 py-3 text-meta text-gray-400 font-medium">
-                    No rule-based bots published yet.
-                  </p>
-                ) : (
-                  ruleBasedBots.map((bot) => (
-                    <button
-                      key={bot.id}
-                      type="button"
-                      onClick={() => pick(`rule_based:${bot.id}`)}
-                      className={`${itemClass} ${value === `rule_based:${bot.id}` ? 'bg-sky-50 text-sky-600' : ''}`}
-                    >
-                      <Bot className="w-4 h-4 text-sky-600 shrink-0" />
-                      <span className="truncate">{bot.name}</span>
                     </button>
                   ))
                 )}

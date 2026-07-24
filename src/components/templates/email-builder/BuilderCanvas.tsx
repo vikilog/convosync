@@ -3,6 +3,7 @@ import { Plus } from 'lucide-react';
 import { useEmailBuilderStore } from './store';
 import { CanvasBlock } from './CanvasBlock';
 import type { BlockType } from './types';
+import { isFullHtmlDocument } from './renderHtml';
 
 const PALETTE_TYPE = 'application/x-convosync-block-type';
 
@@ -19,6 +20,11 @@ export function BuilderCanvas() {
   const setDropIndex = useEmailBuilderStore((s) => s.setDropIndex);
 
   const [dragBlockIndex, setDragBlockIndex] = useState<number | null>(null);
+
+  const singleFullHtml =
+    blocks.length === 1 &&
+    blocks[0].type === 'html' &&
+    isFullHtmlDocument(String(blocks[0].props.rawHtml ?? ''));
 
   const handleCanvasDrop = (e: React.DragEvent, index: number) => {
     e.preventDefault();
@@ -50,14 +56,19 @@ export function BuilderCanvas() {
 
   return (
     <div
-      className="flex-1 min-h-0 min-w-0 overflow-y-auto bg-[#eceff4] p-4 md:p-6"
+      className="flex-1 min-h-0 min-w-0 overflow-y-auto bg-surface flex flex-col"
       onClick={() => selectBlock(null)}
     >
       <div
-        className="w-full max-w-[640px] mx-auto min-h-full bg-white rounded-xl shadow-sm border border-slate-200"
+        className="w-full flex-1 min-h-full bg-surface"
+        style={
+          singleFullHtml
+            ? undefined
+            : { backgroundColor: brand.backgroundColor || undefined }
+        }
         onClick={(e) => e.stopPropagation()}
       >
-        {brand.logoUrl ? (
+        {!singleFullHtml && brand.logoUrl ? (
           <div className="pt-6 px-6 text-center">
             <img src={brand.logoUrl} alt={brand.companyName} className="h-9 mx-auto" />
           </div>
@@ -65,7 +76,7 @@ export function BuilderCanvas() {
 
         {blocks.length === 0 ? (
           <div
-            className="m-6 p-12 border-2 border-dashed border-[#dadde1] rounded-xl text-center"
+            className="m-6 p-12 border-2 border-dashed border-black/10 rounded-xl text-center bg-surface-muted/50"
             onDragOver={(e) => e.preventDefault()}
             onDrop={(e) => handleCanvasDrop(e, 0)}
           >
@@ -77,13 +88,30 @@ export function BuilderCanvas() {
                 e.stopPropagation();
                 addBlock('text');
               }}
-              className="mt-4 inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-primary hover:bg-primary-hover text-white text-sm font-bold"
+              className="mt-4 inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary hover:bg-primary-hover text-white text-sm font-bold"
             >
               <Plus className="w-3.5 h-3.5" /> Add text block
             </button>
           </div>
+        ) : singleFullHtml ? (
+          <CanvasBlock
+            block={blocks[0]}
+            brand={brand}
+            selected={selectedBlockId === blocks[0].id}
+            onSelect={() => selectBlock(blocks[0].id)}
+            onRemove={() => removeBlock(blocks[0].id)}
+            onDuplicate={() => duplicateBlock(blocks[0].id)}
+            dragHandlers={{
+              draggable: true,
+              onDragStart: (e) => {
+                setDragBlockIndex(0);
+                e.dataTransfer.effectAllowed = 'move';
+              },
+              onDragEnd: () => setDragBlockIndex(null),
+            }}
+          />
         ) : (
-          <div className="py-4 px-3 sm:px-5 space-y-1">
+          <div className="py-4 px-4 md:px-8 max-w-4xl mx-auto w-full space-y-1">
             <DropZone index={0} />
             {blocks.map((block, index) => (
               <React.Fragment key={block.id}>
