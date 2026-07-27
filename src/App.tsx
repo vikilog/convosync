@@ -20,6 +20,7 @@ import { TemplatesView } from './components/TemplatesView';
 import { JourneyView } from './components/JourneyView';
 import { AiAgentView } from './components/AiAgentView';
 import { MediaGalleryView } from './components/MediaGalleryView';
+import { CommerceView } from './modules/commerce/CommerceView';
 import { ReportsView } from './components/ReportsView';
 import { AdsView } from './components/AdsView';
 import { FacebookPageView } from './components/FacebookPageView';
@@ -125,6 +126,9 @@ function AppShell() {
     if (activeTab === 'integrations' && location.pathname.startsWith('/integrations/')) {
       return;
     }
+    if (activeTab === 'commerce' && location.pathname.startsWith('/commerce')) {
+      return;
+    }
     const expected = pathForTab(activeTab);
     if (location.pathname !== expected && location.pathname !== '/') {
       navigate(expected, { replace: true });
@@ -171,7 +175,7 @@ function AppShellLayout({
           className={
             activeTab === 'inbox' || activeTab === 'contacts' || campaignCreateWizard
               ? 'min-h-0 flex-1 overflow-hidden px-0'
-              : activeTab === 'google-tools'
+              : activeTab === 'google-tools' || activeTab === 'commerce'
                 ? 'px-2 md:px-4 py-2 md:py-3 flex-1 min-h-0 min-w-0 overflow-hidden'
                 : 'flex-1 min-h-0 overflow-x-hidden overflow-y-auto px-2 md:px-4 pt-2 md:pt-3'
           }
@@ -185,6 +189,7 @@ function AppShellLayout({
               activeTab === 'inbox' ||
               activeTab === 'contacts' ||
               activeTab === 'google-tools' ||
+              activeTab === 'commerce' ||
               campaignCreateWizard
                 ? 'h-full min-h-0 min-w-0 overflow-hidden'
                 : activeTab === 'integrations'
@@ -236,6 +241,11 @@ function AppShellLayout({
             {mountedTabs.has('media-gallery') && (
               <KeepAlive active={activeTab === 'media-gallery'}>
                 <MediaGalleryView />
+              </KeepAlive>
+            )}
+            {mountedTabs.has('commerce') && (
+              <KeepAlive active={activeTab === 'commerce'}>
+                <CommerceView />
               </KeepAlive>
             )}
             {mountedTabs.has('ctwa') && (
@@ -492,6 +502,16 @@ export default function App() {
       />
       <Route
         path="/integrations/*"
+        element={
+          <ProtectedRoute>
+            <OnboardingGuard>
+              <AppShell />
+            </OnboardingGuard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/commerce/*"
         element={
           <ProtectedRoute>
             <OnboardingGuard>

@@ -76,6 +76,11 @@ const TAB_SEO: Record<AppTab, Omit<PageSeo, 'path'>> = {
     title: 'Media Gallery',
     description: 'Upload and manage shared images and documents for AI agents and other features.',
   },
+  commerce: {
+    title: 'Commerce catalog',
+    description:
+      'AI-ready product catalog for WhatsApp conversations — products, collections, inventory, and Meta sync.',
+  },
   ctwa: {
     title: 'Ads Manager',
     description: 'Connect Meta and Google Ads, run Click-to-WhatsApp campaigns, and track performance.',

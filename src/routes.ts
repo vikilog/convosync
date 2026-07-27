@@ -9,6 +9,7 @@ export const VALID_TABS = [
   'journey',
   'ai-agent',
   'media-gallery',
+  'commerce',
   'ctwa',
   'facebook',
   'pay',
@@ -206,4 +207,34 @@ export function isTemplateSubRoute(pathname: string): boolean {
 
 export function pathForSettingsSection(section: SettingsSection): string {
   return `/settings/${section}`;
+}
+
+export const COMMERCE_SECTIONS = [
+  'catalog',
+  'products',
+  'categories',
+  'collections',
+  'brands',
+  'inventory',
+  'ai-knowledge',
+  'sync',
+] as const;
+
+export type CommerceRouteSection = (typeof COMMERCE_SECTIONS)[number];
+
+export function pathForCommerceSection(section: CommerceRouteSection = 'catalog'): string {
+  if (section === 'catalog') return '/commerce';
+  return `/commerce/${section}`;
+}
+
+export function commerceSectionFromPath(pathname: string): CommerceRouteSection {
+  const parts = pathname.replace(/^\//, '').split('/').filter(Boolean);
+  if (parts[0] !== 'commerce') return 'catalog';
+  const section = parts[1];
+  if (!section) return 'catalog';
+  if (section === 'products') return 'products';
+  if ((COMMERCE_SECTIONS as readonly string[]).includes(section)) {
+    return section as CommerceRouteSection;
+  }
+  return 'catalog';
 }

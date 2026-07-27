@@ -5,7 +5,12 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { pathForGoogleTool, pathForSettingsSection, pathForTab } from '../routes';
+import {
+  pathForCommerceSection,
+  pathForGoogleTool,
+  pathForSettingsSection,
+  pathForTab,
+} from '../routes';
 import {
   LayoutGrid,
   Inbox,
@@ -28,6 +33,14 @@ import {
   Settings,
   Menu,
   X,
+  ShoppingBag,
+  Package,
+  FolderTree,
+  Layers,
+  Tags,
+  Warehouse,
+  Brain,
+  RefreshCw,
 } from 'lucide-react';
 import { useSidebar } from '../contexts/SidebarContext';
 import { api, getWorkspaceId } from '../lib/api';
@@ -237,6 +250,54 @@ export const SideNavBar: React.FC = () => {
       ],
     },
     {
+      label: 'Commerce',
+      items: [
+        { id: 'commerce', label: 'Catalog', icon: ShoppingBag, path: pathForCommerceSection('catalog') },
+        {
+          id: 'commerce-products',
+          label: 'Products',
+          icon: Package,
+          path: pathForCommerceSection('products'),
+        },
+        {
+          id: 'commerce-categories',
+          label: 'Categories',
+          icon: FolderTree,
+          path: pathForCommerceSection('categories'),
+        },
+        {
+          id: 'commerce-collections',
+          label: 'Collections',
+          icon: Layers,
+          path: pathForCommerceSection('collections'),
+        },
+        {
+          id: 'commerce-brands',
+          label: 'Brands',
+          icon: Tags,
+          path: pathForCommerceSection('brands'),
+        },
+        {
+          id: 'commerce-inventory',
+          label: 'Inventory',
+          icon: Warehouse,
+          path: pathForCommerceSection('inventory'),
+        },
+        {
+          id: 'commerce-ai',
+          label: 'AI Knowledge',
+          icon: Brain,
+          path: pathForCommerceSection('ai-knowledge'),
+        },
+        {
+          id: 'commerce-sync',
+          label: 'Sync Center',
+          icon: RefreshCw,
+          path: pathForCommerceSection('sync'),
+        },
+      ],
+    },
+    {
       label: 'Systems',
       items: [
         { id: 'integrations', label: 'Integrations', icon: Plug },
@@ -261,9 +322,11 @@ export const SideNavBar: React.FC = () => {
   const visibleNavSections = navSections
     .map((section) => ({
       ...section,
-      items: section.items.filter(
-        (item) => !SIDEBAR_HIDDEN_TABS.has(item.id) && canTab(item.id)
-      ),
+      items: section.items.filter((item) => {
+        if (SIDEBAR_HIDDEN_TABS.has(item.id)) return false;
+        const permTab = item.id.startsWith('commerce') ? 'commerce' : item.id;
+        return canTab(permTab);
+      }),
     }))
     .filter((section) => section.items.length > 0);
 
@@ -384,10 +447,23 @@ export const SideNavBar: React.FC = () => {
                     !onWalletPage;
 
                   const isIntegrations = item.id === 'integrations';
+                  const isCommerceCatalog = item.id === 'commerce';
+                  const isCommerceChild = item.id.startsWith('commerce-');
                   const isItemActive = (isActive: boolean) => {
                     if (isNotifications) return onNotificationsPage;
                     if (isWallet) return onWalletPage;
                     if (isSettings) return onSettingsPage;
+                    if (isCommerceCatalog) {
+                      return (
+                        location.pathname === '/commerce' || location.pathname === '/commerce/'
+                      );
+                    }
+                    if (isCommerceChild && item.path) {
+                      return (
+                        location.pathname === item.path ||
+                        location.pathname.startsWith(`${item.path}/`)
+                      );
+                    }
                     return (
                       isActive ||
                       (isCampaigns && location.pathname.startsWith('/campaigns/')) ||

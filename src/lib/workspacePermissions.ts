@@ -59,6 +59,7 @@ export function tabPermission(tab: string): WorkspacePermission | null {
       return 'campaigns';
     case 'ai-agent':
     case 'media-gallery':
+    case 'commerce':
       return 'ai';
     case 'reports':
       return 'analytics';
@@ -98,6 +99,7 @@ export function canAccessPath(
   if (clean.startsWith('/templates')) return canAccessTab('templates', permissions, role);
   if (clean.startsWith('/ai-agent')) return canAccessTab('ai-agent', permissions, role);
   if (clean.startsWith('/media-gallery')) return canAccessTab('media-gallery', permissions, role);
+  if (clean.startsWith('/commerce')) return canAccessTab('commerce', permissions, role);
   if (clean.startsWith('/google-tools')) return canAccessTab('google-tools', permissions, role);
   const segment = clean.replace(/^\//, '').split('/')[0] || 'dashboard';
   return canAccessTab(segment, permissions, role);
@@ -113,6 +115,7 @@ const NAV_TAB_ORDER = [
   'journey',
   'ai-agent',
   'media-gallery',
+  'commerce',
   'manager',
   'ctwa',
   'facebook',
