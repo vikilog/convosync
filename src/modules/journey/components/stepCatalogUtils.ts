@@ -22,6 +22,8 @@ export function filterPaletteItems(
   const excludeTrigger = options.excludeTrigger ?? false;
 
   return items.filter((item) => {
+    // Hidden until implemented — keep node types for any existing graphs.
+    if (item.comingSoon) return false;
     if (item.type === 'TRIGGER') {
       if (hasTrigger || excludeTrigger) return false;
     }

@@ -4,9 +4,11 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   Search,
   Download,
+  Upload,
   Users,
   UserX,
   Ban,
@@ -16,15 +18,24 @@ import {
   Instagram,
   Pencil,
   Trash2,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { Contact } from '../types';
 import { api } from '../lib/api';
 import { useKeepAliveActivation } from './KeepAlive';
 import { mapContactFromApi } from '../lib/mappers';
 import { AddContactDrawer, type ContactEditPayload } from './contacts/AddContactDrawer';
+import { ImportContactsModal } from './contacts/ImportContactsModal';
+import { ExportContactsDrawer } from './contacts/ExportContactsDrawer';
+import { ThemeDateInput } from './contacts/ThemeDateInput';
+import { ContactsDashboard } from './contacts/ContactsDashboard';
 
 type ContactListKey = 'all' | 'unsubscribe' | 'blocklist';
 type ContactChannelKey = 'all' | 'whatsapp' | 'instagram' | 'messenger';
+type ContactsPageTab = 'dashboard' | 'contacts';
+
+const PAGE_SIZE_OPTIONS = [25, 50, 100] as const;
 
 const LIST_NAV: { id: ContactListKey; label: string; icon: React.ReactNode }[] = [
   { id: 'all', label: 'All', icon: <Users className="w-4 h-4" /> },
@@ -72,59 +83,122 @@ const CHANNEL_NAV: {
   },
 ];
 
-const SELECT_FIELD_CLASS =
-  'w-full rounded-xl border border-black/5 bg-surface px-3 py-2.5 text-sm font-semibold text-gray-800 appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary';
+/** Compact toolbar selects — never stretch. */
+const FILTER_SELECT_CLASS =
+  'shrink-0 rounded-lg border border-black/5 bg-surface px-2.5 py-2 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary';
 
 export const ContactsView: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [pageTab, setPageTab] = useState<ContactsPageTab>('dashboard');
   const [contacts, setContacts] = useState<Contact[]>([]);
-  const [stats, setStats] = useState({ all: 0, unsubscribe: 0, blocklist: 0 });
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [activeList, setActiveList] = useState<ContactListKey>('all');
   const [channelFilter, setChannelFilter] = useState<ContactChannelKey>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [tagFilter, setTagFilter] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+  const [pageLimit, setPageLimit] = useState<(typeof PAGE_SIZE_OPTIONS)[number]>(25);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [cursorStack, setCursorStack] = useState<(string | null)[]>([]);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(true);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
   const [editContact, setEditContact] = useState<ContactEditPayload | null>(null);
   const [deletingContactId, setDeletingContactId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
 
-  const loadContacts = useCallback(async (options?: { silent?: boolean }) => {
-    if (!options?.silent) setLoading(true);
-    try {
-      const params: Record<string, string> = { list: activeList };
+  useEffect(() => {
+    if (searchParams.get('import') !== '1') return;
+    setImportOpen(true);
+    const next = new URLSearchParams(searchParams);
+    next.delete('import');
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
+
+  const buildListParams = useCallback(
+    (pageCursor: string | null): Record<string, string> => {
+      const params: Record<string, string> = {
+        list: activeList,
+        limit: String(pageLimit),
+      };
       if (channelFilter !== 'all') params.channel = channelFilter;
       if (searchQuery.trim()) params.search = searchQuery.trim();
+      if (tagFilter) params.tag = tagFilter;
+      if (dateFrom) params.dateFrom = dateFrom;
+      if (dateTo) params.dateTo = dateTo;
+      if (pageCursor) params.cursor = pageCursor;
+      return params;
+    },
+    [activeList, channelFilter, searchQuery, tagFilter, dateFrom, dateTo, pageLimit]
+  );
 
-      const [rawContacts, rawStats] = await Promise.all([
-        api.getContacts(params),
-        api.getContactStats(),
-      ]);
-      setContacts(rawContacts.map((c: Record<string, unknown>) => mapContactFromApi(c)));
-      setStats(rawStats as { all: number; unsubscribe: number; blocklist: number });
-    } catch (err) {
-      console.error(err);
-    } finally {
-      if (!options?.silent) setLoading(false);
-    }
-  }, [activeList, channelFilter, searchQuery]);
+  const fetchPage = useCallback(
+    async (pageCursor: string | null, options?: { silent?: boolean }) => {
+      if (!options?.silent) setLoading(true);
+      try {
+        const [res, tagsRes] = await Promise.all([
+          api.getContacts(buildListParams(pageCursor)),
+          api.getContactTags().catch(() => ({ tags: [] as string[] })),
+        ]);
+        setContacts((res.items ?? []).map((c) => mapContactFromApi(c)));
+        setNextCursor(res.nextCursor ?? null);
+        setHasMore(Boolean(res.hasMore));
+        setAvailableTags(tagsRes.tags ?? []);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        if (!options?.silent) setLoading(false);
+      }
+    },
+    [buildListParams]
+  );
 
   useEffect(() => {
-    const t = window.setTimeout(() => void loadContacts(), searchQuery ? 300 : 0);
-    return () => window.clearTimeout(t);
-  }, [loadContacts, searchQuery]);
-
-  useEffect(() => {
+    setCursor(null);
+    setCursorStack([]);
     setSelectedIds(new Set());
-  }, [activeList, channelFilter, searchQuery]);
+    const t = window.setTimeout(() => void fetchPage(null), searchQuery ? 300 : 0);
+    return () => window.clearTimeout(t);
+  }, [fetchPage, searchQuery]);
 
   useKeepAliveActivation(() => {
-    void loadContacts({ silent: true });
+    void fetchPage(cursor, { silent: true });
   });
+
+  const goNext = () => {
+    if (!nextCursor || loading) return;
+    setCursorStack((s) => [...s, cursor]);
+    setCursor(nextCursor);
+    setSelectedIds(new Set());
+    void fetchPage(nextCursor);
+  };
+
+  const goPrev = () => {
+    if (cursorStack.length === 0 || loading) return;
+    const prev = cursorStack[cursorStack.length - 1] ?? null;
+    setCursorStack((s) => s.slice(0, -1));
+    setCursor(prev);
+    setSelectedIds(new Set());
+    void fetchPage(prev);
+  };
+
+  const reloadCurrent = (options?: { silent?: boolean }) => {
+    setCursor(null);
+    setCursorStack([]);
+    void fetchPage(null, options);
+  };
 
   const allVisibleSelected =
     contacts.length > 0 && contacts.every((c) => selectedIds.has(c.id));
   const someVisibleSelected = contacts.some((c) => selectedIds.has(c.id));
   const selectedCount = selectedIds.size;
+  const canPrev = cursorStack.length > 0;
+  const pageLabel = `Showing ${contacts.length}${hasMore || canPrev ? '+' : ''}`;
 
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) => {
@@ -140,18 +214,11 @@ export const ContactsView: React.FC = () => {
     else setSelectedIds(new Set(contacts.map((c) => c.id)));
   };
 
-  const countForList = (id: ContactListKey) => {
-    if (id === 'all') return stats.all;
-    if (id === 'unsubscribe') return stats.unsubscribe;
-    return stats.blocklist;
-  };
-
   const listLabelForContact = (contact: Contact) => {
     if (contact.tags.includes('Blocked')) return 'Blocklist';
     if (contact.tags.includes('Unsubscribed')) return 'Unsubscribe';
     return 'All';
   };
-
 
   const openAddContact = () => {
     setEditContact(null);
@@ -183,31 +250,6 @@ export const ContactsView: React.FC = () => {
     }
   };
 
-  const handleExport = () => {
-    if (contacts.length === 0) return;
-    const header = ['id', 'name', 'phone', 'email', 'source', 'tags'];
-    const rows = contacts.map((c) =>
-      [
-        c.id,
-        c.name,
-        c.phone,
-        c.email ?? '',
-        c.source,
-        c.tags.join(';'),
-      ]
-        .map((v) => `"${String(v).replace(/"/g, '""')}"`)
-        .join(',')
-    );
-    const csv = [header.join(','), ...rows].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `contacts-${activeList}${channelFilter !== 'all' ? `-${channelFilter}` : ''}-${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
   const handleDeleteContact = async (contact: Contact) => {
     const confirmed = window.confirm(
       `Delete ${contact.name}? This will also delete related conversations, messages, and journey history.`
@@ -222,8 +264,7 @@ export const ContactsView: React.FC = () => {
         next.delete(contact.id);
         return next;
       });
-      setContacts((prev) => prev.filter((c) => c.id !== contact.id));
-      await loadContacts({ silent: true });
+      reloadCurrent({ silent: true });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to delete contact';
       window.alert(message);
@@ -249,7 +290,7 @@ export const ContactsView: React.FC = () => {
       }
     }
     setSelectedIds(failed);
-    await loadContacts({ silent: true });
+    reloadCurrent({ silent: true });
     if (failed.size > 0) {
       window.alert(`Failed to delete ${failed.size} of ${ids.length} contacts.`);
     }
@@ -260,13 +301,36 @@ export const ContactsView: React.FC = () => {
     <div className="h-full min-h-0 border border-black/5 bg-surface-muted overflow-hidden">
       <div className="h-full min-h-0">
         <section className="min-h-0 h-full flex flex-col">
-          <div className="border-b border-black/5 bg-surface px-3 md:px-4 py-3 space-y-3">
-            <div>
-              <h2 className="text-base font-bold text-slate-900">Contacts</h2>
+          <div className="border-b border-black/5 bg-surface-muted px-3 md:px-4 py-3 space-y-3">
+            <div className="inline-flex rounded-lg border border-black/5 bg-black/[0.04] p-0.5">
+              <button
+                type="button"
+                onClick={() => setPageTab('dashboard')}
+                className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
+                  pageTab === 'dashboard'
+                    ? 'bg-surface text-primary shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Dashboard
+              </button>
+              <button
+                type="button"
+                onClick={() => setPageTab('contacts')}
+                className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
+                  pageTab === 'contacts'
+                    ? 'bg-surface text-primary shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Contacts
+              </button>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-[minmax(260px,1fr)_auto_auto_auto_auto] gap-2 items-center">
-              <div className="relative">
+            {pageTab === 'contacts' && (
+              <>
+            <div className="flex items-center gap-2 w-full">
+              <div className="relative min-w-[180px] flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                 <input
                   type="search"
@@ -280,7 +344,7 @@ export const ContactsView: React.FC = () => {
               <select
                 value={activeList}
                 onChange={(e) => setActiveList(e.target.value as ContactListKey)}
-                className={`${SELECT_FIELD_CLASS} py-2 min-w-[120px]`}
+                className={`${FILTER_SELECT_CLASS} w-[112px]`}
               >
                 {LIST_NAV.map((item) => (
                   <option key={item.id} value={item.id}>
@@ -289,61 +353,125 @@ export const ContactsView: React.FC = () => {
                 ))}
               </select>
 
-              <button
-                type="button"
-                onClick={handleExport}
-                disabled={contacts.length === 0 || loading}
-                className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-black/5 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-surface-muted disabled:opacity-50"
-              >
-                <Download className="w-4 h-4" />
-                Export
-              </button>
+              <ThemeDateInput
+                value={dateFrom}
+                onChange={setDateFrom}
+                aria-label="From date"
+                placeholder="From"
+                max={dateTo || undefined}
+              />
+              <ThemeDateInput
+                value={dateTo}
+                onChange={setDateTo}
+                aria-label="To date"
+                placeholder="To"
+                min={dateFrom || undefined}
+              />
 
-              {selectedCount > 0 && (
+              <select
+                value={tagFilter}
+                onChange={(e) => setTagFilter(e.target.value)}
+                className={`${FILTER_SELECT_CLASS} w-[128px]`}
+                aria-label="Filter by tag"
+              >
+                <option value="">All tags</option>
+                {availableTags.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={pageLimit}
+                onChange={(e) =>
+                  setPageLimit(Number(e.target.value) as (typeof PAGE_SIZE_OPTIONS)[number])
+                }
+                className={`${FILTER_SELECT_CLASS} w-[108px]`}
+                aria-label="Per page"
+              >
+                {PAGE_SIZE_OPTIONS.map((n) => (
+                  <option key={n} value={n}>
+                    {n} / page
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 min-w-0 flex-1">
+                {CHANNEL_NAV.map((item) => {
+                  const active = channelFilter === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setChannelFilter(item.id)}
+                      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 py-1.5 text-xs font-semibold border transition-colors cursor-pointer ${
+                        active
+                          ? 'bg-primary/15 text-primary border-primary/20'
+                          : 'bg-surface text-slate-600 border-black/5 hover:bg-surface-muted'
+                      }`}
+                    >
+                      <span className={active ? 'text-primary' : 'text-slate-400'}>{item.icon}</span>
+                      {item.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
                 <button
                   type="button"
-                  onClick={() => void handleBulkDelete()}
-                  disabled={bulkDeleting || loading}
-                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-100 disabled:opacity-50"
+                  onClick={() => setExportOpen(true)}
+                  disabled={contacts.length === 0 || loading}
+                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-black/5 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-surface-muted disabled:opacity-50"
                 >
-                  <Trash2 className="w-4 h-4" />
-                  {bulkDeleting ? 'Deleting…' : `Delete (${selectedCount})`}
+                  <Download className="w-4 h-4" />
+                  Export
                 </button>
-              )}
 
-              <button
-                type="button"
-                onClick={openAddContact}
-                className="inline-flex items-center justify-center gap-1.5 rounded-full bg-primary px-3 py-2 text-sm font-semibold text-white hover:bg-primary-hover"
-              >
-                <UserPlus className="w-4 h-4" />
-                Add contact
-              </button>
-            </div>
+                <button
+                  type="button"
+                  onClick={() => setImportOpen(true)}
+                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-black/5 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-surface-muted"
+                >
+                  <Upload className="w-4 h-4" />
+                  Import
+                </button>
 
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5">
-              {CHANNEL_NAV.map((item) => {
-                const active = channelFilter === item.id;
-                return (
+                {selectedCount > 0 && (
                   <button
-                    key={item.id}
                     type="button"
-                    onClick={() => setChannelFilter(item.id)}
-                    className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 py-1.5 text-xs font-semibold border transition-colors cursor-pointer ${
-                      active
-                        ? 'bg-primary/15 text-primary border-primary/20'
-                        : 'bg-surface text-slate-600 border-black/5 hover:bg-surface-muted'
-                    }`}
+                    onClick={() => void handleBulkDelete()}
+                    disabled={bulkDeleting || loading}
+                    className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-100 disabled:opacity-50"
                   >
-                    <span className={active ? 'text-primary' : 'text-slate-400'}>{item.icon}</span>
-                    {item.label}
+                    <Trash2 className="w-4 h-4" />
+                    {bulkDeleting ? 'Deleting…' : `Delete (${selectedCount})`}
                   </button>
-                );
-              })}
-            </div>
+                )}
 
+                <button
+                  type="button"
+                  onClick={openAddContact}
+                  className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-white hover:bg-primary-hover whitespace-nowrap"
+                >
+                  <UserPlus className="w-4 h-4" />
+                  Add contact
+                </button>
+              </div>
+            </div>
+              </>
+            )}
           </div>
 
+          {pageTab === 'dashboard' ? (
+            <div className="flex-1 min-h-0">
+              <ContactsDashboard />
+            </div>
+          ) : (
+            <>
           <div className="flex-1 min-h-0 overflow-auto bg-surface">
             {loading ? (
               <div className="flex items-center justify-center h-full text-sm text-slate-500">
@@ -522,6 +650,32 @@ export const ContactsView: React.FC = () => {
               </>
             )}
           </div>
+
+          <div className="shrink-0 flex items-center justify-between gap-3 border-t border-black/5 bg-surface px-3 md:px-4 py-2.5">
+            <p className="text-xs font-semibold text-slate-500">{pageLabel}</p>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={goPrev}
+                disabled={!canPrev || loading}
+                className="inline-flex items-center gap-1 rounded-lg border border-black/5 px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-surface-muted disabled:opacity-40"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                Prev
+              </button>
+              <button
+                type="button"
+                onClick={goNext}
+                disabled={!hasMore || loading}
+                className="inline-flex items-center gap-1 rounded-lg border border-black/5 px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-surface-muted disabled:opacity-40"
+              >
+                Next
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+            </>
+          )}
         </section>
       </div>
 
@@ -529,8 +683,19 @@ export const ContactsView: React.FC = () => {
         open={drawerOpen}
         onClose={closeDrawer}
         editContact={editContact}
-        onCreated={() => void loadContacts()}
-        onSaved={() => void loadContacts()}
+        onCreated={() => reloadCurrent()}
+        onSaved={() => reloadCurrent()}
+      />
+      <ImportContactsModal
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        onImported={() => reloadCurrent({ silent: true })}
+      />
+      <ExportContactsDrawer
+        open={exportOpen}
+        onClose={() => setExportOpen(false)}
+        contacts={contacts}
+        fileSuffix={`${activeList}${channelFilter !== 'all' ? `-${channelFilter}` : ''}`}
       />
     </div>
   );

@@ -370,6 +370,7 @@ export const SideNavBar: React.FC = () => {
                 {section.items.map((item) => {
                   const Icon = item.icon;
                   const isCampaigns = item.id === 'campaigns';
+                  const isJourney = item.id === 'journey';
                   const isSettings = item.id === 'settings';
                   const isWallet = item.id === 'wallet';
                   const isNotifications = item.id === 'notifications';
@@ -391,6 +392,7 @@ export const SideNavBar: React.FC = () => {
                     return (
                       isActive ||
                       (isCampaigns && location.pathname.startsWith('/campaigns/')) ||
+                      (isJourney && location.pathname.startsWith('/journey/')) ||
                       (isIntegrations && location.pathname.startsWith('/integrations'))
                     );
                   };

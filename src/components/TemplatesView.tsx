@@ -371,8 +371,8 @@ export const TemplatesView: React.FC = () => {
   };
 
   return (
-    <div className="space-y-4 animate-scale-up">
-      <div className="flex flex-wrap gap-2">
+    <div className="flex h-full min-h-0 flex-col gap-3 animate-scale-up">
+      <div className="flex shrink-0 flex-wrap gap-2">
         <button
           type="button"
           onClick={() => navigate(pathForTemplatesList('whatsapp'))}
@@ -412,17 +412,19 @@ export const TemplatesView: React.FC = () => {
       </div>
 
       {channel === 'canned' ? (
-        <CannedResponsesPanel
-          items={cannedResponses}
-          loading={loading}
-          saving={cannedSaving}
-          error={actionError || undefined}
-          onSave={handleSaveCanned}
-          onDelete={handleDeleteCanned}
-        />
+        <div className="min-h-0 flex-1 overflow-hidden">
+          <CannedResponsesPanel
+            items={cannedResponses}
+            loading={loading}
+            saving={cannedSaving}
+            error={actionError || undefined}
+            onSave={handleSaveCanned}
+            onDelete={handleDeleteCanned}
+          />
+        </div>
       ) : (
-        <>
-      <div className="p-4 bg-surface border border-black/5 rounded-2xl flex flex-wrap items-center justify-between gap-4">
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto">
+      <div className="p-4 bg-surface border border-black/5 rounded-xl flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-2.5">
           {channel === 'whatsapp' && (
             <div className="flex items-center gap-1 bg-slate-50 px-2.5 py-1.5 rounded-xl border border-slate-200">
@@ -511,7 +513,7 @@ export const TemplatesView: React.FC = () => {
         </div>
       )}
 
-        </>
+        </div>
       )}
     </div>
   );

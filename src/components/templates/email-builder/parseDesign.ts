@@ -16,6 +16,16 @@ export function designFromApi(
     }
   }
 
+  // New / empty templates start with a blank canvas (no auto blocks).
+  if (!htmlBody.trim()) {
+    return {
+      version: 1,
+      blocks: [],
+      brand: { ...DEFAULT_BRAND },
+    };
+  }
+
+  // Legacy HTML-only templates → one custom HTML block.
   return {
     version: 1,
     blocks: [

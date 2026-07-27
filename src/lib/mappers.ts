@@ -235,10 +235,17 @@ export function mapMessageFromApi(raw: Record<string, unknown>): ChatMessage {
 export function mapTemplateFromApi(raw: Record<string, unknown>): CampaignTemplate {
   const updated = (raw.updatedAt ?? raw.createdAt) as string;
   const slug = String(raw.status || 'pending').toLowerCase();
+  const categoryKey = String(raw.category ?? 'Utility').trim().toUpperCase();
+  const category: CampaignTemplate['category'] =
+    categoryKey === 'MARKETING'
+      ? 'Marketing'
+      : categoryKey === 'AUTHENTICATION'
+        ? 'Authentication'
+        : 'Utility';
   return {
     id: raw.id ? String(raw.id) : undefined,
     name: String(raw.name),
-    category: (String(raw.category) as CampaignTemplate['category']) || 'Utility',
+    category,
     status: statusSlugToUi(slug),
     language: raw.language ? String(raw.language) : 'en',
     lastUpdated: formatRelativeTime(updated),
@@ -389,6 +396,7 @@ export function mapTeamMemberFromApi(raw: Record<string, unknown>): TeamMember {
 
 function mapCampaignStatus(statusRaw: string): CampaignRecordStatus {
   const s = statusRaw.toLowerCase();
+  if (s === 'scheduled') return 'Scheduled';
   if (s === 'running') return 'Running';
   if (s === 'completed') return 'Completed';
   if (s === 'failed') return 'Failed';
@@ -417,6 +425,7 @@ export function mapCampaignFromApi(raw: Record<string, unknown>): CampaignRecord
     readCount: Number(raw.readCount ?? 0),
     createdAt: String(raw.createdAt ?? new Date().toISOString()),
     sentAt: raw.sentAt ? String(raw.sentAt) : null,
+    scheduledAt: raw.scheduledAt ? String(raw.scheduledAt) : null,
   };
 }
 

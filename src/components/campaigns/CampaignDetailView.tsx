@@ -18,6 +18,7 @@ import { pathForTab } from '../../routes';
 
 const STATUS_STYLE: Record<CampaignRecordStatus, string> = {
   Draft: 'bg-gray-100 text-gray-600 border-gray-200',
+  Scheduled: 'bg-amber-50 text-amber-800 border-amber-100',
   Running: 'bg-blue-50 text-blue-700 border-blue-100',
   Completed: 'bg-green-50 text-green-700 border-green-100',
   Failed: 'bg-red-50 text-red-700 border-red-100',
@@ -83,8 +84,10 @@ const RecipientsTable: React.FC<{
         <div>
           <p className="text-sm font-bold text-gray-600">No delivery logs yet</p>
           <p className="text-xs text-gray-400 mt-1 max-w-md mx-auto">
-            {status === 'Draft'
-              ? 'This campaign has not been sent.'
+            {status === 'Draft' || status === 'Scheduled'
+              ? status === 'Scheduled'
+                ? 'This campaign is scheduled. Delivery logs appear after it runs.'
+                : 'This campaign has not been sent.'
               : 'Recipient records appear after the broadcast runs. Try Refresh if you just sent.'}
           </p>
         </div>

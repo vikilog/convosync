@@ -133,7 +133,7 @@ export interface EmailTemplateRecord {
   updatedAt?: string;
 }
 
-export type CampaignRecordStatus = 'Draft' | 'Running' | 'Completed' | 'Failed';
+export type CampaignRecordStatus = 'Draft' | 'Scheduled' | 'Running' | 'Completed' | 'Failed';
 
 export interface CampaignRecord {
   id: string;
@@ -147,6 +147,7 @@ export interface CampaignRecord {
   readCount: number;
   createdAt: string;
   sentAt: string | null;
+  scheduledAt: string | null;
 }
 
 export interface CampaignRecipientInsight {

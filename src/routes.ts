@@ -85,6 +85,15 @@ export function pathForTab(tab: string): string {
   return `/${tab}`;
 }
 
+export function pathForJourneyGallery(): string {
+  return '/journey/gallery';
+}
+
+export function isJourneyGalleryPath(pathname: string): boolean {
+  const parts = pathname.replace(/^\//, '').split('/').filter(Boolean);
+  return parts[0] === 'journey' && parts[1] === 'gallery';
+}
+
 export type IntegrationsChannel =
   | 'whatsapp'
   | 'whatsapp-coexistence'

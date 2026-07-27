@@ -64,20 +64,6 @@ export const JOURNEY_STEP_CATALOG: StepCatalogItem[] = [
     category: 'flow',
   },
   {
-    type: 'SEND_CAPI',
-    label: 'Send Conversions API Event',
-    description: 'Send a Conversions API event to Meta',
-    category: 'integrations',
-    comingSoon: true,
-  },
-  {
-    type: 'SEND_TIKTOK',
-    label: 'Send TikTok Lower Funnel Event',
-    description: 'Send a lower funnel event to TikTok',
-    category: 'integrations',
-    comingSoon: true,
-  },
-  {
     type: 'TRIGGER_JOURNEY',
     label: 'Trigger Another Workflow',
     description: 'Start another published journey for this contact',
@@ -90,24 +76,10 @@ export const JOURNEY_STEP_CATALOG: StepCatalogItem[] = [
     category: 'integrations',
   },
   {
-    type: 'GOOGLE_SHEETS',
-    label: 'Add Google Sheets Row',
-    description: 'Append a row to a Google Sheet',
-    category: 'integrations',
-    comingSoon: true,
-  },
-  {
     type: 'UPDATE_LIFECYCLE',
     label: 'Update Lifecycle',
     description: "Update the contact's lifecycle stage",
     category: 'contact',
-  },
-  {
-    type: 'AI_OBJECTIVE',
-    label: 'AI Objective',
-    description: 'Automate the conversation using an AI agent objective',
-    category: 'messages',
-    comingSoon: true,
   },
   {
     type: 'END',

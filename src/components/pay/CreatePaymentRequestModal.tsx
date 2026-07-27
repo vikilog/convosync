@@ -71,11 +71,9 @@ export const CreatePaymentRequestModal: React.FC<CreatePaymentRequestModalProps>
 
   useEffect(() => {
     api
-      .getContacts()
+      .getContacts({ limit: '100' })
       .then((res) => {
-        const list = Array.isArray(res)
-          ? (res as ContactRow[])
-          : ((res as { contacts?: ContactRow[] }).contacts ?? []);
+        const list = (res.items ?? []) as ContactRow[];
         setContacts(list);
       })
       .catch(() => setContacts([]))

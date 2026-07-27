@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Sparkles } from 'lucide-react';
 import { useEmailBuilderStore } from './store';
 import { CanvasBlock } from './CanvasBlock';
 import type { BlockType } from './types';
@@ -7,7 +7,11 @@ import { isFullHtmlDocument } from './renderHtml';
 
 const PALETTE_TYPE = 'application/x-convosync-block-type';
 
-export function BuilderCanvas() {
+type Props = {
+  onGenerateWithAi?: () => void;
+};
+
+export function BuilderCanvas({ onGenerateWithAi }: Props) {
   const blocks = useEmailBuilderStore((s) => s.blocks);
   const brand = useEmailBuilderStore((s) => s.brand);
   const selectedBlockId = useEmailBuilderStore((s) => s.selectedBlockId);
@@ -80,18 +84,34 @@ export function BuilderCanvas() {
             onDragOver={(e) => e.preventDefault()}
             onDrop={(e) => handleCanvasDrop(e, 0)}
           >
-            <p className="text-sm font-semibold text-gray-600">Drag blocks here</p>
-            <p className="text-xs text-gray-400 mt-1">Or pick from the left panel</p>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                addBlock('text');
-              }}
-              className="mt-4 inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary hover:bg-primary-hover text-white text-sm font-bold"
-            >
-              <Plus className="w-3.5 h-3.5" /> Add text block
-            </button>
+            <p className="text-sm font-semibold text-gray-600">Empty canvas</p>
+            <p className="text-xs text-gray-400 mt-1">
+              Drag blocks from the left, or generate a full email with AI
+            </p>
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+              {onGenerateWithAi ? (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onGenerateWithAi();
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-primary/20 bg-primary/5 text-primary text-sm font-bold hover:bg-primary/10"
+                >
+                  <Sparkles className="w-3.5 h-3.5" /> Generate with AI
+                </button>
+              ) : null}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  addBlock('text');
+                }}
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary hover:bg-primary-hover text-white text-sm font-bold"
+              >
+                <Plus className="w-3.5 h-3.5" /> Add text block
+              </button>
+            </div>
           </div>
         ) : singleFullHtml ? (
           <CanvasBlock

@@ -1,8 +1,9 @@
-import React from 'react';
-import { Settings2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Images, Settings2 } from 'lucide-react';
 import { useEmailBuilderStore } from './store';
 import { getBlockDefinition } from './blockRegistry';
 import type { BlockType, TextAlign } from './types';
+import { MediaGalleryPickerModal } from '../../media/MediaGalleryPickerModal';
 
 const ALIGNS: TextAlign[] = ['left', 'center', 'right'];
 
@@ -29,6 +30,7 @@ export function PropertyPanel() {
   const selectedBlockId = useEmailBuilderStore((s) => s.selectedBlockId);
   const brand = useEmailBuilderStore((s) => s.brand);
   const updateBlock = useEmailBuilderStore((s) => s.updateBlock);
+  const [galleryOpen, setGalleryOpen] = useState(false);
 
   const block = blocks.find((b) => b.id === selectedBlockId);
 
@@ -139,6 +141,23 @@ export function PropertyPanel() {
                 placeholder="https://..."
               />
             </Field>
+            <button
+              type="button"
+              onClick={() => setGalleryOpen(true)}
+              className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border border-primary/20 bg-primary/5 text-primary text-sm font-bold hover:bg-primary/10"
+            >
+              <Images className="w-4 h-4" />
+              Pick from Media Gallery
+            </button>
+            {p.src ? (
+              <div className="rounded-lg border border-black/5 overflow-hidden bg-slate-50">
+                <img
+                  src={String(p.src)}
+                  alt={String(p.alt || 'Preview')}
+                  className="w-full max-h-32 object-contain"
+                />
+              </div>
+            ) : null}
             <Field label="Alt text">
               <input
                 className={inputCls}
@@ -301,6 +320,18 @@ export function PropertyPanel() {
         <h3 className="text-sm font-bold text-gray-900">Block properties</h3>
       </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-surface-muted/30">{renderFields()}</div>
+
+      <MediaGalleryPickerModal
+        open={galleryOpen}
+        onClose={() => setGalleryOpen(false)}
+        onPick={(image) => {
+          set({
+            src: image.url,
+            alt: String(p.alt ?? '').trim() || image.title,
+            mediaAssetId: image.id,
+          });
+        }}
+      />
     </aside>
   );
 }

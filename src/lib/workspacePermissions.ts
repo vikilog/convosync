@@ -95,6 +95,7 @@ export function canAccessPath(
     return hasWorkspacePermission(permissions, required, role);
   }
   if (clean.startsWith('/campaigns')) return canAccessTab('campaigns', permissions, role);
+  if (clean.startsWith('/journey')) return canAccessTab('journey', permissions, role);
   if (clean.startsWith('/templates')) return canAccessTab('templates', permissions, role);
   if (clean.startsWith('/ai-agent')) return canAccessTab('ai-agent', permissions, role);
   if (clean.startsWith('/media-gallery')) return canAccessTab('media-gallery', permissions, role);

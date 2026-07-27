@@ -404,6 +404,12 @@ export const api = {
   createEmailTemplate: (data: unknown) => post('/email/templates', data),
   updateEmailTemplate: (id: string, data: unknown) => patch(`/email/templates/${id}`, data),
   deleteEmailTemplate: (id: string) => del(`/email/templates/${id}`),
+  aiGenerateEmailTemplate: (prompt: string) =>
+    post('/email/templates/ai-generate', { prompt }) as Promise<{
+      subject: string;
+      blocks: Array<{ type: string; props?: Record<string, unknown> }>;
+      html?: string;
+    }>,
 
   getCannedResponses: () => get('/canned-responses'),
   createCannedResponse: (data: unknown) => post('/canned-responses', data),
@@ -472,8 +478,30 @@ export const api = {
   getRecentCampaigns: () => get('/analytics/campaigns'),
   getUpcomingCampaigns: () => get('/analytics/campaigns/upcoming'),
 
-  getContactStats: () => get('/contacts/stats'),
-  getContacts: (params?: Record<string, string>) => get('/contacts', params),
+  getContactStats: () =>
+    get('/contacts/stats') as Promise<{
+      all: number;
+      unsubscribe: number;
+      blocklist: number;
+      withEmail: number;
+      channels: { whatsapp: number; instagram: number; messenger: number };
+      sources: { source: string; count: number }[];
+      topTags: { tag: string; count: number }[];
+    }>,
+  getContactGrowth: (params?: Record<string, string>) =>
+    get('/contacts/growth', params) as Promise<{
+      range: string;
+      mode: 'hour' | 'day';
+      total: number;
+      createdByDay: { date: string; count: number; label: string }[];
+    }>,
+  getContactTags: () => get('/contacts/tags') as Promise<{ tags: string[] }>,
+  getContacts: (params?: Record<string, string>) =>
+    get('/contacts', params) as Promise<{
+      items: Record<string, unknown>[];
+      nextCursor: string | null;
+      hasMore: boolean;
+    }>,
   getContact: (id: string) => get(`/contacts/${id}`),
   getContactAudits: (id: string) => get(`/contacts/${id}/audits`),
   getContactInsightLatest: (contactId: string) =>
@@ -488,6 +516,13 @@ export const api = {
       jobId: string | null;
     }>,
   createContact: (data: unknown) => post('/contacts', data),
+  importContacts: (contacts: unknown[]) =>
+    post('/contacts/import', { contacts }) as Promise<{
+      created: number;
+      updated: number;
+      skipped: number;
+      errors: { row: number; phone: string; error: string }[];
+    }>,
   updateContact: (id: string, data: unknown) => put(`/contacts/${id}`, data),
   deleteContact: (id: string) => del(`/contacts/${id}`),
   getSegments: () => get('/contacts/segments'),
@@ -652,6 +687,10 @@ export const api = {
   deleteMediaGalleryItem: (mediaId: string) => del(`/media-gallery/${mediaId}`),
   mediaGalleryFileUrl: (mediaId: string) =>
     `${resolveApiBaseUrl()}/media-gallery/${mediaId}/file`,
+  getMediaGallerySignedUrl: (mediaId: string, expiresIn = 604_800) =>
+    get(`/media-gallery/${mediaId}/signed-url`, {
+      expiresIn: String(expiresIn),
+    }) as Promise<{ url: string; expiresIn: number; mediaId: string }>,
   fetchMediaGalleryFile: async (mediaId: string): Promise<Blob> => {
     const res = await fetch(`${resolveApiBaseUrl()}/media-gallery/${mediaId}/file`, {
       headers: authHeaders(),

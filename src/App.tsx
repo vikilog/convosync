@@ -116,6 +116,9 @@ function AppShell() {
     if (activeTab === 'campaigns' && location.pathname.startsWith('/campaigns/')) {
       return;
     }
+    if (activeTab === 'journey' && location.pathname.startsWith('/journey/')) {
+      return;
+    }
     if (activeTab === 'templates' && location.pathname.startsWith('/templates/')) {
       return;
     }
@@ -171,7 +174,7 @@ function AppShellLayout({
           className={
             activeTab === 'inbox' || activeTab === 'contacts' || campaignCreateWizard
               ? 'min-h-0 flex-1 overflow-hidden px-0'
-              : activeTab === 'google-tools'
+              : activeTab === 'google-tools' || activeTab === 'templates'
                 ? 'px-2 md:px-4 py-2 md:py-3 flex-1 min-h-0 min-w-0 overflow-hidden'
                 : 'flex-1 min-h-0 overflow-x-hidden overflow-y-auto px-2 md:px-4 pt-2 md:pt-3'
           }
@@ -185,6 +188,7 @@ function AppShellLayout({
               activeTab === 'inbox' ||
               activeTab === 'contacts' ||
               activeTab === 'google-tools' ||
+              activeTab === 'templates' ||
               campaignCreateWizard
                 ? 'h-full min-h-0 min-w-0 overflow-hidden'
                 : activeTab === 'integrations'
@@ -198,7 +202,7 @@ function AppShellLayout({
                   onAddContact={() => navigate(pathForTab('contacts'))}
                   onNewCampaign={() => navigate(pathForNewCampaign())}
                   onNewJourney={() => navigate(pathForTab('journey'))}
-                  onImportCSV={() => navigate(pathForTab('contacts'))}
+                  onImportCSV={() => navigate(`${pathForTab('contacts')}?import=1`)}
                 />
               </KeepAlive>
             )}
@@ -462,6 +466,16 @@ export default function App() {
       />
       <Route
         path="/campaigns/*"
+        element={
+          <ProtectedRoute>
+            <OnboardingGuard>
+              <AppShell />
+            </OnboardingGuard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/journey/*"
         element={
           <ProtectedRoute>
             <OnboardingGuard>

@@ -50,6 +50,7 @@ type BuilderState = {
   reorderBlock: (fromIndex: number, toIndex: number) => void;
   setBrand: (brand: Partial<BrandSettings>) => void;
   applyGallery: (design: EmailDesignDocument, subject: string) => void;
+  applyAiResult: (subject: string, blocks: EmailBlock[]) => void;
   setHtmlSource: (rawHtml: string) => void;
   setPreviewVariable: (key: string, value: string) => void;
   resetPreviewVariables: () => void;
@@ -57,7 +58,7 @@ type BuilderState = {
 
 export const useEmailBuilderStore = create<BuilderState>((set, get) => ({
   name: '',
-  subject: 'Welcome to {{company_name}}',
+  subject: '',
   status: 'draft',
   blocks: [],
   brand: loadBrand(),
@@ -170,6 +171,14 @@ export const useEmailBuilderStore = create<BuilderState>((set, get) => ({
       blocks,
       brand: design.brand,
       subject,
+      selectedBlockId: blocks[0]?.id ?? null,
+    });
+  },
+
+  applyAiResult: (subject, blocks) => {
+    set({
+      subject: subject.trim() || get().subject,
+      blocks,
       selectedBlockId: blocks[0]?.id ?? null,
     });
   },

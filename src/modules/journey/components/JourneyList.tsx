@@ -1,30 +1,50 @@
-import { Loader2, Plus, Trash2, Workflow } from 'lucide-react';
+import { LayoutGrid, Loader2, Plus, Trash2, Workflow } from 'lucide-react';
 import type { JourneyRecord } from '../types';
 
 type Props = {
   journeys: JourneyRecord[];
   loading: boolean;
-  onCreate: () => void;
+  onCreateBlank: () => void;
+  onOpenGallery: () => void;
   onOpen: (id: string) => void;
   onDelete: (id: string) => void;
 };
 
-export function JourneyList({ journeys, loading, onCreate, onOpen, onDelete }: Props) {
+export function JourneyList({
+  journeys,
+  loading,
+  onCreateBlank,
+  onOpenGallery,
+  onOpen,
+  onDelete,
+}: Props) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex items-center justify-between gap-3">
         <div>
           <h2 className="font-display text-lg font-black text-gray-950">Journeys</h2>
-          <p className="text-xs text-gray-500">Automate WhatsApp workflows with triggers, delays, and branches.</p>
+          <p className="text-xs text-gray-500">
+            Automate WhatsApp workflows with triggers, delays, and branches.
+          </p>
         </div>
-        <button
-          type="button"
-          onClick={onCreate}
-          className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-hover transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          New journey
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={onOpenGallery}
+            className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-sm font-bold text-primary hover:bg-primary/10 transition-colors"
+          >
+            <LayoutGrid className="w-4 h-4" />
+            Gallery
+          </button>
+          <button
+            type="button"
+            onClick={onCreateBlank}
+            className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-hover transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            New journey
+          </button>
+        </div>
       </div>
 
       {loading ? (
@@ -36,7 +56,17 @@ export function JourneyList({ journeys, loading, onCreate, onOpen, onDelete }: P
         <div className="rounded-2xl border border-dashed border-black/10 bg-surface p-10 text-center">
           <Workflow className="w-8 h-8 text-primary mx-auto mb-3" />
           <p className="font-bold text-gray-900">No journeys yet</p>
-          <p className="text-sm text-gray-500 mt-1">Create your first automation workflow.</p>
+          <p className="text-sm text-gray-500 mt-1">
+            Browse the gallery for starters, or create a blank journey.
+          </p>
+          <button
+            type="button"
+            onClick={onOpenGallery}
+            className="mt-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-sm font-bold text-primary hover:bg-primary/10"
+          >
+            <LayoutGrid className="w-4 h-4" />
+            Open gallery
+          </button>
         </div>
       ) : (
         <div className="rounded-2xl border border-black/5 bg-surface overflow-hidden">

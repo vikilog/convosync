@@ -54,7 +54,7 @@ export function EmailBuilderShell({ template, onBack, onSaved }: Props) {
     const design = designFromApi(template?.designJson, template?.htmlBody ?? '');
     initDesign(design, {
       name: template?.name ?? '',
-      subject: template?.subject ?? 'Welcome to {{company_name}}',
+      subject: template?.subject ?? '',
       status: template?.status ?? 'draft',
     });
   }, [template, initDesign]);
@@ -137,6 +137,7 @@ export function EmailBuilderShell({ template, onBack, onSaved }: Props) {
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
+          {/* ponytail: Generate with AI UI hidden for now — rewire AiGenerateModal when ready */}
           <div className="hidden sm:flex rounded-lg border border-black/5 p-0.5 bg-surface-muted">
             <button
               type="button"
@@ -195,9 +196,7 @@ export function EmailBuilderShell({ template, onBack, onSaved }: Props) {
       ) : null}
 
       <div className="flex-1 flex min-h-0 min-w-0">
-        {viewMode !== 'preview' ? (
-          <LeftSidebar />
-        ) : null}
+        {viewMode !== 'preview' ? <LeftSidebar /> : null}
 
         {viewMode === 'edit' ? <BuilderCanvas /> : null}
         {viewMode === 'html' ? <HtmlCodePanel /> : null}

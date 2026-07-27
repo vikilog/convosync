@@ -14,7 +14,7 @@ import {
   Smartphone,
   CheckCheck,
   ShieldCheck,
-  DollarSign,
+  Coins,
   Play,
   Mail,
   MessageCircle,
@@ -46,6 +46,8 @@ import {
   wrapPreviewHtml,
 } from './templates/emailTemplateUtils';
 import { campaignIdFromPath, pathForCampaign, pathForNewCampaign, isNewCampaignPath, pathForTab } from '../routes';
+import { formatCc } from '../lib/convocoins';
+import { WALLET_CC_RATES } from '../lib/walletPricing';
 import { CampaignDetailView } from './campaigns/CampaignDetailView';
 
 type AudienceSegment = { id: string; name: string; count: number; icon: string };
@@ -369,10 +371,28 @@ type CampaignViewMode = 'list' | 'create';
 
 const CAMPAIGN_STATUS_STYLE: Record<CampaignRecordStatus, string> = {
   Draft: 'bg-gray-100 text-gray-600 border-gray-200',
+  Scheduled: 'bg-amber-50 text-amber-800 border-amber-100',
   Running: 'bg-blue-50 text-blue-700 border-blue-100',
   Completed: 'bg-green-50 text-green-700 border-green-100',
   Failed: 'bg-red-50 text-red-700 border-red-100',
 };
+
+function defaultScheduleLocal(): { date: string; time: string } {
+  const d = new Date(Date.now() + 60 * 60 * 1000);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return {
+    date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
+    time: `${pad(d.getHours())}:${pad(d.getMinutes())}`,
+  };
+}
+
+function localDateTimeToIso(date: string, time: string): string {
+  const local = new Date(`${date}T${time}:00`);
+  if (Number.isNaN(local.getTime())) {
+    throw new Error('Invalid schedule date or time');
+  }
+  return local.toISOString();
+}
 
 function formatCampaignDate(iso: string | null): string {
   if (!iso) return '—';
@@ -385,6 +405,14 @@ function formatCampaignDate(iso: string | null): string {
     hour: '2-digit',
     minute: '2-digit',
   });
+}
+
+/** Match wallet rates for Marketing / Utility / Auth (API may send MARKETING). */
+function waTemplateRateCc(category: string | undefined): { rate: number; label: string } {
+  const key = (category ?? 'utility').trim().toUpperCase();
+  if (key === 'MARKETING') return { rate: WALLET_CC_RATES.waMarketing, label: 'Marketing' };
+  if (key === 'AUTHENTICATION') return { rate: WALLET_CC_RATES.waAuth, label: 'Authentication' };
+  return { rate: WALLET_CC_RATES.waUtility, label: 'Utility' };
 }
 
 const CampaignListPanel: React.FC<{
@@ -489,7 +517,7 @@ const CampaignListPanel: React.FC<{
                   <th className="px-4 py-3">Audience</th>
                   <th className="px-4 py-3">Sent</th>
                   <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Date</th>
+                  <th className="px-4 py-3">When</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200">
@@ -538,11 +566,27 @@ const CampaignListPanel: React.FC<{
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <p className="text-meta font-bold text-gray-700">
-                          {formatCampaignDate(campaign.sentAt ?? campaign.createdAt)}
-                        </p>
-                        {campaign.sentAt && (
-                          <p className="text-xs text-gray-400 mt-0.5">Sent</p>
+                        {campaign.status === 'Scheduled' && campaign.scheduledAt ? (
+                          <>
+                            <p className="text-meta font-bold text-amber-800">
+                              {formatCampaignDate(campaign.scheduledAt)}
+                            </p>
+                            <p className="text-xs text-amber-700/70 mt-0.5 font-semibold">Scheduled</p>
+                          </>
+                        ) : campaign.sentAt ? (
+                          <>
+                            <p className="text-meta font-bold text-gray-700">
+                              {formatCampaignDate(campaign.sentAt)}
+                            </p>
+                            <p className="text-xs text-gray-400 mt-0.5">Sent</p>
+                          </>
+                        ) : (
+                          <>
+                            <p className="text-meta font-bold text-gray-700">
+                              {formatCampaignDate(campaign.createdAt)}
+                            </p>
+                            <p className="text-xs text-gray-400 mt-0.5">Created</p>
+                          </>
                         )}
                       </td>
                     </tr>
@@ -635,6 +679,9 @@ const CampaignsWorkspace: React.FC = () => {
     setEmailVariableMappings({});
     setIgConfig(DEFAULT_INSTIGRAM_CONFIG);
     setIsScheduled(false);
+    const next = defaultScheduleLocal();
+    setScheduledDate(next.date);
+    setScheduledTime(next.time);
     setCampaignLaunched(false);
     setLaunching(false);
     setLaunchError(null);
@@ -826,14 +873,16 @@ const CampaignsWorkspace: React.FC = () => {
   const [igConfig, setIgConfig] = useState(DEFAULT_INSTIGRAM_CONFIG);
 
   const [isScheduled, setIsScheduled] = useState(false);
-  const [scheduledDate, setScheduledDate] = useState('2026-06-10');
-  const [scheduledTime, setScheduledTime] = useState('10:00');
+  const [scheduledDate, setScheduledDate] = useState(() => defaultScheduleLocal().date);
+  const [scheduledTime, setScheduledTime] = useState(() => defaultScheduleLocal().time);
   const [campaignLaunched, setCampaignLaunched] = useState(false);
   const [launching, setLaunching] = useState(false);
   const [launchError, setLaunchError] = useState<string | null>(null);
-  const [launchResult, setLaunchResult] = useState<{ sentCount: number; totalRecipients: number } | null>(
-    null
-  );
+  const [launchResult, setLaunchResult] = useState<{
+    sentCount: number;
+    totalRecipients: number;
+    scheduled?: boolean;
+  } | null>(null);
   const [lastCreatedCampaignId, setLastCreatedCampaignId] = useState<string | null>(null);
 
   const activeTemplate = templates.find((t) => t.name === selectedTemplateName) ?? templates[0] ?? null;
@@ -850,15 +899,27 @@ const CampaignsWorkspace: React.FC = () => {
     return seg?.count ?? 0;
   };
 
-  const estimatedCost = () => {
+  const estimatedCostCc = () => {
+    const n = audienceCount();
     if (selectedChannel === 'whatsapp') {
-      const rate = activeTemplate?.category === 'Marketing' ? 0.0125 : 0.0084;
-      return `$${(audienceCount() * rate).toFixed(2)} USD`;
+      return Math.round(n * waTemplateRateCc(activeTemplate?.category).rate * 100) / 100;
     }
-    if (selectedChannel === 'email') return `₹${(audienceCount() * 0.02).toFixed(0)} (AWS SES)`;
-    if (selectedChannel === 'instagram') return 'Free (Meta DM API)';
-    return '—';
+    if (selectedChannel === 'email') return Math.round(n * WALLET_CC_RATES.email * 100) / 100;
+    if (selectedChannel === 'instagram') return Math.round(n * WALLET_CC_RATES.instagram * 100) / 100;
+    return 0;
   };
+
+  const estimatedCostRateLabel = () => {
+    if (selectedChannel === 'whatsapp') {
+      const { rate, label } = waTemplateRateCc(activeTemplate?.category);
+      return `${rate} CC / conversation · ${label}`;
+    }
+    if (selectedChannel === 'email') return `${WALLET_CC_RATES.email} CC / send`;
+    if (selectedChannel === 'instagram') return `${WALLET_CC_RATES.instagram} CC / message`;
+    return '';
+  };
+
+  const estimatedCost = () => formatCc(estimatedCostCc());
 
   const getRenderedWABody = () => {
     if (!activeTemplate) return '';
@@ -893,9 +954,18 @@ const CampaignsWorkspace: React.FC = () => {
       return;
     }
 
+    let scheduledAtIso: string | undefined;
     if (isScheduled) {
-      setLaunchError('Scheduled campaigns are not supported yet. Turn off scheduling to send now.');
-      return;
+      try {
+        scheduledAtIso = localDateTimeToIso(scheduledDate, scheduledTime);
+      } catch {
+        setLaunchError('Pick a valid schedule date and time.');
+        return;
+      }
+      if (new Date(scheduledAtIso).getTime() <= Date.now() + 30_000) {
+        setLaunchError('Schedule time must be at least 30 seconds in the future.');
+        return;
+      }
     }
 
     let templateId: string | undefined;
@@ -946,7 +1016,20 @@ const CampaignsWorkspace: React.FC = () => {
           segmentId,
           variableMappings: mappings,
         },
-      })) as { id: string };
+        ...(scheduledAtIso ? { scheduledAt: scheduledAtIso } : {}),
+      })) as { id: string; status?: string };
+
+      if (scheduledAtIso || created.status === 'scheduled') {
+        setLaunchResult({
+          sentCount: 0,
+          totalRecipients: audienceCount(),
+          scheduled: true,
+        });
+        setLastCreatedCampaignId(created.id);
+        setCampaignLaunched(true);
+        loadCampaigns();
+        return;
+      }
 
       const result = (await api.sendCampaign(created.id)) as {
         sentCount?: number;
@@ -956,6 +1039,7 @@ const CampaignsWorkspace: React.FC = () => {
       setLaunchResult({
         sentCount: result.sentCount ?? 0,
         totalRecipients: result.totalRecipients ?? audienceCount(),
+        scheduled: false,
       });
       setLastCreatedCampaignId(created.id);
       setCampaignLaunched(true);
@@ -1068,11 +1152,15 @@ const CampaignsWorkspace: React.FC = () => {
                 <CheckCheck className="w-8 h-8" />
               </div>
               <div>
-                <h4 className="font-bold text-gray-900 text-base">Campaign Sent!</h4>
+                <h4 className="font-bold text-gray-900 text-base">
+                  {launchResult?.scheduled ? 'Campaign Scheduled!' : 'Campaign Sent!'}
+                </h4>
                 <p className="text-xs text-gray-400 mt-1">
-                  {launchResult
-                    ? `${launchResult.sentCount.toLocaleString()} of ${launchResult.totalRecipients.toLocaleString()} messages sent via WhatsApp.`
-                    : 'Broadcast completed.'}
+                  {launchResult?.scheduled
+                    ? `Will send to ${launchResult.totalRecipients.toLocaleString()} contacts on ${scheduledDate} at ${scheduledTime}.`
+                    : launchResult
+                      ? `${launchResult.sentCount.toLocaleString()} of ${launchResult.totalRecipients.toLocaleString()} messages sent.`
+                      : 'Broadcast completed.'}
                 </p>
               </div>
               <div className="w-full bg-slate-50 p-4 rounded-xl border border-slate-200 divide-y divide-gray-100">
@@ -1594,19 +1682,19 @@ const CampaignsWorkspace: React.FC = () => {
                     </p>
                   </div>
 
-                  <div className="p-4 bg-primary/5 border border-primary/10 rounded-xl flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-primary/10 text-primary rounded-xl">
-                        <DollarSign className="w-5 h-5" />
+                  <div className="p-4 bg-primary/5 border border-primary/10 rounded-xl flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="p-2 bg-primary/10 text-primary rounded-xl shrink-0">
+                        <Coins className="w-5 h-5" />
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-sm font-bold text-gray-800">Estimated Cost</p>
-                        <p className="text-xs text-gray-400 font-bold mt-0.5">
-                          {audienceCount().toLocaleString()} contacts via {chConfig.name}
+                        <p className="text-xs text-gray-400 font-bold mt-0.5 truncate">
+                          {audienceCount().toLocaleString()} contacts · {estimatedCostRateLabel()}
                         </p>
                       </div>
                     </div>
-                    <span className="text-sm font-black font-mono text-primary">{estimatedCost()}</span>
+                    <span className="text-sm font-black font-mono text-primary shrink-0">{estimatedCost()}</span>
                   </div>
 
                   <div className="bg-white border border-slate-200 p-4 rounded-xl space-y-4">
@@ -1627,6 +1715,7 @@ const CampaignsWorkspace: React.FC = () => {
                         <input
                           type="date"
                           value={scheduledDate}
+                          min={defaultScheduleLocal().date}
                           onChange={(e) => setScheduledDate(e.target.value)}
                           className="bg-slate-50 border border-slate-200 rounded-xl py-2 px-3 text-xs outline-none font-bold"
                         />
@@ -1696,9 +1785,11 @@ const CampaignsWorkspace: React.FC = () => {
               >
                 <Play className="h-3.5 w-3.5 fill-white" />
                 {launching
-                  ? 'Sending…'
+                  ? isScheduled
+                    ? 'Scheduling…'
+                    : 'Sending…'
                   : isScheduled
-                    ? `Schedule: ${scheduledDate}`
+                    ? `Schedule · ${scheduledDate} ${scheduledTime}`
                     : 'Launch campaign'}
               </button>
             )}

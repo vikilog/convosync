@@ -63,10 +63,10 @@ export function InboxNewChatPicker({
     setLoading(true);
     setLoadError(null);
     try {
-      const params: Record<string, string> = { list: 'all' };
+      const params: Record<string, string> = { list: 'all', limit: '100' };
       if (search.trim()) params.search = search.trim();
-      const raw = (await api.getContacts(params)) as Record<string, unknown>[];
-      const rows = raw
+      const res = await api.getContacts(params);
+      const rows = (res.items ?? [])
         .map((row) => mapContactFromApi(row))
         .filter((c) => isWhatsAppPhone(c.phone))
         .map((c) => ({
