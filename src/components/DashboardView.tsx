@@ -120,7 +120,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   if (loading) {
     return (
       <div
-        className="mx-auto w-full max-w-[1400px] space-y-5 pb-10"
+        className="w-full space-y-5 pb-10"
         aria-busy="true"
         aria-label="Loading dashboard"
       >
@@ -210,7 +210,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   }
 
   return (
-    <div className="mx-auto w-full max-w-[1400px] space-y-5 pb-10">
+    <div className="w-full space-y-5 pb-10">
       <OnboardingProfileBanner />
 
       <BottomStatusBar
