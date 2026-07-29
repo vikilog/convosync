@@ -41,10 +41,13 @@ export function InstagramAccountPicker({
           <Instagram className="h-5 w-5" aria-hidden />
         </div>
         <div>
-          <h1 className="text-lg font-bold text-slate-900">Choose Instagram account</h1>
+          <h1 className="text-lg font-bold text-slate-900">
+            {candidates.length > 1 ? 'Choose Instagram account' : 'Confirm Instagram account'}
+          </h1>
           <p className="mt-1 text-sm text-slate-600">
-            Multiple Instagram accounts are linked to your Meta login. Select one page to connect to
-            this workspace.
+            {candidates.length > 1
+              ? 'Multiple Instagram accounts are linked to your Meta login. Select the Facebook Page to connect to this workspace.'
+              : 'Select the Facebook Page below to connect its Instagram Professional account to this workspace.'}
           </p>
         </div>
       </div>

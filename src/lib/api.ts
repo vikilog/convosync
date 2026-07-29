@@ -503,6 +503,156 @@ export const api = {
       hasMore: boolean;
     }>,
   getContact: (id: string) => get(`/contacts/${id}`),
+  getContactLeadJourney: (id: string) =>
+    get(`/contacts/${encodeURIComponent(id)}/lead-journey`) as Promise<{
+      journey: {
+        version: 1;
+        leadId: string;
+        funnelId: string | null;
+        funnelName: string;
+        enteredAt: string;
+        convertedAt: string;
+        finalStage: string;
+        source: string;
+        origin: {
+          username: string;
+          commentText: string;
+          postCaption: string;
+        } | null;
+        timeline: Array<{
+          at: string;
+          type: string;
+          text: string;
+          fromStage?: string;
+          toStage?: string;
+        }>;
+      } | null;
+    }>,
+  getContactLinks: (id: string) =>
+    get(`/contacts/${encodeURIComponent(id)}/links`) as Promise<{
+      groupId: string | null;
+      channels: Array<{
+        contactId: string;
+        channel: 'whatsapp' | 'instagram' | 'messenger';
+        name: string;
+        phone: string;
+        email: string | null;
+        source: string | null;
+      }>;
+    }>,
+  linkContactChannel: (id: string, otherContactId: string) =>
+    post(`/contacts/${encodeURIComponent(id)}/links`, { otherContactId }) as Promise<{
+      groupId: string | null;
+      channels: Array<{
+        contactId: string;
+        channel: 'whatsapp' | 'instagram' | 'messenger';
+        name: string;
+        phone: string;
+        email: string | null;
+        source: string | null;
+      }>;
+    }>,
+  unlinkContactChannel: (id: string, otherContactId: string) =>
+    del(
+      `/contacts/${encodeURIComponent(id)}/links/${encodeURIComponent(otherContactId)}`
+    ) as Promise<{
+      groupId: string | null;
+      channels: Array<{
+        contactId: string;
+        channel: 'whatsapp' | 'instagram' | 'messenger';
+        name: string;
+        phone: string;
+        email: string | null;
+        source: string | null;
+      }>;
+    }>,
+  getContactOverview: (id: string) =>
+    get(`/contacts/${encodeURIComponent(id)}/overview`) as Promise<{
+      contact: {
+        id: string;
+        name: string;
+        phone: string;
+        email: string | null;
+        avatar: string | null;
+        source: string | null;
+        tags: string[];
+        customFields: unknown;
+        excludeFromInsights: boolean;
+        linkGroupId: string | null;
+        channel: 'whatsapp' | 'instagram' | 'messenger';
+        createdAt: string;
+        updatedAt: string;
+      };
+      links: {
+        groupId: string | null;
+        channels: Array<{
+          contactId: string;
+          channel: 'whatsapp' | 'instagram' | 'messenger';
+          name: string;
+          phone: string;
+          email: string | null;
+          source: string | null;
+        }>;
+      };
+      channels: Array<{
+        contactId: string;
+        channel: 'whatsapp' | 'instagram' | 'messenger';
+        name: string;
+        phone: string;
+        email: string | null;
+        source: string | null;
+        conversationCount: number;
+      }>;
+      stats: {
+        campaigns: number;
+        journeys: number;
+        bots: number;
+        aiReplies: number;
+        templates: number;
+        conversations: number;
+        instagramComments: number;
+      };
+      campaigns: Array<{
+        id: string;
+        title: string;
+        subtitle?: string;
+        status?: string;
+        timestamp: string;
+      }>;
+      instagramComments: Array<{
+        id: string;
+        postId: string;
+        commentText: string;
+        postCaption: string | null;
+        postThumbnailUrl: string | null;
+        commentedAt: string;
+        intent: string | null;
+        status: string;
+        commenterUsername: string | null;
+      }>;
+      journey: {
+        version: 1;
+        leadId: string;
+        funnelId: string | null;
+        funnelName: string;
+        enteredAt: string;
+        convertedAt: string;
+        finalStage: string;
+        source: string;
+        origin: {
+          username: string;
+          commentText: string;
+          postCaption: string;
+        } | null;
+        timeline: Array<{
+          at: string;
+          type: string;
+          text: string;
+          fromStage?: string;
+          toStage?: string;
+        }>;
+      } | null;
+    }>,
   getContactAudits: (id: string) => get(`/contacts/${id}/audits`),
   getContactInsightLatest: (contactId: string) =>
     get(`/contacts/${contactId}/insights/latest`) as Promise<{
@@ -855,9 +1005,580 @@ export const api = {
       oauthRedirectUri: string;
       webhookUrl?: string;
     }>,
+  getInstagramConnectUrl: () =>
+    get('/instagram/connect') as Promise<{
+      oauthDialogUrl: string;
+      redirectUri: string;
+      state: string;
+      scopes: string[];
+    }>,
   getInstagramAccounts: () => get('/instagram/accounts'),
-  syncInstagramInbox: () =>
-    post('/instagram/sync') as Promise<{
+  getInstagramListeningProfile: (instagramUserId?: string) =>
+    get(
+      '/instagram/listening/profile',
+      instagramUserId ? { instagramUserId } : undefined
+    ) as Promise<{
+      profile: {
+        instagramUserId: string;
+        pageId: string;
+        pageName: string | null;
+        username: string | null;
+        name: string | null;
+        biography: string | null;
+        website: string | null;
+        followersCount: number | null;
+        followsCount: number | null;
+        mediaCount: number | null;
+        profilePictureUrl: string | null;
+      };
+    }>,
+  getInstagramListeningMedia: (opts?: {
+    instagramUserId?: string;
+    after?: string;
+    limit?: number;
+  }) => {
+    const params: Record<string, string> = {};
+    if (opts?.instagramUserId) params.instagramUserId = opts.instagramUserId;
+    if (opts?.after) params.after = opts.after;
+    if (opts?.limit != null) params.limit = String(opts.limit);
+    return get('/instagram/listening/media', params) as Promise<{
+      items: Array<{
+        id: string;
+        caption: string | null;
+        mediaType: string;
+        mediaProductType: string | null;
+        mediaUrl: string | null;
+        thumbnailUrl: string | null;
+        permalink: string | null;
+        timestamp: string | null;
+        likeCount: number | null;
+        commentsCount: number | null;
+        isReel: boolean;
+      }>;
+      nextCursor: string | null;
+    }>;
+  },
+  getInstagramListeningMediaDetail: (mediaId: string, instagramUserId?: string) =>
+    get(
+      `/instagram/listening/media/${encodeURIComponent(mediaId)}`,
+      instagramUserId ? { instagramUserId } : undefined
+    ) as Promise<{
+      media: {
+        id: string;
+        caption: string | null;
+        mediaType: string;
+        mediaProductType: string | null;
+        mediaUrl: string | null;
+        thumbnailUrl: string | null;
+        permalink: string | null;
+        timestamp: string | null;
+        likeCount: number | null;
+        commentsCount: number | null;
+        isReel: boolean;
+      };
+    }>,
+  getInstagramListeningComments: (
+    mediaId: string,
+    opts?: { instagramUserId?: string; after?: string; limit?: number }
+  ) => {
+    const params: Record<string, string> = {};
+    if (opts?.instagramUserId) params.instagramUserId = opts.instagramUserId;
+    if (opts?.after) params.after = opts.after;
+    if (opts?.limit != null) params.limit = String(opts.limit);
+    return get(
+      `/instagram/listening/media/${encodeURIComponent(mediaId)}/comments`,
+      params
+    ) as Promise<{
+      comments: Array<{
+        id: string;
+        text: string;
+        username: string | null;
+        timestamp: string | null;
+        likeCount: number | null;
+        fromId: string | null;
+        socialCommentId?: string | null;
+        intent?: string | null;
+        intentLabel?: 'Interested' | 'Question' | 'Complaint' | 'Spam' | 'Neutral' | null;
+        confidence?: number | null;
+        classificationStatus?: 'pending' | 'classified' | 'failed' | null;
+        classificationError?: string | null;
+        reviewStatus?: 'pending' | 'approved' | 'ignored' | null;
+        suggestedReply?: string | null;
+        status?: string | null;
+        publicReplyText?: string | null;
+        dmReplyText?: string | null;
+        dmSentAt?: string | null;
+        dmStatus?: string | null;
+        dmError?: string | null;
+        leadId?: string | null;
+        replies: Array<Record<string, unknown>>;
+      }>;
+      nextCursor: string | null;
+      classifying?: number;
+    }>;
+  },
+  replyInstagramListeningComment: (
+    commentId: string,
+    message: string,
+    instagramUserId?: string
+  ) =>
+    post(`/instagram/listening/comments/${encodeURIComponent(commentId)}/reply`, {
+      message,
+      ...(instagramUserId ? { instagramUserId } : {}),
+    }) as Promise<{ success: boolean; id: string }>,
+  getSocialListeningComments: (params?: { status?: string; postId?: string }) => {
+    const q: Record<string, string> = {};
+    if (params?.status) q.status = params.status;
+    if (params?.postId) q.postId = params.postId;
+    return get('/social-listening/comments', q) as Promise<{
+      comments: Array<{
+        id: string;
+        commentId: string;
+        postId: string;
+        username: string;
+        profilePicUrl: string | null;
+        commentText: string;
+        postThumbnailUrl: string;
+        postCaption: string;
+        intent: 'Interested' | 'Question' | 'Complaint' | 'Spam' | 'Neutral';
+        confidence: number;
+        status: 'pending' | 'approved' | 'ignored';
+        rawStatus: string;
+        classificationStatus: string;
+        classificationError: string | null;
+        suggestedDm: string;
+        publicReplyText?: string | null;
+        dmReplyText?: string | null;
+        dmSentAt?: string | null;
+        dmStatus?: string | null;
+        dmError?: string | null;
+        createdAt: string;
+        needsReview: boolean;
+      }>;
+      threshold: number;
+    }>;
+  },
+  classifySocialListeningComment: (id: string) =>
+    post(`/social-listening/comments/${encodeURIComponent(id)}/classify`, {}) as Promise<{
+      success?: boolean;
+      id: string;
+      intent: string | null;
+      intentLabel?: string;
+      confidence: number | null;
+      classificationStatus: string;
+      classificationError: string | null;
+      suggestedReply: string | null;
+    }>,
+  socialListeningCommentAction: (
+    id: string,
+    data: {
+      action: 'approve_dm' | 'approve_reply' | 'escalate' | 'ignore' | 'review';
+      message?: string;
+      instagramUserId?: string;
+    }
+  ) =>
+    post(`/social-listening/comments/${encodeURIComponent(id)}/action`, data) as Promise<{
+      success: boolean;
+      id: string;
+      status: string;
+      reviewStatus: string;
+      replyId: string | null;
+      publicReplyText?: string;
+      dmReplyText?: string;
+      dmStatus?: 'sent' | 'failed' | 'skipped';
+      dmError?: string | null;
+      dmMessageId?: string | null;
+      leadId?: string | null;
+    }>,
+  retrySocialListeningDm: (id: string, instagramUserId?: string) =>
+    post(`/social-listening/comments/${encodeURIComponent(id)}/retry-dm`, {
+      ...(instagramUserId ? { instagramUserId } : {}),
+    }) as Promise<{
+      success?: boolean;
+      dmStatus: 'sent' | 'failed';
+      dmError: string | null;
+      dmMessageId: string | null;
+      dmReplyText: string;
+    }>,
+  getSocialListeningSettings: () =>
+    get('/social-listening/settings') as Promise<{
+      settings: {
+        id: string;
+        workspaceId: string;
+        autoResponseEnabled: boolean;
+        leadFunnelId: string | null;
+        interestedMode: 'auto' | 'review' | 'off';
+        questionMode: 'auto' | 'review' | 'off';
+        complaintMode: 'review' | 'escalate_only';
+        spamMode: 'auto_ignore' | 'review';
+        confidenceThreshold: number;
+        publicReplyTone: 'friendly' | 'professional' | 'playful';
+        dmAgentSkillId: string | null;
+        fallbackMessage: string | null;
+        leadCreationRule: 'interested_only' | 'interested_and_questions' | 'never';
+        maxAutoDmsPerDay: number;
+        workingHoursOnly: boolean;
+        workingHoursStart: string | null;
+        workingHoursEnd: string | null;
+        updatedAt: string;
+        autoDmsSentToday: number;
+      };
+      dmSkillOptions: Array<{
+        id: string;
+        title: string;
+        agentId: string;
+        agentName: string;
+      }>;
+    }>,
+  updateSocialListeningSettings: (data: Record<string, unknown>) =>
+    patch('/social-listening/settings', data) as Promise<{
+      settings: {
+        id: string;
+        workspaceId: string;
+        autoResponseEnabled: boolean;
+        leadFunnelId: string | null;
+        interestedMode: 'auto' | 'review' | 'off';
+        questionMode: 'auto' | 'review' | 'off';
+        complaintMode: 'review' | 'escalate_only';
+        spamMode: 'auto_ignore' | 'review';
+        confidenceThreshold: number;
+        publicReplyTone: 'friendly' | 'professional' | 'playful';
+        dmAgentSkillId: string | null;
+        fallbackMessage: string | null;
+        leadCreationRule: 'interested_only' | 'interested_and_questions' | 'never';
+        maxAutoDmsPerDay: number;
+        workingHoursOnly: boolean;
+        workingHoursStart: string | null;
+        workingHoursEnd: string | null;
+        updatedAt: string;
+        autoDmsSentToday: number;
+      };
+    }>,
+  getSocialListeningDashboardStats: (range: 'today' | '7d' | '30d' | 'all' = '7d') =>
+    get('/social-listening/dashboard/stats', { range }) as Promise<{
+      range: string;
+      totalComments: number;
+      pendingReview: number;
+      autoHandled: number;
+      leadsCreated: number;
+      autoDmsSentToday: number;
+      maxAutoDmsPerDay: number;
+      autoResponseEnabled: boolean;
+    }>,
+  getSocialListeningIntentBreakdown: (range: 'today' | '7d' | '30d' | 'all' = '7d') =>
+    get('/social-listening/dashboard/intent-breakdown', { range }) as Promise<{
+      range: string;
+      items: Array<{ intent: string; label: string; count: number }>;
+    }>,
+  getSocialListeningNeedsAttention: (limit = 25) =>
+    get('/social-listening/dashboard/needs-attention', {
+      limit: String(limit),
+    }) as Promise<{
+      items: Array<{
+        id: string;
+        kind: 'complaint' | 'interested' | 'question' | 'pending' | 'failed_dm';
+        priority: number;
+        commentId: string;
+        postId: string;
+        username: string;
+        commentText: string;
+        postThumbnailUrl: string;
+        postCaption: string;
+        intent: 'Interested' | 'Question' | 'Complaint' | 'Spam' | 'Neutral';
+        confidence: number;
+        waitingSince: string;
+        dmError: string | null;
+        suggestedAction: 'approve_dm' | 'escalate' | 'retry_dm' | 'open_review';
+      }>;
+    }>,
+  getSocialListeningActivity: (limit = 30) =>
+    get('/social-listening/dashboard/activity', { limit: String(limit) }) as Promise<{
+      events: Array<{
+        id: string;
+        eventType: string;
+        message: string;
+        relatedCommentId: string | null;
+        relatedLeadId: string | null;
+        meta: unknown;
+        createdAt: string;
+      }>;
+    }>,
+  getSocialListeningTopPosts: (range: 'today' | '7d' | '30d' | 'all' = '7d', limit = 8) =>
+    get('/social-listening/dashboard/top-posts', {
+      range,
+      limit: String(limit),
+    }) as Promise<{
+      range: string;
+      posts: Array<{
+        postId: string;
+        commentCount: number;
+        leadCount: number;
+        postThumbnailUrl: string;
+        postCaption: string;
+      }>;
+    }>,
+  getSocialListeningPostAutomation: (postIds: string[]) =>
+    get('/social-listening/posts/automation', {
+      postIds: postIds.join(','),
+    }) as Promise<{
+      posts: Record<
+        string,
+        { autoResponseEnabled: boolean; leadFunnelId: string | null }
+      >;
+    }>,
+  getSocialListeningPostSettings: (postId: string) =>
+    get(`/social-listening/posts/${encodeURIComponent(postId)}/settings`) as Promise<{
+      settings: {
+        id: string;
+        workspaceId: string;
+        postId: string;
+        autoResponseEnabled: boolean;
+        leadFunnelId: string | null;
+        interestedMode: 'auto' | 'review' | 'off';
+        questionMode: 'auto' | 'review' | 'off';
+        complaintMode: 'review' | 'escalate_only';
+        spamMode: 'auto_ignore' | 'review';
+        confidenceThreshold: number;
+        publicReplyTone: 'friendly' | 'professional' | 'playful';
+        dmAgentSkillId: string | null;
+        fallbackMessage: string | null;
+        leadCreationRule: 'interested_only' | 'interested_and_questions' | 'never';
+        maxAutoDmsPerDay: number;
+        workingHoursOnly: boolean;
+        workingHoursStart: string | null;
+        workingHoursEnd: string | null;
+        updatedAt: string;
+        autoDmsSentToday: number;
+      };
+      dmSkillOptions: Array<{
+        id: string;
+        title: string;
+        agentId: string;
+        agentName: string;
+      }>;
+    }>,
+  updateSocialListeningPostSettings: (postId: string, data: Record<string, unknown>) =>
+    patch(`/social-listening/posts/${encodeURIComponent(postId)}/settings`, data) as Promise<{
+      success: boolean;
+      settings: Record<string, unknown> & {
+        autoResponseEnabled: boolean;
+        leadFunnelId: string | null;
+        autoDmsSentToday: number;
+      };
+    }>,
+  getLeads: (params?: { source?: string; funnelId?: string }) => {
+    const q: Record<string, string> = {};
+    if (params?.source && params.source !== 'all') q.source = params.source;
+    if (params?.funnelId) q.funnelId = params.funnelId;
+    return get('/leads', q) as Promise<{
+      leads: Array<{
+        id: string;
+        funnelId: string | null;
+        stageId: string | null;
+        contactId: string | null;
+        name: string | null;
+        phone: string | null;
+        email: string | null;
+        stage: string;
+        source: 'instagram' | 'manual' | 'whatsapp';
+        requirement: string;
+        assignedRep: null;
+        createdAt: string;
+        updatedAt: string;
+        origin: {
+          username: string;
+          commentText: string;
+          postThumbnailUrl: string;
+          postCaption: string;
+          commentedAt: string;
+        } | null;
+        notes: string;
+        activity: Array<{
+          id: string;
+          type: 'stage_change' | 'dm_sent' | 'note' | 'created' | 'converted';
+          text: string;
+          at: string;
+        }>;
+      }>;
+    }>;
+  },
+  updateLead: (
+    id: string,
+    data: {
+      stage?: string;
+      stageId?: string;
+      name?: string | null;
+      phone?: string | null;
+      email?: string | null;
+      requirement?: string;
+      notes?: string;
+    }
+  ) =>
+    patch(`/leads/${encodeURIComponent(id)}`, data) as Promise<{
+      lead: {
+        id: string;
+        funnelId: string | null;
+        stageId: string | null;
+        contactId: string | null;
+        name: string | null;
+        phone: string | null;
+        email: string | null;
+        stage: string;
+        source: 'instagram' | 'manual' | 'whatsapp';
+        requirement: string;
+        assignedRep: null;
+        createdAt: string;
+        updatedAt: string;
+        origin: {
+          username: string;
+          commentText: string;
+          postThumbnailUrl: string;
+          postCaption: string;
+          commentedAt: string;
+        } | null;
+        notes: string;
+        activity: Array<{
+          id: string;
+          type: 'stage_change' | 'dm_sent' | 'note' | 'created' | 'converted';
+          text: string;
+          at: string;
+        }>;
+      };
+    }>,
+  convertLeadToContact: (id: string) =>
+    post(`/leads/${encodeURIComponent(id)}/convert-to-contact`, {}) as Promise<{
+      success: boolean;
+      created: boolean;
+      contactId: string;
+      lead: {
+        id: string;
+        contactId: string | null;
+        [key: string]: unknown;
+      };
+    }>,
+  createLead: (data: {
+    socialCommentId?: string;
+    funnelId: string;
+    name?: string;
+    requirement?: string;
+    source?: string;
+  }) =>
+    post('/leads', data) as Promise<{
+      success: boolean;
+      created: boolean;
+      lead: {
+        id: string;
+        funnelId: string | null;
+        stageId: string | null;
+        name: string | null;
+        phone: string | null;
+        email: string | null;
+        stage: string;
+        source: 'instagram' | 'manual' | 'whatsapp';
+        requirement: string;
+        assignedRep: null;
+        createdAt: string;
+        updatedAt: string;
+        origin: {
+          username: string;
+          commentText: string;
+          postThumbnailUrl: string;
+          postCaption: string;
+          commentedAt: string;
+        } | null;
+        notes: string;
+        activity: Array<{
+          id: string;
+          type: 'stage_change' | 'dm_sent' | 'note' | 'created';
+          text: string;
+          at: string;
+        }>;
+      } | null;
+    }>,
+  getLeadFunnels: () =>
+    get('/lead-funnels') as Promise<{
+      funnels: Array<{
+        id: string;
+        name: string;
+        description: string;
+        goal: string;
+        leadCount: number;
+        stages: Array<{ id: string; name: string; position: number; isFinal?: boolean }>;
+        createdAt: string;
+        updatedAt: string;
+      }>;
+    }>,
+  getLeadFunnelInsights: (id: string) =>
+    get(`/lead-funnels/${encodeURIComponent(id)}/insights`) as Promise<{
+      insights: {
+        funnelId: string;
+        funnelName: string;
+        entered: number;
+        converted: number;
+        conversionRate: number;
+        stageMoves: number;
+        avgDaysToConvert: number | null;
+        byStage: Array<{
+          stageId: string;
+          name: string;
+          isFinal: boolean;
+          count: number;
+        }>;
+      };
+    }>,
+  createLeadFunnel: (data: { name: string; description?: string; goal?: string }) =>
+    post('/lead-funnels', data) as Promise<{
+      funnel: {
+        id: string;
+        name: string;
+        description: string;
+        goal: string;
+        leadCount: number;
+        stages: Array<{ id: string; name: string; position: number; isFinal?: boolean }>;
+        createdAt: string;
+        updatedAt: string;
+      };
+    }>,
+  updateLeadFunnel: (
+    id: string,
+    data: { name?: string; description?: string; goal?: string }
+  ) =>
+    patch(`/lead-funnels/${encodeURIComponent(id)}`, data) as Promise<{
+      funnel: {
+        id: string;
+        name: string;
+        description: string;
+        goal: string;
+        leadCount: number;
+        stages: Array<{ id: string; name: string; position: number; isFinal?: boolean }>;
+        createdAt: string;
+        updatedAt: string;
+      };
+    }>,
+  deleteLeadFunnel: (id: string) =>
+    del(`/lead-funnels/${encodeURIComponent(id)}`) as Promise<{ success: boolean }>,
+  createLeadFunnelStage: (
+    funnelId: string,
+    data: { name: string; isFinal?: boolean }
+  ) =>
+    post(`/lead-funnels/${encodeURIComponent(funnelId)}/stages`, data) as Promise<{
+      stage: { id: string; name: string; position: number; isFinal: boolean };
+    }>,
+  updateLeadFunnelStage: (
+    funnelId: string,
+    stageId: string,
+    data: { name?: string; isFinal?: boolean }
+  ) =>
+    patch(
+      `/lead-funnels/${encodeURIComponent(funnelId)}/stages/${encodeURIComponent(stageId)}`,
+      data
+    ) as Promise<{ stage: { id: string; name: string; position: number; isFinal: boolean } }>,
+  deleteLeadFunnelStage: (funnelId: string, stageId: string) =>
+    del(
+      `/lead-funnels/${encodeURIComponent(funnelId)}/stages/${encodeURIComponent(stageId)}`
+    ) as Promise<{ success: boolean }>,
+  syncInstagramInbox: (opts?: { loadMore?: boolean; maxPages?: number }) =>
+    post('/instagram/sync', opts || {}) as Promise<{
       success: boolean;
       status?: 'started' | 'completed' | 'in_progress';
       message?: string;

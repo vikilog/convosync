@@ -10,6 +10,7 @@ import { Plus, Search, Pencil, Trash2, Send, Loader2, Mail, MessageCircle, Messa
 import { CampaignTemplate, EmailTemplateRecord } from '../types';
 import { api } from '../lib/api';
 import { mapTemplateFromApi } from '../lib/mappers';
+import { useInboxAssigneeMeta } from '../hooks/inbox/useInboxMeta';
 import {
   pathForTemplateEditor,
   pathForTemplatesList,
@@ -70,6 +71,8 @@ function formatUpdated(iso?: string): string {
 export const TemplatesView: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { whatsappAccounts, emailConnected, channelsReady } = useInboxAssigneeMeta();
+  const whatsappConnected = whatsappAccounts.length > 0;
   const editorRoute = useMemo(
     () => templateEditorFromPath(location.pathname),
     [location.pathname]
@@ -89,6 +92,24 @@ export const TemplatesView: React.FC = () => {
   const [editingWa, setEditingWa] = useState<CampaignTemplate | null>(null);
   const [editingEmail, setEditingEmail] = useState<EmailTemplateRecord | null>(null);
   const [actionError, setActionError] = useState('');
+
+  useEffect(() => {
+    if (!channelsReady || isBuilder) return;
+    if (channel === 'whatsapp' && !whatsappConnected) {
+      navigate(pathForTemplatesList(emailConnected ? 'email' : 'canned'), { replace: true });
+      return;
+    }
+    if (channel === 'email' && !emailConnected) {
+      navigate(pathForTemplatesList(whatsappConnected ? 'whatsapp' : 'canned'), { replace: true });
+    }
+  }, [
+    channel,
+    channelsReady,
+    emailConnected,
+    isBuilder,
+    navigate,
+    whatsappConnected,
+  ]);
 
   const loadWhatsApp = useCallback(async () => {
     const raw = await api.getTemplates();
@@ -373,30 +394,34 @@ export const TemplatesView: React.FC = () => {
   return (
     <div className="flex h-full min-h-0 flex-col gap-3 animate-scale-up">
       <div className="flex shrink-0 flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={() => navigate(pathForTemplatesList('whatsapp'))}
-          className={`px-3 py-2 rounded-xl text-sm font-bold border inline-flex items-center gap-1.5 ${
-            channel === 'whatsapp'
-              ? 'bg-[#008069] text-white border-[#008069]'
-              : 'bg-surface text-gray-700 border-black/5'
-          }`}
-        >
-          <MessageCircle className="w-3.5 h-3.5" />
-          WhatsApp
-        </button>
-        <button
-          type="button"
-          onClick={() => navigate(pathForTemplatesList('email'))}
-          className={`px-3 py-2 rounded-xl text-sm font-bold border inline-flex items-center gap-1.5 ${
-            channel === 'email'
-              ? 'bg-primary text-white border-primary'
-              : 'bg-surface text-gray-700 border-black/5'
-          }`}
-        >
-          <Mail className="w-3.5 h-3.5" />
-          Email
-        </button>
+        {whatsappConnected && (
+          <button
+            type="button"
+            onClick={() => navigate(pathForTemplatesList('whatsapp'))}
+            className={`px-3 py-2 rounded-xl text-sm font-bold border inline-flex items-center gap-1.5 ${
+              channel === 'whatsapp'
+                ? 'bg-[#008069] text-white border-[#008069]'
+                : 'bg-surface text-gray-700 border-black/5'
+            }`}
+          >
+            <MessageCircle className="w-3.5 h-3.5" />
+            WhatsApp
+          </button>
+        )}
+        {emailConnected && (
+          <button
+            type="button"
+            onClick={() => navigate(pathForTemplatesList('email'))}
+            className={`px-3 py-2 rounded-xl text-sm font-bold border inline-flex items-center gap-1.5 ${
+              channel === 'email'
+                ? 'bg-primary text-white border-primary'
+                : 'bg-surface text-gray-700 border-black/5'
+            }`}
+          >
+            <Mail className="w-3.5 h-3.5" />
+            Email
+          </button>
+        )}
         <button
           type="button"
           onClick={() => navigate(pathForTemplatesList('canned'))}

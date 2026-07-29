@@ -76,6 +76,7 @@ const MessageBubble: React.FC<{ message: ChatMessage; channel: Channel }> = ({
     messageType !== 'text' &&
     messageType !== 'template' &&
     (Boolean(message.media?.storageKey) ||
+      Boolean(message.media?.mediaUrl) ||
       Boolean(message.localPreviewUrl) ||
       message.media?.latitude != null ||
       // Show media bubble shell even when download failed (waMediaId present / typed media)
@@ -127,7 +128,7 @@ const MessageBubble: React.FC<{ message: ChatMessage; channel: Channel }> = ({
 
     return (
       <div
-        className={`flex flex-col max-w-[min(420px,78%)] w-fit ${
+        className={`flex flex-col max-w-[50%] w-fit ${
           isContact ? 'items-start mr-auto' : 'items-end ml-auto'
         } ${message.status === 'sending' ? 'opacity-90' : ''}`}
       >
@@ -156,7 +157,7 @@ const MessageBubble: React.FC<{ message: ChatMessage; channel: Channel }> = ({
 
     return (
       <div
-        className={`flex flex-col max-w-[min(420px,78%)] ${
+        className={`flex flex-col max-w-[50%] ${
           isContact ? 'items-start mr-auto' : 'items-end ml-auto'
         }`}
       >
@@ -193,7 +194,7 @@ const MessageBubble: React.FC<{ message: ChatMessage; channel: Channel }> = ({
 
   return (
     <div
-      className={`flex flex-col max-w-[80%] ${
+      className={`flex flex-col max-w-[50%] ${
         isContact ? 'items-start text-left' : 'items-end ml-auto text-right'
       } ${message.status === 'sending' ? 'opacity-90' : ''}`}
     >
@@ -204,7 +205,11 @@ const MessageBubble: React.FC<{ message: ChatMessage; channel: Channel }> = ({
             : outboundClass
         }`}
       >
-        {message.content}
+        {isDeleted
+          ? 'This message was deleted'
+          : message.content === '[media]'
+            ? 'Media'
+            : message.content}
       </div>
       <div className="flex items-center gap-1 mt-1 text-meta text-gray-400 font-bold font-mono px-1">
         <span>{time}</span>

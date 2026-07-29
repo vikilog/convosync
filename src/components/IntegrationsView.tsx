@@ -184,6 +184,9 @@ type InstagramAccountSummary = {
   pageName?: string;
   profilePicture?: string;
   label?: string;
+  status?: string;
+  statusLabel?: 'connected' | 'expiring_soon' | 'expired' | 'error' | 'revoked';
+  tokenExpiresAt?: string | null;
 };
 
 type MessengerAccountSummary = {
@@ -217,6 +220,8 @@ type ConnectedChannelCardProps = {
   detail?: string;
   avatarUrl?: string;
   disconnecting?: boolean;
+  /** Override default "Connected · Inbox ready" / Live badge for token health */
+  connectionStatus?: 'connected' | 'expiring_soon' | 'expired' | 'error' | 'revoked';
   onDisconnect?: () => void;
   onManage?: () => void;
   onSync?: () => void;
@@ -231,6 +236,7 @@ function ConnectedChannelCard({
   detail,
   avatarUrl,
   disconnecting,
+  connectionStatus = 'connected',
   onDisconnect,
   onManage,
   onSync,
@@ -273,13 +279,37 @@ function ConnectedChannelCard({
         ? 'text-[#1877F2] bg-[#e8f4ff] border-[#1877F2]/20 hover:bg-[#d9ecff]'
         : 'text-channel-green bg-[#e6f7ec] border-channel-green/20 hover:bg-[#d4f5df]';
   const liveBadgeClass =
-    channel === 'whatsapp'
-      ? 'bg-[#e6f7ec] text-channel-green border-channel-green/20'
-      : channel === 'email' || channel === 'messenger'
-        ? 'bg-[#e8f4ff] text-channel-blue border-channel-blue/25'
-        : 'bg-[#fce8f0] text-[#C13584] border-[#E1306C]/20';
+    connectionStatus === 'expired' || connectionStatus === 'revoked'
+      ? 'bg-red-50 text-red-700 border-red-200'
+      : connectionStatus === 'error'
+        ? 'bg-amber-50 text-amber-800 border-amber-200'
+        : connectionStatus === 'expiring_soon'
+          ? 'bg-amber-50 text-amber-800 border-amber-200'
+          : channel === 'whatsapp'
+            ? 'bg-[#e6f7ec] text-channel-green border-channel-green/20'
+            : channel === 'email' || channel === 'messenger'
+              ? 'bg-[#e8f4ff] text-channel-blue border-channel-blue/25'
+              : 'bg-[#fce8f0] text-[#C13584] border-[#E1306C]/20';
+  const liveBadgeText =
+    connectionStatus === 'expired'
+      ? 'Expired'
+      : connectionStatus === 'revoked'
+        ? 'Revoked'
+        : connectionStatus === 'error'
+          ? 'Error'
+          : connectionStatus === 'expiring_soon'
+            ? 'Expiring soon'
+            : 'Live';
   const statusText =
-    channel === 'email' ? 'Connected · Ready to send' : 'Connected · Inbox ready';
+    connectionStatus === 'expired' || connectionStatus === 'revoked'
+      ? 'Reconnect required'
+      : connectionStatus === 'error'
+        ? 'Token check failed — reconnect if messaging breaks'
+        : connectionStatus === 'expiring_soon'
+          ? 'Token expiring soon — reconnect recommended'
+          : channel === 'email'
+            ? 'Connected · Ready to send'
+            : 'Connected · Inbox ready';
   const metaLine = [subtitle, detail].filter(Boolean).join(' · ');
 
   return (
@@ -317,7 +347,7 @@ function ConnectedChannelCard({
             <span
               className={`shrink-0 inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full border ${liveBadgeClass}`}
             >
-              Live
+              {liveBadgeText}
             </span>
           </div>
           <p className="mt-0.5 text-sm font-bold text-gray-900 leading-snug truncate">{title}</p>
@@ -1455,7 +1485,17 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
                     : account.pageName || account.pageId || 'Connected account'
                 }
                 avatarUrl={account.profilePicture}
-                onDisconnect={() => void handleInstagramDisconnect(account.instagramUserId)}
+                connectionStatus={account.statusLabel ?? 'connected'}
+                onDisconnect={() => {
+                  if (
+                    !window.confirm(
+                      `Disconnect @${account.username || account.instagramUserId}? Inbox sync and Social Listening for this account will stop.`
+                    )
+                  ) {
+                    return;
+                  }
+                  void handleInstagramDisconnect(account.instagramUserId);
+                }}
                 onSync={() => void handleInstagramSync()}
                 syncing={instagramSyncing}
                 disconnecting={disconnectingKey === `ig:${account.instagramUserId}`}
@@ -1481,7 +1521,6 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
                 iconClass="text-channel-green"
                 connectLabel={isChannelLimitReached ? 'Limit reached' : 'Connect'}
                 connectDisabled={isChannelLimitReached}
-                connectBtnClass="bg-channel-green hover:bg-[#20bd5a]"
                 onConnect={openWhatsappChannel}
               />
             )}
@@ -1495,14 +1534,13 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
                 iconClass="text-channel-green"
                 connectLabel={isChannelLimitReached ? 'Limit reached' : 'Connect'}
                 connectDisabled={isChannelLimitReached}
-                connectBtnClass="bg-channel-green hover:bg-[#20bd5a]"
                 onConnect={openWhatsappCoexistenceChannel}
               />
             )}
             {!instagramConnected && (
               <IntegrationCard
                 title="Instagram"
-                description="Connect Instagram DMs for inbox, automation, and AI-powered replies."
+                description="Connect your Instagram Business account for inbox DMs, Social Listening comments, and AI replies."
                 icon={Instagram}
                 iconBgClass="bg-[#fce8f0]"
                 iconClass="text-[#C13584]"
@@ -1538,7 +1576,6 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
             iconBgClass="bg-violet-50"
             iconClass="text-violet-600"
             connectLabel="Manage"
-            connectBtnClass="text-violet-700 bg-violet-50 border-violet-200 hover:bg-violet-100"
             onConnect={openAiChannel}
           />
         </div>

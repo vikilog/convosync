@@ -45,11 +45,11 @@ export const META_ADS_SCOPES = [
 /** Instagram DM connect — must match Meta App → Permissions (instagram_manage_messages deps). */
 export const INSTAGRAM_SCOPES = [
   'instagram_basic',
+  'instagram_manage_comments',
   'instagram_manage_messages',
   'pages_show_list',
   'pages_read_engagement',
   'business_management',
   'pages_manage_metadata',
-  'pages_messaging'
-  
+  'pages_messaging',
 ].join(',');

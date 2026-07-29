@@ -22,6 +22,7 @@ import {
   type ContactJourneyProgress,
 } from './ContactJourneyPanel';
 import { ContactInsightPanel } from './ContactInsightPanel';
+import { ContactLeadJourneyPanel } from '../leads/ContactLeadJourneyPanel';
 
 type JourneyOption = { id: string; name: string };
 
@@ -292,6 +293,8 @@ export const InboxContactSidebar: React.FC<Props> = ({
               assignedJourneyId={assignedJourneyId}
               onAssignJourney={onAssignJourney}
             />
+
+            <ContactLeadJourneyPanel contactId={contact.id} />
         </div>
 
         <div role="tabpanel" hidden={tab !== 'ai'} className={tab === 'ai' ? '' : 'hidden'}>

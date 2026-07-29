@@ -325,9 +325,6 @@ export const MediaGalleryView: React.FC = () => {
             <Cloud className="w-8 h-8 text-primary" aria-hidden />
           </div>
           <p className="text-base font-semibold text-[#111827]">No media yet</p>
-          <p className="text-sm text-[#64748B] mt-1 max-w-sm">
-            Add a file to store it on S3 and make it available to agents.
-          </p>
           <button
             type="button"
             onClick={() => {

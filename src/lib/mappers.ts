@@ -146,10 +146,11 @@ export function mapSegmentFromApi(raw: { id: string; name: string; count: number
 function mapMessageMediaFromApi(metadata: unknown): ChatMessage['media'] | undefined {
   if (!metadata || typeof metadata !== 'object') return undefined;
   const m = metadata as Record<string, unknown>;
+  const mediaUrl = m.mediaUrl || m.mediaLink;
   const hasMedia =
     m.storageKey ||
     m.waMediaId ||
-    m.mediaUrl ||
+    mediaUrl ||
     m.mimeType ||
     m.fileName ||
     m.latitude != null ||
@@ -160,6 +161,7 @@ function mapMessageMediaFromApi(metadata: unknown): ChatMessage['media'] | undef
     fileName: m.fileName ? String(m.fileName) : undefined,
     caption: m.caption ? String(m.caption) : undefined,
     storageKey: m.storageKey ? String(m.storageKey) : undefined,
+    mediaUrl: mediaUrl ? String(mediaUrl) : undefined,
     latitude: typeof m.latitude === 'number' ? m.latitude : undefined,
     longitude: typeof m.longitude === 'number' ? m.longitude : undefined,
     locationName: m.locationName ? String(m.locationName) : undefined,
@@ -178,7 +180,7 @@ function inferMessageTypeFromMedia(
   if (mime?.startsWith('image/')) return 'image';
   if (mime?.startsWith('video/')) return 'video';
   if (mime?.startsWith('audio/')) return 'audio';
-  if (media.storageKey || mime) return 'document';
+  if (media.storageKey || media.mediaUrl || mime) return 'document';
   return type ?? 'text';
 }
 
@@ -215,8 +217,10 @@ export function mapMessageFromApi(raw: Record<string, unknown>): ChatMessage {
   const rawContent = String(raw.content ?? '');
   const content = revoked
     ? 'This message was deleted'
-    : rawContent === '[media]' && type !== 'text'
-      ? mediaPreviewLabel(type)
+    : rawContent === '[media]'
+      ? type !== 'text'
+        ? mediaPreviewLabel(type)
+        : 'Media'
       : rawContent;
   return {
     id: String(raw.id),

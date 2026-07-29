@@ -76,6 +76,14 @@ const TAB_SEO: Record<AppTab, Omit<PageSeo, 'path'>> = {
     title: 'Media Gallery',
     description: 'Upload and manage shared images and documents for AI agents and other features.',
   },
+  'social-listening': {
+    title: 'Social Listening',
+    description: 'Review Instagram comments flagged by AI before sending private replies and DMs.',
+  },
+  leads: {
+    title: 'Lead funnel',
+    description: 'Kanban pipeline for Instagram-qualified leads from first comment to close.',
+  },
   ctwa: {
     title: 'Ads Manager',
     description: 'Connect Meta and Google Ads, run Click-to-WhatsApp campaigns, and track performance.',

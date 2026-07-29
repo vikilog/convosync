@@ -27,6 +27,8 @@ export interface ChatMessageMedia {
   fileName?: string;
   caption?: string;
   storageKey?: string;
+  /** Public/CDN URL when storageKey is missing (e.g. older Meta AI sends). */
+  mediaUrl?: string;
   latitude?: number;
   longitude?: number;
   locationName?: string;

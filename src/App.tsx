@@ -36,9 +36,17 @@ import { GoogleToolsView } from './components/google-tools/GoogleToolsView';
 import { DevelopersView } from './components/DevelopersView';
 import { SettingsView } from './components/SettingsView';
 import { UsageCost } from './pages/UsageCost';
+import {
+  SocialListeningDashboardView,
+  SocialListeningFeedView,
+  SocialListeningMediaDetailView,
+  SocialListeningReviewView,
+} from './components/social-listening';
+import { LeadsKanbanView } from './components/leads';
 import { motion } from 'motion/react';
 import { tabFromPath, pathForTab, pathForNewCampaign, isNewCampaignPath, type AppTab } from './routes';
 import { KeepAlive } from './components/KeepAlive';
+import { RequireConnectedChannel } from './components/RequireConnectedChannel';
 import { getOnboardingCache, isLoggedIn } from './lib/session';
 import { getUserPermissions, getUserRole, getWorkspaceId } from './lib/api';
 import { useWorkspaceAccess } from './hooks/useWorkspaceAccess';
@@ -51,6 +59,7 @@ import { DocumentSeo } from './components/DocumentSeo';
 import { AnalyticsRoot } from './components/analytics/AnalyticsRoot';
 import { landingPath } from './lib/publicUrls';
 import { InboxRealtimeBridge } from './components/InboxRealtimeBridge';
+import { SocialListeningRealtimeBridge } from './components/social-listening/SocialListeningRealtimeBridge';
 import { CallRealtimeBridge } from './components/calling/CallRealtimeBridge';
 import { CallPage } from './components/calling/CallPage';
 import { CallShortRedirectPage } from './components/calling/CallShortRedirectPage';
@@ -116,6 +125,12 @@ function AppShell() {
     if (activeTab === 'campaigns' && location.pathname.startsWith('/campaigns/')) {
       return;
     }
+    if (activeTab === 'contacts' && location.pathname.startsWith('/contacts/')) {
+      return;
+    }
+    if (activeTab === 'leads' && location.pathname.startsWith('/leads/')) {
+      return;
+    }
     if (activeTab === 'journey' && location.pathname.startsWith('/journey/')) {
       return;
     }
@@ -127,6 +142,12 @@ function AppShell() {
     }
     if (activeTab === 'integrations' && location.pathname.startsWith('/integrations/')) {
       return;
+    }
+    if (activeTab === 'social-listening') {
+      // Keep /social-listening and /social-listening/* on this tab (don't bounce to pathForTab)
+      if (location.pathname.startsWith('/social-listening')) {
+        return;
+      }
     }
     const expected = pathForTab(activeTab);
     if (location.pathname !== expected && location.pathname !== '/') {
@@ -163,6 +184,7 @@ function AppShellLayout({
   return (
     <div className="flex min-h-screen bg-surface-muted selection:bg-primary/15">
       <InboxRealtimeBridge />
+      <SocialListeningRealtimeBridge />
       <CallRealtimeBridge />
       <SideNavBar />
 
@@ -174,7 +196,10 @@ function AppShellLayout({
           className={
             activeTab === 'inbox' || activeTab === 'contacts' || campaignCreateWizard
               ? 'min-h-0 flex-1 overflow-hidden px-0'
-              : activeTab === 'google-tools' || activeTab === 'templates'
+              : activeTab === 'google-tools' ||
+                  activeTab === 'templates' ||
+                  activeTab === 'leads' ||
+                  activeTab === 'social-listening'
                 ? 'px-2 md:px-4 py-2 md:py-3 flex-1 min-h-0 min-w-0 overflow-hidden'
                 : 'flex-1 min-h-0 overflow-x-hidden overflow-y-auto px-2 md:px-4 pt-2 md:pt-3'
           }
@@ -189,6 +214,8 @@ function AppShellLayout({
               activeTab === 'contacts' ||
               activeTab === 'google-tools' ||
               activeTab === 'templates' ||
+              activeTab === 'leads' ||
+              activeTab === 'social-listening' ||
               campaignCreateWizard
                 ? 'h-full min-h-0 min-w-0 overflow-hidden'
                 : activeTab === 'integrations'
@@ -219,17 +246,33 @@ function AppShellLayout({
             )}
             {mountedTabs.has('campaigns') && (
               <KeepAlive active={activeTab === 'campaigns'}>
-                <CampaignsView />
+                <RequireConnectedChannel
+                  anyOf={['whatsapp', 'email']}
+                  title="Connect WhatsApp or Email first"
+                  description="Campaigns need WhatsApp or Email before you can create broadcasts."
+                  connectChannel="whatsapp"
+                >
+                  <CampaignsView />
+                </RequireConnectedChannel>
               </KeepAlive>
             )}
             {mountedTabs.has('templates') && (
               <KeepAlive active={activeTab === 'templates'}>
-                <TemplatesView />
+                <RequireConnectedChannel
+                  anyOf={['whatsapp', 'email']}
+                  title="Connect WhatsApp or Email first"
+                  description="Templates need WhatsApp or Email before you can create and manage them."
+                  connectChannel="whatsapp"
+                >
+                  <TemplatesView />
+                </RequireConnectedChannel>
               </KeepAlive>
             )}
             {mountedTabs.has('journey') && (
               <KeepAlive active={activeTab === 'journey'}>
-                <JourneyView />
+                <RequireConnectedChannel>
+                  <JourneyView />
+                </RequireConnectedChannel>
               </KeepAlive>
             )}
             {mountedTabs.has('ai-agent') && (
@@ -240,6 +283,28 @@ function AppShellLayout({
             {mountedTabs.has('media-gallery') && (
               <KeepAlive active={activeTab === 'media-gallery'}>
                 <MediaGalleryView />
+              </KeepAlive>
+            )}
+            {mountedTabs.has('social-listening') && (
+              <KeepAlive active={activeTab === 'social-listening'}>
+                <RequireConnectedChannel>
+                  {location.pathname.startsWith('/social-listening/review') ? (
+                    <SocialListeningReviewView />
+                  ) : location.pathname.startsWith('/social-listening/media/') ? (
+                    <SocialListeningMediaDetailView />
+                  ) : location.pathname.startsWith('/social-listening/content') ? (
+                    <SocialListeningFeedView />
+                  ) : (
+                    <SocialListeningDashboardView />
+                  )}
+                </RequireConnectedChannel>
+              </KeepAlive>
+            )}
+            {mountedTabs.has('leads') && (
+              <KeepAlive active={activeTab === 'leads'}>
+                <RequireConnectedChannel>
+                  <LeadsKanbanView />
+                </RequireConnectedChannel>
               </KeepAlive>
             )}
             {mountedTabs.has('ctwa') && (
@@ -475,6 +540,26 @@ export default function App() {
         }
       />
       <Route
+        path="/contacts/*"
+        element={
+          <ProtectedRoute>
+            <OnboardingGuard>
+              <AppShell />
+            </OnboardingGuard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/leads/*"
+        element={
+          <ProtectedRoute>
+            <OnboardingGuard>
+              <AppShell />
+            </OnboardingGuard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/journey/*"
         element={
           <ProtectedRoute>
@@ -506,6 +591,17 @@ export default function App() {
       />
       <Route
         path="/integrations/*"
+        element={
+          <ProtectedRoute>
+            <OnboardingGuard>
+              <AppShell />
+            </OnboardingGuard>
+          </ProtectedRoute>
+        }
+      />
+      {/* Nested review URL + aliases — must mount AppShell (else * → / → inbox) */}
+      <Route
+        path="/social-listening/*"
         element={
           <ProtectedRoute>
             <OnboardingGuard>

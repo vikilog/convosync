@@ -34,7 +34,6 @@ export function InstagramConnectPanel({
   onAutoStartConsumed,
 }: Props) {
   const [loading, setLoading] = useState(false);
-  const [webhookUrl, setWebhookUrl] = useState('');
   const autoStartTriggered = useRef(false);
 
   const metaAppId = import.meta.env.VITE_META_APP_ID;
@@ -53,10 +52,6 @@ export function InstagramConnectPanel({
       const activeRedirectUri = oauth.redirectUri;
       if (!activeRedirectUri) {
         throw new Error('Missing redirect URI from server');
-      }
-
-      if (oauth.webhookUrl) {
-        setWebhookUrl(oauth.webhookUrl);
       }
 
       sessionStorage.setItem(INSTAGRAM_OAUTH_REDIRECT_STORAGE_KEY, activeRedirectUri);
@@ -90,17 +85,17 @@ export function InstagramConnectPanel({
         <Instagram className="w-3 h-3" />
         Instagram Business
       </span>
-      <h4 className="text-xl font-black text-gray-950">Connect Instagram DMs</h4>
+      <h4 className="text-xl font-black text-gray-950">Connect Instagram Business</h4>
       <p className="mt-2 text-sm text-gray-600 font-medium max-w-xl">
-        You will be redirected to Meta to authorize Instagram messaging. After approval, you return
-        here automatically and DMs flow into your ConvoSync inbox.
+        Authorize via Facebook Login to link your Instagram Professional account. This powers
+        inbox DMs and Social Listening (comment triage).
       </p>
 
       <ul className="mt-4 space-y-2 text-xs text-gray-500 font-medium">
         <li>• Instagram must be a Professional account (Business or Creator)</li>
         <li>• Instagram must be linked to a Facebook Page you admin</li>
         <li>• Log in with the same Facebook profile that manages that Page</li>
-        <li>• Meta app needs Instagram Messaging permissions enabled</li>
+        <li>• Meta app needs Instagram Messaging + Comments permissions</li>
       </ul>
 
       <button
@@ -111,13 +106,6 @@ export function InstagramConnectPanel({
       >
         {loading ? 'Redirecting to Meta…' : 'Continue with Facebook'}
       </button>
-
-      {webhookUrl && (
-        <p className="mt-2 text-sm font-bold text-gray-400">
-          Meta webhook callback (Page object, fields: messages):
-          <span className="block font-mono text-gray-500 mt-0.5 break-all">{webhookUrl}</span>
-        </p>
-      )}
     </div>
   );
 }

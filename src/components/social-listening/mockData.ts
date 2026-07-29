@@ -1,0 +1,165 @@
+import type { ReviewComment } from './types';
+
+const hoursAgo = (h: number) => new Date(Date.now() - h * 3600_000).toISOString();
+const minsAgo = (m: number) => new Date(Date.now() - m * 60_000).toISOString();
+
+/** Mock queue for UI — replace with API later. */
+export const MOCK_REVIEW_COMMENTS: ReviewComment[] = [
+  // —— Sales Interest (≥2) ——
+  {
+    id: 'rc-1',
+    username: 'priya.sharma',
+    profilePicUrl: 'https://i.pravatar.cc/80?u=priya',
+    commentText: 'This looks amazing! Do you deliver to Mumbai? Need 2 sets for my salon 🙌',
+    postThumbnailUrl: 'https://picsum.photos/seed/cs-post1/200/200',
+    postCaption: 'New summer collection drop — limited stock',
+    intent: 'Interested',
+    confidence: 0.62,
+    status: 'pending',
+    suggestedDm:
+      "Hi Priya! Thanks for your interest 💚 We do deliver to Mumbai. I'd love to help you pick the right sets for your salon — what's your preferred budget range?",
+    createdAt: minsAgo(12),
+  },
+  {
+    id: 'rc-2',
+    username: 'rahul.mehta',
+    profilePicUrl: 'https://i.pravatar.cc/80?u=rahul',
+    commentText: 'Price please? And is COD available?',
+    postThumbnailUrl: 'https://picsum.photos/seed/cs-post2/200/200',
+    postCaption: 'Pro skincare kit — 30% off this week',
+    intent: 'Interested',
+    confidence: 0.58,
+    status: 'pending',
+    suggestedDm:
+      "Hey Rahul! Happy to share pricing. Our Pro kit starts at ₹2,499 and yes — COD is available in most cities. Want me to send the full price list?",
+    createdAt: minsAgo(45),
+  },
+  {
+    id: 'rc-7',
+    username: 'kavya.designs',
+    profilePicUrl: 'https://i.pravatar.cc/80?u=kavya',
+    commentText: 'Love the packaging! Can I bulk order for my boutique?',
+    postThumbnailUrl: 'https://picsum.photos/seed/cs-post5/200/200',
+    postCaption: 'Packaging glow-up 📦',
+    intent: 'Interested',
+    confidence: 0.67,
+    status: 'pending',
+    suggestedDm:
+      "Hi Kavya! We'd love to support your boutique. Bulk pricing kicks in at 25+ units — want me to share the wholesale sheet?",
+    createdAt: hoursAgo(1),
+  },
+  // —— Questions (≥2) ——
+  {
+    id: 'rc-3',
+    username: 'neha.kapoor',
+    profilePicUrl: null,
+    commentText: 'Is this suitable for dry skin? My dermatologist said I need something gentle.',
+    postThumbnailUrl: 'https://picsum.photos/seed/cs-post3/200/200',
+    postCaption: 'Gentle cleanser — dermatologist recommended',
+    intent: 'Question',
+    confidence: 0.71,
+    status: 'pending',
+    suggestedDm:
+      "Hi Neha! Yes — this cleanser is formulated for dry & sensitive skin and is fragrance-free. I can share the ingredient list and a few customer results if helpful?",
+    createdAt: hoursAgo(2),
+  },
+  {
+    id: 'rc-8',
+    username: 'rohan.gupta',
+    profilePicUrl: 'https://i.pravatar.cc/80?u=rohan',
+    commentText: 'What sizes do you ship in? Looking for travel-friendly packaging.',
+    postThumbnailUrl: 'https://picsum.photos/seed/cs-post3/200/200',
+    postCaption: 'Gentle cleanser — dermatologist recommended',
+    intent: 'Question',
+    confidence: 0.69,
+    status: 'pending',
+    suggestedDm:
+      'Hi Rohan! We ship 50ml travel kits and full 200ml bottles. Want me to send the size chart with dimensions?',
+    createdAt: minsAgo(30),
+  },
+  // —— Complaints (≥2) ——
+  {
+    id: 'rc-4',
+    username: 'amit.verma',
+    profilePicUrl: 'https://i.pravatar.cc/80?u=amit',
+    commentText: 'Ordered last week and still waiting. Where is my package??',
+    postThumbnailUrl: 'https://picsum.photos/seed/cs-post1/200/200',
+    postCaption: 'New summer collection drop — limited stock',
+    intent: 'Complaint',
+    confidence: 0.74,
+    status: 'pending',
+    suggestedDm:
+      "Hi Amit — sorry for the delay. Can you share your order ID? I'll check tracking right away and get this sorted for you.",
+    createdAt: hoursAgo(3),
+  },
+  {
+    id: 'rc-9',
+    username: 'isha.nair',
+    profilePicUrl: 'https://i.pravatar.cc/80?u=isha',
+    commentText: 'Product arrived damaged. Bottle leaked all over the box. Very disappointed.',
+    postThumbnailUrl: 'https://picsum.photos/seed/cs-post2/200/200',
+    postCaption: 'Pro skincare kit — 30% off this week',
+    intent: 'Complaint',
+    confidence: 0.81,
+    status: 'pending',
+    suggestedDm:
+      "Hi Isha — really sorry about that. We'll arrange a replacement today. Please share a photo of the damage and your order ID.",
+    createdAt: minsAgo(20),
+  },
+  // —— Low confidence / unclear (≥2) ——
+  {
+    id: 'rc-10',
+    username: 'mystery.user',
+    profilePicUrl: null,
+    commentText: 'hmm maybe later idk',
+    postThumbnailUrl: 'https://picsum.photos/seed/cs-post4/200/200',
+    postCaption: 'Behind the scenes — factory tour',
+    intent: 'Neutral',
+    confidence: 0.38,
+    status: 'pending',
+    suggestedDm: '',
+    createdAt: hoursAgo(4),
+  },
+  {
+    id: 'rc-11',
+    username: 'vikas.trades',
+    profilePicUrl: 'https://i.pravatar.cc/80?u=vikas',
+    commentText: 'Same?',
+    postThumbnailUrl: 'https://picsum.photos/seed/cs-post5/200/200',
+    postCaption: 'Packaging glow-up 📦',
+    intent: 'Interested',
+    confidence: 0.42,
+    status: 'pending',
+    suggestedDm:
+      "Hi! Happy to help — are you asking about pricing, availability, or something else?",
+    createdAt: minsAgo(55),
+  },
+  {
+    id: 'rc-6',
+    username: 'spam.bot99',
+    profilePicUrl: null,
+    commentText: 'Click here for free followers!!!! www.fakelink.xyz',
+    postThumbnailUrl: 'https://picsum.photos/seed/cs-post2/200/200',
+    postCaption: 'Pro skincare kit — 30% off this week',
+    intent: 'Spam',
+    confidence: 0.41,
+    status: 'pending',
+    suggestedDm: '',
+    createdAt: hoursAgo(8),
+  },
+  // —— Already handled (filter demos) ——
+  {
+    id: 'rc-5',
+    username: 'sneha.r',
+    profilePicUrl: 'https://i.pravatar.cc/80?u=sneha',
+    commentText: 'Interested! Please DM me the catalogue ✨',
+    postThumbnailUrl: 'https://picsum.photos/seed/cs-post4/200/200',
+    postCaption: 'Behind the scenes — factory tour',
+    intent: 'Interested',
+    confidence: 0.88,
+    status: 'approved',
+    suggestedDm:
+      "Hi Sneha! Here's our latest catalogue — happy to walk you through bestsellers. What are you looking for?",
+    createdAt: hoursAgo(5),
+  },
+];

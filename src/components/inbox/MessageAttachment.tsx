@@ -148,6 +148,7 @@ export function MessageAttachment({ message }: Props) {
   const type = message.type ?? 'text';
   const media = message.media;
   const hasFile = Boolean(media?.storageKey);
+  const remoteUrl = media?.mediaUrl;
   const isSending = message.status === 'sending';
   const localPreviewUrl = message.localPreviewUrl;
   const isMediaType =
@@ -159,7 +160,7 @@ export function MessageAttachment({ message }: Props) {
     type === 'location';
 
   useEffect(() => {
-    if (localPreviewUrl || !hasFile || type === 'location') {
+    if (localPreviewUrl || remoteUrl || !hasFile || type === 'location') {
       setLoading(false);
       return;
     }
@@ -187,10 +188,10 @@ export function MessageAttachment({ message }: Props) {
       active = false;
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
-  }, [hasFile, localPreviewUrl, message.id, type]);
+  }, [hasFile, localPreviewUrl, remoteUrl, message.id, type]);
 
-  const previewUrl = localPreviewUrl || blobUrl;
-  const showSkeleton = !previewUrl && loading;
+  const previewUrl = localPreviewUrl || remoteUrl || blobUrl;
+  const showSkeleton = !previewUrl && loading && hasFile;
 
   if (type === 'location' && media?.latitude != null && media?.longitude != null) {
     const label = media.locationName || media.locationAddress || 'Shared location';
@@ -211,8 +212,18 @@ export function MessageAttachment({ message }: Props) {
     );
   }
 
-  if (!hasFile && !localPreviewUrl) {
+  if (!hasFile && !localPreviewUrl && !remoteUrl) {
     if (isMediaType) {
+      // Still show a document chip when we know the type/name but URL failed.
+      if (type === 'document') {
+        const label = media?.fileName || message.content || '📎 Document';
+        return (
+          <div className="flex items-center gap-2 rounded-lg border border-[#d1d7db] bg-[#f0f2f5] px-3 py-2 text-[#111b21]">
+            <FileText className="w-4 h-4 shrink-0 text-[#128C7E]" />
+            <span className="text-sm font-medium truncate flex-1">{label}</span>
+          </div>
+        );
+      }
       return (
         <p className="text-sm text-[#667781] italic px-1.5 py-2">
           {message.content === '[media]' || message.content === 'Media unavailable'
@@ -246,7 +257,10 @@ export function MessageAttachment({ message }: Props) {
   }
 
   const caption = media?.caption?.trim();
-  const fileName = media?.fileName || 'attachment';
+  const fileName =
+    media?.fileName ||
+    message.content.match(/^\[(?:file|document|image|video|audio)\]\s*(.+)$/i)?.[1]?.trim() ||
+    'attachment';
   const canPreview =
     Boolean(previewUrl) &&
     !isSending &&

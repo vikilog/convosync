@@ -103,6 +103,20 @@ export function useMessengerAccounts() {
   });
 }
 
+export function useEmailIntegration() {
+  return useQuery({
+    queryKey: ['email-integration'],
+    queryFn: async () => {
+      const data = (await api.getEmailIntegration().catch(() => ({ connected: false }))) as {
+        connected?: boolean;
+      };
+      return { connected: Boolean(data.connected) };
+    },
+    staleTime: META_STALE_MS,
+    refetchOnWindowFocus: true,
+  });
+}
+
 /** Derived Inbox assignee lists + channel labels from cached queries. */
 export function useInboxAssigneeMeta() {
   const me = useMe();
@@ -112,6 +126,7 @@ export function useInboxAssigneeMeta() {
   const wa = useWhatsAppAccounts();
   const ig = useInstagramAccounts();
   const messenger = useMessengerAccounts();
+  const email = useEmailIntegration();
 
   const teamAgents = useMemo<InboxNamedOption[]>(
     () => (team.data ?? []).map((a) => ({ id: a.id, name: a.name })),
@@ -164,10 +179,12 @@ export function useInboxAssigneeMeta() {
     : null;
 
   const fbList = messenger.data ?? [];
-  const messengerInboxLabel =
-    fbList.length > 0
-      ? fbList[0].label || fbList[0].displayName || fbList[0].pageName || 'Messenger'
-      : null;
+  const messengerConnected = fbList.length > 0;
+  const messengerInboxLabel = messengerConnected
+    ? fbList[0].label || fbList[0].displayName || fbList[0].pageName || 'Messenger'
+    : null;
+
+  const emailConnected = email.data?.connected === true;
 
   return {
     currentUserId: me.data?.id || getUserId() || '',
@@ -179,6 +196,10 @@ export function useInboxAssigneeMeta() {
     whatsappAccounts,
     instagramConnected,
     instagramInboxLabel,
+    messengerConnected,
     messengerInboxLabel,
+    emailConnected,
+    /** True once WA / IG / Messenger / Email account queries have settled. */
+    channelsReady: wa.isFetched && ig.isFetched && messenger.isFetched && email.isFetched,
   };
 }

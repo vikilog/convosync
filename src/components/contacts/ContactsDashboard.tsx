@@ -109,7 +109,9 @@ function rangeHint(range: GrowthRange): string {
   }
 }
 
-export const ContactsDashboard: React.FC = () => {
+export const ContactsDashboard: React.FC<{
+  connectedChannels?: Array<'whatsapp' | 'instagram' | 'messenger'>;
+}> = ({ connectedChannels }) => {
   const [stats, setStats] = useState<ContactDashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -195,11 +197,25 @@ export const ContactsDashboard: React.FC = () => {
     );
   }
 
-  const channelPie = [
-    { name: 'WhatsApp', value: stats.channels.whatsapp, color: CHANNEL_COLORS.whatsapp },
-    { name: 'Instagram', value: stats.channels.instagram, color: CHANNEL_COLORS.instagram },
-    { name: 'Messenger', value: stats.channels.messenger, color: CHANNEL_COLORS.messenger },
-  ].filter((c) => c.value > 0);
+  const connected = new Set(connectedChannels ?? ['whatsapp', 'instagram', 'messenger']);
+
+  const channelPie = (
+    [
+      { id: 'whatsapp' as const, name: 'WhatsApp', value: stats.channels.whatsapp, color: CHANNEL_COLORS.whatsapp },
+      { id: 'instagram' as const, name: 'Instagram', value: stats.channels.instagram, color: CHANNEL_COLORS.instagram },
+      { id: 'messenger' as const, name: 'Messenger', value: stats.channels.messenger, color: CHANNEL_COLORS.messenger },
+    ] as const
+  ).filter((c) => connected.has(c.id) && c.value > 0);
+
+  const channelLegend = (
+    [
+      { id: 'whatsapp' as const, name: 'WhatsApp', value: stats.channels.whatsapp, icon: MessageCircle },
+      { id: 'instagram' as const, name: 'Instagram', value: stats.channels.instagram, icon: Instagram },
+      { id: 'messenger' as const, name: 'Messenger', value: stats.channels.messenger, icon: Facebook },
+    ] as const
+  ).filter((c) => connected.has(c.id));
+
+  const channelSubtitle = channelLegend.map((c) => c.name).join(' · ') || 'No channels';
 
   const sourceData = stats.sources.map((s, i) => ({
     name: s.source,
@@ -218,11 +234,27 @@ export const ContactsDashboard: React.FC = () => {
           value={stats.withEmail}
           icon={<Mail className="h-4 w-4" />}
         />
-        <StatCard
-          label="WhatsApp"
-          value={stats.channels.whatsapp}
-          icon={<MessageCircle className="h-4 w-4" />}
-        />
+        {connected.has('whatsapp') && (
+          <StatCard
+            label="WhatsApp"
+            value={stats.channels.whatsapp}
+            icon={<MessageCircle className="h-4 w-4" />}
+          />
+        )}
+        {connected.has('instagram') && (
+          <StatCard
+            label="Instagram"
+            value={stats.channels.instagram}
+            icon={<Instagram className="h-4 w-4" />}
+          />
+        )}
+        {connected.has('messenger') && (
+          <StatCard
+            label="Messenger"
+            value={stats.channels.messenger}
+            icon={<Facebook className="h-4 w-4" />}
+          />
+        )}
         <StatCard
           label="Unsubscribed"
           value={stats.unsubscribe}
@@ -341,7 +373,7 @@ export const ContactsDashboard: React.FC = () => {
 
         <div className="rounded-xl border border-primary/15 bg-primary/[0.03] p-4">
           <h3 className="text-sm font-bold text-slate-900">By channel</h3>
-          <p className="mb-2 text-xs text-slate-500">WhatsApp · Instagram · Messenger</p>
+          <p className="mb-2 text-xs text-slate-500">{channelSubtitle}</p>
           <div className="h-[180px] w-full">
             {channelPie.length === 0 ? (
               <div className="flex h-full items-center justify-center text-sm text-slate-400">
@@ -351,7 +383,7 @@ export const ContactsDashboard: React.FC = () => {
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={channelPie}
+                    data={[...channelPie]}
                     dataKey="value"
                     nameKey="name"
                     innerRadius={48}
@@ -375,11 +407,7 @@ export const ContactsDashboard: React.FC = () => {
             )}
           </div>
           <div className="mt-1 flex flex-wrap justify-center gap-x-3 gap-y-1">
-            {[
-              { name: 'WhatsApp', value: stats.channels.whatsapp, icon: MessageCircle },
-              { name: 'Instagram', value: stats.channels.instagram, icon: Instagram },
-              { name: 'Messenger', value: stats.channels.messenger, icon: Facebook },
-            ].map((c) => (
+            {channelLegend.map((c) => (
               <div key={c.name} className="flex items-center gap-1.5 text-xs text-slate-600">
                 <c.icon className="h-3.5 w-3.5 text-primary" />
                 <span>{c.name}</span>

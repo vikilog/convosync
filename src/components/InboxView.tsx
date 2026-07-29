@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Sparkles,
   FileText,
@@ -12,7 +13,6 @@ import {
   Paperclip,
   User,
   Bot,
-  Facebook,
   Plus,
   Loader2,
   ArrowLeft,
@@ -38,11 +38,13 @@ import { fetchInboxConversationRows } from '../lib/inboxConversations';
 import { groupMessagesByDate } from '../lib/formatDates';
 import { getSocket } from '../lib/socket';
 import { setActiveInboxConversationId, setInboxVisible } from '../lib/inboxFocus';
+import { pathForIntegrationsChannel } from '../routes';
 import {
   dispatchInboxUnreadTotal,
   INBOX_OPEN_CONVERSATION_EVENT,
 } from '../lib/inboxEvents';
 import { useKeepAliveActivation, useKeepAliveActive } from './KeepAlive';
+import { ConnectChannelEmpty } from './ConnectChannelEmpty';
 import { InboxAssigneePicker } from './inbox/InboxAssigneePicker';
 import { InboxNewChatPicker } from './inbox/InboxNewChatPicker';
 import { InboxTemplatePicker } from './inbox/InboxTemplatePicker';
@@ -56,6 +58,12 @@ import {
   AddContactDrawer,
   type ContactEditPayload,
 } from './contacts/AddContactDrawer';
+import {
+  formatInstagramSyncProgress,
+  type InstagramSyncProgressPayload,
+} from '../lib/instagramSyncEvents';
+
+const IG_INBOX_HAS_MORE_KEY = 'convosync:ig:inboxHasMore';
 
 type AgentOption = { id: string; name: string };
 type BotOption = { id: string; name: string };
@@ -339,6 +347,15 @@ function InstagramIcon({ className }: { className?: string }) {
   );
 }
 
+/** Meta Messenger mark (chat bubble + lightning), not the Facebook "f". */
+function MessengerIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M12 2C6.36 2 2 6.13 2 11.7c0 2.91 1.19 5.44 3.14 7.17V22l3.45-1.89c.99.27 2.04.42 3.41.42 5.64 0 10-4.13 10-9.7S17.64 2 12 2zm.99 13.07l-2.54-2.71-4.95 2.71 5.44-5.79 2.61 2.71 4.89-2.71-5.45 5.79z" />
+    </svg>
+  );
+}
+
 interface WhatsAppInboxAccount {
   phoneNumberId: string;
   phoneNumber?: string;
@@ -359,6 +376,7 @@ const FILTER_TABS = [
 const CHANNEL_TABS: { id: InboxChannel; label: string }[] = [
   { id: 'whatsapp', label: 'WhatsApp' },
   { id: 'instagram', label: 'Instagram' },
+  { id: 'messenger', label: 'Messenger' },
 ];
 
 function contactChannel(contact: Contact): 'whatsapp' | 'instagram' | 'messenger' {
@@ -379,6 +397,7 @@ function contactDisplayHandle(contact: Contact): string {
 }
 
 export const InboxView: React.FC = () => {
+  const navigate = useNavigate();
   const { inboxScope } = useWorkspaceAccess();
   const isLargeUp = useIsLargeUp();
   const isXLargeUp = useIsXLargeUp();
@@ -392,7 +411,9 @@ export const InboxView: React.FC = () => {
     whatsappAccounts,
     instagramConnected,
     instagramInboxLabel,
+    messengerConnected,
     messengerInboxLabel,
+    channelsReady,
   } = useInboxAssigneeMeta();
   const [mobilePane, setMobilePane] = useState<'list' | 'chat'>('list');
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -411,6 +432,13 @@ export const InboxView: React.FC = () => {
   const [channelFilter, setChannelFilter] = useState<InboxChannel>('whatsapp');
   const [instagramSyncing, setInstagramSyncing] = useState(false);
   const [instagramSyncHint, setInstagramSyncHint] = useState<string | null>(null);
+  const [instagramHasMore, setInstagramHasMore] = useState(() => {
+    try {
+      return sessionStorage.getItem(IG_INBOX_HAS_MORE_KEY) === '1';
+    } catch {
+      return false;
+    }
+  });
 
   const [messageInput, setMessageInput] = useState<string>('');
   const [sendError, setSendError] = useState<string | null>(null);
@@ -448,8 +476,15 @@ export const InboxView: React.FC = () => {
   const viewingConversationId = inboxTabActive ? selectedConversationId : '';
 
   const visibleChannelTabs = useMemo(
-    () => CHANNEL_TABS.filter((tab) => isInboxChannelAllowed(tab.id, inboxScope)),
-    [inboxScope]
+    () =>
+      CHANNEL_TABS.filter((tab) => {
+        if (!isInboxChannelAllowed(tab.id, inboxScope)) return false;
+        if (tab.id === 'whatsapp') return whatsappAccounts.length > 0;
+        if (tab.id === 'instagram') return instagramConnected;
+        if (tab.id === 'messenger') return messengerConnected;
+        return false;
+      }),
+    [inboxScope, whatsappAccounts.length, instagramConnected, messengerConnected]
   );
 
   const newChatWhatsAppAccounts = useMemo(
@@ -965,17 +1000,24 @@ export const InboxView: React.FC = () => {
     };
     socket.on('messenger_sync_progress', onMessengerSyncProgress);
 
-    const onInstagramSyncProgress = (payload: { phase?: string; message?: string }) => {
+    const onInstagramSyncProgress = (payload: InstagramSyncProgressPayload) => {
       if (payload.phase === 'started') {
         setInstagramSyncing(true);
-        setInstagramSyncHint(payload.message || 'Syncing Instagram chats…');
+        setInstagramSyncHint(formatInstagramSyncProgress(payload));
       } else if (payload.phase === 'completed') {
         setInstagramSyncing(false);
-        setInstagramSyncHint(payload.message || 'Instagram sync complete.');
+        setInstagramSyncHint(formatInstagramSyncProgress(payload));
+        const more = Boolean(payload.hasMore);
+        setInstagramHasMore(more);
+        try {
+          sessionStorage.setItem(IG_INBOX_HAS_MORE_KEY, more ? '1' : '0');
+        } catch {
+          /* ignore */
+        }
         void loadConversations();
       } else if (payload.phase === 'error') {
         setInstagramSyncing(false);
-        setInstagramSyncHint(payload.message || 'Instagram sync failed.');
+        setInstagramSyncHint(formatInstagramSyncProgress(payload));
       } else if (payload.message) {
         setInstagramSyncHint(payload.message);
       }
@@ -1455,13 +1497,19 @@ export const InboxView: React.FC = () => {
   const channelEmptyMessage =
     channelFilter === 'whatsapp'
       ? 'No WhatsApp conversations yet.'
-      : 'No Instagram conversations yet.';
+      : channelFilter === 'messenger'
+        ? 'No Messenger conversations yet.'
+        : 'No Instagram conversations yet.';
 
-  async function handleInstagramSync() {
+  async function handleInstagramSync(opts?: { loadMore?: boolean }) {
     setInstagramSyncing(true);
-    setInstagramSyncHint('Starting Instagram sync…');
+    setInstagramSyncHint(
+      opts?.loadMore ? 'Loading more Instagram chats…' : 'Starting Instagram sync…'
+    );
     try {
-      const res = (await api.syncInstagramInbox()) as { message?: string };
+      const res = (await api.syncInstagramInbox(
+        opts?.loadMore ? { loadMore: true } : undefined
+      )) as { message?: string };
       setInstagramSyncHint(res.message || 'Instagram sync started…');
     } catch (err) {
       setInstagramSyncing(false);
@@ -1482,6 +1530,20 @@ export const InboxView: React.FC = () => {
           : inboxThreads.some((t) => contactChannel(t) === channelFilter)
             ? 'No conversations in this view.'
             : channelEmptyMessage;
+
+  const hasConnectedChannel =
+    whatsappAccounts.length > 0 || instagramConnected || messengerConnected;
+  const showConnectChannelEmpty = channelsReady && !hasConnectedChannel;
+
+  if (showConnectChannelEmpty) {
+    return (
+      <div className="flex flex-row h-full min-h-0 overflow-hidden bg-surface-muted border-t border-black/5 selection:bg-sky-50">
+        <ConnectChannelEmpty
+          onConnect={() => navigate(pathForIntegrationsChannel('whatsapp'))}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-row h-full min-h-0 overflow-hidden bg-surface-muted border-t border-black/5 selection:bg-sky-50">
@@ -1520,22 +1582,42 @@ export const InboxView: React.FC = () => {
             role="tablist"
             aria-label="Channel"
           >
-            {visibleChannelTabs.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                role="tab"
-                aria-selected={channelFilter === tab.id}
-                onClick={() => setChannelFilter(tab.id)}
-                className={`flex-1 rounded-md py-1.5 text-xs font-bold transition-colors ${
-                  channelFilter === tab.id
-                    ? 'bg-surface text-emerald-800 shadow-sm ring-1 ring-emerald-100'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+            {visibleChannelTabs.map((tab) => {
+              const active = channelFilter === tab.id;
+              const iconClass = `h-4 w-4 ${
+                active
+                  ? tab.id === 'instagram'
+                    ? 'text-[#E1306C]'
+                    : tab.id === 'messenger'
+                      ? 'text-[#1877F2]'
+                      : 'text-[#25D366]'
+                  : 'text-slate-500'
+              }`;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  aria-label={tab.label}
+                  title={tab.label}
+                  onClick={() => setChannelFilter(tab.id)}
+                  className={`flex flex-1 items-center justify-center rounded-md py-1.5 transition-colors ${
+                    active
+                      ? 'bg-surface shadow-sm ring-1 ring-black/5'
+                      : 'hover:bg-surface/70'
+                  }`}
+                >
+                  {tab.id === 'instagram' ? (
+                    <InstagramIcon className={iconClass} />
+                  ) : tab.id === 'messenger' ? (
+                    <MessengerIcon className={iconClass} />
+                  ) : (
+                    <WhatsAppIcon className={iconClass} />
+                  )}
+                </button>
+              );
+            })}
             {channelFilter === 'whatsapp' && whatsappAccounts.length > 0 ? (
               <button
                 type="button"
@@ -1675,7 +1757,7 @@ export const InboxView: React.FC = () => {
                             {contactChannel(thread) === 'instagram' ? (
                               <InstagramIcon className="w-3.5 h-3.5" />
                             ) : contactChannel(thread) === 'messenger' ? (
-                              <Facebook className="w-3.5 h-3.5" />
+                              <MessengerIcon className="w-3.5 h-3.5" />
                             ) : (
                               <WhatsAppIcon className="w-3.5 h-3.5" />
                             )}
@@ -1741,6 +1823,33 @@ export const InboxView: React.FC = () => {
               );
             })
           )}
+          {channelFilter === 'instagram' &&
+          instagramConnected &&
+          instagramHasMore &&
+          (filteredThreads.length > 0 || instagramThreadCount > 0) ? (
+            <div className="sticky bottom-0 border-t border-black/5 bg-surface px-3 py-2.5">
+              <button
+                type="button"
+                disabled={instagramSyncing}
+                onClick={() => void handleInstagramSync({ loadMore: true })}
+                className="w-full inline-flex items-center justify-center gap-1.5 rounded-lg border border-[#E1306C]/30 bg-[#fce8f0] px-3 py-2 text-xs font-semibold text-[#C13584] hover:bg-[#f8d4e2] disabled:opacity-60"
+              >
+                {instagramSyncing ? (
+                  <>
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    Loading next 20…
+                  </>
+                ) : (
+                  'Load more'
+                )}
+              </button>
+              {instagramSyncHint ? (
+                <p className="mt-1.5 text-[11px] text-slate-500 leading-snug text-center">
+                  {instagramSyncHint}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       </section>
 

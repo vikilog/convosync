@@ -7,6 +7,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { X, Plus, Info, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { api } from '../../lib/api';
+import { ContactLeadJourneyPanel } from '../leads/ContactLeadJourneyPanel';
+import { ContactLinkedChannelsPanel } from './ContactLinkedChannelsPanel';
 
 export type NewContactPayload = {
   name: string;
@@ -48,6 +50,7 @@ const COUNTRY_CODES = [
 type Member = { userId: string; name: string; email: string };
 
 const INSTAGRAM_FIELD_PREFIX = 'instagram';
+const LEAD_JOURNEY_FIELD = 'leadJourney';
 
 function isSyntheticChannelPhone(phone: string): boolean {
   return phone.startsWith('fb:') || phone.startsWith('ig:');
@@ -73,6 +76,7 @@ function customFieldsToRows(fields: Record<string, string> | undefined): { key: 
     .filter(
       ([key]) =>
         key !== 'ownerId' &&
+        key !== LEAD_JOURNEY_FIELD &&
         !key.startsWith(INSTAGRAM_FIELD_PREFIX)
     )
     .map(([key, value]) => ({ key, value: String(value) }));
@@ -177,12 +181,14 @@ export function AddContactDrawer({ open, onClose, onCreated, onSaved, editContac
     const customFields: Record<string, string> = {};
     if (editContact?.customFields) {
       for (const [key, value] of Object.entries(editContact.customFields)) {
-        if (key.startsWith(INSTAGRAM_FIELD_PREFIX)) customFields[key] = String(value);
+        if (key.startsWith(INSTAGRAM_FIELD_PREFIX) || key === LEAD_JOURNEY_FIELD) {
+          customFields[key] = String(value);
+        }
       }
     }
     for (const row of customAttrs) {
       const k = row.key.trim();
-      if (k) customFields[k] = row.value;
+      if (k && k !== LEAD_JOURNEY_FIELD) customFields[k] = row.value;
     }
     if (ownerId) customFields.ownerId = ownerId;
 
@@ -409,6 +415,13 @@ export function AddContactDrawer({ open, onClose, onCreated, onSaved, editContac
                   </label>
                 )}
               </div>
+
+              {isEdit && editContact?.id ? (
+                <>
+                  <ContactLinkedChannelsPanel contactId={editContact.id} />
+                  <ContactLeadJourneyPanel contactId={editContact.id} />
+                </>
+              ) : null}
 
               {!showCustom ? (
                 <button

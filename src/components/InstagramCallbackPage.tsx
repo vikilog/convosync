@@ -132,14 +132,10 @@ export function InstagramCallbackPage() {
           return;
         }
 
+        // Always show page picker so the user explicitly confirms which Page/IG to connect
+        // (even when Meta returns a single candidate — don't auto-skip).
         setConnectToken(preview.connectToken);
         setCandidates(available);
-
-        if (!preview.requiresSelection) {
-          void connectSelected(preview.connectToken, available[0].pageId);
-          return;
-        }
-
         setSelectedPageId(available[0]?.pageId ?? null);
         setPhase('selecting');
       })
@@ -151,7 +147,7 @@ export function InstagramCallbackPage() {
     return () => {
       cancelled = true;
     };
-  }, [connectSelected, finishError, searchParams]);
+  }, [finishError, searchParams]);
 
   if (phase === 'selecting' || phase === 'connecting') {
     return (

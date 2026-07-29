@@ -9,6 +9,8 @@ export const VALID_TABS = [
   'journey',
   'ai-agent',
   'media-gallery',
+  'social-listening',
+  'leads',
   'ctwa',
   'facebook',
   'pay',
@@ -82,6 +84,9 @@ export function settingsSectionFromPath(pathname: string): SettingsSection {
 
 export function pathForTab(tab: string): string {
   if (tab === 'settings') return '/settings/company-info';
+  if (tab === 'social-listening') return '/social-listening/dashboard';
+  if (tab === 'contacts') return '/contacts/list';
+  if (tab === 'leads') return '/leads';
   return `/${tab}`;
 }
 
@@ -165,6 +170,45 @@ export function pathForNewCampaign(): string {
 export function isNewCampaignPath(pathname: string): boolean {
   const parts = pathname.replace(/^\//, '').split('/').filter(Boolean);
   return parts[0] === 'campaigns' && parts[1] === 'new';
+}
+
+export function contactIdFromPath(pathname: string): string | null {
+  const parts = pathname.replace(/^\//, '').split('/').filter(Boolean);
+  if (parts[0] !== 'contacts' || !parts[1]) return null;
+  if (parts[1] === 'dashboard' || parts[1] === 'list') return null;
+  return parts[1];
+}
+
+export function contactsSectionFromPath(
+  pathname: string
+): 'dashboard' | 'list' | 'detail' {
+  const parts = pathname.replace(/^\//, '').split('/').filter(Boolean);
+  if (parts[0] !== 'contacts') return 'list';
+  if (!parts[1] || parts[1] === 'list') return 'list';
+  if (parts[1] === 'dashboard') return 'dashboard';
+  return 'detail';
+}
+
+export function pathForContactsDashboard(): string {
+  return '/contacts/dashboard';
+}
+
+export function pathForContactsList(): string {
+  return '/contacts/list';
+}
+
+export function pathForContact(contactId: string): string {
+  return `/contacts/${contactId}`;
+}
+
+export function leadFunnelIdFromPath(pathname: string): string | null {
+  const parts = pathname.replace(/^\//, '').split('/').filter(Boolean);
+  if (parts[0] !== 'leads' || !parts[1]) return null;
+  return parts[1];
+}
+
+export function pathForLeadFunnel(funnelId: string): string {
+  return `/leads/${funnelId}`;
 }
 
 export type TemplateChannel = 'whatsapp' | 'email' | 'canned';

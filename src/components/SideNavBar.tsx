@@ -28,6 +28,8 @@ import {
   Settings,
   Menu,
   X,
+  Ear,
+  UsersRound,
 } from 'lucide-react';
 import { useSidebar } from '../contexts/SidebarContext';
 import { api, getWorkspaceId } from '../lib/api';
@@ -233,6 +235,8 @@ export const SideNavBar: React.FC = () => {
         { id: 'templates', label: 'Templates', icon: FileText },
         { id: 'journey', label: 'Journeys', icon: GitBranch },
         { id: 'ai-agent', label: 'AI Agent', icon: Bot },
+        { id: 'social-listening', label: 'Social Listening', icon: Ear },
+        { id: 'leads', label: 'Leads', icon: UsersRound },
         { id: 'media-gallery', label: 'Media Gallery', icon: Images },
       ],
     },
@@ -370,10 +374,13 @@ export const SideNavBar: React.FC = () => {
                 {section.items.map((item) => {
                   const Icon = item.icon;
                   const isCampaigns = item.id === 'campaigns';
+                  const isContacts = item.id === 'contacts';
+                  const isLeads = item.id === 'leads';
                   const isJourney = item.id === 'journey';
                   const isSettings = item.id === 'settings';
                   const isWallet = item.id === 'wallet';
                   const isNotifications = item.id === 'notifications';
+                  const isSocialListening = item.id === 'social-listening';
                   const itemPath = item.path ?? pathForTab(item.id);
                   const onNotificationsPage = location.pathname.startsWith(
                     '/settings/notifications'
@@ -392,7 +399,11 @@ export const SideNavBar: React.FC = () => {
                     return (
                       isActive ||
                       (isCampaigns && location.pathname.startsWith('/campaigns/')) ||
+                      (isContacts && location.pathname.startsWith('/contacts/')) ||
+                      (isLeads && location.pathname.startsWith('/leads/')) ||
                       (isJourney && location.pathname.startsWith('/journey/')) ||
+                      (isSocialListening &&
+                        location.pathname.startsWith('/social-listening')) ||
                       (isIntegrations && location.pathname.startsWith('/integrations'))
                     );
                   };

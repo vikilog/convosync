@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Search,
   Download,
@@ -30,6 +30,10 @@ import { ImportContactsModal } from './contacts/ImportContactsModal';
 import { ExportContactsDrawer } from './contacts/ExportContactsDrawer';
 import { ThemeDateInput } from './contacts/ThemeDateInput';
 import { ContactsDashboard } from './contacts/ContactsDashboard';
+import { ContactDetailView } from './contacts/ContactDetailView';
+import { contactIdFromPath, pathForContact, pathForContactsDashboard, pathForContactsList, pathForIntegrationsChannel } from '../routes';
+import { useInboxAssigneeMeta } from '../hooks/inbox/useInboxMeta';
+import { ConnectChannelEmpty } from './ConnectChannelEmpty';
 
 type ContactListKey = 'all' | 'unsubscribe' | 'blocklist';
 type ContactChannelKey = 'all' | 'whatsapp' | 'instagram' | 'messenger';
@@ -88,8 +92,26 @@ const FILTER_SELECT_CLASS =
   'shrink-0 rounded-lg border border-black/5 bg-surface px-2.5 py-2 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary';
 
 export const ContactsView: React.FC = () => {
+  const location = useLocation();
+  const detailContactId = contactIdFromPath(location.pathname);
+  if (detailContactId) {
+    return <ContactDetailView contactId={detailContactId} />;
+  }
+  return <ContactsWorkspace />;
+};
+
+const ContactsWorkspace: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [pageTab, setPageTab] = useState<ContactsPageTab>('dashboard');
+  const {
+    whatsappAccounts,
+    instagramConnected,
+    messengerConnected,
+    channelsReady,
+  } = useInboxAssigneeMeta();
+  const pageTab: ContactsPageTab =
+    location.pathname.startsWith('/contacts/dashboard') ? 'dashboard' : 'contacts';
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [activeList, setActiveList] = useState<ContactListKey>('all');
@@ -112,6 +134,22 @@ export const ContactsView: React.FC = () => {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
 
+  const connectedChannels = useMemo(() => {
+    const channels: Array<'whatsapp' | 'instagram' | 'messenger'> = [];
+    if (whatsappAccounts.length > 0) channels.push('whatsapp');
+    if (instagramConnected) channels.push('instagram');
+    if (messengerConnected) channels.push('messenger');
+    return channels;
+  }, [whatsappAccounts.length, instagramConnected, messengerConnected]);
+
+  const visibleChannelNav = useMemo(() => {
+    const connected = new Set(connectedChannels);
+    return CHANNEL_NAV.filter((item) => {
+      if (item.id === 'all') return connectedChannels.length > 1;
+      return connected.has(item.id);
+    });
+  }, [connectedChannels]);
+
   useEffect(() => {
     if (searchParams.get('import') !== '1') return;
     setImportOpen(true);
@@ -119,6 +157,20 @@ export const ContactsView: React.FC = () => {
     next.delete('import');
     setSearchParams(next, { replace: true });
   }, [searchParams, setSearchParams]);
+
+  useEffect(() => {
+    if (connectedChannels.length === 0) return;
+    if (connectedChannels.length === 1) {
+      if (channelFilter !== connectedChannels[0]) {
+        setChannelFilter(connectedChannels[0]);
+      }
+      return;
+    }
+    if (channelFilter === 'all') return;
+    if (!connectedChannels.includes(channelFilter)) {
+      setChannelFilter('all');
+    }
+  }, [channelFilter, connectedChannels]);
 
   const buildListParams = useCallback(
     (pageCursor: string | null): Record<string, string> => {
@@ -297,6 +349,20 @@ export const ContactsView: React.FC = () => {
     setBulkDeleting(false);
   };
 
+  const hasConnectedChannel =
+    whatsappAccounts.length > 0 || instagramConnected || messengerConnected;
+  const showConnectChannelEmpty = channelsReady && !hasConnectedChannel;
+
+  if (showConnectChannelEmpty) {
+    return (
+      <div className="h-full min-h-0 border border-black/5 bg-surface-muted overflow-hidden flex">
+        <ConnectChannelEmpty
+          onConnect={() => navigate(pathForIntegrationsChannel('whatsapp'))}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="h-full min-h-0 border border-black/5 bg-surface-muted overflow-hidden">
       <div className="h-full min-h-0">
@@ -305,8 +371,8 @@ export const ContactsView: React.FC = () => {
             <div className="inline-flex rounded-lg border border-black/5 bg-black/[0.04] p-0.5">
               <button
                 type="button"
-                onClick={() => setPageTab('dashboard')}
-                className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
+                onClick={() => navigate(pathForContactsDashboard())}
+                className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer ${
                   pageTab === 'dashboard'
                     ? 'bg-surface text-primary shadow-sm'
                     : 'text-slate-600 hover:text-slate-900'
@@ -316,8 +382,8 @@ export const ContactsView: React.FC = () => {
               </button>
               <button
                 type="button"
-                onClick={() => setPageTab('contacts')}
-                className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
+                onClick={() => navigate(pathForContactsList())}
+                className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer ${
                   pageTab === 'contacts'
                     ? 'bg-surface text-primary shadow-sm'
                     : 'text-slate-600 hover:text-slate-900'
@@ -400,7 +466,7 @@ export const ContactsView: React.FC = () => {
 
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 min-w-0 flex-1">
-                {CHANNEL_NAV.map((item) => {
+                {visibleChannelNav.map((item) => {
                   const active = channelFilter === item.id;
                   return (
                     <button
@@ -468,7 +534,7 @@ export const ContactsView: React.FC = () => {
 
           {pageTab === 'dashboard' ? (
             <div className="flex-1 min-h-0">
-              <ContactsDashboard />
+              <ContactsDashboard connectedChannels={connectedChannels} />
             </div>
           ) : (
             <>
@@ -522,7 +588,7 @@ export const ContactsView: React.FC = () => {
                         </div>
                         <button
                           type="button"
-                          onClick={() => void openEditContact(contact)}
+                          onClick={() => navigate(pathForContact(contact.id))}
                           className="flex-1 min-w-0 text-left"
                         >
                           <p className="text-sm font-semibold text-slate-900 truncate">{contact.name}</p>
@@ -588,7 +654,7 @@ export const ContactsView: React.FC = () => {
                           <td className="px-4 py-2">
                             <button
                               type="button"
-                              onClick={() => void openEditContact(contact)}
+                              onClick={() => navigate(pathForContact(contact.id))}
                               className="flex items-center gap-2 min-w-0 cursor-pointer"
                             >
                               <div className="w-7 h-7 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center shrink-0">

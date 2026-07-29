@@ -26,7 +26,7 @@ export function formatInstagramSyncProgress(p: InstagramSyncProgressPayload): st
       `Done: ${p.syncedConversations} chat(s) saved, ${p.importedMessages} message(s).`,
     ];
     if (p.warning) parts.push(p.warning);
-    if (p.hasMore) parts.push('More chats available — tap Fetch again.');
+    if (p.hasMore) parts.push('More chats available — scroll down and tap Load more.');
     return parts.join(' ');
   }
   if (p.message) return p.message;
