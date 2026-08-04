@@ -64,7 +64,7 @@ export function SignupPage() {
 
     setLoading(true);
     try {
-      const res = await api.register(name.trim(), email.trim(), password);
+      const res = await api.register(name.trim(), email.trim().toLowerCase(), password);
       finishAuth(res);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
@@ -159,7 +159,7 @@ export function SignupPage() {
                   <input
                     type="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => setEmail(e.target.value.toLowerCase())}
                     autoComplete="email"
                     required
                     className="w-full pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"

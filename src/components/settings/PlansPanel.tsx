@@ -507,7 +507,7 @@ export function PlansPanel() {
     setActionMessage(null);
     try {
       const couponCode = appliedCoupon?.code ?? (couponInput.trim() || undefined);
-      if (couponCode && !appliedCoupon) {
+      if (couponCode) {
         const amountPaise = planAmountPaise(plan, cycle);
         if (amountPaise) {
           const result = (await api.validateBillingCoupon({
@@ -516,6 +516,7 @@ export function PlansPanel() {
             planId: plan.id,
           })) as ValidateCouponResult;
           if (!result.valid) {
+            setAppliedCoupon(null);
             setCouponError(result.reason);
             return;
           }
@@ -572,7 +573,13 @@ export function PlansPanel() {
       });
     } catch (err) {
       const message = formatCatchError(err);
-      if (message !== 'Payment cancelled') setError(message);
+      if (message !== 'Payment cancelled') {
+        if (appliedCoupon?.code || couponInput.trim()) {
+          setCouponError(message);
+        } else {
+          setError(message);
+        }
+      }
     } finally {
       setCheckoutSlug(null);
     }

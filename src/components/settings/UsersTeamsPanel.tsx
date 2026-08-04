@@ -117,7 +117,7 @@ export function UsersTeamsPanel() {
       const hasInbox =
         invite.role === 'agent' && invite.permissions.includes('inbox');
       const result = (await api.addWorkspaceMember({
-        email: invite.email.trim(),
+        email: invite.email.trim().toLowerCase(),
         name: invite.name.trim() || undefined,
         password: invite.password.trim() || undefined,
         role: invite.role,
@@ -131,7 +131,7 @@ export function UsersTeamsPanel() {
       setMembers((prev) => [...prev, result.member]);
       setMessage(
         result.createdUser
-          ? `${result.member.name} was added with a new account. Share the password you set with them.`
+          ? `${result.member.name} was added. Login details were emailed to ${result.member.email}.`
           : `${result.member.name} was added to this company.`
       );
       setInvite(emptyInvite);
@@ -497,7 +497,9 @@ export function UsersTeamsPanel() {
                 required
                 type="email"
                 value={invite.email}
-                onChange={(e) => setInvite((prev) => ({ ...prev, email: e.target.value }))}
+                onChange={(e) =>
+                  setInvite((prev) => ({ ...prev, email: e.target.value.toLowerCase() }))
+                }
                 className="w-full px-3 py-2 text-xs border border-black/5 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </label>

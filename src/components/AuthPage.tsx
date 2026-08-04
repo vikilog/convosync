@@ -66,7 +66,7 @@ export function AuthPage() {
     setError(null);
     setLoading(true);
     try {
-      const res = await api.login(email.trim(), password);
+      const res = await api.login(email.trim().toLowerCase(), password);
       finishAuth(res);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
@@ -223,7 +223,7 @@ export function AuthPage() {
                       id="login-email"
                       type="email"
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      onChange={(e) => setEmail(e.target.value.toLowerCase())}
                       autoComplete="email"
                       required
                       disabled={loading}
