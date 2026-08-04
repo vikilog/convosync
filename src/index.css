@@ -63,6 +63,7 @@
   --color-warning-orange: #f2994a;
   --color-danger-red: #ba1a1a;
   --color-border-subtle: #e5e2dc;
+  --color-border-strong: #b8b4ac;
   --color-brand-blue: #064e3b;
   --color-brand-purple: #0a5c46;
   --color-brand-indigo: #0d6b52;
@@ -375,19 +376,15 @@ body {
 }
 
 /* Journey workflow canvas */
-.journey-canvas-shell .react-flow__controls-button {
-  border-bottom-color: #e2e8f0;
-}
-
-.journey-canvas-shell .react-flow__controls-button:hover {
-  background: #f8fafc;
-}
-
 .journey-canvas-shell .react-flow__edge-path {
   stroke-linecap: round;
 }
 
 .journey-canvas-shell .react-flow__node.selected {
   z-index: 10;
+}
+
+.journey-canvas-shell .react-flow__handle {
+  opacity: 1;
 }
 

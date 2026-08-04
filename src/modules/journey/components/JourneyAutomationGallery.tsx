@@ -7,7 +7,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import type { JourneyTemplate, JourneyTemplateCategory } from '../templates';
-import { UNIVERSAL_JOURNEY_TEMPLATES } from '../templates';
+import { JOURNEY_TEMPLATES } from '../templates';
 
 const CATEGORY_ICON: Record<JourneyTemplateCategory, LucideIcon> = {
   welcome: MessageCircleHeart,
@@ -35,8 +35,8 @@ export function JourneyAutomationGallery({
           <div>
             <h3 className="text-sm font-black text-gray-900">Automation gallery</h3>
             <p className="text-xs text-gray-500 mt-0.5">
-              Universal WhatsApp starters — edit copy after you create. Publish, then assign chats to
-              this journey.
+              ConvoSync customer care + universal starters — edit copy after create, then publish &
+              assign chats.
             </p>
           </div>
           {onStartBlank ? (
@@ -53,8 +53,9 @@ export function JourneyAutomationGallery({
       ) : null}
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        {UNIVERSAL_JOURNEY_TEMPLATES.map((template) => {
+        {JOURNEY_TEMPLATES.map((template) => {
           const Icon = CATEGORY_ICON[template.category];
+          const isConvoSync = template.id.startsWith('convosync_');
           return (
             <button
               key={template.id}
@@ -71,6 +72,11 @@ export function JourneyAutomationGallery({
                     <p className="text-sm font-bold text-gray-900 group-hover:text-primary">
                       {template.name}
                     </p>
+                    {isConvoSync ? (
+                      <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-800">
+                        ConvoSync
+                      </span>
+                    ) : null}
                     <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
                       {template.triggerLabel}
                     </span>

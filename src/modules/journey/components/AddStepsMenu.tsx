@@ -1,20 +1,19 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
+import { useEffect, useMemo, useState } from 'react';
 import { Plus, X } from 'lucide-react';
 import { StepsCatalogList } from './StepsCatalogList';
 import { filterPaletteItems, PALETTE_ITEMS } from './stepCatalogUtils';
 import type { JourneyNodeType } from '../types';
 
 type Props = {
+  open: boolean;
   onSelect: (type: JourneyNodeType) => void;
   onClose: () => void;
   hasTrigger?: boolean;
-  anchor?: { top: number; left: number } | null;
 };
 
-export function AddStepsMenu({ onSelect, onClose, hasTrigger = false, anchor = null }: Props) {
+/** Right sidesheet inside the journey builder content area (not a floating canvas popover). */
+export function AddStepsMenu({ open, onSelect, onClose, hasTrigger = false }: Props) {
   const [query, setQuery] = useState('');
-  const panelRef = useRef<HTMLDivElement>(null);
 
   const items = useMemo(
     () => filterPaletteItems(PALETTE_ITEMS, { query, hasTrigger }),
@@ -22,77 +21,70 @@ export function AddStepsMenu({ onSelect, onClose, hasTrigger = false, anchor = n
   );
 
   useEffect(() => {
-    const onPointerDown = (e: MouseEvent) => {
-      if (panelRef.current && !panelRef.current.contains(e.target as HTMLElement)) {
-        onClose();
-      }
-    };
+    if (!open) {
+      setQuery('');
+      return;
+    }
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
-    window.addEventListener('mousedown', onPointerDown);
     window.addEventListener('keydown', onKeyDown);
-    return () => {
-      window.removeEventListener('mousedown', onPointerDown);
-      window.removeEventListener('keydown', onKeyDown);
-    };
-  }, [onClose]);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [open, onClose]);
 
-  const panel = (
-    <div
-      ref={panelRef}
-      className="w-[min(20rem,calc(100vw-2rem))] rounded-2xl border border-slate-200/80 bg-white/95 shadow-[0_20px_50px_-12px_rgba(15,23,42,0.25)] backdrop-blur-md overflow-hidden"
-      onClick={(e) => e.stopPropagation()}
-      style={
-        anchor
-          ? {
-              position: 'fixed',
-              top: Math.min(anchor.top, window.innerHeight - 420),
-              left: Math.min(Math.max(16, anchor.left - 160), window.innerWidth - 336),
-              zIndex: 9999,
-            }
-          : undefined
-      }
-    >
-      <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
-        <div className="flex items-center gap-2">
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <Plus className="h-4 w-4" />
-          </span>
-          <div>
-            <p className="text-sm font-bold text-slate-900">Add next step</p>
-            <p className="text-xs text-slate-500">Choose an action for this branch</p>
+  if (!open) return null;
+
+  return (
+    <>
+      <button
+        type="button"
+        aria-label="Close add step"
+        className="absolute inset-0 z-20 cursor-pointer bg-dark-navy/20"
+        onClick={onClose}
+      />
+      <aside
+        className="absolute inset-y-0 right-0 z-30 flex w-full max-w-[380px] flex-col border-l-[0.5px] border-border-subtle bg-white"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="add-step-title"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex shrink-0 items-center justify-between border-b-[0.5px] border-border-subtle px-4 py-3">
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-[26px] w-[26px] items-center justify-center rounded-md bg-primary/10 text-primary">
+              <Plus className="h-3.5 w-3.5" strokeWidth={2.25} />
+            </span>
+            <div>
+              <p id="add-step-title" className="text-[14px] font-bold text-dark-navy">
+                Add next step
+              </p>
+              <p className="text-[12px] text-slate-500">Choose an action for this branch</p>
+            </div>
           </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="cursor-pointer rounded-lg p-1.5 text-slate-400 transition-colors duration-150 hover:bg-surface-muted hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+            aria-label="Close"
+          >
+            <X className="h-4 w-4" />
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={onClose}
-          className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 cursor-pointer"
-          aria-label="Close"
-        >
-          <X className="h-4 w-4" />
-        </button>
-      </div>
 
-      <div className="px-3 pb-3 pt-2">
-        <StepsCatalogList
-          items={items}
-          query={query}
-          onQueryChange={setQuery}
-          mode="click"
-          autoFocusSearch
-          onSelect={(type) => {
-            onSelect(type);
-            onClose();
-          }}
-        />
-      </div>
-    </div>
+        <div className="min-h-0 flex-1 overflow-y-auto px-3 py-3">
+          <StepsCatalogList
+            items={items}
+            query={query}
+            onQueryChange={setQuery}
+            mode="click"
+            autoFocusSearch
+            onSelect={(type) => {
+              onSelect(type);
+              onClose();
+            }}
+          />
+        </div>
+      </aside>
+    </>
   );
-
-  if (anchor) {
-    return createPortal(panel, document.body);
-  }
-
-  return panel;
 }

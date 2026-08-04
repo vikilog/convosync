@@ -6,7 +6,9 @@ export const VALID_TABS = [
   'calling',
   'campaigns',
   'templates',
+  'automations',
   'journey',
+  'instagram-automation',
   'ai-agent',
   'media-gallery',
   'social-listening',
@@ -29,9 +31,11 @@ export const SETTINGS_SECTIONS = [
   'profile',
   'company-info',
   'users',
+  'automation',
+  'inbox-behavior',
   'security',
   'holidays',
-  'notifications',
+  'alerts',
   'wallet',
   'subscription',
   'billing',
@@ -55,6 +59,10 @@ export function tabFromPath(pathname: string): AppTab {
   if (!segment || segment === '') return 'dashboard';
   if (segment === 'settings') return 'settings';
   if (segment === 'google-tools') return 'google-tools';
+  // Nested builders share the Automations tab
+  if (segment === 'automations') return 'automations';
+  // Legacy top-level builder URLs (redirected in App) — keep tab highlight correct mid-nav
+  if (segment === 'journey' || segment === 'instagram-automation') return 'automations';
   if (VALID_TABS.includes(segment as AppTab)) return segment as AppTab;
   return 'dashboard';
 }
@@ -73,9 +81,11 @@ export function settingsSectionFromPath(pathname: string): SettingsSection {
   const parts = pathname.replace(/\/$/, '').split('/').filter(Boolean);
   if (parts[0] !== 'settings') return 'profile';
   const segment = parts[1];
-  if (segment === 'subscription' || segment === 'billing' || segment === 'recharge') {
+  if (segment === 'billing' || segment === 'recharge') {
     return 'wallet';
   }
+  // Legacy path — page renamed from Notifications → Alerts
+  if (segment === 'notifications') return 'alerts';
   if (segment && SETTINGS_SECTIONS.includes(segment as SettingsSection)) {
     return segment as SettingsSection;
   }
@@ -87,16 +97,77 @@ export function pathForTab(tab: string): string {
   if (tab === 'social-listening') return '/social-listening/dashboard';
   if (tab === 'contacts') return '/contacts/list';
   if (tab === 'leads') return '/leads';
+  if (tab === 'journey' || tab === 'instagram-automation' || tab === 'automations') {
+    return '/automations';
+  }
   return `/${tab}`;
 }
 
+/** /automations/whatsapp-automation/... */
 export function pathForJourneyGallery(): string {
-  return '/journey/gallery';
+  return '/automations/whatsapp-automation/gallery';
 }
 
 export function isJourneyGalleryPath(pathname: string): boolean {
   const parts = pathname.replace(/^\//, '').split('/').filter(Boolean);
-  return parts[0] === 'journey' && parts[1] === 'gallery';
+  return (
+    (parts[0] === 'automations' && parts[1] === 'whatsapp-automation' && parts[2] === 'gallery') ||
+    (parts[0] === 'journey' && parts[1] === 'gallery')
+  );
+}
+
+/** Builder URL — /automations/whatsapp-automation/:id */
+export function pathForJourney(journeyId: string): string {
+  return `/automations/whatsapp-automation/${journeyId}`;
+}
+
+export function journeyIdFromPath(pathname: string): string | null {
+  const parts = pathname.replace(/^\//, '').split('/').filter(Boolean);
+  if (parts[0] === 'automations' && parts[1] === 'whatsapp-automation') {
+    const id = parts[2];
+    if (!id || id === 'gallery') return null;
+    return id;
+  }
+  // Legacy /journey/:id
+  if (parts[0] === 'journey') {
+    const id = parts[1];
+    if (!id || id === 'gallery') return null;
+    return id;
+  }
+  return null;
+}
+
+export function isWhatsAppAutomationPath(pathname: string): boolean {
+  const parts = pathname.replace(/^\//, '').split('/').filter(Boolean);
+  return (
+    (parts[0] === 'automations' && parts[1] === 'whatsapp-automation') ||
+    parts[0] === 'journey'
+  );
+}
+
+/** Builder URL — /automations/instagram-automation/:id */
+export function pathForInstagramAutomation(journeyId: string): string {
+  return `/automations/instagram-automation/${journeyId}`;
+}
+
+export function instagramAutomationIdFromPath(pathname: string): string | null {
+  const parts = pathname.replace(/^\//, '').split('/').filter(Boolean);
+  if (parts[0] === 'automations' && parts[1] === 'instagram-automation' && parts[2]) {
+    return parts[2];
+  }
+  // Legacy /instagram-automation/:id
+  if (parts[0] === 'instagram-automation' && parts[1]) {
+    return parts[1];
+  }
+  return null;
+}
+
+export function isInstagramAutomationPath(pathname: string): boolean {
+  const parts = pathname.replace(/^\//, '').split('/').filter(Boolean);
+  return (
+    (parts[0] === 'automations' && parts[1] === 'instagram-automation') ||
+    parts[0] === 'instagram-automation'
+  );
 }
 
 export type IntegrationsChannel =

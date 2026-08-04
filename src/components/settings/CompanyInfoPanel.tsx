@@ -1,9 +1,21 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Building2, Camera, Globe, Loader2, Mail, MapPin, Phone, Save, Trash2 } from 'lucide-react';
-import { api, getUserEmail, getWorkspaceId } from '../../lib/api';
+import {
+  Building2,
+  Camera,
+  CheckCircle2,
+  Globe,
+  Loader2,
+  Mail,
+  MapPin,
+  Phone,
+  Save,
+  Trash2,
+} from 'lucide-react';
+import { api, getUserEmail, getUserPermissions, getUserRole, getWorkspaceId } from '../../lib/api';
 import { dispatchCompanyUpdated } from '../../lib/companyEvents';
 import { normalizeCompanySettingsResponse } from '../../lib/companySettings';
 import { compressImageFile } from '../../lib/imageUpload';
+import { hasWorkspacePermission } from '../../lib/workspacePermissions';
 import { useKeepAliveActivation } from '../KeepAlive';
 import {
   mapWorkspaceToForm,
@@ -11,6 +23,33 @@ import {
   type CompanyForm,
   type CompanySettingsResponse,
 } from './companyFormUtils';
+
+type CompanyVerifyTarget = 'company_email' | 'company_phone';
+
+function otpSentMessage(target: CompanyVerifyTarget, destinationHint?: string): string {
+  if (target === 'company_email') {
+    return destinationHint
+      ? `Check your email (${destinationHint}) for the OTP`
+      : 'Check your email for the OTP';
+  }
+  return destinationHint
+    ? `Check WhatsApp (${destinationHint}) for the OTP`
+    : 'Check WhatsApp for the OTP';
+}
+
+type ContactVerifyState = {
+  value: string | null;
+  verified: boolean;
+  verifiedAt: string | null;
+};
+
+type VerificationStatus = {
+  companyEmail: ContactVerifyState;
+  companyPhone: ContactVerifyState;
+};
+
+// ponytail: company verify UI off until re-enabled — flip to true to restore Verify/OTP controls
+const showCompanyVerifyUi = false;
 
 const emptyForm: CompanyForm = {
   name: '',
@@ -51,6 +90,7 @@ function payloadFromForm(form: CompanyForm) {
 export function CompanyInfoPanel() {
   const activeWorkspaceId = getWorkspaceId();
   const logoInputRef = useRef<HTMLInputElement>(null);
+  const canVerifyCompany = hasWorkspacePermission(getUserPermissions(), 'settings', getUserRole());
   const [form, setForm] = useState<CompanyForm>(emptyForm);
   const [workspaceId, setWorkspaceId] = useState('');
   const [slug, setSlug] = useState('');
@@ -60,12 +100,27 @@ export function CompanyInfoPanel() {
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [verifyStatus, setVerifyStatus] = useState<VerificationStatus | null>(null);
+  const [otpPending, setOtpPending] = useState<Partial<Record<CompanyVerifyTarget, boolean>>>({});
+  const [otpCodes, setOtpCodes] = useState<Partial<Record<CompanyVerifyTarget, string>>>({});
+  const [otpBusy, setOtpBusy] = useState<Partial<Record<CompanyVerifyTarget, 'send' | 'verify'>>>({});
+  const [otpError, setOtpError] = useState<Partial<Record<CompanyVerifyTarget, string>>>({});
+  const [otpSentHint, setOtpSentHint] = useState<Partial<Record<CompanyVerifyTarget, string>>>({});
 
   const applySettings = useCallback((data: CompanySettingsResponse, fallbackEmail?: string) => {
     setForm(mapWorkspaceToForm(data, { email: fallbackEmail }));
     setWorkspaceId(data.id ?? '');
     setSlug(data.slug ?? '');
     setWhatsappLines(whatsappLinesFromSettings(data));
+  }, []);
+
+  const loadVerification = useCallback(async () => {
+    try {
+      const status = (await api.getVerificationStatus()) as VerificationStatus;
+      setVerifyStatus(status);
+    } catch {
+      // optional — company form still works
+    }
   }, []);
 
   const loadSettings = useCallback(async () => {
@@ -79,12 +134,13 @@ export function CompanyInfoPanel() {
       const company = normalizeCompanySettingsResponse(companyRaw);
       const fallbackEmail = company.email ? undefined : me?.email ?? getUserEmail() ?? undefined;
       applySettings(company, fallbackEmail);
+      await loadVerification();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load company details');
     } finally {
       setLoading(false);
     }
-  }, [applySettings]);
+  }, [applySettings, loadVerification]);
 
   useEffect(() => {
     void loadSettings();
@@ -97,6 +153,150 @@ export function CompanyInfoPanel() {
   const update = (field: keyof CompanyForm, value: string) => {
     setForm((f) => ({ ...f, [field]: value }));
     setMessage(null);
+    if (field === 'email') {
+      setOtpPending((p) => ({ ...p, company_email: false }));
+      setOtpCodes((c) => ({ ...c, company_email: '' }));
+      setOtpSentHint((h) => ({ ...h, company_email: '' }));
+      setOtpError((e) => ({ ...e, company_email: '' }));
+    }
+    if (field === 'phone') {
+      setOtpPending((p) => ({ ...p, company_phone: false }));
+      setOtpCodes((c) => ({ ...c, company_phone: '' }));
+      setOtpSentHint((h) => ({ ...h, company_phone: '' }));
+      setOtpError((e) => ({ ...e, company_phone: '' }));
+    }
+  };
+
+  const sendOtp = async (target: CompanyVerifyTarget) => {
+    if (!canVerifyCompany) return;
+    setOtpError((e) => ({ ...e, [target]: '' }));
+    setOtpSentHint((h) => ({ ...h, [target]: '' }));
+    setOtpBusy((b) => ({ ...b, [target]: 'send' }));
+    setError(null);
+    setMessage(null);
+    try {
+      const res = (await api.sendVerificationOtp({
+        target,
+        ...(target === 'company_email' && form.email.trim() ? { email: form.email.trim() } : {}),
+        ...(target === 'company_phone' && form.phone.trim() ? { phone: form.phone.trim() } : {}),
+      })) as { sent?: boolean; alreadyVerified?: boolean; destinationHint?: string };
+      if (res.alreadyVerified) {
+        setMessage('Already verified.');
+        setOtpPending((p) => ({ ...p, [target]: false }));
+        await loadVerification();
+      } else {
+        setOtpPending((p) => ({ ...p, [target]: true }));
+        setOtpSentHint((h) => ({ ...h, [target]: otpSentMessage(target, res.destinationHint) }));
+        await loadVerification();
+      }
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Failed to send OTP';
+      setOtpPending((p) => ({ ...p, [target]: false }));
+      setOtpError((prev) => ({ ...prev, [target]: msg }));
+      setError(msg);
+    } finally {
+      setOtpBusy((b) => {
+        const next = { ...b };
+        delete next[target];
+        return next;
+      });
+    }
+  };
+
+  const verifyOtp = async (target: CompanyVerifyTarget) => {
+    const code = (otpCodes[target] || '').trim();
+    if (code.length < 4) return;
+    setOtpBusy((b) => ({ ...b, [target]: 'verify' }));
+    setOtpError((e) => ({ ...e, [target]: '' }));
+    setError(null);
+    setMessage(null);
+    try {
+      const status = (await api.verifyVerificationOtp({ target, code })) as VerificationStatus;
+      setVerifyStatus(status);
+      setOtpPending((p) => ({ ...p, [target]: false }));
+      setOtpCodes((c) => ({ ...c, [target]: '' }));
+      if (target === 'company_email' && status.companyEmail.value) {
+        setForm((f) => ({ ...f, email: status.companyEmail.value || f.email }));
+      }
+      if (target === 'company_phone' && status.companyPhone.value) {
+        setForm((f) => ({ ...f, phone: status.companyPhone.value || f.phone }));
+      }
+      setMessage('Verified successfully.');
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Failed to verify OTP';
+      setOtpError((prev) => ({ ...prev, [target]: msg }));
+      setError(msg);
+    } finally {
+      setOtpBusy((b) => {
+        const next = { ...b };
+        delete next[target];
+        return next;
+      });
+    }
+  };
+
+  const renderVerifyControls = (
+    target: CompanyVerifyTarget,
+    opts: { disabledSend: boolean; verified: boolean }
+  ) => {
+    if (opts.verified) {
+      return (
+        <span className="inline-flex shrink-0 items-center gap-1 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-xs font-semibold text-emerald-700">
+          <CheckCircle2 className="h-3.5 w-3.5" />
+          Verified
+        </span>
+      );
+    }
+    if (!canVerifyCompany || !showCompanyVerifyUi) return null;
+    return (
+      <button
+        type="button"
+        onClick={() => void sendOtp(target)}
+        disabled={Boolean(otpBusy[target]) || opts.disabledSend}
+        className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-60"
+      >
+        {otpBusy[target] === 'send' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+        {otpPending[target] ? 'Resend' : 'Verify'}
+      </button>
+    );
+  };
+
+  const renderOtpSendError = (target: CompanyVerifyTarget) => {
+    if (otpPending[target] || !otpError[target]) return null;
+    return <p className="mt-1 text-xs font-medium text-danger-red">{otpError[target]}</p>;
+  };
+
+  const renderOtpRow = (target: CompanyVerifyTarget) => {
+    if (!showCompanyVerifyUi || !otpPending[target] || !canVerifyCompany) return null;
+    return (
+      <div className="mt-2 space-y-1.5">
+        {otpSentHint[target] ? (
+          <p className="text-xs font-medium text-accent-green">{otpSentHint[target]}</p>
+        ) : null}
+        <div className="flex gap-2">
+          <input
+            value={otpCodes[target] || ''}
+            onChange={(e) => setOtpCodes((c) => ({ ...c, [target]: e.target.value }))}
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            placeholder="Enter OTP"
+            className="min-w-0 flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+          />
+          <button
+            type="button"
+            onClick={() => void verifyOtp(target)}
+            disabled={otpBusy[target] === 'verify' || (otpCodes[target] || '').trim().length < 4}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-slate-900 px-3 py-2 text-xs font-semibold text-white disabled:opacity-60"
+          >
+            {otpBusy[target] === 'verify' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+            Confirm
+          </button>
+        </div>
+        {otpError[target] ? (
+          <p className="text-xs font-medium text-danger-red">{otpError[target]}</p>
+        ) : null}
+      </div>
+    );
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -168,7 +368,11 @@ export function CompanyInfoPanel() {
   }
 
   return (
-    <form onSubmit={handleSave} className="max-w-3xl">
+    <div className="max-w-3xl space-y-4">
+      {error && <p className="text-xs text-danger-red font-medium">{error}</p>}
+      {message && <p className="text-xs text-accent-green font-medium">{message}</p>}
+
+      <form onSubmit={handleSave}>
       <div className="bg-surface rounded-2xl border border-black/5 p-6 shadow-sm">
         <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2 mb-1">
           <Building2 className="w-4 h-4 text-primary" />
@@ -279,29 +483,46 @@ export function CompanyInfoPanel() {
               />
             </div>
           </label>
-          <label className="block">
+          <div className="block">
             <span className="text-meta font-bold text-gray-500 uppercase">Company email</span>
-            <div className="relative mt-1">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="email"
-                value={form.email}
-                onChange={(e) => update('email', e.target.value)}
-                className="w-full pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
-              />
+            <div className="mt-1 flex gap-2">
+              <div className="relative min-w-0 flex-1">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => update('email', e.target.value)}
+                  className="w-full pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+              {renderVerifyControls('company_email', {
+                disabledSend: !form.email.trim(),
+                verified: Boolean(verifyStatus?.companyEmail.verified),
+              })}
             </div>
-          </label>
-          <label className="block">
+            {renderOtpSendError('company_email')}
+            {renderOtpRow('company_email')}
+          </div>
+          <div className="block">
             <span className="text-meta font-bold text-gray-500 uppercase">Phone</span>
-            <div className="relative mt-1">
-              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                value={form.phone}
-                onChange={(e) => update('phone', e.target.value)}
-                className="w-full pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
-              />
+            <div className="mt-1 flex gap-2">
+              <div className="relative min-w-0 flex-1">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  value={form.phone}
+                  onChange={(e) => update('phone', e.target.value)}
+                  className="w-full pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  placeholder="+919876543210"
+                />
+              </div>
+              {renderVerifyControls('company_phone', {
+                disabledSend: !form.phone.trim(),
+                verified: Boolean(verifyStatus?.companyPhone.verified),
+              })}
             </div>
-          </label>
+            {renderOtpSendError('company_phone')}
+            {renderOtpRow('company_phone')}
+          </div>
           <label className="block">
             <span className="text-meta font-bold text-gray-500 uppercase">Timezone</span>
             <select
@@ -361,9 +582,6 @@ export function CompanyInfoPanel() {
           </label>
         </div>
 
-        {error && <p className="mt-4 text-xs text-danger-red font-medium">{error}</p>}
-        {message && <p className="mt-4 text-xs text-accent-green font-medium">{message}</p>}
-
         <div className="mt-6 flex justify-end">
           <button
             type="submit"
@@ -375,8 +593,9 @@ export function CompanyInfoPanel() {
           </button>
         </div>
       </div>
+      </form>
 
-      <div className="mt-4 bg-sky-50 rounded-2xl border border-sky-100 p-5">
+      <div className="bg-sky-50 rounded-2xl border border-sky-100 p-5">
         <h4 className="text-sm font-bold text-gray-700 mb-3">Workspace reference</h4>
         <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
           <div>
@@ -395,6 +614,6 @@ export function CompanyInfoPanel() {
           </div>
         </dl>
       </div>
-    </form>
+    </div>
   );
 }

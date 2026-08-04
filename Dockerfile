@@ -28,6 +28,8 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY . .
+# Vite build needs >2GB heap on this app; default Node limit OOMs on VPS builds.
+ENV NODE_OPTIONS=--max-old-space-size=4096
 RUN npm run build
 
 FROM nginx:1.27-alpine AS runner

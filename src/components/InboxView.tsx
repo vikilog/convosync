@@ -407,7 +407,8 @@ export const InboxView: React.FC = () => {
     teamAgents,
     aiAgents,
     ruleBasedBots,
-    publishedJourneys,
+    publishedWhatsAppJourneys,
+    publishedInstagramJourneys,
     whatsappAccounts,
     instagramConnected,
     instagramInboxLabel,
@@ -531,6 +532,22 @@ export const InboxView: React.FC = () => {
   const selectedThread =
     filteredThreads.find((t) => t.conversationId === selectedConversationId) ?? undefined;
   const selectedContact = selectedThread;
+  const selectedChannel = selectedThread
+    ? contactChannel(selectedThread)
+    : channelFilter;
+  /** WA inbox → WhatsApp journeys; IG inbox → Instagram automations. */
+  const channelAutomations =
+    selectedChannel === 'instagram'
+      ? publishedInstagramJourneys
+      : selectedChannel === 'whatsapp'
+        ? publishedWhatsAppJourneys
+        : [];
+  const automationMenuLabel =
+    selectedChannel === 'instagram' ? 'Instagram Automation' : 'WhatsApp Automation';
+  const allAutomationsForLabels = useMemo(
+    () => [...publishedWhatsAppJourneys, ...publishedInstagramJourneys],
+    [publishedWhatsAppJourneys, publishedInstagramJourneys]
+  );
 
   const activeHistory = selectedThread
     ? dedupeChatMessages(chatHistories[selectedThread.conversationId] || [])
@@ -541,7 +558,13 @@ export const InboxView: React.FC = () => {
     Boolean(selectedConversationId) &&
     chatHistories[selectedConversationId] === undefined;
   const { progress: journeyProgress, initialLoading: journeyInitialLoading } =
-    useContactJourneyProgress(selectedThread?.id ?? null, journeyProgressRefresh);
+    useContactJourneyProgress(
+      selectedThread?.id ?? null,
+      journeyProgressRefresh,
+      selectedChannel === 'instagram' || selectedChannel === 'whatsapp'
+        ? selectedChannel
+        : null
+    );
 
   useEffect(() => {
     if (loading) return;
@@ -1102,7 +1125,7 @@ export const InboxView: React.FC = () => {
         teamAgents,
         aiAgents,
         ruleBasedBots,
-        publishedJourneys
+        allAutomationsForLabels
       );
       const statusCap = patch.status
         ? ((patch.status.charAt(0).toUpperCase() + patch.status.slice(1)) as Contact['status'])
@@ -1142,7 +1165,7 @@ export const InboxView: React.FC = () => {
         teamAgents,
         aiAgents,
         ruleBasedBots,
-        publishedJourneys
+        allAutomationsForLabels
       );
       setAssignedToByConversationId((prev) => ({ ...prev, [convId]: assigneeValue }));
       setActiveAssigneeValue(assigneeValue);
@@ -1178,7 +1201,7 @@ export const InboxView: React.FC = () => {
         teamAgents,
         aiAgents,
         ruleBasedBots,
-        publishedJourneys
+        allAutomationsForLabels
       );
       setAssignedToByConversationId((prev) => ({ ...prev, [convId]: assigneeValue }));
       setActiveAssigneeValue(assigneeValue);
@@ -1481,14 +1504,6 @@ export const InboxView: React.FC = () => {
       throw err;
     }
   };
-
-  const activeAssigneeName = assigneeLabelFromValue(
-    activeAssigneeValue,
-    teamAgents,
-    aiAgents,
-    ruleBasedBots,
-    publishedJourneys
-  );
 
   const instagramThreadCount = inboxThreads.filter(
     (thread) => contactChannel(thread) === 'instagram'
@@ -1948,7 +1963,8 @@ export const InboxView: React.FC = () => {
                     teamAgents={teamAgents}
                     aiAgents={aiAgents}
                     ruleBasedBots={ruleBasedBots}
-                    publishedJourneys={publishedJourneys}
+                    publishedJourneys={channelAutomations}
+                    journeysMenuLabel={automationMenuLabel}
                     onChange={(nextValue) => {
                       setActiveAssigneeValue(nextValue);
                       const { assigneeType, assigneeId } = decodeAssigneeValue(nextValue);
@@ -2264,10 +2280,10 @@ export const InboxView: React.FC = () => {
           contact={selectedContact}
           conversationId={selectedConversationId}
           contactHandle={contactDisplayHandle(selectedContact)}
-          assigneeLabel={activeAssigneeName}
           journeyProgress={journeyProgress}
           journeyInitialLoading={journeyInitialLoading}
-          publishedJourneys={publishedJourneys}
+          publishedJourneys={channelAutomations}
+          automationLabel={automationMenuLabel}
           assignedJourneyId={
             decodeAssigneeValue(activeAssigneeValue).assigneeType === 'journey'
               ? decodeAssigneeValue(activeAssigneeValue).assigneeId
@@ -2300,10 +2316,10 @@ export const InboxView: React.FC = () => {
               contact={selectedContact}
               conversationId={selectedConversationId}
               contactHandle={contactDisplayHandle(selectedContact)}
-              assigneeLabel={activeAssigneeName}
               journeyProgress={journeyProgress}
               journeyInitialLoading={journeyInitialLoading}
-              publishedJourneys={publishedJourneys}
+              publishedJourneys={channelAutomations}
+              automationLabel={automationMenuLabel}
               assignedJourneyId={
                 decodeAssigneeValue(activeAssigneeValue).assigneeType === 'journey'
                   ? decodeAssigneeValue(activeAssigneeValue).assigneeId

@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
-import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { SideNavBar } from './components/SideNavBar';
 import { SidebarProvider } from './contexts/SidebarContext';
 import { TrialBanner } from './components/TrialBanner';
@@ -17,7 +17,7 @@ import { InboxView } from './components/InboxView';
 import { ContactsView } from './components/ContactsView';
 import { CampaignsView } from './components/CampaignsView';
 import { TemplatesView } from './components/TemplatesView';
-import { JourneyView } from './components/JourneyView';
+import { AutomationsRouter } from './components/AutomationsRouter';
 import { AiAgentView } from './components/AiAgentView';
 import { MediaGalleryView } from './components/MediaGalleryView';
 import { ReportsView } from './components/ReportsView';
@@ -66,10 +66,24 @@ import { CallShortRedirectPage } from './components/calling/CallShortRedirectPag
 import { OnboardingWizard } from './components/onboarding/OnboardingWizard';
 import { OnboardingGuard } from './components/onboarding/OnboardingGuard';
 
+function LegacyWhatsAppAutomationRedirect() {
+  const { id } = useParams<{ id: string }>();
+  if (!id || id === 'gallery') {
+    return <Navigate to="/automations/whatsapp-automation/gallery" replace />;
+  }
+  return <Navigate to={`/automations/whatsapp-automation/${encodeURIComponent(id)}`} replace />;
+}
+
+function LegacyInstagramAutomationRedirect() {
+  const { id } = useParams<{ id: string }>();
+  if (!id) return <Navigate to="/automations" replace />;
+  return <Navigate to={`/automations/instagram-automation/${encodeURIComponent(id)}`} replace />;
+}
+
 function AppShell() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { permissions, role, canPath } = useWorkspaceAccess();
+  const { permissions, role, canPath, firstAccessiblePath, planFeatures } = useWorkspaceAccess();
   const activeTab = tabFromPath(location.pathname);
   const [mountedTabs, setMountedTabs] = useState<Set<AppTab>>(() => new Set([activeTab]));
   const companyKey = getWorkspaceId() ?? 'company';
@@ -91,10 +105,10 @@ function AppShell() {
 
   useEffect(() => {
     if (!canPath(location.pathname)) {
-      navigate(firstAccessibleTabPath(permissions, role), { replace: true });
+      navigate(firstAccessiblePath(), { replace: true });
       return;
     }
-  }, [location.pathname, canPath, permissions, role, navigate]);
+  }, [location.pathname, canPath, firstAccessiblePath, navigate]);
 
   useEffect(() => {
     if (location.pathname === '/manager' || location.pathname === '/manager/') {
@@ -114,7 +128,7 @@ function AppShell() {
         navigate(firstAccessibleSettingsPath(permissions, role), { replace: true });
         return;
       }
-      if (!canAccessPath(location.pathname, permissions, role)) {
+      if (!canAccessPath(location.pathname, permissions, role, planFeatures)) {
         navigate(firstAccessibleSettingsPath(permissions, role), { replace: true });
       }
       return;
@@ -131,7 +145,7 @@ function AppShell() {
     if (activeTab === 'leads' && location.pathname.startsWith('/leads/')) {
       return;
     }
-    if (activeTab === 'journey' && location.pathname.startsWith('/journey/')) {
+    if (activeTab === 'automations' && location.pathname.startsWith('/automations')) {
       return;
     }
     if (activeTab === 'templates' && location.pathname.startsWith('/templates/')) {
@@ -153,7 +167,7 @@ function AppShell() {
     if (location.pathname !== expected && location.pathname !== '/') {
       navigate(expected, { replace: true });
     }
-  }, [activeTab, location.pathname, navigate, permissions, role]);
+  }, [activeTab, location.pathname, navigate, permissions, role, planFeatures]);
 
   return (
     <SidebarProvider>
@@ -199,7 +213,8 @@ function AppShellLayout({
               : activeTab === 'google-tools' ||
                   activeTab === 'templates' ||
                   activeTab === 'leads' ||
-                  activeTab === 'social-listening'
+                  activeTab === 'social-listening' ||
+                  activeTab === 'automations'
                 ? 'px-2 md:px-4 py-2 md:py-3 flex-1 min-h-0 min-w-0 overflow-hidden'
                 : 'flex-1 min-h-0 overflow-x-hidden overflow-y-auto px-2 md:px-4 pt-2 md:pt-3'
           }
@@ -216,6 +231,7 @@ function AppShellLayout({
               activeTab === 'templates' ||
               activeTab === 'leads' ||
               activeTab === 'social-listening' ||
+              activeTab === 'automations' ||
               campaignCreateWizard
                 ? 'h-full min-h-0 min-w-0 overflow-hidden'
                 : activeTab === 'integrations'
@@ -228,7 +244,7 @@ function AppShellLayout({
                 <DashboardView
                   onAddContact={() => navigate(pathForTab('contacts'))}
                   onNewCampaign={() => navigate(pathForNewCampaign())}
-                  onNewJourney={() => navigate(pathForTab('journey'))}
+                  onNewJourney={() => navigate(pathForTab('automations'))}
                   onImportCSV={() => navigate(`${pathForTab('contacts')}?import=1`)}
                 />
               </KeepAlive>
@@ -268,11 +284,9 @@ function AppShellLayout({
                 </RequireConnectedChannel>
               </KeepAlive>
             )}
-            {mountedTabs.has('journey') && (
-              <KeepAlive active={activeTab === 'journey'}>
-                <RequireConnectedChannel>
-                  <JourneyView />
-                </RequireConnectedChannel>
+            {mountedTabs.has('automations') && (
+              <KeepAlive active={activeTab === 'automations'}>
+                <AutomationsRouter />
               </KeepAlive>
             )}
             {mountedTabs.has('ai-agent') && (
@@ -560,7 +574,7 @@ export default function App() {
         }
       />
       <Route
-        path="/journey/*"
+        path="/automations/*"
         element={
           <ProtectedRoute>
             <OnboardingGuard>
@@ -569,6 +583,12 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+      {/* Legacy builder URLs → nested under /automations */}
+      <Route path="/journey/gallery" element={<Navigate to="/automations/whatsapp-automation/gallery" replace />} />
+      <Route path="/journey/:id" element={<LegacyWhatsAppAutomationRedirect />} />
+      <Route path="/journey" element={<Navigate to="/automations" replace />} />
+      <Route path="/instagram-automation/:id" element={<LegacyInstagramAutomationRedirect />} />
+      <Route path="/instagram-automation" element={<Navigate to="/automations" replace />} />
       <Route
         path="/templates/*"
         element={

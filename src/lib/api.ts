@@ -20,6 +20,14 @@ function authHeaders(extra?: Record<string, string>): Record<string, string> {
   };
 }
 
+export type WorkspaceTagRecord = {
+  id: string;
+  name: string;
+  folder: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export function parseApiError(text: string): string {
   try {
     const j = JSON.parse(text) as { error?: string; message?: string };
@@ -258,15 +266,40 @@ export const api = {
   login: (email: string, password: string) =>
     postPublic('/auth/login', { email, password }),
   getMe: () => get('/auth/me'),
-  updateProfile: (data: { name: string }) => patch('/auth/profile', data),
+  updateProfile: (data: { name?: string; phone?: string | null }) => patch('/auth/profile', data),
   updateAvatar: (avatar: string | null) => patch('/auth/avatar', { avatar }),
   changePassword: (data: { currentPassword: string; newPassword: string }) =>
     post('/auth/change-password', data),
+  getVerificationStatus: () => get('/workspace/verification'),
+  sendVerificationOtp: (data: {
+    target: 'user_email' | 'company_email' | 'company_phone';
+    email?: string;
+    phone?: string;
+  }) => post('/workspace/verification/send', data),
+  verifyVerificationOtp: (data: {
+    target: 'user_email' | 'company_email' | 'company_phone';
+    code: string;
+  }) => post('/workspace/verification/verify', data),
   /** Blacklist this JWT jti (Redis). Throws if server asks to retry. */
   logout: () => post('/auth/logout', {}),
   /** Invalidate all sessions via tokenVersion bump. */
   logoutAll: () => post('/auth/logout-all', {}),
   getCompanySettings: () => get('/workspace/company'),
+  getWorkspaceAutomation: () => get('/workspace/automation'),
+  updateWorkspaceAutomation: (data: unknown) => patch('/workspace/automation', data),
+  getWorkspaceTags: () =>
+    get('/workspace/tags') as Promise<{
+      items: WorkspaceTagRecord[];
+      groups: { folder: string; items: WorkspaceTagRecord[] }[];
+      tags: string[];
+    }>,
+  createWorkspaceTag: (data: { name: string; folder?: string | null }) =>
+    post('/workspace/tags', data) as Promise<WorkspaceTagRecord>,
+  updateWorkspaceTag: (id: string, data: { name?: string; folder?: string | null }) =>
+    patch(`/workspace/tags/${id}`, data) as Promise<WorkspaceTagRecord>,
+  deleteWorkspaceTag: (id: string) => del(`/workspace/tags/${id}`),
+  getNotificationPreferences: () => get('/workspace/notifications'),
+  updateNotificationPreferences: (data: unknown) => patch('/workspace/notifications', data),
   getSubscription: () => get('/workspace/subscription'),
   getSubscriptionQuote: (query: string) => get(`/workspace/subscription/quote?${query}`),
   saveSubscriptionQuote: (data: {
@@ -305,8 +338,13 @@ export const api = {
     razorpay_payment_id: string;
     razorpay_signature: string;
   }) => post('/billing/order/verify', data),
-  createBillingSubscription: (data: { planId: string; billingCycle?: 'monthly' | 'annual' }) =>
-    post('/billing/subscription/create', data),
+  validateBillingCoupon: (data: { code: string; amountPaise: number; planId?: string }) =>
+    post('/billing/coupon/validate', data),
+  createBillingSubscription: (data: {
+    planId: string;
+    billingCycle?: 'monthly' | 'annual';
+    couponCode?: string;
+  }) => post('/billing/subscription/create', data),
   verifyBillingSubscription: (data: {
     razorpay_payment_id: string;
     razorpay_subscription_id: string;
@@ -331,9 +369,35 @@ export const api = {
   }) => post('/workspace/members', data),
   updateWorkspaceMember: (
     membershipId: string,
-    data: { role: 'admin' | 'agent'; permissions?: string[]; inboxScope?: unknown }
+    data: {
+      role: 'admin' | 'agent';
+      permissions?: string[];
+      inboxScope?: unknown;
+      autoAssignEligible?: boolean;
+      assignmentLimit?: number | null;
+    }
   ) => patch(`/workspace/members/${membershipId}`, data),
   removeWorkspaceMember: (membershipId: string) => del(`/workspace/members/${membershipId}`),
+
+  getInboxBehavior: () => get('/workspace/inbox-behavior'),
+  updateInboxBehavior: (data: { mode?: 'off' | 'basic' | 'advanced'; timezone?: string | null }) =>
+    patch('/workspace/inbox-behavior', data),
+  getInboxGroups: () => get('/workspace/inbox-groups'),
+  createInboxGroup: (name: string) => post('/workspace/inbox-groups', { name }),
+  updateInboxGroup: (groupId: string, name: string) =>
+    patch(`/workspace/inbox-groups/${groupId}`, { name }),
+  deleteInboxGroup: (groupId: string) => del(`/workspace/inbox-groups/${groupId}`),
+  addInboxGroupMember: (groupId: string, membershipId: string) =>
+    post(`/workspace/inbox-groups/${groupId}/members`, { membershipId }),
+  removeInboxGroupMember: (groupId: string, membershipId: string) =>
+    del(`/workspace/inbox-groups/${groupId}/members/${membershipId}`),
+  getInboxRules: () => get('/workspace/inbox-rules'),
+  createInboxRule: (data: unknown) => post('/workspace/inbox-rules', data),
+  updateInboxRule: (ruleId: string, data: unknown) =>
+    patch(`/workspace/inbox-rules/${ruleId}`, data),
+  deleteInboxRule: (ruleId: string) => del(`/workspace/inbox-rules/${ruleId}`),
+  reorderInboxRules: (orderedIds: string[]) =>
+    patch('/workspace/inbox-rules/reorder', { orderedIds }),
 
   getAiKnowledgeConfig: () => get('/ai-knowledge/config'),
   saveAiKnowledgeConfig: (data: { venueId: string; connectionString?: string }) =>
@@ -765,6 +829,18 @@ export const api = {
   getJourneyAnalytics: (id: string) => get(`/journeys/${id}/analytics`),
   getContactJourneyProgress: (contactId: string) =>
     get(`/journeys/contacts/${contactId}/progress`),
+  getContactInstagramJourneyProgress: (contactId: string) =>
+    get(`/instagram-journeys/contacts/${contactId}/progress`),
+
+  getInstagramJourneys: () => get('/instagram-journeys'),
+  getInstagramJourney: (id: string) => get(`/instagram-journeys/${id}`),
+  createInstagramJourney: (data: unknown) => post('/instagram-journeys', data),
+  updateInstagramJourney: (id: string, data: unknown) => put(`/instagram-journeys/${id}`, data),
+  deleteInstagramJourney: (id: string) => del(`/instagram-journeys/${id}`),
+  getInstagramJourneyGraph: (id: string) => get(`/instagram-journeys/${id}/graph`),
+  saveInstagramJourneyGraph: (id: string, graph: unknown) =>
+    put(`/instagram-journeys/${id}/graph`, graph),
+  publishInstagramJourney: (id: string) => post(`/instagram-journeys/${id}/publish`, {}),
 
   getAgents: () => get('/agents'),
   getAgent: (id: string) => get(`/agents/${encodeURIComponent(id)}`),
@@ -807,6 +883,12 @@ export const api = {
     if (params?.tag) q.tag = params.tag;
     return get('/media-gallery', Object.keys(q).length ? q : undefined);
   },
+  getMediaGalleryUsage: () =>
+    get('/media-gallery/usage') as Promise<{
+      usedBytes: number;
+      limitBytes: number | null;
+      storageGb?: number;
+    }>,
   createMediaGalleryItem: async (data: {
     title: string;
     description: string;
@@ -1323,7 +1405,12 @@ export const api = {
     }) as Promise<{
       posts: Record<
         string,
-        { autoResponseEnabled: boolean; leadFunnelId: string | null }
+        {
+          autoResponseEnabled: boolean;
+          leadFunnelId: string | null;
+          commentAutomationJourneyId: string | null;
+          commentAutomationJourneyName: string | null;
+        }
       >;
     }>,
   getSocialListeningPostSettings: (postId: string) =>
@@ -1334,6 +1421,8 @@ export const api = {
         postId: string;
         autoResponseEnabled: boolean;
         leadFunnelId: string | null;
+        commentAutomationJourneyId: string | null;
+        commentAutomationJourneyName: string | null;
         interestedMode: 'auto' | 'review' | 'off';
         questionMode: 'auto' | 'review' | 'off';
         complaintMode: 'review' | 'escalate_only';
@@ -1363,6 +1452,8 @@ export const api = {
       settings: Record<string, unknown> & {
         autoResponseEnabled: boolean;
         leadFunnelId: string | null;
+        commentAutomationJourneyId: string | null;
+        commentAutomationJourneyName: string | null;
         autoDmsSentToday: number;
       };
     }>,

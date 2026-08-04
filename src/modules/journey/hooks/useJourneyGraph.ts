@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import type { Edge, Node } from '@xyflow/react';
 import type { JourneyGraph, JourneyGraphEdge, JourneyGraphNode, JourneyNodeType } from '../types';
+import { FLOW_EDGE_STYLE } from '../../flow-builder/channelTheme';
 
 export function graphToFlow(graph: JourneyGraph): { nodes: Node[]; edges: Edge[] } {
   const nodes: Node[] = graph.nodes.map((n) => ({
@@ -14,14 +15,12 @@ export function graphToFlow(graph: JourneyGraph): { nodes: Node[]; edges: Edge[]
     id: e.id,
     source: e.sourceNodeId,
     target: e.targetNodeId,
+    type: 'curved',
+    style: { ...FLOW_EDGE_STYLE },
     label: e.conditionValue === 'yes' ? 'Yes' : e.conditionValue === 'no' ? 'No' : undefined,
     data: { conditionValue: e.conditionValue ?? 'default' },
     sourceHandle:
-      e.conditionValue === 'yes'
-        ? 'yes'
-        : e.conditionValue === 'no'
-          ? 'no'
-          : undefined,
+      e.conditionValue && e.conditionValue !== 'default' ? e.conditionValue : undefined,
   }));
 
   return { nodes, edges };
@@ -38,8 +37,7 @@ export function flowToGraph(nodes: Node[], edges: Edge[]): JourneyGraph {
 
   const graphEdges: JourneyGraphEdge[] = edges.map((e) => {
     let conditionValue: string | null = (e.data as { conditionValue?: string })?.conditionValue ?? null;
-    if (e.sourceHandle === 'yes') conditionValue = 'yes';
-    if (e.sourceHandle === 'no') conditionValue = 'no';
+    if (e.sourceHandle && e.sourceHandle !== 'default') conditionValue = e.sourceHandle;
     if (conditionValue === 'default') conditionValue = null;
     return {
       id: e.id,

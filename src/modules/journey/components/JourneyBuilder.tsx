@@ -1,25 +1,29 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Node } from '@xyflow/react';
+import { Check, Eye, Loader2, Rocket, Save } from 'lucide-react';
 import {
-  ArrowLeft,
-  Circle,
-  Loader2,
-  MousePointerClick,
-  Rocket,
-  Save,
-  Workflow,
-} from 'lucide-react';
-import { JourneyFlowCanvas } from '../reactflow/JourneyFlowCanvas';
+  JourneyFlowCanvas,
+  type JourneyAddStepApi,
+} from '../reactflow/JourneyFlowCanvas';
 import { NodeConfigPanel } from './NodeConfigPanel';
+import { AddStepsMenu } from './AddStepsMenu';
 import { JourneyNameDialog } from './JourneyNameDialog';
 import { useJourneyBuilderStore } from '../store/journeyBuilderStore';
-import type { JourneyGraph, JourneyRecord } from '../types';
+import type { JourneyGraph, JourneyNodeType, JourneyRecord } from '../types';
 import {
   useJourneyGraph,
   usePublishJourney,
   useSaveJourneyGraph,
   useUpdateJourney,
 } from '../hooks/useJourneys';
+import { FLOW_CHANNEL_THEMES } from '../../flow-builder/channelTheme';
+import {
+  buildButtonDestination,
+  type ButtonActionId,
+  type PerformActionId,
+} from '../../flow-builder/buttonActions';
+
+const theme = FLOW_CHANNEL_THEMES.whatsapp;
 
 type Props = {
   journey: JourneyRecord;
@@ -41,6 +45,10 @@ export function JourneyBuilder({ journey, onBack }: Props) {
   const [draftName, setDraftName] = useState(journey.name);
   const [nameDialogOpen, setNameDialogOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<'save' | 'publish' | null>(null);
+  const [addAfterNodeId, setAddAfterNodeId] = useState<string | null>(null);
+  const [addMenuHasTrigger, setAddMenuHasTrigger] = useState(false);
+  const [previewStripVisible, setPreviewStripVisible] = useState(true);
+  const addStepApiRef = useRef<JourneyAddStepApi | null>(null);
 
   const graph = draftGraph ?? graphData;
 
@@ -51,7 +59,7 @@ export function JourneyBuilder({ journey, onBack }: Props) {
   const nameChanged = draftName.trim() !== journey.name;
   const hasValidName = draftName.trim().length > 0;
   const isPublished = journey.status === 'published';
-  const nodeCount = graph?.nodes.length ?? 0;
+  const isSaved = !isDirty && !nameChanged;
 
   const persistName = async (name: string) => {
     if (name !== journey.name) {
@@ -98,9 +106,6 @@ export function JourneyBuilder({ journey, onBack }: Props) {
     if (action === 'save') void runSave(draftName.trim());
     else void runPublish(draftName.trim());
   };
-
-  const handleSave = () => requestNameThen('save');
-  const handlePublish = () => requestNameThen('publish');
 
   const handleNameDialogConfirm = async (name: string) => {
     setDraftName(name);
@@ -149,7 +154,7 @@ export function JourneyBuilder({ journey, onBack }: Props) {
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (!selectedNode) return;
+      if (!selectedNode || addAfterNodeId) return;
       if (e.key !== 'Delete' && e.key !== 'Backspace') return;
       const target = e.target as HTMLElement;
       if (
@@ -165,60 +170,101 @@ export function JourneyBuilder({ journey, onBack }: Props) {
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [selectedNode, handleDeleteNode]);
+  }, [selectedNode, handleDeleteNode, addAfterNodeId]);
+
+  const closeAddSteps = useCallback(() => setAddAfterNodeId(null), []);
+
+  /** Focuses an already-wired destination node (Edit Button panel's "Currently: …" banner). */
+  const handleFocusNode = useCallback(
+    (nodeId: string) => {
+      const n = graph?.nodes.find((x) => x.id === nodeId);
+      if (!n) return;
+      setSelectedNode({
+        id: n.id,
+        type: n.type,
+        data: { ...n.data, label: n.type },
+        position: { x: n.positionX, y: n.positionY },
+      } as Node);
+    },
+    [graph]
+  );
+
+  /** "When this button is pressed" — ensures a destination node + edge, then focuses it. */
+  const handleButtonAction = useCallback(
+    (
+      sourceNodeId: string,
+      buttonId: string,
+      actionId: ButtonActionId | PerformActionId,
+      buttonTitle: string
+    ) => {
+      const dest = buildButtonDestination(actionId, { channel: 'whatsapp', buttonTitle });
+      if (!dest) return;
+      const result = addStepApiRef.current?.addNodeAfterHandle(
+        sourceNodeId,
+        dest.nodeType as JourneyNodeType,
+        buttonId,
+        dest.data
+      );
+      if (result) {
+        // ponytail: position isn't known synchronously here, {0,0} is fine — NodeConfigPanel
+        // never reads a node's position, only id/type/data.
+        setSelectedNode({ id: result.id, type: result.type, data: result.data, position: { x: 0, y: 0 } } as Node);
+      }
+    },
+    []
+  );
 
   return (
-    <div className="flex h-[calc(100vh-7rem)] min-h-[580px] flex-col gap-3">
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-black/5 bg-surface px-4 py-3 shadow-sm">
-        <div className="flex min-w-0 items-center gap-3">
+    <div className="flex h-full min-h-0 flex-col gap-3">
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 rounded-xl border-[0.5px] border-border-subtle bg-white px-4 py-2.5">
+        <div className="flex min-w-0 items-center gap-2 text-sm">
           <button
             type="button"
             onClick={onBack}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-black/5 text-slate-600 transition-colors hover:bg-surface-muted hover:text-slate-900 cursor-pointer"
-            aria-label="Back to journeys"
+            className="cursor-pointer font-medium text-slate-500 transition-colors hover:text-dark-navy"
           >
-            <ArrowLeft className="h-4 w-4" />
+            WhatsApp Automation
           </button>
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-            <Workflow className="h-5 w-5" />
-          </div>
-          <div className="min-w-0">
-            <input
-              type="text"
-              value={draftName}
-              onChange={(e) => {
-                setDraftName(e.target.value);
-                if (e.target.value.trim()) setError(null);
-              }}
-              placeholder="Journey name"
-              className="block w-full max-w-sm truncate bg-transparent text-lg font-bold text-slate-900 placeholder:text-slate-400 border-b border-transparent transition-colors hover:border-slate-200 focus:border-primary focus:outline-none"
-            />
-            <div className="mt-1 flex flex-wrap items-center gap-2">
-              <span
-                className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
-                  isPublished
-                    ? 'bg-primary/10 text-primary'
-                    : 'bg-amber-100 text-amber-800'
-                }`}
-              >
-                {journey.status}
-              </span>
-              <span className="text-xs text-slate-500">{nodeCount} steps</span>
-              {(isDirty || nameChanged) && (
-                <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-700">
-                  <Circle className="h-1.5 w-1.5 fill-current" />
-                  Unsaved changes
-                </span>
-              )}
-            </div>
-          </div>
+          <span className="text-slate-300">/</span>
+          <input
+            type="text"
+            value={draftName}
+            onChange={(e) => {
+              setDraftName(e.target.value);
+              if (e.target.value.trim()) setError(null);
+            }}
+            placeholder="Journey name"
+            className="max-w-[200px] truncate bg-transparent font-semibold text-dark-navy placeholder:text-slate-400 focus:outline-none"
+          />
+          <span className="text-slate-300">/</span>
+          <span className="font-medium text-slate-500">Edit</span>
+          {isSaved && !saveGraph.isPending ? (
+            <span className="ml-2 inline-flex items-center gap-1 text-[12px] font-medium text-emerald-600">
+              <Check className="h-3.5 w-3.5" strokeWidth={2.5} />
+              Saved
+            </span>
+          ) : (
+            <span className="ml-2 inline-flex items-center gap-1 text-[12px] font-medium text-amber-600">
+              {saveGraph.isPending ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : null}
+              {saveGraph.isPending ? 'Saving…' : 'Unsaved'}
+            </span>
+          )}
+          {isPublished ? (
+            <span
+              className={`ml-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${theme.softChip}`}
+            >
+              Published
+            </span>
+          ) : null}
         </div>
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={handleSave}
-            disabled={saveGraph.isPending || !graph}
-            className="inline-flex items-center gap-2 rounded-xl border border-black/5 bg-surface px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-surface-muted disabled:opacity-50 cursor-pointer"
+            onClick={() => requestNameThen('save')}
+            disabled={saveGraph.isPending || !graph || isSaved}
+            className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border-[0.5px] border-border-subtle bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-surface-muted disabled:opacity-50"
           >
             {saveGraph.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -229,9 +275,18 @@ export function JourneyBuilder({ journey, onBack }: Props) {
           </button>
           <button
             type="button"
-            onClick={handlePublish}
+            onClick={() => setPreviewStripVisible((v) => !v)}
+            className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border-[0.5px] border-border-subtle bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-surface-muted"
+          >
+            <Eye className="h-4 w-4" />
+            Preview
+          </button>
+          {/* Keep "Publish" — WA product language; IG uses "Set Live". Same button styling. */}
+          <button
+            type="button"
+            onClick={() => requestNameThen('publish')}
             disabled={publish.isPending}
-            className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-hover disabled:opacity-50 cursor-pointer"
+            className={`inline-flex cursor-pointer items-center gap-2 rounded-lg px-3.5 py-2 text-sm font-semibold disabled:opacity-50 ${theme.primaryBtn}`}
           >
             {publish.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -244,44 +299,68 @@ export function JourneyBuilder({ journey, onBack }: Props) {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm text-rose-700">
+        <div className="rounded-xl border-[0.5px] border-rose-200 bg-rose-50 px-4 py-2.5 text-sm text-rose-700">
           {error}
         </div>
       )}
 
-      <div className="grid min-h-0 flex-1 grid-cols-12 gap-3">
-        <div className="col-span-8 min-h-0 lg:col-span-9">
-          {isLoading && !graph ? (
-            <div className="flex h-full items-center justify-center rounded-2xl border border-black/5 bg-surface-muted text-sm text-slate-500">
-              <Loader2 className="mr-2 h-5 w-5 animate-spin text-primary" />
-              Loading workflow…
-            </div>
-          ) : (
-            <JourneyFlowCanvas
-              graph={graph}
-              onGraphChange={onGraphChange}
-              onSelectNode={setSelectedNode}
-              selectedNodeId={selectedNode?.id ?? null}
-            />
-          )}
+      <div className="relative min-h-0 flex-1">
+        <div className="grid h-full min-h-0 grid-cols-12 gap-3">
+          <div
+            className={`min-h-0 ${selectedNode ? 'col-span-8 lg:col-span-9' : 'col-span-12'}`}
+          >
+            {isLoading && !graph ? (
+              <div className="flex h-full min-h-0 items-center justify-center rounded-xl border-[0.5px] border-border-subtle bg-surface text-sm text-slate-500">
+                <Loader2 className="mr-2 h-5 w-5 animate-spin text-primary" />
+                Loading workflow…
+              </div>
+            ) : (
+              <div className="h-full min-h-0">
+                <JourneyFlowCanvas
+                  graph={graph}
+                  onGraphChange={onGraphChange}
+                  onSelectNode={(node) => {
+                    setAddAfterNodeId(null);
+                    setSelectedNode(node);
+                  }}
+                  selectedNodeId={selectedNode?.id ?? null}
+                  addStepApiRef={addStepApiRef}
+                  showPreviewStrip={previewStripVisible}
+                  onRequestAddStep={(nodeId, meta) => {
+                    setAddMenuHasTrigger(meta.hasTrigger);
+                    setAddAfterNodeId(nodeId);
+                  }}
+                />
+              </div>
+            )}
+          </div>
+
+          {selectedNode ? (
+            <aside className="col-span-4 flex min-h-0 flex-col lg:col-span-3">
+              <div className="min-h-0 flex-1">
+                <NodeConfigPanel
+                  node={selectedNode}
+                  graph={graph ?? null}
+                  onUpdate={onNodeUpdate}
+                  onDelete={handleDeleteNode}
+                  onButtonAction={handleButtonAction}
+                  onFocusNode={handleFocusNode}
+                />
+              </div>
+            </aside>
+          ) : null}
         </div>
 
-        <aside className="col-span-4 flex min-h-0 flex-col lg:col-span-3">
-          <NodeConfigPanel
-            node={selectedNode}
-            onUpdate={onNodeUpdate}
-            onDelete={handleDeleteNode}
-          />
-          <div className="mt-3 rounded-xl border border-dashed border-black/10 bg-surface-muted/80 px-3 py-3">
-            <div className="flex items-start gap-2.5">
-              <MousePointerClick className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-              <p className="text-xs leading-relaxed text-slate-500">
-                Click <span className="font-semibold text-slate-700">+</span> on any node to add
-                the next step. Select a node to configure it. Press Delete to remove.
-              </p>
-            </div>
-          </div>
-        </aside>
+        <AddStepsMenu
+          open={addAfterNodeId !== null}
+          hasTrigger={addMenuHasTrigger}
+          onClose={closeAddSteps}
+          onSelect={(type) => {
+            if (!addAfterNodeId) return;
+            addStepApiRef.current?.addNodeAfter(addAfterNodeId, type);
+            setAddAfterNodeId(null);
+          }}
+        />
       </div>
 
       <JourneyNameDialog

@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { api } from '../../lib/api';
 import { ContactLeadJourneyPanel } from '../leads/ContactLeadJourneyPanel';
 import { ContactLinkedChannelsPanel } from './ContactLinkedChannelsPanel';
+import { TagChipInput } from '../tags/TagChipInput';
 
 export type NewContactPayload = {
   name: string;
@@ -89,7 +90,6 @@ export function AddContactDrawer({ open, onClose, onCreated, onSaved, editContac
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [ownerId, setOwnerId] = useState('');
-  const [tagInput, setTagInput] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [excludeFromInsights, setExcludeFromInsights] = useState(false);
   const [customAttrs, setCustomAttrs] = useState<{ key: string; value: string }[]>([]);
@@ -123,7 +123,6 @@ export function AddContactDrawer({ open, onClose, onCreated, onSaved, editContac
     const rows = customFieldsToRows(cf);
     setCustomAttrs(rows);
     setShowCustom(rows.length > 0);
-    setTagInput('');
     setError(null);
   }, [open, editContact]);
 
@@ -133,7 +132,6 @@ export function AddContactDrawer({ open, onClose, onCreated, onSaved, editContac
     setPhone('');
     setEmail('');
     setOwnerId('');
-    setTagInput('');
     setTags([]);
     setExcludeFromInsights(false);
     setCustomAttrs([]);
@@ -144,13 +142,6 @@ export function AddContactDrawer({ open, onClose, onCreated, onSaved, editContac
   const handleClose = () => {
     reset();
     onClose();
-  };
-
-  const addTag = (value: string) => {
-    const t = value.trim();
-    if (!t || tags.includes(t)) return;
-    setTags((prev) => [...prev, t]);
-    setTagInput('');
   };
 
   const fullPhone = useMemo(() => {
@@ -365,35 +356,9 @@ export function AddContactDrawer({ open, onClose, onCreated, onSaved, editContac
 
                 <div className="block">
                   <span className="text-meta font-semibold text-gray-600">Tag</span>
-                  <div className="mt-1.5 flex flex-wrap gap-1.5 mb-2">
-                    {tags.map((t) => (
-                      <span
-                        key={t}
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-sky-50 text-primary text-meta font-bold"
-                      >
-                        {t}
-                        <button
-                          type="button"
-                          onClick={() => setTags((prev) => prev.filter((x) => x !== t))}
-                          className="hover:text-red-500"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </span>
-                    ))}
+                  <div className="mt-1.5">
+                    <TagChipInput value={tags} onChange={setTags} />
                   </div>
-                  <input
-                    value={tagInput}
-                    onChange={(e) => setTagInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        addTag(tagInput);
-                      }
-                    }}
-                    placeholder="Select or create a new tag"
-                    className="w-full text-sm border border-slate-200 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  />
                 </div>
 
                 {isEdit && (

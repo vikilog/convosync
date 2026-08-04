@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { Bot, Loader2 } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Bot, Loader2, Route } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { api } from '../../lib/api';
 import { slKeys } from './hooks/useSocialListeningQueries';
+import { useIgJourneys } from '../../modules/instagram-automation/hooks/useIgJourneys';
 import {
   AGENT_SETTINGS_DEFAULTS,
   SocialListeningAgentSettingsForm,
@@ -42,13 +43,20 @@ export function SocialListeningPostAgentPanel({
   onSaved?: (leadFunnelId: string | null) => void;
 }) {
   const qc = useQueryClient();
+  const igJourneys = useIgJourneys();
   const [draft, setDraft] = useState<SocialListeningSettingsState>(AGENT_SETTINGS_DEFAULTS);
+  const [commentJourneyId, setCommentJourneyId] = useState<string>('');
   const [skills, setSkills] = useState<SkillOption[]>([]);
   const [funnels, setFunnels] = useState<Array<{ id: string; name: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+
+  const publishedJourneys = useMemo(
+    () => (igJourneys.data ?? []).filter((j) => j.status === 'published'),
+    [igJourneys.data]
+  );
 
   useEffect(() => {
     if (!toast) return;
@@ -68,6 +76,7 @@ export function SocialListeningPostAgentPanel({
         ]);
         if (cancelled) return;
         setDraft(mapSettings(res.settings as unknown as Record<string, unknown>));
+        setCommentJourneyId(res.settings.commentAutomationJourneyId ?? '');
         setSkills(res.dmSkillOptions);
         setFunnels(funnelRes.funnels.map((f) => ({ id: f.id, name: f.name })));
       } catch (err) {
@@ -103,9 +112,13 @@ export function SocialListeningPostAgentPanel({
         workingHoursOnly: draft.workingHoursOnly,
         workingHoursStart: draft.workingHoursOnly ? draft.workingHoursStart : null,
         workingHoursEnd: draft.workingHoursOnly ? draft.workingHoursEnd : null,
+        commentAutomationJourneyId: commentJourneyId || null,
       });
       setDraft(mapSettings(res.settings as unknown as Record<string, unknown>));
-      setToast('Agent settings saved');
+      setCommentJourneyId(
+        (res.settings.commentAutomationJourneyId as string | null | undefined) ?? ''
+      );
+      setToast('Comment handling saved');
       onSaved?.(
         (res.settings.leadFunnelId as string | null | undefined) ?? null
       );
@@ -132,7 +145,7 @@ export function SocialListeningPostAgentPanel({
             <Bot className="h-3.5 w-3.5" />
             This post
           </p>
-          <h2 className="text-sm font-black text-gray-950">Agent settings</h2>
+          <h2 className="text-sm font-black text-gray-950">Comment handling</h2>
         </div>
         <button
           type="button"
@@ -150,20 +163,60 @@ export function SocialListeningPostAgentPanel({
         </button>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto p-3.5">
+      <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-3.5">
         {loading ? (
           <div className="flex items-center gap-2 py-8 text-sm text-gray-400">
             <Loader2 className="h-4 w-4 animate-spin" /> Loading…
           </div>
         ) : (
-          <SocialListeningAgentSettingsForm
-            draft={draft}
-            setDraft={setDraft}
-            skills={skills}
-            funnels={funnels}
-            error={error}
-            onError={setError}
-          />
+          <>
+            <div className="rounded-xl border border-black/5 bg-surface-muted/40 p-3">
+              <div className="flex items-start gap-2">
+                <Route className="mt-0.5 h-4 w-4 shrink-0 text-sky-600" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-bold text-gray-900">Instagram Automation</p>
+                  <p className="mt-0.5 text-xs text-gray-500">
+                    Start a published automation when someone comments on this post. Leave off to
+                    use global Comment-on-post triggers (keyword match) instead.
+                  </p>
+                  <label className="mt-2 block text-[11px] font-semibold uppercase tracking-wide text-neutral-400">
+                    Automation
+                    <select
+                      className="mt-1 w-full cursor-pointer rounded-lg border border-black/5 bg-surface px-2.5 py-2 text-sm font-semibold text-gray-800 outline-none focus:border-sky-200 focus:ring-2 focus:ring-sky-100"
+                      value={commentJourneyId}
+                      onChange={(e) => setCommentJourneyId(e.target.value)}
+                    >
+                      <option value="">Off — no post-specific automation</option>
+                      {publishedJourneys.map((j) => (
+                        <option key={j.id} value={j.id}>
+                          {j.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  {publishedJourneys.length === 0 && (
+                    <p className="mt-1.5 text-xs text-amber-700">
+                      Publish an Instagram Automation with a Comment on post trigger first.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-neutral-400">
+                AI Agent (Social Listening)
+              </p>
+              <SocialListeningAgentSettingsForm
+                draft={draft}
+                setDraft={setDraft}
+                skills={skills}
+                funnels={funnels}
+                error={error}
+                onError={setError}
+              />
+            </div>
+          </>
         )}
       </div>
 

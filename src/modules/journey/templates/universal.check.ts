@@ -1,13 +1,21 @@
 /**
- * Runnable check: universal journey templates build valid graphs.
+ * Runnable check: journey templates (ConvoSync + universal) build valid graphs.
  * Run: npx tsx src/modules/journey/templates/universal.check.ts
  */
 import assert from 'node:assert/strict';
-import { UNIVERSAL_JOURNEY_TEMPLATES, getJourneyTemplate } from './index.ts';
+import {
+  CONVOSYNC_JOURNEY_TEMPLATES,
+  JOURNEY_TEMPLATES,
+  UNIVERSAL_JOURNEY_TEMPLATES,
+  getJourneyTemplate,
+} from './index.ts';
 
 assert.equal(UNIVERSAL_JOURNEY_TEMPLATES.length, 5);
+assert.equal(CONVOSYNC_JOURNEY_TEMPLATES.length, 2);
+assert.equal(JOURNEY_TEMPLATES.length, 7);
+assert.ok(JOURNEY_TEMPLATES[0].id.startsWith('convosync_'));
 
-for (const t of UNIVERSAL_JOURNEY_TEMPLATES) {
+for (const t of JOURNEY_TEMPLATES) {
   const g = t.buildGraph();
   assert.ok(g.nodes.length >= 3, `${t.id}: expected multi-step graph`);
   assert.equal(g.nodes[0].type, 'TRIGGER');
@@ -20,6 +28,20 @@ for (const t of UNIVERSAL_JOURNEY_TEMPLATES) {
     assert.ok(ids.has(e.targetNodeId));
   }
 }
+
+const care = getJourneyTemplate('convosync_customer_care')!.buildGraph();
+assert.ok(
+  (care.nodes[0].data.channels as string[]).includes('whatsapp'),
+  'customer care triggers all channels'
+);
+assert.ok(
+  care.nodes.some((n) => n.type === 'ASK_QUESTION'),
+  'customer care asks intent'
+);
+assert.ok(
+  care.nodes.some((n) => n.type === 'OPEN_CONVERSATION'),
+  'customer care opens conversation'
+);
 
 const a = getJourneyTemplate('welcome_reply')!.buildGraph();
 const b = getJourneyTemplate('welcome_reply')!.buildGraph();

@@ -9,6 +9,8 @@ import type { ContactJourneyProgress } from '../components/inbox/ContactJourneyP
 
 const FALLBACK_POLL_MS = 60_000;
 
+export type JourneyProgressChannel = 'whatsapp' | 'instagram' | null | undefined;
+
 function progressSnapshot(p: ContactJourneyProgress | null): string {
   if (!p) return '';
   return JSON.stringify({
@@ -24,14 +26,18 @@ function progressSnapshot(p: ContactJourneyProgress | null): string {
   });
 }
 
-export function useContactJourneyProgress(contactId: string | null, refreshKey = 0) {
+export function useContactJourneyProgress(
+  contactId: string | null,
+  refreshKey = 0,
+  channel: JourneyProgressChannel = 'whatsapp'
+) {
   const [progress, setProgress] = useState<ContactJourneyProgress | null>(null);
   const [initialLoading, setInitialLoading] = useState(false);
   const loadedForContactRef = useRef<string | null>(null);
 
   const fetchProgress = useCallback(
     async (options?: { silent?: boolean }) => {
-      if (!contactId) {
+      if (!contactId || !channel) {
         setProgress(null);
         loadedForContactRef.current = null;
         return;
@@ -43,7 +49,9 @@ export function useContactJourneyProgress(contactId: string | null, refreshKey =
       if (!silent) setInitialLoading(true);
 
       try {
-        const data = (await api.getContactJourneyProgress(contactId)) as
+        const data = (await (channel === 'instagram'
+          ? api.getContactInstagramJourneyProgress(contactId)
+          : api.getContactJourneyProgress(contactId))) as
           | ContactJourneyProgress
           | { active: false };
         const next = data && 'executionId' in data ? data : null;
@@ -60,11 +68,11 @@ export function useContactJourneyProgress(contactId: string | null, refreshKey =
         if (!silent) setInitialLoading(false);
       }
     },
-    [contactId]
+    [contactId, channel]
   );
 
   useEffect(() => {
-    if (!contactId) {
+    if (!contactId || !channel) {
       setProgress(null);
       loadedForContactRef.current = null;
       return;
@@ -73,22 +81,25 @@ export function useContactJourneyProgress(contactId: string | null, refreshKey =
       setProgress(null);
     }
     void fetchProgress({ silent: loadedForContactRef.current === contactId });
-  }, [contactId, fetchProgress]);
+  }, [contactId, channel, fetchProgress]);
 
   useEffect(() => {
-    if (refreshKey === 0 || !contactId) return;
+    if (refreshKey === 0 || !contactId || !channel) return;
     void fetchProgress({ silent: true });
-  }, [refreshKey, contactId, fetchProgress]);
+  }, [refreshKey, contactId, channel, fetchProgress]);
 
   // Fallback only — primary refresh is refreshKey (incoming messages). Pause when tab hidden.
+  // When waiting/running, poll faster so missed-webhook recovery can unstick the flow.
   useEffect(() => {
-    if (!contactId) return;
+    if (!contactId || !channel) return;
     const tick = () => {
       if (document.visibilityState === 'visible') {
         void fetchProgress({ silent: true });
       }
     };
-    const timer = window.setInterval(tick, FALLBACK_POLL_MS);
+    const waiting = progress?.status === 'waiting' || progress?.status === 'running';
+    const ms = waiting ? 5_000 : FALLBACK_POLL_MS;
+    const timer = window.setInterval(tick, ms);
     const onVis = () => {
       if (document.visibilityState === 'visible') tick();
     };
@@ -97,7 +108,7 @@ export function useContactJourneyProgress(contactId: string | null, refreshKey =
       window.clearInterval(timer);
       document.removeEventListener('visibilitychange', onVis);
     };
-  }, [contactId, fetchProgress]);
+  }, [contactId, channel, fetchProgress, progress?.status]);
 
   return { progress, initialLoading, refetch: () => fetchProgress({ silent: true }) };
 }

@@ -6,6 +6,7 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api, getUserId, getUserName } from '../../lib/api';
 import { useJourneys } from '../../modules/journey/hooks/useJourneys';
+import { useIgJourneys } from '../../modules/instagram-automation/hooks/useIgJourneys';
 
 const META_STALE_MS = 60_000;
 const ME_STALE_MS = 5 * 60_000;
@@ -123,6 +124,7 @@ export function useInboxAssigneeMeta() {
   const team = useTeam();
   const agents = useAgents();
   const journeys = useJourneys();
+  const igJourneys = useIgJourneys();
   const wa = useWhatsAppAccounts();
   const ig = useInstagramAccounts();
   const messenger = useMessengerAccounts();
@@ -162,13 +164,26 @@ export function useInboxAssigneeMeta() {
     [agents.data]
   );
 
-  const publishedJourneys = useMemo<InboxNamedOption[]>(
+  /** WhatsApp Automation (Journey) — for WhatsApp inbox only. */
+  const publishedWhatsAppJourneys = useMemo<InboxNamedOption[]>(
     () =>
       (journeys.data ?? [])
         .filter((j) => j.status === 'published')
         .map((j) => ({ id: j.id, name: j.name })),
     [journeys.data]
   );
+
+  /** Instagram Automation — for Instagram inbox only. */
+  const publishedInstagramJourneys = useMemo<InboxNamedOption[]>(
+    () =>
+      (igJourneys.data ?? [])
+        .filter((j) => j.status === 'published')
+        .map((j) => ({ id: j.id, name: j.name })),
+    [igJourneys.data]
+  );
+
+  /** @deprecated Prefer channel-specific lists — kept as WA alias for older callers. */
+  const publishedJourneys = publishedWhatsAppJourneys;
 
   const whatsappAccounts = wa.data ?? [];
 
@@ -193,6 +208,8 @@ export function useInboxAssigneeMeta() {
     aiAgents,
     ruleBasedBots,
     publishedJourneys,
+    publishedWhatsAppJourneys,
+    publishedInstagramJourneys,
     whatsappAccounts,
     instagramConnected,
     instagramInboxLabel,

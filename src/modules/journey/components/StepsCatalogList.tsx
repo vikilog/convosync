@@ -98,7 +98,7 @@ export function StepsCatalogList({
         />
       </div>
 
-      <div className={mode === 'click' ? 'mt-2 max-h-[min(22rem,50vh)] overflow-y-auto' : 'mt-2 space-y-3'}>
+      <div className={mode === 'click' ? 'mt-2 space-y-1' : 'mt-2 space-y-3'}>
         {items.length === 0 ? (
           <p className="px-2 py-6 text-center text-sm text-slate-400">{emptyLabel}</p>
         ) : (

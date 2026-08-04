@@ -25,6 +25,8 @@ type Props = {
   onError?: (error: string) => void;
   autoStart?: boolean;
   onAutoStartConsumed?: () => void;
+  connectDisabled?: boolean;
+  connectDisabledMessage?: string;
 };
 
 export function InstagramConnectPanel({
@@ -32,6 +34,8 @@ export function InstagramConnectPanel({
   onError,
   autoStart = false,
   onAutoStartConsumed,
+  connectDisabled = false,
+  connectDisabledMessage,
 }: Props) {
   const [loading, setLoading] = useState(false);
   const autoStartTriggered = useRef(false);
@@ -40,6 +44,13 @@ export function InstagramConnectPanel({
   const hasValidAppId = !!metaAppId && metaAppId !== 'your_meta_app_id_here';
 
   const handleConnect = useCallback(async () => {
+    if (connectDisabled) {
+      onError?.(
+        connectDisabledMessage ||
+          'Instagram is not available on your current plan. Upgrade in Settings → Plans.'
+      );
+      return;
+    }
     if (!hasValidAppId) {
       onError?.('Meta App ID is missing. Set VITE_META_APP_ID in frontend/.env.');
       return;
@@ -68,16 +79,16 @@ export function InstagramConnectPanel({
       setLoading(false);
       onError?.(err instanceof Error ? err.message : 'Failed to start Instagram login');
     }
-  }, [hasValidAppId, metaAppId, onError]);
+  }, [connectDisabled, connectDisabledMessage, hasValidAppId, metaAppId, onError]);
 
   useEffect(() => {
-    if (!autoStart || autoStartTriggered.current) return;
+    if (!autoStart || autoStartTriggered.current || connectDisabled) return;
     autoStartTriggered.current = true;
     onAutoStartConsumed?.();
     void handleConnect();
-  }, [autoStart, handleConnect, onAutoStartConsumed]);
+  }, [autoStart, connectDisabled, handleConnect, onAutoStartConsumed]);
 
-  const canConnect = hasValidAppId && !loading;
+  const canConnect = hasValidAppId && !loading && !connectDisabled;
 
   return (
     <div className="bg-surface border-2 border-[#E1306C]/25 rounded-2xl p-6 sm:p-8 shadow-[0_8px_32px_rgba(225,48,108,0.1)]">
@@ -104,8 +115,11 @@ export function InstagramConnectPanel({
         disabled={!canConnect}
         className="mt-6 inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary-hover disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-xl text-sm font-black shadow-md transition-all"
       >
-        {loading ? 'Redirecting to Meta…' : 'Continue with Facebook'}
+        {loading ? 'Redirecting to Meta…' : connectDisabled ? 'Upgrade plan' : 'Continue with Facebook'}
       </button>
+      {connectDisabled && connectDisabledMessage ? (
+        <p className="mt-4 text-sm font-bold text-amber-700">{connectDisabledMessage}</p>
+      ) : null}
     </div>
   );
 }

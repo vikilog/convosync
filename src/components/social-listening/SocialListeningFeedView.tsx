@@ -308,7 +308,18 @@ export const SocialListeningFeedView: React.FC = () => {
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {filteredItems.map((item) => {
               const thumb = item.thumbnailUrl || item.mediaUrl;
-              const autoOn = automationByPost[item.id]?.autoResponseEnabled ?? false;
+              const autoInfo = automationByPost[item.id];
+              const agentOn = autoInfo?.autoResponseEnabled ?? false;
+              const journeyOn = Boolean(autoInfo?.commentAutomationJourneyId);
+              const badgeLabel =
+                agentOn && journeyOn
+                  ? 'Both'
+                  : agentOn
+                    ? 'Agent'
+                    : journeyOn
+                      ? 'Auto'
+                      : 'Off';
+              const badgeOn = agentOn || journeyOn;
               return (
                 <div
                   key={item.id}
@@ -343,11 +354,16 @@ export const SocialListeningFeedView: React.FC = () => {
                   )}
                   <span
                     className={`absolute right-2 top-2 inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-bold shadow-sm ${
-                      autoOn ? 'bg-emerald-600 text-white' : 'bg-black/65 text-white/90'
+                      badgeOn ? 'bg-emerald-600 text-white' : 'bg-black/65 text-white/90'
                     }`}
+                    title={
+                      journeyOn
+                        ? autoInfo?.commentAutomationJourneyName || 'Instagram Automation'
+                        : undefined
+                    }
                   >
                     <Bot className="h-3 w-3" />
-                    {autoOn ? 'Agent' : 'Off'}
+                    {badgeLabel}
                   </span>
 
                   {/* Insights — hover only */}

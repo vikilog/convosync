@@ -26,6 +26,8 @@ type Member = {
   role: string;
   permissions: string[];
   inboxScope?: InboxScope;
+  autoAssignEligible?: boolean;
+  assignmentLimit?: number | null;
   status: string;
   isOwner: boolean;
   avatar?: string | null;
@@ -183,6 +185,25 @@ export function UsersTeamsPanel() {
     }
   };
 
+  const handleAutoAssignChange = async (
+    member: Member,
+    patch: { autoAssignEligible?: boolean; assignmentLimit?: number | null }
+  ) => {
+    setActionKey(`${member.id}:auto-assign`);
+    setError(null);
+    try {
+      const updated = (await api.updateWorkspaceMember(member.id, {
+        role: member.role as 'admin' | 'agent',
+        ...patch,
+      })) as Member;
+      setMembers((prev) => prev.map((m) => (m.id === member.id ? { ...m, ...updated } : m)));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update auto-assign settings');
+    } finally {
+      setActionKey(null);
+    }
+  };
+
   const handleRemove = async (member: Member) => {
     if (member.isOwner) return;
     const confirmed = window.confirm(`Remove ${member.name} from this company?`);
@@ -269,6 +290,7 @@ export function UsersTeamsPanel() {
                   <th className="px-5 py-3">User</th>
                   <th className="px-5 py-3">Role</th>
                   <th className="px-5 py-3">Access</th>
+                  <th className="px-5 py-3">Auto-assign</th>
                   <th className="px-5 py-3">Status</th>
                   {canManageUsers && <th className="px-5 py-3 w-28">Actions</th>}
                 </tr>
@@ -365,6 +387,36 @@ export function UsersTeamsPanel() {
                         </div>
                       </td>
                       <td className="px-5 py-4">
+                        <div className="flex items-center gap-2">
+                          <label className="flex cursor-pointer items-center gap-1.5">
+                            <input
+                              type="checkbox"
+                              checked={m.autoAssignEligible ?? true}
+                              disabled={!canManageUsers || busy}
+                              onChange={(e) =>
+                                void handleAutoAssignChange(m, { autoAssignEligible: e.target.checked })
+                              }
+                              className="h-3.5 w-3.5 accent-primary disabled:opacity-50"
+                            />
+                            <span className="text-gray-600 font-medium">Eligible</span>
+                          </label>
+                          <input
+                            type="number"
+                            min={0}
+                            placeholder="∞"
+                            value={m.assignmentLimit ?? ''}
+                            disabled={!canManageUsers || busy}
+                            onChange={(e) => {
+                              const raw = e.target.value;
+                              const value = raw === '' ? null : Math.max(0, Number(raw));
+                              void handleAutoAssignChange(m, { assignmentLimit: value });
+                            }}
+                            title="Max open conversations via auto-assign (blank = unlimited)"
+                            className="w-14 rounded-lg border border-black/5 px-1.5 py-1 text-center disabled:opacity-50"
+                          />
+                        </div>
+                      </td>
+                      <td className="px-5 py-4">
                         <span className="inline-flex items-center gap-1.5 text-primary font-bold capitalize">
                           <span className="w-2 h-2 rounded-full bg-primary" />
                           {m.status}
@@ -391,7 +443,7 @@ export function UsersTeamsPanel() {
                 })}
                 {filtered.length === 0 && (
                   <tr>
-                    <td colSpan={canManageUsers ? 5 : 4} className="px-5 py-12 text-center text-gray-400">
+                    <td colSpan={canManageUsers ? 6 : 5} className="px-5 py-12 text-center text-gray-400">
                       No users found for this company.
                     </td>
                   </tr>

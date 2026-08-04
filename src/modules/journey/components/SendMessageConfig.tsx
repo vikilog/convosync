@@ -6,8 +6,11 @@ import { mapTemplateFromApi } from '../../../lib/mappers';
 import { statusUiToSlug } from '../../../lib/templateLabels';
 import { TemplateStatusBadge } from '../../../components/templates/TemplateStatusBadge';
 import { countBodyVariables, renderBodyWithSamples } from '../../../components/templates/templateBuilderUtils';
+import { ChannelMessagePreviews } from './ChannelMessagePreviews';
 
-export type MessageMode = 'text' | 'template';
+export type MessageMode = 'text' | 'template' | 'cta_url';
+
+const CTA_URL_LABEL_MAX = 20;
 
 type Props = {
   local: Record<string, unknown>;
@@ -16,7 +19,7 @@ type Props = {
 };
 
 function resolveMode(local: Record<string, unknown>): MessageMode {
-  if (local.messageMode === 'text' || local.messageMode === 'template') {
+  if (local.messageMode === 'text' || local.messageMode === 'template' || local.messageMode === 'cta_url') {
     return local.messageMode;
   }
   if (local.templateName || local.templateId) return 'template';
@@ -41,18 +44,20 @@ function CompactTemplatePreview({
   const showHeader = template.header?.trim();
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-[#efeae2] p-2.5">
-      <p className="text-sm font-bold text-gray-400 uppercase tracking-wide mb-2">Preview</p>
-      <div className="bg-white rounded-lg rounded-tl-sm shadow-sm overflow-hidden text-[#111b21] text-xs">
+    <div className="rounded-lg border border-slate-200 bg-white p-2.5">
+      <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+        Template content
+      </p>
+      <div className="overflow-hidden rounded-lg border border-border-subtle text-[11px] text-[#111b21]">
         {showHeader && (
           <p className="px-2.5 pt-2 font-semibold leading-snug">{template.header}</p>
         )}
-        <p className="px-2.5 py-2 leading-relaxed whitespace-pre-wrap break-words">{body}</p>
+        <p className="whitespace-pre-wrap break-words px-2.5 py-2 leading-relaxed">{body}</p>
         {template.footer?.trim() && (
           <p className="px-2.5 pb-2 text-xs text-[#667781]">{template.footer}</p>
         )}
         {template.buttonText?.trim() && template.buttonType && (
-          <div className="border-t border-[#e9edef] px-2.5 py-2 text-meta font-medium text-[#008069] text-center">
+          <div className="border-t border-[#e9edef] px-2.5 py-2 text-center text-meta font-medium text-[#008069]">
             {template.buttonText}
           </div>
         )}
@@ -102,10 +107,17 @@ export function SendMessageConfig({ local, patch, patchMany }: Props) {
         templateName: '',
         variables: [],
       });
-    } else {
+    } else if (next === 'template') {
       patchMany({
         messageMode: 'template',
         text: '',
+      });
+    } else {
+      patchMany({
+        messageMode: 'cta_url',
+        templateId: '',
+        templateName: '',
+        variables: [],
       });
     }
   };
@@ -139,23 +151,36 @@ export function SendMessageConfig({ local, patch, patchMany }: Props) {
     patch('variables', next);
   };
 
+  const previewBody =
+    mode === 'template'
+      ? selectedTemplate
+        ? [
+            selectedTemplate.header?.trim(),
+            renderBodyWithSamples(selectedTemplate.bodyPattern, variableValues),
+            selectedTemplate.footer?.trim(),
+          ]
+            .filter(Boolean)
+            .join('\n\n')
+        : ''
+      : String(local.text ?? '');
+
   return (
     <div className="space-y-3">
       <div>
-        <p className="text-sm font-semibold text-gray-700 mb-1.5">Message type</p>
-        <div className="grid grid-cols-2 gap-1 rounded-lg border border-slate-200 p-1 bg-slate-50">
-          {(['text', 'template'] as const).map((opt) => (
+        <p className="mb-1.5 text-sm font-semibold text-gray-700">Message type</p>
+        <div className="grid grid-cols-3 gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1">
+          {(['text', 'template', 'cta_url'] as const).map((opt) => (
             <button
               key={opt}
               type="button"
               onClick={() => setMode(opt)}
-              className={`rounded-md py-1.5 text-sm font-bold capitalize transition-colors ${
+              className={`rounded-md py-1.5 text-xs font-bold transition-colors ${
                 mode === opt
-                  ? 'bg-white text-primary shadow-sm border border-primary/20'
+                  ? 'border border-primary/20 bg-white text-primary shadow-sm'
                   : 'text-gray-500 hover:text-gray-800'
               }`}
             >
-              {opt === 'text' ? 'Text' : 'Template'}
+              {opt === 'text' ? 'Text' : opt === 'template' ? 'Template' : 'Link button'}
             </button>
           ))}
         </div>
@@ -166,7 +191,7 @@ export function SendMessageConfig({ local, patch, patchMany }: Props) {
           <label className="block text-sm font-semibold text-gray-700">
             Message text
             <textarea
-              className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm min-h-[96px]"
+              className="mt-1 min-h-[96px] w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
               value={String(local.text ?? '')}
               onChange={(e) => patch('text', e.target.value)}
               placeholder="Hi {{contact.name}}, thanks for reaching out!"
@@ -175,31 +200,75 @@ export function SendMessageConfig({ local, patch, patchMany }: Props) {
           <p className="text-xs text-gray-400">
             Variables: {'{{contact.name}}'}, {'{{contact.phone}}'}, {'{{contact.email}}'}
           </p>
+          <ChannelMessagePreviews body={previewBody} />
+        </>
+      )}
+
+      {mode === 'cta_url' && (
+        <>
+          <p className="rounded-lg bg-primary/5 px-2.5 py-2 text-xs leading-relaxed text-primary">
+            WhatsApp&apos;s CTA URL message — the only Meta-accepted way to attach a link button.
+            Reply buttons can&apos;t open a URL, so this sends as its own message type.
+          </p>
+          <label className="block text-sm font-semibold text-gray-700">
+            Message text
+            <textarea
+              className="mt-1 min-h-[80px] w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+              value={String(local.text ?? '')}
+              onChange={(e) => patch('text', e.target.value)}
+              placeholder="Hi {{contact.name}}, here's your link:"
+            />
+          </label>
+          <div className="grid grid-cols-2 gap-2">
+            <label className="block text-sm font-semibold text-gray-700">
+              Button label
+              <input
+                className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                value={String(local.ctaLabel ?? '')}
+                maxLength={CTA_URL_LABEL_MAX}
+                onChange={(e) => patch('ctaLabel', e.target.value)}
+                placeholder="Open link"
+              />
+              <span className="mt-1 block text-right text-xs text-slate-400">
+                {String(local.ctaLabel ?? '').length}/{CTA_URL_LABEL_MAX}
+              </span>
+            </label>
+            <label className="block text-sm font-semibold text-gray-700">
+              URL
+              <input
+                className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm font-mono text-xs"
+                value={String(local.ctaUrl ?? '')}
+                onChange={(e) => patch('ctaUrl', e.target.value)}
+                placeholder="https://…"
+              />
+            </label>
+          </div>
+          <ChannelMessagePreviews body={previewBody} />
         </>
       )}
 
       {mode === 'template' && (
         <>
           {loadError && (
-            <p className="text-meta font-semibold text-rose-600 bg-rose-50 border border-rose-100 rounded-lg px-2 py-1.5">
+            <p className="rounded-lg border border-rose-100 bg-rose-50 px-2 py-1.5 text-meta font-semibold text-rose-600">
               {loadError}
             </p>
           )}
 
           {loading ? (
-            <div className="flex items-center gap-2 text-xs text-gray-500 py-4 justify-center">
-              <Loader2 className="w-4 h-4 animate-spin" />
+            <div className="flex items-center justify-center gap-2 py-4 text-xs text-gray-500">
+              <Loader2 className="h-4 w-4 animate-spin" />
               Loading templates…
             </div>
           ) : templates.length === 0 ? (
-            <p className="text-xs text-gray-500 bg-gray-50 border border-slate-200 rounded-lg px-3 py-3 text-center">
+            <p className="rounded-lg border border-slate-200 bg-gray-50 px-3 py-3 text-center text-xs text-gray-500">
               No templates found. Create or sync templates from the Templates page.
             </p>
           ) : (
             <>
               <div>
-                <p className="text-sm font-semibold text-gray-700 mb-1.5">Choose template</p>
-                <ul className="max-h-44 overflow-y-auto space-y-1 rounded-lg border border-slate-200 p-1.5 bg-slate-50">
+                <p className="mb-1.5 text-sm font-semibold text-gray-700">Choose template</p>
+                <ul className="max-h-44 space-y-1 overflow-y-auto rounded-lg border border-slate-200 bg-slate-50 p-1.5">
                   {templates.map((t) => {
                     const active =
                       (local.templateId && t.id === String(local.templateId)) ||
@@ -209,14 +278,16 @@ export function SendMessageConfig({ local, patch, patchMany }: Props) {
                         <button
                           type="button"
                           onClick={() => selectTemplate(t)}
-                          className={`w-full text-left rounded-lg px-2.5 py-2 transition-colors ${
+                          className={`w-full rounded-lg px-2.5 py-2 text-left transition-colors ${
                             active
-                              ? 'bg-primary/10 border border-primary/25'
-                              : 'hover:bg-white border border-transparent'
+                              ? 'border border-primary/25 bg-primary/10'
+                              : 'border border-transparent hover:bg-white'
                           }`}
                         >
-                          <p className="text-sm font-bold text-gray-900 font-mono truncate">{t.name}</p>
-                          <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                          <p className="truncate font-mono text-sm font-bold text-gray-900">
+                            {t.name}
+                          </p>
+                          <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
                             <TemplateStatusBadge status={statusUiToSlug(t.status)} />
                             <span className="text-xs text-gray-400">{t.category}</span>
                           </div>
@@ -230,8 +301,9 @@ export function SendMessageConfig({ local, patch, patchMany }: Props) {
               {selectedTemplate && (
                 <>
                   {selectedTemplate.status !== 'Approved' && (
-                    <p className="text-meta text-amber-800 bg-amber-50 border border-amber-100 rounded-lg px-2 py-1.5">
-                      This template is {selectedTemplate.status}. Only Approved templates can be sent.
+                    <p className="rounded-lg border border-amber-100 bg-amber-50 px-2 py-1.5 text-meta text-amber-800">
+                      This template is {selectedTemplate.status}. Only Approved templates can be
+                      sent.
                     </p>
                   )}
 
@@ -242,7 +314,7 @@ export function SendMessageConfig({ local, patch, patchMany }: Props) {
 
                   {varCount > 0 && (
                     <div className="space-y-2">
-                      <p className="text-sm font-bold text-gray-400 uppercase tracking-wide">
+                      <p className="text-sm font-bold uppercase tracking-wide text-gray-400">
                         Variable mapping
                       </p>
                       {Array.from({ length: varCount }, (_, i) => {
@@ -262,6 +334,11 @@ export function SendMessageConfig({ local, patch, patchMany }: Props) {
                       })}
                     </div>
                   )}
+
+                  <ChannelMessagePreviews
+                    body={previewBody}
+                    emptyHint="Select a template to preview on WhatsApp."
+                  />
                 </>
               )}
             </>

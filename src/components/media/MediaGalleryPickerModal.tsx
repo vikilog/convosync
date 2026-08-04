@@ -1,10 +1,12 @@
 /**
- * Pick an image from Media Gallery.
+ * Pick a file from Media Gallery (image by default; pass `filterType` for video/pdf/document).
  * Thumbs via auth /file; picked src = S3 presigned URL (bucket is private).
  */
 import React, { useCallback, useEffect, useState } from 'react';
-import { Image as ImageIcon, Loader2, Search, X } from 'lucide-react';
+import { File as FileIcon, Image as ImageIcon, Loader2, Search, Video, X } from 'lucide-react';
 import { api, formatCatchError } from '../../lib/api';
+
+export type MediaGalleryFilterType = 'image' | 'video' | 'pdf' | 'document';
 
 export type PickedGalleryImage = {
   id: string;
@@ -24,21 +26,31 @@ type Props = {
   open: boolean;
   onClose: () => void;
   onPick: (image: PickedGalleryImage) => void;
+  /** Media Gallery asset type to list — defaults to 'image' (existing callers unaffected). */
+  filterType?: MediaGalleryFilterType;
 };
 
-function mapImage(raw: Record<string, unknown>): GalleryRow | null {
-  if (String(raw.type ?? '') !== 'image') return null;
+const FILTER_META: Record<MediaGalleryFilterType, { icon: typeof ImageIcon; noun: string }> = {
+  image: { icon: ImageIcon, noun: 'image' },
+  video: { icon: Video, noun: 'video' },
+  pdf: { icon: FileIcon, noun: 'PDF' },
+  document: { icon: FileIcon, noun: 'document' },
+};
+
+function mapAsset(raw: Record<string, unknown>, filterType: MediaGalleryFilterType): GalleryRow | null {
+  if (String(raw.type ?? '') !== filterType) return null;
   if (raw.isActive === false) return null;
   const id = String(raw.id ?? '');
   if (!id) return null;
   return {
     id,
-    title: String(raw.title ?? raw.filename ?? 'Image'),
+    title: String(raw.title ?? raw.filename ?? 'File'),
     filename: String(raw.filename ?? ''),
   };
 }
 
-export function MediaGalleryPickerModal({ open, onClose, onPick }: Props) {
+export function MediaGalleryPickerModal({ open, onClose, onPick, filterType = 'image' }: Props) {
+  const { icon: TypeIcon, noun } = FILTER_META[filterType];
   const [items, setItems] = useState<GalleryRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [pickingId, setPickingId] = useState<string | null>(null);
@@ -53,10 +65,13 @@ export function MediaGalleryPickerModal({ open, onClose, onPick }: Props) {
         string,
         unknown
       >[];
-      const rows = raw.map(mapImage).filter((x): x is GalleryRow => Boolean(x));
+      const rows = raw
+        .map((r) => mapAsset(r, filterType))
+        .filter((x): x is GalleryRow => Boolean(x));
 
       const withThumbs = await Promise.all(
         rows.map(async (row) => {
+          if (filterType !== 'image') return row;
           try {
             const blob = await api.fetchMediaGalleryFile(row.id);
             if (!blob.type.startsWith('image/')) return row;
@@ -73,7 +88,7 @@ export function MediaGalleryPickerModal({ open, onClose, onPick }: Props) {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [filterType]);
 
   useEffect(() => {
     if (!open) return;
@@ -131,11 +146,11 @@ export function MediaGalleryPickerModal({ open, onClose, onPick }: Props) {
               id="media-gallery-picker-title"
               className="text-sm font-bold text-gray-900 flex items-center gap-2"
             >
-              <ImageIcon className="w-4 h-4 text-primary" />
-              Pick from Media Gallery
+              <TypeIcon className="w-4 h-4 text-primary" />
+              Pick a {noun} from Media Gallery
             </h2>
             <p className="text-xs text-gray-400 mt-0.5">
-              Uses a secure image link (S3 bucket is private)
+              Uses a secure link (S3 bucket is private)
             </p>
           </div>
           <button
@@ -155,7 +170,7 @@ export function MediaGalleryPickerModal({ open, onClose, onPick }: Props) {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search images…"
+              placeholder={`Search ${noun}s…`}
               className="w-full rounded-xl border border-black/10 bg-surface-muted py-2 pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-primary/20"
             />
           </div>
@@ -172,13 +187,13 @@ export function MediaGalleryPickerModal({ open, onClose, onPick }: Props) {
             </p>
           ) : filtered.length === 0 ? (
             <div className="text-center py-12">
-              <ImageIcon className="w-10 h-10 text-gray-300 mx-auto mb-2" />
+              <TypeIcon className="w-10 h-10 text-gray-300 mx-auto mb-2" />
               <p className="text-sm font-bold text-gray-600">
-                {items.length === 0 ? 'No images in Media Gallery' : 'No matches'}
+                {items.length === 0 ? `No ${noun}s in Media Gallery` : 'No matches'}
               </p>
               <p className="text-xs text-gray-400 mt-1">
                 {items.length === 0
-                  ? 'Upload images under Media Gallery, then pick them here.'
+                  ? `Upload ${noun}s under Media Gallery, then pick them here.`
                   : 'Try a different search.'}
               </p>
             </div>
@@ -208,7 +223,7 @@ export function MediaGalleryPickerModal({ open, onClose, onPick }: Props) {
                             className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform"
                           />
                         ) : (
-                          <ImageIcon className="w-8 h-8 text-gray-300" />
+                          <TypeIcon className="w-8 h-8 text-gray-300" />
                         )}
                         {busy ? (
                           <div className="absolute inset-0 bg-white/70 flex items-center justify-center">

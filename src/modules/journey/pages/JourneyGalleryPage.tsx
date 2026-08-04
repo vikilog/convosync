@@ -27,7 +27,7 @@ export function JourneyGalleryPage({ onBack, onSelectTemplate, onStartBlank }: P
               Automation gallery
             </h2>
             <p className="text-xs text-gray-500 mt-0.5">
-              Universal WhatsApp starters. More automations will be added here over time.
+              ConvoSync customer care plus universal starters — edit copy, publish, assign chats.
             </p>
           </div>
         </div>

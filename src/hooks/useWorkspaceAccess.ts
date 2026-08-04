@@ -1,19 +1,31 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api, getUserInboxScope, getUserPermissions, getUserRole, setUserInboxScope } from '../lib/api';
 import { resolveEffectiveInboxScope, type InboxScope } from '../lib/inboxScope';
+import type { PlanFeatureFlags } from '../lib/planEntitlements';
 import { AUTH_CHANGED_EVENT } from '../lib/session';
 import {
   canAccessPath,
   canAccessTab,
+  firstAccessibleTabPath,
   type WorkspacePermission,
 } from '../lib/workspacePermissions';
 
 export function useWorkspaceAccess() {
   const [role, setRole] = useState(getUserRole());
   const [permissions, setPermissions] = useState(getUserPermissions());
+  const [planFeatures, setPlanFeatures] = useState<PlanFeatureFlags | null>(null);
   const [inboxScope, setInboxScope] = useState<InboxScope>(() =>
     resolveEffectiveInboxScope(getUserRole() ?? 'agent', getUserInboxScope())
   );
+
+  const loadPlanFeatures = useCallback(async () => {
+    try {
+      const res = (await api.getSubscription()) as { currentPlan?: PlanFeatureFlags | null };
+      setPlanFeatures(res.currentPlan ?? null);
+    } catch {
+      setPlanFeatures(null);
+    }
+  }, []);
 
   const refresh = useCallback(async () => {
     setRole(getUserRole());
@@ -38,19 +50,28 @@ export function useWorkspaceAccess() {
 
   useEffect(() => {
     void refresh();
-    const onAuthChanged = () => void refresh();
+    void loadPlanFeatures();
+    const onAuthChanged = () => {
+      void refresh();
+      void loadPlanFeatures();
+    };
     window.addEventListener(AUTH_CHANGED_EVENT, onAuthChanged);
     return () => window.removeEventListener(AUTH_CHANGED_EVENT, onAuthChanged);
-  }, [refresh]);
+  }, [refresh, loadPlanFeatures]);
 
   const canTab = useCallback(
-    (tab: string) => canAccessTab(tab, permissions, role),
-    [permissions, role]
+    (tab: string) => canAccessTab(tab, permissions, role, planFeatures),
+    [permissions, role, planFeatures]
   );
 
   const canPath = useCallback(
-    (pathname: string) => canAccessPath(pathname, permissions, role),
-    [permissions, role]
+    (pathname: string) => canAccessPath(pathname, permissions, role, planFeatures),
+    [permissions, role, planFeatures]
+  );
+
+  const firstAccessiblePath = useCallback(
+    () => firstAccessibleTabPath(permissions, role, planFeatures),
+    [permissions, role, planFeatures]
   );
 
   const hasPermission = useCallback(
@@ -62,5 +83,15 @@ export function useWorkspaceAccess() {
     [permissions, role]
   );
 
-  return { role, permissions, inboxScope, canTab, canPath, hasPermission, refresh };
+  return {
+    role,
+    permissions,
+    planFeatures,
+    inboxScope,
+    canTab,
+    canPath,
+    firstAccessiblePath,
+    hasPermission,
+    refresh,
+  };
 }

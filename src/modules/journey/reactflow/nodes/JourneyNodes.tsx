@@ -1,14 +1,28 @@
 import { type ReactNode } from 'react';
-import { Handle, Position, type NodeProps } from '@xyflow/react';
-import { Plus } from 'lucide-react';
+import { type NodeProps } from '@xyflow/react';
+import {
+  FlowActionCard,
+  FlowAddStepButton,
+  FlowTriggerCard,
+} from '../../../flow-builder/FlowNodeCards';
+import { FLOW_CHANNEL_THEMES } from '../../../flow-builder/channelTheme';
+import {
+  AddNoteButton,
+  readStepNote,
+  StepNote,
+  type StepNoteData,
+} from '../../../flow-builder/StepNote';
 import { getStepVisual } from '../../components/stepIcons';
-import { NODE_LABELS, type JourneyNodeType } from '../../types';
+import { NODE_LABELS, TRIGGER_EVENTS, type JourneyNodeType } from '../../types';
+import { summarizeConditionGroup } from '../../../flow-builder/condition/conditionTypes';
 import { useJourneyCanvasActions } from '../JourneyCanvasContext';
+
+const theme = FLOW_CHANNEL_THEMES.whatsapp;
 
 type JourneyNodeData = {
   label?: string;
   event?: string;
-  messageMode?: 'text' | 'template';
+  messageMode?: 'text' | 'template' | 'cta_url';
   text?: string;
   templateName?: string;
   templateId?: string;
@@ -26,174 +40,239 @@ type JourneyNodeData = {
   closingNote?: string;
   customFieldKey?: string;
   value?: string;
+  funnelId?: string;
+  stageId?: string;
+  buttons?: { id: string; title: string }[];
+  paths?: { id: string; label?: string; weight?: number }[];
+  targetNodeId?: string;
+  responseMappings?: { jsonPath: string; attributeKey: string }[];
+  operator?: string;
 };
 
-function NodeAddButton({ nodeId, nodeType }: { nodeId: string; nodeType: JourneyNodeType }) {
-  const actions = useJourneyCanvasActions();
-
-  if (!actions || nodeType === 'END') return null;
-
+function withAddStep(
+  nodeId: string,
+  nodeType: JourneyNodeType,
+  card: ReactNode,
+  note?: StepNoteData
+) {
   return (
-    <button
-      type="button"
-      onClick={(e) => {
-        e.stopPropagation();
-        const rect = e.currentTarget.getBoundingClientRect();
-        actions.openAddMenu({
-          nodeId,
-          top: rect.bottom + 10,
-          left: rect.left + rect.width / 2,
-        });
-      }}
-      className="absolute -bottom-4 left-1/2 z-10 flex h-8 w-8 -translate-x-1/2 items-center justify-center rounded-full border-2 border-white bg-primary text-white shadow-lg transition-all duration-200 hover:scale-105 hover:bg-primary-hover hover:shadow-xl cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-      title="Add next step"
-      aria-label="Add next step"
-    >
-      <Plus className="h-4 w-4" strokeWidth={2.5} />
-    </button>
-  );
-}
-
-function NodeShell({
-  id,
-  type,
-  title,
-  subtitle,
-  selected,
-  children,
-  outputs,
-}: {
-  id: string;
-  type: JourneyNodeType;
-  title?: string;
-  subtitle?: string;
-  selected?: boolean;
-  children?: ReactNode;
-  outputs?: 'single' | 'branch';
-}) {
-  const visual = getStepVisual(type);
-  const Icon = visual.icon;
-
-  return (
-    <div className="group relative pb-5">
-      <div
-        className={`min-w-[200px] max-w-[240px] overflow-hidden rounded-2xl border bg-white shadow-[0_4px_20px_-4px_rgba(15,23,42,0.12)] transition-all duration-200 ${
-          selected
-            ? 'border-primary ring-2 ring-primary/25 shadow-[0_8px_30px_-6px_rgba(2,132,199,0.25)]'
-            : 'border-slate-200/90 hover:border-slate-300 hover:shadow-[0_8px_24px_-6px_rgba(15,23,42,0.14)]'
-        }`}
-      >
-        <Handle
-          type="target"
-          position={Position.Left}
-          className="!h-2.5 !w-2.5 !border-2 !border-white !bg-slate-400"
-        />
-
-        <div className="flex items-center gap-2.5 border-b border-slate-100 px-3 py-2.5">
-          <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${visual.accentBg}`}>
-            <Icon className={`h-4 w-4 ${visual.accent}`} strokeWidth={2} />
-          </span>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-[10px] font-bold uppercase tracking-wider text-slate-400">
-              {NODE_LABELS[type]}
-            </p>
-            <p className="truncate text-sm font-bold text-slate-900">{title}</p>
-          </div>
-        </div>
-
-        {(subtitle || children) && (
-          <div className="px-3 py-2.5">
-            {subtitle ? (
-              <p className="text-xs leading-relaxed text-slate-500 line-clamp-2">{subtitle}</p>
-            ) : null}
-            {children}
-          </div>
-        )}
-
-        {outputs === 'branch' ? (
-          <>
-            <Handle
-              id="yes"
-              type="source"
-              position={Position.Right}
-              style={{ top: '42%' }}
-              className="!h-2.5 !w-2.5 !border-2 !border-white !bg-primary"
-            />
-            <Handle
-              id="no"
-              type="source"
-              position={Position.Right}
-              style={{ top: '72%' }}
-              className="!h-2.5 !w-2.5 !border-2 !border-white !bg-rose-500"
-            />
-            <div className="flex justify-end gap-4 border-t border-slate-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-400">
-              <span className="text-primary">Yes</span>
-              <span className="text-rose-500">No</span>
-            </div>
-          </>
-        ) : type !== 'END' ? (
-          <Handle
-            type="source"
-            position={Position.Right}
-            className="!h-2.5 !w-2.5 !border-2 !border-white !bg-primary"
-          />
-        ) : null}
-      </div>
-
-      <NodeAddButton nodeId={id} nodeType={type} />
+    <div className="group/step relative pb-5">
+      {card}
+      {nodeType !== 'END' ? <AddStep nodeId={nodeId} /> : null}
+      <StepNoteSlot nodeId={nodeId} note={note} />
     </div>
   );
 }
 
-function shellProps(props: NodeProps) {
-  return {
-    id: props.id,
-    type: props.type as JourneyNodeType,
-    selected: props.selected,
-  };
-}
-
-export function TriggerNode(props: NodeProps) {
-  const d = props.data as JourneyNodeData;
-  const event = String(d.event ?? 'message.received').replace(/\./g, ' · ');
+function AddStep({ nodeId }: { nodeId: string }) {
+  const actions = useJourneyCanvasActions();
+  if (!actions) return null;
   return (
-    <NodeShell
-      {...shellProps(props)}
-      title="When"
-      subtitle={event}
+    <FlowAddStepButton
+      theme={theme}
+      onClick={() => actions.openAddMenu({ nodeId })}
     />
   );
 }
 
-export function SendMessageNode(props: NodeProps) {
+function StepNoteSlot({ nodeId, note }: { nodeId: string; note?: StepNoteData }) {
+  const actions = useJourneyCanvasActions();
+  if (!actions) return null;
+  if (!note) {
+    return <AddNoteButton onClick={() => actions.updateNodeData(nodeId, { note: { text: '' } })} />;
+  }
+  return (
+    <StepNote
+      note={note}
+      onChange={(text) => actions.updateNodeData(nodeId, { note: { ...note, text } })}
+      onDelete={() => actions.updateNodeData(nodeId, { note: undefined })}
+      onMove={(offsetX, offsetY) => actions.updateNodeData(nodeId, { note: { ...note, offsetX, offsetY } })}
+    />
+  );
+}
+
+function MessageBody({ text, emptyHint }: { text?: string; emptyHint: string }) {
+  const body = text?.trim();
+  if (!body) {
+    return (
+      <div className="rounded-lg border border-dashed border-border-strong bg-white/60 px-2.5 py-2 text-[11px] text-slate-400">
+        {emptyHint}
+      </div>
+    );
+  }
+  return (
+    <div className="line-clamp-3 rounded-lg border-[0.5px] border-border-subtle bg-white px-2.5 py-2 text-[11px] leading-snug text-slate-600">
+      {body}
+    </div>
+  );
+}
+
+function triggerLabel(event: string | undefined) {
+  return TRIGGER_EVENTS.find((e) => e.value === event)?.label ?? 'When';
+}
+
+function triggerTypeLabel(event: string | undefined) {
+  if (event === 'contact.created') return 'Contact trigger';
+  if (event === 'contact.tag_added') return 'Tag trigger';
+  if (event === 'conversation.opened') return 'Conversation trigger';
+  if (event === 'manual') return 'Manual trigger';
+  return 'Message trigger';
+}
+
+function ActionNode({
+  props,
+  stepName,
+  body,
+  bodyPlaceholder,
+  outputs,
+  multiOutputs,
+  footer,
+}: {
+  props: NodeProps;
+  stepName: string;
+  body?: ReactNode;
+  bodyPlaceholder?: string | null;
+  outputs?: 'single' | 'branch' | 'none';
+  multiOutputs?: { id: string; label: string }[];
+  footer?: ReactNode;
+}) {
+  const type = props.type as JourneyNodeType;
+  const visual = getStepVisual(type);
+  return withAddStep(
+    props.id,
+    type,
+    <FlowActionCard
+      theme={theme}
+      selected={props.selected}
+      stepName={stepName}
+      StepIcon={visual.icon}
+      body={body}
+      bodyPlaceholder={bodyPlaceholder}
+      outputs={outputs}
+      multiOutputs={multiOutputs}
+      footer={footer}
+      showNextStep={type !== 'END'}
+    />,
+    readStepNote(props.data)
+  );
+}
+
+export function TriggerNode(props: NodeProps) {
   const d = props.data as JourneyNodeData;
+  const event = d.event ?? 'message.received';
+  const visual = getStepVisual('TRIGGER');
+  return withAddStep(
+    props.id,
+    'TRIGGER',
+    <FlowTriggerCard
+      theme={theme}
+      selected={props.selected}
+      triggerName={triggerLabel(event)}
+      triggerTypeLabel={triggerTypeLabel(event)}
+      TriggerIcon={visual.icon}
+      canAddTrigger={false}
+    />,
+    readStepNote(props.data)
+  );
+}
+
+export function SendMessageNode(props: NodeProps) {
+  const d = props.data as JourneyNodeData & { ctaUrl?: string; ctaLabel?: string };
   const mode = d.messageMode ?? (d.templateName || d.templateId ? 'template' : 'text');
-  const subtitle =
-    mode === 'template' && d.templateName
-      ? `Template: ${d.templateName}`
-      : mode === 'text' && d.text?.trim()
-        ? d.text.trim().slice(0, 36) + (d.text.length > 36 ? '…' : '')
-        : mode === 'text'
-          ? 'Text message'
-          : 'Choose template';
-  return <NodeShell {...shellProps(props)} title="WhatsApp" subtitle={subtitle} />;
+  const body =
+    mode === 'template' ? (
+      <MessageBody
+        text={d.templateName ? `Template: ${d.templateName}` : undefined}
+        emptyHint="Choose template"
+      />
+    ) : mode === 'cta_url' ? (
+      <MessageBody
+        text={d.ctaUrl ? `🔗 ${d.ctaLabel || 'Open link'} → ${d.ctaUrl}` : undefined}
+        emptyHint="Add a link"
+      />
+    ) : (
+      <MessageBody text={d.text} emptyHint="Add a text" />
+    );
+  return (
+    <ActionNode
+      props={props}
+      stepName={mode === 'cta_url' ? 'Send Message · Link' : 'Send Message'}
+      body={body}
+      bodyPlaceholder={null}
+    />
+  );
 }
 
 export function AskQuestionNode(props: NodeProps) {
   const d = props.data as JourneyNodeData;
-  const subtitle = d.text?.trim()
-    ? d.text.trim().slice(0, 40) + (d.text.length > 40 ? '…' : '')
-    : 'Configure question';
-  return <NodeShell {...shellProps(props)} title="Question" subtitle={subtitle} />;
+  return (
+    <ActionNode
+      props={props}
+      stepName="Ask Question"
+      body={<MessageBody text={d.text} emptyHint="Add a text" />}
+      bodyPlaceholder={null}
+    />
+  );
+}
+
+export function ButtonsNode(props: NodeProps) {
+  const d = props.data as JourneyNodeData;
+  const buttons = Array.isArray(d.buttons) ? d.buttons : [];
+  const titles = buttons.map((b) => b.title?.trim()).filter(Boolean) as string[];
+  return (
+    <ActionNode
+      props={props}
+      stepName="Buttons"
+      body={
+        <div className="space-y-1.5">
+          <MessageBody text={d.text} emptyHint="Add a text" />
+          {titles.length > 0 ? (
+            <div className="flex flex-wrap gap-1">
+              {titles.slice(0, 3).map((title) => (
+                <span
+                  key={title}
+                  className="rounded-full border-[0.5px] border-border-subtle bg-white px-1.5 py-0.5 text-[9px] font-medium text-slate-500"
+                >
+                  {title}
+                </span>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      }
+      bodyPlaceholder={null}
+      multiOutputs={buttons
+        .filter((b) => b.id)
+        .map((b) => ({ id: b.id, label: b.title?.trim() || b.id }))}
+    />
+  );
+}
+
+export function RandomizerNode(props: NodeProps) {
+  const d = props.data as JourneyNodeData;
+  const paths = Array.isArray(d.paths) ? d.paths : [];
+  const summary = paths
+    .map((p) => `${p.label?.trim() || p.id} ${p.weight ?? 0}%`)
+    .join(' · ');
+  return (
+    <ActionNode
+      props={props}
+      stepName="Randomizer"
+      bodyPlaceholder={summary || 'Add paths'}
+      multiOutputs={paths
+        .filter((p) => p.id)
+        .map((p) => ({ id: p.id, label: p.label?.trim() || p.id }))}
+    />
+  );
 }
 
 export function AssignToNode(props: NodeProps) {
   const d = props.data as JourneyNodeData;
   return (
-    <NodeShell
-      {...shellProps(props)}
-      title="Assign"
-      subtitle={d.assigneeType ?? 'user'}
+    <ActionNode
+      props={props}
+      stepName="Assign To"
+      bodyPlaceholder={d.assigneeType ?? 'user'}
     />
   );
 }
@@ -201,10 +280,24 @@ export function AssignToNode(props: NodeProps) {
 export function WaitNode(props: NodeProps) {
   const d = props.data as JourneyNodeData;
   return (
-    <NodeShell
-      {...shellProps(props)}
-      title="Wait"
-      subtitle={`${d.amount ?? 1} ${d.unit ?? 'hours'}`}
+    <ActionNode
+      props={props}
+      stepName="Wait"
+      bodyPlaceholder={`${d.amount ?? 1} ${d.unit ?? 'hours'}`}
+    />
+  );
+}
+
+export function GotoStepNode(props: NodeProps) {
+  const d = props.data as JourneyNodeData;
+  const target = d.targetNodeId?.trim();
+  return (
+    <ActionNode
+      props={props}
+      stepName="Go to Step"
+      bodyPlaceholder={
+        target ? target.slice(0, 12) + (target.length > 12 ? '…' : '') : 'Select step'
+      }
     />
   );
 }
@@ -212,10 +305,10 @@ export function WaitNode(props: NodeProps) {
 export function ConditionNode(props: NodeProps) {
   const d = props.data as JourneyNodeData;
   return (
-    <NodeShell
-      {...shellProps(props)}
-      title={d.field ?? 'contact.field'}
-      subtitle="Yes / No branch"
+    <ActionNode
+      props={props}
+      stepName={NODE_LABELS.CONDITION}
+      bodyPlaceholder={summarizeConditionGroup(d as Record<string, unknown>) || 'Set condition'}
       outputs="branch"
     />
   );
@@ -224,39 +317,37 @@ export function ConditionNode(props: NodeProps) {
 export function UpdateFieldNode(props: NodeProps) {
   const d = props.data as JourneyNodeData;
   return (
-    <NodeShell
-      {...shellProps(props)}
-      title="Field"
-      subtitle={d.field === 'custom' ? d.customFieldKey || 'custom' : d.field || 'name'}
+    <ActionNode
+      props={props}
+      stepName="Update Field"
+      bodyPlaceholder={
+        d.field === 'custom' ? d.customFieldKey || 'custom' : d.field || 'name'
+      }
     />
   );
 }
 
 export function WebhookNode(props: NodeProps) {
-  const d = props.data as JourneyNodeData & {
-    responseMappings?: { jsonPath: string; attributeKey: string }[];
-  };
+  const d = props.data as JourneyNodeData;
   const method = d.method ?? 'POST';
-  const name = d.name?.trim();
   const mappingCount = Array.isArray(d.responseMappings)
     ? d.responseMappings.filter((m) => m.jsonPath?.trim() && m.attributeKey?.trim()).length
     : 0;
-  let subtitle = 'Configure request';
+  let placeholder = 'Configure request';
   if (d.url?.trim()) {
     const url = d.url.trim();
-    const shortUrl = url.length > 32 ? `${url.slice(0, 32)}…` : url;
-    subtitle = `${method} · ${shortUrl}`;
-  } else if (name) {
-    subtitle = method;
+    placeholder = `${method} · ${url.length > 28 ? `${url.slice(0, 28)}…` : url}`;
+  } else if (d.name?.trim()) {
+    placeholder = method;
   }
   if (mappingCount > 0) {
-    subtitle = `${subtitle} · ${mappingCount} saved field${mappingCount === 1 ? '' : 's'}`;
+    placeholder = `${placeholder} · ${mappingCount} saved field${mappingCount === 1 ? '' : 's'}`;
   }
   return (
-    <NodeShell
-      {...shellProps(props)}
-      title={name || 'HTTP Request'}
-      subtitle={subtitle}
+    <ActionNode
+      props={props}
+      stepName={d.name?.trim() || 'HTTP Request'}
+      bodyPlaceholder={placeholder}
     />
   );
 }
@@ -264,20 +355,43 @@ export function WebhookNode(props: NodeProps) {
 export function UpdateTagNode(props: NodeProps) {
   const d = props.data as JourneyNodeData;
   const tags = Array.isArray(d.tags) ? d.tags.join(', ') : '';
-  return <NodeShell {...shellProps(props)} title="Tags" subtitle={tags || 'Add tags'} />;
+  return (
+    <ActionNode
+      props={props}
+      stepName="Update Tag"
+      bodyPlaceholder={tags || 'Add tags'}
+    />
+  );
+}
+
+export function AddToFunnelNode(props: NodeProps) {
+  const d = props.data as JourneyNodeData;
+  return (
+    <ActionNode
+      props={props}
+      stepName="Add to Funnel"
+      bodyPlaceholder={d.funnelId ? 'Lead funnel selected' : 'Select funnel'}
+    />
+  );
 }
 
 export function OpenConversationNode(props: NodeProps) {
-  return <NodeShell {...shellProps(props)} title="Open" subtitle="Reopen in inbox" />;
+  return (
+    <ActionNode
+      props={props}
+      stepName="Open Conversation"
+      bodyPlaceholder="Reopen in inbox"
+    />
+  );
 }
 
 export function CloseConversationNode(props: NodeProps) {
   const d = props.data as JourneyNodeData;
   return (
-    <NodeShell
-      {...shellProps(props)}
-      title="Close"
-      subtitle={d.closingNote?.trim() ? 'With note' : 'Resolve conversation'}
+    <ActionNode
+      props={props}
+      stepName="Close Conversation"
+      bodyPlaceholder={d.closingNote?.trim() ? 'With note' : 'Resolve conversation'}
     />
   );
 }
@@ -285,10 +399,12 @@ export function CloseConversationNode(props: NodeProps) {
 export function TriggerJourneyNode(props: NodeProps) {
   const d = props.data as JourneyNodeData;
   return (
-    <NodeShell
-      {...shellProps(props)}
-      title="Trigger"
-      subtitle={d.journeyId ? `Journey ${d.journeyId.slice(0, 8)}…` : 'Select journey'}
+    <ActionNode
+      props={props}
+      stepName="Trigger Journey"
+      bodyPlaceholder={
+        d.journeyId ? `Journey ${d.journeyId.slice(0, 8)}…` : 'Select journey'
+      }
     />
   );
 }
@@ -296,10 +412,10 @@ export function TriggerJourneyNode(props: NodeProps) {
 export function UpdateLifecycleNode(props: NodeProps) {
   const d = props.data as JourneyNodeData;
   return (
-    <NodeShell
-      {...shellProps(props)}
-      title="Lifecycle"
-      subtitle={d.stage || 'Set stage'}
+    <ActionNode
+      props={props}
+      stepName="Update Lifecycle"
+      bodyPlaceholder={d.stage || 'Set stage'}
     />
   );
 }
@@ -307,28 +423,39 @@ export function UpdateLifecycleNode(props: NodeProps) {
 export function IntegrationStubNode(props: NodeProps) {
   const type = props.type as JourneyNodeType;
   return (
-    <NodeShell
-      {...shellProps(props)}
-      title={NODE_LABELS[type]}
-      subtitle="Coming soon"
+    <ActionNode
+      props={props}
+      stepName={NODE_LABELS[type]}
+      bodyPlaceholder="Coming soon"
     />
   );
 }
 
 export function EndNode(props: NodeProps) {
-  return <NodeShell {...shellProps(props)} title="Journey ends" subtitle="Workflow complete" />;
+  return (
+    <ActionNode
+      props={props}
+      stepName="End"
+      bodyPlaceholder="Workflow complete"
+      outputs="none"
+    />
+  );
 }
 
 export const journeyNodeTypes = {
   TRIGGER: TriggerNode,
   SEND_MESSAGE: SendMessageNode,
   ASK_QUESTION: AskQuestionNode,
+  BUTTONS: ButtonsNode,
   ASSIGN_TO: AssignToNode,
   WAIT: WaitNode,
+  GOTO_STEP: GotoStepNode,
   CONDITION: ConditionNode,
+  RANDOMIZER: RandomizerNode,
   UPDATE_FIELD: UpdateFieldNode,
   WEBHOOK: WebhookNode,
   UPDATE_TAG: UpdateTagNode,
+  ADD_TO_FUNNEL: AddToFunnelNode,
   OPEN_CONVERSATION: OpenConversationNode,
   CLOSE_CONVERSATION: CloseConversationNode,
   TRIGGER_JOURNEY: TriggerJourneyNode,

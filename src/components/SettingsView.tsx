@@ -27,7 +27,11 @@ import { SettingsPlaceholder } from './settings/SettingsPlaceholder';
 import { AiKnowledgePanel } from './settings/AiKnowledgePanel';
 import { AiCopilotPanel } from './settings/AiCopilotPanel';
 import { WalletPanel } from './settings/WalletPanel';
+import { PlansPanel } from './settings/PlansPanel';
 import { InvoiceLogsPanel } from './settings/InvoiceLogsPanel';
+import { AutomationSettingsPanel } from './settings/AutomationSettingsPanel';
+import { InboxBehaviorPanel } from './settings/InboxBehaviorPanel';
+import { NotificationsPanel } from './settings/NotificationsPanel';
 import { fetchWalletBalanceCc, WALLET_BALANCE_EVENT } from '../lib/walletEvents';
 import { formatCc } from '../lib/convocoins';
 import { ConvoCoinIcon } from './ConvoCoinIcon';
@@ -38,8 +42,12 @@ function SettingsPanel({ section }: { section: SettingsSection }) {
     return <CompanyInfoPanel key={getWorkspaceId() ?? 'company'} />;
   }
   if (section === 'users') return <UsersTeamsPanel />;
+  if (section === 'automation') return <AutomationSettingsPanel />;
+  if (section === 'inbox-behavior') return <InboxBehaviorPanel />;
+  if (section === 'alerts') return <NotificationsPanel />;
   if (section === 'ai-knowledge') return <AiKnowledgePanel />;
   if (section === 'ai-copilot') return <AiCopilotPanel />;
+  if (section === 'subscription') return <PlansPanel />;
   if (section === 'wallet') return <WalletPanel />;
   if (section === 'invoices') return <InvoiceLogsPanel />;
   return <SettingsPlaceholder title={SETTINGS_SECTION_TITLES[section]} />;
@@ -51,11 +59,19 @@ export function SettingsView() {
   const section = settingsSectionFromPath(location.pathname);
   const title = SETTINGS_SECTION_TITLES[section];
   const subtitle =
-    section === 'wallet'
-      ? 'Subscription, ConvoCoins balance, usage rates, and billing activity.'
-      : section === 'invoices'
-        ? 'Razorpay payment and order IDs for charges, renewals, and add-ons.'
-        : 'Manage your workspace preferences and account configuration.';
+    section === 'subscription'
+      ? 'Your current plan, upgrades, and the full pricing catalog.'
+      : section === 'wallet'
+        ? 'ConvoCoins balance, usage rates, and wallet top-ups.'
+        : section === 'invoices'
+          ? 'Razorpay payment and order IDs for charges, renewals, and add-ons.'
+          : section === 'automation'
+            ? 'Pause automations, default reply, persistent menu, and your workspace tag registry.'
+            : section === 'inbox-behavior'
+              ? 'Auto-assign new conversations to your team — round-robin or rule-based.'
+              : section === 'alerts'
+                ? 'Choose channels, message content, and recipients when AI escalates to a human.'
+                : 'Manage your workspace preferences and account configuration.';
   const [role, setRole] = useState(getUserRole());
   const [permissions, setPermissions] = useState(getUserPermissions());
   const [walletBalanceCc, setWalletBalanceCc] = useState<number | null>(null);
@@ -87,6 +103,15 @@ export function SettingsView() {
       navigate(pathForSettingsSection('wallet'), { replace: true });
     }
   }, [navigate, section]);
+
+  useEffect(() => {
+    if (location.pathname.startsWith('/settings/notifications')) {
+      navigate(pathForSettingsSection('alerts'), { replace: true });
+    }
+    if (location.pathname.startsWith('/settings/verification')) {
+      navigate(pathForSettingsSection('company-info'), { replace: true });
+    }
+  }, [location.pathname, navigate]);
 
   const visibleNav = useMemo(
     () =>
@@ -170,11 +195,17 @@ export function SettingsView() {
           </div>
         </aside>
 
-        <div className="flex-1 min-w-0 overflow-y-auto bg-surface-muted p-3 md:p-4">
-          <div className="mb-3 rounded-2xl border border-black/5 bg-surface px-4 py-3 shadow-sm md:mb-4 md:px-5">
-            <h1 className="text-xl font-bold tracking-tight text-slate-900 md:text-2xl">{title}</h1>
-            <p className="mt-0.5 text-xs text-slate-500 md:text-sm">{subtitle}</p>
-          </div>
+        <div
+          className={`flex-1 min-w-0 overflow-y-auto bg-surface-muted ${
+            section === 'alerts' ? 'p-2 md:p-3' : 'p-3 md:p-4'
+          }`}
+        >
+          {section !== 'alerts' && section !== 'subscription' ? (
+            <div className="mb-3 rounded-2xl border border-black/5 bg-surface px-4 py-3 shadow-sm md:mb-4 md:px-5">
+              <h1 className="text-xl font-bold tracking-tight text-slate-900 md:text-2xl">{title}</h1>
+              <p className="mt-0.5 text-xs text-slate-500 md:text-sm">{subtitle}</p>
+            </div>
+          ) : null}
 
           {currentSectionAllowed ? (
             <SettingsPanel section={section} />

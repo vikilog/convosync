@@ -3,12 +3,11 @@ import type { JourneyNodeType } from '../types';
 
 export type AddStepsMenuAnchor = {
   nodeId: string;
-  top: number;
-  left: number;
 };
 
 type JourneyCanvasContextValue = {
   addNodeAfter: (sourceNodeId: string, type: JourneyNodeType) => void;
+  updateNodeData: (nodeId: string, patch: Record<string, unknown>) => void;
   hasTrigger: boolean;
   addMenuAnchor: AddStepsMenuAnchor | null;
   openAddMenu: (anchor: AddStepsMenuAnchor) => void;

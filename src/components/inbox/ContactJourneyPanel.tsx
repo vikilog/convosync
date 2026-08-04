@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { Check, ChevronDown, PauseCircle, Play, Route, XCircle } from 'lucide-react';
+import { Check, ChevronDown, PauseCircle, RotateCcw, Route, XCircle } from 'lucide-react';
 
 export type JourneyProgressStep = {
   nodeId: string;
@@ -35,6 +35,8 @@ type Props = {
   publishedJourneys?: JourneyOption[];
   assignedJourneyId?: string | null;
   onAssignJourney?: (journeyId: string) => void;
+  /** e.g. WhatsApp Automation / Instagram Automation */
+  automationLabel?: string;
 };
 
 function formatRemaining(ms: number): string {
@@ -193,7 +195,11 @@ function JourneySteps({ progress }: { progress: ContactJourneyProgress }) {
             {step.detail && (
               <p
                 className={`mt-0.5 text-xs font-medium ${
-                  step.state === 'current' ? 'text-sky-600/70' : 'text-gray-400'
+                  step.state === 'failed'
+                    ? 'text-[#ba1a1a]/80'
+                    : step.state === 'current'
+                      ? 'text-sky-600/70'
+                      : 'text-gray-400'
                 }`}
               >
                 {step.detail}
@@ -215,26 +221,28 @@ export const ContactJourneyPanel: React.FC<Props> = ({
   publishedJourneys = [],
   assignedJourneyId = null,
   onAssignJourney,
+  automationLabel = 'Automation',
 }) => {
   const [expanded, setExpanded] = useState(false);
-  const [selectedJourneyId, setSelectedJourneyId] = useState(assignedJourneyId ?? '');
 
   useEffect(() => {
-    setSelectedJourneyId(assignedJourneyId ?? progress?.journeyId ?? '');
-  }, [assignedJourneyId, progress?.journeyId, progress?.executionId]);
-
-  useEffect(() => {
-    if (progress?.status === 'running' || progress?.status === 'waiting') {
+    if (
+      progress?.status === 'running' ||
+      progress?.status === 'waiting' ||
+      progress?.status === 'failed' ||
+      progress?.status === 'completed'
+    ) {
       setExpanded(true);
-    } else if (progress?.status === 'completed' || progress?.status === 'failed') {
-      setExpanded(false);
     }
   }, [progress?.executionId, progress?.status]);
 
   const currentStep = progress?.steps.find((s) => s.state === 'current');
+  const failedStep = progress?.steps.find((s) => s.state === 'failed');
   const badge = progress ? statusBadge(progress.status) : null;
   const assignedName =
     publishedJourneys.find((j) => j.id === assignedJourneyId)?.name ?? 'Assigned journey';
+  const restartJourneyId = assignedJourneyId ?? progress?.journeyId ?? null;
+  const canRestart = Boolean(onAssignJourney && restartJourneyId);
 
   if (initialLoading && !progress) {
     return (
@@ -253,67 +261,92 @@ export const ContactJourneyPanel: React.FC<Props> = ({
         isActive ? 'border-sky-200' : 'border-black/5'
       }`}
     >
-      <button
-        type="button"
-        onClick={() => setExpanded((open) => !open)}
-        className="flex w-full cursor-pointer items-start gap-2 p-3 text-left transition-colors hover:bg-surface-muted"
-        aria-expanded={expanded}
-      >
-        <span
-          className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${
-            isActive ? 'bg-sky-50 text-sky-600' : 'bg-sky-50 text-gray-400'
-          }`}
+      <div className="flex items-start gap-1 p-3">
+        <button
+          type="button"
+          onClick={() => setExpanded((open) => !open)}
+          className="flex min-w-0 flex-1 cursor-pointer items-start gap-2 text-left transition-colors"
+          aria-expanded={expanded}
         >
-          <Route className="h-4 w-4" />
-        </span>
+          <span
+            className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${
+              isActive ? 'bg-sky-50 text-sky-600' : 'bg-sky-50 text-gray-400'
+            }`}
+          >
+            <Route className="h-4 w-4" />
+          </span>
 
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <p className="text-xs font-bold text-gray-500">Automation journey</p>
-            {progress && badge && (
-              <StatusBadgePill status={progress.status} badge={badge} />
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <p className="text-xs font-bold text-gray-500">{automationLabel}</p>
+              {progress && badge && (
+                <StatusBadgePill status={progress.status} badge={badge} />
+              )}
+            </div>
+
+            {progress ? (
+              <>
+                <p
+                  className="mt-1 break-words text-sm font-bold leading-snug text-gray-900"
+                  title={progress.journeyName}
+                >
+                  {progress.journeyName}
+                </p>
+                {!expanded && progress.status === 'completed' && (
+                  <p className="mt-1 text-xs font-medium text-gray-500">
+                    {progress.steps.filter((s) => s.state === 'done').length} steps completed
+                  </p>
+                )}
+                {!expanded && progress.status === 'failed' && failedStep && (
+                  <p className="mt-1 truncate text-xs font-semibold text-[#ba1a1a]">
+                    {failedStep.detail || failedStep.label}
+                  </p>
+                )}
+                {!expanded && currentStep && progress.status !== 'completed' && progress.status !== 'failed' && (
+                  <p className="mt-1 truncate text-xs font-semibold text-sky-600">
+                    Now: {currentStep.label}
+                  </p>
+                )}
+                {!expanded && currentStep?.type === 'WAIT' && currentStep.waitUntil && (
+                  <div className="mt-1">
+                    <WaitRemaining waitUntil={currentStep.waitUntil} />
+                  </div>
+                )}
+              </>
+            ) : assignedJourneyId ? (
+              <p
+                className="mt-1 break-words text-sm font-bold leading-snug text-gray-900"
+                title={assignedName}
+              >
+                {assignedName}
+              </p>
+            ) : (
+              <p className="mt-1 text-sm font-medium text-gray-500">No active journey</p>
             )}
           </div>
 
-          {progress ? (
-            <>
-              <p
-                className="mt-1 break-words text-sm font-bold leading-snug text-gray-900"
-                title={progress.journeyName}
-              >
-                {progress.journeyName}
-              </p>
-              {!expanded && progress.status === 'completed' && (
-                <p className="mt-1 text-xs font-medium text-gray-500">
-                  {progress.steps.filter((s) => s.state === 'done').length} steps completed
-                </p>
-              )}
-              {!expanded && currentStep && progress.status !== 'completed' && (
-                <p className="mt-1 truncate text-xs font-semibold text-sky-600">
-                  Now: {currentStep.label}
-                </p>
-              )}
-              {!expanded && currentStep?.type === 'WAIT' && currentStep.waitUntil && (
-                <div className="mt-1">
-                  <WaitRemaining waitUntil={currentStep.waitUntil} />
-                </div>
-              )}
-            </>
-          ) : assignedJourneyId ? (
-            <p className="mt-1 break-words text-sm font-bold leading-snug text-gray-900" title={assignedName}>
-              {assignedName}
-            </p>
-          ) : (
-            <p className="mt-1 text-sm font-medium text-gray-500">No active journey</p>
-          )}
-        </div>
+          <ChevronDown
+            className={`mt-1 h-4 w-4 shrink-0 text-gray-400 transition-transform duration-200 ${
+              expanded ? 'rotate-180' : ''
+            }`}
+          />
+        </button>
 
-        <ChevronDown
-          className={`mt-1 h-4 w-4 shrink-0 text-gray-400 transition-transform duration-200 ${
-            expanded ? 'rotate-180' : ''
-          }`}
-        />
-      </button>
+        {canRestart && (
+          <button
+            type="button"
+            title="Restart automation"
+            aria-label="Restart automation"
+            onClick={() => {
+              if (!restartJourneyId || !onAssignJourney) return;
+              onAssignJourney(restartJourneyId);
+            }}
+            className="mt-0.5 flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-xl text-gray-500 transition-colors hover:bg-emerald-50 hover:text-channel-green"
+          >
+            <RotateCcw className="h-4 w-4" />
+          </button>
+        )}
+      </div>
 
       {expanded && (
         <div className="border-t border-black/5 px-3 pb-3">
@@ -329,38 +362,6 @@ export const ContactJourneyPanel: React.FC<Props> = ({
               <JourneySteps progress={progress} />
             </div>
           )}
-        </div>
-      )}
-
-      {onAssignJourney && publishedJourneys.length > 0 && (
-        <div className="space-y-2 border-t border-black/5 bg-surface-muted/50 p-3">
-          <p className="text-xs font-bold text-gray-500">Assign journey</p>
-          <select
-            value={selectedJourneyId}
-            onChange={(e) => setSelectedJourneyId(e.target.value)}
-            className="w-full cursor-pointer rounded-xl border border-black/5 bg-surface px-3 py-2 text-sm font-semibold text-gray-800 outline-none transition-colors focus:border-channel-green/40 focus:ring-2 focus:ring-emerald-100"
-          >
-            <option value="">Select a journey…</option>
-            {publishedJourneys.map((journey) => (
-              <option key={journey.id} value={journey.id}>
-                {journey.name}
-              </option>
-            ))}
-          </select>
-          <button
-            type="button"
-            disabled={!selectedJourneyId}
-            onClick={() => {
-              if (!selectedJourneyId) return;
-              onAssignJourney(selectedJourneyId);
-            }}
-            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-channel-green py-2.5 text-sm font-bold text-white transition-colors hover:bg-channel-green-hover disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            <Play className="h-3.5 w-3.5" />
-            {selectedJourneyId && selectedJourneyId === assignedJourneyId
-              ? 'Restart journey'
-              : 'Start journey'}
-          </button>
         </div>
       )}
     </article>

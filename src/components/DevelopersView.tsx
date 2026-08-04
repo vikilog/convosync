@@ -4,11 +4,14 @@
  */
 
 import type { FC } from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Code2, Database, Webhook, Zap } from 'lucide-react';
 import { WebhooksPanel } from './developers/WebhooksPanel';
 import { ActionsPanel } from './developers/ActionsPanel';
 import { AiSyncPanel } from './developers/AiSyncPanel';
+import { api } from '../lib/api';
+import { planFeatureEnabled, type PlanFeatureFlags } from '../lib/planEntitlements';
+import { PlanUpgradeBanner } from './PlanUpgradeBanner';
 
 type DevSection = 'webhooks' | 'actions' | 'ai-sync';
 
@@ -40,7 +43,19 @@ const SECTIONS: {
 
 export const DevelopersView: FC = () => {
   const [section, setSection] = useState<DevSection>('webhooks');
+  const [planFeatures, setPlanFeatures] = useState<PlanFeatureFlags | null>(null);
   const active = SECTIONS.find((s) => s.id === section)!;
+
+  useEffect(() => {
+    void api
+      .getSubscription()
+      .then((res: { currentPlan?: PlanFeatureFlags | null }) => {
+        setPlanFeatures(res.currentPlan ?? null);
+      })
+      .catch(() => setPlanFeatures(null));
+  }, []);
+
+  const developersAllowed = planFeatureEnabled(planFeatures, 'developers');
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 max-w-6xl">
@@ -78,14 +93,17 @@ export const DevelopersView: FC = () => {
       </aside>
 
       <main className="flex-1 min-w-0">
-        <header className="mb-4">
+        {!developersAllowed ? (
+          <PlanUpgradeBanner message="Developers (webhooks, actions, AI sync) is available on Business plan and above." />
+        ) : null}
+        <header className="mb-4 mt-4">
           <h3 className="text-base font-bold text-gray-900">{active.label}</h3>
           <p className="text-xs text-gray-500 mt-1">{active.description}</p>
         </header>
 
-        {section === 'webhooks' && <WebhooksPanel />}
-        {section === 'actions' && <ActionsPanel />}
-        {section === 'ai-sync' && <AiSyncPanel />}
+        {developersAllowed && section === 'webhooks' && <WebhooksPanel />}
+        {developersAllowed && section === 'actions' && <ActionsPanel />}
+        {developersAllowed && section === 'ai-sync' && <AiSyncPanel />}
       </main>
     </div>
   );

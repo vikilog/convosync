@@ -4,12 +4,16 @@ export type JourneyNodeType =
   | 'TRIGGER'
   | 'SEND_MESSAGE'
   | 'ASK_QUESTION'
+  | 'BUTTONS'
   | 'ASSIGN_TO'
   | 'WAIT'
+  | 'GOTO_STEP'
   | 'CONDITION'
+  | 'RANDOMIZER'
   | 'UPDATE_FIELD'
   | 'WEBHOOK'
   | 'UPDATE_TAG'
+  | 'ADD_TO_FUNNEL'
   | 'OPEN_CONVERSATION'
   | 'CLOSE_CONVERSATION'
   | 'TRIGGER_JOURNEY'
@@ -26,6 +30,8 @@ export type JourneyRecord = {
   status: JourneyStatus;
   createdAt: string;
   updatedAt: string;
+  /** From TRIGGER node — e.g. message.received */
+  triggerEvent?: string | null;
   _count?: { executions: number; nodes: number };
 };
 
@@ -63,12 +69,16 @@ export const NODE_LABELS: Record<JourneyNodeType, string> = {
   TRIGGER: 'Trigger',
   SEND_MESSAGE: 'Send Message',
   ASK_QUESTION: 'Ask Question',
+  BUTTONS: 'Buttons',
   ASSIGN_TO: 'Assign To',
   WAIT: 'Wait',
-  CONDITION: 'Branch',
+  GOTO_STEP: 'Go to Step',
+  CONDITION: 'Condition',
+  RANDOMIZER: 'Randomizer',
   UPDATE_FIELD: 'Update Field',
   WEBHOOK: 'HTTP Request',
   UPDATE_TAG: 'Update Tag',
+  ADD_TO_FUNNEL: 'Add to Funnel',
   OPEN_CONVERSATION: 'Open Conversation',
   CLOSE_CONVERSATION: 'Close Conversation',
   TRIGGER_JOURNEY: 'Trigger Journey',
@@ -107,7 +117,9 @@ export const ASSIGNEE_TYPES = [
 ] as const;
 
 export const DEFAULT_NODE_DATA: Record<JourneyNodeType, Record<string, unknown>> = {
-  TRIGGER: { event: 'message.received' },
+  TRIGGER: {
+    event: 'message.received',
+  },
   SEND_MESSAGE: {
     messageMode: 'text',
     text: '',
@@ -115,11 +127,44 @@ export const DEFAULT_NODE_DATA: Record<JourneyNodeType, Record<string, unknown>>
     templateId: '',
     language: 'en',
     variables: [],
+    simulateTyping: false,
   },
-  ASK_QUESTION: { text: '', saveReplyTo: 'last_reply' },
+  ASK_QUESTION: {
+    text: '',
+    saveReplyTo: 'last_reply',
+    quickCollect: false,
+    simulateTyping: false,
+  },
+  BUTTONS: {
+    text: '',
+    buttons: [
+      { id: 'btn_a', title: 'Option A' },
+      { id: 'btn_b', title: 'Option B' },
+    ],
+    simulateTyping: false,
+  },
   ASSIGN_TO: { assigneeType: 'user', assigneeId: '' },
-  WAIT: { amount: 1, unit: 'hours' },
-  CONDITION: { field: 'contact.name', operator: 'contains', value: '' },
+  WAIT: {
+    amount: 1,
+    unit: 'hours',
+    businessHours: {
+      enabled: false,
+      startTime: '08:00',
+      endTime: '22:00',
+      daysOfWeek: [],
+    },
+  },
+  GOTO_STEP: { targetNodeId: '' },
+  CONDITION: {
+    combinator: 'all',
+    conditions: [{ type: 'field', field: 'contact.name', operator: 'contains', value: '' }],
+  },
+  RANDOMIZER: {
+    paths: [
+      { id: 'a', label: 'Path A', weight: 50 },
+      { id: 'b', label: 'Path B', weight: 50 },
+    ],
+  },
   UPDATE_FIELD: { field: 'name', value: '', customFieldKey: '' },
   WEBHOOK: {
     name: '',
@@ -132,6 +177,7 @@ export const DEFAULT_NODE_DATA: Record<JourneyNodeType, Record<string, unknown>>
     responseMappings: [],
   },
   UPDATE_TAG: { action: 'add', tags: [] },
+  ADD_TO_FUNNEL: { funnelId: '', stageId: '' },
   OPEN_CONVERSATION: {},
   CLOSE_CONVERSATION: { closingNote: '' },
   TRIGGER_JOURNEY: { journeyId: '' },

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, Loader2, Lock, LogOut, Save, Trash2, User } from 'lucide-react';
+import { Camera, CheckCircle2, Loader2, Lock, LogOut, Save, Trash2, User } from 'lucide-react';
 import { api, getUserAvatar, getUserEmail, getUserName, setUserAvatar, setUserName } from '../../lib/api';
 import { compressImageFile } from '../../lib/imageUpload';
 import { logoutThisDevice } from '../../lib/session';
@@ -12,6 +12,7 @@ type ProfileUser = {
   email: string;
   avatar?: string | null;
   role?: string;
+  emailVerified?: boolean;
 };
 
 const inputClass =
@@ -36,14 +37,25 @@ export function ProfilePanel() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [otpPending, setOtpPending] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
+  const [otpBusy, setOtpBusy] = useState<'send' | 'verify' | null>(null);
+  const [otpSentHint, setOtpSentHint] = useState<string | null>(null);
 
   const loadProfile = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const me = (await api.getMe()) as ProfileUser;
+      const [me, verification] = await Promise.all([
+        api.getMe() as Promise<ProfileUser>,
+        api.getVerificationStatus().catch(() => null) as Promise<{
+          userEmail?: { verified?: boolean };
+        } | null>,
+      ]);
       setProfile(me);
       setName(me.name);
+      setEmailVerified(Boolean(me.emailVerified ?? verification?.userEmail?.verified));
       if (me.name) setUserName(me.name);
       if (me.avatar !== undefined) setUserAvatar(me.avatar ?? '');
     } catch (e) {
@@ -246,16 +258,110 @@ export function ProfilePanel() {
           />
         </label>
 
-        <label className="block">
+        <div className="block">
           <span className="text-meta font-bold uppercase text-gray-500">Email</span>
-          <input
-            type="email"
-            value={profile.email}
-            disabled
-            className={`${inputClass} cursor-not-allowed bg-slate-50 text-slate-500`}
-          />
+          <div className="mt-1 flex gap-2">
+            <input
+              type="email"
+              value={profile.email}
+              disabled
+              className={`${inputClass} mt-0 min-w-0 flex-1 cursor-not-allowed bg-slate-50 text-slate-500`}
+            />
+            {emailVerified ? (
+              <span className="inline-flex shrink-0 items-center gap-1 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-xs font-semibold text-emerald-700">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                Verified
+              </span>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  void (async () => {
+                    setOtpBusy('send');
+                    setError(null);
+                    setMessage(null);
+                    setOtpSentHint(null);
+                    try {
+                      const res = (await api.sendVerificationOtp({ target: 'user_email' })) as {
+                        alreadyVerified?: boolean;
+                        destinationHint?: string;
+                      };
+                      if (res.alreadyVerified) {
+                        setEmailVerified(true);
+                        setOtpPending(false);
+                        setMessage('Email already verified.');
+                      } else {
+                        setOtpPending(true);
+                        setOtpSentHint(
+                          res.destinationHint
+                            ? `Check your email (${res.destinationHint}) for the OTP`
+                            : 'Check your email for the OTP'
+                        );
+                      }
+                    } catch (err) {
+                      setOtpPending(false);
+                      setError(err instanceof Error ? err.message : 'Failed to send OTP');
+                    } finally {
+                      setOtpBusy(null);
+                    }
+                  })();
+                }}
+                disabled={otpBusy !== null}
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-60"
+              >
+                {otpBusy === 'send' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+                {otpPending ? 'Resend' : 'Verify'}
+              </button>
+            )}
+          </div>
+          {otpPending && !emailVerified ? (
+            <div className="mt-2 space-y-1.5">
+              {otpSentHint ? (
+                <p className="text-xs font-medium text-accent-green">{otpSentHint}</p>
+              ) : null}
+              <div className="flex gap-2">
+              <input
+                value={otpCode}
+                onChange={(e) => setOtpCode(e.target.value)}
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                placeholder="Enter OTP"
+                className="min-w-0 flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  void (async () => {
+                    setOtpBusy('verify');
+                    setError(null);
+                    setMessage(null);
+                    try {
+                      const status = (await api.verifyVerificationOtp({
+                        target: 'user_email',
+                        code: otpCode.trim(),
+                      })) as { userEmail?: { verified?: boolean } };
+                      setEmailVerified(Boolean(status.userEmail?.verified));
+                      setOtpPending(false);
+                      setOtpCode('');
+                      setMessage('Email verified.');
+                    } catch (err) {
+                      setError(err instanceof Error ? err.message : 'Failed to verify OTP');
+                    } finally {
+                      setOtpBusy(null);
+                    }
+                  })();
+                }}
+                disabled={otpBusy !== null || otpCode.trim().length < 4}
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-slate-900 px-3 py-2 text-xs font-semibold text-white disabled:opacity-60"
+              >
+                {otpBusy === 'verify' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+                Confirm
+              </button>
+              </div>
+            </div>
+          ) : null}
           <p className="mt-1 text-xs text-slate-500">Email cannot be changed here.</p>
-        </label>
+        </div>
 
         {profile.role ? (
           <p className="text-xs font-medium capitalize text-slate-600">

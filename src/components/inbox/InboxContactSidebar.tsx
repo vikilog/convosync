@@ -6,14 +6,12 @@
 import React, { useState } from 'react';
 import {
   Ban,
+  ChevronDown,
   History,
-  MessageSquare,
   Pencil,
   Sparkles,
-  Tag,
   Trash2,
   User,
-  UserCheck,
   X,
 } from 'lucide-react';
 import type { Contact } from '../../types';
@@ -32,12 +30,12 @@ type SidebarTab = 'profile' | 'ai';
 type Props = {
   contact: Contact;
   conversationId: string;
-  assigneeLabel: string;
   journeyProgress: ContactJourneyProgress | null;
   journeyInitialLoading?: boolean;
   publishedJourneys?: JourneyOption[];
   assignedJourneyId?: string | null;
   onAssignJourney?: (journeyId: string) => void;
+  automationLabel?: string;
   onEditContact: () => void;
   onDeleteChat: () => void;
   onViewAudits: () => void;
@@ -64,44 +62,15 @@ function tagStyles(tag: string): string {
   return 'bg-surface-muted text-slate-600 border-black/5';
 }
 
-function DetailRow({
-  icon: Icon,
-  label,
-  value,
-  title,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  value: string;
-  title?: string;
-}) {
-  return (
-    <div className="flex items-start gap-2.5 py-2">
-      <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sky-50 text-sky-600">
-        <Icon className="h-3.5 w-3.5" />
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">{label}</p>
-        <p
-          className="mt-0.5 text-sm font-semibold text-gray-900 break-words leading-snug"
-          title={title ?? value}
-        >
-          {value}
-        </p>
-      </div>
-    </div>
-  );
-}
-
 export const InboxContactSidebar: React.FC<Props> = ({
   contact,
   conversationId: _conversationId, // ponytail: used by Calls tab when re-enabled
-  assigneeLabel,
   journeyProgress,
   journeyInitialLoading,
   publishedJourneys,
   assignedJourneyId,
   onAssignJourney,
+  automationLabel,
   onEditContact,
   onDeleteChat,
   onViewAudits,
@@ -109,6 +78,7 @@ export const InboxContactSidebar: React.FC<Props> = ({
   onClose,
 }) => {
   const [tab, setTab] = useState<SidebarTab>('profile');
+  const [profileOpen, setProfileOpen] = useState(true);
 
   const initials = contact.name
     .split(' ')
@@ -167,123 +137,132 @@ export const InboxContactSidebar: React.FC<Props> = ({
           hidden={tab !== 'profile'}
           className={tab === 'profile' ? 'space-y-3' : 'hidden'}
         >
-            <article className="rounded-2xl border border-black/5 bg-surface p-4 shadow-sm">
-              <div className="flex flex-col items-center text-center">
+            <article className="overflow-hidden rounded-2xl border border-black/5 bg-surface shadow-sm">
+              <button
+                type="button"
+                onClick={() => setProfileOpen((o) => !o)}
+                className="flex w-full cursor-pointer items-center gap-2 p-3 text-left transition-colors hover:bg-surface-muted"
+                aria-expanded={profileOpen}
+              >
                 {contact.avatar ? (
                   <img
                     src={contact.avatar}
-                    alt={contact.name}
-                    className="mb-3 h-[72px] w-[72px] rounded-full border-[3px] border-sky-100 object-cover shadow-sm"
+                    alt=""
+                    className="h-9 w-9 shrink-0 rounded-full border-2 border-sky-100 object-cover"
                   />
                 ) : (
-                  <div className="mb-3 flex h-[72px] w-[72px] items-center justify-center rounded-full border-[3px] border-sky-100 bg-sky-50 text-xl font-bold text-sky-600">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-sky-100 bg-sky-50 text-xs font-bold text-sky-600">
                     {initials}
                   </div>
                 )}
-
-                <div className="flex items-center gap-1">
-                  <h3 className="text-base font-bold leading-tight text-gray-950">{contact.name}</h3>
-                  <button
-                    type="button"
-                    onClick={onEditContact}
-                    className="cursor-pointer rounded-md p-1 text-gray-400 transition-colors hover:bg-sky-50 hover:text-sky-600"
-                    title="Edit contact"
-                    aria-label="Edit contact"
-                  >
-                    <Pencil className="h-3.5 w-3.5" />
-                  </button>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-bold text-gray-950">{contact.name}</p>
+                  <p className="truncate font-mono text-[11px] font-semibold text-gray-500">
+                    {contactHandle}
+                  </p>
                 </div>
+                <ChevronDown
+                  className={`h-4 w-4 shrink-0 text-gray-400 transition-transform duration-200 ${
+                    profileOpen ? 'rotate-180' : ''
+                  }`}
+                />
+              </button>
 
-                <p className="mt-1 font-mono text-xs font-semibold text-gray-500">{contactHandle}</p>
-
-                {contact.tags.length > 0 && (
-                  <div className="mt-3 flex flex-wrap justify-center gap-1.5">
-                    {contact.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className={`rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${tagStyles(tag)}`}
-                      >
-                        {tag.replace(/_/g, ' ')}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {contact.channel === 'instagram' &&
-                (contact.instagramBio ||
-                  contact.instagramFollowerCount ||
-                  contact.instagramVerified) && (
-                  <div className="mt-4 border-t border-black/5 pt-3 text-left">
-                    {contact.instagramBio && (
-                      <p className="text-xs leading-relaxed text-gray-600 whitespace-pre-wrap">
-                        {contact.instagramBio}
-                      </p>
+              {profileOpen && (
+                <div className="border-t border-black/5 px-4 pb-4 pt-3">
+                  <div className="flex flex-col items-center text-center">
+                    {contact.avatar ? (
+                      <img
+                        src={contact.avatar}
+                        alt={contact.name}
+                        className="mb-3 h-[72px] w-[72px] rounded-full border-[3px] border-sky-100 object-cover shadow-sm"
+                      />
+                    ) : (
+                      <div className="mb-3 flex h-[72px] w-[72px] items-center justify-center rounded-full border-[3px] border-sky-100 bg-sky-50 text-xl font-bold text-sky-600">
+                        {initials}
+                      </div>
                     )}
-                    <div className="mt-2 flex flex-wrap gap-2 text-xs font-semibold text-gray-500">
-                      {contact.instagramFollowerCount && (
-                        <span>{contact.instagramFollowerCount} followers</span>
-                      )}
-                      {contact.instagramFollowsCount && (
-                        <span>{contact.instagramFollowsCount} following</span>
-                      )}
-                      {contact.instagramMediaCount && (
-                        <span>{contact.instagramMediaCount} posts</span>
-                      )}
-                      {contact.instagramVerified && (
-                        <span className="text-sky-600">Verified</span>
-                      )}
+
+                    <div className="flex items-center gap-1">
+                      <h3 className="text-base font-bold leading-tight text-gray-950">
+                        {contact.name}
+                      </h3>
+                      <button
+                        type="button"
+                        onClick={onEditContact}
+                        className="cursor-pointer rounded-md p-1 text-gray-400 transition-colors hover:bg-sky-50 hover:text-sky-600"
+                        title="Edit contact"
+                        aria-label="Edit contact"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </button>
                     </div>
-                    {(contact.instagramFollowsBusiness != null ||
-                      contact.instagramBusinessFollowsUser != null) && (
-                      <div className="mt-2 space-y-0.5 text-center text-[11px] font-medium text-gray-400">
-                        {contact.instagramFollowsBusiness != null && (
-                          <p>
-                            {contact.instagramFollowsBusiness
-                              ? 'Follows your business'
-                              : 'Does not follow your business'}
-                          </p>
-                        )}
-                        {contact.instagramBusinessFollowsUser != null && (
-                          <p>
-                            {contact.instagramBusinessFollowsUser
-                              ? 'Your business follows them'
-                              : 'Your business does not follow them'}
-                          </p>
-                        )}
+
+                    <p className="mt-1 font-mono text-xs font-semibold text-gray-500">
+                      {contactHandle}
+                    </p>
+
+                    {contact.tags.length > 0 && (
+                      <div className="mt-3 flex flex-wrap justify-center gap-1.5">
+                        {contact.tags.map((tag) => (
+                          <span
+                            key={tag}
+                            className={`rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${tagStyles(tag)}`}
+                          >
+                            {tag.replace(/_/g, ' ')}
+                          </span>
+                        ))}
                       </div>
                     )}
                   </div>
-                )}
-            </article>
 
-            <article className="rounded-2xl border border-black/5 bg-surface p-3 shadow-sm">
-              <h4 className="px-1 text-xs font-bold text-gray-500">Contact details</h4>
-              <div className="mt-1 divide-y divide-slate-100">
-                <DetailRow icon={MessageSquare} label="Source" value={contact.source || '—'} />
-                {contact.channel === 'instagram' && contact.instagramFollowerCount && (
-                  <DetailRow
-                    icon={Sparkles}
-                    label="Followers"
-                    value={contact.instagramFollowerCount}
-                  />
-                )}
-                {contact.channel === 'instagram' && contact.handle && (
-                  <DetailRow icon={MessageSquare} label="Username" value={contact.handle} />
-                )}
-                <DetailRow
-                  icon={Tag}
-                  label="Interest"
-                  value={contact.courseInterest || '—'}
-                  title={contact.courseInterest}
-                />
-                <DetailRow
-                  icon={UserCheck}
-                  label="Assigned to"
-                  value={assigneeLabel}
-                  title={assigneeLabel}
-                />
-              </div>
+                  {contact.channel === 'instagram' &&
+                    (contact.instagramBio ||
+                      contact.instagramFollowerCount ||
+                      contact.instagramVerified) && (
+                      <div className="mt-4 border-t border-black/5 pt-3 text-left">
+                        {contact.instagramBio && (
+                          <p className="whitespace-pre-wrap text-xs leading-relaxed text-gray-600">
+                            {contact.instagramBio}
+                          </p>
+                        )}
+                        <div className="mt-2 flex flex-wrap gap-2 text-xs font-semibold text-gray-500">
+                          {contact.instagramFollowerCount && (
+                            <span>{contact.instagramFollowerCount} followers</span>
+                          )}
+                          {contact.instagramFollowsCount && (
+                            <span>{contact.instagramFollowsCount} following</span>
+                          )}
+                          {contact.instagramMediaCount && (
+                            <span>{contact.instagramMediaCount} posts</span>
+                          )}
+                          {contact.instagramVerified && (
+                            <span className="text-sky-600">Verified</span>
+                          )}
+                        </div>
+                        {(contact.instagramFollowsBusiness != null ||
+                          contact.instagramBusinessFollowsUser != null) && (
+                          <div className="mt-2 space-y-0.5 text-center text-[11px] font-medium text-gray-400">
+                            {contact.instagramFollowsBusiness != null && (
+                              <p>
+                                {contact.instagramFollowsBusiness
+                                  ? 'Follows your business'
+                                  : 'Does not follow your business'}
+                              </p>
+                            )}
+                            {contact.instagramBusinessFollowsUser != null && (
+                              <p>
+                                {contact.instagramBusinessFollowsUser
+                                  ? 'Your business follows them'
+                                  : 'Your business does not follow them'}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                </div>
+              )}
             </article>
 
             <ContactJourneyPanel
@@ -292,6 +271,7 @@ export const InboxContactSidebar: React.FC<Props> = ({
               publishedJourneys={publishedJourneys}
               assignedJourneyId={assignedJourneyId}
               onAssignJourney={onAssignJourney}
+              automationLabel={automationLabel}
             />
 
             <ContactLeadJourneyPanel contactId={contact.id} />

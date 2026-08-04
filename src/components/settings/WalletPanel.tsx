@@ -7,12 +7,10 @@ import { useCallback, useEffect, useState, type ComponentType } from 'react';
 import {
   ArrowRight,
   Bot,
-  Check,
   Loader2,
   Mail,
   MessageCircle,
   Smartphone,
-  Sparkles,
   Workflow,
   X,
   Zap,
@@ -28,12 +26,6 @@ import {
   inrToCc,
   paiseToCc,
 } from '../../lib/convocoins';
-import {
-  hasPaidSubscription,
-  resolveCheckoutPlan,
-  subscriptionStatusLabel,
-  type BillingPlanOption,
-} from '../../lib/billingSubscription';
 import { openRazorpayCheckout } from '../../lib/razorpay';
 import { computeWalletRechargeQuote, type WalletRechargeQuote } from '../../lib/walletRechargeQuote';
 import { RechargeConfirmDialog } from './RechargeConfirmDialog';
@@ -41,26 +33,8 @@ import { WalletUsageCalculator } from './WalletUsageCalculator';
 import { dispatchWalletBalance } from '../../lib/walletEvents';
 import { WALLET_PRICING_ROWS, type WalletPricingKey } from '../../lib/walletPricing';
 
-const PLAN_NAME = 'ConvoSync Pro';
-const PLAN_PRICE_INR = 1999;
-const PLAN_SLUG = 'starter';
-const AUTO_RECHARGE_CC = 1000;
-
 const CARD_CLASS =
   'rounded-xl border border-black/5 bg-surface p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]';
-
-const INCLUDED_FEATURES = [
-  'WhatsApp Inbox (unlimited)',
-  'Instagram Inbox (unlimited)',
-  'Campaigns',
-  'Templates',
-  'Journey builder',
-  'AI Agent',
-  'Email campaigns',
-  'All channels access',
-  'Unlimited team members',
-  'Priority support',
-] as const;
 
 const PRICING_ICONS: Record<
   WalletPricingKey,
@@ -74,15 +48,6 @@ const PRICING_ICONS: Record<
   aiAgent: Bot,
   journeyTrigger: Zap,
   inbox: Workflow,
-};
-
-type BillingWorkspace = {
-  subscriptionStatus: string;
-  billingSubscription: {
-    status: string;
-    currentPeriodEnd: string | null;
-    cancelAtPeriodEnd: boolean;
-  } | null;
 };
 
 type WalletSummary = {
@@ -106,30 +71,12 @@ type WalletTransaction = {
   createdAt: string;
 };
 
-function formatBillingDate(iso: string | null): string {
-  if (!iso) return '—';
-  return new Date(iso).toLocaleDateString('en-IN', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
-}
-
 function formatTxDate(iso: string): string {
   return new Date(iso).toLocaleDateString('en-IN', {
     day: 'numeric',
     month: 'numeric',
     year: 'numeric',
   });
-}
-
-function subscriptionLabel(status: string, billingStatus?: string): string {
-  return subscriptionStatusLabel(status, billingStatus);
-}
-
-function isOnTrial(billing: BillingWorkspace | null): boolean {
-  if (!billing || hasPaidSubscription(billing)) return false;
-  return billing.subscriptionStatus.toLowerCase() === 'trial';
 }
 
 function txTitle(tx: WalletTransaction): string {
@@ -155,19 +102,14 @@ function ConvoCoinIcon({ size = 24 }: { size?: number }) {
 }
 
 export function WalletPanel() {
-  const [billing, setBilling] = useState<BillingWorkspace | null>(null);
   const [wallet, setWallet] = useState<WalletSummary | null>(null);
   const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
   const [allTransactions, setAllTransactions] = useState<WalletTransaction[] | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [actionMessage, setActionMessage] = useState<string | null>(null);
 
   const [checkoutBusy, setCheckoutBusy] = useState(false);
-  const [subscribeBusy, setSubscribeBusy] = useState(false);
-  const [checkoutPlanSlug, setCheckoutPlanSlug] = useState(PLAN_SLUG);
-  const [cancelBusy, setCancelBusy] = useState(false);
   const [settingsBusy, setSettingsBusy] = useState(false);
 
   const [selectedPreset, setSelectedPreset] = useState<number | null>(null);
@@ -183,19 +125,11 @@ export function WalletPanel() {
     setLoading(true);
     setError(null);
     try {
-      const [billingRes, walletRes, txRes, plansRes] = await Promise.all([
-        api.getBillingWorkspace(),
+      const [walletRes, txRes] = await Promise.all([
         api.getBillingWallet(),
         api.getBillingWalletTransactions(5),
-        api.getBillingPlans().catch(() => []),
       ]);
-      const checkoutPlan = resolveCheckoutPlan(
-        (plansRes as BillingPlanOption[]) ?? [],
-        PLAN_SLUG
-      );
-      setCheckoutPlanSlug(checkoutPlan?.slug ?? PLAN_SLUG);
       const walletData = walletRes as WalletSummary;
-      setBilling(billingRes as BillingWorkspace);
       setWallet(walletData);
       setAlertDraft(String(paiseToCc(walletData.lowBalanceThresholdPaise)));
       setTransactions((txRes as { transactions: WalletTransaction[] }).transactions ?? []);
@@ -348,75 +282,6 @@ export function WalletPanel() {
     }
   }
 
-  async function handleSubscribe() {
-    setSubscribeBusy(true);
-    setError(null);
-    try {
-      const created = (await api.createBillingSubscription({
-        planId: checkoutPlanSlug,
-        billingCycle: 'monthly',
-      })) as {
-        checkoutMode?: 'subscription' | 'order';
-        subscriptionId?: string;
-        orderId?: string;
-        keyId: string;
-        amountPaise: number;
-      };
-      const useOrder = created.checkoutMode === 'order' || Boolean(created.orderId);
-      await openRazorpayCheckout({
-        key: created.keyId,
-        name: 'ConvoSync',
-        description: `${PLAN_NAME} (monthly)`,
-        theme: { color: BRAND_PURPLE },
-        ...(useOrder
-          ? { order_id: created.orderId, amount: created.amountPaise, currency: 'INR' }
-          : { subscription_id: created.subscriptionId }),
-        onSuccess: async (response) => {
-          if (useOrder) {
-            await api.verifyBillingOrder({
-              razorpay_order_id: response.razorpay_order_id!,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature!,
-            });
-          } else {
-            await api.verifyBillingSubscription({
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_subscription_id: response.razorpay_subscription_id!,
-              razorpay_signature: response.razorpay_signature!,
-            });
-          }
-          await load();
-        },
-      });
-    } catch (err) {
-      const message = formatCatchError(err);
-      if (message !== 'Payment cancelled') setError(message);
-    } finally {
-      setSubscribeBusy(false);
-    }
-  }
-
-  async function handleCancel() {
-    if (
-      !window.confirm(
-        'Cancel subscription at the end of this billing period? Access continues until then.'
-      )
-    ) {
-      return;
-    }
-    setCancelBusy(true);
-    setError(null);
-    try {
-      await api.cancelBillingSubscription({ cancelAtPeriodEnd: true });
-      setActionMessage('Subscription will cancel at period end.');
-      await load();
-    } catch (err) {
-      setError(formatCatchError(err));
-    } finally {
-      setCancelBusy(false);
-    }
-  }
-
   async function openAllTransactions() {
     setShowAllModal(true);
     if (allTransactions) return;
@@ -441,14 +306,6 @@ export function WalletPanel() {
     );
   }
 
-  const paid = hasPaidSubscription(billing);
-  const onTrial = isOnTrial(billing);
-  const status = subscriptionLabel(
-    billing?.subscriptionStatus ?? 'inactive',
-    billing?.billingSubscription?.status
-  );
-  const nextBilling = billing?.billingSubscription?.currentPeriodEnd ?? null;
-  const cancelling = billing?.billingSubscription?.cancelAtPeriodEnd ?? false;
   const balanceCc = paiseToCc(wallet?.balancePaise ?? 0);
   const monthSpentCc = paiseToCc(wallet?.monthSpentPaise ?? 0);
   const alertCc = paiseToCc(wallet?.lowBalanceThresholdPaise ?? 50_000);
@@ -461,75 +318,11 @@ export function WalletPanel() {
           {error}
         </div>
       ) : null}
-      {actionMessage ? (
-        <div className="rounded-xl border border-primary/20 bg-primary/10 px-4 py-2.5 text-sm text-primary">
-          {actionMessage}
-        </div>
-      ) : null}
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-5">
         {/* LEFT — 60% */}
         <div className="flex flex-col gap-4 xl:col-span-3">
-          {/* Card 1 — Plan + Balance */}
           <section className={CARD_CLASS}>
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-base font-bold text-slate-900">{PLAN_NAME}</span>
-                  {paid ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary ring-1 ring-primary/20">
-                      <Check className="h-3 w-3" aria-hidden />
-                      {status}
-                    </span>
-                  ) : onTrial ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-800 ring-1 ring-amber-200">
-                      Trial
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center rounded-full bg-surface-muted px-2 py-0.5 text-xs font-semibold text-slate-600 ring-1 ring-black/5">
-                      {status}
-                    </span>
-                  )}
-                </div>
-                <p className="mt-1 text-sm text-slate-600">
-                  ₹{PLAN_PRICE_INR.toLocaleString('en-IN')}/month
-                  {paid && nextBilling ? (
-                    <>
-                      <span className="text-slate-400"> • </span>
-                      Next billing: {formatBillingDate(nextBilling)}
-                    </>
-                  ) : null}
-                  {cancelling ? (
-                    <span className="ml-2 text-xs font-medium text-amber-700">(cancels at period end)</span>
-                  ) : null}
-                </p>
-                {!paid ? (
-                  <div className="mt-3 rounded-lg border border-violet-200 bg-violet-50/80 p-3">
-                    <p className="text-sm text-slate-700">
-                      {onTrial
-                        ? 'Your free trial is active. Subscribe to keep access after it ends.'
-                        : 'No active plan. Subscribe to unlock full platform access.'}
-                    </p>
-                    <button
-                      type="button"
-                      disabled={subscribeBusy}
-                      onClick={() => void handleSubscribe()}
-                      className="mt-2 inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {subscribeBusy ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Sparkles className="h-4 w-4" />
-                      )}
-                      {subscribeBusy ? 'Opening checkout…' : `Subscribe · ₹${PLAN_PRICE_INR.toLocaleString('en-IN')}/mo`}
-                    </button>
-                  </div>
-                ) : null}
-              </div>
-            </div>
-
-            <div className="my-4 h-px bg-[#E5E7EB]" />
-
             <div className="flex items-center gap-4">
               <ConvoCoinIcon size={48} />
               <div>
@@ -768,56 +561,6 @@ export function WalletPanel() {
 
         {/* RIGHT — 40% */}
         <div className="flex flex-col gap-4 xl:col-span-2 xl:sticky xl:top-4 xl:self-start">
-          {/* Card 4 — Included */}
-          <section className={CARD_CLASS}>
-            <h3 className="text-sm font-bold text-slate-900">ConvoSync Pro Includes</h3>
-            <ul className="mt-2 space-y-1">
-              {INCLUDED_FEATURES.map((feature) => (
-                <li
-                  key={feature}
-                  className="flex items-start gap-2 text-xs leading-snug text-slate-700 sm:text-[13px]"
-                >
-                  <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" aria-hidden />
-                  <span>{feature}</span>
-                </li>
-              ))}
-            </ul>
-
-            {paid && !cancelling ? (
-              <>
-                <div className="my-3 h-px bg-[#E5E7EB]" />
-                <button
-                  type="button"
-                  disabled={cancelBusy}
-                  onClick={() => void handleCancel()}
-                  className="cursor-pointer text-xs font-semibold text-[#EF4444] hover:underline disabled:opacity-50"
-                >
-                  {cancelBusy ? 'Cancelling…' : 'Cancel subscription'}
-                </button>
-              </>
-            ) : !paid ? (
-              <>
-                <div className="my-3 h-px bg-[#E5E7EB]" />
-                <button
-                  type="button"
-                  disabled={subscribeBusy}
-                  onClick={() => void handleSubscribe()}
-                  className="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-primary px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {subscribeBusy ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Sparkles className="h-4 w-4" />
-                  )}
-                  {subscribeBusy ? 'Opening checkout…' : 'Subscribe to ConvoSync Pro'}
-                </button>
-                <p className="mt-2 text-center text-[11px] text-slate-500">
-                  ₹{PLAN_PRICE_INR.toLocaleString('en-IN')}/month · billed monthly
-                </p>
-              </>
-            ) : null}
-          </section>
-
           <WalletUsageCalculator
             balanceCc={balanceCc}
             onSuggestRecharge={(cc) => {
@@ -830,7 +573,6 @@ export function WalletPanel() {
               });
             }}
           />
-
         </div>
       </div>
 

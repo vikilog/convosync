@@ -10,7 +10,6 @@ import {
   LayoutGrid,
   Inbox,
   Users,
-  Bell,
   Megaphone,
   FileText,
   GitBranch,
@@ -62,7 +61,6 @@ const SIDEBAR_HIDDEN_TABS = new Set([
   'google-tools',
   'ctwa',
   'pay',
-  'notifications',
 ]);
 
 type NavItem = {
@@ -218,13 +216,6 @@ export const SideNavBar: React.FC = () => {
           icon: Inbox,
           badge: inboxUnreadTotal > 0 ? inboxUnreadTotal : undefined,
         },
-        {
-          id: 'notifications',
-          label: 'Notifications',
-          icon: Bell,
-          path: pathForSettingsSection('notifications'),
-          pulse: true,
-        },
         { id: 'contacts', label: 'Contacts', icon: Users },
       ],
     },
@@ -233,7 +224,7 @@ export const SideNavBar: React.FC = () => {
       items: [
         { id: 'campaigns', label: 'Campaigns', icon: Megaphone },
         { id: 'templates', label: 'Templates', icon: FileText },
-        { id: 'journey', label: 'Journeys', icon: GitBranch },
+        { id: 'automations', label: 'Automations', icon: GitBranch },
         { id: 'ai-agent', label: 'AI Agent', icon: Bot },
         { id: 'social-listening', label: 'Social Listening', icon: Ear },
         { id: 'leads', label: 'Leads', icon: UsersRound },
@@ -376,32 +367,26 @@ export const SideNavBar: React.FC = () => {
                   const isCampaigns = item.id === 'campaigns';
                   const isContacts = item.id === 'contacts';
                   const isLeads = item.id === 'leads';
-                  const isJourney = item.id === 'journey';
+                  const isAutomations = item.id === 'automations';
                   const isSettings = item.id === 'settings';
                   const isWallet = item.id === 'wallet';
-                  const isNotifications = item.id === 'notifications';
                   const isSocialListening = item.id === 'social-listening';
                   const itemPath = item.path ?? pathForTab(item.id);
-                  const onNotificationsPage = location.pathname.startsWith(
-                    '/settings/notifications'
-                  );
                   const onWalletPage = location.pathname.startsWith('/settings/wallet');
                   const onSettingsPage =
-                    location.pathname.startsWith('/settings') &&
-                    !onNotificationsPage &&
-                    !onWalletPage;
+                    location.pathname.startsWith('/settings') && !onWalletPage;
+                  const onAutomationsPage = location.pathname.startsWith('/automations');
 
                   const isIntegrations = item.id === 'integrations';
                   const isItemActive = (isActive: boolean) => {
-                    if (isNotifications) return onNotificationsPage;
                     if (isWallet) return onWalletPage;
                     if (isSettings) return onSettingsPage;
+                    if (isAutomations) return onAutomationsPage;
                     return (
                       isActive ||
                       (isCampaigns && location.pathname.startsWith('/campaigns/')) ||
                       (isContacts && location.pathname.startsWith('/contacts/')) ||
                       (isLeads && location.pathname.startsWith('/leads/')) ||
-                      (isJourney && location.pathname.startsWith('/journey/')) ||
                       (isSocialListening &&
                         location.pathname.startsWith('/social-listening')) ||
                       (isIntegrations && location.pathname.startsWith('/integrations'))

@@ -60,7 +60,7 @@ export function InvoiceLogsPanel() {
   }
 
   return (
-    <div className="max-w-5xl space-y-4">
+    <div className="w-full space-y-4">
       <div className="flex items-start gap-3 rounded-xl border border-primary/15 bg-primary/[0.06] px-4 py-3 text-sm text-neutral-700">
         <Receipt className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
         <p>

@@ -17,6 +17,8 @@ type InboxAssigneePickerProps = {
   aiAgents: AgentOption[];
   ruleBasedBots: BotOption[];
   publishedJourneys: JourneyOption[];
+  /** e.g. "WhatsApp Automation" / "Instagram Automation" */
+  journeysMenuLabel?: string;
   onChange: (value: string) => void;
 };
 
@@ -67,6 +69,7 @@ export function InboxAssigneePicker({
   aiAgents,
   ruleBasedBots,
   publishedJourneys,
+  journeysMenuLabel = 'Automation',
   onChange,
 }: InboxAssigneePickerProps) {
   const [open, setOpen] = useState(false);
@@ -178,7 +181,7 @@ export function InboxAssigneePicker({
                 >
                   <span className="flex items-center gap-2.5 min-w-0">
                     <Route className="w-4 h-4 text-sky-600 shrink-0" />
-                    Automation Journey
+                    {journeysMenuLabel}
                   </span>
                   <span className="text-xs text-gray-400 font-bold shrink-0">
                     {publishedJourneys.length}
@@ -231,11 +234,11 @@ export function InboxAssigneePicker({
                   Back
                 </button>
                 <div className="px-3 py-2 text-meta font-black uppercase tracking-wider text-gray-400">
-                  Select journey
+                  Select automation
                 </div>
                 {publishedJourneys.length === 0 ? (
                   <p className="px-3 py-3 text-meta text-gray-400 font-medium">
-                    No published journeys yet.
+                    No published {journeysMenuLabel.toLowerCase()} yet.
                   </p>
                 ) : (
                   publishedJourneys.map((journey) => (

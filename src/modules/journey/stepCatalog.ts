@@ -22,6 +22,12 @@ export const JOURNEY_STEP_CATALOG: StepCatalogItem[] = [
     category: 'messages',
   },
   {
+    type: 'BUTTONS',
+    label: 'Buttons',
+    description: 'Send a message with reply buttons and branch by choice',
+    category: 'messages',
+  },
+  {
     type: 'ASSIGN_TO',
     label: 'Assign To',
     description: 'Assign the conversation to a user, AI, bot, or journey',
@@ -29,8 +35,14 @@ export const JOURNEY_STEP_CATALOG: StepCatalogItem[] = [
   },
   {
     type: 'CONDITION',
-    label: 'Branch',
-    description: 'Create workflow branches based on contact data',
+    label: 'Condition',
+    description: 'Branch the workflow when a contact matches a condition',
+    category: 'logic',
+  },
+  {
+    type: 'RANDOMIZER',
+    label: 'Randomizer',
+    description: 'Split contacts randomly across weighted paths',
     category: 'logic',
   },
   {
@@ -43,6 +55,12 @@ export const JOURNEY_STEP_CATALOG: StepCatalogItem[] = [
     type: 'UPDATE_TAG',
     label: 'Update Contact Tag',
     description: 'Add, remove, or replace contact tags',
+    category: 'contact',
+  },
+  {
+    type: 'ADD_TO_FUNNEL',
+    label: 'Add to Funnel',
+    description: 'Capture this contact as a lead in a funnel board',
     category: 'contact',
   },
   {
@@ -61,6 +79,12 @@ export const JOURNEY_STEP_CATALOG: StepCatalogItem[] = [
     type: 'WAIT',
     label: 'Wait',
     description: 'Wait for a period of time before advancing',
+    category: 'flow',
+  },
+  {
+    type: 'GOTO_STEP',
+    label: 'Go to Step',
+    description: 'Jump to another step in this same automation',
     category: 'flow',
   },
   {

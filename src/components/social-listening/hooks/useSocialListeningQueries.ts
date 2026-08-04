@@ -178,6 +178,8 @@ export function useTopPosts(range: DashboardRange) {
 export type PostAutomationInfo = {
   autoResponseEnabled: boolean;
   leadFunnelId: string | null;
+  commentAutomationJourneyId: string | null;
+  commentAutomationJourneyName: string | null;
 };
 
 export function usePostAutomationMap(postIds: string[]) {

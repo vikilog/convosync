@@ -169,9 +169,9 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
     }
 
     // Connect → always land on requirements / instructions page (not Meta popup).
+    // Don't mark coexistence "connected" here — hub card must stay until a number links.
     setConnectionType('app_coexistence');
     localStorage.setItem(CONNECTION_TYPE_STORAGE_KEY, 'app_coexistence');
-    localStorage.setItem(COEXISTENCE_CONNECTED_KEY, '1');
     localStorage.setItem(COEXISTENCE_ONBOARDING_STEP_KEY, '1');
     sessionStorage.removeItem(PENDING_SETUP_SESSION_KEY);
     setAutoLaunchSignup(false);
@@ -372,6 +372,9 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
     }
     const remaining = await loadWhatsappAccounts({ silent: true });
     onAccountsChanged?.();
+    if (!remaining.some((a) => a.connectionMode === 'app_coexistence')) {
+      localStorage.removeItem(COEXISTENCE_CONNECTED_KEY);
+    }
     if (remaining.length === 0) {
       if (lockedMode === 'app_coexistence') {
         setConnectionType('app_coexistence');

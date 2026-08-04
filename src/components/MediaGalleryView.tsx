@@ -12,6 +12,8 @@ import {
   X,
 } from 'lucide-react';
 import { api } from '../lib/api';
+import { mediaGalleryAllowedByPlan } from '../lib/planEntitlements';
+import { PlanUpgradeBanner } from './PlanUpgradeBanner';
 
 type MediaScope = 'customer' | 'partner' | 'both';
 type MediaType = 'image' | 'pdf' | 'video' | 'document';
@@ -63,7 +65,25 @@ function mapAsset(raw: Record<string, unknown>): MediaAsset {
 function formatBytes(n: number): string {
   if (n < 1024) return `${n} B`;
   if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
-  return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+  if (n < 1024 * 1024 * 1024) return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+  return `${(n / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+}
+
+function formatStorageLimit(gb: number | undefined, limitBytes: number | null): string {
+  if (limitBytes == null) return 'Custom';
+  if (gb != null && gb > 0) return `${gb} GB`;
+  return formatBytes(limitBytes);
+}
+
+function formatUsageLabel(usage: {
+  usedBytes: number;
+  limitBytes: number | null;
+  storageGb?: number;
+}): string {
+  const used = formatBytes(usage.usedBytes);
+  if (usage.limitBytes == null) return `${used} used (Custom storage)`;
+  const limit = formatStorageLimit(usage.storageGb, usage.limitBytes);
+  return `${used} of ${limit} used`;
 }
 
 const TYPE_ICON: Record<MediaType, React.ReactNode> = {
@@ -105,12 +125,26 @@ export const MediaGalleryView: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [thumbnails, setThumbnails] = useState<Record<string, string>>({});
+  const [storageUsage, setStorageUsage] = useState<{
+    usedBytes: number;
+    limitBytes: number | null;
+    storageGb?: number;
+  } | null>(null);
+  const [galleryAllowed, setGalleryAllowed] = useState(true);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const raw = await api.getMediaGallery();
+      const [raw, usage, subscription] = await Promise.all([
+        api.getMediaGallery(),
+        api.getMediaGalleryUsage().catch(() => null),
+        api.getSubscription().catch(() => null),
+      ]);
       setItems((raw as Record<string, unknown>[]).map(mapAsset));
+      setStorageUsage(usage);
+      const plan = (subscription as { currentPlan?: { storageGb?: number } | null } | null)
+        ?.currentPlan;
+      setGalleryAllowed(mediaGalleryAllowedByPlan(plan));
     } catch {
       setItems([]);
     } finally {
@@ -271,9 +305,17 @@ export const MediaGalleryView: React.FC = () => {
       )}
 
       <header className="mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold text-[#111827] tracking-tight mb-4">
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#111827] tracking-tight mb-2">
           Media Gallery
         </h1>
+        {!galleryAllowed ? (
+          <PlanUpgradeBanner
+            message="Media Gallery storage is available on Growth plan and above."
+            className="mb-4"
+          />
+        ) : storageUsage ? (
+          <p className="text-sm text-[#64748B] mb-4">{formatUsageLabel(storageUsage)}</p>
+        ) : null}
         <div className="flex flex-row items-center gap-3">
           <div className="relative flex-1 min-w-0">
             <label htmlFor="media-search" className="sr-only">
@@ -294,11 +336,12 @@ export const MediaGalleryView: React.FC = () => {
           </div>
           <button
             type="button"
+            disabled={!galleryAllowed}
             onClick={() => {
               resetForm();
               setShowAdd(true);
             }}
-            className="inline-flex items-center justify-center gap-2 shrink-0 min-h-11 px-5 py-2.5 bg-primary hover:bg-primary-hover text-white rounded-xl text-sm font-bold cursor-pointer transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            className="inline-flex items-center justify-center gap-2 shrink-0 min-h-11 px-5 py-2.5 bg-primary hover:bg-primary-hover disabled:opacity-60 text-white rounded-xl text-sm font-bold cursor-pointer transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
             <Plus className="w-4 h-4" aria-hidden />
             Add media
@@ -327,11 +370,12 @@ export const MediaGalleryView: React.FC = () => {
           <p className="text-base font-semibold text-[#111827]">No media yet</p>
           <button
             type="button"
+            disabled={!galleryAllowed}
             onClick={() => {
               resetForm();
               setShowAdd(true);
             }}
-            className="mt-5 min-h-11 px-5 py-2.5 rounded-xl text-sm font-bold text-primary border border-primary/30 hover:bg-primary/5 cursor-pointer transition-colors duration-200"
+            className="mt-5 min-h-11 px-5 py-2.5 rounded-xl text-sm font-bold text-primary border border-primary/30 hover:bg-primary/5 disabled:opacity-60 cursor-pointer transition-colors duration-200"
           >
             Upload first file
           </button>

@@ -1,18 +1,18 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
+import { Loader2 } from 'lucide-react';
 import { api } from '../../../lib/api';
 import { useKeepAliveActivation } from '../../../components/KeepAlive';
-import { isJourneyGalleryPath, pathForJourneyGallery, pathForTab } from '../../../routes';
-import { JourneyList } from '../components/JourneyList';
+import {
+  isJourneyGalleryPath,
+  journeyIdFromPath,
+  pathForJourney,
+  pathForTab,
+} from '../../../routes';
 import { JourneyBuilder } from '../components/JourneyBuilder';
 import { JourneyNameDialog } from '../components/JourneyNameDialog';
-import {
-  useCreateJourney,
-  useDeleteJourney,
-  useJourney,
-  useJourneys,
-} from '../hooks/useJourneys';
+import { useCreateJourney, useJourney, useJourneys } from '../hooks/useJourneys';
 import { useJourneyBuilderStore } from '../store/journeyBuilderStore';
 import { getJourneyTemplate, type JourneyTemplate } from '../templates';
 import { JourneyGalleryPage } from './JourneyGalleryPage';
@@ -22,27 +22,38 @@ export function JourneyWorkspace() {
   const location = useLocation();
   const queryClient = useQueryClient();
   const showGallery = isJourneyGalleryPath(location.pathname);
+  const journeyId = journeyIdFromPath(location.pathname);
 
-  const [activeId, setActiveId] = useState<string | null>(null);
-  const activeIdRef = useRef(activeId);
-  activeIdRef.current = activeId;
+  const journeyIdRef = useRef(journeyId);
+  journeyIdRef.current = journeyId;
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [pendingTemplateId, setPendingTemplateId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
-  const { data: journeys = [], isLoading } = useJourneys();
+  useJourneys();
 
   useKeepAliveActivation(() => {
     void queryClient.invalidateQueries({ queryKey: ['journeys'] });
-    const id = activeIdRef.current;
+    const id = journeyIdRef.current;
     if (id) {
       void queryClient.invalidateQueries({ queryKey: ['journeys', id] });
       void queryClient.invalidateQueries({ queryKey: ['journeys', id, 'graph'] });
     }
   });
-  const { data: activeJourney } = useJourney(activeId);
+
+  const {
+    data: activeJourney,
+    isLoading: journeyLoading,
+    isError: journeyMissing,
+    isFetched,
+  } = useJourney(journeyId);
   const createJourney = useCreateJourney();
-  const deleteJourney = useDeleteJourney();
   const setDirty = useJourneyBuilderStore((s) => s.setDirty);
+
+  useEffect(() => {
+    if (journeyId && isFetched && journeyMissing) {
+      navigate(pathForTab('automations'), { replace: true });
+    }
+  }, [journeyId, journeyMissing, isFetched, navigate]);
 
   const openBlankCreate = () => {
     setPendingTemplateId(null);
@@ -68,68 +79,67 @@ export function JourneyWorkspace() {
       setDirty(false);
       setCreateDialogOpen(false);
       setPendingTemplateId(null);
-      navigate(pathForTab('journey'), { replace: true });
-      setActiveId(created.id);
+      navigate(pathForJourney(created.id));
     } finally {
       setCreating(false);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('Delete this journey?')) return;
-    await deleteJourney.mutateAsync(id);
-    if (activeId === id) setActiveId(null);
-  };
+  if (journeyId) {
+    if (journeyLoading || !activeJourney) {
+      return (
+        <div className="flex h-full min-h-0 items-center justify-center text-sm text-slate-500">
+          <Loader2 className="mr-2 h-5 w-5 animate-spin text-primary" />
+          Opening journey…
+        </div>
+      );
+    }
 
-  if (activeId && activeJourney) {
     return (
       <JourneyBuilder
         journey={activeJourney}
         onBack={() => {
-          setActiveId(null);
           setDirty(false);
-          navigate(pathForTab('journey'));
+          navigate(pathForTab('automations'));
         }}
       />
     );
   }
 
-  return (
-    <>
-      {showGallery ? (
+  if (showGallery) {
+    return (
+      <>
         <JourneyGalleryPage
-          onBack={() => navigate(pathForTab('journey'))}
+          onBack={() => navigate(pathForTab('automations'))}
           onSelectTemplate={openTemplateCreate}
           onStartBlank={openBlankCreate}
         />
-      ) : (
-        <JourneyList
-          journeys={journeys}
-          loading={isLoading || createJourney.isPending || creating}
-          onCreateBlank={openBlankCreate}
-          onOpenGallery={() => navigate(pathForJourneyGallery())}
-          onOpen={setActiveId}
-          onDelete={handleDelete}
+        <JourneyNameDialog
+          open={createDialogOpen}
+          title={pendingTemplate ? `Create “${pendingTemplate.name}”` : 'Name your journey'}
+          description={
+            pendingTemplate
+              ? "We'll pre-fill the workflow. You can edit messages and steps after creating."
+              : 'Choose a clear name before you start building the workflow.'
+          }
+          initialName={pendingTemplate?.name ?? ''}
+          confirmLabel={pendingTemplate ? 'Create from template' : 'Create journey'}
+          loading={createJourney.isPending || creating}
+          onClose={() => {
+            if (createJourney.isPending || creating) return;
+            setCreateDialogOpen(false);
+            setPendingTemplateId(null);
+          }}
+          onConfirm={handleCreateConfirm}
         />
-      )}
-      <JourneyNameDialog
-        open={createDialogOpen}
-        title={pendingTemplate ? `Create “${pendingTemplate.name}”` : 'Name your journey'}
-        description={
-          pendingTemplate
-            ? "We'll pre-fill the workflow. You can edit messages and steps after creating."
-            : 'Choose a clear name before you start building the workflow.'
-        }
-        initialName={pendingTemplate?.name ?? ''}
-        confirmLabel={pendingTemplate ? 'Create from template' : 'Create journey'}
-        loading={createJourney.isPending || creating}
-        onClose={() => {
-          if (createJourney.isPending || creating) return;
-          setCreateDialogOpen(false);
-          setPendingTemplateId(null);
-        }}
-        onConfirm={handleCreateConfirm}
-      />
-    </>
+      </>
+    );
+  }
+
+  return (
+    <div className="flex h-full min-h-0 items-center justify-center text-sm text-slate-500">
+      <Loader2 className="mr-2 h-5 w-5 animate-spin text-primary" />
+      Opening automations…
+    </div>
   );
 }

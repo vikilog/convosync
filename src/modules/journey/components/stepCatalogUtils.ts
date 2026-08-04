@@ -30,7 +30,8 @@ export function filterPaletteItems(
     if (!q) return true;
     return (
       item.label.toLowerCase().includes(q) ||
-      item.description.toLowerCase().includes(q)
+      item.description.toLowerCase().includes(q) ||
+      item.type.toLowerCase().includes(q)
     );
   });
 }

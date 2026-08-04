@@ -1,3 +1,5 @@
+import { tabAllowedByPlan, channelAllowedByPlan, type PlanFeatureFlags } from './planEntitlements';
+
 export const WORKSPACE_PERMISSION_DEFS = [
   { key: 'inbox', label: 'Inbox & conversations' },
   { key: 'contacts', label: 'Contacts & CRM' },
@@ -54,7 +56,9 @@ export function tabPermission(tab: string): WorkspacePermission | null {
       return 'contacts';
     case 'campaigns':
     case 'templates':
+    case 'automations':
     case 'journey':
+    case 'instagram-automation':
     case 'ctwa':
       return 'campaigns';
     case 'social-listening':
@@ -79,8 +83,10 @@ export function tabPermission(tab: string): WorkspacePermission | null {
 export function canAccessTab(
   tab: string,
   permissions: string[] | null | undefined,
-  role?: string | null
+  role?: string | null,
+  plan?: PlanFeatureFlags | null
 ): boolean {
+  if (!tabAllowedByPlan(tab, plan)) return false;
   const required = tabPermission(tab);
   if (!required) return true;
   return hasWorkspacePermission(permissions, required, role);
@@ -89,7 +95,8 @@ export function canAccessTab(
 export function canAccessPath(
   pathname: string,
   permissions: string[] | null | undefined,
-  role?: string | null
+  role?: string | null,
+  plan?: PlanFeatureFlags | null
 ): boolean {
   const clean = pathname.replace(/\/$/, '') || '/';
   if (clean.startsWith('/settings')) {
@@ -98,16 +105,27 @@ export function canAccessPath(
     if (!required) return true;
     return hasWorkspacePermission(permissions, required, role);
   }
-  if (clean.startsWith('/campaigns')) return canAccessTab('campaigns', permissions, role);
-  if (clean.startsWith('/journey')) return canAccessTab('journey', permissions, role);
-  if (clean.startsWith('/templates')) return canAccessTab('templates', permissions, role);
-  if (clean.startsWith('/ai-agent')) return canAccessTab('ai-agent', permissions, role);
-  if (clean.startsWith('/media-gallery')) return canAccessTab('media-gallery', permissions, role);
-  if (clean.startsWith('/social-listening')) return canAccessTab('social-listening', permissions, role);
-  if (clean.startsWith('/leads')) return canAccessTab('leads', permissions, role);
-  if (clean.startsWith('/google-tools')) return canAccessTab('google-tools', permissions, role);
+  if (clean.startsWith('/campaigns')) return canAccessTab('campaigns', permissions, role, plan);
+  if (clean.startsWith('/automations/instagram-automation')) {
+    if (!channelAllowedByPlan(plan, 'instagram')) return false;
+    return canAccessTab('automations', permissions, role, plan);
+  }
+  if (clean.startsWith('/automations')) return canAccessTab('automations', permissions, role, plan);
+  if (clean.startsWith('/instagram-automation')) {
+    if (!channelAllowedByPlan(plan, 'instagram')) return false;
+    return canAccessTab('automations', permissions, role, plan);
+  }
+  if (clean.startsWith('/journey')) {
+    return canAccessTab('automations', permissions, role, plan);
+  }
+  if (clean.startsWith('/templates')) return canAccessTab('templates', permissions, role, plan);
+  if (clean.startsWith('/ai-agent')) return canAccessTab('ai-agent', permissions, role, plan);
+  if (clean.startsWith('/media-gallery')) return canAccessTab('media-gallery', permissions, role, plan);
+  if (clean.startsWith('/social-listening')) return canAccessTab('social-listening', permissions, role, plan);
+  if (clean.startsWith('/leads')) return canAccessTab('leads', permissions, role, plan);
+  if (clean.startsWith('/google-tools')) return canAccessTab('google-tools', permissions, role, plan);
   const segment = clean.replace(/^\//, '').split('/')[0] || 'dashboard';
-  return canAccessTab(segment, permissions, role);
+  return canAccessTab(segment, permissions, role, plan);
 }
 
 const NAV_TAB_ORDER = [
@@ -117,7 +135,7 @@ const NAV_TAB_ORDER = [
   'calling',
   'campaigns',
   'templates',
-  'journey',
+  'automations',
   'ai-agent',
   'media-gallery',
   'social-listening',
@@ -142,10 +160,11 @@ export function pathForAppTab(tab: string): string {
 
 export function firstAccessibleTabPath(
   permissions: string[] | null | undefined,
-  role?: string | null
+  role?: string | null,
+  plan?: PlanFeatureFlags | null
 ): string {
   for (const tab of NAV_TAB_ORDER) {
-    if (canAccessTab(tab, permissions, role)) {
+    if (canAccessTab(tab, permissions, role, plan)) {
       return pathForAppTab(tab);
     }
   }
@@ -156,9 +175,10 @@ const SETTINGS_SECTION_ORDER = [
   'profile',
   'company-info',
   'users',
+  'automation',
+  'alerts',
   // 'security',
   // 'holidays',
-  // 'notifications',
   'wallet',
   'invoices',
   // 'contact-attributes',

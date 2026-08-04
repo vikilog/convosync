@@ -64,9 +64,17 @@ const TAB_SEO: Record<AppTab, Omit<PageSeo, 'path'>> = {
     title: 'Message templates',
     description: 'Create, preview, and submit WhatsApp message templates for Meta review.',
   },
+  automations: {
+    title: 'Automations',
+    description: 'WhatsApp and Instagram automation workflows in one place.',
+  },
   journey: {
-    title: 'Journeys',
-    description: 'Visual automation flows for onboarding and customer lifecycle.',
+    title: 'WhatsApp Automation',
+    description: 'Visual WhatsApp automation flows for onboarding and customer lifecycle.',
+  },
+  'instagram-automation': {
+    title: 'Instagram Automation',
+    description: 'Automate Instagram DMs and comment replies with triggers and quick replies.',
   },
   'ai-agent': {
     title: 'AI agents',
