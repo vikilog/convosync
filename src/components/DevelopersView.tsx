@@ -10,7 +10,11 @@ import { WebhooksPanel } from './developers/WebhooksPanel';
 import { ActionsPanel } from './developers/ActionsPanel';
 import { AiSyncPanel } from './developers/AiSyncPanel';
 import { api } from '../lib/api';
-import { planFeatureEnabled, type PlanFeatureFlags } from '../lib/planEntitlements';
+import {
+  planFeatureEnabled,
+  planFeaturesFromSubscription,
+  type PlanFeatureFlags,
+} from '../lib/planEntitlements';
 import { PlanUpgradeBanner } from './PlanUpgradeBanner';
 
 type DevSection = 'webhooks' | 'actions' | 'ai-sync';
@@ -50,7 +54,7 @@ export const DevelopersView: FC = () => {
     void api
       .getSubscription()
       .then((res: { currentPlan?: PlanFeatureFlags | null }) => {
-        setPlanFeatures(res.currentPlan ?? null);
+        setPlanFeatures(planFeaturesFromSubscription(res.currentPlan));
       })
       .catch(() => setPlanFeatures(null));
   }, []);

@@ -46,8 +46,19 @@ export function TrialBanner() {
 
   if (loading || !trial) return null;
 
+  // Paid / active always wins — never prefer a leftover trialEndsAt window
+  const paid =
+    trial.subscriptionStatus === 'active' ||
+    trial.subscriptionStatus === 'authenticated' ||
+    (!trial.isTrial && trial.displayStatus === 'Active');
+  if (paid) return null;
+
   if (trial.isTrial) {
     const urgent = trial.trialDaysLeft <= 3;
+    const daysLabel =
+      trial.trialDaysLeft === 0
+        ? 'ends today'
+        : `${trial.trialDaysLeft} day${trial.trialDaysLeft === 1 ? '' : 's'} left`;
     return (
       <div
         className={`shrink-0 border-b px-6 py-2.5 flex items-center justify-between gap-4 ${
@@ -59,11 +70,9 @@ export function TrialBanner() {
         <div className="flex items-center gap-2.5 min-w-0">
           <Clock className={`h-4 w-4 shrink-0 ${urgent ? 'text-amber-600' : 'text-primary'}`} />
           <p className="text-sm">
-            <span className="font-semibold">14-day free trial</span>
+            <span className="font-semibold">Free trial</span>
             {' — '}
-            {trial.trialDaysLeft === 0
-              ? 'ends today'
-              : `${trial.trialDaysLeft} day${trial.trialDaysLeft === 1 ? '' : 's'} left`}
+            {daysLabel}
             {trial.planName ? ` · ${trial.planName}` : ''}
           </p>
         </div>

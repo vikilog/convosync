@@ -19,6 +19,30 @@ export type PlanFeatureFlags = {
 
 const STARTER_CHANNELS = 'WhatsApp only';
 
+/** Normalize /workspace/subscription currentPlan (top-level + nested features.channels). */
+export function planFeaturesFromSubscription(
+  plan:
+    | (PlanFeatureFlags & {
+        features?: { channels?: string; channelsUnlimited?: boolean; storageGb?: number };
+      })
+    | null
+    | undefined
+): PlanFeatureFlags | null {
+  if (!plan) return null;
+  const nested = plan.features;
+  return {
+    channels: plan.channels ?? nested?.channels,
+    channelsUnlimited: plan.channelsUnlimited ?? nested?.channelsUnlimited,
+    aiCopilot: plan.aiCopilot,
+    socialListening: plan.socialListening,
+    voiceAgent: plan.voiceAgent,
+    developers: plan.developers,
+    whatsappPay: plan.whatsappPay,
+    ctwaAds: plan.ctwaAds,
+    storageGb: plan.storageGb ?? nested?.storageGb,
+  };
+}
+
 export function isUnlimitedUsageLimit(limit: number | null | undefined): boolean {
   return limit == null || limit >= UNLIMITED_USAGE_LIMIT;
 }

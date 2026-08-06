@@ -35,6 +35,7 @@ import {
   channelConnectBlockedReason,
   isChannelCountLimitReached,
   planFeatureEnabled,
+  planFeaturesFromSubscription,
   PLAN_UPGRADE_PATH,
   type PlanFeatureFlags,
 } from '../lib/planEntitlements';
@@ -736,7 +737,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
         { currentPlan?: PlanFeatureFlags | null } | null,
         { config?: { mode?: string; lastTestedAt?: string | null } } | null,
       ]) => {
-        setPlanFeatures(subscriptionRes?.currentPlan ?? null);
+        setPlanFeatures(planFeaturesFromSubscription(subscriptionRes?.currentPlan));
         const aiConfig = aiProviderRes?.config;
         setAiProviderConfigured(
           aiConfig?.mode === 'byok' || Boolean(aiConfig?.lastTestedAt)

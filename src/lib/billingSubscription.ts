@@ -26,12 +26,18 @@ export function subscriptionStatusLabel(
   subscriptionStatus: string,
   billingStatus?: string
 ): string {
-  const normalized = (billingStatus ?? subscriptionStatus).toLowerCase();
-  if (normalized === 'active' || normalized === 'authenticated') return 'Active';
-  if (normalized === 'paused') return 'Paused';
-  if (normalized === 'trial' || subscriptionStatus === 'trial') return 'Trial';
-  if (normalized === 'past_due') return 'Past due';
-  if (normalized === 'cancelled' || normalized === 'canceled') return 'Cancelled';
+  const billing = billingStatus?.toLowerCase();
+  const ws = subscriptionStatus.toLowerCase();
+  // Live billing / paid workspace always wins over leftover trial status
+  if (billing === 'active' || billing === 'authenticated' || ws === 'active' || ws === 'authenticated') {
+    return 'Active';
+  }
+  if (billing === 'paused') return 'Paused';
+  if (ws === 'trial') return 'Trial';
+  if (billing === 'past_due' || ws === 'past_due') return 'Past due';
+  if (billing === 'cancelled' || billing === 'canceled' || ws === 'cancelled' || ws === 'canceled') {
+    return 'Cancelled';
+  }
   return 'Inactive';
 }
 

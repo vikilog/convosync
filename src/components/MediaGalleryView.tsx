@@ -12,7 +12,10 @@ import {
   X,
 } from 'lucide-react';
 import { api } from '../lib/api';
-import { mediaGalleryAllowedByPlan } from '../lib/planEntitlements';
+import {
+  mediaGalleryAllowedByPlan,
+  planFeaturesFromSubscription,
+} from '../lib/planEntitlements';
 import { PlanUpgradeBanner } from './PlanUpgradeBanner';
 
 type MediaScope = 'customer' | 'partner' | 'both';
@@ -142,9 +145,8 @@ export const MediaGalleryView: React.FC = () => {
       ]);
       setItems((raw as Record<string, unknown>[]).map(mapAsset));
       setStorageUsage(usage);
-      const plan = (subscription as { currentPlan?: { storageGb?: number } | null } | null)
-        ?.currentPlan;
-      setGalleryAllowed(mediaGalleryAllowedByPlan(plan));
+      const currentPlan = (subscription as { currentPlan?: unknown } | null)?.currentPlan;
+      setGalleryAllowed(mediaGalleryAllowedByPlan(planFeaturesFromSubscription(currentPlan as never)));
     } catch {
       setItems([]);
     } finally {

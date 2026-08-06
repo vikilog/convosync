@@ -6,6 +6,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Bot, Calculator, Check, Contact, Loader2, Mail, Users, Zap } from 'lucide-react';
 import { api, formatCatchError } from '../../lib/api';
+import { dispatchCompanyUpdated } from '../../lib/companyEvents';
 import { openRazorpayCheckout } from '../../lib/razorpay';
 
 type PricingRules = {
@@ -183,6 +184,7 @@ export function PlanCustomizer({ pricingRules, initialQuote, onSaved }: PlanCust
             razorpay_signature: response.razorpay_signature,
           });
           setSavedMessage('Payment successful. Your custom plan is now active.');
+          dispatchCompanyUpdated();
           onSaved?.();
         },
       });

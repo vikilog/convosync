@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api, getUserInboxScope, getUserPermissions, getUserRole, setUserInboxScope } from '../lib/api';
 import { resolveEffectiveInboxScope, type InboxScope } from '../lib/inboxScope';
-import type { PlanFeatureFlags } from '../lib/planEntitlements';
+import {
+  planFeaturesFromSubscription,
+  type PlanFeatureFlags,
+} from '../lib/planEntitlements';
 import { AUTH_CHANGED_EVENT } from '../lib/session';
 import {
   canAccessPath,
@@ -21,7 +24,7 @@ export function useWorkspaceAccess() {
   const loadPlanFeatures = useCallback(async () => {
     try {
       const res = (await api.getSubscription()) as { currentPlan?: PlanFeatureFlags | null };
-      setPlanFeatures(res.currentPlan ?? null);
+      setPlanFeatures(planFeaturesFromSubscription(res.currentPlan));
     } catch {
       setPlanFeatures(null);
     }

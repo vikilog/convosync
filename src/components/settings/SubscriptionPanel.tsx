@@ -9,6 +9,7 @@ import { api, formatCatchError } from '../../lib/api';
 import { openRazorpayCheckout } from '../../lib/razorpay';
 import { BRAND_PURPLE } from '../../lib/convocoins';
 import { hasPaidSubscription, resolveCheckoutPlan, subscriptionStatusLabel, type BillingPlanOption } from '../../lib/billingSubscription';
+import { dispatchCompanyUpdated } from '../../lib/companyEvents';
 
 const PLAN_NAME = 'ConvoSync Pro';
 const PLAN_PRICE_INR = 1999;
@@ -139,6 +140,7 @@ export function SubscriptionPanel({
             });
           }
           await load();
+          dispatchCompanyUpdated();
           onBillingChange?.();
         },
       });
