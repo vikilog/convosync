@@ -1163,8 +1163,8 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
 
             <p className="text-sm text-gray-600 leading-relaxed">
               Default sender will be{' '}
-              <span className="font-mono font-bold text-gray-900">{defaultEmail}</span>. You can add
-              custom domains and senders after enabling.
+              <span className="font-mono font-bold text-gray-900">{defaultEmail}</span>. After
+              enabling, you can connect AWS SES and choose your own From address.
             </p>
 
             {emailError && (

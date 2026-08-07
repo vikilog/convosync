@@ -23,12 +23,14 @@ import {
   WhatsAppProfileSideSheet,
   type WhatsAppProfileTarget,
 } from './integrations/WhatsAppProfileSideSheet';
+import { WhatsAppPaymentModePanel } from './integrations/WhatsAppPaymentModePanel';
 
 const CONNECTION_TYPE_STORAGE_KEY = 'convosync_whatsapp_connection_type';
 const BUSINESS_API_ONBOARDING_STEP_KEY = 'convosync_business_api_onboarding_step';
 const COEXISTENCE_ONBOARDING_STEP_KEY = 'convosync_coexistence_onboarding_step';
 const PENDING_SETUP_SESSION_KEY = 'convosync_whatsapp_pending_setup';
 const COEXISTENCE_CONNECTED_KEY = 'convosync_whatsapp_coexistence_connected';
+const PAYMENT_MODE_PROMPT_KEY = 'convosync_whatsapp_payment_mode_prompt';
 
 type NumbersFlowView =
   | 'selector'
@@ -36,6 +38,7 @@ type NumbersFlowView =
   | 'business_api_connect'
   | 'coexistence_guide'
   | 'coexistence_connect'
+  | 'payment_mode'
   | 'accounts';
 
 function loadStoredConnectionType(): WhatsAppConnectionType | null {
@@ -98,6 +101,9 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
             displayName?: string;
             label?: string;
             connectionMode?: string;
+            paymentMode?: 'self_pay' | 'platform' | null;
+            hasOwnMetaPaymentMethod?: boolean;
+            metaBusinessId?: string | null;
           }>;
         }) => {
           const mapped = (data.accounts || []).map((a) => ({
@@ -110,6 +116,9 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
             status: 'Connected',
             verified: true,
             connectionMode: a.connectionMode || 'business_api',
+            paymentMode: a.paymentMode ?? null,
+            hasOwnMetaPaymentMethod: !!a.hasOwnMetaPaymentMethod,
+            metaBusinessId: a.metaBusinessId ?? null,
           }));
           setWhatsappAccounts(mapped);
           if (mapped.length === 0) {
@@ -154,6 +163,17 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
   const [isStartingApiSetup, setIsStartingApiSetup] = useState(false);
   const [isStartingCoexistenceSetup, setIsStartingCoexistenceSetup] = useState(false);
   const [autoLaunchSignup, setAutoLaunchSignup] = useState(false);
+  const [paymentModePrompt, setPaymentModePrompt] = useState<{
+    phoneNumberId: string;
+    businessId?: string;
+  } | null>(() => {
+    try {
+      const raw = sessionStorage.getItem(PAYMENT_MODE_PROMPT_KEY);
+      return raw ? (JSON.parse(raw) as { phoneNumberId: string; businessId?: string }) : null;
+    } catch {
+      return null;
+    }
+  });
   const accountsLoadedRef = useRef(false);
 
   useEffect(() => {
@@ -188,6 +208,19 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
     loadWhatsappAccounts({ silent: accountsLoadedRef.current });
     accountsLoadedRef.current = true;
   }, [isActive]);
+
+  // Resume post-connect payment step after refresh / KeepAlive remount
+  useEffect(() => {
+    if (!isActive || accountsLoading || !paymentModePrompt?.phoneNumberId) return;
+    if (!hasWhatsappNumbers) return;
+    setNumbersFlow('payment_mode');
+    setCoexistenceInstructionsOpen(false);
+  }, [
+    accountsLoading,
+    hasWhatsappNumbers,
+    isActive,
+    paymentModePrompt?.phoneNumberId,
+  ]);
 
   /** KeepAlive keeps this view mounted — re-read Integrations → Manager handoff from storage. */
   useEffect(() => {
@@ -307,6 +340,9 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
   };
 
   const handleConnectSuccess = async (data?: {
+    phoneNumberId?: string;
+    businessId?: string;
+    needsPaymentMode?: boolean;
     webhookSubscribe?: { error?: string; wabaSubscribed?: boolean; details?: string };
     coexistenceSync?: {
       contactsRequestId?: string;
@@ -334,6 +370,24 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
       localStorage.setItem(COEXISTENCE_CONNECTED_KEY, '1');
     }
 
+    const phoneNumberId =
+      data?.phoneNumberId ||
+      (accounts.length > 0 ? accounts[accounts.length - 1].phoneNumberId : undefined);
+    const connectedAccount = accounts.find((a) => a.phoneNumberId === phoneNumberId);
+    const alreadyChoseMode = !!connectedAccount?.paymentMode;
+    if (phoneNumberId && data?.needsPaymentMode !== false && !alreadyChoseMode) {
+      const prompt = {
+        phoneNumberId,
+        businessId: data?.businessId || connectedAccount?.metaBusinessId || undefined,
+      };
+      setPaymentModePrompt(prompt);
+      sessionStorage.setItem(PAYMENT_MODE_PROMPT_KEY, JSON.stringify(prompt));
+      setNumbersFlow('payment_mode');
+    } else {
+      setPaymentModePrompt(null);
+      sessionStorage.removeItem(PAYMENT_MODE_PROMPT_KEY);
+    }
+
     const sub = data?.webhookSubscribe;
     if (sub && (!sub.wabaSubscribed || sub.error)) {
       const msg = [sub.error, sub.details].filter(Boolean).join(' — ');
@@ -342,9 +396,6 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
           ? `Number connected, but webhook auto-subscribe needs attention: ${msg}`
           : 'Number connected. Open Webhooks tab and click Subscribe via API if inbound messages do not arrive.'
       );
-    } else if (sub?.wabaSubscribed) {
-      setWebhookSubscribeMessage('Webhooks auto-subscribed on connect.');
-      setWebhookSubscribed(true);
     }
 
     const sync = data?.coexistenceSync;
@@ -356,12 +407,15 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
             ? `${prev} Coexistence sync: ${syncMsg}`
             : `Connected, but initial sync needs attention: ${syncMsg}`
         );
-      } else if (sync?.contactsRequestId || sync?.historyRequestId) {
-        setWebhookSubscribeMessage(
-          'WhatsApp Business App connected. Contact and chat history sync started — keep the mobile app open.'
-        );
       }
     }
+  };
+
+  const dismissPaymentModePrompt = () => {
+    setPaymentModePrompt(null);
+    sessionStorage.removeItem(PAYMENT_MODE_PROMPT_KEY);
+    setNumbersFlow('accounts');
+    void loadWhatsappAccounts({ silent: true });
   };
 
   const handleDisconnectWhatsApp = async (phoneNumberId: string) => {
@@ -411,8 +465,11 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
     connectionType === 'app_coexistence' &&
     (!hasWhatsappNumbers || coexistenceInstructionsOpen);
 
+  const showPaymentModeStep =
+    numbersFlow === 'payment_mode' && !!paymentModePrompt?.phoneNumberId;
+
   const showAccountManager =
-    hasWhatsappNumbers && !coexistenceInstructionsOpen;
+    hasWhatsappNumbers && !coexistenceInstructionsOpen && !showPaymentModeStep;
 
   const containerClass = showAccountManager
     ? 'flex-1 space-y-6 max-w-7xl mx-auto pb-12 text-left selection:bg-primary/15'
@@ -441,6 +498,21 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
           Back to integrations
         </button>
       )}
+
+      {showPaymentModeStep && paymentModePrompt ? (
+        <div className="max-w-3xl mx-auto space-y-4 animate-scale-up">
+          <WhatsAppPaymentModePanel
+            variant="post_connect"
+            phoneNumberId={paymentModePrompt.phoneNumberId}
+            businessId={paymentModePrompt.businessId}
+            onDone={dismissPaymentModePrompt}
+            onStatusChange={() => void loadWhatsappAccounts({ silent: true })}
+          />
+          {connectError && (
+            <p className="text-sm font-bold text-red-500">{connectError}</p>
+          )}
+        </div>
+      ) : null}
 
       {showAccountManager && (
         <WhatsAppAccountManager

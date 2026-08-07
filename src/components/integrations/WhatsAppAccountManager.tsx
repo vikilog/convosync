@@ -1,4 +1,5 @@
 import { CheckCircle2, MessageCircle, Settings2, Unplug } from 'lucide-react';
+import { WhatsAppPaymentModePanel } from './WhatsAppPaymentModePanel';
 
 export type WhatsAppPhoneAccount = {
   id: string;
@@ -10,6 +11,9 @@ export type WhatsAppPhoneAccount = {
   status: string;
   verified: boolean;
   connectionMode?: string;
+  paymentMode?: 'self_pay' | 'platform' | null;
+  hasOwnMetaPaymentMethod?: boolean;
+  metaBusinessId?: string | null;
 };
 
 type WhatsAppAccountManagerProps = {
@@ -148,6 +152,14 @@ export function WhatsAppAccountManager({
                       Disconnect
                     </button>
                   </div>
+                </div>
+
+                <div className="mt-4">
+                  <WhatsAppPaymentModePanel
+                    variant="settings"
+                    phoneNumberId={account.phoneNumberId}
+                    businessId={account.metaBusinessId || undefined}
+                  />
                 </div>
               </article>
             );

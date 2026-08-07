@@ -463,6 +463,14 @@ export const api = {
   deleteEmailProvider: (id: string) => del(`/email/providers/${id}`),
   setDefaultEmailProvider: (id: string) => post(`/email/providers/${id}/default`, {}),
   testEmailProvider: (id: string) => post(`/email/providers/${id}/test`, {}),
+  refreshEmailProviderIdentities: (id: string, data?: unknown) =>
+    post(`/email/providers/${id}/refresh-identities`, data ?? {}),
+  previewSesIdentities: (data: unknown) =>
+    post('/email/providers/ses/refresh-identities', data),
+  testEmailProviderSesSend: (id: string, data?: unknown) =>
+    post(`/email/providers/${id}/test-send`, data ?? {}),
+  testSesProviderSendPreview: (data: unknown) =>
+    post('/email/providers/ses/test-send', data),
   getEmailTemplates: () => get('/email/templates'),
   getEmailTemplate: (id: string) => get(`/email/templates/${id}`),
   createEmailTemplate: (data: unknown) => post('/email/templates', data),
@@ -1034,11 +1042,82 @@ export const api = {
       wabaId?: string;
       phoneNumberId?: string;
       phoneNumber?: string;
+      businessId?: string;
       connectionMode?: 'business_api' | 'app_coexistence';
     }
   ) => post('/whatsapp/connect', { code, ...session }),
   completeWhatsAppOAuth: (code: string, state: string) =>
     post('/whatsapp/connect-oauth', { code, state }),
+  getWhatsAppPaymentMode: (phoneNumberId?: string) =>
+    get(
+      phoneNumberId
+        ? `/whatsapp/payment-mode?phoneNumberId=${encodeURIComponent(phoneNumberId)}`
+        : '/whatsapp/payment-mode'
+    ) as Promise<{
+      phoneNumberId: string;
+      wabaId: string;
+      paymentMode: 'self_pay' | 'platform' | null;
+      hasOwnMetaPaymentMethod: boolean;
+      billingCheckStatus: 'confirmed' | 'missing' | 'unknown';
+      paymentConfigCheckedAt: string | null;
+      paymentSetupAcknowledgedAt: string | null;
+      metaBusinessId: string | null;
+      metaPaymentSetupUrl: string;
+      primaryFundingId?: string | null;
+      note?: string;
+      error?: string;
+    }>,
+  setWhatsAppPaymentMode: (body: {
+    paymentMode: 'self_pay' | 'platform';
+    phoneNumberId?: string;
+    businessId?: string;
+  }) =>
+    post('/whatsapp/payment-mode', body) as Promise<{
+      success: boolean;
+      phoneNumberId: string;
+      wabaId: string;
+      paymentMode: 'self_pay' | 'platform' | null;
+      hasOwnMetaPaymentMethod: boolean;
+      billingCheckStatus: 'confirmed' | 'missing' | 'unknown';
+      paymentConfigCheckedAt: string | null;
+      paymentSetupAcknowledgedAt: string | null;
+      metaBusinessId: string | null;
+      metaPaymentSetupUrl: string;
+      primaryFundingId?: string | null;
+      note?: string;
+      error?: string;
+    }>,
+  refreshWhatsAppPaymentMode: (body?: { phoneNumberId?: string; businessId?: string }) =>
+    post('/whatsapp/payment-mode/refresh', body || {}) as Promise<{
+      success: boolean;
+      phoneNumberId: string;
+      wabaId: string;
+      paymentMode: 'self_pay' | 'platform' | null;
+      hasOwnMetaPaymentMethod: boolean;
+      billingCheckStatus: 'confirmed' | 'missing' | 'unknown';
+      paymentConfigCheckedAt: string | null;
+      paymentSetupAcknowledgedAt: string | null;
+      metaBusinessId: string | null;
+      metaPaymentSetupUrl: string;
+      primaryFundingId?: string | null;
+      note?: string;
+      error?: string;
+    }>,
+  acknowledgeWhatsAppPaymentMode: (body?: { phoneNumberId?: string }) =>
+    post('/whatsapp/payment-mode/acknowledge', body || {}) as Promise<{
+      success: boolean;
+      phoneNumberId: string;
+      wabaId: string;
+      paymentMode: 'self_pay' | 'platform' | null;
+      hasOwnMetaPaymentMethod: boolean;
+      billingCheckStatus: 'confirmed' | 'missing' | 'unknown';
+      paymentConfigCheckedAt: string | null;
+      paymentSetupAcknowledgedAt: string | null;
+      metaBusinessId: string | null;
+      metaPaymentSetupUrl: string;
+      note?: string;
+      error?: string;
+    }>,
   disconnectWhatsApp: (phoneNumberId?: string) =>
     del(
       phoneNumberId

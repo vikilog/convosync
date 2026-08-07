@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { Check, CheckCheck, Loader2 } from 'lucide-react';
+import { Check, CheckCheck, Loader2, X } from 'lucide-react';
 import type { ChatMessage } from '../../types';
 import { formatMessageClock } from '../../lib/formatDates';
 import { MessageAttachment } from './MessageAttachment';
@@ -88,10 +88,14 @@ const MessageBubble: React.FC<{ message: ChatMessage; channel: Channel }> = ({
       messageType === 'location');
   const isRichMessage = hasMediaAttachment;
 
-  // ✓ sent · ✓✓ delivered · blue ✓✓ read (WhatsApp / Instagram / Messenger)
+  // ✓ sent · ✓✓ delivered · blue ✓✓ read · ✕ failed (WhatsApp / Instagram / Messenger)
   const deliveryStatusIcon = !isContact ? (
     message.status === 'sending' ? (
       <Loader2 className="w-[14px] h-[14px] animate-spin" strokeWidth={2.5} />
+    ) : message.status === 'failed' ? (
+      <span title={message.deliveryError || 'Delivery failed'}>
+        <X className="w-[14px] h-[14px] text-red-500" strokeWidth={2.5} />
+      </span>
     ) : message.status === 'read' ? (
       <CheckCheck
         className={`w-[14px] h-[14px] ${
@@ -144,6 +148,11 @@ const MessageBubble: React.FC<{ message: ChatMessage; channel: Channel }> = ({
             Automated · Journey
           </p>
         )}
+        {!isContact && message.status === 'failed' && message.deliveryError && (
+          <p className="text-xs text-red-600 mt-1 leading-tight px-1 max-w-full">
+            {message.deliveryError}
+          </p>
+        )}
       </div>
     );
   }
@@ -181,6 +190,11 @@ const MessageBubble: React.FC<{ message: ChatMessage; channel: Channel }> = ({
             {!isDeleted ? deliveryStatusIcon : null}
           </span>
         </div>
+        {!isContact && message.status === 'failed' && message.deliveryError && (
+          <p className="text-xs text-red-600 mt-1 leading-tight px-1 max-w-full">
+            {message.deliveryError}
+          </p>
+        )}
       </div>
     );
   }
@@ -216,6 +230,10 @@ const MessageBubble: React.FC<{ message: ChatMessage; channel: Channel }> = ({
         {!isContact &&
           (message.status === 'sending' ? (
             <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          ) : message.status === 'failed' ? (
+            <span title={message.deliveryError || 'Delivery failed'}>
+              <X className="w-3.5 h-3.5 text-red-500" />
+            </span>
           ) : message.status === 'read' ? (
             <CheckCheck
               className={`w-3.5 h-3.5 ${
@@ -228,6 +246,9 @@ const MessageBubble: React.FC<{ message: ChatMessage; channel: Channel }> = ({
             <Check className="w-3.5 h-3.5 text-gray-400" />
           ))}
       </div>
+      {!isContact && message.status === 'failed' && message.deliveryError && (
+        <p className="text-xs text-red-600 mt-0.5 leading-tight px-1">{message.deliveryError}</p>
+      )}
     </div>
   );
 };

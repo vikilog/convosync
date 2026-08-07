@@ -953,9 +953,19 @@ export const InboxView: React.FC = () => {
     };
 
     // Live delivery/read ticks (Meta status / Instagram messaging_seen webhooks)
-    const onMessageStatus = (payload: { messageId: string; status: string }) => {
-      const { messageId, status } = payload;
+    const onMessageStatus = (payload: {
+      messageId: string;
+      status: string;
+      errors?: Array<{ code?: number; title?: string; message?: string }>;
+    }) => {
+      const { messageId, status, errors } = payload;
       if (!messageId || !status) return;
+      const err = errors?.[0];
+      const deliveryError = err
+        ? [err.title || err.message, err.code != null ? `(${err.code})` : null]
+            .filter(Boolean)
+            .join(' ') || undefined
+        : undefined;
       setChatHistories((prev) => {
         let changed = false;
         const next: Record<string, ChatMessage[]> = {};
@@ -979,7 +989,13 @@ export const InboxView: React.FC = () => {
             });
           } else {
             next[convId] = msgs.map((m) =>
-              m.id === messageId ? { ...m, status: status as ChatMessage['status'] } : m
+              m.id === messageId
+                ? {
+                    ...m,
+                    status: status as ChatMessage['status'],
+                    ...(deliveryError ? { deliveryError } : {}),
+                  }
+                : m
             );
           }
         }

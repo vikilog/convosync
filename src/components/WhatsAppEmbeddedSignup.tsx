@@ -14,6 +14,8 @@ type ConnectSuccessData = {
   phoneNumberId: string;
   wabaId: string;
   displayName?: string;
+  businessId?: string;
+  needsPaymentMode?: boolean;
   connectionMode?: WhatsAppSignupMode;
   webhookSubscribe?: {
     wabaSubscribed: boolean;
@@ -164,6 +166,7 @@ export default function WhatsAppEmbeddedSignup({
           redirectUri: redirectUriRef.current,
           wabaId: session?.wabaId,
           phoneNumberId: session?.phoneNumberId,
+          businessId: session?.businessId,
           connectionMode: mode,
         });
         pendingCodeRef.current = null;

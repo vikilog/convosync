@@ -8,6 +8,7 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   settingsSectionFromPath,
   pathForSettingsSection,
+  pathForIntegrationsChannel,
   type SettingsSection,
 } from '../routes';
 import {
@@ -110,6 +111,10 @@ export function SettingsView() {
     }
     if (location.pathname.startsWith('/settings/verification')) {
       navigate(pathForSettingsSection('company-info'), { replace: true });
+    }
+    // Legacy: BYO SES lived under Settings → Email; product home is Integrations → Email.
+    if (location.pathname.startsWith('/settings/email')) {
+      navigate(pathForIntegrationsChannel('email'), { replace: true });
     }
   }, [location.pathname, navigate]);
 

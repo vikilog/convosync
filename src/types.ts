@@ -44,7 +44,9 @@ export interface ChatMessage {
   media?: ChatMessageMedia;
   createdAt?: string;
   timestamp: string;
-  status?: 'sending' | 'sent' | 'delivered' | 'read';
+  status?: 'sending' | 'sent' | 'delivered' | 'read' | 'failed';
+  /** Meta delivery failure summary (from status webhook errors[]) */
+  deliveryError?: string;
   /** WhatsApp "delete for everyone" */
   revoked?: boolean;
   /** Optimistic local preview while outbound media is uploading */

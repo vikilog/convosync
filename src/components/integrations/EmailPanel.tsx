@@ -17,8 +17,14 @@ import {
   Zap,
 } from 'lucide-react';
 import { api, formatCatchError } from '../../lib/api';
+import {
+  SesProviderFormFields,
+  computeSesSenderEmail,
+  splitSenderAgainstIdentities,
+  type VerifiedIdentity,
+} from './SesProviderFormFields';
 
-type EmailTab = 'domains' | 'senders' | 'providers' | 'logs';
+type EmailTab = 'setup' | 'logs';
 
 type EmailProviderConfig = {
   id: string;
@@ -28,6 +34,12 @@ type EmailProviderConfig = {
   hasCredentials: boolean;
   createdAt: string;
   updatedAt: string;
+  region?: string | null;
+  senderEmail?: string | null;
+  accessKeyIdMasked?: string | null;
+  verifiedIdentities?: VerifiedIdentity[];
+  identitiesFetchedAt?: string | null;
+  sesConsoleUrl?: string | null;
 };
 
 type ProviderFormType = EmailProviderConfig['provider'];
@@ -103,13 +115,20 @@ function statusBadge(status: string) {
   return map[status] ?? 'bg-gray-50 text-gray-600 border-gray-200';
 }
 
+function domainFromEmail(email: string | null | undefined): string | null {
+  const e = (email ?? '').trim().toLowerCase();
+  const at = e.lastIndexOf('@');
+  if (at < 1 || at === e.length - 1) return null;
+  return e.slice(at + 1);
+}
+
 export function EmailPanel() {
-  const [tab, setTab] = useState<EmailTab>('domains');
+  const [tab, setTab] = useState<EmailTab>('setup');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sharedSenders, setSharedSenders] = useState<EmailSender[]>([]);
-  const [customSenders, setCustomSenders] = useState<EmailSender[]>([]);
+  const [defaultSenderEmail, setDefaultSenderEmail] = useState<string | null>(null);
   const [logs, setLogs] = useState<EmailLog[]>([]);
   const [providers, setProviders] = useState<EmailProviderConfig[]>([]);
   const [showAddProvider, setShowAddProvider] = useState(false);
@@ -130,6 +149,16 @@ export function EmailPanel() {
     username: '',
     password: '',
   });
+  const [sesSelectedIdentity, setSesSelectedIdentity] = useState('');
+  const [sesDomainLocalPart, setSesDomainLocalPart] = useState('');
+  const [sesIdentities, setSesIdentities] = useState<VerifiedIdentity[]>([]);
+  const [sesIdentitiesFetchedAt, setSesIdentitiesFetchedAt] = useState<string | null>(null);
+  const [sesAccessKeyIdMasked, setSesAccessKeyIdMasked] = useState<string | null>(null);
+  const [sesHasSecret, setSesHasSecret] = useState(false);
+  const [sesConsoleUrl, setSesConsoleUrl] = useState<string | null>(null);
+  const [sesRefreshing, setSesRefreshing] = useState(false);
+  const [sesTesting, setSesTesting] = useState(false);
+  const [sesNotice, setSesNotice] = useState<{ ok: boolean; message: string } | null>(null);
 
   const [testSend, setTestSend] = useState({
     to: '',
@@ -142,12 +171,16 @@ export function EmailPanel() {
     setError(null);
     try {
       const [senderRows, logRows, providerRows] = await Promise.all([
-        api.getEmailSenders() as Promise<{ shared: EmailSender[]; custom: EmailSender[] }>,
+        api.getEmailSenders() as Promise<{
+          shared: EmailSender[];
+          custom: EmailSender[];
+          defaultSenderEmail?: string | null;
+        }>,
         api.getEmailLogs() as Promise<EmailLog[]>,
         api.getEmailProviders() as Promise<EmailProviderConfig[]>,
       ]);
       setSharedSenders(senderRows.shared ?? []);
-      setCustomSenders(senderRows.custom ?? []);
+      setDefaultSenderEmail(senderRows.defaultSenderEmail ?? null);
       setLogs(logRows);
       setProviders(providerRows ?? []);
     } catch (err) {
@@ -160,19 +193,6 @@ export function EmailPanel() {
   useEffect(() => {
     void load();
   }, [load]);
-
-  const handleSetDefaultSender = async (email: string) => {
-    setSaving(true);
-    setError(null);
-    try {
-      await api.setDefaultEmailSender(email);
-      await load();
-    } catch (err) {
-      setError(formatCatchError(err));
-    } finally {
-      setSaving(false);
-    }
-  };
 
   const handleTestSend = async () => {
     if (!testSend.to.trim()) return;
@@ -199,6 +219,33 @@ export function EmailPanel() {
     (t) => !usedProviderTypes.has(t) || providerForm.provider === t
   );
 
+  const resetSesFormState = () => {
+    setSesSelectedIdentity('');
+    setSesDomainLocalPart('');
+    setSesIdentities([]);
+    setSesIdentitiesFetchedAt(null);
+    setSesAccessKeyIdMasked(null);
+    setSesHasSecret(false);
+    setSesConsoleUrl(null);
+    setSesNotice(null);
+  };
+
+  const applySesFromProvider = (p: EmailProviderConfig) => {
+    const identities = p.verifiedIdentities ?? [];
+    setSesIdentities(identities);
+    setSesIdentitiesFetchedAt(p.identitiesFetchedAt ?? null);
+    setSesAccessKeyIdMasked(p.accessKeyIdMasked ?? null);
+    setSesHasSecret(Boolean(p.hasCredentials));
+    setSesConsoleUrl(p.sesConsoleUrl ?? null);
+    if (p.region) {
+      setProviderForm((f) => ({ ...f, region: p.region || f.region }));
+    }
+    const split = splitSenderAgainstIdentities(p.senderEmail || '', identities);
+    setSesSelectedIdentity(split.selectedIdentity);
+    setSesDomainLocalPart(split.localPart);
+    setSesNotice(null);
+  };
+
   const resetProviderForm = () => {
     setProviderForm({
       provider: availableProviderTypes[0] ?? 'RESEND',
@@ -213,8 +260,26 @@ export function EmailPanel() {
       username: '',
       password: '',
     });
+    resetSesFormState();
     setEditingProviderId(null);
     setShowAddProvider(false);
+  };
+
+  const sesSenderEmail = computeSesSenderEmail(
+    sesSelectedIdentity,
+    sesDomainLocalPart,
+    sesIdentities
+  );
+
+  const sesCredentialDraft = () => {
+    const payload: Record<string, string> = {};
+    if (providerForm.accessKeyId.trim()) payload.accessKeyId = providerForm.accessKeyId.trim();
+    if (providerForm.secretAccessKey.trim()) {
+      payload.secretAccessKey = providerForm.secretAccessKey.trim();
+    }
+    if (providerForm.region.trim()) payload.region = providerForm.region.trim();
+    if (sesSenderEmail.trim()) payload.senderEmail = sesSenderEmail.trim();
+    return payload;
   };
 
   const buildProviderConfigPayload = () => {
@@ -228,6 +293,9 @@ export function EmailPanel() {
           accessKeyId: providerForm.accessKeyId.trim(),
           secretAccessKey: providerForm.secretAccessKey.trim(),
           region: providerForm.region.trim(),
+          senderEmail: sesSenderEmail.trim(),
+          verifiedIdentities: sesIdentities,
+          identitiesFetchedAt: sesIdentitiesFetchedAt,
         };
       case 'SENDGRID':
         return { apiKey: providerForm.apiKey.trim() };
@@ -244,7 +312,144 @@ export function EmailPanel() {
     }
   };
 
+  const handleRefreshSesIdentities = async (providerId?: string | null) => {
+    setSesRefreshing(true);
+    setSesNotice(null);
+    setError(null);
+    try {
+      const draft = sesCredentialDraft();
+      const res = (
+        providerId
+          ? await api.refreshEmailProviderIdentities(providerId, draft)
+          : await api.previewSesIdentities(draft)
+      ) as {
+        ok: boolean;
+        message: string;
+        verifiedIdentities?: VerifiedIdentity[];
+        identitiesFetchedAt?: string;
+        provider?: EmailProviderConfig;
+      };
+      if (res.provider) {
+        applySesFromProvider(res.provider);
+        setProviders((prev) =>
+          prev.map((p) => (p.id === res.provider!.id ? { ...p, ...res.provider! } : p))
+        );
+      } else if (res.verifiedIdentities) {
+        setSesIdentities(res.verifiedIdentities);
+        setSesIdentitiesFetchedAt(res.identitiesFetchedAt ?? new Date().toISOString());
+        setSesSelectedIdentity((prev) =>
+          res.verifiedIdentities!.some((i) => i.identity === prev) ? prev : ''
+        );
+      }
+      if (!res.ok) {
+        setSesNotice({ ok: false, message: res.message || 'Could not load SES identities.' });
+        return;
+      }
+      if (res.verifiedIdentities?.length) {
+        setSesNotice({ ok: true, message: res.message || 'Verified identities refreshed.' });
+      } else {
+        setSesNotice({
+          ok: false,
+          message:
+            res.message ||
+            `No verified domains or emails in region ${providerForm.region.trim() || 'this region'}.`,
+        });
+      }
+      if (providerId) {
+        setProviderForm((f) => ({ ...f, accessKeyId: '', secretAccessKey: '' }));
+        setSesHasSecret(true);
+      }
+    } catch (err) {
+      setSesNotice({ ok: false, message: formatCatchError(err) });
+    } finally {
+      setSesRefreshing(false);
+    }
+  };
+
+  const handleSesTestSend = async (providerId?: string | null) => {
+    setSesTesting(true);
+    setSesNotice(null);
+    setError(null);
+    try {
+      const draft = sesCredentialDraft();
+      const res = (
+        providerId
+          ? await api.testEmailProviderSesSend(providerId, draft)
+          : await api.testSesProviderSendPreview(draft)
+      ) as {
+        ok: boolean;
+        message: string;
+        verifiedIdentities?: VerifiedIdentity[];
+        provider?: EmailProviderConfig;
+      };
+      if (res.provider) {
+        applySesFromProvider(res.provider);
+        setProviders((prev) =>
+          prev.map((p) => (p.id === res.provider!.id ? { ...p, ...res.provider! } : p))
+        );
+      } else if (res.verifiedIdentities) {
+        setSesIdentities(res.verifiedIdentities);
+      }
+      setSesNotice({
+        ok: Boolean(res.ok),
+        message: res.message || (res.ok ? 'Test email sent.' : 'Test email failed'),
+      });
+      if (providerId) {
+        setProviderForm((f) => ({ ...f, accessKeyId: '', secretAccessKey: '' }));
+        setSesHasSecret(true);
+      }
+    } catch (err) {
+      setSesNotice({ ok: false, message: formatCatchError(err) });
+    } finally {
+      setSesTesting(false);
+    }
+  };
+
+  const renderSesFields = (providerId?: string | null) => (
+    <div className="space-y-2">
+      {sesNotice && (
+        <p className={`text-xs ${sesNotice.ok ? 'text-green-700' : 'text-red-600'}`}>
+          {sesNotice.message}
+        </p>
+      )}
+      <SesProviderFormFields
+        accessKeyId={providerForm.accessKeyId}
+        secretAccessKey={providerForm.secretAccessKey}
+        region={providerForm.region}
+        accessKeyIdMasked={sesAccessKeyIdMasked}
+        hasSecretAccessKey={sesHasSecret}
+        selectedIdentity={sesSelectedIdentity}
+        domainLocalPart={sesDomainLocalPart}
+        identities={sesIdentities}
+        identitiesFetchedAt={sesIdentitiesFetchedAt}
+        sesConsoleUrl={sesConsoleUrl}
+        refreshing={sesRefreshing}
+        testing={sesTesting}
+        saving={saving}
+        onAccessKeyIdChange={(value) =>
+          setProviderForm((f) => ({ ...f, accessKeyId: value }))
+        }
+        onSecretAccessKeyChange={(value) =>
+          setProviderForm((f) => ({ ...f, secretAccessKey: value }))
+        }
+        onRegionChange={(value) => setProviderForm((f) => ({ ...f, region: value }))}
+        onSelectIdentity={(identity) => {
+          if (identity === sesSelectedIdentity) return;
+          setSesSelectedIdentity(identity);
+          setSesDomainLocalPart('');
+        }}
+        onDomainLocalPartChange={setSesDomainLocalPart}
+        onRefreshIdentities={() => void handleRefreshSesIdentities(providerId)}
+        onTestSend={() => void handleSesTestSend(providerId)}
+      />
+    </div>
+  );
+
   const handleCreateProvider = async () => {
+    if (providerForm.provider === 'AWS_SES' && !sesSenderEmail.trim()) {
+      setError('Refresh identities and select a verified From address before saving AWS SES.');
+      return;
+    }
     setSaving(true);
     setError(null);
     try {
@@ -263,12 +468,20 @@ export function EmailPanel() {
   };
 
   const handleUpdateProvider = async (id: string) => {
+    if (providerForm.provider === 'AWS_SES' && !sesSenderEmail.trim()) {
+      setError('Refresh identities and select a verified From address before saving AWS SES.');
+      return;
+    }
     setSaving(true);
     setError(null);
     try {
       const config = buildProviderConfigPayload();
       const hasConfigUpdate = Object.values(config).some((v) =>
-        typeof v === 'string' ? v.length > 0 : v !== undefined && v !== false
+        typeof v === 'string'
+          ? v.length > 0
+          : Array.isArray(v)
+            ? true
+            : v !== undefined && v !== false && v !== null
       );
       await api.updateEmailProvider(id, {
         ...(hasConfigUpdate ? { config } : {}),
@@ -338,22 +551,38 @@ export function EmailPanel() {
     }
   };
 
+  const defaultProvider =
+    providers.find((p) => p.isDefault) ??
+    providers.find((p) => p.status === 'active') ??
+    null;
+  // Provider From is source of truth; shared list is already synced by API.
+  const activeFromEmail =
+    (defaultProvider?.provider === 'AWS_SES' && defaultProvider.senderEmail?.trim()) ||
+    defaultSenderEmail ||
+    sharedSenders.find((s) => s.isDefault)?.email ||
+    sharedSenders[0]?.email ||
+    null;
+  const activeDomain = domainFromEmail(activeFromEmail);
+  const activeProviderLabel = defaultProvider
+    ? PROVIDER_LABELS[defaultProvider.provider]
+    : null;
+
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2" role="tablist" aria-label="Email settings">
         {(
           [
-            ['domains', 'Domains'],
-            ['senders', 'Sender Addresses'],
-            ['providers', 'Providers'],
+            ['setup', 'Setup'],
             ['logs', 'Email Logs'],
           ] as const
         ).map(([id, label]) => (
           <button
             key={id}
             type="button"
+            role="tab"
+            aria-selected={tab === id}
             onClick={() => setTab(id)}
-            className={`px-3 py-1.5 rounded-lg text-sm font-bold border transition-colors ${
+            className={`px-3 py-1.5 rounded-lg text-sm font-bold border cursor-pointer transition-colors duration-150 ${
               tab === id
                 ? 'bg-primary text-white border-primary'
                 : 'bg-white text-gray-600 border-slate-200 hover:border-primary/30'
@@ -365,7 +594,7 @@ export function EmailPanel() {
         <button
           type="button"
           onClick={() => void load()}
-          className="ml-auto inline-flex items-center gap-1 px-2 py-1.5 text-sm font-semibold text-gray-500 hover:text-primary"
+          className="ml-auto inline-flex items-center gap-1 px-2 py-1.5 text-sm font-semibold text-gray-500 hover:text-primary cursor-pointer"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
           Refresh
@@ -373,146 +602,89 @@ export function EmailPanel() {
       </div>
 
       {error && (
-        <div className="flex items-start gap-2 p-3 rounded-xl bg-red-50 border border-red-100 text-xs text-red-700">
-          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+        <div
+          role="alert"
+          className="flex items-start gap-2 p-3 rounded-xl bg-red-50 border border-red-100 text-xs text-red-700"
+        >
+          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" aria-hidden />
           {error}
         </div>
       )}
 
-      {loading && tab === 'domains' && sharedSenders.length === 0 ? (
-        <div className="flex justify-center py-12 text-gray-400">
-          <Loader2 className="w-6 h-6 animate-spin" />
-        </div>
-      ) : null}
-
-      {tab === 'domains' && (
+      {tab === 'setup' && (
         <div className="space-y-4">
-          {loading && sharedSenders.length === 0 ? (
-            <div className="flex justify-center py-12 text-gray-400">
+          {loading && providers.length === 0 ? (
+            <div className="flex justify-center py-12 text-gray-400" aria-busy="true">
               <Loader2 className="w-6 h-6 animate-spin" />
             </div>
-          ) : sharedSenders[0] ? (
-            <div className="bg-surface rounded-2xl border border-black/5 p-4">
-              <h4 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
-                <Globe className="w-4 h-4 text-primary" />
-                Your domain
-              </h4>
+          ) : null}
+
+          {/* 1. Active sending identity — mirrors default provider From */}
+          <section
+            aria-labelledby="email-sending-as-heading"
+            className="bg-surface rounded-2xl border border-black/5 p-4"
+          >
+            <h4
+              id="email-sending-as-heading"
+              className="text-sm font-bold text-gray-900 mb-1 flex items-center gap-2"
+            >
+              <Globe className="w-4 h-4 text-primary" aria-hidden />
+              Sending as
+            </h4>
+            <p className="text-xs text-gray-500 mb-3">
+              Set by your default provider
+              {defaultProvider?.provider === 'AWS_SES'
+                ? ' — choose a From address under AWS SES below.'
+                : '.'}
+            </p>
+            {activeFromEmail ? (
               <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/15 bg-slate-50 px-4 py-3">
                 <div className="min-w-0">
                   <p className="text-sm font-bold text-gray-900">
-                    {sharedSenders[0].displayName ?? 'ConvoSync'}
+                    {activeDomain ?? activeProviderLabel ?? 'Email'}
                   </p>
                   <p className="text-sm font-mono text-gray-600 mt-0.5 break-all">
-                    {sharedSenders[0].email}
+                    {activeFromEmail}
                   </p>
-                </div>
-                <span className="shrink-0 text-sm font-bold text-primary uppercase">Default</span>
-              </div>
-            </div>
-          ) : (
-            <p className="text-xs text-gray-500 text-center py-10">No domain available yet.</p>
-          )}
-        </div>
-      )}
-
-      {tab === 'senders' && (
-        <div className="space-y-4">
-          <div className="bg-slate-50 rounded-2xl border border-primary/15 p-4">
-            <h4 className="text-sm font-bold text-gray-900 mb-2">Your domain</h4>
-            <ul className="space-y-2">
-              {sharedSenders.map((s) => (
-                <li
-                  key={s.id}
-                  className="flex flex-wrap items-center justify-between gap-2 text-xs bg-white rounded-lg px-3 py-2 border border-slate-200"
-                >
-                  <span className="min-w-0">
-                    <span className="font-bold text-gray-900">{s.displayName ?? 'ConvoSync'}</span>
-                    <span className="text-gray-500 ml-2 font-mono break-all">{s.email}</span>
-                  </span>
-                  {s.isDefault && (
-                    <span className="text-sm font-bold text-primary uppercase">Default</span>
+                  {activeProviderLabel && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Provider · {activeProviderLabel}
+                      {defaultProvider?.isDefault ? ' · Default' : ''}
+                    </p>
                   )}
-                </li>
-              ))}
-            </ul>
-          </div>
+                </div>
+                <span className="shrink-0 text-sm font-bold text-primary uppercase">
+                  Active
+                </span>
+              </div>
+            ) : (
+              <p className="text-xs text-gray-500 py-2">
+                Connect a provider and choose a From address to start sending.
+              </p>
+            )}
+          </section>
 
-
-          {customSenders.length > 0 && (
-            <div className="bg-surface rounded-2xl border border-black/5 p-4">
-              <h4 className="text-sm font-bold text-gray-900 mb-3">Your senders</h4>
-              <ul className="space-y-2">
-                {customSenders.map((s) => (
-                  <li
-                    key={s.id}
-                    className="flex items-center justify-between text-xs border-b border-gray-50 py-2 last:border-0"
-                  >
-                    <span>
-                      <span className="font-bold">{s.displayName ?? s.email}</span>
-                      <span className="text-gray-400 ml-2 font-mono">{s.email}</span>
-                    </span>
-                    <div className="flex gap-2 items-center">
-                      {s.isShared && (
-                        <span className="text-xs text-gray-400 uppercase">Shared</span>
-                      )}
-                      {s.isDefault ? (
-                        <span className="text-sm font-bold text-primary">Default</span>
-                      ) : (
-                        <button
-                          type="button"
-                          disabled={saving}
-                          onClick={() => void handleSetDefaultSender(s.email)}
-                          className="px-2 py-0.5 rounded border border-slate-200 text-xs font-bold text-gray-600 hover:border-primary/30 disabled:opacity-50"
-                        >
-                          Set default
-                        </button>
-                      )}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          <div className="bg-surface rounded-2xl border border-black/5 p-4 space-y-3">
-            <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-              <Send className="w-4 h-4 text-primary" />
-              Send test email
-            </h4>
-            <input
-              value={testSend.to}
-              onChange={(e) => setTestSend((s) => ({ ...s, to: e.target.value }))}
-              placeholder="recipient@example.com"
-              className="w-full text-sm border border-slate-200 rounded-lg px-3 py-2"
-            />
-            <button
-              type="button"
-              disabled={saving || !testSend.to.trim()}
-              onClick={() => void handleTestSend()}
-              className="px-4 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-sm font-bold disabled:opacity-50"
-            >
-              Send test
-            </button>
-          </div>
-        </div>
-      )}
-
-      {tab === 'providers' && (
-        <div className="space-y-4">
+          {/* 2. Providers */}
           <div className="bg-surface rounded-2xl border border-black/5 p-4">
             <div className="flex items-center justify-between gap-2 mb-3">
               <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                <Settings className="w-4 h-4 text-primary" />
-                Email providers
+                <Settings className="w-4 h-4 text-primary" aria-hidden />
+                Providers
               </h4>
               {!showAddProvider && availableProviderTypes.length > 0 && (
                 <button
                   type="button"
                   onClick={() => {
+                    setEditingProviderId(null);
+                    resetSesFormState();
                     setShowAddProvider(true);
                     setProviderForm((f) => ({
                       ...f,
                       provider: availableProviderTypes[0] ?? 'RESEND',
+                      accessKeyId: '',
+                      secretAccessKey: '',
+                      apiKey: '',
+                      region: 'us-east-1',
                     }));
                   }}
                   className="px-3 py-1.5 rounded-full bg-primary hover:bg-primary-hover text-white text-sm font-bold inline-flex items-center gap-1"
@@ -522,9 +694,9 @@ export function EmailPanel() {
                 </button>
               )}
             </div>
-            <p className="text-xs text-gray-400 mb-4">
-              ConvoSync includes platform email by default. Optionally bring your own provider —
-              credentials are encrypted at rest.
+            <p className="text-xs text-gray-500 mb-4">
+              Default provider chooses how mail is sent. For AWS SES, pick a verified From —
+              that sets both your sending email and domain.
             </p>
 
             {providers.length === 0 ? (
@@ -541,6 +713,11 @@ export function EmailPanel() {
                         <p className="text-sm font-bold text-gray-900">
                           {PROVIDER_LABELS[p.provider]}
                         </p>
+                        {p.provider === 'AWS_SES' && p.senderEmail ? (
+                          <p className="text-xs font-mono text-gray-600 mt-0.5 break-all">
+                            From · {p.senderEmail}
+                          </p>
+                        ) : null}
                         <div className="flex flex-wrap gap-1.5 mt-1">
                           <span
                             className={`text-sm font-bold uppercase px-2 py-0.5 rounded border ${statusBadge(p.status)}`}
@@ -591,8 +768,20 @@ export function EmailPanel() {
                             disabled={saving}
                             onClick={() => {
                               setEditingProviderId(p.id);
-                              setProviderForm((f) => ({ ...f, provider: p.provider }));
                               setShowAddProvider(false);
+                              setProviderForm((f) => ({
+                                ...f,
+                                provider: p.provider,
+                                accessKeyId: '',
+                                secretAccessKey: '',
+                                apiKey: '',
+                                region: p.region || f.region || 'us-east-1',
+                              }));
+                              if (p.provider === 'AWS_SES') {
+                                applySesFromProvider(p);
+                              } else {
+                                resetSesFormState();
+                              }
                             }}
                             className="px-2 py-1 text-sm font-bold rounded border border-slate-200 hover:border-primary/30"
                           >
@@ -631,35 +820,7 @@ export function EmailPanel() {
                             className="w-full text-sm border border-slate-200 rounded-lg px-3 py-2"
                           />
                         ) : null}
-                        {p.provider === 'AWS_SES' ? (
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            <input
-                              value={providerForm.accessKeyId}
-                              onChange={(e) =>
-                                setProviderForm((f) => ({ ...f, accessKeyId: e.target.value }))
-                              }
-                              placeholder="Access key ID"
-                              className="text-sm border border-slate-200 rounded-lg px-3 py-2"
-                            />
-                            <input
-                              type="password"
-                              value={providerForm.secretAccessKey}
-                              onChange={(e) =>
-                                setProviderForm((f) => ({ ...f, secretAccessKey: e.target.value }))
-                              }
-                              placeholder="Secret access key"
-                              className="text-sm border border-slate-200 rounded-lg px-3 py-2"
-                            />
-                            <input
-                              value={providerForm.region}
-                              onChange={(e) =>
-                                setProviderForm((f) => ({ ...f, region: e.target.value }))
-                              }
-                              placeholder="Region (e.g. us-east-1)"
-                              className="text-sm border border-slate-200 rounded-lg px-3 py-2 sm:col-span-2"
-                            />
-                          </div>
-                        ) : null}
+                        {p.provider === 'AWS_SES' ? renderSesFields(p.id) : null}
                         {p.provider === 'SMTP' ? (
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             <input
@@ -710,7 +871,15 @@ export function EmailPanel() {
                         <div className="flex gap-2">
                           <button
                             type="button"
-                            disabled={saving}
+                            disabled={
+                              saving ||
+                              (p.provider === 'AWS_SES' && !sesSenderEmail.trim())
+                            }
+                            title={
+                              p.provider === 'AWS_SES' && !sesSenderEmail.trim()
+                                ? 'Choose a From address above before saving'
+                                : undefined
+                            }
                             onClick={() => void handleUpdateProvider(p.id)}
                             className="px-3 py-1.5 rounded-full bg-primary hover:bg-primary-hover text-white text-sm font-bold disabled:opacity-50"
                           >
@@ -737,12 +906,11 @@ export function EmailPanel() {
               <h4 className="text-sm font-bold text-gray-900">Add provider</h4>
               <select
                 value={providerForm.provider}
-                onChange={(e) =>
-                  setProviderForm((f) => ({
-                    ...f,
-                    provider: e.target.value as ProviderFormType,
-                  }))
-                }
+                onChange={(e) => {
+                  const next = e.target.value as ProviderFormType;
+                  setProviderForm((f) => ({ ...f, provider: next }));
+                  if (next !== 'AWS_SES') resetSesFormState();
+                }}
                 className="w-full text-sm border border-slate-200 rounded-lg px-3 py-2"
               >
                 {availableProviderTypes.map((t) => (
@@ -762,33 +930,7 @@ export function EmailPanel() {
                 />
               ) : null}
 
-              {providerForm.provider === 'AWS_SES' ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <input
-                    value={providerForm.accessKeyId}
-                    onChange={(e) =>
-                      setProviderForm((f) => ({ ...f, accessKeyId: e.target.value }))
-                    }
-                    placeholder="Access key ID"
-                    className="text-sm border border-slate-200 rounded-lg px-3 py-2"
-                  />
-                  <input
-                    type="password"
-                    value={providerForm.secretAccessKey}
-                    onChange={(e) =>
-                      setProviderForm((f) => ({ ...f, secretAccessKey: e.target.value }))
-                    }
-                    placeholder="Secret access key"
-                    className="text-sm border border-slate-200 rounded-lg px-3 py-2"
-                  />
-                  <input
-                    value={providerForm.region}
-                    onChange={(e) => setProviderForm((f) => ({ ...f, region: e.target.value }))}
-                    placeholder="Region (e.g. us-east-1)"
-                    className="text-sm border border-slate-200 rounded-lg px-3 py-2 sm:col-span-2"
-                  />
-                </div>
-              ) : null}
+              {providerForm.provider === 'AWS_SES' ? renderSesFields(null) : null}
 
               {providerForm.provider === 'SMTP' ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -850,7 +992,15 @@ export function EmailPanel() {
               <div className="flex gap-2">
                 <button
                   type="button"
-                  disabled={saving}
+                  disabled={
+                    saving ||
+                    (providerForm.provider === 'AWS_SES' && !sesSenderEmail.trim())
+                  }
+                  title={
+                    providerForm.provider === 'AWS_SES' && !sesSenderEmail.trim()
+                      ? 'Choose a From address above before saving'
+                      : undefined
+                  }
                   onClick={() => void handleCreateProvider()}
                   className="px-4 py-2 rounded-full bg-primary hover:bg-primary-hover text-white text-sm font-bold disabled:opacity-50"
                 >
@@ -866,6 +1016,50 @@ export function EmailPanel() {
               </div>
             </div>
           )}
+
+          {/* 3. Test send */}
+          <section
+            aria-labelledby="email-test-send-heading"
+            className="bg-surface rounded-2xl border border-black/5 p-4 space-y-3"
+          >
+            <h4
+              id="email-test-send-heading"
+              className="text-sm font-bold text-gray-900 flex items-center gap-2"
+            >
+              <Send className="w-4 h-4 text-primary" aria-hidden />
+              Send test email
+            </h4>
+            <p className="text-xs text-gray-500">
+              Sends with your active From
+              {activeFromEmail ? (
+                <>
+                  {' '}
+                  (<span className="font-mono text-gray-700">{activeFromEmail}</span>)
+                </>
+              ) : null}
+              .
+            </p>
+            <label htmlFor="email-test-to" className="sr-only">
+              Recipient email
+            </label>
+            <input
+              id="email-test-to"
+              type="email"
+              autoComplete="email"
+              value={testSend.to}
+              onChange={(e) => setTestSend((s) => ({ ...s, to: e.target.value }))}
+              placeholder="recipient@example.com"
+              className="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+            />
+            <button
+              type="button"
+              disabled={saving || !testSend.to.trim()}
+              onClick={() => void handleTestSend()}
+              className="px-4 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-sm font-bold disabled:opacity-50 cursor-pointer"
+            >
+              Send test
+            </button>
+          </section>
         </div>
       )}
 

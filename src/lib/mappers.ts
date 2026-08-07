@@ -214,6 +214,15 @@ export function mapMessageFromApi(raw: Record<string, unknown>): ChatMessage {
       ? (raw.metadata as Record<string, unknown>)
       : null;
   const revoked = metadata?.revoked === true;
+  const statusErrors = Array.isArray(metadata?.whatsappStatusErrors)
+    ? (metadata!.whatsappStatusErrors as Array<Record<string, unknown>>)
+    : [];
+  const firstErr = statusErrors[0];
+  const deliveryError = firstErr
+    ? [firstErr.title || firstErr.message, firstErr.code != null ? `(${firstErr.code})` : null]
+        .filter(Boolean)
+        .join(' ') || undefined
+    : undefined;
   const rawContent = String(raw.content ?? '');
   const content = revoked
     ? 'This message was deleted'
@@ -232,6 +241,7 @@ export function mapMessageFromApi(raw: Record<string, unknown>): ChatMessage {
     createdAt,
     timestamp: formatMessageTime(createdAt),
     status: raw.status as ChatMessage['status'],
+    deliveryError,
     revoked,
   };
 }
