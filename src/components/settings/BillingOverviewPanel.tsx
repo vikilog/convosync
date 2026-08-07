@@ -219,7 +219,8 @@ export function BillingOverviewPanel() {
           usage: data.usageSnapshot?.campaigns,
         },
         {
-          label: 'Emails / month',
+          // Platform email is CC-metered; snapshot shows Unlimited when emailsLimit is 0
+          label: 'Emails (ConvoCoins)',
           limit: limits.emailsLimit,
           usage: data.usageSnapshot?.emails,
         },

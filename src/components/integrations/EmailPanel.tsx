@@ -695,8 +695,9 @@ export function EmailPanel() {
               )}
             </div>
             <p className="text-xs text-gray-500 mb-4">
-              Default provider chooses how mail is sent. For AWS SES, pick a verified From —
-              that sets both your sending email and domain.
+              Default provider chooses how mail is sent. ConvoSync platform email bills
+              ConvoCoins only; your own SES/SMTP/etc. is not metered by ConvoSync. For AWS
+              SES, pick a verified From — that sets both your sending email and domain.
             </p>
 
             {providers.length === 0 ? (
@@ -974,7 +975,8 @@ export function EmailPanel() {
 
               {providerForm.provider === 'CONVOSYNC_MANAGED' ? (
                 <p className="text-xs text-gray-500">
-                  Uses ConvoSync platform email. No API key required from your workspace.
+                  Uses ConvoSync platform email. No API key required. Sends are billed from
+                  your ConvoCoins wallet (1 CC per recipient) — not a monthly plan email quota.
                 </p>
               ) : null}
 
@@ -1038,6 +1040,11 @@ export function EmailPanel() {
                 </>
               ) : null}
               .
+              {defaultProvider?.provider === 'CONVOSYNC_MANAGED'
+                ? ' Platform sends use ConvoCoins from your wallet.'
+                : defaultProvider
+                  ? ' Your own provider is not billed by ConvoSync.'
+                  : ''}
             </p>
             <label htmlFor="email-test-to" className="sr-only">
               Recipient email
