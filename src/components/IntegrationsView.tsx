@@ -1187,7 +1187,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
     }
 
     return (
-      <div className="w-full pb-12 space-y-6 animate-scale-up max-w-6xl mx-auto">
+      <div className="w-full pb-12 space-y-6 animate-scale-up">
         <button
           type="button"
           onClick={goToHub}
