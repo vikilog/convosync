@@ -635,7 +635,7 @@ export function EmailPanel() {
     : null;
 
   return (
-    <div className="space-y-4">
+    <div className="w-full space-y-4">
       <div className="flex flex-wrap gap-2" role="tablist" aria-label="Email settings">
         {(
           [
@@ -1192,33 +1192,46 @@ export function EmailPanel() {
             <p className="text-xs text-gray-500 text-center py-10">No emails sent yet.</p>
           ) : (
             <div className="w-full overflow-x-auto">
-              <table className="w-full min-w-[1100px] text-xs text-left">
+              {/* ponytail: table-fixed + % cols so logs fill the pane; overflow-x only for narrow viewports */}
+              <table className="w-full min-w-[960px] table-fixed text-xs text-left">
                 <caption className="sr-only">Email delivery logs</caption>
+                <colgroup>
+                  <col className="w-[9%]" />
+                  <col className="w-[12%]" />
+                  <col className="w-[12%]" />
+                  <col />
+                  <col className="w-[7%]" />
+                  <col className="w-[8%]" />
+                  <col className="w-[8%]" />
+                  <col className="w-[8%]" />
+                  <col className="w-[8%]" />
+                  <col className="w-[8%]" />
+                </colgroup>
                 <thead className="bg-slate-50 text-gray-500 font-bold border-b border-slate-200">
                   <tr>
-                    <th scope="col" className="px-4 py-2.5 whitespace-nowrap">
+                    <th scope="col" className="px-3 py-2.5 whitespace-nowrap">
                       Time
                     </th>
-                    <th scope="col" className="px-4 py-2.5 whitespace-nowrap">
+                    <th scope="col" className="px-3 py-2.5 whitespace-nowrap">
                       From
                     </th>
-                    <th scope="col" className="px-4 py-2.5 whitespace-nowrap">
+                    <th scope="col" className="px-3 py-2.5 whitespace-nowrap">
                       To
                     </th>
-                    <th scope="col" className="px-4 py-2.5">
+                    <th scope="col" className="px-3 py-2.5">
                       Subject
                     </th>
-                    <th scope="col" className="px-4 py-2.5 whitespace-nowrap">
+                    <th scope="col" className="px-3 py-2.5 whitespace-nowrap">
                       Provider
                     </th>
-                    <th scope="col" className="px-4 py-2.5 whitespace-nowrap">
+                    <th scope="col" className="px-3 py-2.5 whitespace-nowrap">
                       Status
                     </th>
                     {TRACKING_STEPS.map((step) => (
                       <th
                         key={step}
                         scope="col"
-                        className="px-4 py-2.5 whitespace-nowrap capitalize"
+                        className="px-3 py-2.5 whitespace-nowrap capitalize"
                       >
                         {step}
                       </th>
@@ -1231,32 +1244,35 @@ export function EmailPanel() {
                       key={log.id}
                       className="border-b border-gray-50 hover:bg-slate-50/50 transition-colors duration-150"
                     >
-                      <td className="px-4 py-2.5 text-gray-600 whitespace-nowrap tabular-nums">
+                      <td className="px-3 py-2.5 text-gray-600 whitespace-nowrap tabular-nums truncate">
                         {formatDate(log.createdAt)}
                       </td>
-                      <td className="px-4 py-2.5 font-mono text-meta whitespace-nowrap">
+                      <td
+                        className="px-3 py-2.5 font-mono text-meta whitespace-nowrap truncate"
+                        title={log.sender}
+                      >
                         {log.sender}
                       </td>
-                      <td className="px-4 py-2.5 font-mono text-meta whitespace-nowrap">
+                      <td
+                        className="px-3 py-2.5 font-mono text-meta whitespace-nowrap truncate"
+                        title={log.recipient}
+                      >
                         {log.recipient}
                       </td>
-                      <td
-                        className="px-4 py-2.5 text-gray-800 max-w-[240px] truncate"
-                        title={log.subject}
-                      >
+                      <td className="px-3 py-2.5 text-gray-800 truncate" title={log.subject}>
                         {log.subject}
                       </td>
-                      <td className="px-4 py-2.5 text-gray-500 whitespace-nowrap">
+                      <td className="px-3 py-2.5 text-gray-500 whitespace-nowrap truncate">
                         {logProviderLabel(log)}
                       </td>
-                      <td className="px-4 py-2.5 whitespace-nowrap">
+                      <td className="px-3 py-2.5 whitespace-nowrap">
                         <span
                           className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold uppercase border ${statusBadge(log.status)}`}
                         >
                           {log.status}
                         </span>
                         {log.errorMessage && (
-                          <p className="text-[11px] text-red-600 mt-1 max-w-[200px] whitespace-normal leading-snug">
+                          <p className="text-[11px] text-red-600 mt-1 whitespace-normal leading-snug truncate">
                             {log.errorMessage}
                           </p>
                         )}
@@ -1266,7 +1282,7 @@ export function EmailPanel() {
                         return (
                           <td
                             key={step}
-                            className={`px-4 py-2.5 whitespace-nowrap tabular-nums ${
+                            className={`px-3 py-2.5 whitespace-nowrap tabular-nums truncate ${
                               at ? 'text-gray-700' : 'text-gray-400'
                             }`}
                           >

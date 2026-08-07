@@ -234,9 +234,7 @@ function AppShellLayout({
               activeTab === 'automations' ||
               campaignCreateWizard
                 ? 'h-full min-h-0 min-w-0 overflow-hidden'
-                : activeTab === 'integrations'
-                  ? 'mx-auto h-full min-h-0 w-full max-w-6xl'
-                  : 'h-full min-h-0'
+                : 'h-full min-h-0 w-full'
             }
           >
             {mountedTabs.has('dashboard') && (
