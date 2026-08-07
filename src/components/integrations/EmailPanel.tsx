@@ -40,6 +40,9 @@ type EmailProviderConfig = {
   verifiedIdentities?: VerifiedIdentity[];
   identitiesFetchedAt?: string | null;
   sesConsoleUrl?: string | null;
+  trackingStatus?: 'enabled' | 'error' | 'disabled' | null;
+  trackingError?: string | null;
+  configurationSetName?: string | null;
 };
 
 type ProviderFormType = EmailProviderConfig['provider'];
@@ -77,6 +80,12 @@ type EmailSender = {
   domainId: string | null;
 };
 
+type EmailDeliveryEvent = {
+  type: string;
+  at: string;
+  detail?: string;
+};
+
 type EmailLog = {
   id: string;
   sender: string;
@@ -87,8 +96,51 @@ type EmailLog = {
   status: string;
   messageId: string | null;
   errorMessage: string | null;
+  metadata?: {
+    events?: EmailDeliveryEvent[];
+    [key: string]: unknown;
+  } | null;
   createdAt: string;
+  updatedAt?: string;
 };
+
+const TRACKING_STEPS = ['sent', 'delivered', 'opened', 'clicked'] as const;
+
+function eventTimeForStatus(log: EmailLog, status: string): string | null {
+  const events = Array.isArray(log.metadata?.events) ? log.metadata!.events! : [];
+  const hit = [...events].reverse().find((e) => e.type === status);
+  if (hit?.at) return hit.at;
+  if (status === 'sent') return log.createdAt;
+  const rank: Record<string, number> = {
+    queued: 0,
+    sent: 1,
+    delivered: 2,
+    opened: 3,
+    clicked: 4,
+  };
+  const cur = rank[log.status] ?? 0;
+  const need = rank[status] ?? 99;
+  if (cur >= need && status !== 'clicked') {
+    // Status advanced without a discrete timestamp — show updatedAt as best effort.
+    return log.updatedAt ?? null;
+  }
+  return null;
+}
+
+function reachedTrackingStep(log: EmailLog, step: string): boolean {
+  const rank: Record<string, number> = {
+    queued: 0,
+    sent: 1,
+    delivered: 2,
+    opened: 3,
+    clicked: 4,
+  };
+  if (['bounced', 'complained', 'rejected', 'failed'].includes(log.status)) {
+    const events = Array.isArray(log.metadata?.events) ? log.metadata!.events! : [];
+    return events.some((e) => e.type === step) || step === 'sent';
+  }
+  return (rank[log.status] ?? 0) >= (rank[step] ?? 99);
+}
 
 function formatDate(iso: string | null): string {
   if (!iso) return '—';
@@ -107,6 +159,11 @@ function statusBadge(status: string) {
     sent: 'bg-[#e6f7ec] text-[#006d2f] border-[#5dfd8a]/40',
     queued: 'bg-gray-50 text-gray-600 border-gray-200',
     delivered: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+    opened: 'bg-sky-50 text-sky-800 border-sky-200',
+    clicked: 'bg-violet-50 text-violet-800 border-violet-200',
+    bounced: 'bg-red-50 text-red-700 border-red-200',
+    complained: 'bg-orange-50 text-orange-800 border-orange-200',
+    rejected: 'bg-red-50 text-red-700 border-red-200',
     active: 'bg-[#e6f7ec] text-[#006d2f] border-[#5dfd8a]/40',
     disabled: 'bg-gray-100 text-gray-500 border-gray-200',
     credentials_missing: 'bg-amber-50 text-amber-800 border-amber-200',
@@ -733,7 +790,30 @@ export function EmailPanel() {
                           {!p.hasCredentials && p.provider !== 'CONVOSYNC_MANAGED' && (
                             <span className="text-xs text-amber-700">No credentials</span>
                           )}
+                          {p.provider === 'AWS_SES' && p.trackingStatus === 'enabled' && (
+                            <span className="text-sm font-bold uppercase px-2 py-0.5 rounded border bg-[#e6f7ec] text-[#006d2f] border-[#5dfd8a]/40">
+                              Tracking on
+                            </span>
+                          )}
+                          {p.provider === 'AWS_SES' && p.trackingStatus === 'error' && (
+                            <span className="text-sm font-bold uppercase px-2 py-0.5 rounded border bg-amber-50 text-amber-800 border-amber-200">
+                              Tracking off
+                            </span>
+                          )}
                         </div>
+                        {p.provider === 'AWS_SES' && p.trackingStatus === 'error' && p.trackingError ? (
+                          <p className="text-xs text-amber-800 mt-1.5 flex gap-1.5 items-start">
+                            <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                            <span>{p.trackingError}</span>
+                          </p>
+                        ) : null}
+                        {p.provider === 'AWS_SES' &&
+                        p.trackingStatus === 'enabled' &&
+                        p.configurationSetName ? (
+                          <p className="text-xs text-gray-500 mt-1 font-mono">
+                            Config set · {p.configurationSetName}
+                          </p>
+                        ) : null}
                       </div>
                       <div className="flex flex-wrap gap-1">
                         {!p.isDefault && p.status !== 'disabled' && (
@@ -1084,12 +1164,12 @@ export function EmailPanel() {
                     <th className="text-left px-4 py-2">To</th>
                     <th className="text-left px-4 py-2">Subject</th>
                     <th className="text-left px-4 py-2">Provider</th>
-                    <th className="text-left px-4 py-2">Status</th>
+                    <th className="text-left px-4 py-2">Delivery</th>
                   </tr>
                 </thead>
                 <tbody>
                   {logs.map((log) => (
-                    <tr key={log.id} className="border-b border-gray-50 hover:bg-slate-50/50">
+                    <tr key={log.id} className="border-b border-gray-50 hover:bg-slate-50/50 align-top">
                       <td className="px-4 py-2 text-gray-500 whitespace-nowrap">
                         {formatDate(log.createdAt)}
                       </td>
@@ -1101,15 +1181,39 @@ export function EmailPanel() {
                       <td className="px-4 py-2 text-xs text-gray-500 whitespace-nowrap">
                         {logProviderLabel(log)}
                       </td>
-                      <td className="px-4 py-2">
+                      <td className="px-4 py-2 min-w-[220px]">
                         <span
                           className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-sm font-bold uppercase border ${statusBadge(log.status)}`}
                         >
-                          {log.status === 'sent' && <CheckCircle2 className="w-3 h-3" />}
+                          {(log.status === 'sent' ||
+                            log.status === 'delivered' ||
+                            log.status === 'opened' ||
+                            log.status === 'clicked') && (
+                            <CheckCircle2 className="w-3 h-3" />
+                          )}
                           {log.status}
                         </span>
+                        <ol className="mt-2 space-y-0.5">
+                          {TRACKING_STEPS.map((step) => {
+                            const reached = reachedTrackingStep(log, step);
+                            const at = eventTimeForStatus(log, step);
+                            return (
+                              <li
+                                key={step}
+                                className={`flex justify-between gap-3 capitalize ${
+                                  reached ? 'text-gray-700' : 'text-gray-300'
+                                }`}
+                              >
+                                <span>{step}</span>
+                                <span className="whitespace-nowrap tabular-nums">
+                                  {reached && at ? formatDate(at) : reached ? '—' : ''}
+                                </span>
+                              </li>
+                            );
+                          })}
+                        </ol>
                         {log.errorMessage && (
-                          <p className="text-xs text-red-600 mt-1">{log.errorMessage}</p>
+                          <p className="text-xs text-red-600 mt-1.5">{log.errorMessage}</p>
                         )}
                       </td>
                     </tr>
