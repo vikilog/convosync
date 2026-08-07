@@ -68,4 +68,37 @@ assert.notEqual(
   })
 );
 
+// Same contact + page must NOT collapse IG vs Messenger threads.
+const igAndMessengerSameContact = dedupeInboxThreads([
+  {
+    conversationId: 'ig-thread',
+    id: 'contact-shared',
+    phone: '36586673007584588',
+    channel: 'instagram',
+    channelAccountId: 'page-1',
+    lastMessageAt: '2026-01-01T10:00:00.000Z',
+  },
+  {
+    conversationId: 'fb-thread',
+    id: 'contact-shared',
+    phone: '36586673007584588',
+    channel: 'messenger',
+    channelAccountId: 'page-1',
+    lastMessageAt: '2026-01-01T12:00:00.000Z',
+  },
+]);
+assert.equal(igAndMessengerSameContact.length, 2);
+assert.notEqual(
+  whatsappInboxDedupeKey({
+    channel: 'instagram',
+    channelAccountId: 'page-1',
+    contact: { id: 'contact-shared', phone: 'ig:1' },
+  }),
+  whatsappInboxDedupeKey({
+    channel: 'messenger',
+    channelAccountId: 'page-1',
+    contact: { id: 'contact-shared', phone: 'fb:1' },
+  })
+);
+
 console.log('inboxDedupe.check.ts: ok');
