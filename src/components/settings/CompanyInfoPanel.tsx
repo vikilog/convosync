@@ -17,6 +17,7 @@ import { normalizeCompanySettingsResponse } from '../../lib/companySettings';
 import { compressImageFile } from '../../lib/imageUpload';
 import { hasWorkspacePermission } from '../../lib/workspacePermissions';
 import { useKeepAliveActivation } from '../KeepAlive';
+import { LocaleFields } from '../locale/LocaleFields';
 import {
   mapWorkspaceToForm,
   whatsappLinesFromSettings,
@@ -523,19 +524,15 @@ export function CompanyInfoPanel() {
             {renderOtpSendError('company_phone')}
             {renderOtpRow('company_phone')}
           </div>
-          <label className="block">
-            <span className="text-meta font-bold text-gray-500 uppercase">Timezone</span>
-            <select
-              value={form.timezone}
-              onChange={(e) => update('timezone', e.target.value)}
-              className="mt-1 w-full text-sm border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"
-            >
-              <option value="Asia/Kolkata">Asia/Kolkata (IST)</option>
-              <option value="Asia/Dubai">Asia/Dubai (GST)</option>
-              <option value="Europe/London">Europe/London</option>
-              <option value="America/New_York">America/New_York</option>
-            </select>
-          </label>
+          <div className="md:col-span-2">
+            <LocaleFields
+              idPrefix="company"
+              country={form.country}
+              timezone={form.timezone}
+              onCountryChange={(code) => update('country', code)}
+              onTimezoneChange={(tz) => update('timezone', tz)}
+            />
+          </div>
           <label className="block md:col-span-2">
             <span className="text-meta font-bold text-gray-500 uppercase">Address</span>
             <div className="relative mt-1">
@@ -561,14 +558,6 @@ export function CompanyInfoPanel() {
             <input
               value={form.state}
               onChange={(e) => update('state', e.target.value)}
-              className="mt-1 w-full text-sm border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20"
-            />
-          </label>
-          <label className="block">
-            <span className="text-meta font-bold text-gray-500 uppercase">Country</span>
-            <input
-              value={form.country}
-              onChange={(e) => update('country', e.target.value)}
               className="mt-1 w-full text-sm border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
           </label>

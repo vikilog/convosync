@@ -100,28 +100,6 @@ export const HEARD_ABOUT_OPTIONS = [
   'Other',
 ] as const;
 
-export const TIMEZONES = [
-  'Asia/Kolkata',
-  'Asia/Dubai',
-  'Asia/Singapore',
-  'Europe/London',
-  'Europe/Berlin',
-  'America/New_York',
-  'America/Los_Angeles',
-  'Australia/Sydney',
-] as const;
-
-export const COUNTRIES = [
-  { code: 'IN', label: 'India' },
-  { code: 'US', label: 'United States' },
-  { code: 'GB', label: 'United Kingdom' },
-  { code: 'AE', label: 'United Arab Emirates' },
-  { code: 'SG', label: 'Singapore' },
-  { code: 'AU', label: 'Australia' },
-  { code: 'DE', label: 'Germany' },
-  { code: 'CA', label: 'Canada' },
-] as const;
-
 export function isStepOptional(step: number) {
   return (OPTIONAL_STEPS as readonly number[]).includes(step);
 }

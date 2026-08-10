@@ -1,10 +1,21 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, CheckCircle2, Loader2, Lock, LogOut, Save, Trash2, User } from 'lucide-react';
-import { api, getUserAvatar, getUserEmail, getUserName, setUserAvatar, setUserName } from '../../lib/api';
+import { Camera, CheckCircle2, Globe, Loader2, Lock, LogOut, Save, Trash2, User } from 'lucide-react';
+import {
+  api,
+  getUserAvatar,
+  getUserEmail,
+  getUserName,
+  getUserPermissions,
+  getUserRole,
+  setUserAvatar,
+  setUserName,
+} from '../../lib/api';
 import { compressImageFile } from '../../lib/imageUpload';
 import { logoutThisDevice } from '../../lib/session';
 import { disconnectSocket } from '../../lib/socket';
+import { hasWorkspacePermission } from '../../lib/workspacePermissions';
+import { LocaleFields } from '../locale/LocaleFields';
 
 type ProfileUser = {
   id: string;
@@ -42,15 +53,25 @@ export function ProfilePanel() {
   const [otpCode, setOtpCode] = useState('');
   const [otpBusy, setOtpBusy] = useState<'send' | 'verify' | null>(null);
   const [otpSentHint, setOtpSentHint] = useState<string | null>(null);
+  const canEditLocale = hasWorkspacePermission(getUserPermissions(), 'settings', getUserRole());
+  const [country, setCountry] = useState('IN');
+  const [timezone, setTimezone] = useState('Asia/Kolkata');
+  const [savedCountry, setSavedCountry] = useState('IN');
+  const [savedTimezone, setSavedTimezone] = useState('Asia/Kolkata');
+  const [savingLocale, setSavingLocale] = useState(false);
 
   const loadProfile = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const [me, verification] = await Promise.all([
+      const [me, verification, company] = await Promise.all([
         api.getMe() as Promise<ProfileUser>,
         api.getVerificationStatus().catch(() => null) as Promise<{
           userEmail?: { verified?: boolean };
+        } | null>,
+        api.getCompanySettings().catch(() => null) as Promise<{
+          country?: string | null;
+          timezone?: string | null;
         } | null>,
       ]);
       setProfile(me);
@@ -58,6 +79,12 @@ export function ProfilePanel() {
       setEmailVerified(Boolean(me.emailVerified ?? verification?.userEmail?.verified));
       if (me.name) setUserName(me.name);
       if (me.avatar !== undefined) setUserAvatar(me.avatar ?? '');
+      const nextCountry = company?.country || 'IN';
+      const nextTimezone = company?.timezone || 'Asia/Kolkata';
+      setCountry(nextCountry);
+      setTimezone(nextTimezone);
+      setSavedCountry(nextCountry);
+      setSavedTimezone(nextTimezone);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load profile');
     } finally {
@@ -384,6 +411,67 @@ export function ProfilePanel() {
             Save name
           </button>
         </div>
+      </form>
+
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          void (async () => {
+            if (!canEditLocale) return;
+            setSavingLocale(true);
+            setError(null);
+            setMessage(null);
+            try {
+              const res = await api.updateLocale({ country, timezone });
+              setCountry(res.country || country);
+              setTimezone(res.timezone || timezone);
+              setSavedCountry(res.country || country);
+              setSavedTimezone(res.timezone || timezone);
+              setMessage('Country and timezone saved.');
+            } catch (err) {
+              setError(err instanceof Error ? err.message : 'Failed to save locale');
+            } finally {
+              setSavingLocale(false);
+            }
+          })();
+        }}
+        className="space-y-4 rounded-2xl bg-white ring-1 ring-slate-200/80 p-5 shadow-sm md:p-6"
+      >
+        <div className="mb-1 flex items-center gap-2">
+          <Globe className="h-4 w-4 text-primary" aria-hidden />
+          <h3 className="text-sm font-semibold text-slate-900">Country &amp; timezone</h3>
+        </div>
+        <p className="text-sm text-slate-500">
+          Workspace defaults used for scheduling and business hours. Same fields as Company info.
+        </p>
+        <LocaleFields
+          idPrefix="profile"
+          country={country}
+          timezone={timezone}
+          disabled={!canEditLocale}
+          onCountryChange={setCountry}
+          onTimezoneChange={setTimezone}
+        />
+        {!canEditLocale ? (
+          <p className="text-xs text-slate-500">Ask a workspace admin to change these settings.</p>
+        ) : (
+          <div className="flex justify-end pt-1">
+            <button
+              type="submit"
+              disabled={
+                savingLocale || (country === savedCountry && timezone === savedTimezone)
+              }
+              className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-primary-hover disabled:opacity-60"
+            >
+              {savingLocale ? (
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+              ) : (
+                <Save className="h-4 w-4" aria-hidden />
+              )}
+              Save location
+            </button>
+          </div>
+        )}
       </form>
 
       <form

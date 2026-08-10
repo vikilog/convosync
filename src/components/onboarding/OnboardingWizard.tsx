@@ -5,7 +5,6 @@ import {
   ArrowRight,
   Building2,
   CheckCircle2,
-  Globe2,
   Sparkles,
   User,
 } from 'lucide-react';
@@ -13,18 +12,18 @@ import { api, setUserName } from '../../lib/api';
 import { AppLoadingScreen } from '../ui/AppLoadingScreen';
 import {
   ACCOUNT_TYPES,
-  COUNTRIES,
   COMPANY_SIZES,
   HEARD_ABOUT_OPTIONS,
   INDUSTRIES,
   isStepOptional,
   ONBOARDING_TOTAL_STEPS,
-  TIMEZONES,
   USE_CASE_OPTIONS,
   type AccountType,
   type OnboardingState,
 } from '../../lib/onboarding';
+import { detectBrowserTimezone } from '../../lib/locale/detectBrowserTimezone';
 import { setOnboardingCache } from '../../lib/session';
+import { LocaleFields } from '../locale/LocaleFields';
 import { OnboardingStepIndicator } from './OnboardingStepIndicator';
 
 type FormState = {
@@ -82,12 +81,14 @@ function validateStep(step: number, form: FormState): string | null {
         if (!form.companySize) return 'Company size is required.';
         if (!form.industry) return 'Industry is required.';
         if (!form.country) return 'Country is required.';
+        if (!form.timezone) return 'Timezone is required.';
       } else {
         if (!form.displayName.trim()) return 'Display or business name is required.';
         if (/https?:\/\//i.test(form.displayName) || /^www\./i.test(form.displayName.trim())) {
           return 'Business name cannot be a URL.';
         }
         if (!form.country) return 'Country is required.';
+        if (!form.timezone) return 'Timezone is required.';
       }
       return null;
     case 4:
@@ -96,7 +97,6 @@ function validateStep(step: number, form: FormState): string | null {
       return null;
     case 6:
       if (!form.workspaceName.trim()) return 'Workspace name is required.';
-      if (!form.timezone) return 'Timezone is required.';
       return null;
     default:
       return null;
@@ -116,10 +116,12 @@ function stepPayload(step: number, form: FormState): Record<string, unknown> {
             companySize: form.companySize,
             industry: form.industry,
             country: form.country,
+            timezone: form.timezone,
           }
         : {
             displayName: form.displayName.trim(),
             country: form.country,
+            timezone: form.timezone,
           };
     case 4:
       return { useCases: form.useCases };
@@ -144,6 +146,8 @@ export function OnboardingWizard() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
+  const [countryHint, setCountryHint] = useState<string | null>(null);
+  const [timezoneHint, setTimezoneHint] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>({
     accountType: '',
     name: '',
@@ -182,7 +186,24 @@ export function OnboardingWizard() {
     (async () => {
       try {
         const state = await api.getOnboarding();
-        if (!cancelled) applyState(state);
+        if (cancelled) return;
+        applyState(state);
+        if (state.onboardingCompleted) return;
+
+        // Prefill suggestion into the form only — never auto-save until the user continues.
+        const browserTimezone = detectBrowserTimezone();
+        const suggestion = await api.detectLocale(browserTimezone || undefined).catch(() => null);
+        if (cancelled || !suggestion) return;
+
+        setCountryHint(suggestion.countryHint);
+        setTimezoneHint(suggestion.timezoneHint);
+        // Don't clobber locale already confirmed in a later onboarding step.
+        if (state.onboardingStep > 3) return;
+        setForm((prev) => ({
+          ...prev,
+          country: suggestion.country || prev.country,
+          timezone: suggestion.timezone || prev.timezone || browserTimezone || prev.timezone,
+        }));
       } catch (err) {
         if (!cancelled) setError(err instanceof Error ? err.message : 'Failed to load onboarding');
       } finally {
@@ -404,18 +425,28 @@ export function OnboardingWizard() {
                   />
                 </label>
               )}
-              <label className="block">
-                <span className="text-meta font-bold uppercase tracking-wide text-gray-500">Country</span>
-                <select
-                  value={form.country}
-                  onChange={(e) => setForm((f) => ({ ...f, country: e.target.value }))}
-                  className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                >
-                  {COUNTRIES.map((c) => (
-                    <option key={c.code} value={c.code}>{c.label}</option>
-                  ))}
-                </select>
-              </label>
+              <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4">
+                <p className="mb-3 text-sm font-semibold text-gray-800">Confirm your location</p>
+                <p className="mb-4 text-xs text-gray-500">
+                  We detected these from your device and network. Change either before continuing —
+                  nothing is saved until you confirm.
+                </p>
+                <LocaleFields
+                  idPrefix="onboarding"
+                  country={form.country}
+                  timezone={form.timezone}
+                  countryHint={countryHint}
+                  timezoneHint={timezoneHint}
+                  onCountryChange={(code) => {
+                    setCountryHint(null);
+                    setForm((f) => ({ ...f, country: code }));
+                  }}
+                  onTimezoneChange={(tz) => {
+                    setTimezoneHint(null);
+                    setForm((f) => ({ ...f, timezone: tz }));
+                  }}
+                />
+              </div>
             </div>
           )}
 
@@ -483,7 +514,9 @@ export function OnboardingWizard() {
             <div className="space-y-5">
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Workspace setup</h1>
-                <p className="mt-2 text-sm text-gray-500">Name your workspace and set your default timezone.</p>
+                <p className="mt-2 text-sm text-gray-500">
+                  Name your workspace. Country and timezone were set earlier — you can change them in Settings anytime.
+                </p>
               </div>
               <label className="block">
                 <span className="text-meta font-bold uppercase tracking-wide text-gray-500">Workspace name</span>
@@ -492,21 +525,6 @@ export function OnboardingWizard() {
                   onChange={(e) => setForm((f) => ({ ...f, workspaceName: e.target.value }))}
                   className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
-              </label>
-              <label className="block">
-                <span className="text-meta font-bold uppercase tracking-wide text-gray-500">Timezone</span>
-                <div className="relative mt-1">
-                  <Globe2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                  <select
-                    value={form.timezone}
-                    onChange={(e) => setForm((f) => ({ ...f, timezone: e.target.value }))}
-                    className="w-full rounded-xl border border-slate-200 py-2.5 pl-9 pr-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  >
-                    {TIMEZONES.map((tz) => (
-                      <option key={tz} value={tz}>{tz.replace(/_/g, ' ')}</option>
-                    ))}
-                  </select>
-                </div>
               </label>
             </div>
           )}
@@ -534,6 +552,14 @@ export function OnboardingWizard() {
                 <div className="grid grid-cols-3 gap-2 px-4 py-3">
                   <dt className="text-gray-500">Workspace</dt>
                   <dd className="col-span-2 font-medium text-gray-900">{form.workspaceName}</dd>
+                </div>
+                <div className="grid grid-cols-3 gap-2 px-4 py-3">
+                  <dt className="text-gray-500">Country</dt>
+                  <dd className="col-span-2 font-medium text-gray-900">{form.country}</dd>
+                </div>
+                <div className="grid grid-cols-3 gap-2 px-4 py-3">
+                  <dt className="text-gray-500">Timezone</dt>
+                  <dd className="col-span-2 font-medium text-gray-900">{form.timezone}</dd>
                 </div>
                 <div className="grid grid-cols-3 gap-2 px-4 py-3">
                   <dt className="text-gray-500">Use cases</dt>

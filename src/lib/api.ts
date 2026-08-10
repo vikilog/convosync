@@ -314,6 +314,22 @@ export const api = {
   /** Invalidate all sessions via tokenVersion bump. */
   logoutAll: () => post('/auth/logout-all', {}),
   getCompanySettings: () => get('/workspace/company'),
+  detectLocale: (browserTimezone?: string) =>
+    get('/workspace/locale/detect', browserTimezone ? { browserTimezone } : undefined) as Promise<{
+      country: string | null;
+      timezone: string | null;
+      countrySource: 'ip' | null;
+      timezoneSource: 'browser' | 'ip' | null;
+      countryHint: string | null;
+      timezoneHint: string | null;
+      ipFound: boolean;
+    }>,
+  updateLocale: (data: { country: string; timezone: string }) =>
+    patch('/workspace/locale', data) as Promise<{
+      id: string;
+      country: string | null;
+      timezone: string | null;
+    }>,
   getWorkspaceAutomation: () => get('/workspace/automation'),
   updateWorkspaceAutomation: (data: unknown) => patch('/workspace/automation', data),
   getWorkspaceTags: () =>

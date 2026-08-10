@@ -16,6 +16,8 @@ export type InAppNotification = {
   unread: boolean;
   entityType: string | null;
   entityId: string | null;
+  /** When false/undefined, ignore for bell realtime (activity-only rows). */
+  forBell?: boolean;
 };
 
 const TABS = [
@@ -92,6 +94,7 @@ export const NotificationsPanel: React.FC<Props> = ({
   useEffect(() => {
     const s = getSocket();
     const onNote = (payload: InAppNotification) => {
+      if (payload.forBell === false) return;
       setItems((prev) => {
         if (prev.some((p) => p.id === payload.id)) return prev;
         if (tab !== 'all' && payload.category !== tab) return prev;
