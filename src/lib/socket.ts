@@ -4,6 +4,10 @@ import { resolveSocketUrl } from './publicUrls';
 
 let socket: Socket | null = null;
 
+function authToken(): string {
+  return localStorage.getItem('convosync_token') ?? '';
+}
+
 export function getSocket(): Socket {
   if (!socket) {
     const url = resolveSocketUrl();
@@ -11,12 +15,16 @@ export function getSocket(): Socket {
       transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionAttempts: 10,
+      auth: { token: authToken() },
     });
     socket.on('connect', () => {
+      // Refresh token on each connect (login / company switch).
+      socket!.auth = { token: authToken() };
       const workspaceId = getWorkspaceId();
       if (workspaceId) socket?.emit('join-workspace', workspaceId);
     });
     socket.io.on('reconnect', () => {
+      socket!.auth = { token: authToken() };
       const workspaceId = getWorkspaceId();
       if (workspaceId) socket?.emit('join-workspace', workspaceId);
     });
@@ -26,6 +34,7 @@ export function getSocket(): Socket {
 
 export function connectSocket(workspaceId: string) {
   const s = getSocket();
+  s.auth = { token: authToken() };
   s.emit('join-workspace', workspaceId);
   return s;
 }

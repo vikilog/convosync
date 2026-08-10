@@ -16,6 +16,7 @@ import { MessagePerformanceChart } from './dashboard/MessagePerformanceChart';
 import { RecentCampaignsPanel } from './dashboard/RecentCampaignsPanel';
 import { UpcomingCampaignsPanel } from './dashboard/UpcomingCampaignsPanel';
 import { TeamPerformanceSection } from './dashboard/TeamPerformanceSection';
+import { RecentActivityPanel } from './dashboard/RecentActivityPanel';
 import { BottomStatusBar } from './dashboard/BottomStatusBar';
 import { useCountUp } from '../hooks/useCountUp';
 import {
@@ -288,6 +289,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           />
         </div>
       </div>
+
+      <RecentActivityPanel />
 
       <TeamPerformanceSection
         members={teamMembers}

@@ -329,6 +329,87 @@ export const api = {
   deleteWorkspaceTag: (id: string) => del(`/workspace/tags/${id}`),
   getNotificationPreferences: () => get('/workspace/notifications'),
   updateNotificationPreferences: (data: unknown) => patch('/workspace/notifications', data),
+
+  getInAppNotifications: (params?: { category?: string; limit?: number }) =>
+    get('/in-app-notifications', {
+      ...(params?.category ? { category: params.category } : {}),
+      ...(params?.limit != null ? { limit: String(params.limit) } : {}),
+    }) as Promise<{
+      items: Array<{
+        id: string;
+        type: string;
+        category: string;
+        title: string;
+        message: string;
+        entityType: string | null;
+        entityId: string | null;
+        severity: string;
+        createdAt: string;
+        unread: boolean;
+        metadata?: unknown;
+      }>;
+    }>,
+  getInAppNotificationUnreadCount: () =>
+    get('/in-app-notifications/unread-count') as Promise<{ unread: number }>,
+  getRecentActivity: (limit = 20) =>
+    get('/in-app-notifications/activity', { limit: String(limit) }) as Promise<{
+      role: string;
+      items: Array<{
+        id: string;
+        type: string;
+        category: string;
+        title: string;
+        message: string;
+        severity: string;
+        createdAt: string;
+        entityType: string | null;
+        entityId: string | null;
+      }>;
+    }>,
+  markInAppNotificationRead: (id: string) => post(`/in-app-notifications/${id}/read`, {}),
+  markAllInAppNotificationsRead: () => post('/in-app-notifications/read-all', {}),
+
+  getTeamChatPeers: () =>
+    get('/team-chat/peers') as Promise<{
+      peers: Array<{
+        userId: string;
+        name: string;
+        avatar: string | null;
+        online: boolean;
+        lastMessage: {
+          id: string;
+          body: string;
+          createdAt: string;
+          senderUserId: string;
+        } | null;
+      }>;
+    }>,
+  getTeamChatMessages: (peerUserId: string, limit = 50) =>
+    get('/team-chat/messages', {
+      peerUserId,
+      limit: String(limit),
+    }) as Promise<{
+      items: Array<{
+        id: string;
+        body: string;
+        createdAt: string;
+        recipientUserId: string;
+        sender: { id: string; name: string; avatar: string | null };
+      }>;
+    }>,
+  sendTeamChatMessage: (body: string, recipientUserId: string) =>
+    post('/team-chat/messages', { body, recipientUserId }) as Promise<{
+      id: string;
+      body: string;
+      createdAt: string;
+      recipientUserId: string;
+      sender: { id: string; name: string; avatar: string | null };
+    }>,
+  getTeamChatPresence: () =>
+    get('/team-chat/presence') as Promise<{
+      online: Array<{ userId: string; name: string; avatar: string | null }>;
+      onlineCount: number;
+    }>,
   getSubscription: () => get('/workspace/subscription'),
   getSubscriptionQuote: (query: string) => get(`/workspace/subscription/quote?${query}`),
   saveSubscriptionQuote: (data: {

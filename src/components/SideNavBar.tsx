@@ -29,9 +29,12 @@ import {
   X,
   Ear,
   UsersRound,
+  MessageSquare,
+  Bell,
 } from 'lucide-react';
 import { useSidebar } from '../contexts/SidebarContext';
 import { api, getWorkspaceId } from '../lib/api';
+import { getSocket } from '../lib/socket';
 import { useWorkspaceAccess } from '../hooks/useWorkspaceAccess';
 import {
   GOOGLE_TOOL_META,
@@ -45,10 +48,12 @@ import {
   fetchInboxUnreadTotal,
   INBOX_UNREAD_TOTAL_EVENT,
 } from '../lib/inboxEvents';
+import { TEAM_CHAT_UNREAD_TOTAL_EVENT } from '../lib/teamChatEvents';
 import { fetchWalletBalanceCc, WALLET_BALANCE_EVENT } from '../lib/walletEvents';
 import { COMPANY_UPDATED_EVENT } from '../lib/companyEvents';
 import { formatCc } from '../lib/convocoins';
 import { ConvoCoinIcon } from './ConvoCoinIcon';
+import { NotificationsPanel } from './notifications/NotificationsPanel';
 import type { WorkspaceSummary } from './WorkspaceSwitcherDialog';
 
 const SIDEBAR_HIDDEN_TABS = new Set([
@@ -92,15 +97,39 @@ export const SideNavBar: React.FC = () => {
   const [companyName, setCompanyName] = useState<string | null>(null);
   const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(null);
   const [inboxUnreadTotal, setInboxUnreadTotal] = useState(0);
+  const [teamChatUnreadTotal, setTeamChatUnreadTotal] = useState(0);
   const [walletBalanceCc, setWalletBalanceCc] = useState<number | null>(null);
   const [connectedGoogleTools, setConnectedGoogleTools] = useState<GoogleToolProduct[]>([]);
   const [googleToolsOpen, setGoogleToolsOpen] = useState(() =>
     location.pathname.startsWith('/google-tools')
   );
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifUnread, setNotifUnread] = useState(0);
   const { collapsed, toggleCollapsed, setCollapsed, mobileOpen, setMobileOpen, toggleMobile, isLargeScreen } =
     useSidebar();
   const sidebarCollapsed = collapsed && isLargeScreen;
   const { canTab } = useWorkspaceAccess();
+
+  const refreshNotifUnread = useCallback(async () => {
+    try {
+      const res = await api.getInAppNotificationUnreadCount();
+      setNotifUnread(res.unread ?? 0);
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  useEffect(() => {
+    void refreshNotifUnread();
+    const s = getSocket();
+    const onNote = () => {
+      void refreshNotifUnread();
+    };
+    s.on('workspace_notification', onNote);
+    return () => {
+      s.off('workspace_notification', onNote);
+    };
+  }, [refreshNotifUnread, activeWorkspace?.id]);
 
   useEffect(() => {
     const wsId = getWorkspaceId();
@@ -188,6 +217,15 @@ export const SideNavBar: React.FC = () => {
   }, [activeWorkspace?.id]);
 
   useEffect(() => {
+    const onTeamUnread = (event: Event) => {
+      const total = (event as CustomEvent<{ total: number }>).detail?.total;
+      if (typeof total === 'number') setTeamChatUnreadTotal(total);
+    };
+    window.addEventListener(TEAM_CHAT_UNREAD_TOTAL_EVENT, onTeamUnread);
+    return () => window.removeEventListener(TEAM_CHAT_UNREAD_TOTAL_EVENT, onTeamUnread);
+  }, [activeWorkspace?.id]);
+
+  useEffect(() => {
     const onWalletBalance = (event: Event) => {
       const balanceCc = (event as CustomEvent<{ balanceCc: number }>).detail?.balanceCc;
       if (typeof balanceCc === 'number') setWalletBalanceCc(balanceCc);
@@ -215,6 +253,12 @@ export const SideNavBar: React.FC = () => {
           label: 'Inbox',
           icon: Inbox,
           badge: inboxUnreadTotal > 0 ? inboxUnreadTotal : undefined,
+        },
+        {
+          id: 'team-chat',
+          label: 'Team Chat',
+          icon: MessageSquare,
+          badge: teamChatUnreadTotal > 0 ? teamChatUnreadTotal : undefined,
         },
         { id: 'contacts', label: 'Contacts', icon: Users },
       ],
@@ -571,7 +615,44 @@ export const SideNavBar: React.FC = () => {
             </div>
           )}
         </nav>
+
+        <div
+          className={`mt-auto space-y-0.5 border-t border-black/5 ${
+            sidebarCollapsed ? 'p-2' : 'px-2 py-2'
+          }`}
+        >
+          <button
+            type="button"
+            onClick={() => setNotifOpen((v) => !v)}
+            title={sidebarCollapsed ? 'Notifications' : undefined}
+            className={navLinkClass(notifOpen, sidebarCollapsed)}
+            aria-label="Notifications"
+            aria-expanded={notifOpen}
+          >
+            <div className="relative shrink-0">
+              <Bell
+                className={`h-4 w-4 ${notifOpen ? 'text-primary' : 'text-neutral-400'}`}
+              />
+              {notifUnread > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full border-2 border-white bg-red-500" />
+              )}
+            </div>
+            {!sidebarCollapsed && <span>Notifications</span>}
+          </button>
+        </div>
       </aside>
+
+      {/* Outside aside: transform/overflow on sidebar would clip a fixed panel */}
+      <NotificationsPanel
+        open={notifOpen}
+        onClose={() => setNotifOpen(false)}
+        onUnreadChange={setNotifUnread}
+        panelClassName={`fixed bottom-3 z-[70] flex w-[min(380px,calc(100vw-1.5rem))] flex-col overflow-hidden rounded-xl border border-black/8 bg-white shadow-lg shadow-black/10 ${
+          sidebarCollapsed
+            ? 'left-[calc(72px+0.5rem)]'
+            : 'left-[calc(min(260px,85vw)+0.5rem)] lg:left-[calc(220px+0.5rem)]'
+        }`}
+      />
     </>
   );
 };

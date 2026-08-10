@@ -2,6 +2,7 @@ export const VALID_TABS = [
   'dashboard',
   'manager',
   'inbox',
+  'team-chat',
   'contacts',
   'calling',
   'campaigns',

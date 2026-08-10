@@ -14,6 +14,7 @@ import { SignupPage } from './components/SignupPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { DashboardView } from './components/DashboardView';
 import { InboxView } from './components/InboxView';
+import { TeamChatView } from './components/team-chat/TeamChatView';
 import { ContactsView } from './components/ContactsView';
 import { CampaignsView } from './components/CampaignsView';
 import { TemplatesView } from './components/TemplatesView';
@@ -59,6 +60,7 @@ import { DocumentSeo } from './components/DocumentSeo';
 import { AnalyticsRoot } from './components/analytics/AnalyticsRoot';
 import { landingPath } from './lib/publicUrls';
 import { InboxRealtimeBridge } from './components/InboxRealtimeBridge';
+import { TeamChatRealtimeBridge } from './components/team-chat/TeamChatRealtimeBridge';
 import { SocialListeningRealtimeBridge } from './components/social-listening/SocialListeningRealtimeBridge';
 import { CallRealtimeBridge } from './components/calling/CallRealtimeBridge';
 import { CallPage } from './components/calling/CallPage';
@@ -200,6 +202,7 @@ function AppShellLayout({
       className="flex min-h-screen bg-white selection:bg-primary/15"
     >
       <InboxRealtimeBridge />
+      <TeamChatRealtimeBridge />
       <SocialListeningRealtimeBridge />
       <CallRealtimeBridge />
       <SideNavBar />
@@ -210,7 +213,10 @@ function AppShellLayout({
 
         <main
           className={
-            activeTab === 'inbox' || activeTab === 'contacts' || campaignCreateWizard
+            activeTab === 'inbox' ||
+            activeTab === 'team-chat' ||
+            activeTab === 'contacts' ||
+            campaignCreateWizard
               ? 'min-h-0 flex-1 overflow-hidden px-0'
               : activeTab === 'google-tools' ||
                   activeTab === 'templates' ||
@@ -228,6 +234,7 @@ function AppShellLayout({
             transition={{ duration: 0.15 }}
             className={
               activeTab === 'inbox' ||
+              activeTab === 'team-chat' ||
               activeTab === 'contacts' ||
               activeTab === 'google-tools' ||
               activeTab === 'templates' ||
@@ -253,6 +260,11 @@ function AppShellLayout({
             {mountedTabs.has('inbox') && (
               <KeepAlive active={activeTab === 'inbox'}>
                 <InboxView />
+              </KeepAlive>
+            )}
+            {mountedTabs.has('team-chat') && (
+              <KeepAlive active={activeTab === 'team-chat'}>
+                <TeamChatView />
               </KeepAlive>
             )}
             {mountedTabs.has('contacts') && (
