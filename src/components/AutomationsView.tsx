@@ -181,9 +181,12 @@ export function AutomationsView() {
   const [igNameOpen, setIgNameOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [filter, setFilter] = useState<'all' | Channel>('all');
-  const { planFeatures } = useWorkspaceAccess();
+  const { planFeatures, planFeaturesReady } = useWorkspaceAccess();
 
-  const instagramAutomationAllowed = channelAllowedByPlan(planFeatures, 'instagram');
+  // Before subscription resolves, planFeatures is null (= Starter default). Don't hide
+  // Instagram for Business workspaces during that window / after a slow fetch.
+  const instagramAutomationAllowed =
+    !planFeaturesReady || channelAllowedByPlan(planFeatures, 'instagram');
 
   const rows = useMemo(() => {
     const wa: UnifiedRow[] = (waJourneys as JourneyRecord[]).map((j) => ({

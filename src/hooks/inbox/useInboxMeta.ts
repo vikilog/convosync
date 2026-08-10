@@ -108,10 +108,13 @@ export function useEmailIntegration() {
   return useQuery({
     queryKey: ['email-integration'],
     queryFn: async () => {
-      const data = (await api.getEmailIntegration().catch(() => ({ connected: false }))) as {
-        connected?: boolean;
+      // Backend `/email/integration` returns `{ enabled }` (emailIntegrationEnabled
+      // or legacy heal when a provider/domain exists — includes BYO AWS_SES).
+      // IntegrationsView already maps enabled → connected; match that here.
+      const data = (await api.getEmailIntegration().catch(() => ({ enabled: false }))) as {
+        enabled?: boolean;
       };
-      return { connected: Boolean(data.connected) };
+      return { connected: Boolean(data.enabled) };
     },
     staleTime: META_STALE_MS,
     refetchOnWindowFocus: true,

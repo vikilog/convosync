@@ -11,6 +11,7 @@ type ChatMessage = {
   fromCache?: boolean;
   intent?: string;
   costInr?: number;
+  billingMode?: 'convosync' | 'byok';
 };
 
 function formatTokenCount(value: number): string {
@@ -184,6 +185,7 @@ export const ChatPreviewPanel: React.FC<Props> = ({
           fromCache: data.fromCache,
           intent: data.intent,
           costInr: data.costInr,
+          billingMode: data.billingMode,
         },
       ]);
     } catch {
@@ -209,7 +211,7 @@ export const ChatPreviewPanel: React.FC<Props> = ({
         <div className="min-w-0">
           <h4 className="text-sm font-bold text-[#111827]">Test conversation</h4>
           <p className="mt-0.5 text-[11px] text-slate-500">Agent ko yahan chat karke test karo</p>
-          {sessionTokens > 0 ? (
+          {sessionTokens > 0 && lastMeta?.billingMode !== 'byok' ? (
             <p className="mt-0.5 text-[11px] font-medium text-slate-500 tabular-nums">
               Session: {formatTokenCount(sessionTokens)} tokens
             </p>
@@ -252,7 +254,9 @@ export const ChatPreviewPanel: React.FC<Props> = ({
                 <div className="rounded-2xl rounded-bl-md bg-surface border border-black/5 text-[#111827] px-3 py-2 text-sm">
                   {msg.content}
                 </div>
-                {msg.tokensUsed != null && msg.tokensUsed > 0 ? (
+                {msg.billingMode !== 'byok' &&
+                msg.tokensUsed != null &&
+                msg.tokensUsed > 0 ? (
                   <p className="mt-1 pl-1 text-[10px] font-medium text-slate-400 tabular-nums">
                     {formatTokenCount(msg.tokensUsed)} tokens
                     {msg.fromCache ? ' · cache' : ''}
@@ -281,11 +285,17 @@ export const ChatPreviewPanel: React.FC<Props> = ({
 
       {lastMeta ? (
         <div className="px-3 py-1.5 border-t border-black/5 bg-surface-muted shrink-0">
-          <p className="text-[10px] text-slate-500 tabular-nums truncate">
-            Intent: {lastMeta.intent} | Tokens: {formatTokenCount(lastMeta.tokensUsed)} | Cost:{' '}
-            {formatCostInr(lastMeta.costInr)} | Cache: {lastMeta.fromCache ? '✓' : '—'}
-            {lastMeta.billingMode === 'byok' ? ' | BYOK' : ''}
-          </p>
+          {lastMeta.billingMode === 'byok' ? (
+            <p className="text-[10px] text-slate-500 leading-snug">
+              You&apos;re using your own AI provider. Check usage and billing in your provider&apos;s
+              dashboard.
+            </p>
+          ) : (
+            <p className="text-[10px] text-slate-500 tabular-nums truncate">
+              Intent: {lastMeta.intent} | Tokens: {formatTokenCount(lastMeta.tokensUsed)} | Cost:{' '}
+              {formatCostInr(lastMeta.costInr)} | Cache: {lastMeta.fromCache ? '✓' : '—'}
+            </p>
+          )}
         </div>
       ) : null}
 

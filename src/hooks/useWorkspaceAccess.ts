@@ -17,6 +17,8 @@ export function useWorkspaceAccess() {
   const [role, setRole] = useState(getUserRole());
   const [permissions, setPermissions] = useState(getUserPermissions());
   const [planFeatures, setPlanFeatures] = useState<PlanFeatureFlags | null>(null);
+  /** false until first /workspace/subscription attempt finishes (success or fail). */
+  const [planFeaturesReady, setPlanFeaturesReady] = useState(false);
   const [inboxScope, setInboxScope] = useState<InboxScope>(() =>
     resolveEffectiveInboxScope(getUserRole() ?? 'agent', getUserInboxScope())
   );
@@ -27,6 +29,8 @@ export function useWorkspaceAccess() {
       setPlanFeatures(planFeaturesFromSubscription(res.currentPlan));
     } catch {
       setPlanFeatures(null);
+    } finally {
+      setPlanFeaturesReady(true);
     }
   }, []);
 
@@ -90,6 +94,7 @@ export function useWorkspaceAccess() {
     role,
     permissions,
     planFeatures,
+    planFeaturesReady,
     inboxScope,
     canTab,
     canPath,

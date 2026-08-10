@@ -19,7 +19,7 @@ import {
   PanelRightOpen,
 } from 'lucide-react';
 import { Contact, ChatMessage, type ChatMessageType } from '../types';
-import { api, formatCatchError, getUserName } from '../lib/api';
+import { api, formatCatchError, getUserName, SendFailedError } from '../lib/api';
 import { useWorkspaceAccess } from '../hooks/useWorkspaceAccess';
 import { useInboxAssigneeMeta } from '../hooks/inbox/useInboxMeta';
 import {
@@ -461,6 +461,7 @@ export const InboxView: React.FC = () => {
   const [newChatPhoneNumberId, setNewChatPhoneNumberId] = useState<string | undefined>();
   const [auditsOpen, setAuditsOpen] = useState(false);
   const [sendingMedia, setSendingMedia] = useState(false);
+  const [resendingMessageId, setResendingMessageId] = useState<string | null>(null);
   const [composerActionsOpen, setComposerActionsOpen] = useState(false);
   const inboxTabActive = useKeepAliveActive();
   const selectedConversationIdRef = useRef(selectedConversationId);
@@ -1292,11 +1293,19 @@ export const InboxView: React.FC = () => {
       setJourneyProgressRefresh((n) => n + 1);
       // Keep blob URL on the message so preview stays stable (no skeleton flash)
     } catch (err) {
-      setChatHistories((prev) => removeChatMessage(prev, convId, pendingId));
-      if (caption) setMessageInput(caption);
+      if (err instanceof SendFailedError && err.failedMessage) {
+        const failed = {
+          ...mapMessageFromApi(err.failedMessage),
+          localPreviewUrl,
+        };
+        setChatHistories((prev) => replaceChatMessage(prev, convId, pendingId, failed));
+      } else {
+        setChatHistories((prev) => removeChatMessage(prev, convId, pendingId));
+        if (caption) setMessageInput(caption);
+        URL.revokeObjectURL(localPreviewUrl);
+      }
       setSendError(err instanceof Error ? err.message : 'Failed to send attachment');
       console.error(err);
-      URL.revokeObjectURL(localPreviewUrl);
     } finally {
       setSendingMedia(false);
       if (mediaInputRef.current) mediaInputRef.current.value = '';
@@ -1363,10 +1372,57 @@ export const InboxView: React.FC = () => {
       setChatHistories((prev) => replaceChatMessage(prev, convId, pendingId, newMessage));
       setJourneyProgressRefresh((n) => n + 1);
     } catch (err) {
-      setChatHistories((prev) => removeChatMessage(prev, convId, pendingId));
-      setMessageInput(content);
+      if (err instanceof SendFailedError && err.failedMessage) {
+        setChatHistories((prev) =>
+          replaceChatMessage(prev, convId, pendingId, mapMessageFromApi(err.failedMessage!))
+        );
+      } else {
+        setChatHistories((prev) => removeChatMessage(prev, convId, pendingId));
+        setMessageInput(content);
+      }
       setSendError(err instanceof Error ? err.message : 'Failed to send message');
       console.error(err);
+    }
+  };
+
+  const handleResendMessage = async (messageId: string) => {
+    if (!selectedThread || resendingMessageId) return;
+    const convId = selectedThread.conversationId;
+    setResendingMessageId(messageId);
+    setSendError(null);
+    setChatHistories((prev) => {
+      const msgs = prev[convId] ?? [];
+      return {
+        ...prev,
+        [convId]: msgs.map((m) =>
+          m.id === messageId ? { ...m, status: 'resend_pending' as const } : m
+        ),
+      };
+    });
+    try {
+      const sent = await api.resendMessage(messageId);
+      setChatHistories((prev) =>
+        replaceChatMessage(prev, convId, messageId, mapMessageFromApi(sent))
+      );
+    } catch (err) {
+      setChatHistories((prev) => {
+        const msgs = prev[convId] ?? [];
+        return {
+          ...prev,
+          [convId]: msgs.map((m) =>
+            m.id === messageId
+              ? {
+                  ...m,
+                  status: 'failed' as const,
+                  deliveryError: err instanceof Error ? err.message : 'Resend failed',
+                }
+              : m
+          ),
+        };
+      });
+      setSendError(err instanceof Error ? err.message : 'Resend failed');
+    } finally {
+      setResendingMessageId(null);
     }
   };
 
@@ -1502,9 +1558,9 @@ export const InboxView: React.FC = () => {
   ) => {
     if (!selectedThread) return;
     setSendError(null);
+    const convId = selectedThread.conversationId;
 
     try {
-      const convId = selectedThread.conversationId;
       const sent = await api.sendTemplateMessage(convId, templateId, variables, headerMediaFile);
       const newMessage = mapMessageFromApi(sent as Record<string, unknown>);
       setChatHistories((prev) => appendChatMessage(prev, convId, newMessage));
@@ -1516,6 +1572,11 @@ export const InboxView: React.FC = () => {
         })
       );
     } catch (err) {
+      if (err instanceof SendFailedError && err.failedMessage) {
+        setChatHistories((prev) =>
+          appendChatMessage(prev, convId, mapMessageFromApi(err.failedMessage!))
+        );
+      }
       setSendError(err instanceof Error ? err.message : 'Failed to send template');
       throw err;
     }
@@ -2024,6 +2085,8 @@ export const InboxView: React.FC = () => {
               channel={contactChannel(selectedContact)}
               messageEndRef={messageEndRef}
               loading={showMessageSkeleton}
+              resendingId={resendingMessageId}
+              onResend={(id) => void handleResendMessage(id)}
             />
 
             <div className="p-2.5 bg-surface border-t border-black/5 text-left">

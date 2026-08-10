@@ -13,6 +13,7 @@ import {
   HelpCircle,
   Image as ImageIcon,
   Loader2,
+  Pencil,
   Phone,
   Plus,
   Reply,
@@ -651,56 +652,94 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                             e.target.value = '';
                           }}
                         />
-                        <button
-                          type="button"
-                          disabled={uploadingMedia}
-                          onClick={() => fileInputRef.current?.click()}
-                          className="w-full border-2 border-dashed border-black/10 rounded-lg px-4 py-8 flex flex-col items-center justify-center gap-2 text-[#65676b] hover:border-primary hover:bg-surface-muted transition-colors disabled:opacity-60 cursor-pointer"
-                        >
-                          {uploadingMedia ? (
-                            <>
-                              <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                              <span className="text-sm font-medium">Uploading to Meta…</span>
-                            </>
-                          ) : previewMediaUrl ? (
-                            <>
-                              {headerFormat === 'image' ? (
-                                <img
-                                  src={previewMediaUrl}
-                                  alt="Header preview"
-                                  className="max-h-32 rounded object-contain"
-                                />
-                              ) : headerFormat === 'video' ? (
-                                <video
-                                  src={previewMediaUrl}
-                                  className="max-h-32 rounded"
-                                  controls
-                                  muted
-                                />
-                              ) : (
-                                <FileText className="w-10 h-10 text-primary" />
-                              )}
-                              <span className="text-sm font-medium text-[#050505]">
-                                {headerMediaFileName || 'Sample uploaded'}
-                              </span>
-                              <span className="text-meta">Click to replace</span>
-                            </>
-                          ) : (
-                            <>
-                              <Upload className="w-8 h-8 text-primary" />
-                              <span className="text-sm font-semibold text-[#050505]">
-                                Upload sample {headerFormat}
-                              </span>
-                              <span className="text-meta">{HEADER_MEDIA_HINT[headerFormat]}</span>
-                            </>
-                          )}
-                        </button>
+                        {previewMediaUrl ? (
+                          <div className="rounded-lg border border-black/10 bg-surface-muted/40 p-3 space-y-3">
+                            <div className="flex items-start gap-3">
+                              <button
+                                type="button"
+                                disabled={uploadingMedia}
+                                onClick={() => fileInputRef.current?.click()}
+                                className="group relative flex h-24 w-32 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-white ring-1 ring-black/5 disabled:opacity-60"
+                                aria-label={`Edit header ${headerFormat}`}
+                              >
+                                {uploadingMedia ? (
+                                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                                ) : headerFormat === 'image' ? (
+                                  <img
+                                    src={previewMediaUrl}
+                                    alt="Header preview"
+                                    className="h-full w-full object-cover"
+                                  />
+                                ) : headerFormat === 'video' ? (
+                                  <video
+                                    src={previewMediaUrl}
+                                    className="h-full w-full object-cover"
+                                    muted
+                                  />
+                                ) : (
+                                  <FileText className="w-8 h-8 text-primary" />
+                                )}
+                                {!uploadingMedia && (
+                                  <span className="absolute inset-0 flex items-center justify-center bg-[#050505]/45 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+                                    <span className="inline-flex items-center gap-1 rounded-md bg-white px-2 py-1 text-[11px] font-semibold text-[#050505]">
+                                      <Pencil className="w-3 h-3" aria-hidden />
+                                      Edit
+                                    </span>
+                                  </span>
+                                )}
+                              </button>
+                              <div className="min-w-0 flex-1 pt-0.5">
+                                <p className="truncate text-sm font-medium text-[#050505]">
+                                  {headerMediaFileName || 'Sample uploaded'}
+                                </p>
+                                <p className="mt-0.5 text-meta text-[#65676b]">
+                                  {HEADER_MEDIA_HINT[headerFormat]}
+                                </p>
+                                <button
+                                  type="button"
+                                  disabled={uploadingMedia}
+                                  onClick={() => fileInputRef.current?.click()}
+                                  className="mt-2 inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary-hover disabled:opacity-60"
+                                >
+                                  {uploadingMedia ? (
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden />
+                                  ) : (
+                                    <Pencil className="w-3.5 h-3.5" aria-hidden />
+                                  )}
+                                  Edit {headerFormat}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            disabled={uploadingMedia}
+                            onClick={() => fileInputRef.current?.click()}
+                            className="w-full border-2 border-dashed border-black/10 rounded-lg px-4 py-8 flex flex-col items-center justify-center gap-2 text-[#65676b] hover:border-primary hover:bg-surface-muted transition-colors disabled:opacity-60 cursor-pointer"
+                          >
+                            {uploadingMedia ? (
+                              <>
+                                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                                <span className="text-sm font-medium">Uploading to Meta…</span>
+                              </>
+                            ) : (
+                              <>
+                                <Upload className="w-8 h-8 text-primary" />
+                                <span className="text-sm font-semibold text-[#050505]">
+                                  Upload sample {headerFormat}
+                                </span>
+                                <span className="text-meta">{HEADER_MEDIA_HINT[headerFormat]}</span>
+                              </>
+                            )}
+                          </button>
+                        )}
                         {mediaError && (
                           <p className="text-sm text-red-600 font-medium">{mediaError}</p>
                         )}
                         <p className="text-meta text-[#65676b]">
                           Meta requires a sample file when creating media headers. This is only used
-                          for review.
+                          for review. Category, body, footer, and buttons stay editable below.
                         </p>
                       </div>
                     )}

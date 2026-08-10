@@ -613,23 +613,25 @@ export const UsageCost: React.FC = () => {
               <h2 className="text-[15px] font-bold text-slate-900">AI Agent Token Usage</h2>
               <p className="text-xs text-slate-500">
                 {ai.billingMode === 'byok'
-                  ? 'Bring-your-own-key mode — tokens logged, wallet not charged'
+                  ? 'Bring-your-own-key — billed by your AI provider, not ConvoCoins'
                   : 'Logged from tokenUsageLog · provider cost + platform markup → tokens'}
               </p>
             </div>
           </div>
-          <div className="text-left sm:text-right">
-            <p className="text-lg font-bold text-[#0F172A]">{formatTokens(aiBilledTotal)}</p>
-            <p className="text-[11px] text-slate-400">{selectedMonthLabel}</p>
-          </div>
+          {ai.billingMode === 'byok' ? null : (
+            <div className="text-left sm:text-right">
+              <p className="text-lg font-bold text-[#0F172A]">{formatTokens(aiBilledTotal)}</p>
+              <p className="text-[11px] text-slate-400">{selectedMonthLabel}</p>
+            </div>
+          )}
         </div>
 
         {ai.billingMode === 'byok' ? (
           <div className="mt-4 mb-2 flex gap-2.5 rounded-lg bg-amber-50 p-3">
             <Info className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
             <p className="text-xs leading-relaxed text-amber-900">
-              This workspace uses your own OpenAI key. Token counts still appear below for monitoring,
-              but tokens are not deducted from the wallet for AI usage.
+              You&apos;re using your own AI provider. Check your usage and billing directly in your
+              provider&apos;s dashboard. ConvoCoins are not deducted for AI usage.
             </p>
           </div>
         ) : (
@@ -643,6 +645,7 @@ export const UsageCost: React.FC = () => {
           </div>
         )}
 
+        {ai.billingMode === 'byok' ? null : (
         <div className="mt-5 grid grid-cols-1 gap-6 lg:grid-cols-2">
           <div>
             <table className="w-full text-left text-sm">
@@ -795,6 +798,7 @@ export const UsageCost: React.FC = () => {
             )}
           </div>
         </div>
+        )}
       </section>
 
       <section className="rounded-xl border border-black/5 bg-surface p-4 md:p-5">

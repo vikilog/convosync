@@ -6,6 +6,7 @@ import type {
   CampaignRecordStatus,
   CampaignDetail,
   CampaignInsights,
+  CampaignAnalytics,
   CampaignRecipientInsight,
   CampaignTemplate,
   EmailTemplateRecord,
@@ -218,11 +219,16 @@ export function mapMessageFromApi(raw: Record<string, unknown>): ChatMessage {
     ? (metadata!.whatsappStatusErrors as Array<Record<string, unknown>>)
     : [];
   const firstErr = statusErrors[0];
-  const deliveryError = firstErr
+  const webhookError = firstErr
     ? [firstErr.title || firstErr.message, firstErr.code != null ? `(${firstErr.code})` : null]
         .filter(Boolean)
         .join(' ') || undefined
     : undefined;
+  const sendError =
+    typeof metadata?.sendError === 'string' && metadata.sendError
+      ? metadata.sendError
+      : undefined;
+  const deliveryError = webhookError || sendError;
   const rawContent = String(raw.content ?? '');
   const content = revoked
     ? 'This message was deleted'
@@ -242,6 +248,7 @@ export function mapMessageFromApi(raw: Record<string, unknown>): ChatMessage {
     timestamp: formatMessageTime(createdAt),
     status: raw.status as ChatMessage['status'],
     deliveryError,
+    retryCount: typeof raw.retryCount === 'number' ? raw.retryCount : undefined,
     revoked,
   };
 }
@@ -421,10 +428,17 @@ export function mapCampaignFromApi(raw: Record<string, unknown>): CampaignRecord
   const filter = (raw.audienceFilter ?? {}) as Record<string, unknown>;
   const channel =
     filter.channel === 'email' || filter.channel === 'instagram' ? filter.channel : 'whatsapp';
-  const segmentId = String(filter.segmentId ?? 'all');
+  const segmentIds = Array.isArray(filter.segmentIds)
+    ? filter.segmentIds.map(String)
+    : [String(filter.segmentId ?? 'all')];
+  const tags = segmentIds
+    .filter((id) => id.startsWith('tag:'))
+    .map((id) => id.slice(4).trim())
+    .filter(Boolean);
   let segmentLabel = 'All contacts';
-  if (segmentId.startsWith('tag:')) {
-    segmentLabel = `Tag: ${segmentId.slice(4)}`;
+  if (String(raw.audienceType ?? 'all') !== 'all') {
+    if (tags.length === 1) segmentLabel = `Tag: ${tags[0]}`;
+    else if (tags.length > 1) segmentLabel = `Tags: ${tags.join(', ')}`;
   }
 
   return {
@@ -440,6 +454,76 @@ export function mapCampaignFromApi(raw: Record<string, unknown>): CampaignRecord
     createdAt: String(raw.createdAt ?? new Date().toISOString()),
     sentAt: raw.sentAt ? String(raw.sentAt) : null,
     scheduledAt: raw.scheduledAt ? String(raw.scheduledAt) : null,
+  };
+}
+
+function mapLagSeries(raw: unknown): CampaignAnalytics['lag']['sendToDelivered'] {
+  const s = (raw ?? {}) as Record<string, unknown>;
+  const bucketsRaw = Array.isArray(s.buckets) ? s.buckets : [];
+  return {
+    samples: Number(s.samples ?? 0),
+    medianMs: s.medianMs == null ? null : Number(s.medianMs),
+    buckets: bucketsRaw.map((b) => {
+      const row = (b ?? {}) as Record<string, unknown>;
+      return {
+        label: String(row.label ?? ''),
+        count: Number(row.count ?? 0),
+        minMs: Number(row.minMs ?? 0),
+        maxMs: row.maxMs == null ? null : Number(row.maxMs),
+      };
+    }),
+  };
+}
+
+function mapCampaignAnalytics(raw: unknown): CampaignAnalytics | null {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+  const a = raw as Record<string, unknown>;
+  const funnelRaw = Array.isArray(a.funnel) ? a.funnel : [];
+  const completion = (a.completion ?? {}) as Record<string, unknown>;
+  const lag = (a.lag ?? {}) as Record<string, unknown>;
+  const reasonsRaw = Array.isArray(a.failureReasons) ? a.failureReasons : [];
+
+  const trendRaw = Array.isArray(a.deliveryTrend) ? a.deliveryTrend : [];
+
+  return {
+    funnel: funnelRaw.map((step) => {
+      const s = (step ?? {}) as Record<string, unknown>;
+      return {
+        key: String(s.key ?? ''),
+        label: String(s.label ?? ''),
+        count: Number(s.count ?? 0),
+        pct: Number(s.pct ?? 0),
+      };
+    }),
+    successRate: Number(a.successRate ?? 0),
+    failureRate: Number(a.failureRate ?? 0),
+    completion: {
+      startedAt: completion.startedAt ? String(completion.startedAt) : null,
+      completedAt: completion.completedAt ? String(completion.completedAt) : null,
+      durationMs: completion.durationMs == null ? null : Number(completion.durationMs),
+      durationLabel: completion.durationLabel ? String(completion.durationLabel) : null,
+    },
+    deliveryTrend: trendRaw.map((p) => {
+      const row = (p ?? {}) as Record<string, unknown>;
+      return {
+        at: String(row.at ?? ''),
+        cumulative: Number(row.cumulative ?? 0),
+      };
+    }),
+    lag: {
+      available: Boolean(lag.available),
+      blockedReason: lag.blockedReason ? String(lag.blockedReason) : null,
+      sendToDelivered: mapLagSeries(lag.sendToDelivered),
+      deliveredToRead: mapLagSeries(lag.deliveredToRead),
+    },
+    failureReasons: reasonsRaw.map((r) => {
+      const row = (r ?? {}) as Record<string, unknown>;
+      return {
+        reason: String(row.reason ?? ''),
+        count: Number(row.count ?? 0),
+        pct: Number(row.pct ?? 0),
+      };
+    }),
   };
 }
 
@@ -463,7 +547,12 @@ export function mapCampaignDetailFromApi(raw: Record<string, unknown>): Campaign
     pending: Number(insightsRaw.pending ?? 0),
     deliveryRate: Number(insightsRaw.deliveryRate ?? 0),
     readRate: Number(insightsRaw.readRate ?? 0),
+    ...(insightsRaw.successRate != null
+      ? { successRate: Number(insightsRaw.successRate) }
+      : {}),
   };
+
+  const analytics = mapCampaignAnalytics(raw.analytics);
 
   const templateRaw = raw.template as Record<string, unknown> | null | undefined;
   const template = templateRaw
@@ -501,8 +590,11 @@ export function mapCampaignDetailFromApi(raw: Record<string, unknown>): Campaign
       email: r.email ? String(r.email) : null,
       status: String(r.status),
       sentAt: String(r.sentAt),
+      deliveredAt: r.deliveredAt ? String(r.deliveredAt) : null,
+      readAt: r.readAt ? String(r.readAt) : null,
       content: String(r.content ?? ''),
       errorMessage: r.errorMessage != null ? String(r.errorMessage) : null,
+      retryCount: typeof r.retryCount === 'number' ? r.retryCount : undefined,
     })
   );
 
@@ -523,6 +615,7 @@ export function mapCampaignDetailFromApi(raw: Record<string, unknown>): Campaign
     template,
     variableMappings,
     insights,
+    analytics,
     recipients,
   };
 }

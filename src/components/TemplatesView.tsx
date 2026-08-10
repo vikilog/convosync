@@ -12,6 +12,7 @@ import { api } from '../lib/api';
 import { mapTemplateFromApi } from '../lib/mappers';
 import { useInboxAssigneeMeta } from '../hooks/inbox/useInboxMeta';
 import {
+  pathForTab,
   pathForTemplateEditor,
   pathForTemplatesList,
   templateEditorFromPath,
@@ -87,6 +88,7 @@ export const TemplatesView: React.FC = () => {
   const [cannedSaving, setCannedSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [editorLoading, setEditorLoading] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [editingWa, setEditingWa] = useState<CampaignTemplate | null>(null);
@@ -111,8 +113,10 @@ export const TemplatesView: React.FC = () => {
     whatsappConnected,
   ]);
 
-  const loadWhatsApp = useCallback(async () => {
-    const raw = await api.getTemplates();
+  const loadWhatsApp = useCallback(async (sync = false) => {
+    const raw = sync
+      ? ((await api.syncTemplates()) as { templates?: Record<string, unknown>[] }).templates
+      : await api.getTemplates();
     const list = (raw ?? []) as Record<string, unknown>[];
     setWaTemplates(list.map((t) => mapTemplateFromApi(t)));
   }, []);
@@ -289,6 +293,18 @@ export const TemplatesView: React.FC = () => {
     );
   }
 
+  const handleSync = async () => {
+    setSyncing(true);
+    setActionError('');
+    try {
+      await loadWhatsApp(true);
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'Sync failed');
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   const handleDeleteWa = async (t: CampaignTemplate) => {
     if (!t.id) return;
     if (!window.confirm(`Delete template "${t.name}" from Meta and this workspace?`)) return;
@@ -436,6 +452,17 @@ export const TemplatesView: React.FC = () => {
         </button>
       </div>
 
+      <p className="shrink-0 text-xs text-gray-500">
+        Looking for Instagram DM or comment automations?{' '}
+        <button
+          type="button"
+          onClick={() => navigate(pathForTab('automations'))}
+          className="cursor-pointer font-semibold text-primary underline-offset-2 hover:underline"
+        >
+          Open Automations
+        </button>
+      </p>
+
       {channel === 'canned' ? (
         <div className="min-h-0 flex-1 overflow-hidden">
           <CannedResponsesPanel
@@ -480,6 +507,21 @@ export const TemplatesView: React.FC = () => {
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
+          {channel === 'whatsapp' && (
+            <button
+              type="button"
+              onClick={() => void handleSync()}
+              disabled={syncing}
+              className="px-3 py-2 bg-surface border border-black/5 hover:bg-gray-50 text-gray-800 rounded-xl text-meta font-bold flex items-center gap-1.5 disabled:opacity-60"
+            >
+              {syncing ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <RefreshCw className="w-3.5 h-3.5" />
+              )}
+              Fetch from Meta
+            </button>
+          )}
           <button
             type="button"
             onClick={openCreate}

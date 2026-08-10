@@ -44,9 +44,10 @@ export interface ChatMessage {
   media?: ChatMessageMedia;
   createdAt?: string;
   timestamp: string;
-  status?: 'sending' | 'sent' | 'delivered' | 'read' | 'failed';
-  /** Meta delivery failure summary (from status webhook errors[]) */
+  status?: 'sending' | 'sent' | 'delivered' | 'read' | 'failed' | 'resend_pending' | 'resent';
+  /** Meta delivery failure summary (from status webhook errors[]) or sendError */
   deliveryError?: string;
+  retryCount?: number;
   /** WhatsApp "delete for everyone" */
   revoked?: boolean;
   /** Optimistic local preview while outbound media is uploading */
@@ -163,8 +164,13 @@ export interface CampaignRecipientInsight {
   email: string | null;
   status: string;
   sentAt: string;
+  /** ISO from metadata.events `delivered`; null if never delivered */
+  deliveredAt: string | null;
+  /** ISO from first read/opened event; null if never read */
+  readAt: string | null;
   content: string;
   errorMessage?: string | null;
+  retryCount?: number;
 }
 
 export interface CampaignInsights {
@@ -176,6 +182,53 @@ export interface CampaignInsights {
   pending: number;
   deliveryRate: number;
   readRate: number;
+  successRate?: number;
+}
+
+export interface CampaignFunnelStep {
+  key: string;
+  label: string;
+  count: number;
+  pct: number;
+}
+
+export interface CampaignLagBucket {
+  label: string;
+  count: number;
+  minMs: number;
+  maxMs: number | null;
+}
+
+export interface CampaignLagSeries {
+  samples: number;
+  medianMs: number | null;
+  buckets: CampaignLagBucket[];
+}
+
+export interface CampaignDeliveryTrendPoint {
+  at: string;
+  cumulative: number;
+}
+
+export interface CampaignAnalytics {
+  funnel: CampaignFunnelStep[];
+  successRate: number;
+  failureRate: number;
+  completion: {
+    startedAt: string | null;
+    completedAt: string | null;
+    durationMs: number | null;
+    durationLabel: string | null;
+  };
+  /** Cumulative delivered count vs time (from recipient deliveredAt) */
+  deliveryTrend: CampaignDeliveryTrendPoint[];
+  lag: {
+    available: boolean;
+    blockedReason: string | null;
+    sendToDelivered: CampaignLagSeries;
+    deliveredToRead: CampaignLagSeries;
+  };
+  failureReasons: Array<{ reason: string; count: number; pct: number }>;
 }
 
 export interface CampaignDetail {
@@ -206,6 +259,7 @@ export interface CampaignDetail {
   } | null;
   variableMappings: Record<string, string>;
   insights: CampaignInsights;
+  analytics: CampaignAnalytics | null;
   recipients: CampaignRecipientInsight[];
 }
 

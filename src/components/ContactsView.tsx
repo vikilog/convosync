@@ -133,6 +133,7 @@ const ContactsWorkspace: React.FC = () => {
   const [deletingContactId, setDeletingContactId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [tagDeleting, setTagDeleting] = useState(false);
 
   const connectedChannels = useMemo(() => {
     const channels: Array<'whatsapp' | 'instagram' | 'messenger'> = [];
@@ -349,6 +350,30 @@ const ContactsWorkspace: React.FC = () => {
     setBulkDeleting(false);
   };
 
+  const handleDeleteByTag = async () => {
+    if (!tagFilter) return;
+    setTagDeleting(true);
+    try {
+      const { count, tag } = await api.countContactsByTag(tagFilter);
+      if (count === 0) {
+        window.alert(`No contacts found with tag "${tag}".`);
+        return;
+      }
+      const confirmed = window.confirm(
+        `Delete ${count} contact${count === 1 ? '' : 's'} with tag "${tag}"? This will also delete related conversations, messages, and journey history. The tag itself will not be removed.`
+      );
+      if (!confirmed) return;
+      await api.deleteContactsByTag(tag);
+      setSelectedIds(new Set());
+      reloadCurrent({ silent: true });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to delete contacts by tag';
+      window.alert(message);
+    } finally {
+      setTagDeleting(false);
+    }
+  };
+
   const hasConnectedChannel =
     whatsappAccounts.length > 0 || instagramConnected || messengerConnected;
   const showConnectChannelEmpty = channelsReady && !hasConnectedChannel;
@@ -510,13 +535,26 @@ const ContactsWorkspace: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => void handleBulkDelete()}
-                    disabled={bulkDeleting || loading}
+                    disabled={bulkDeleting || tagDeleting || loading}
                     className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-100 disabled:opacity-50"
                   >
                     <Trash2 className="w-4 h-4" />
                     {bulkDeleting ? 'Deleting…' : `Delete (${selectedCount})`}
                   </button>
                 )}
+
+                {tagFilter ? (
+                  <button
+                    type="button"
+                    onClick={() => void handleDeleteByTag()}
+                    disabled={bulkDeleting || tagDeleting || loading}
+                    className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-100 disabled:opacity-50 whitespace-nowrap"
+                    title={`Delete all contacts with tag "${tagFilter}"`}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    {tagDeleting ? 'Deleting…' : 'Delete all with tag'}
+                  </button>
+                ) : null}
 
                 <button
                   type="button"

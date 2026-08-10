@@ -86,6 +86,35 @@ async function assertOk(res: Response): Promise<void> {
   if (!res.ok) throw new Error(parseApiError(await res.text()));
 }
 
+/** 502 send failures may include a persisted failed message for Resend. */
+export class SendFailedError extends Error {
+  failedMessage?: Record<string, unknown>;
+  constructor(message: string, failedMessage?: Record<string, unknown>) {
+    super(message);
+    this.name = 'SendFailedError';
+    this.failedMessage = failedMessage;
+  }
+}
+
+async function parseSendFailure(res: Response): Promise<never> {
+  if (res.status === 401) {
+    const text = await res.text();
+    forceLogoutToLogin();
+    throw new Error(parseApiError(text) || 'Unauthorized');
+  }
+  const text = await res.text();
+  try {
+    const body = JSON.parse(text) as { error?: string; message?: Record<string, unknown> };
+    throw new SendFailedError(
+      body.error || parseApiError(text) || 'Request failed',
+      body.message && typeof body.message === 'object' ? body.message : undefined
+    );
+  } catch (err) {
+    if (err instanceof SendFailedError) throw err;
+    throw new Error(parseApiError(text) || 'Request failed');
+  }
+}
+
 export function setToken(token: string) {
   handlingUnauthorized = false;
   localStorage.setItem('convosync_token', token);
@@ -747,13 +776,29 @@ export const api = {
     }>,
   updateContact: (id: string, data: unknown) => put(`/contacts/${id}`, data),
   deleteContact: (id: string) => del(`/contacts/${id}`),
+  countContactsByTag: (tag: string) =>
+    get('/contacts/by-tag/count', { tag }) as Promise<{ tag: string; count: number }>,
+  deleteContactsByTag: (tag: string) =>
+    delJson('/contacts/by-tag', { tag }) as Promise<{
+      success: boolean;
+      tag: string;
+      deleted: number;
+    }>,
   getSegments: () => get('/contacts/segments'),
   getCampaignAudience: (channel: 'whatsapp' | 'email' | 'instagram') =>
     get('/contacts/campaign-audience', { channel }),
   getCampaignAudienceContacts: (
     channel: 'whatsapp' | 'email' | 'instagram',
-    segmentId: string
-  ) => get('/contacts/campaign-audience/contacts', { channel, segmentId }),
+    segmentIdOrIds: string | string[]
+  ) => {
+    const ids = Array.isArray(segmentIdOrIds) ? segmentIdOrIds : [segmentIdOrIds];
+    const params: Record<string, string> = {
+      channel,
+      segmentId: ids[0] ?? 'all',
+    };
+    if (ids.length > 1) params.segmentIds = JSON.stringify(ids);
+    return get('/contacts/campaign-audience/contacts', params);
+  },
 
   getConversations: (params?: Record<string, string>) => get('/conversations', params),
   getConversation: (id: string) => get(`/conversations/${id}`),
@@ -772,8 +817,15 @@ export const api = {
     const query = qs.toString();
     return get(`/conversations/${convId}/messages${query ? `?${query}` : ''}`);
   },
-  sendMessage: (convId: string, content: string) =>
-    post(`/conversations/${convId}/messages`, { content }),
+  sendMessage: async (convId: string, content: string) => {
+    const res = await fetch(apiUrl(`/conversations/${convId}/messages`), {
+      method: 'POST',
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ content }),
+    });
+    if (!res.ok) await parseSendFailure(res);
+    return res.json();
+  },
   sendMediaMessage: async (convId: string, file: File, caption?: string) => {
     const form = new FormData();
     form.append('file', file);
@@ -783,7 +835,7 @@ export const api = {
       headers: authHeaders(),
       body: form,
     });
-    await assertOk(res);
+    if (!res.ok) await parseSendFailure(res);
     return res.json();
   },
   fetchMessageAttachment: async (messageId: string): Promise<Blob> => {
@@ -793,6 +845,8 @@ export const api = {
     await assertOk(res);
     return res.blob();
   },
+  resendMessage: (messageId: string) =>
+    post(`/conversations/messages/${messageId}/resend`, {}) as Promise<Record<string, unknown>>,
   sendTemplateMessage: async (
     convId: string,
     templateId: string,
@@ -809,10 +863,16 @@ export const api = {
         headers: authHeaders(),
         body: form,
       });
-      await assertOk(res);
+      if (!res.ok) await parseSendFailure(res);
       return res.json();
     }
-    return post(`/conversations/${convId}/messages/template`, { templateId, variables });
+    const res = await fetch(apiUrl(`/conversations/${convId}/messages/template`), {
+      method: 'POST',
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ templateId, variables }),
+    });
+    if (!res.ok) await parseSendFailure(res);
+    return res.json();
   },
   updateConversation: (id: string, data: unknown) => put(`/conversations/${id}`, data),
   takeoverConversation: (id: string) => post(`/conversations/${id}/takeover`),
@@ -823,6 +883,20 @@ export const api = {
   getCampaign: (id: string) => get(`/campaigns/${id}`),
   createCampaign: (data: unknown) => post('/campaigns', data),
   sendCampaign: (id: string) => post(`/campaigns/${id}/send`),
+  resendCampaignFailed: (id: string) =>
+    post(`/campaigns/${id}/resend-failed`, {}) as Promise<{
+      total: number;
+      resent: number;
+      failed: number;
+      results: Array<{ messageId: string; ok: boolean; error?: string }>;
+    }>,
+  resendCampaignRecipient: (campaignId: string, messageId: string) =>
+    post(`/campaigns/${campaignId}/recipients/${messageId}/resend`, {}) as Promise<{
+      messageId: string;
+      ok: boolean;
+      status?: string;
+      error?: string;
+    }>,
 
   getJourneys: () => get('/journeys'),
   getJourney: (id: string) => get(`/journeys/${id}`),
@@ -922,8 +996,37 @@ export const api = {
     await assertOk(res);
     return res.json();
   },
-  updateMediaGalleryItem: (mediaId: string, data: unknown) =>
-    patch(`/media-gallery/${mediaId}`, data),
+  updateMediaGalleryItem: (
+    mediaId: string,
+    data: unknown
+  ) => patch(`/media-gallery/${mediaId}`, data),
+  /** Metadata edit and/or file replace (multipart when `file` is set). */
+  updateMediaGalleryItemForm: async (
+    mediaId: string,
+    data: {
+      title: string;
+      description: string;
+      scope?: string;
+      usage?: string[];
+      tags?: string[];
+      file?: File | null;
+    }
+  ) => {
+    const form = new FormData();
+    form.append('title', data.title);
+    form.append('description', data.description);
+    form.append('scope', data.scope ?? 'customer');
+    form.append('usage', JSON.stringify(data.usage?.length ? data.usage : ['agent']));
+    form.append('tags', JSON.stringify(data.tags ?? []));
+    if (data.file) form.append('file', data.file);
+    const res = await fetch(`${resolveApiBaseUrl()}/media-gallery/${mediaId}`, {
+      method: 'PATCH',
+      headers: authHeaders(),
+      body: form,
+    });
+    await assertOk(res);
+    return res.json();
+  },
   deleteMediaGalleryItem: (mediaId: string) => del(`/media-gallery/${mediaId}`),
   mediaGalleryFileUrl: (mediaId: string) =>
     `${resolveApiBaseUrl()}/media-gallery/${mediaId}/file`,
@@ -1001,10 +1104,11 @@ export const api = {
   refreshTemplateStatus: (id: string) => post(`/templates/${id}/refresh-status`),
   deleteTemplate: (id: string) => del(`/templates/${id}`),
   syncTemplates: () => post('/templates/sync'),
-  uploadTemplateHeaderMedia: async (file: File) => {
+  uploadTemplateHeaderMedia: async (file: File, opts?: { persistOnly?: boolean }) => {
     const form = new FormData();
     form.append('file', file);
-    const res = await fetch(`${resolveApiBaseUrl()}/templates/header-media`, {
+    const q = opts?.persistOnly ? '?persistOnly=1' : '';
+    const res = await fetch(`${resolveApiBaseUrl()}/templates/header-media${q}`, {
       method: 'POST',
       headers: authHeaders(),
       body: form,

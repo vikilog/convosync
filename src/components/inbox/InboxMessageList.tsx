@@ -7,6 +7,7 @@ import React from 'react';
 import { Check, CheckCheck, Loader2, X } from 'lucide-react';
 import type { ChatMessage } from '../../types';
 import { formatMessageClock } from '../../lib/formatDates';
+import { ResendButton } from '../shared/ResendButton';
 import { MessageAttachment } from './MessageAttachment';
 
 const WA_CHAT_BG = '#e5ddd5';
@@ -18,6 +19,8 @@ type Props = {
   channel: Channel;
   messageEndRef: React.RefObject<HTMLDivElement | null>;
   loading?: boolean;
+  resendingId?: string | null;
+  onResend?: (messageId: string) => void;
 };
 
 const WA_DELETED_MESSAGE = 'This message was deleted';
@@ -58,10 +61,12 @@ export function InboxMessageListSkeleton({ channel }: { channel: Channel }) {
   );
 }
 
-const MessageBubble: React.FC<{ message: ChatMessage; channel: Channel }> = ({
-  message,
-  channel,
-}) => {
+const MessageBubble: React.FC<{
+  message: ChatMessage;
+  channel: Channel;
+  resending?: boolean;
+  onResend?: (messageId: string) => void;
+}> = ({ message, channel, resending, onResend }) => {
   const isContact = message.sender === 'contact';
   const isWhatsApp = channel === 'whatsapp';
   const isInstagram = channel === 'instagram';
@@ -96,6 +101,8 @@ const MessageBubble: React.FC<{ message: ChatMessage; channel: Channel }> = ({
       <span title={message.deliveryError || 'Delivery failed'}>
         <X className="w-[14px] h-[14px] text-red-500" strokeWidth={2.5} />
       </span>
+    ) : message.status === 'resend_pending' ? (
+      <Loader2 className="w-[14px] h-[14px] animate-spin text-amber-500" strokeWidth={2.5} />
     ) : message.status === 'read' ? (
       <CheckCheck
         className={`w-[14px] h-[14px] ${
@@ -148,10 +155,20 @@ const MessageBubble: React.FC<{ message: ChatMessage; channel: Channel }> = ({
             Automated · Journey
           </p>
         )}
-        {!isContact && message.status === 'failed' && message.deliveryError && (
-          <p className="text-xs text-red-600 mt-1 leading-tight px-1 max-w-full">
-            {message.deliveryError}
-          </p>
+        {!isContact && message.status === 'failed' && (
+          <>
+            {message.deliveryError && (
+              <p className="text-xs text-red-600 mt-1 leading-tight px-1 max-w-full">
+                {message.deliveryError}
+              </p>
+            )}
+            {onResend && (
+              <ResendButton
+                loading={resending}
+                onClick={() => onResend(message.id)}
+              />
+            )}
+          </>
         )}
       </div>
     );
@@ -190,10 +207,20 @@ const MessageBubble: React.FC<{ message: ChatMessage; channel: Channel }> = ({
             {!isDeleted ? deliveryStatusIcon : null}
           </span>
         </div>
-        {!isContact && message.status === 'failed' && message.deliveryError && (
-          <p className="text-xs text-red-600 mt-1 leading-tight px-1 max-w-full">
-            {message.deliveryError}
-          </p>
+        {!isContact && message.status === 'failed' && (
+          <>
+            {message.deliveryError && (
+              <p className="text-xs text-red-600 mt-1 leading-tight px-1 max-w-full">
+                {message.deliveryError}
+              </p>
+            )}
+            {onResend && (
+              <ResendButton
+                loading={resending}
+                onClick={() => onResend(message.id)}
+              />
+            )}
+          </>
         )}
       </div>
     );
@@ -246,8 +273,15 @@ const MessageBubble: React.FC<{ message: ChatMessage; channel: Channel }> = ({
             <Check className="w-3.5 h-3.5 text-gray-400" />
           ))}
       </div>
-      {!isContact && message.status === 'failed' && message.deliveryError && (
-        <p className="text-xs text-red-600 mt-0.5 leading-tight px-1">{message.deliveryError}</p>
+      {!isContact && message.status === 'failed' && (
+        <>
+          {message.deliveryError && (
+            <p className="text-xs text-red-600 mt-0.5 leading-tight px-1">{message.deliveryError}</p>
+          )}
+          {onResend && (
+            <ResendButton loading={resending} onClick={() => onResend(message.id)} />
+          )}
+        </>
       )}
     </div>
   );
@@ -258,6 +292,8 @@ export const InboxMessageList: React.FC<Props> = ({
   channel,
   messageEndRef,
   loading = false,
+  resendingId = null,
+  onResend,
 }) => {
   const isWhatsApp = channel === 'whatsapp';
 
@@ -309,7 +345,15 @@ export const InboxMessageList: React.FC<Props> = ({
               );
             }
 
-            return <MessageBubble key={message.id} message={message} channel={channel} />;
+            return (
+              <MessageBubble
+                key={message.id}
+                message={message}
+                channel={channel}
+                resending={resendingId === message.id}
+                onResend={onResend}
+              />
+            );
           })}
         </div>
       ))}

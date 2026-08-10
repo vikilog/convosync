@@ -25,7 +25,11 @@ type BillingWorkspace = {
 
 type UsageCostResponse = {
   whatsapp?: { totalConversations?: number; billedCostInr?: number };
-  ai?: { totalTokens?: number; billedCostInr?: number };
+  ai?: {
+    totalTokens?: number;
+    billedCostInr?: number;
+    billingMode?: 'convosync' | 'byok';
+  };
   email?: { sent?: number; billedCostInr?: number };
 };
 
@@ -99,6 +103,7 @@ export function UsageMeteringSection({ refreshKey = 0 }: { refreshKey?: number }
       const waCc = usage.whatsapp?.billedCostInr ?? 0;
       const aiTokens = usage.ai?.totalTokens ?? 0;
       const aiCc = usage.ai?.billedCostInr ?? 0;
+      const aiByok = usage.ai?.billingMode === 'byok';
       const emailsSent = usage.email?.sent ?? 0;
       const emailCc = usage.email?.billedCostInr ?? 0;
 
@@ -112,15 +117,22 @@ export function UsageMeteringSection({ refreshKey = 0 }: { refreshKey?: number }
               : 'No usage yet',
           usageClass: waCc > 0 ? 'text-amber-700 font-semibold' : undefined,
         },
-        {
-          feature: 'AI responses',
-          billing: 'ConvoCoins (metered)',
-          usage:
-            aiTokens > 0
-              ? `${aiTokens.toLocaleString('en-IN')} tokens · ${ccLabel(aiCc)}`
-              : 'No usage yet',
-          usageClass: aiCc > 0 ? 'text-amber-700 font-semibold' : undefined,
-        },
+        aiByok
+          ? {
+              feature: 'AI responses',
+              billing: 'Your AI provider',
+              usage:
+                "You're using your own AI provider. Check usage and billing in your provider's dashboard.",
+            }
+          : {
+              feature: 'AI responses',
+              billing: 'ConvoCoins (metered)',
+              usage:
+                aiTokens > 0
+                  ? `${aiTokens.toLocaleString('en-IN')} tokens · ${ccLabel(aiCc)}`
+                  : 'No usage yet',
+              usageClass: aiCc > 0 ? 'text-amber-700 font-semibold' : undefined,
+            },
         {
           feature: 'Email sends',
           billing: 'ConvoCoins (metered)',

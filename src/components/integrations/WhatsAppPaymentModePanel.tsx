@@ -235,10 +235,6 @@ export function WhatsAppPaymentModePanel({
               <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" aria-hidden />
               <div>
                 <p className="text-sm font-bold text-slate-900">Payment method noted</p>
-                <p className="mt-0.5 text-xs text-slate-500">
-                  We can&apos;t auto-verify from Meta on a Tech Provider app. You can still message
-                  once the card is active in Business Manager.
-                </p>
               </div>
             </div>
           ) : checkUnknown ? (

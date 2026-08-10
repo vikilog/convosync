@@ -36,4 +36,11 @@ assert(!channelAllowedByPlan(topLevel, 'messenger'), 'top-level growth no messen
 // Missing channels → starter default
 assert(!channelAllowedByPlan(planFeaturesFromSubscription({ aiCopilot: false }), 'instagram'), 'empty → no ig');
 
+// Billing-sub fallback shape (subscription API may expose plan only via nested features)
+const billingOnly = planFeaturesFromSubscription({
+  channels: 'WhatsApp + Instagram',
+  features: { channels: 'WhatsApp + Instagram' },
+});
+assert(channelAllowedByPlan(billingOnly, 'instagram'), 'effective plan exposes instagram for Automations tab');
+
 console.log('planEntitlements.check: ok');

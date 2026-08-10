@@ -752,6 +752,8 @@ export function EmailPanel() {
                       secretAccessKey: '',
                       apiKey: '',
                       region: 'us-east-1',
+                      // BYO providers become default (backend also forces this)
+                      isDefault: true,
                     }));
                   }}
                   className="px-3 py-1.5 rounded-full bg-primary hover:bg-primary-hover text-white text-sm font-bold inline-flex items-center gap-1"
