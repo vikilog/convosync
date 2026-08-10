@@ -113,8 +113,8 @@ export function primaryActionFor(section: TriageSectionId): {
 }
 
 export const IGNORE_BTN_CLASS =
-  'text-neutral-700 bg-surface border border-black/10 hover:bg-surface-muted';
+  'text-neutral-700 bg-white ring-1 ring-slate-200/80 hover:bg-surface-muted';
 
 /** Same shell as IntegrationsView IntegrationCard / ConnectedChannelCard */
 export const REVIEW_CARD_SHELL =
-  'bg-surface rounded-xl border border-black/5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]';
+  'bg-white rounded-xl border border-black/5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]';

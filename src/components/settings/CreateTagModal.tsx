@@ -63,7 +63,7 @@ export function CreateTagModal({ open, onClose, onSaved, folders, editingTag }: 
       <div className="absolute inset-0" onClick={() => !saving && onClose()} aria-hidden />
       <form
         onSubmit={(e) => void handleSubmit(e)}
-        className="relative w-full max-w-md space-y-4 rounded-2xl border border-black/5 bg-surface p-6 shadow-xl"
+        className="relative w-full max-w-md space-y-4 rounded-2xl bg-white ring-1 ring-slate-200/80 p-6 shadow-xl"
       >
         <div>
           <h3 className="text-base font-black text-gray-950">{isEdit ? 'Edit tag' : 'New tag'}</h3>

@@ -110,7 +110,7 @@ export function SocialListeningAgentSettingsForm({
 
   return (
     <div className="space-y-5">
-      <section className="rounded-2xl border border-black/5 bg-surface-muted/60 p-4">
+      <section className="rounded-2xl bg-surface-muted/60 p-4">
         <div className="flex items-start justify-between gap-3">
           <div>
             <h3 className="text-sm font-bold text-gray-900">Agent</h3>
@@ -344,7 +344,7 @@ export function SocialListeningAgentSettingsForm({
             Sent today: {draft.autoDmsSentToday} / {draft.maxAutoDmsPerDay}
           </p>
         </label>
-        <div className="flex items-center justify-between gap-3 rounded-xl border border-black/5 bg-surface-muted/50 px-3 py-2.5">
+        <div className="flex items-center justify-between gap-3 rounded-xl bg-surface-muted/50 px-3 py-2.5">
           <div>
             <p className="text-sm font-semibold text-gray-800">Working hours only</p>
             <p className="text-[11px] text-gray-400">

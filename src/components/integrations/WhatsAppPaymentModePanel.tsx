@@ -133,7 +133,7 @@ export function WhatsAppPaymentModePanel({
 
   if (loading) {
     return (
-      <div className="rounded-2xl border border-black/5 bg-surface p-6">
+      <div className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-6">
         <p className="text-sm font-bold text-gray-500">Checking payment setup…</p>
       </div>
     );
@@ -146,7 +146,7 @@ export function WhatsAppPaymentModePanel({
   const readyToContinue = hasPm || acknowledged || modeChosen;
 
   return (
-    <div className="rounded-2xl border border-black/5 bg-surface p-6 sm:p-8 shadow-sm space-y-5">
+    <div className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-6 sm:p-8 shadow-sm space-y-5">
       {variant === 'post_connect' ? (
         <div>
           <span className="inline-block px-3 py-1 rounded-full text-sm font-black uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 mb-4">
@@ -175,7 +175,7 @@ export function WhatsAppPaymentModePanel({
           className={`text-left rounded-xl border p-4 transition-colors ${
             modeChosen
               ? 'border-primary/40 bg-primary/5 ring-1 ring-primary/20'
-              : 'border-black/10 bg-surface-muted hover:border-primary/30 hover:bg-primary/5 cursor-pointer'
+              : 'border-black/10 bg-white hover:border-primary/30 hover:bg-primary/5 cursor-pointer'
           } disabled:cursor-default`}
         >
           <div className="flex items-start gap-3">
@@ -219,7 +219,7 @@ export function WhatsAppPaymentModePanel({
       </div>
 
       {modeChosen ? (
-        <div className="rounded-xl border border-black/5 bg-surface-muted p-4 space-y-3">
+        <div className="rounded-xl bg-surface-muted p-4 space-y-3">
           {hasPm ? (
             <div className="flex items-start gap-3">
               <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" aria-hidden />
@@ -258,7 +258,7 @@ export function WhatsAppPaymentModePanel({
                   type="button"
                   disabled={busy}
                   onClick={refresh}
-                  className="inline-flex items-center gap-2 rounded-xl border border-black/10 bg-surface px-4 py-2 text-sm font-bold text-slate-800 hover:bg-surface-muted disabled:opacity-50"
+                  className="inline-flex items-center gap-2 rounded-xl bg-white ring-1 ring-slate-200/80 px-4 py-2 text-sm font-bold text-slate-800 hover:bg-surface-muted disabled:opacity-50"
                 >
                   <RefreshCw className={`h-3.5 w-3.5 ${busy ? 'animate-spin' : ''}`} aria-hidden />
                   Refresh status
@@ -294,7 +294,7 @@ export function WhatsAppPaymentModePanel({
                   type="button"
                   disabled={busy}
                   onClick={refresh}
-                  className="inline-flex items-center gap-2 rounded-xl border border-black/10 bg-surface px-4 py-2 text-sm font-bold text-slate-800 hover:bg-surface-muted disabled:opacity-50"
+                  className="inline-flex items-center gap-2 rounded-xl bg-white ring-1 ring-slate-200/80 px-4 py-2 text-sm font-bold text-slate-800 hover:bg-surface-muted disabled:opacity-50"
                 >
                   <RefreshCw className={`h-3.5 w-3.5 ${busy ? 'animate-spin' : ''}`} aria-hidden />
                   Refresh status

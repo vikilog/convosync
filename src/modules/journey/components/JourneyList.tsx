@@ -82,7 +82,7 @@ export function JourneyList({
           Loading journeys…
         </div>
       ) : journeys.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-black/10 bg-surface p-8 text-center">
+        <div className="rounded-2xl border border-dashed border-black/10 bg-white p-8 text-center">
           <Workflow className="mx-auto mb-3 h-7 w-7 text-primary" />
           <p className="font-bold text-gray-900">No journeys yet</p>
           <p className="mt-1 text-sm text-gray-500">
@@ -104,7 +104,7 @@ export function JourneyList({
             return (
               <article
                 key={j.id}
-                className="group flex items-stretch overflow-hidden rounded-xl border border-black/5 bg-surface transition-shadow hover:shadow-sm"
+                className="group flex items-stretch overflow-hidden rounded-xl bg-white ring-1 ring-slate-200/80 transition-shadow hover:shadow-sm"
               >
                 <button
                   type="button"

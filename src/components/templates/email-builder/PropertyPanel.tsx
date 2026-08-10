@@ -23,7 +23,7 @@ function Field({
 }
 
 const inputCls =
-  'w-full rounded-lg border border-black/10 bg-surface-muted px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary';
+  'w-full rounded-lg bg-surface-muted px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary';
 
 export function PropertyPanel() {
   const blocks = useEmailBuilderStore((s) => s.blocks);
@@ -36,7 +36,7 @@ export function PropertyPanel() {
 
   if (!block) {
     return (
-      <aside className="w-[300px] shrink-0 border-l border-black/5 bg-surface flex flex-col">
+      <aside className="w-[300px] shrink-0 border-l border-black/5 bg-white flex flex-col">
         <div className="px-4 py-3 border-b border-black/5">
           <h3 className="text-sm font-bold text-gray-900">Properties</h3>
         </div>
@@ -314,7 +314,7 @@ export function PropertyPanel() {
   };
 
   return (
-    <aside className="w-[320px] shrink-0 border-l border-black/5 bg-surface flex flex-col min-h-0">
+    <aside className="w-[320px] shrink-0 border-l border-black/5 bg-white flex flex-col min-h-0">
       <div className="px-4 py-3 border-b border-black/5">
         <p className="text-meta font-semibold uppercase tracking-wide text-primary">{def.label}</p>
         <h3 className="text-sm font-bold text-gray-900">Block properties</h3>

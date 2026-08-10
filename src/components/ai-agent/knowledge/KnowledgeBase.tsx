@@ -195,7 +195,7 @@ export const KnowledgeBase: React.FC<Props> = ({ agentId }) => {
           {filtered.map((item) => (
             <div
               key={item.id}
-              className="flex items-center justify-between gap-4 bg-surface border border-black/5 rounded-xl p-4"
+              className="flex items-center justify-between gap-4 bg-white ring-1 ring-slate-200/80 rounded-xl p-4"
             >
               <button
                 type="button"
@@ -264,7 +264,7 @@ export const KnowledgeBase: React.FC<Props> = ({ agentId }) => {
 
       {deleteTarget && (
         <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-surface rounded-2xl w-full max-w-sm border border-black/5 p-6 shadow-2xl">
+          <div className="bg-white rounded-2xl w-full max-w-sm border border-black/5 p-6 shadow-2xl">
             <h3 className="text-base font-bold text-[#111827] mb-2">Delete knowledge item?</h3>
             <p className="text-sm text-[#6B7280] mb-6">
               &ldquo;{deleteTarget.title}&rdquo; will be permanently removed from this agent.

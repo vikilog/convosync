@@ -67,7 +67,7 @@ export function NeedsAttentionList({
   };
 
   return (
-    <div className="flex min-h-[280px] flex-col rounded-xl border border-black/5 bg-surface p-5">
+    <div className="flex min-h-[280px] flex-col rounded-xl bg-white ring-1 ring-slate-200/80 p-5">
       <div className="mb-3 flex items-start justify-between gap-2">
         <div>
           <h2 className="text-sm font-bold text-neutral-900">Needs attention</h2>

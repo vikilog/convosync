@@ -188,7 +188,7 @@ export function AiCopilotPanel() {
 
   return (
     <div className="max-w-4xl space-y-4">
-      <div className="rounded-2xl border border-black/5 bg-surface p-4 shadow-sm">
+      <div className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-4 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex items-start gap-3">
             <div className="p-2.5 rounded-xl bg-sky-50 text-primary">
@@ -263,7 +263,7 @@ export function AiCopilotPanel() {
         </div>
       )}
 
-      <div className="rounded-2xl border border-black/5 bg-surface shadow-sm overflow-hidden flex flex-col min-h-[420px] max-h-[560px]">
+      <div className="rounded-2xl bg-white ring-1 ring-slate-200/80 shadow-sm overflow-hidden flex flex-col min-h-[420px] max-h-[560px]">
         <div
           ref={scrollRef}
           className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50"

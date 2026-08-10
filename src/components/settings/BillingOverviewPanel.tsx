@@ -248,7 +248,7 @@ export function BillingOverviewPanel() {
         </div>
       )}
 
-      <section className="rounded-xl border border-black/5 bg-surface p-4 md:p-5">
+      <section className="rounded-xl bg-white ring-1 ring-slate-200/80 p-4 md:p-5">
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
           <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
             <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
@@ -334,7 +334,7 @@ export function BillingOverviewPanel() {
       </section>
 
       <div className="grid items-start gap-4 xl:grid-cols-[1.2fr_0.8fr]">
-        <section className="rounded-xl border border-black/5 bg-surface p-5">
+        <section className="rounded-xl bg-white ring-1 ring-slate-200/80 p-5">
           <div className="flex items-start gap-3">
             <Gauge className="mt-0.5 h-5 w-5 text-sky-600" />
             <div>
@@ -424,7 +424,7 @@ export function BillingOverviewPanel() {
           )}
         </section>
 
-        <section className="rounded-xl border border-black/5 bg-surface p-5">
+        <section className="rounded-xl bg-white ring-1 ring-slate-200/80 p-5">
           <div className="flex items-start gap-3">
             <CreditCard className="mt-0.5 h-5 w-5 text-sky-600" />
             <div className="min-w-0 flex-1">
@@ -464,7 +464,7 @@ export function BillingOverviewPanel() {
       )}
 
       {sub && ['active', 'authenticated', 'paused'].includes(sub.status) && (
-        <section className="rounded-xl border border-black/5 bg-surface p-5">
+        <section className="rounded-xl bg-white ring-1 ring-slate-200/80 p-5">
           <p className="text-sm font-semibold text-slate-900">Manage subscription</p>
           <p className="mt-1 text-xs text-slate-600">
             Pause billing or cancel at the end of the current period.
@@ -522,7 +522,7 @@ export function BillingOverviewPanel() {
         </section>
       )}
 
-      <section className="rounded-xl border border-black/5 bg-surface p-5">
+      <section className="rounded-xl bg-white ring-1 ring-slate-200/80 p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-start gap-3">
             <Receipt className="mt-0.5 h-5 w-5 text-sky-600" />

@@ -47,7 +47,7 @@ export const RecentCampaignsPanel: React.FC<RecentCampaignsPanelProps> = ({
   const items = campaigns.slice(0, 4);
 
   return (
-    <div className="flex h-full flex-col rounded-xl border border-black/5 bg-surface p-5">
+    <div className="flex h-full flex-col rounded-xl bg-white p-5 ring-1 ring-slate-200/80">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="font-display text-lg font-medium text-neutral-900">Recent campaigns</h2>
         <button

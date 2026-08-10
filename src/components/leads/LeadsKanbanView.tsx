@@ -227,7 +227,7 @@ const StageColumn: React.FC<{
   return (
     <div
       ref={setNodeRef}
-      className={`flex w-72 shrink-0 flex-col rounded-2xl border border-black/5 bg-surface ${
+      className={`flex w-72 shrink-0 flex-col rounded-2xl bg-white ring-1 ring-slate-200/80 ${
         isOver ? 'ring-2 ring-primary/20' : ''
       }`}
     >
@@ -736,8 +736,8 @@ export const LeadsKanbanView: React.FC = () => {
   // —— Funnel list (no board until a funnel is opened) ——
   if (!activeFunnelId) {
     return (
-      <div className="flex h-full min-h-0 flex-1 flex-col gap-4 overflow-y-auto bg-surface-muted p-4 md:p-6">
-        <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 rounded-2xl border border-black/5 bg-surface p-4">
+      <div className="flex h-full min-h-0 flex-1 flex-col gap-4 overflow-y-auto bg-white p-4 md:p-6">
+        <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 rounded-2xl bg-white ring-1 ring-slate-200/80 p-4">
           <div>
             <h2 className="flex items-center gap-2 text-base font-black text-gray-900">
               <Filter className="h-5 w-5 text-primary" />
@@ -768,7 +768,7 @@ export const LeadsKanbanView: React.FC = () => {
         {funnelsLoading ? (
           <p className="text-sm font-medium text-gray-400">Loading funnels…</p>
         ) : funnels.length === 0 ? (
-          <div className="flex flex-1 flex-col items-center justify-center rounded-2xl border border-dashed border-black/10 bg-surface px-6 py-16 text-center">
+          <div className="flex flex-1 flex-col items-center justify-center rounded-2xl border border-dashed border-black/10 bg-white px-6 py-16 text-center">
             <Users className="mb-3 h-8 w-8 text-slate-300" />
             <p className="text-sm font-bold text-[#0F172A]">No funnels yet</p>
             <p className="mt-1 max-w-sm text-sm text-slate-500">
@@ -790,7 +790,7 @@ export const LeadsKanbanView: React.FC = () => {
                 key={f.id}
                 type="button"
                 onClick={() => navigate(pathForLeadFunnel(f.id))}
-                className="cursor-pointer rounded-2xl border border-black/5 bg-surface p-4 text-left shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-colors hover:border-primary/20 hover:bg-white"
+                className="cursor-pointer rounded-2xl bg-white ring-1 ring-slate-200/80 p-4 text-left shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-colors hover:border-primary/20 hover:bg-white"
               >
                 <div className="flex items-start justify-between gap-2">
                   <p className="text-sm font-bold text-[#0F172A]">{f.name}</p>
@@ -852,8 +852,8 @@ export const LeadsKanbanView: React.FC = () => {
 
   // —— Kanban inside selected funnel ——
   return (
-    <div className="flex h-full min-h-0 flex-1 flex-col gap-4 overflow-hidden bg-surface-muted p-4 md:p-6 selection:bg-primary/15">
-      <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 rounded-2xl border border-black/5 bg-surface p-4">
+    <div className="flex h-full min-h-0 flex-1 flex-col gap-4 overflow-hidden bg-white p-4 md:p-6 selection:bg-primary/15">
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 rounded-2xl bg-white ring-1 ring-slate-200/80 p-4">
         <div className="min-w-0">
           <button
             type="button"
@@ -944,7 +944,7 @@ export const LeadsKanbanView: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setAddBoardOpen(true)}
-                      className="flex w-56 shrink-0 cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-black/15 bg-surface/50 text-sm font-bold text-slate-500 hover:border-primary/30 hover:text-primary"
+                      className="flex w-56 shrink-0 cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-black/15 bg-white/50 text-sm font-bold text-slate-500 hover:border-primary/30 hover:text-primary"
                     >
                       <Plus className="h-5 w-5" />
                       Add board
@@ -968,7 +968,7 @@ export const LeadsKanbanView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setAddBoardOpen(true)}
-                  className="flex w-56 shrink-0 cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-black/15 bg-surface/50 text-sm font-bold text-slate-500 hover:border-primary/30 hover:text-primary"
+                  className="flex w-56 shrink-0 cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-black/15 bg-white/50 text-sm font-bold text-slate-500 hover:border-primary/30 hover:text-primary"
                 >
                   <Plus className="h-5 w-5" />
                   Add board
@@ -1077,7 +1077,7 @@ export const LeadsKanbanView: React.FC = () => {
               />
             </label>
             {!hasFinalBoard ? (
-              <label className="mt-3 flex cursor-pointer items-start gap-2.5 rounded-xl border border-black/5 bg-surface-muted px-3 py-2.5">
+              <label className="mt-3 flex cursor-pointer items-start gap-2.5 rounded-xl bg-surface-muted px-3 py-2.5">
                 <input
                   type="checkbox"
                   checked={boardIsFinal}

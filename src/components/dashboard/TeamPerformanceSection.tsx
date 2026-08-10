@@ -32,7 +32,7 @@ export const TeamPerformanceSection: React.FC<TeamPerformanceSectionProps> = ({
     range === '7' ? '7 days' : range === '30' ? '30 days' : '90 days';
 
   return (
-    <section className="rounded-xl border border-black/5 bg-surface p-5">
+    <section className="rounded-xl bg-white p-5 ring-1 ring-slate-200/80">
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="font-display text-lg font-medium text-neutral-900">Team performance</h2>

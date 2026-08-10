@@ -70,7 +70,7 @@ export function ContactLeadJourneyPanel({
 
   if (loading) {
     return (
-      <div className="animate-pulse rounded-2xl border border-black/5 bg-surface p-3">
+      <div className="animate-pulse rounded-2xl bg-white ring-1 ring-slate-200/80 p-3">
         <div className="h-3 w-28 rounded bg-slate-100" />
         <div className="mt-3 h-16 rounded bg-slate-50" />
       </div>

@@ -45,7 +45,7 @@ export const EditProfileModal: React.FC<Props> = ({ profile, onClose, onSave, sa
 
   return (
     <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-surface rounded-2xl w-full max-w-lg border border-black/5 shadow-2xl">
+      <div className="bg-white rounded-2xl w-full max-w-lg border border-black/5 shadow-2xl">
         <div className="flex justify-between items-center px-6 py-4 border-b border-black/5">
           <h3 className="text-base font-bold text-[#111827]">Edit profile</h3>
           <button type="button" onClick={onClose} className="text-[#6B7280] hover:text-[#111827]">
@@ -82,7 +82,7 @@ export const EditProfileModal: React.FC<Props> = ({ profile, onClose, onSave, sa
                   type="button"
                   onClick={() => fileRef.current?.click()}
                   disabled={uploading || saving}
-                  className="rounded-xl border border-black/5 bg-surface px-3 py-2 text-sm font-bold text-[#111827] hover:bg-surface-muted disabled:opacity-60"
+                  className="rounded-xl bg-white ring-1 ring-slate-200/80 px-3 py-2 text-sm font-bold text-[#111827] hover:bg-surface-muted disabled:opacity-60"
                 >
                   {avatarUrl ? 'Change image' : 'Upload image'}
                 </button>

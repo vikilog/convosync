@@ -60,7 +60,7 @@ export function IgJourneyList({ journeys, loading, onCreateBlank, onOpen, onDele
           Loading automations…
         </div>
       ) : journeys.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-black/10 bg-surface p-8 text-center">
+        <div className="rounded-2xl border border-dashed border-black/10 bg-white p-8 text-center">
           <div
             className={`mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl ${IG_GRADIENT_SOFT}`}
           >
@@ -86,7 +86,7 @@ export function IgJourneyList({ journeys, loading, onCreateBlank, onOpen, onDele
             return (
               <article
                 key={j.id}
-                className="group flex items-stretch overflow-hidden rounded-xl border border-black/5 bg-surface transition-shadow hover:shadow-sm"
+                className="group flex items-stretch overflow-hidden rounded-xl bg-white ring-1 ring-slate-200/80 transition-shadow hover:shadow-sm"
               >
                 <button
                   type="button"

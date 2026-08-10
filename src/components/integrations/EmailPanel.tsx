@@ -689,7 +689,7 @@ export function EmailPanel() {
           {/* 1. Active sending identity — mirrors default provider From */}
           <section
             aria-labelledby="email-sending-as-heading"
-            className="bg-surface rounded-2xl border border-black/5 p-4"
+            className="bg-white rounded-2xl border border-black/5 p-4"
           >
             <h4
               id="email-sending-as-heading"
@@ -732,7 +732,7 @@ export function EmailPanel() {
           </section>
 
           {/* 2. Providers */}
-          <div className="bg-surface rounded-2xl border border-black/5 p-4">
+          <div className="bg-white rounded-2xl border border-black/5 p-4">
             <div className="flex items-center justify-between gap-2 mb-3">
               <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
                 <Settings className="w-4 h-4 text-primary" aria-hidden />
@@ -1021,7 +1021,7 @@ export function EmailPanel() {
           </div>
 
           {showAddProvider && (
-            <div className="bg-surface rounded-2xl border border-black/5 p-4 space-y-3">
+            <div className="bg-white rounded-2xl border border-black/5 p-4 space-y-3">
               <h4 className="text-sm font-bold text-gray-900">Add provider</h4>
               <select
                 value={providerForm.provider}
@@ -1140,7 +1140,7 @@ export function EmailPanel() {
           {/* 3. Test send */}
           <section
             aria-labelledby="email-test-send-heading"
-            className="bg-surface rounded-2xl border border-black/5 p-4 space-y-3"
+            className="bg-white rounded-2xl border border-black/5 p-4 space-y-3"
           >
             <h4
               id="email-test-send-heading"
@@ -1189,7 +1189,7 @@ export function EmailPanel() {
       )}
 
       {tab === 'logs' && (
-        <div className="w-full bg-surface rounded-2xl border border-black/5 overflow-hidden">
+        <div className="w-full bg-white rounded-2xl border border-black/5 overflow-hidden">
           {logs.length === 0 ? (
             <p className="text-xs text-gray-500 text-center py-10">No emails sent yet.</p>
           ) : (

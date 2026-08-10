@@ -131,7 +131,7 @@ export function ThemeDateInput({
         aria-label={ariaLabel}
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
-        className={`inline-flex w-[148px] items-center gap-2 rounded-lg border bg-surface px-2.5 py-2 text-left text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20 ${
+        className={`inline-flex w-[148px] items-center gap-2 rounded-lg border bg-white px-2.5 py-2 text-left text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20 ${
           open
             ? 'border-primary/40 ring-2 ring-primary/15'
             : 'border-black/5 hover:border-primary/25'

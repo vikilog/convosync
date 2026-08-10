@@ -133,7 +133,7 @@ function IntegrationCard({
   onConnect,
 }: IntegrationCardProps) {
   return (
-    <article className="bg-surface rounded-2xl border border-black/5 p-5 flex flex-col h-full shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+    <article className="bg-white rounded-2xl border border-black/5 p-5 flex flex-col h-full shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
       <div className="flex items-center gap-3 min-w-0">
         <div
           className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${iconBgClass}`}
@@ -323,7 +323,7 @@ function ConnectedChannelCard({
 
   return (
     <article
-      className={`bg-surface rounded-xl border ${borderAccent} p-3.5 flex flex-col gap-2.5 h-full shadow-[0_1px_2px_rgba(0,0,0,0.04)]`}
+      className={`bg-white rounded-xl border ${borderAccent} p-3.5 flex flex-col gap-2.5 h-full shadow-[0_1px_2px_rgba(0,0,0,0.04)]`}
     >
       <div className="flex items-start gap-2.5 min-w-0">
         {avatarUrl ? (
@@ -435,7 +435,7 @@ function WhatsAppGroupedCard({ accounts, onManage, onEditProfile }: WhatsAppGrou
   const shownAccounts = accounts.slice(0, 3);
   const remainingCount = accounts.length - shownAccounts.length;
   return (
-    <article className="bg-surface rounded-xl border border-channel-green/20 p-3 flex flex-col gap-2.5 h-full shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+    <article className="bg-white rounded-xl border border-channel-green/20 p-3 flex flex-col gap-2.5 h-full shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-[#e6f7ec]">
@@ -521,7 +521,7 @@ function ConnectedAdsToolCard({
   onManage: () => void;
 }) {
   return (
-    <article className="bg-surface rounded-xl border border-black/5 p-3.5 flex flex-col gap-2.5 h-full shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+    <article className="bg-white rounded-xl border border-black/5 p-3.5 flex flex-col gap-2.5 h-full shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
       <div className="flex items-start gap-2.5 min-w-0">
         <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-sky-50 border border-black/5">
           {icon}
@@ -1148,7 +1148,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
             Back to integrations
           </button>
 
-          <div className="bg-surface border border-black/5 rounded-2xl p-6 space-y-4">
+          <div className="bg-white ring-1 ring-slate-200/80 rounded-2xl p-6 space-y-4">
             <div className="flex items-center gap-3">
               <div className="w-11 h-11 rounded-xl bg-[#e8f4ff] text-channel-blue flex items-center justify-center">
                 <Mail className="w-5 h-5" />
@@ -1269,7 +1269,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
           <ArrowLeft className="w-3.5 h-3.5" />
           Back to integrations
         </button>
-        <div className="bg-surface border border-black/5 rounded-2xl p-6 text-center space-y-3">
+        <div className="bg-white ring-1 ring-slate-200/80 rounded-2xl p-6 text-center space-y-3">
           <h3 className="text-lg font-black text-gray-950">{channel.title}</h3>
           <p className="text-sm text-gray-500 font-medium">{channel.description}</p>
           <span className="inline-block text-sm font-black uppercase tracking-wider px-3 py-1 rounded-full bg-[#f3eeff] text-primary">
@@ -1437,7 +1437,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
             {Array.from({ length: 3 }).map((_, i) => (
               <div
                 key={`connected-skel-${i}`}
-                className="rounded-xl border border-black/5 bg-surface p-3.5 space-y-3 animate-pulse"
+                className="rounded-xl bg-white ring-1 ring-slate-200/80 p-3.5 space-y-3 animate-pulse"
               >
                 <div className="flex items-start gap-2.5">
                   <div className="h-9 w-9 rounded-lg skel shrink-0" />
@@ -1462,7 +1462,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
             {Array.from({ length: 3 }).map((_, i) => (
               <div
                 key={`add-skel-${i}`}
-                className="rounded-2xl border border-black/5 bg-surface p-5 space-y-4 animate-pulse"
+                className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-5 space-y-4 animate-pulse"
               >
                 <div className="h-11 w-11 rounded-xl skel" />
                 <div className="space-y-2">
@@ -1479,7 +1479,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
         <section className="space-y-3">
           <div className="h-4 w-36 rounded-md skel animate-pulse" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="rounded-2xl border border-black/5 bg-surface p-5 space-y-4 animate-pulse">
+            <div className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-5 space-y-4 animate-pulse">
               <div className="h-11 w-11 rounded-xl skel" />
               <div className="space-y-2">
                 <div className="h-4 w-24 rounded skel" />

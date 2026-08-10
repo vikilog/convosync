@@ -41,7 +41,7 @@ export function AiGenerateModal({ open, onClose, onGenerate }: Props) {
       <div
         role="dialog"
         aria-labelledby="ai-email-gen-title"
-        className="w-full max-w-lg rounded-2xl border border-black/5 bg-surface shadow-xl"
+        className="w-full max-w-lg rounded-2xl bg-white ring-1 ring-slate-200/80 shadow-xl"
       >
         <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-black/5">
           <div className="flex items-center gap-2 min-w-0">
@@ -75,7 +75,7 @@ export function AiGenerateModal({ open, onClose, onGenerate }: Props) {
             rows={5}
             disabled={busy}
             placeholder="e.g. Welcome email for new customers: thank them, mention a 10% off code, CTA to shop, use {{first_name}} and {{company_name}}"
-            className="w-full rounded-xl border border-black/10 bg-surface-muted px-3 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-y min-h-[120px]"
+            className="w-full rounded-xl bg-surface-muted px-3 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-y min-h-[120px]"
           />
           {error ? (
             <p className="text-xs font-semibold text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">

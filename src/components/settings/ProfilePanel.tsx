@@ -181,7 +181,7 @@ export function ProfilePanel() {
         </p>
       ) : null}
 
-      <div className="rounded-2xl border border-black/5 bg-surface p-5 shadow-sm md:p-6">
+      <div className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-5 shadow-sm md:p-6">
         <h3 className="mb-4 text-sm font-semibold text-slate-900">Profile photo</h3>
         <div className="flex flex-wrap items-center gap-4">
           <div className="relative">
@@ -240,7 +240,7 @@ export function ProfilePanel() {
 
       <form
         onSubmit={(e) => void handleSaveName(e)}
-        className="space-y-4 rounded-2xl border border-black/5 bg-surface p-5 shadow-sm md:p-6"
+        className="space-y-4 rounded-2xl bg-white ring-1 ring-slate-200/80 p-5 shadow-sm md:p-6"
       >
         <div className="mb-1 flex items-center gap-2">
           <User className="h-4 w-4 text-primary" aria-hidden />
@@ -388,7 +388,7 @@ export function ProfilePanel() {
 
       <form
         onSubmit={(e) => void handleChangePassword(e)}
-        className="space-y-4 rounded-2xl border border-black/5 bg-surface p-5 shadow-sm md:p-6"
+        className="space-y-4 rounded-2xl bg-white ring-1 ring-slate-200/80 p-5 shadow-sm md:p-6"
       >
         <div className="mb-1 flex items-center gap-2">
           <Lock className="h-4 w-4 text-primary" aria-hidden />
@@ -449,7 +449,7 @@ export function ProfilePanel() {
         </div>
       </form>
 
-      <section className="rounded-2xl border border-black/5 bg-surface p-5 shadow-sm md:p-6">
+      <section className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-5 shadow-sm md:p-6">
         <div className="mb-1 flex items-center gap-2">
           <LogOut className="h-4 w-4 text-slate-500" aria-hidden />
           <h3 className="text-sm font-semibold text-slate-900">Sign out</h3>

@@ -417,7 +417,7 @@ export const TemplatesView: React.FC = () => {
             className={`px-3 py-2 rounded-xl text-sm font-bold border inline-flex items-center gap-1.5 ${
               channel === 'whatsapp'
                 ? 'bg-[#008069] text-white border-[#008069]'
-                : 'bg-surface text-gray-700 border-black/5'
+                : 'bg-white text-gray-700 border-black/5'
             }`}
           >
             <MessageCircle className="w-3.5 h-3.5" />
@@ -431,7 +431,7 @@ export const TemplatesView: React.FC = () => {
             className={`px-3 py-2 rounded-xl text-sm font-bold border inline-flex items-center gap-1.5 ${
               channel === 'email'
                 ? 'bg-primary text-white border-primary'
-                : 'bg-surface text-gray-700 border-black/5'
+                : 'bg-white text-gray-700 border-black/5'
             }`}
           >
             <Mail className="w-3.5 h-3.5" />
@@ -444,7 +444,7 @@ export const TemplatesView: React.FC = () => {
           className={`px-3 py-2 rounded-xl text-sm font-bold border inline-flex items-center gap-1.5 ${
             channel === 'canned'
               ? 'bg-primary text-white border-primary'
-              : 'bg-surface text-gray-700 border-black/5'
+              : 'bg-white text-gray-700 border-black/5'
           }`}
         >
           <MessageSquareText className="w-3.5 h-3.5" />
@@ -476,7 +476,7 @@ export const TemplatesView: React.FC = () => {
         </div>
       ) : (
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto">
-      <div className="p-4 bg-surface border border-black/5 rounded-xl flex flex-wrap items-center justify-between gap-4">
+      <div className="p-4 bg-white ring-1 ring-slate-200/80 rounded-xl flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-2.5">
           {channel === 'whatsapp' && (
             <div className="flex items-center gap-1 bg-slate-50 px-2.5 py-1.5 rounded-xl border border-slate-200">
@@ -512,7 +512,7 @@ export const TemplatesView: React.FC = () => {
               type="button"
               onClick={() => void handleSync()}
               disabled={syncing}
-              className="px-3 py-2 bg-surface border border-black/5 hover:bg-gray-50 text-gray-800 rounded-xl text-meta font-bold flex items-center gap-1.5 disabled:opacity-60"
+              className="px-3 py-2 bg-white ring-1 ring-slate-200/80 hover:bg-gray-50 text-gray-800 rounded-xl text-meta font-bold flex items-center gap-1.5 disabled:opacity-60"
             >
               {syncing ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -590,7 +590,7 @@ function EmptyState({ channel, onCreate }: { channel: Channel; onCreate: () => v
   const label =
     channel === 'whatsapp' ? 'WhatsApp' : channel === 'email' ? 'email' : 'canned response';
   return (
-    <div className="bg-surface border border-dashed border-black/10 rounded-2xl p-12 text-center">
+    <div className="bg-white border border-dashed border-black/10 rounded-2xl p-12 text-center">
       <p className="text-sm font-bold text-gray-600">No {label} templates</p>
       <p className="text-xs text-gray-400 mt-1 max-w-md mx-auto">
         {channel === 'whatsapp'
@@ -648,7 +648,7 @@ function WhatsAppCard({
 
   return (
     <div
-      className="bg-surface border border-black/5 rounded-xl p-3 flex flex-col text-left hover:border-[#008069]/30 transition-all cursor-pointer"
+      className="bg-white ring-1 ring-slate-200/80 rounded-xl p-3 flex flex-col text-left hover:border-[#008069]/30 transition-all cursor-pointer"
       onClick={onOpen}
       onKeyDown={(e) => e.key === 'Enter' && onOpen()}
       role="button"
@@ -764,7 +764,7 @@ function EmailCard({
 
   return (
     <div
-      className="bg-surface border border-black/5 rounded-xl p-3 flex flex-col text-left hover:border-primary/30 transition-all cursor-pointer"
+      className="bg-white ring-1 ring-slate-200/80 rounded-xl p-3 flex flex-col text-left hover:border-primary/30 transition-all cursor-pointer"
       onClick={onOpen}
       onKeyDown={(e) => e.key === 'Enter' && onOpen()}
       role="button"

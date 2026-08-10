@@ -75,7 +75,7 @@ export function ConditionTypePicker({ open, channel, onClose, onSelect }: Props)
             initial={{ scale: 0.96, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.96, opacity: 0 }}
-            className="relative flex max-h-[80vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-black/5 bg-surface shadow-2xl"
+            className="relative flex max-h-[80vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200/80 shadow-2xl"
           >
             <div className="flex items-center justify-between border-b border-black/5 px-4 py-3">
               <h3 className="text-sm font-bold text-gray-900">Add a condition</h3>

@@ -61,7 +61,7 @@ export function AISuggestionCard({
 }) {
   if (state === 'scanning') {
     return (
-      <section className="rounded-2xl border border-black/5 bg-surface p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+      <section className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
         <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-neutral-400">
           <Sparkles className="h-3.5 w-3.5 text-cyan-600" />
           AI Suggestion
@@ -72,7 +72,7 @@ export function AISuggestionCard({
         </div>
         <div className="mt-4 space-y-2.5" aria-hidden>
           {[0, 1, 2].map((i) => (
-            <div key={i} className="animate-pulse rounded-xl border border-black/5 bg-surface-muted/60 p-3">
+            <div key={i} className="animate-pulse rounded-xl bg-surface-muted/60 p-3">
               <div className="h-3 w-24 rounded bg-slate-100" />
               <div className="mt-2 h-3 w-full max-w-[90%] rounded bg-slate-50" />
             </div>
@@ -110,7 +110,7 @@ export function AISuggestionCard({
   }
 
   return (
-    <section className="rounded-2xl border border-black/5 bg-surface p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+    <section className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-neutral-400">
           <Sparkles className="h-3.5 w-3.5 text-cyan-600" />

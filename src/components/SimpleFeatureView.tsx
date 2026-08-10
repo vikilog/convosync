@@ -28,7 +28,7 @@ export const SimpleFeatureView: FC<SimpleFeatureViewProps> = ({
 
   return (
     <div className="max-w-3xl mx-auto space-y-6 pb-12">
-      <div className="bg-surface rounded-xl border border-black/5 p-6 md:p-8 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+      <div className="rounded-xl bg-white ring-1 ring-slate-200/80 p-6 md:p-8 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
         <div className="flex flex-col sm:flex-row sm:items-start gap-5">
           <div className="w-14 h-14 rounded-2xl bg-sky-50 text-primary flex items-center justify-center shrink-0">
             <Icon className="w-7 h-7" />
@@ -68,7 +68,7 @@ export const SimpleFeatureView: FC<SimpleFeatureViewProps> = ({
         <button
           type="button"
           onClick={() => navigate(pathForTab('inbox'))}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-surface text-slate-700 border border-black/5 hover:bg-surface-muted text-sm font-bold rounded-xl transition-all"
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-white text-slate-700 ring-1 ring-slate-200/80 hover:bg-surface-muted text-sm font-bold rounded-xl transition-all"
         >
           Open Inbox
         </button>

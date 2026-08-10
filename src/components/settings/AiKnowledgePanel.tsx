@@ -318,7 +318,7 @@ export function AiKnowledgePanel() {
 
   return (
     <div className="max-w-3xl space-y-6">
-      <div className="rounded-2xl border border-black/5 bg-surface p-5 shadow-sm">
+      <div className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-5 shadow-sm">
         <div className="flex items-start gap-3 mb-5">
           <div className="p-2.5 rounded-xl bg-sky-50 text-primary">
             <Database className="w-5 h-5" />
@@ -415,7 +415,7 @@ export function AiKnowledgePanel() {
       </div>
 
       {collections.length > 0 && (
-        <div className="rounded-2xl border border-black/5 bg-surface p-5 shadow-sm">
+        <div className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-5 shadow-sm">
           <div className="flex items-center justify-between mb-3">
             <p className="text-meta font-bold text-gray-400 uppercase tracking-wide">
               Collections ({collections.filter((c) => c.synced).length}/{collections.length} synced)
@@ -469,7 +469,7 @@ export function AiKnowledgePanel() {
         </div>
       )}
 
-      <div className="rounded-2xl border border-black/5 bg-surface p-5 shadow-sm space-y-4">
+      <div className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-5 shadow-sm space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-meta font-bold text-gray-400 uppercase tracking-wide">Status</p>
@@ -525,7 +525,7 @@ export function AiKnowledgePanel() {
       </div>
 
       {record?.data && Object.keys(record.data).length > 0 && (
-        <div className="rounded-2xl border border-black/5 bg-surface p-5 shadow-sm">
+        <div className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-5 shadow-sm">
           <div className="flex items-center justify-between mb-3">
             <div>
               <p className="text-meta font-bold text-gray-400 uppercase tracking-wide">

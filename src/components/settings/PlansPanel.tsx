@@ -296,16 +296,16 @@ function PlansSkeleton() {
   return (
     <div className="mx-auto max-w-6xl space-y-4" aria-busy="true" aria-label="Loading plans">
       <div className="grid gap-4 lg:grid-cols-3">
-        <div className="h-44 animate-pulse rounded-3xl bg-surface-muted lg:col-span-2" />
-        <div className="h-44 animate-pulse rounded-3xl bg-surface-muted" />
+        <div className="h-44 animate-pulse rounded-3xl bg-white lg:col-span-2" />
+        <div className="h-44 animate-pulse rounded-3xl bg-white" />
       </div>
       <div className="flex justify-between gap-3 pt-2">
-        <div className="h-10 w-52 animate-pulse rounded-xl bg-surface-muted" />
-        <div className="h-10 w-44 animate-pulse rounded-xl bg-surface-muted" />
+        <div className="h-10 w-52 animate-pulse rounded-xl bg-white" />
+        <div className="h-10 w-44 animate-pulse rounded-xl bg-white" />
       </div>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {[0, 1, 2, 3].map((i) => (
-          <div key={i} className="h-[22rem] animate-pulse rounded-3xl bg-surface-muted" />
+          <div key={i} className="h-[22rem] animate-pulse rounded-3xl bg-white" />
         ))}
       </div>
     </div>
@@ -715,7 +715,7 @@ export function PlansPanel() {
                       className={`inline-flex min-h-8 items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold ${
                         paid
                           ? 'bg-accent-green-bg text-primary ring-1 ring-primary/20'
-                          : 'bg-surface-muted text-slate-700 ring-1 ring-black/5'
+                          : 'bg-white text-slate-700 ring-1 ring-black/5'
                       }`}
                     >
                       {paid ? <Check className="h-3.5 w-3.5" aria-hidden /> : null}
@@ -923,7 +923,7 @@ export function PlansPanel() {
             <div
               role="group"
               aria-label="Billing cycle"
-              className="relative inline-flex rounded-2xl border border-border-subtle bg-surface-muted p-1"
+              className="relative inline-flex rounded-2xl border border-border-subtle bg-white p-1"
             >
               {(['monthly', 'annual'] as const).map((key) => (
                 <button
@@ -1077,7 +1077,7 @@ export function PlansPanel() {
                   }
                   className={`mt-6 inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-60 ${
                     isCurrent
-                      ? 'bg-surface-muted text-slate-500'
+                      ? 'bg-white text-slate-500'
                       : custom
                         ? 'border border-border-subtle bg-white text-slate-800 hover:bg-surface-muted'
                         : 'bg-primary text-white hover:bg-primary-hover'

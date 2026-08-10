@@ -75,15 +75,15 @@ export function InvoiceLogsPanel() {
       )}
 
       {transactions.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-black/10 bg-surface py-16 text-center text-sm text-neutral-400">
+        <div className="rounded-2xl border border-dashed border-black/10 bg-white py-16 text-center text-sm text-neutral-400">
           No invoices or transactions yet.
         </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-black/5 bg-surface">
+        <div className="overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200/80">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[720px] text-left text-xs">
               <thead>
-                <tr className="border-b border-black/5 bg-surface-muted text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
+                <tr className="border-b border-black/5 bg-white text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
                   <th className="px-4 py-3">Date</th>
                   <th className="px-4 py-3">Description</th>
                   <th className="px-4 py-3">Type</th>

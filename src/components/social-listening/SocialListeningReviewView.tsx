@@ -45,7 +45,7 @@ function ReviewSkeleton() {
       {[0, 1, 2].map((i) => (
         <div
           key={i}
-          className="animate-pulse rounded-xl border border-black/5 bg-surface p-4"
+          className="animate-pulse rounded-xl bg-white ring-1 ring-slate-200/80 p-4"
         >
           <div className="flex gap-3">
             <div className="h-10 w-10 rounded-full bg-slate-100" />
@@ -347,7 +347,7 @@ export const SocialListeningReviewView: React.FC = () => {
   };
 
   return (
-    <div className="relative flex h-full min-h-0 flex-1 flex-col gap-4 overflow-y-auto bg-surface-muted p-4 md:p-6 selection:bg-sky-500/15">
+    <div className="relative flex h-full min-h-0 flex-1 flex-col gap-4 overflow-y-auto bg-white p-4 md:p-6 selection:bg-sky-500/15">
       <SocialListeningSubNav />
 
       {loadError && (
@@ -359,7 +359,7 @@ export const SocialListeningReviewView: React.FC = () => {
         </p>
       )}
 
-      <div className="sticky top-0 z-10 -mx-1 flex shrink-0 flex-col gap-2 rounded-2xl border border-black/5 bg-surface/95 p-2 shadow-[0_1px_2px_rgba(0,0,0,0.04)] backdrop-blur-sm sm:flex-row sm:items-center">
+      <div className="sticky top-0 z-10 -mx-1 flex shrink-0 flex-col gap-2 rounded-2xl bg-white/95 p-2 shadow-[0_1px_2px_rgba(0,0,0,0.04)] backdrop-blur-sm sm:flex-row sm:items-center">
         <div
           role="tablist"
           aria-label="Intent filters"

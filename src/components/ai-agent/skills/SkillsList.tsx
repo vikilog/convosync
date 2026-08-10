@@ -128,7 +128,7 @@ export const SkillsList: React.FC<Props> = ({ agentId }) => {
               key={skill.id}
               type="button"
               onClick={() => navigate(pathForAgentSkill(agentId, skill.id))}
-              className="w-full text-left bg-surface border border-black/5 rounded-xl p-4 hover:border-primary hover:bg-primary/5 transition-colors"
+              className="w-full text-left bg-white ring-1 ring-slate-200/80 rounded-xl p-4 hover:border-primary hover:bg-primary/5 transition-colors"
             >
               <div className="flex items-center justify-between gap-3">
                 <p className="text-sm font-bold text-[#111827]">{skill.title}</p>

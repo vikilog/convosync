@@ -106,7 +106,7 @@ export function PostConfigurationPanel({
     scanState === 'failed' || showForm || (editing && isConfigured);
 
   return (
-    <div className="relative flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border border-black/5 bg-surface shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+    <div className="relative flex h-full min-h-0 flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
       <div className="flex shrink-0 items-start justify-between gap-2 border-b border-black/5 px-3.5 py-3">
         <div className="min-w-0">
           <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-neutral-400">
@@ -242,7 +242,7 @@ export function PostConfigurationPanel({
 
 export function PostConfigEmptyState() {
   return (
-    <div className="flex h-full min-h-[280px] flex-col items-center justify-center rounded-2xl border border-dashed border-black/10 bg-surface px-6 py-12 text-center shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+    <div className="flex h-full min-h-[280px] flex-col items-center justify-center rounded-2xl border border-dashed border-black/10 bg-white px-6 py-12 text-center shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
       <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-50 text-cyan-700">
         <Sparkles className="h-6 w-6" />
       </div>

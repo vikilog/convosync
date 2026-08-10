@@ -160,7 +160,7 @@ export function AiProviderPanel() {
 
   return (
     <div className="mx-auto w-full max-w-2xl space-y-6">
-      <div className="rounded-2xl border border-black/5 bg-surface p-5 shadow-sm text-center">
+      <div className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-5 shadow-sm text-center">
         <div className="flex flex-col items-center gap-3">
           <div className="rounded-xl bg-violet-50 p-2 text-violet-600">
             <Sparkles className="h-5 w-5" />
@@ -189,7 +189,7 @@ export function AiProviderPanel() {
       )}
 
       <form
-        className="rounded-2xl border border-black/5 bg-surface p-5 shadow-sm space-y-5"
+        className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-5 shadow-sm space-y-5"
         onSubmit={(e) => void handleSave(e)}
       >
         <div>
@@ -352,7 +352,7 @@ export function AiProviderPanel() {
               type="button"
               onClick={(e) => void handleTest(e)}
               disabled={testing || !canTest}
-              className="inline-flex items-center gap-2 rounded-xl border border-black/5 bg-surface px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-surface-muted disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-xl bg-white ring-1 ring-slate-200/80 px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-surface-muted disabled:opacity-60"
             >
               {testing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plug className="h-4 w-4" />}
               Test connection
@@ -360,7 +360,7 @@ export function AiProviderPanel() {
             <button
               type="button"
               onClick={() => void load()}
-              className="inline-flex items-center gap-2 rounded-xl border border-black/5 bg-surface px-4 py-2.5 text-sm text-gray-600 hover:bg-surface-muted"
+              className="inline-flex items-center gap-2 rounded-xl bg-white ring-1 ring-slate-200/80 px-4 py-2.5 text-sm text-gray-600 hover:bg-surface-muted"
             >
               <RefreshCw className="h-4 w-4" />
               Refresh

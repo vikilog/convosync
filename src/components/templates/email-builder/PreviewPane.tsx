@@ -30,18 +30,18 @@ export function PreviewPane() {
   const isMobile = previewMode === 'mobile';
 
   return (
-    <div className="flex-1 min-h-0 min-w-0 flex flex-col bg-surface-muted">
-      <div className="shrink-0 flex items-center justify-between px-4 py-2 border-b border-black/5 bg-surface">
+    <div className="flex-1 min-h-0 min-w-0 flex flex-col bg-white">
+      <div className="shrink-0 flex items-center justify-between px-4 py-2 border-b border-black/5 bg-white">
         <div className="min-w-0 flex-1 pr-4">
           <p className="text-sm font-bold uppercase text-gray-400">Subject preview</p>
           <p className="text-sm font-semibold text-gray-900 truncate">{previewSubject}</p>
         </div>
-        <div className="flex rounded-lg border border-black/5 p-0.5 bg-surface-muted">
+        <div className="flex rounded-lg border border-black/5 p-0.5 bg-white">
           <button
             type="button"
             onClick={() => setPreviewMode('desktop')}
             className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md text-sm font-semibold ${
-              previewMode === 'desktop' ? 'bg-surface shadow-sm text-primary' : 'text-gray-500'
+              previewMode === 'desktop' ? 'bg-white shadow-sm text-primary' : 'text-gray-500'
             }`}
           >
             <Monitor className="w-3.5 h-3.5" /> Desktop
@@ -50,7 +50,7 @@ export function PreviewPane() {
             type="button"
             onClick={() => setPreviewMode('mobile')}
             className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md text-sm font-semibold ${
-              previewMode === 'mobile' ? 'bg-surface shadow-sm text-primary' : 'text-gray-500'
+              previewMode === 'mobile' ? 'bg-white shadow-sm text-primary' : 'text-gray-500'
             }`}
           >
             <Smartphone className="w-3.5 h-3.5" /> Mobile
@@ -60,7 +60,7 @@ export function PreviewPane() {
 
       <div className="flex-1 min-h-0 overflow-y-auto p-3 md:p-4 flex">
         <div
-          className={`transition-all duration-300 shadow-sm rounded-2xl overflow-hidden border border-black/5 bg-surface flex-1 min-h-0 flex flex-col ${
+          className={`transition-all duration-300 shadow-sm rounded-2xl overflow-hidden bg-white ring-1 ring-slate-200/80 flex-1 min-h-0 flex flex-col ${
             isMobile ? 'max-w-[375px] mx-auto w-full' : 'w-full max-w-[720px] mx-auto'
           }`}
         >

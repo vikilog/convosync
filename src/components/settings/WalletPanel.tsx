@@ -34,7 +34,7 @@ import { dispatchWalletBalance } from '../../lib/walletEvents';
 import { WALLET_PRICING_ROWS, type WalletPricingKey } from '../../lib/walletPricing';
 
 const CARD_CLASS =
-  'rounded-xl border border-black/5 bg-surface p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]';
+  'rounded-xl bg-white ring-1 ring-slate-200/80 p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]';
 
 const PRICING_ICONS: Record<
   WalletPricingKey,
@@ -424,7 +424,7 @@ export function WalletPanel() {
                     className={`cursor-pointer rounded-lg border px-2 py-2 text-center transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
                       selected
                         ? 'border-transparent bg-primary text-white hover:bg-primary-hover'
-                        : 'border-black/5 bg-surface text-slate-800 hover:border-primary/30'
+                        : 'border-black/5 bg-white text-slate-800 hover:border-primary/30'
                     }`}
                   >
                     <span className="block text-xs font-bold sm:text-sm">{formatCc(cc)}</span>
@@ -532,7 +532,7 @@ export function WalletPanel() {
                     return (
                       <tr
                         key={row.key}
-                        className={index % 2 === 0 ? 'bg-surface' : 'bg-surface-muted/80'}
+                        className={index % 2 === 0 ? 'bg-white' : 'bg-surface-muted/80'}
                       >
                         <td className="px-3 py-2 font-medium text-slate-900">
                           <span className="inline-flex items-center gap-1.5">
@@ -600,7 +600,7 @@ export function WalletPanel() {
               return (
                 <li
                   key={tx.id}
-                  className="flex items-center justify-between gap-4 bg-surface px-4 py-3 sm:px-5"
+                  className="flex items-center justify-between gap-4 bg-white px-4 py-3 sm:px-5"
                 >
                   <div className="flex min-w-0 flex-1 items-center gap-3">
                     {isCredit ? (
@@ -652,7 +652,7 @@ export function WalletPanel() {
       {showAllModal ? (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
           <div
-            className="flex max-h-[85vh] w-full max-w-lg flex-col rounded-xl border border-black/5 bg-surface shadow-xl"
+            className="flex max-h-[85vh] w-full max-w-lg flex-col rounded-xl bg-white ring-1 ring-slate-200/80 shadow-xl"
             role="dialog"
             aria-modal="true"
             aria-labelledby="wallet-all-tx-title"

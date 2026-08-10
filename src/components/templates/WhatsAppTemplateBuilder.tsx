@@ -135,7 +135,7 @@ function Section({
   const [open, setOpen] = useState(defaultOpen);
   return (
     <div
-      className={`bg-surface rounded-xl border border-black/5 shadow-sm ${className}`}
+      className={`bg-white rounded-xl border border-black/5 shadow-sm ${className}`}
     >
       <button
         type="button"
@@ -480,10 +480,10 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex h-dvh flex-col overflow-hidden bg-surface-muted transition-[left] duration-200 ease-out"
+      className="fixed inset-0 z-50 flex h-dvh flex-col overflow-hidden bg-white transition-[left] duration-200 ease-out"
       style={{ left: sidebarOffset }}
     >
-      <header className="bg-surface border-b border-black/5 px-5 py-2.5 flex items-center justify-between gap-4 shrink-0">
+      <header className="bg-white border-b border-black/5 px-5 py-2.5 flex items-center justify-between gap-4 shrink-0">
         <div className="flex items-center gap-3 min-w-0">
           <button
             type="button"
@@ -508,7 +508,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
               type="button"
               disabled={saving}
               onClick={() => handleSave(true)}
-              className="px-4 py-2 text-sm font-semibold text-[#050505] bg-surface-muted hover:bg-black/[0.06] border border-black/5 rounded-lg disabled:opacity-50"
+              className="px-4 py-2 text-sm font-semibold text-[#050505] bg-white hover:bg-black/[0.06] border border-black/5 rounded-lg disabled:opacity-50"
             >
               Save as draft
             </button>
@@ -610,7 +610,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                       }}
                       disabled={nameLocked}
                       placeholder="e.g. order_confirmation"
-                      className="w-full rounded-lg border border-black/10 bg-surface-muted px-3 py-2.5 font-mono text-sm text-[#050505] outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/15 disabled:opacity-60"
+                      className="w-full rounded-lg bg-surface-muted px-3 py-2.5 font-mono text-sm text-[#050505] outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/15 disabled:opacity-60"
                     />
                     <p className="mt-1 font-mono text-meta text-[#65676b]">{displayName}</p>
                     {isUrlLikeName(name) && (
@@ -630,7 +630,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                       id="wa-tpl-language"
                       value={language}
                       onChange={(e) => setLanguage(e.target.value)}
-                      className="w-full cursor-pointer rounded-lg border border-black/10 bg-surface-muted px-3 py-2.5 text-sm text-[#050505] outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/15"
+                      className="w-full cursor-pointer rounded-lg bg-surface-muted px-3 py-2.5 text-sm text-[#050505] outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/15"
                     >
                       {languageOptions.map((l) => (
                         <option key={l.value} value={l.value}>
@@ -669,7 +669,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                           className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
                             headerFormat === opt.value
                               ? 'border-primary bg-primary/10 text-primary'
-                              : 'border-black/10 bg-surface-muted text-[#050505] hover:border-primary/50'
+                              : 'border-black/10 bg-white text-[#050505] hover:border-primary/50'
                           }`}
                         >
                           {opt.icon}
@@ -684,7 +684,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                         onChange={(e) => setHeader(e.target.value.slice(0, HEADER_MAX))}
                         placeholder="Add a short header line"
                         maxLength={HEADER_MAX}
-                        className="w-full border border-black/10 bg-surface-muted rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
+                        className="w-full bg-surface-muted rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
                       />
                     )}
 
@@ -702,7 +702,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                           }}
                         />
                         {previewMediaUrl ? (
-                          <div className="rounded-lg border border-black/10 bg-surface-muted/40 p-3 space-y-3">
+                          <div className="rounded-lg bg-surface-muted/40 p-3 space-y-3">
                             <div className="flex items-start gap-3">
                               <button
                                 type="button"
@@ -809,7 +809,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                       onChange={(e) => setBodyPattern(e.target.value.slice(0, BODY_MAX))}
                       rows={8}
                       placeholder="Write your message. Use {{1}}, {{2}} for variables."
-                      className="w-full border border-black/10 bg-surface-muted rounded-lg px-3 py-2 text-sm leading-relaxed outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 resize-none min-h-[160px]"
+                      className="w-full bg-surface-muted rounded-lg px-3 py-2 text-sm leading-relaxed outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 resize-none min-h-[160px]"
                     />
                     <div className="flex flex-wrap items-center gap-2 mt-1.5">
                       <button
@@ -832,7 +832,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                       onChange={(e) => setFooter(e.target.value.slice(0, FOOTER_MAX))}
                       maxLength={FOOTER_MAX}
                       placeholder="Reply STOP to unsubscribe"
-                      className="w-full border border-black/10 bg-surface-muted rounded-lg px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
+                      className="w-full bg-surface-muted rounded-lg px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
                     />
                   </div>
 
@@ -854,7 +854,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                           Add button
                         </button>
                         {showButtonMenu && (
-                          <div className="relative z-20 mt-1 w-full max-w-sm overflow-hidden rounded-lg border border-black/5 bg-surface shadow-lg">
+                          <div className="relative z-20 mt-1 w-full max-w-sm overflow-hidden rounded-lg bg-white ring-1 ring-slate-200/80 shadow-lg">
                             {BUTTON_OPTIONS.map((opt) => (
                               <button
                                 key={opt.value}
@@ -876,7 +876,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                       </div>
                     ) : (
                       <div className="border border-black/5 rounded-lg overflow-hidden">
-                        <div className="flex items-center justify-between px-3 py-2 bg-surface-muted border-b border-black/5">
+                        <div className="flex items-center justify-between px-3 py-2 bg-white border-b border-black/5">
                           <span className="text-sm font-semibold text-[#050505] flex items-center gap-2">
                             {BUTTON_OPTIONS.find((b) => b.value === buttonKind)?.icon}
                             {BUTTON_OPTIONS.find((b) => b.value === buttonKind)?.label}
@@ -908,7 +908,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                                     ? 'Call us'
                                     : 'Quick reply'
                               }
-                              className="w-full border border-black/10 bg-surface-muted rounded-lg px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
+                              className="w-full bg-surface-muted rounded-lg px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
                             />
                           </div>
                           {buttonKind === 'URL' && (
@@ -921,7 +921,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                                   value={buttonUrl}
                                   onChange={(e) => setButtonUrl(e.target.value)}
                                   placeholder="https://www.example.com or https://example.com/{{1}}"
-                                  className="w-full border border-black/10 bg-surface-muted rounded-lg px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
+                                  className="w-full bg-surface-muted rounded-lg px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
                                 />
                               </div>
                               {/\{\{\d+\}\}/.test(buttonUrl) && (
@@ -933,7 +933,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                                     value={buttonUrlSample}
                                     onChange={(e) => setButtonUrlSample(e.target.value)}
                                     placeholder="sample_payment_id"
-                                    className="w-full border border-black/10 bg-surface-muted rounded-lg px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
+                                    className="w-full bg-surface-muted rounded-lg px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
                                   />
                                   <p className="text-meta text-[#65676b] mt-1">
                                     Meta needs a sample value for {'{{1}}'} in the button URL (not the
@@ -952,7 +952,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                                 value={buttonPhone}
                                 onChange={(e) => setButtonPhone(e.target.value)}
                                 placeholder="+91 98765 43210"
-                                className="w-full border border-black/10 bg-surface-muted rounded-lg px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
+                                className="w-full bg-surface-muted rounded-lg px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
                               />
                               <p className="text-meta text-[#65676b] mt-1">
                                 Include country code, e.g. +91 for India
@@ -967,7 +967,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
 
                 <div className="space-y-3">
                   {varCount > 0 && (
-                    <div className="p-3 bg-surface-muted rounded-lg border border-black/5 space-y-2 h-fit">
+                    <div className="p-3 bg-white rounded-lg border border-black/5 space-y-2 h-fit">
                       <p className="text-meta font-semibold text-[#050505]">Variable samples</p>
                       <p className="text-meta text-[#65676b]">
                         Shown in preview and sent to Meta for review.
@@ -984,7 +984,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                               next[i] = e.target.value;
                               setVariableSamples(next);
                             }}
-                            className="flex-1 border border-black/10 bg-surface rounded-lg px-3 py-1.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
+                            className="flex-1 bg-white ring-1 ring-slate-200/80 rounded-lg px-3 py-1.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
                           />
                         </div>
                       ))}
@@ -992,7 +992,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                   )}
 
                   {!contentLocked && (
-                    <label className="flex items-start gap-3 p-3 bg-surface-muted rounded-lg border border-black/5 cursor-pointer h-fit">
+                    <label className="flex items-start gap-3 p-3 bg-white rounded-lg border border-black/5 cursor-pointer h-fit">
                       <input
                         type="checkbox"
                         checked={submitToMeta}

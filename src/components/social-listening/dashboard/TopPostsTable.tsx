@@ -16,7 +16,7 @@ export function TopPostsTable({
   loading: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-black/5 bg-surface p-5">
+    <div className="rounded-xl bg-white ring-1 ring-slate-200/80 p-5">
       <div className="mb-3">
         <h2 className="text-sm font-bold text-neutral-900">Top posts</h2>
         <p className="text-xs text-neutral-500">Ranked by comment volume in range</p>

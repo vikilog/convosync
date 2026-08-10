@@ -108,10 +108,10 @@ export function EmailBuilderShell({ template, onBack, onSaved }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex flex-col bg-surface-muted min-h-0 transition-[left] duration-200 ease-out"
+      className="fixed inset-0 z-50 flex flex-col bg-white min-h-0 transition-[left] duration-200 ease-out"
       style={{ left: sidebarOffset }}
     >
-      <header className="shrink-0 flex items-center gap-3 px-4 py-2.5 border-b border-black/5 bg-surface">
+      <header className="shrink-0 flex items-center gap-3 px-4 py-2.5 border-b border-black/5 bg-white">
         <button
           type="button"
           onClick={onBack}
@@ -123,13 +123,13 @@ export function EmailBuilderShell({ template, onBack, onSaved }: Props) {
 
         <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-2 gap-2">
           <input
-            className="rounded-lg border border-black/10 bg-surface-muted px-3 py-2 text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+            className="rounded-lg bg-surface-muted px-3 py-2 text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
             placeholder="Template name"
             value={name}
             onChange={(e) => setMeta({ name: e.target.value })}
           />
           <input
-            className="rounded-lg border border-black/10 bg-surface-muted px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+            className="rounded-lg bg-surface-muted px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
             placeholder="Subject line — use {{variables}}"
             value={subject}
             onChange={(e) => setMeta({ subject: e.target.value })}
@@ -138,12 +138,12 @@ export function EmailBuilderShell({ template, onBack, onSaved }: Props) {
 
         <div className="flex items-center gap-2 shrink-0">
           {/* ponytail: Generate with AI UI hidden for now — rewire AiGenerateModal when ready */}
-          <div className="hidden sm:flex rounded-lg border border-black/5 p-0.5 bg-surface-muted">
+          <div className="hidden sm:flex rounded-lg border border-black/5 p-0.5 bg-white">
             <button
               type="button"
               onClick={() => setViewMode('edit')}
               className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md text-sm font-semibold ${
-                viewMode === 'edit' ? 'bg-surface shadow-sm text-primary' : 'text-gray-500'
+                viewMode === 'edit' ? 'bg-white shadow-sm text-primary' : 'text-gray-500'
               }`}
             >
               <Pencil className="w-3.5 h-3.5" /> Edit
@@ -152,7 +152,7 @@ export function EmailBuilderShell({ template, onBack, onSaved }: Props) {
               type="button"
               onClick={() => setViewMode('html')}
               className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md text-sm font-semibold ${
-                viewMode === 'html' ? 'bg-surface shadow-sm text-primary' : 'text-gray-500'
+                viewMode === 'html' ? 'bg-white shadow-sm text-primary' : 'text-gray-500'
               }`}
             >
               <Code2 className="w-3.5 h-3.5" /> HTML
@@ -161,7 +161,7 @@ export function EmailBuilderShell({ template, onBack, onSaved }: Props) {
               type="button"
               onClick={() => setViewMode('preview')}
               className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md text-sm font-semibold ${
-                viewMode === 'preview' ? 'bg-surface shadow-sm text-primary' : 'text-gray-500'
+                viewMode === 'preview' ? 'bg-white shadow-sm text-primary' : 'text-gray-500'
               }`}
             >
               <Eye className="w-3.5 h-3.5" /> Preview

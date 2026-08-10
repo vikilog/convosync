@@ -151,8 +151,8 @@ export const SocialListeningFeedView: React.FC = () => {
 
   if (loadingAccounts) {
     return (
-      <div className="flex h-full min-h-0 flex-1 flex-col gap-4 overflow-y-auto bg-surface-muted p-4 md:p-6">
-        <div className="h-40 animate-pulse rounded-2xl border border-black/5 bg-surface" />
+      <div className="flex h-full min-h-0 flex-1 flex-col gap-4 overflow-y-auto bg-white p-4 md:p-6">
+        <div className="h-40 animate-pulse rounded-2xl bg-white ring-1 ring-slate-200/80" />
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="aspect-square animate-pulse rounded-xl bg-slate-100" />
@@ -164,9 +164,9 @@ export const SocialListeningFeedView: React.FC = () => {
 
   if (!accounts.length) {
     return (
-      <div className="flex h-full min-h-0 flex-1 flex-col gap-4 overflow-y-auto bg-surface-muted p-4 md:p-6">
+      <div className="flex h-full min-h-0 flex-1 flex-col gap-4 overflow-y-auto bg-white p-4 md:p-6">
         <SocialListeningSubNav />
-        <div className="flex flex-1 flex-col items-center justify-center rounded-2xl border border-dashed border-black/10 bg-surface px-6 py-16 text-center">
+        <div className="flex flex-1 flex-col items-center justify-center rounded-2xl border border-dashed border-black/10 bg-white px-6 py-16 text-center">
           <Instagram className="mb-3 h-10 w-10 text-[#C13584]" />
           <h2 className="text-lg font-black text-gray-950">Connect Instagram</h2>
           <p className="mt-2 max-w-sm text-sm text-gray-500">
@@ -185,14 +185,14 @@ export const SocialListeningFeedView: React.FC = () => {
   }
 
   return (
-    <div className="relative flex h-full min-h-0 flex-1 flex-col gap-4 overflow-y-auto bg-surface-muted p-4 md:p-6">
+    <div className="relative flex h-full min-h-0 flex-1 flex-col gap-4 overflow-y-auto bg-white p-4 md:p-6">
       <SocialListeningSubNav
         trailing={
           <button
             type="button"
             disabled={!selectedIgId || loadingProfile || loadingMedia}
             onClick={() => loadFeed()}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-black/5 bg-surface px-3 py-1.5 text-xs font-bold text-gray-700 hover:bg-surface-muted disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-white ring-1 ring-slate-200/80 px-3 py-1.5 text-xs font-bold text-gray-700 hover:bg-surface-muted disabled:opacity-50"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${loadingProfile || loadingMedia ? 'animate-spin' : ''}`} />
             Refresh
@@ -215,7 +215,7 @@ export const SocialListeningFeedView: React.FC = () => {
                 className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-colors ${
                   active
                     ? 'bg-[#0F172A] text-white'
-                    : 'border border-black/5 bg-surface text-gray-600 hover:bg-surface-muted'
+                    : 'bg-white ring-1 ring-slate-200/80 text-gray-600 hover:bg-surface-muted'
                 }`}
               >
                 {label}
@@ -231,7 +231,7 @@ export const SocialListeningFeedView: React.FC = () => {
         </p>
       )}
 
-      <section className="rounded-2xl border border-black/5 bg-surface p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+      <section className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
         {loadingProfile && !profile ? (
           <div className="flex gap-4 animate-pulse">
             <div className="h-20 w-20 shrink-0 rounded-2xl bg-slate-100" />
@@ -270,7 +270,7 @@ export const SocialListeningFeedView: React.FC = () => {
       </section>
 
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="inline-flex rounded-xl bg-surface p-0.5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+        <div className="inline-flex rounded-xl bg-white p-0.5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
           {(
             [
               { id: 'all' as const, label: 'All' },
@@ -332,7 +332,7 @@ export const SocialListeningFeedView: React.FC = () => {
                       openPostComments(item.id);
                     }
                   }}
-                  className="group relative aspect-square cursor-pointer overflow-hidden rounded-xl border border-black/5 bg-surface text-left shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
+                  className="group relative aspect-square cursor-pointer overflow-hidden rounded-xl bg-white ring-1 ring-slate-200/80 text-left shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
                 >
                   {thumb ? (
                     <img
@@ -409,7 +409,7 @@ export const SocialListeningFeedView: React.FC = () => {
                 type="button"
                 disabled={loadingMore}
                 onClick={() => void loadMore()}
-                className="rounded-xl border border-black/5 bg-surface px-5 py-2 text-sm font-bold text-gray-700 hover:bg-surface-muted disabled:opacity-50"
+                className="rounded-xl bg-white ring-1 ring-slate-200/80 px-5 py-2 text-sm font-bold text-gray-700 hover:bg-surface-muted disabled:opacity-50"
               >
                 {loadingMore ? 'Loading…' : 'Load more'}
               </button>

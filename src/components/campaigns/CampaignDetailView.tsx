@@ -234,7 +234,7 @@ const RecipientsTable: React.FC<{
           {showActions && <col className="w-[10%]" />}
         </colgroup>
         <thead className="sticky top-0 z-10">
-          <tr className="border-b border-black/5 bg-surface/95 backdrop-blur-sm">
+          <tr className="border-b border-black/5 bg-white/95 backdrop-blur-sm">
             <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-gray-400">
               Contact
             </th>
@@ -441,7 +441,7 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
 
   if (loading) {
     return (
-      <div className="flex-1 h-[calc(100vh-64px)] flex items-center justify-center bg-surface-muted">
+      <div className="flex-1 h-[calc(100vh-64px)] flex items-center justify-center bg-white">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
@@ -449,7 +449,7 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
 
   if (error || !detail) {
     return (
-      <div className="flex-1 h-[calc(100vh-64px)] overflow-y-auto bg-surface-muted p-6">
+      <div className="flex-1 h-[calc(100vh-64px)] overflow-y-auto bg-white p-6">
         <button
           type="button"
           onClick={() => navigate(pathForTab('campaigns'))}
@@ -472,7 +472,7 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
 
   const mainContent = (
     <div className="p-6 w-full max-w-none space-y-5">
-      <div className="bg-surface border border-black/5 rounded-2xl p-5 space-y-3">
+      <div className="bg-white ring-1 ring-slate-200/80 rounded-2xl p-5 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0 flex flex-wrap items-center gap-2">
             <button
@@ -509,7 +509,7 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
                 onClick={() => canEditSchedule && openFullEdit()}
                 disabled={!canEditSchedule}
                 title={canEditSchedule ? 'Edit campaign' : SCHEDULED_CAMPAIGN_EDIT_BLOCKED_HINT}
-                className="cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-surface-muted border border-black/5 hover:bg-surface text-gray-700 rounded-xl text-xs font-bold disabled:cursor-not-allowed disabled:opacity-45 transition-colors duration-200"
+                className="cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-white border border-black/5 hover:bg-surface-muted text-gray-700 rounded-xl text-xs font-bold disabled:cursor-not-allowed disabled:opacity-45 transition-colors duration-200"
               >
                 <Pencil className="w-3.5 h-3.5" aria-hidden />
                 Edit
@@ -519,7 +519,7 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
               type="button"
               onClick={loadDetail}
               aria-label="Refresh"
-              className="cursor-pointer p-1.5 bg-surface-muted border border-black/5 hover:bg-surface text-gray-600 rounded-xl flex items-center transition-colors duration-200"
+              className="cursor-pointer p-1.5 bg-white border border-black/5 hover:bg-surface-muted text-gray-600 rounded-xl flex items-center transition-colors duration-200"
             >
               <RefreshCw className="w-3.5 h-3.5" aria-hidden />
             </button>
@@ -586,7 +586,7 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
         <CampaignDetailAnalytics channel={detail.channel} analytics={detail.analytics} />
       )}
 
-      <div className="bg-surface border border-black/5 rounded-2xl p-5">
+      <div className="bg-white ring-1 ring-slate-200/80 rounded-2xl p-5">
         <h3 className="text-sm font-black text-gray-900 uppercase tracking-wider mb-3">Details</h3>
         <dl className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-3">
           {detailRows.map(([label, value]) => (
@@ -599,7 +599,7 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
       </div>
 
       <section
-        className="flex min-h-[320px] flex-col overflow-hidden rounded-2xl border border-black/5 bg-surface"
+        className="flex min-h-[320px] flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200/80"
         aria-labelledby="campaign-recipients-heading"
       >
         <div className="flex shrink-0 items-baseline justify-between gap-3 border-b border-black/5 px-5 py-4">
@@ -635,7 +635,7 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
 
       {showFailedOnly && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="bg-surface rounded-2xl border border-black/10 shadow-xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden">
+          <div className="bg-white rounded-2xl border border-black/10 shadow-xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden">
             <div className="px-5 py-3 border-b border-black/5 flex items-center justify-between gap-3 shrink-0">
               <div>
                 <h3 className="text-sm font-black text-gray-900">
@@ -695,18 +695,18 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
 
   if (!showWhatsAppPreview) {
     return (
-      <div className="flex-1 h-[calc(100vh-64px)] overflow-y-auto bg-surface-muted selection:bg-primary/15">
+      <div className="flex-1 h-[calc(100vh-64px)] overflow-y-auto bg-white selection:bg-primary/15">
         <div className="max-w-7xl">{mainContent}</div>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 flex flex-col xl:flex-row h-[calc(100vh-64px)] overflow-hidden bg-surface-muted selection:bg-primary/15">
+    <div className="flex-1 flex flex-col xl:flex-row h-[calc(100vh-64px)] overflow-hidden bg-white selection:bg-primary/15">
       <section className="flex-1 flex flex-col min-w-0 min-h-0 overflow-y-auto border-r border-black/5">
         {mainContent}
       </section>
-      <aside className="w-full xl:w-[320px] shrink-0 p-5 flex flex-col bg-surface border-t xl:border-t-0 xl:border-l border-black/5 overflow-y-auto">
+      <aside className="w-full xl:w-[320px] shrink-0 p-5 flex flex-col bg-white border-t xl:border-t-0 xl:border-l border-black/5 overflow-y-auto">
         <p className="text-sm font-black text-gray-400 uppercase tracking-widest mb-4">
           Message sent
         </p>

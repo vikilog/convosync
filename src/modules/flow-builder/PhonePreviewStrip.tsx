@@ -86,7 +86,7 @@ export function PhonePreviewStrip({
         )}
 
         {overflow > 0 ? (
-          <div className="mb-2 flex h-[140px] w-[56px] shrink-0 flex-col items-center justify-center rounded-[12px] border border-dashed border-border-strong bg-surface/80 px-1 text-center">
+          <div className="mb-2 flex h-[140px] w-[56px] shrink-0 flex-col items-center justify-center rounded-[12px] border border-dashed border-border-strong bg-white/80 px-1 text-center">
             <span className="text-[12px] font-bold text-slate-600">+{overflow}</span>
             <span className="text-[9px] font-medium leading-tight text-slate-400">
               more step{overflow === 1 ? '' : 's'}
@@ -162,7 +162,7 @@ function PhoneMock({
     channel === 'whatsapp'
       ? 'border-primary ring-2 ring-primary/25'
       : 'border-[#833AB4] ring-2 ring-[#833AB4]/25';
-  const shellClass = `flex h-[140px] w-[78px] shrink-0 flex-col overflow-hidden rounded-[12px] border-[0.5px] bg-surface shadow-[0_1px_3px_rgba(0,0,0,0.08)] transition-colors ${
+  const shellClass = `flex h-[140px] w-[78px] shrink-0 flex-col overflow-hidden rounded-[12px] border-[0.5px] bg-white shadow-[0_1px_3px_rgba(0,0,0,0.08)] transition-colors ${
     selected ? selectedRing : 'border-border-subtle'
   }`;
 

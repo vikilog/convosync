@@ -9,7 +9,7 @@ type Props = {
 
 export const PromptTemplatesModal: React.FC<Props> = ({ onClose, onSelect }) => (
   <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-    <div className="bg-surface rounded-2xl w-full max-w-lg border border-black/5 shadow-2xl max-h-[80vh] flex flex-col">
+    <div className="bg-white rounded-2xl w-full max-w-lg border border-black/5 shadow-2xl max-h-[80vh] flex flex-col">
       <div className="flex justify-between items-center px-6 py-4 border-b border-black/5">
         <h3 className="text-base font-bold text-[#111827]">Prompt templates</h3>
         <button type="button" onClick={onClose} className="text-[#6B7280] hover:text-[#111827]">

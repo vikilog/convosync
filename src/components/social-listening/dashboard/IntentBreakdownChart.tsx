@@ -33,7 +33,7 @@ export function IntentBreakdownChart({
   const total = data.reduce((s, d) => s + d.value, 0);
 
   return (
-    <div className="flex h-full min-h-[260px] flex-col rounded-xl border border-black/5 bg-surface p-5">
+    <div className="flex h-full min-h-[260px] flex-col rounded-xl bg-white ring-1 ring-slate-200/80 p-5">
       <div className="mb-3">
         <h2 className="text-sm font-bold text-neutral-900">Intent breakdown</h2>
         <p className="text-xs text-neutral-500">Comment distribution by AI intent</p>

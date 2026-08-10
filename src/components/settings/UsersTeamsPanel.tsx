@@ -236,7 +236,7 @@ export function UsersTeamsPanel() {
         </p>
       )}
 
-      <div className="bg-surface rounded-2xl border border-black/5 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-black/5 shadow-sm overflow-hidden">
         <div className="p-5 border-b border-black/5 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h3 className="text-sm font-black text-gray-950">Team members</h3>
@@ -286,7 +286,7 @@ export function UsersTeamsPanel() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="bg-surface-muted text-gray-500 font-bold border-b border-black/5">
+                <tr className="bg-white text-gray-500 font-bold border-b border-black/5">
                   <th className="px-5 py-3">User</th>
                   <th className="px-5 py-3">Role</th>
                   <th className="px-5 py-3">Access</th>
@@ -336,7 +336,7 @@ export function UsersTeamsPanel() {
                             onChange={(e) =>
                               void handleRoleChange(m, e.target.value as 'admin' | 'agent')
                             }
-                            className="text-sm font-bold border border-black/5 rounded-lg px-2 py-1.5 bg-surface capitalize focus:outline-none focus:ring-2 focus:ring-primary/20"
+                            className="text-sm font-bold border border-black/5 rounded-lg px-2 py-1.5 bg-white capitalize focus:outline-none focus:ring-2 focus:ring-primary/20"
                           >
                             <option value="admin">Admin</option>
                             <option value="agent">Agent</option>
@@ -470,7 +470,7 @@ export function UsersTeamsPanel() {
           />
           <form
             onSubmit={(e) => void handleInvite(e)}
-            className="relative w-full max-w-lg bg-surface rounded-2xl border border-black/5 shadow-xl p-6 space-y-4 max-h-[90vh] overflow-y-auto"
+            className="relative w-full max-w-lg bg-white rounded-2xl border border-black/5 shadow-xl p-6 space-y-4 max-h-[90vh] overflow-y-auto"
           >
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -540,7 +540,7 @@ export function UsersTeamsPanel() {
                     role: e.target.value as 'admin' | 'agent',
                   }))
                 }
-                className="w-full px-3 py-2 text-xs border border-black/5 rounded-xl bg-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
+                className="w-full px-3 py-2 text-xs border border-black/5 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"
               >
                 <option value="agent">Agent — custom permissions</option>
                 <option value="admin">Admin — full access</option>
@@ -591,7 +591,7 @@ export function UsersTeamsPanel() {
             onClick={() => !saving && setEditingMember(null)}
             aria-hidden
           />
-          <div className="relative w-full max-w-lg bg-surface rounded-2xl border border-black/5 shadow-xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+          <div className="relative w-full max-w-lg bg-white rounded-2xl border border-black/5 shadow-xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h3 className="text-base font-black text-gray-950">Edit permissions</h3>

@@ -28,7 +28,7 @@ export const BottomStatusBar: React.FC<BottomStatusBarProps> = ({
   onAddContact,
   onImportCSV,
 }) => (
-  <div className="flex flex-col gap-3 rounded-xl border border-black/5 bg-surface px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+  <div className="flex flex-col gap-3 rounded-xl bg-white px-4 py-3 ring-1 ring-slate-200/80 sm:flex-row sm:items-center sm:justify-between">
     <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
       <Link
         to={pathForTab('integrations')}

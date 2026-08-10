@@ -352,7 +352,7 @@ export function JourneyFlowCanvas({
 
   return (
     <JourneyCanvasContext.Provider value={canvasActions}>
-      <div className="journey-canvas-shell relative h-full w-full overflow-hidden rounded-xl border-[0.5px] border-border-subtle bg-surface">
+      <div className="journey-canvas-shell relative h-full w-full overflow-hidden rounded-xl border-[0.5px] border-border-subtle bg-white">
         <ReactFlow
           nodes={nodes}
           edges={edges}

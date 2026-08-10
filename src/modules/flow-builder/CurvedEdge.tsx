@@ -39,7 +39,7 @@ export function CurvedEdge({
       {label ? (
         <EdgeLabelRenderer>
           <div
-            className="nodrag nopan pointer-events-none absolute rounded bg-surface px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-slate-500"
+            className="nodrag nopan pointer-events-none absolute rounded bg-white px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-slate-500"
             style={{
               transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
             }}

@@ -52,7 +52,7 @@ export const SocialListeningDashboardView: React.FC = () => {
   };
 
   return (
-    <div className="relative flex h-full min-h-0 flex-1 flex-col gap-4 overflow-y-auto bg-surface-muted p-4 md:p-6">
+    <div className="relative flex h-full min-h-0 flex-1 flex-col gap-4 overflow-y-auto bg-white p-4 md:p-6">
       <SocialListeningSubNav
         trailing={
           <div className="inline-flex rounded-xl bg-surface-muted p-0.5">
@@ -75,7 +75,7 @@ export const SocialListeningDashboardView: React.FC = () => {
       />
 
       {hasAccounts === false && (
-        <div className="rounded-2xl border border-black/5 bg-surface p-8 text-center shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+        <div className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-8 text-center shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#fce8f0] text-[#C13584]">
             <Instagram className="h-6 w-6" />
           </div>
@@ -97,7 +97,7 @@ export const SocialListeningDashboardView: React.FC = () => {
       {hasAccounts !== false && (
         <>
           {emptyWorkspace && (
-            <div className="rounded-xl border border-dashed border-black/10 bg-surface px-4 py-3 text-sm text-gray-600">
+            <div className="rounded-xl border border-dashed border-black/10 bg-white px-4 py-3 text-sm text-gray-600">
               No comment data yet — open{' '}
               <Link to="/social-listening/content" className="font-bold text-primary hover:underline">
                 Content

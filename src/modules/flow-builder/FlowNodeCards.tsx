@@ -4,7 +4,7 @@ import { Plus, Zap, type LucideIcon } from 'lucide-react';
 import type { FlowChannelTheme } from './channelTheme';
 
 const CARD =
-  'w-[220px] overflow-hidden rounded-2xl border-[0.5px] border-border-subtle bg-surface shadow-[0_1px_3px_rgba(0,0,0,0.06)]';
+  'w-[220px] overflow-hidden rounded-2xl border-[0.5px] border-border-subtle bg-white shadow-[0_1px_3px_rgba(0,0,0,0.06)]';
 
 export type FlowTriggerEntry = {
   name: string;

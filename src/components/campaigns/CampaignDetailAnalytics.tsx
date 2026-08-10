@@ -303,7 +303,7 @@ export const CampaignDetailAnalytics: React.FC<Props> = ({ channel, analytics })
 
   return (
     <motion.section
-      className="rounded-2xl border border-black/5 bg-surface"
+      className="rounded-2xl bg-white ring-1 ring-slate-200/80"
       initial={reduceMotion ? false : { opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: reduceMotion ? 0 : 0.35, ease: 'easeOut' }}

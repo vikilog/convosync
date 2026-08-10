@@ -235,7 +235,7 @@ export function LeadDetailDrawer({
                 </div>
               </div>
 
-              <div className="flex gap-1 rounded-xl border border-black/5 bg-surface-muted p-1">
+              <div className="flex gap-1 rounded-xl bg-white p-1">
                 {tabs.map((t) => {
                   const Icon = t.icon;
                   const active = tab === t.id;
@@ -308,7 +308,7 @@ export function LeadDetailDrawer({
                     lead.activity.map((a) => (
                       <li
                         key={a.id}
-                        className="rounded-xl border border-black/5 bg-surface px-3 py-2"
+                        className="rounded-xl bg-white ring-1 ring-slate-200/80 px-3 py-2"
                       >
                         <div className="flex items-center gap-2 text-[11px] text-gray-400">
                           <MessageSquare className="h-3 w-3" />

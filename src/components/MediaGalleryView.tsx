@@ -388,7 +388,7 @@ export const MediaGalleryView: React.FC = () => {
       : `${filtered.length} of ${items.length}`;
 
   return (
-    <div className="flex h-full min-h-0 flex-1 flex-col overflow-y-auto bg-surface-muted selection:bg-primary/15">
+    <div className="flex h-full min-h-0 flex-1 flex-col overflow-y-auto bg-white selection:bg-primary/15">
       <div className="mx-auto w-full max-w-7xl px-4 py-5 sm:px-6 sm:py-6 md:px-8">
         <AnimatePresence>
           {toast && (
@@ -727,7 +727,7 @@ export const MediaGalleryView: React.FC = () => {
             aria-modal="true"
             aria-labelledby="media-upload-title"
           >
-            <div className="flex max-h-[92vh] w-full flex-col rounded-t-2xl border border-black/5 bg-surface shadow-2xl sm:max-w-lg sm:rounded-2xl">
+            <div className="flex max-h-[92vh] w-full flex-col rounded-t-2xl bg-white ring-1 ring-slate-200/80 shadow-2xl sm:max-w-lg sm:rounded-2xl">
               <div className="flex shrink-0 items-center justify-between gap-3 border-b border-black/5 px-5 py-4 sm:px-6">
                 <div>
                   <h2 id="media-upload-title" className="text-base font-bold text-slate-900">
@@ -877,7 +877,7 @@ export const MediaGalleryView: React.FC = () => {
                       id={scopeId}
                       value={scope}
                       onChange={(e) => setScope(e.target.value as MediaScope)}
-                      className="mt-1.5 w-full min-h-11 cursor-pointer rounded-xl border border-black/10 bg-surface px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                      className="mt-1.5 w-full min-h-11 cursor-pointer rounded-xl bg-white ring-1 ring-slate-200/80 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
                     >
                       <option value="customer">Customer</option>
                       <option value="partner">Partner</option>

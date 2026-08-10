@@ -272,7 +272,7 @@ export const PayView: React.FC = () => {
         {kpiStats.map((stat) => (
           <div
             key={stat.label}
-            className="bg-surface p-5 rounded-2xl border border-black/5 hover:border-primary/10 transition-colors"
+            className="bg-white p-5 rounded-2xl border border-black/5 hover:border-primary/10 transition-colors"
           >
             <div className={`${stat.color} w-8 h-8 rounded-xl flex items-center justify-center mb-2`}>
               <stat.icon className="w-4 h-4" />
@@ -288,7 +288,7 @@ export const PayView: React.FC = () => {
 
       <section className="space-y-4">
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-1 bg-surface border border-black/5 rounded-xl p-1">
+          <div className="flex items-center gap-1 bg-white ring-1 ring-slate-200/80 rounded-xl p-1">
             {(['ALL', 'draft', 'sent', 'paid'] as const).map((s) => (
               <button
                 key={s}
@@ -312,11 +312,11 @@ export const PayView: React.FC = () => {
           </button>
         </div>
 
-        <div className="bg-surface border border-black/5 rounded-2xl overflow-hidden">
+        <div className="bg-white ring-1 ring-slate-200/80 rounded-2xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-surface-muted text-left text-xs font-bold uppercase tracking-wide text-gray-500">
+                <tr className="bg-white text-left text-xs font-bold uppercase tracking-wide text-gray-500">
                   <th className="px-4 py-3">Contact</th>
                   <th className="px-4 py-3">Amount</th>
                   <th className="px-4 py-3">Description</th>

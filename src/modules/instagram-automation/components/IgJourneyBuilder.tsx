@@ -302,7 +302,7 @@ export function IgJourneyBuilder({ journey, onBack }: Props) {
             className={`min-h-0 ${selectedNode ? 'col-span-8 lg:col-span-9' : 'col-span-12'}`}
           >
             {isLoading && !graph ? (
-              <div className="flex h-full min-h-0 items-center justify-center rounded-xl border-[0.5px] border-border-subtle bg-surface text-sm text-slate-500">
+              <div className="flex h-full min-h-0 items-center justify-center rounded-xl border-[0.5px] border-border-subtle bg-white text-sm text-slate-500">
                 <Loader2 className="mr-2 h-5 w-5 animate-spin text-[#833AB4]" />
                 Loading workflow…
               </div>

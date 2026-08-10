@@ -132,7 +132,7 @@ function CommentsSkeleton({ rows = 4 }: { rows?: number }) {
       {Array.from({ length: rows }, (_, i) => (
         <div
           key={i}
-          className="animate-pulse rounded-xl border border-black/5 bg-surface p-3"
+          className="animate-pulse rounded-xl bg-white ring-1 ring-slate-200/80 p-3"
         >
           <div className="flex items-start gap-2.5">
             <div className="h-8 w-8 shrink-0 rounded-full bg-slate-100" />
@@ -222,7 +222,7 @@ function CommentRow({
         className={
           hideIdentity
             ? 'border-t border-black/5 pt-3 first:border-t-0 first:pt-0'
-            : 'rounded-xl border border-black/5 bg-surface p-3'
+            : 'rounded-xl bg-white ring-1 ring-slate-200/80 p-3'
         }
       >
         <div className="flex items-start gap-2.5">
@@ -373,7 +373,7 @@ function CommentRow({
             )}
 
             {(comment.publicReplyText || comment.dmReplyText || comment.dmStatus === 'failed') && (
-              <div className="mt-3 space-y-2 rounded-lg border border-black/5 bg-surface-muted/80 p-2.5">
+              <div className="mt-3 space-y-2 rounded-lg bg-surface-muted/80 p-2.5">
                 {comment.publicReplyText && (
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400">
@@ -495,7 +495,7 @@ function CommentClub({
   onAddLead: (comment: ListeningComment) => void;
 }) {
   return (
-    <div className="rounded-xl border border-black/5 bg-surface p-3">
+    <div className="rounded-xl bg-white ring-1 ring-slate-200/80 p-3">
       <div className="space-y-3">
         {club.comments.map((comment, index) => (
           <CommentRow
@@ -795,7 +795,7 @@ export const SocialListeningMediaDetailView: React.FC = () => {
   const commentClubs = useMemo(() => clubCommentsByUser(comments), [comments]);
 
   return (
-    <div className="flex h-full min-h-0 flex-1 flex-col gap-3 overflow-hidden bg-surface-muted p-3 md:p-4">
+    <div className="flex h-full min-h-0 flex-1 flex-col gap-3 overflow-hidden bg-white p-3 md:p-4">
       <div className="flex shrink-0 flex-wrap items-center justify-between gap-2">
         <button
           type="button"
@@ -816,7 +816,7 @@ export const SocialListeningMediaDetailView: React.FC = () => {
               href={media.permalink}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1 rounded-xl border border-black/5 bg-surface px-3 py-1.5 text-xs font-bold text-gray-700 hover:bg-surface-muted"
+              className="inline-flex items-center gap-1 rounded-xl bg-white ring-1 ring-slate-200/80 px-3 py-1.5 text-xs font-bold text-gray-700 hover:bg-surface-muted"
             >
               Open on Instagram
               <ExternalLink className="h-3 w-3" />
@@ -826,7 +826,7 @@ export const SocialListeningMediaDetailView: React.FC = () => {
             type="button"
             disabled={loading}
             onClick={() => void load()}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-black/5 bg-surface px-3 py-1.5 text-xs font-bold text-gray-700 hover:bg-surface-muted disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-white ring-1 ring-slate-200/80 px-3 py-1.5 text-xs font-bold text-gray-700 hover:bg-surface-muted disabled:opacity-50"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
             Refresh
@@ -842,8 +842,8 @@ export const SocialListeningMediaDetailView: React.FC = () => {
 
       {loading && !media ? (
         <div className="grid min-h-0 flex-1 gap-3 lg:grid-cols-2">
-          <div className="animate-pulse rounded-2xl border border-black/5 bg-surface" />
-          <section className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-black/5 bg-surface p-3.5">
+          <div className="animate-pulse rounded-2xl bg-white ring-1 ring-slate-200/80" />
+          <section className="flex min-h-0 flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200/80 p-3.5">
             <div className="mb-2 h-4 w-24 animate-pulse rounded bg-slate-100" />
             <CommentsSkeleton />
           </section>
@@ -852,7 +852,7 @@ export const SocialListeningMediaDetailView: React.FC = () => {
         <div className="grid min-h-0 flex-1 gap-3 lg:grid-cols-2">
           {/* Post + agent settings */}
           <div className="flex min-h-0 flex-col gap-3 overflow-hidden">
-          <section className="flex shrink-0 flex-col overflow-hidden rounded-2xl border border-black/5 bg-surface shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+          <section className="flex shrink-0 flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
             <div className="relative flex h-44 shrink-0 items-center justify-center bg-[#0b1220] sm:h-52">
               {preview ? (
                 media.mediaType === 'VIDEO' || media.isReel ? (
@@ -913,7 +913,7 @@ export const SocialListeningMediaDetailView: React.FC = () => {
           </div>
 
           {/* Comments card — scrolls inside */}
-          <section className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-black/5 bg-surface p-3.5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+          <section className="flex min-h-0 flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200/80 p-3.5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
             <div className="mb-2 flex shrink-0 items-center justify-between gap-2">
               <h2 className="text-sm font-black text-gray-950">Comments</h2>
               <span className="text-[11px] font-bold text-gray-400">
@@ -1017,7 +1017,7 @@ export const SocialListeningMediaDetailView: React.FC = () => {
                   type="button"
                   disabled={loadingMore}
                   onClick={() => void loadMoreComments()}
-                  className="rounded-xl border border-black/5 bg-surface-muted px-4 py-2 text-xs font-bold text-gray-700 hover:bg-slate-100 disabled:opacity-50"
+                  className="rounded-xl bg-white px-4 py-2 text-xs font-bold text-gray-700 hover:bg-slate-100 disabled:opacity-50"
                 >
                   {loadingMore ? 'Loading…' : 'Load more comments'}
                 </button>

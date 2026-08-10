@@ -16,7 +16,7 @@ import {
 } from '../../lib/walletUsageRates';
 
 const CARD_CLASS =
-  'rounded-xl border border-black/5 bg-surface p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)] h-full flex flex-col';
+  'rounded-xl bg-white ring-1 ring-slate-200/80 p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)] h-full flex flex-col';
 
 type WalletUsageCalculatorProps = {
   balanceCc?: number;

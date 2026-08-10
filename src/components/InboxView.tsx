@@ -5,6 +5,7 @@
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import {
   Sparkles,
   FileText,
@@ -17,6 +18,8 @@ import {
   Loader2,
   ArrowLeft,
   PanelRightOpen,
+  Search,
+  PauseCircle,
 } from 'lucide-react';
 import { Contact, ChatMessage, type ChatMessageType } from '../types';
 import { api, formatCatchError, getUserName, SendFailedError } from '../lib/api';
@@ -43,17 +46,24 @@ import {
   dispatchInboxUnreadTotal,
   INBOX_OPEN_CONVERSATION_EVENT,
 } from '../lib/inboxEvents';
+import {
+  formatMessagingWindowRemaining,
+  messagingWindowFromLastInbound,
+} from '../lib/messagingWindow';
 import { useKeepAliveActivation, useKeepAliveActive } from './KeepAlive';
 import { ConnectChannelEmpty } from './ConnectChannelEmpty';
 import { InboxAssigneePicker } from './inbox/InboxAssigneePicker';
 import { InboxNewChatPicker } from './inbox/InboxNewChatPicker';
 import { InboxTemplatePicker } from './inbox/InboxTemplatePicker';
 import { InboxCannedResponsePicker, type CannedSelection } from './inbox/InboxCannedResponsePicker';
-import { InboxMessageList } from './inbox/InboxMessageList';
+import {
+  InboxMessageList,
+  type AutomationWaitingBanner,
+} from './inbox/InboxMessageList';
 import { InboxContactSidebar } from './inbox/InboxContactSidebar';
 import { ContactHistoricalAuditsModal } from './inbox/ContactHistoricalAuditsModal';
 import { useContactJourneyProgress } from '../hooks/useContactJourneyProgress';
-import { useIsLargeUp, useIsXLargeUp } from '../hooks/useBreakpoint';
+import { useIsLargeUp } from '../hooks/useBreakpoint';
 import {
   AddContactDrawer,
   type ContactEditPayload,
@@ -400,7 +410,7 @@ export const InboxView: React.FC = () => {
   const navigate = useNavigate();
   const { inboxScope } = useWorkspaceAccess();
   const isLargeUp = useIsLargeUp();
-  const isXLargeUp = useIsXLargeUp();
+  const reduceMotion = useReducedMotion();
   const {
     currentUserId,
     currentUserName,
@@ -418,6 +428,7 @@ export const InboxView: React.FC = () => {
   } = useInboxAssigneeMeta();
   const [mobilePane, setMobilePane] = useState<'list' | 'chat'>('list');
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [listSearch, setListSearch] = useState('');
   const [inboxThreads, setInboxThreads] = useState<InboxThread[]>([]);
   const [selectedConversationId, setSelectedConversationId] = useState<string>('');
   const [chatHistories, setChatHistories] = useState<Record<string, ChatMessage[]>>({});
@@ -517,17 +528,23 @@ export const InboxView: React.FC = () => {
       inboxScope
     );
 
+    const q = listSearch.trim().toLowerCase();
+    const matchesSearch =
+      !q ||
+      thread.name.toLowerCase().includes(q) ||
+      (thread.handle || '').toLowerCase().includes(q) ||
+      (thread.phone || '').toLowerCase().includes(q) ||
+      (thread.lastMessage || '').toLowerCase().includes(q);
+
+    if (!matchesChannel || !matchesScope || !matchesSearch) return false;
+
     if (filterTab === 'mine') {
-      return (
-        matchesChannel &&
-        matchesScope &&
-        assignedToByConversationId[thread.conversationId] === `user:${currentUserId}`
-      );
+      return assignedToByConversationId[thread.conversationId] === `user:${currentUserId}`;
     }
     if (filterTab === 'unassigned') {
-      return matchesChannel && matchesScope && !assignedToByConversationId[thread.conversationId];
+      return !assignedToByConversationId[thread.conversationId];
     }
-    return matchesChannel && matchesScope;
+    return true;
   });
 
   const selectedThread =
@@ -566,6 +583,37 @@ export const InboxView: React.FC = () => {
         ? selectedChannel
         : null
     );
+
+  const automationWaitingBanner = useMemo((): AutomationWaitingBanner | null => {
+    if (!journeyProgress || journeyProgress.status !== 'waiting') return null;
+    const current = journeyProgress.steps.find((s) => s.state === 'current');
+    const kind: AutomationWaitingBanner['kind'] =
+      current?.type === 'ASK_QUESTION' ||
+      (current?.detail || '').toLowerCase().includes('reply')
+        ? 'reply'
+        : current?.type === 'WAIT'
+          ? 'delay'
+          : 'other';
+    return {
+      automationLabel: automationMenuLabel,
+      journeyName: journeyProgress.journeyName,
+      kind,
+    };
+  }, [journeyProgress, automationMenuLabel]);
+
+  const lastInboundAt = useMemo(() => {
+    for (let i = activeHistory.length - 1; i >= 0; i -= 1) {
+      if (activeHistory[i].sender === 'contact' && activeHistory[i].createdAt) {
+        return activeHistory[i].createdAt;
+      }
+    }
+    return null;
+  }, [activeHistory]);
+
+  const messagingWindow = useMemo(
+    () => messagingWindowFromLastInbound(lastInboundAt),
+    [lastInboundAt]
+  );
 
   useEffect(() => {
     if (loading) return;
@@ -1629,7 +1677,7 @@ export const InboxView: React.FC = () => {
 
   if (showConnectChannelEmpty) {
     return (
-      <div className="flex flex-row h-full min-h-0 overflow-hidden bg-surface-muted border-t border-black/5 selection:bg-sky-50">
+      <div className="flex flex-row h-full min-h-0 overflow-hidden bg-surface-muted border-t border-black/5 selection:bg-primary/15">
         <ConnectChannelEmpty
           onConnect={() => navigate(pathForIntegrationsChannel('whatsapp'))}
         />
@@ -1637,18 +1685,46 @@ export const InboxView: React.FC = () => {
     );
   }
 
+  const profileSidebarProps = selectedContact
+    ? {
+        contact: selectedContact,
+        conversationId: selectedConversationId,
+        contactHandle: contactDisplayHandle(selectedContact),
+        journeyProgress,
+        journeyInitialLoading,
+        publishedJourneys: channelAutomations,
+        automationLabel: automationMenuLabel,
+        assignedJourneyId:
+          decodeAssigneeValue(activeAssigneeValue).assigneeType === 'journey'
+            ? decodeAssigneeValue(activeAssigneeValue).assigneeId
+            : null,
+        onAssignJourney: (journeyId: string) => {
+          const nextValue = `journey:${journeyId}`;
+          setActiveAssigneeValue(nextValue);
+          void persistConversation({
+            assigneeType: 'journey',
+            assigneeId: journeyId,
+          });
+        },
+        onEditContact: () => void openEditContact(),
+        onDeleteChat: () => void handleDeleteConversation(),
+        onViewAudits: () => setAuditsOpen(true),
+        onClose: () => setDetailsOpen(false),
+      }
+    : null;
+
   return (
-    <div className="flex flex-row h-full min-h-0 overflow-hidden bg-surface-muted border-t border-black/5 selection:bg-sky-50">
+    <div className="flex flex-row h-full min-h-0 overflow-hidden bg-surface-muted border-t border-black/5 selection:bg-primary/15">
       <section
         className={`${
-          isLargeUp ? 'w-[280px] xl:w-[300px]' : 'w-full'
-        } shrink-0 flex-col bg-surface border-r border-black/5 h-full text-left ${
+          isLargeUp ? 'w-[300px] xl:w-[320px]' : 'w-full'
+        } shrink-0 flex-col bg-white border-r border-black/5 h-full text-left ${
           !isLargeUp && mobilePane !== 'list' ? 'hidden' : 'flex'
         }`}
       >
-        <div className="p-3 border-b border-black/5 flex flex-col gap-2">
+        <div className="p-3 border-b border-black/5 flex flex-col gap-2.5">
           <div
-            className="flex min-w-0 gap-1 rounded-lg border border-black/5 bg-surface-muted p-1"
+            className="flex min-w-0 gap-1 rounded-xl bg-surface-muted p-1 ring-1 ring-slate-200/80"
             role="tablist"
             aria-label="Filter conversations"
           >
@@ -1659,9 +1735,9 @@ export const InboxView: React.FC = () => {
                 role="tab"
                 aria-selected={filterTab === tab.id}
                 onClick={() => setFilterTab(tab.id)}
-                className={`flex-1 rounded-md py-1.5 text-xs font-bold transition-colors ${
+                className={`flex-1 cursor-pointer rounded-lg py-1.5 text-xs font-bold transition-colors duration-200 ${
                   filterTab === tab.id
-                    ? 'bg-surface text-emerald-800 shadow-sm ring-1 ring-emerald-100'
+                    ? 'bg-white text-primary shadow-sm ring-1 ring-primary/15'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
@@ -1670,7 +1746,7 @@ export const InboxView: React.FC = () => {
             ))}
           </div>
           <div
-            className="flex min-w-0 gap-1 rounded-lg border border-black/5 bg-surface-muted p-1"
+            className="flex min-w-0 gap-1 rounded-xl bg-surface-muted p-1 ring-1 ring-slate-200/80"
             role="tablist"
             aria-label="Channel"
           >
@@ -1694,10 +1770,10 @@ export const InboxView: React.FC = () => {
                   aria-label={tab.label}
                   title={tab.label}
                   onClick={() => setChannelFilter(tab.id)}
-                  className={`flex flex-1 items-center justify-center rounded-md py-1.5 transition-colors ${
+                  className={`flex flex-1 cursor-pointer items-center justify-center rounded-lg py-1.5 transition-colors duration-200 ${
                     active
-                      ? 'bg-surface shadow-sm ring-1 ring-black/5'
-                      : 'hover:bg-surface/70'
+                      ? 'bg-white shadow-sm ring-1 ring-black/5'
+                      : 'hover:bg-white/70'
                   }`}
                 >
                   {tab.id === 'instagram' ? (
@@ -1714,7 +1790,7 @@ export const InboxView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setNewChatOpen(true)}
-                className="shrink-0 rounded-md bg-[#128C7E] p-1.5 text-white transition-colors hover:bg-[#0f7a6e]"
+                className="shrink-0 cursor-pointer rounded-lg bg-primary p-1.5 text-white transition-colors duration-200 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
                 title="New WhatsApp chat"
                 aria-label="New WhatsApp chat"
               >
@@ -1722,6 +1798,20 @@ export const InboxView: React.FC = () => {
               </button>
             ) : null}
           </div>
+          <label className="relative block">
+            <span className="sr-only">Search conversations</span>
+            <Search
+              className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400"
+              aria-hidden
+            />
+            <input
+              type="search"
+              value={listSearch}
+              onChange={(e) => setListSearch(e.target.value)}
+              placeholder="Search conversations…"
+              className="w-full min-h-10 cursor-text rounded-xl border border-black/5 bg-surface-muted py-2 pl-8 pr-3 text-sm font-medium text-gray-900 outline-none transition-colors duration-200 placeholder:text-slate-400 focus:border-primary/40 focus:ring-2 focus:ring-primary/15"
+            />
+          </label>
         </div>
 
         {channelFilter === 'instagram' &&
@@ -1756,7 +1846,7 @@ export const InboxView: React.FC = () => {
           </div>
         ) : null}
 
-        <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
+        <div className="flex-1 overflow-y-auto">
           {loading && inboxThreads.length === 0 ? (
             <div className="p-8 text-center text-slate-400 text-sm font-medium">
               {listEmptyMessage}
@@ -1764,7 +1854,7 @@ export const InboxView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => loadConversations()}
-                  className="block mx-auto mt-3 text-sky-600 hover:underline"
+                  className="mx-auto mt-3 block cursor-pointer text-primary hover:underline"
                 >
                   Retry
                 </button>
@@ -1772,13 +1862,17 @@ export const InboxView: React.FC = () => {
             </div>
           ) : filteredThreads.length === 0 ? (
             <div className="p-8 text-center text-slate-400 text-sm font-medium">
-              {listEmptyMessage}
+              {listSearch.trim()
+                ? 'No conversations match your search.'
+                : listEmptyMessage}
             </div>
           ) : (
             filteredThreads.map((thread) => {
               const isActive = thread.conversationId === selectedConversationId;
+              const unread = thread.unreadCount > 0 && !isActive;
               const waLine = whatsappLineLabel(thread, whatsappAccounts);
               const showWaLine = waLine && whatsappAccounts.length > 1;
+              const ch = contactChannel(thread);
               return (
                 <div
                   key={thread.conversationId}
@@ -1791,19 +1885,21 @@ export const InboxView: React.FC = () => {
                       selectThread(thread.conversationId);
                     }
                   }}
-                  className={`group px-3 py-2.5 cursor-pointer transition-all border-l-3 text-left relative ${
+                  className={`group relative cursor-pointer border-l-[3px] px-3 py-2.5 text-left transition-colors duration-200 ${
                     isActive
-                      ? 'bg-primary/10 border-l-primary'
-                      : 'border-transparent hover:bg-surface-muted'
+                      ? 'border-l-primary bg-primary/10'
+                      : unread
+                        ? 'border-l-transparent bg-emerald-50/40 hover:bg-primary/5'
+                        : 'border-l-transparent hover:bg-gray-50'
                   }`}
                 >
-                  <div className="flex items-start gap-2 min-w-0">
+                  <div className="flex items-start gap-2.5 min-w-0">
                     <div className="relative shrink-0">
                       {thread.avatar ? (
                         <img
                           src={thread.avatar}
                           alt={thread.name}
-                          className="w-9 h-9 rounded-full border border-gray-100 object-cover bg-surface-muted"
+                          className="h-10 w-10 rounded-full border border-black/5 object-cover bg-surface-muted"
                           referrerPolicy="no-referrer"
                           onError={(e) => {
                             e.currentTarget.style.display = 'none';
@@ -1813,7 +1909,7 @@ export const InboxView: React.FC = () => {
                         />
                       ) : null}
                       <div
-                        className={`w-9 h-9 rounded-full bg-sky-50 text-sky-600 font-black border border-border-subtle flex items-center justify-center text-xs ${
+                        className={`flex h-10 w-10 items-center justify-center rounded-full border border-black/5 bg-primary/10 text-xs font-black text-primary ${
                           thread.avatar ? 'hidden' : ''
                         }`}
                       >
@@ -1822,38 +1918,40 @@ export const InboxView: React.FC = () => {
                           .map((n) => n[0])
                           .join('')}
                       </div>
+                      <span
+                        className={`absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-white ring-2 ring-white ${
+                          ch === 'instagram'
+                            ? 'text-[#E1306C]'
+                            : ch === 'messenger'
+                              ? 'text-[#1877F2]'
+                              : 'text-[#25D366]'
+                        }`}
+                        aria-label={channelLabel(thread)}
+                      >
+                        {ch === 'instagram' ? (
+                          <InstagramIcon className="h-2.5 w-2.5" />
+                        ) : ch === 'messenger' ? (
+                          <MessengerIcon className="h-2.5 w-2.5" />
+                        ) : (
+                          <WhatsAppIcon className="h-2.5 w-2.5" />
+                        )}
+                      </span>
                     </div>
 
                     <div className="overflow-hidden min-w-0 flex-1 leading-tight">
                       <div className="flex items-center justify-between gap-1 min-w-0">
                         <div className="flex items-center gap-1 min-w-0 flex-1">
                           <h4
-                            className={`text-sm font-bold truncate ${
-                              isActive
-                                ? 'text-primary'
-                                : 'text-gray-900 group-hover:text-primary'
+                            className={`truncate text-sm ${
+                              unread
+                                ? 'font-extrabold text-gray-950'
+                                : isActive
+                                  ? 'font-bold text-primary'
+                                  : 'font-bold text-gray-900 group-hover:text-primary'
                             }`}
                           >
                             {thread.name}
                           </h4>
-                          <span
-                            className={`shrink-0 ${
-                              contactChannel(thread) === 'instagram'
-                                ? 'text-[#E1306C]'
-                                : contactChannel(thread) === 'messenger'
-                                  ? 'text-[#1877F2]'
-                                : 'text-[#25D366]'
-                            }`}
-                            aria-label={channelLabel(thread)}
-                          >
-                            {contactChannel(thread) === 'instagram' ? (
-                              <InstagramIcon className="w-3.5 h-3.5" />
-                            ) : contactChannel(thread) === 'messenger' ? (
-                              <MessengerIcon className="w-3.5 h-3.5" />
-                            ) : (
-                              <WhatsAppIcon className="w-3.5 h-3.5" />
-                            )}
-                          </span>
                           {(() => {
                             const assignee = assignedToByConversationId[thread.conversationId];
                             if (isAiAssigneeValue(assignee)) {
@@ -1877,7 +1975,7 @@ export const InboxView: React.FC = () => {
                               const initial = (human?.name || 'A').charAt(0).toUpperCase();
                               return (
                                 <span
-                                  className="shrink-0 inline-flex items-center justify-center w-4 h-4 rounded-full bg-sky-50 text-sky-700 text-[9px] font-black"
+                                  className="shrink-0 inline-flex items-center justify-center w-4 h-4 rounded-full bg-primary/10 text-primary text-[9px] font-black"
                                   title={human?.name || 'Human agent'}
                                   aria-label={human?.name || 'Human agent'}
                                 >
@@ -1888,22 +1986,30 @@ export const InboxView: React.FC = () => {
                             return null;
                           })()}
                         </div>
-                        <span className="text-meta text-gray-400 font-bold font-mono leading-none shrink-0">
+                        <span
+                          className={`shrink-0 font-mono text-meta font-bold leading-none ${
+                            unread ? 'text-primary' : 'text-gray-400'
+                          }`}
+                        >
                           {thread.lastActive}
                         </span>
                       </div>
                       {showWaLine && (
-                        <p className="text-meta font-bold text-[#128C7E] truncate mt-0.5">
+                        <p className="text-meta font-bold text-primary truncate mt-0.5">
                           {waLine}
                         </p>
                       )}
                       <div className="flex items-center justify-between gap-1 mt-0.5 min-w-0">
-                        <p className="text-xs text-gray-500 truncate font-medium flex-1">
+                        <p
+                          className={`truncate text-xs flex-1 ${
+                            unread ? 'font-semibold text-gray-700' : 'font-medium text-gray-500'
+                          }`}
+                        >
                           {thread.lastMessage === '[media]'
                             ? 'Media unavailable'
                             : thread.lastMessage}
                         </p>
-                        {thread.unreadCount > 0 && !isActive && (
+                        {unread && (
                           <span className="bg-channel-green text-white text-badge min-w-[18px] h-[18px] px-1 rounded-full font-black flex items-center justify-center leading-none shrink-0">
                             {thread.unreadCount > 99 ? '99+' : thread.unreadCount}
                           </span>
@@ -1919,7 +2025,7 @@ export const InboxView: React.FC = () => {
           instagramConnected &&
           instagramHasMore &&
           (filteredThreads.length > 0 || instagramThreadCount > 0) ? (
-            <div className="sticky bottom-0 border-t border-black/5 bg-surface px-3 py-2.5">
+            <div className="sticky bottom-0 border-t border-black/5 bg-white px-3 py-2.5">
               <button
                 type="button"
                 disabled={instagramSyncing}
@@ -1956,13 +2062,13 @@ export const InboxView: React.FC = () => {
           <EmptyChatPanel message="Select a conversation from the list, or wait for new chats to arrive." />
         ) : (
           <>
-            <div className="h-16 flex items-center justify-between gap-2 px-3 md:px-4 border-b border-black/5 bg-surface">
-              <div className="flex items-center min-w-0 text-left">
+            <div className="flex h-16 items-center justify-between gap-2 border-b border-black/5 bg-surface px-3 md:px-4">
+              <div className="flex min-w-0 items-center text-left">
                 {!isLargeUp && (
                   <button
                     type="button"
                     onClick={() => setMobilePane('list')}
-                    className="mr-2 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-gray-500 hover:bg-sky-50 hover:text-sky-600 transition-colors"
+                    className="mr-2 inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-xl text-gray-500 transition-colors duration-200 hover:bg-primary/10 hover:text-primary"
                     aria-label="Back to conversations"
                   >
                     <ArrowLeft className="h-4 w-4" />
@@ -1973,7 +2079,7 @@ export const InboxView: React.FC = () => {
                     <img
                       src={selectedContact.avatar}
                       alt={selectedContact.name}
-                      className="w-10 h-10 rounded-full object-cover bg-surface-muted"
+                      className="h-10 w-10 rounded-full object-cover bg-surface-muted ring-1 ring-black/5"
                       referrerPolicy="no-referrer"
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
@@ -1983,7 +2089,7 @@ export const InboxView: React.FC = () => {
                     />
                   ) : null}
                   <div
-                    className={`w-10 h-10 rounded-full bg-sky-50 text-sky-600 font-black flex items-center justify-center text-xs ${
+                    className={`flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-xs font-black text-primary ring-1 ring-primary/15 ${
                       selectedContact.avatar ? 'hidden' : ''
                     }`}
                   >
@@ -1992,12 +2098,19 @@ export const InboxView: React.FC = () => {
                       .map((n) => n[0])
                       .join('')}
                   </div>
-                  <span className="absolute bottom-0 right-0 w-3 h-3 bg-secondary-fixed border-2 border-white rounded-full translate-x-1 translate-y-1" />
                 </div>
                 <div className="ml-3 min-w-0">
-                  <h3 className="font-bold text-gray-950 text-sm leading-tight truncate flex items-center gap-1.5">
-                    {selectedContact.name}
-                  </h3>
+                  <div className="flex min-w-0 items-center gap-2">
+                    <h3 className="truncate text-sm font-bold leading-tight text-gray-950">
+                      {selectedContact.name}
+                    </h3>
+                    {journeyProgress?.status === 'waiting' && (
+                      <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[#f2994a]/30 bg-[#fff5e6] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#b45309]">
+                        <PauseCircle className="h-3 w-3" aria-hidden />
+                        Automation waiting
+                      </span>
+                    )}
+                  </div>
                   {selectedThread &&
                     (() => {
                       const line = inboxChannelLineLabel(
@@ -2008,7 +2121,7 @@ export const InboxView: React.FC = () => {
                       );
                       return line ? (
                         <p
-                          className={`text-sm font-bold mt-0.5 ${inboxChannelLineClass(selectedThread)}`}
+                          className={`mt-0.5 truncate text-xs font-bold ${inboxChannelLineClass(selectedThread)}`}
                         >
                           {line}
                         </p>
@@ -2017,23 +2130,12 @@ export const InboxView: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex items-center gap-1.5 md:gap-2 shrink-0">
-                {!isXLargeUp && (
-                  <button
-                    type="button"
-                    onClick={() => setDetailsOpen(true)}
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 hover:bg-sky-50 hover:text-sky-600 transition-colors"
-                    aria-label="Open contact details"
-                  >
-                    <PanelRightOpen className="h-4 w-4" />
-                  </button>
-                )}
-
+              <div className="flex shrink-0 items-center gap-1.5 md:gap-2">
                 {/* ponytail: inbox voice-call button parked for later release — restore Phone import + createCall handler */}
 
-                <div className="hidden lg:flex items-center bg-surface-muted px-2.5 py-1.5 rounded-xl border border-black/5">
-                  <span className="text-sm font-bold text-gray-500 mr-1 flex items-center gap-1">
-                    <User className="w-3.5 h-3.5 text-sky-600" /> Active :
+                <div className="hidden items-center rounded-xl bg-surface-muted px-2.5 py-1.5 ring-1 ring-slate-200/80 lg:flex">
+                  <span className="mr-1 flex items-center gap-1 text-sm font-bold text-gray-500">
+                    <User className="h-3.5 w-3.5 text-primary" /> Active :
                   </span>
                   <InboxAssigneePicker
                     value={activeAssigneeValue}
@@ -2054,15 +2156,15 @@ export const InboxView: React.FC = () => {
                 </div>
 
                 <div
-                  className={`flex items-center px-2.5 py-1.5 rounded-xl border ${
+                  className={`flex items-center rounded-xl px-2.5 py-1.5 ring-1 ${
                     chatStatus === 'Open'
-                      ? 'bg-[#e6f7ec]/60 border-[#5dfd8a]/40 text-accent-green'
+                      ? 'bg-[#e6f7ec]/60 text-accent-green ring-[#5dfd8a]/40'
                       : chatStatus === 'Pending'
-                        ? 'bg-[#fff5e6]/60 border-[#f2994a]/30 text-[#f2994a]'
-                        : 'bg-sky-50/60 border-sky-200 text-sky-600'
+                        ? 'bg-[#fff5e6]/60 text-[#f2994a] ring-[#f2994a]/30'
+                        : 'bg-slate-50/80 text-slate-600 ring-slate-200'
                   }`}
                 >
-                  <span className="w-2 h-2 rounded-full mr-2 bg-current animate-pulse" />
+                  <span className="mr-2 h-2 w-2 animate-pulse rounded-full bg-current" />
                   <select
                     value={chatStatus}
                     onChange={(e) => {
@@ -2070,26 +2172,38 @@ export const InboxView: React.FC = () => {
                       setChatStatus(s);
                       void persistConversation({ status: statusToApi(s) });
                     }}
-                    className="bg-transparent border-none text-sm font-extrabold focus:ring-0 outline-none p-0 cursor-pointer focus:outline-none"
+                    className="cursor-pointer border-none bg-transparent p-0 text-sm font-extrabold outline-none focus:outline-none focus:ring-0"
                   >
                     <option value="Open">Open</option>
                     <option value="Pending">Pending</option>
                     <option value="Resolved">Resolved</option>
                   </select>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={() => setDetailsOpen(true)}
+                  className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl text-gray-500 transition-colors duration-200 hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                  aria-label="Open contact profile"
+                  title="Contact & journey"
+                >
+                  <PanelRightOpen className="h-4 w-4" />
+                </button>
               </div>
             </div>
 
             <InboxMessageList
               messages={messageGroups}
               channel={contactChannel(selectedContact)}
+              conversationId={selectedConversationId}
               messageEndRef={messageEndRef}
               loading={showMessageSkeleton}
               resendingId={resendingMessageId}
               onResend={(id) => void handleResendMessage(id)}
+              automationWaiting={automationWaitingBanner}
             />
 
-            <div className="p-2.5 bg-surface border-t border-black/5 text-left">
+            <div className="border-t border-black/5 bg-surface p-2.5 text-left">
               {isAiAssigneeValue(activeAssigneeValue) ? (
                 <div className="mb-2 flex items-center justify-between gap-2 rounded-xl border border-violet-200 bg-violet-50/80 px-3 py-2">
                   <span className="inline-flex items-center gap-1.5 text-sm font-bold text-violet-700 min-w-0">
@@ -2132,21 +2246,38 @@ export const InboxView: React.FC = () => {
                 </div>
               ) : null}
 
-              {selectedContact && contactChannel(selectedContact) === 'instagram' && (
-                <p className="mb-2 text-sm font-bold text-[#C13584] bg-[#fce8f0] border border-[#E1306C]/15 rounded-lg px-3 py-2">
-                  Replying via Instagram DM
-                  {instagramInboxLabel ? ` from ${instagramInboxLabel}` : ''}. Meta allows replies within
-                  24 hours of the customer&apos;s last message.
-                </p>
-              )}
-
-              {selectedContact && contactChannel(selectedContact) === 'messenger' && (
-                <p className="mb-2 text-sm font-bold text-[#1877F2] bg-[#e8f4ff] border border-[#1877F2]/15 rounded-lg px-3 py-2">
-                  Replying via Messenger
-                  {messengerInboxLabel ? ` from ${messengerInboxLabel}` : ''}. Meta allows replies within
-                  24 hours of the customer&apos;s last message.
-                </p>
-              )}
+              {selectedContact &&
+                (contactChannel(selectedContact) === 'instagram' ||
+                  contactChannel(selectedContact) === 'messenger') &&
+                messagingWindow &&
+                (() => {
+                  const isIg = contactChannel(selectedContact) === 'instagram';
+                  const label = isIg ? 'Instagram DM' : 'Messenger';
+                  const fromLabel = isIg ? instagramInboxLabel : messengerInboxLabel;
+                  const remaining = formatMessagingWindowRemaining(messagingWindow.remainingMs);
+                  if (messagingWindow.open) {
+                    return (
+                      <p
+                        className={`mb-2 rounded-xl px-3 py-2 text-xs font-bold ring-1 ${
+                          isIg
+                            ? 'bg-[#fce8f0]/90 text-[#C13584] ring-[#E1306C]/15'
+                            : 'bg-[#e8f4ff]/90 text-[#1877F2] ring-[#1877F2]/15'
+                        }`}
+                      >
+                        {label}
+                        {fromLabel ? ` · ${fromLabel}` : ''} — free-form reply window:{' '}
+                        {remaining}
+                      </p>
+                    );
+                  }
+                  return (
+                    <p className="mb-2 rounded-xl bg-amber-50 px-3 py-2 text-xs font-bold text-amber-800 ring-1 ring-amber-200/80">
+                      {label} 24h reply window expired
+                      {fromLabel ? ` (${fromLabel})` : ''}. Customer must message again before
+                      free-form replies work.
+                    </p>
+                  );
+                })()}
 
               {sendError && (
                 <p className="mb-2 text-sm font-semibold text-danger-red bg-red-50 border border-red-100 rounded-lg px-3 py-2">
@@ -2191,10 +2322,10 @@ export const InboxView: React.FC = () => {
               />
 
               <div
-                className={`flex items-center min-h-[44px] gap-0.5 rounded-xl border bg-surface px-1 transition-all ${
+                className={`flex min-h-11 items-center gap-0.5 rounded-2xl bg-surface px-1.5 ring-1 transition-shadow duration-200 ${
                   sendingMedia
-                    ? 'border-sky-300 ring-2 ring-emerald-100'
-                    : 'border-black/5 focus-within:ring-2 focus-within:ring-sky-200 focus-within:border-sky-500'
+                    ? 'ring-2 ring-primary/25'
+                    : 'ring-slate-200/80 focus-within:ring-2 focus-within:ring-primary/20'
                 }`}
               >
                 <textarea
@@ -2217,31 +2348,31 @@ export const InboxView: React.FC = () => {
                   }
                   rows={1}
                   disabled={sendingMedia}
-                  className="flex-1 min-h-[36px] max-h-20 py-2.5 pl-2.5 pr-1 border-0 bg-transparent outline-none focus:outline-none text-sm font-medium leading-5 resize-none transition-all disabled:opacity-60"
+                  className="max-h-20 min-h-9 flex-1 resize-none border-0 bg-transparent py-2.5 pl-2.5 pr-1 text-sm font-medium leading-5 outline-none focus:outline-none disabled:opacity-60"
                 />
 
-                <div className="flex items-center gap-0.5 shrink-0 pr-1">
+                <div className="flex shrink-0 items-center gap-0.5 pr-0.5">
                   <div className="relative" ref={composerActionsRef}>
                     <button
                       type="button"
                       disabled={sendingMedia}
                       onClick={() => setComposerActionsOpen((open) => !open)}
-                      className={`inline-flex h-8 w-8 items-center justify-center rounded-lg transition-colors disabled:opacity-40 ${
+                      className={`inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl transition-colors duration-200 disabled:opacity-40 ${
                         composerActionsOpen
-                          ? 'bg-sky-50 text-sky-600'
-                          : 'text-gray-400 hover:text-sky-600 hover:bg-sky-50'
+                          ? 'bg-primary/10 text-primary'
+                          : 'text-gray-400 hover:bg-primary/10 hover:text-primary'
                       }`}
                       title="More options"
                       aria-label="More options"
                       aria-expanded={composerActionsOpen}
                     >
-                      <Plus className="w-4 h-4" />
+                      <Plus className="h-4 w-4" />
                     </button>
 
                     {composerActionsOpen && selectedContact && (
                       <div
                         role="menu"
-                        className="absolute bottom-full right-0 mb-2 w-[min(240px,calc(100vw-2rem))] rounded-xl border border-black/5 bg-surface py-1.5 shadow-lg shadow-black/10 z-50"
+                        className="absolute bottom-full right-0 z-50 mb-2 w-[min(240px,calc(100vw-2rem))] rounded-2xl bg-surface py-1.5 shadow-lg shadow-black/10 ring-1 ring-slate-200/80"
                       >
                         {(contactChannel(selectedContact) === 'whatsapp' ||
                           contactChannel(selectedContact) === 'instagram') && (
@@ -2253,9 +2384,9 @@ export const InboxView: React.FC = () => {
                               setComposerActionsOpen(false);
                               mediaInputRef.current?.click();
                             }}
-                            className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-gray-700 hover:bg-sky-50 hover:text-sky-600 transition-colors disabled:opacity-40"
+                            className="flex w-full cursor-pointer items-center gap-3 px-3 py-2.5 text-sm font-semibold text-gray-700 transition-colors duration-200 hover:bg-primary/5 hover:text-primary disabled:opacity-40"
                           >
-                            <Paperclip className="w-4 h-4 shrink-0" />
+                            <Paperclip className="h-4 w-4 shrink-0" />
                             Attach media
                           </button>
                         )}
@@ -2267,9 +2398,9 @@ export const InboxView: React.FC = () => {
                             setComposerActionsOpen(false);
                             void handleAiSuggest();
                           }}
-                          className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-gray-700 hover:bg-sky-50 hover:text-sky-600 transition-colors disabled:opacity-40"
+                          className="flex w-full cursor-pointer items-center gap-3 px-3 py-2.5 text-sm font-semibold text-gray-700 transition-colors duration-200 hover:bg-primary/5 hover:text-primary disabled:opacity-40"
                         >
-                          <Sparkles className="w-4 h-4 shrink-0 text-sky-600" />
+                          <Sparkles className="h-4 w-4 shrink-0 text-primary" />
                           AI suggest
                         </button>
                         <button
@@ -2281,9 +2412,9 @@ export const InboxView: React.FC = () => {
                             setSendError(null);
                             setShowCannedPicker(true);
                           }}
-                          className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-gray-700 hover:bg-sky-50 hover:text-sky-600 transition-colors disabled:opacity-40"
+                          className="flex w-full cursor-pointer items-center gap-3 px-3 py-2.5 text-sm font-semibold text-gray-700 transition-colors duration-200 hover:bg-primary/5 hover:text-primary disabled:opacity-40"
                         >
-                          <MessageSquareText className="w-4 h-4 shrink-0" />
+                          <MessageSquareText className="h-4 w-4 shrink-0" />
                           Canned responses
                         </button>
                         {contactChannel(selectedContact) !== 'instagram' &&
@@ -2296,14 +2427,14 @@ export const InboxView: React.FC = () => {
                                 setComposerActionsOpen(false);
                                 void handleTriggerTemplate();
                               }}
-                              className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-gray-700 hover:bg-sky-50 hover:text-sky-600 transition-colors disabled:opacity-40"
+                              className="flex w-full cursor-pointer items-center gap-3 px-3 py-2.5 text-sm font-semibold text-gray-700 transition-colors duration-200 hover:bg-primary/5 hover:text-primary disabled:opacity-40"
                             >
-                              <FileText className="w-4 h-4 shrink-0" />
+                              <FileText className="h-4 w-4 shrink-0" />
                               Templates
                             </button>
                           )}
-                        <div className="border-t border-black/5 mt-1 pt-2 px-3 pb-1">
-                          <p className="text-[11px] font-bold uppercase tracking-wide text-gray-400 mb-2">
+                        <div className="mt-1 border-t border-black/5 px-3 pb-1 pt-2">
+                          <p className="mb-2 text-[11px] font-bold uppercase tracking-wide text-gray-400">
                             Emoji
                           </p>
                           <div className="grid grid-cols-8 gap-0.5">
@@ -2316,7 +2447,7 @@ export const InboxView: React.FC = () => {
                                   setMessageInput((prev) => prev + emoji);
                                   setComposerActionsOpen(false);
                                 }}
-                                className="h-8 w-8 rounded-lg text-base hover:bg-sky-50 transition-colors disabled:opacity-40"
+                                className="h-8 w-8 cursor-pointer rounded-lg text-base transition-colors duration-200 hover:bg-primary/5 disabled:opacity-40"
                                 aria-label={`Insert ${emoji}`}
                               >
                                 {emoji}
@@ -2332,13 +2463,13 @@ export const InboxView: React.FC = () => {
                     type="button"
                     onClick={handleSendMessage}
                     disabled={(!messageInput.trim() && !pendingComposerFile) || sendingMedia}
-                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-channel-green hover:bg-[#20bd5a] disabled:opacity-40 text-white transition-all shadow-sm shadow-emerald-600/15 ml-0.5"
+                    className="ml-0.5 inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl bg-channel-green text-white shadow-sm shadow-emerald-600/15 transition-colors duration-200 hover:bg-[#20bd5a] disabled:cursor-not-allowed disabled:opacity-40"
                     aria-label={sendingMedia ? 'Sending' : 'Send message'}
                   >
                     {sendingMedia ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
-                      <Send className="w-4 h-4" />
+                      <Send className="h-4 w-4" />
                     )}
                   </button>
                 </div>
@@ -2348,78 +2479,35 @@ export const InboxView: React.FC = () => {
         )}
       </section>
 
-      {isXLargeUp && !selectedContact && (
-        <section className="hidden xl:flex h-full w-[380px] shrink-0 items-center justify-center border-l border-black/5 bg-surface-muted p-4">
-          <EmptyChatPanel message="Contact details appear when you select a chat." />
-        </section>
-      )}
-
-      {selectedContact && isXLargeUp && (
-        <InboxContactSidebar
-          contact={selectedContact}
-          conversationId={selectedConversationId}
-          contactHandle={contactDisplayHandle(selectedContact)}
-          journeyProgress={journeyProgress}
-          journeyInitialLoading={journeyInitialLoading}
-          publishedJourneys={channelAutomations}
-          automationLabel={automationMenuLabel}
-          assignedJourneyId={
-            decodeAssigneeValue(activeAssigneeValue).assigneeType === 'journey'
-              ? decodeAssigneeValue(activeAssigneeValue).assigneeId
-              : null
-          }
-          onAssignJourney={(journeyId) => {
-            const nextValue = `journey:${journeyId}`;
-            setActiveAssigneeValue(nextValue);
-            void persistConversation({
-              assigneeType: 'journey',
-              assigneeId: journeyId,
-            });
-          }}
-          onEditContact={() => void openEditContact()}
-          onDeleteChat={() => void handleDeleteConversation()}
-          onViewAudits={() => setAuditsOpen(true)}
-        />
-      )}
-
-      {selectedContact && !isXLargeUp && detailsOpen && (
-        <>
-          <button
-            type="button"
-            aria-label="Close contact details"
-            className="fixed inset-0 z-40 bg-black/35 xl:hidden"
-            onClick={() => setDetailsOpen(false)}
-          />
-          <div className="fixed inset-y-0 right-0 z-50 w-full max-w-[min(400px,92vw)] xl:hidden shadow-2xl">
-            <InboxContactSidebar
-              contact={selectedContact}
-              conversationId={selectedConversationId}
-              contactHandle={contactDisplayHandle(selectedContact)}
-              journeyProgress={journeyProgress}
-              journeyInitialLoading={journeyInitialLoading}
-              publishedJourneys={channelAutomations}
-              automationLabel={automationMenuLabel}
-              assignedJourneyId={
-                decodeAssigneeValue(activeAssigneeValue).assigneeType === 'journey'
-                  ? decodeAssigneeValue(activeAssigneeValue).assigneeId
-                  : null
-              }
-              onAssignJourney={(journeyId) => {
-                const nextValue = `journey:${journeyId}`;
-                setActiveAssigneeValue(nextValue);
-                void persistConversation({
-                  assigneeType: 'journey',
-                  assigneeId: journeyId,
-                });
-              }}
-              onEditContact={() => void openEditContact()}
-              onDeleteChat={() => void handleDeleteConversation()}
-              onViewAudits={() => setAuditsOpen(true)}
-              onClose={() => setDetailsOpen(false)}
+      <AnimatePresence>
+        {profileSidebarProps && detailsOpen && (
+          <>
+            <motion.button
+              type="button"
+              aria-label="Close contact details"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: reduceMotion ? 0 : 0.18 }}
+              className="fixed inset-0 z-40 cursor-pointer bg-gray-900/35"
+              onClick={() => setDetailsOpen(false)}
             />
-          </div>
-        </>
-      )}
+            <motion.div
+              initial={reduceMotion ? false : { x: '100%' }}
+              animate={{ x: 0 }}
+              exit={reduceMotion ? undefined : { x: '100%' }}
+              transition={
+                reduceMotion
+                  ? { duration: 0 }
+                  : { type: 'spring', damping: 28, stiffness: 320 }
+              }
+              className="fixed inset-y-0 right-0 z-50 w-full max-w-[min(400px,92vw)] overflow-hidden bg-surface shadow-2xl ring-1 ring-black/5"
+            >
+              <InboxContactSidebar {...profileSidebarProps} />
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
       <InboxTemplatePicker
         open={showTemplatePicker}
         contactName={selectedContact?.name ?? ''}

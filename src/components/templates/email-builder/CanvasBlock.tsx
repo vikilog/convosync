@@ -154,7 +154,7 @@ export function CanvasBlock({
         <button
           type="button"
           {...dragHandlers}
-          className="p-1 rounded-md bg-surface border border-black/5 text-gray-400 cursor-grab active:cursor-grabbing"
+          className="p-1 rounded-md bg-white ring-1 ring-slate-200/80 text-gray-400 cursor-grab active:cursor-grabbing"
           aria-label="Drag block"
         >
           <GripVertical className="w-3.5 h-3.5" />
@@ -167,7 +167,7 @@ export function CanvasBlock({
             e.stopPropagation();
             onDuplicate();
           }}
-          className="p-1 rounded-full bg-surface border border-black/5 text-gray-500 hover:text-primary"
+          className="p-1 rounded-full bg-white ring-1 ring-slate-200/80 text-gray-500 hover:text-primary"
           aria-label="Duplicate"
         >
           <Copy className="w-3 h-3" />
@@ -178,13 +178,13 @@ export function CanvasBlock({
             e.stopPropagation();
             onRemove();
           }}
-          className="p-1 rounded-full bg-surface border border-red-100 text-red-500"
+          className="p-1 rounded-full bg-white border border-red-100 text-red-500"
           aria-label="Delete"
         >
           <Trash2 className="w-3 h-3" />
         </button>
       </div>
-      <div className={fullHtmlDoc ? 'bg-surface' : 'px-6 py-4 bg-surface'}>{renderContent()}</div>
+      <div className={fullHtmlDoc ? 'bg-white' : 'px-6 py-4 bg-white'}>{renderContent()}</div>
     </div>
   );
 }

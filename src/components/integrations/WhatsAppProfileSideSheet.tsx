@@ -151,7 +151,7 @@ export function WhatsAppProfileSideSheet({ open, account, onClose, onSaved }: Pr
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-            className="fixed top-0 right-0 z-[79] flex h-full w-full max-w-lg flex-col border-l border-black/5 bg-surface shadow-2xl"
+            className="fixed top-0 right-0 z-[79] flex h-full w-full max-w-lg flex-col border-l border-black/5 bg-white shadow-2xl"
           >
             <header className="flex items-start justify-between gap-3 border-b border-black/5 px-5 py-4 shrink-0">
               <div className="flex gap-3 min-w-0">
@@ -183,7 +183,7 @@ export function WhatsAppProfileSideSheet({ open, account, onClose, onSaved }: Pr
                 </div>
               ) : (
                 <>
-                  <section className="rounded-2xl border border-black/5 bg-surface-muted/80 p-4">
+                  <section className="rounded-2xl bg-surface-muted/80 p-4">
                     <div className="flex items-center gap-3">
                       {pictureUrl ? (
                         <img
@@ -353,7 +353,7 @@ export function WhatsAppProfileSideSheet({ open, account, onClose, onSaved }: Pr
               )}
             </div>
 
-            <footer className="shrink-0 border-t border-black/5 px-5 py-4 flex items-center justify-end gap-2 bg-surface">
+            <footer className="shrink-0 border-t border-black/5 px-5 py-4 flex items-center justify-end gap-2 bg-white">
               <button
                 type="button"
                 onClick={onClose}

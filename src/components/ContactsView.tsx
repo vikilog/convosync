@@ -89,7 +89,7 @@ const CHANNEL_NAV: {
 
 /** Compact toolbar selects — never stretch. */
 const FILTER_SELECT_CLASS =
-  'shrink-0 rounded-lg border border-black/5 bg-surface px-2.5 py-2 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary';
+  'shrink-0 rounded-lg border border-black/5 bg-white px-2.5 py-2 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary';
 
 export const ContactsView: React.FC = () => {
   const location = useLocation();
@@ -380,7 +380,7 @@ const ContactsWorkspace: React.FC = () => {
 
   if (showConnectChannelEmpty) {
     return (
-      <div className="h-full min-h-0 border border-black/5 bg-surface-muted overflow-hidden flex">
+      <div className="h-full min-h-0 border border-black/5 bg-white overflow-hidden flex">
         <ConnectChannelEmpty
           onConnect={() => navigate(pathForIntegrationsChannel('whatsapp'))}
         />
@@ -389,17 +389,17 @@ const ContactsWorkspace: React.FC = () => {
   }
 
   return (
-    <div className="h-full min-h-0 border border-black/5 bg-surface-muted overflow-hidden">
+    <div className="h-full min-h-0 border border-black/5 bg-white overflow-hidden">
       <div className="h-full min-h-0">
         <section className="min-h-0 h-full flex flex-col">
-          <div className="border-b border-black/5 bg-surface-muted px-3 md:px-4 py-3 space-y-3">
-            <div className="inline-flex rounded-lg border border-black/5 bg-black/[0.04] p-0.5">
+          <div className="border-b border-black/5 bg-white px-3 md:px-4 py-3 space-y-3">
+            <div className="inline-flex rounded-lg bg-surface-muted p-0.5">
               <button
                 type="button"
                 onClick={() => navigate(pathForContactsDashboard())}
                 className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer ${
                   pageTab === 'dashboard'
-                    ? 'bg-surface text-primary shadow-sm'
+                    ? 'bg-white text-primary shadow-sm ring-1 ring-slate-200/80'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
@@ -410,7 +410,7 @@ const ContactsWorkspace: React.FC = () => {
                 onClick={() => navigate(pathForContactsList())}
                 className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer ${
                   pageTab === 'contacts'
-                    ? 'bg-surface text-primary shadow-sm'
+                    ? 'bg-white text-primary shadow-sm ring-1 ring-slate-200/80'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
@@ -428,7 +428,7 @@ const ContactsWorkspace: React.FC = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search name, phone, email..."
-                  className="w-full rounded-lg border border-black/5 bg-surface py-2 pl-9 pr-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  className="w-full rounded-lg border border-black/5 bg-white py-2 pl-9 pr-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 />
               </div>
 
@@ -501,7 +501,7 @@ const ContactsWorkspace: React.FC = () => {
                       className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 py-1.5 text-xs font-semibold border transition-colors cursor-pointer ${
                         active
                           ? 'bg-primary/15 text-primary border-primary/20'
-                          : 'bg-surface text-slate-600 border-black/5 hover:bg-surface-muted'
+                          : 'bg-white text-slate-600 border-black/5 hover:bg-surface-muted'
                       }`}
                     >
                       <span className={active ? 'text-primary' : 'text-slate-400'}>{item.icon}</span>
@@ -576,14 +576,14 @@ const ContactsWorkspace: React.FC = () => {
             </div>
           ) : (
             <>
-          <div className="flex-1 min-h-0 overflow-auto bg-surface">
+          <div className="flex-1 min-h-0 overflow-auto bg-white">
             {loading ? (
               <div className="flex items-center justify-center h-full text-sm text-slate-500">
                 Loading contacts...
               </div>
             ) : contacts.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center px-6 text-center">
-                <div className="w-16 h-16 rounded-xl border border-black/5 bg-surface-muted flex items-center justify-center mb-3">
+                <div className="w-16 h-16 rounded-xl bg-surface-muted flex items-center justify-center mb-3">
                   <Users className="w-7 h-7 text-slate-400" />
                 </div>
                 <p className="text-sm font-semibold text-slate-700">No contacts found</p>
@@ -593,7 +593,7 @@ const ContactsWorkspace: React.FC = () => {
               </div>
             ) : (
               <>
-                <div className="md:hidden flex items-center gap-2 px-3 py-2 border-b border-black/5 bg-surface-muted">
+                <div className="md:hidden flex items-center gap-2 px-3 py-2 border-b border-black/5 bg-white">
                   <input
                     type="checkbox"
                     checked={allVisibleSelected}
@@ -755,7 +755,7 @@ const ContactsWorkspace: React.FC = () => {
             )}
           </div>
 
-          <div className="shrink-0 flex items-center justify-between gap-3 border-t border-black/5 bg-surface px-3 md:px-4 py-2.5">
+          <div className="shrink-0 flex items-center justify-between gap-3 border-t border-black/5 bg-white px-3 md:px-4 py-2.5">
             <p className="text-xs font-semibold text-slate-500">{pageLabel}</p>
             <div className="flex items-center gap-2">
               <button

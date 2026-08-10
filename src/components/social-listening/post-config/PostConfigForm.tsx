@@ -31,7 +31,7 @@ export function PostConfigForm({
     onChange({ ...values, [key]: value });
 
   return (
-    <section className="rounded-2xl border border-black/5 bg-surface p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+    <section className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
       <h3 className="text-sm font-black text-gray-950">Manual configuration</h3>
       <p className="mt-0.5 text-xs text-gray-500">
         Funnel, agent skill, and reply tone for this post.
@@ -72,7 +72,7 @@ export function PostConfigForm({
 
         <div>
           <FieldLabel>Reply tone</FieldLabel>
-          <div className="mt-1.5 inline-flex w-full rounded-xl bg-surface-muted p-0.5">
+          <div className="mt-1.5 inline-flex w-full rounded-xl bg-white p-0.5">
             {TONE_OPTIONS.map((t) => {
               const active = values.tone === t.value;
               return (

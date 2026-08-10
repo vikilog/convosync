@@ -122,7 +122,7 @@ function ChannelChooserDialog({
               <button
                 type="button"
                 onClick={() => onPick('whatsapp')}
-                className="flex w-full cursor-pointer items-center gap-3 rounded-xl border border-black/5 bg-surface px-4 py-3 text-left transition-colors hover:border-channel-green/40 hover:bg-[#25d366]/08"
+                className="flex w-full cursor-pointer items-center gap-3 rounded-xl bg-white ring-1 ring-slate-200/80 px-4 py-3 text-left transition-colors hover:border-channel-green/40 hover:bg-[#25d366]/08"
               >
                 <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#25d366]/15 text-[#128C7E]">
                   <MessageCircle className="h-5 w-5" aria-hidden />
@@ -138,7 +138,7 @@ function ChannelChooserDialog({
                 <button
                   type="button"
                   onClick={() => onPick('instagram')}
-                  className="flex w-full cursor-pointer items-center gap-3 rounded-xl border border-black/5 bg-surface px-4 py-3 text-left transition-colors hover:border-[#833AB4]/40 hover:bg-[#833AB4]/08"
+                  className="flex w-full cursor-pointer items-center gap-3 rounded-xl bg-white ring-1 ring-slate-200/80 px-4 py-3 text-left transition-colors hover:border-[#833AB4]/40 hover:bg-[#833AB4]/08"
                 >
                   <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#F58529]/20 via-[#DD2A7B]/20 to-[#8134AF]/20 text-[#833AB4]">
                     <Instagram className="h-5 w-5" aria-hidden />
@@ -300,7 +300,7 @@ export function AutomationsView() {
             className={`cursor-pointer rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
               filter === tab.id
                 ? 'bg-primary text-white'
-                : 'bg-surface text-slate-600 hover:bg-surface-muted'
+                : 'bg-white text-slate-600 hover:bg-surface-muted'
             }`}
           >
             {tab.label}
@@ -314,7 +314,7 @@ export function AutomationsView() {
           Loading automations…
         </div>
       ) : visible.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-black/10 bg-surface p-8 text-center">
+        <div className="rounded-2xl border border-dashed border-black/10 bg-white p-8 text-center">
           <Workflow className="mx-auto mb-3 h-7 w-7 text-primary" aria-hidden />
           <p className="font-bold text-gray-900">No automations yet</p>
           <p className="mt-1 text-sm text-gray-500">
@@ -339,7 +339,7 @@ export function AutomationsView() {
             return (
               <article
                 key={`${row.channel}-${row.id}`}
-                className="group flex items-stretch overflow-hidden rounded-xl border border-black/5 bg-surface transition-shadow hover:shadow-sm"
+                className="group flex items-stretch overflow-hidden rounded-xl bg-white ring-1 ring-slate-200/80 transition-shadow hover:shadow-sm"
               >
                 <button
                   type="button"

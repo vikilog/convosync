@@ -226,7 +226,7 @@ export const ContactsDashboard: React.FC<{
   const customReady = growthRange !== 'custom' || (Boolean(customFrom) && Boolean(customTo));
 
   return (
-    <div className="h-full min-h-0 overflow-auto bg-surface-muted p-3 md:p-4 space-y-4">
+    <div className="h-full min-h-0 overflow-auto bg-white p-3 md:p-4 space-y-4">
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         <StatCard label="Total contacts" value={stats.all} icon={<Users className="h-4 w-4" />} />
         <StatCard
@@ -486,7 +486,7 @@ export const ContactsDashboard: React.FC<{
                         {t.count.toLocaleString()} · {pct}%
                       </span>
                     </div>
-                    <div className="h-1.5 overflow-hidden rounded-full bg-surface-muted">
+                    <div className="h-1.5 overflow-hidden rounded-full bg-white">
                       <div
                         className="h-full rounded-full bg-primary"
                         style={{ width: `${Math.max(pct, 2)}%` }}

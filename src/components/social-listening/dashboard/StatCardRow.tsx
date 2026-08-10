@@ -35,7 +35,7 @@ export function StatCardRow({
         {Array.from({ length: 5 }).map((_, i) => (
           <div
             key={i}
-            className="h-[88px] animate-pulse rounded-xl border border-black/5 bg-surface"
+            className="h-[88px] animate-pulse rounded-xl bg-white ring-1 ring-slate-200/80"
           />
         ))}
       </div>

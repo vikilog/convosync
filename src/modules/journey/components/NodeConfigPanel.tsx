@@ -155,7 +155,7 @@ export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButt
   if (!node) {
     return (
       <div className="flex h-full min-h-0 flex-col items-center justify-center rounded-xl border-[0.5px] border-border-subtle bg-white p-6 text-center">
-        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-surface-muted text-slate-400">
+        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-white text-slate-400">
           <MousePointerClick className="h-5 w-5" />
         </div>
         <h3 className="text-[14px] font-bold text-dark-navy">No step selected</h3>

@@ -47,7 +47,7 @@ function BlockPaletteItem({
         e.dataTransfer.setData(PALETTE_TYPE, type);
         e.dataTransfer.effectAllowed = 'copy';
       }}
-      className="flex items-start gap-3 p-3 rounded-xl border border-black/5 bg-surface hover:border-primary/40 hover:shadow-sm cursor-grab active:cursor-grabbing transition-all"
+      className="flex items-start gap-3 p-3 rounded-xl bg-white ring-1 ring-slate-200/80 hover:border-primary/40 hover:shadow-sm cursor-grab active:cursor-grabbing transition-all"
     >
       <span className="shrink-0 w-9 h-9 rounded-lg bg-primary/10 text-primary text-sm font-black flex items-center justify-center">
         {icon}
@@ -85,8 +85,8 @@ export function LeftSidebar() {
   };
 
   return (
-    <aside className="w-[300px] shrink-0 border-r border-black/5 bg-surface flex flex-col min-h-0">
-      <div className="grid grid-cols-5 border-b border-black/5 bg-surface">
+    <aside className="w-[300px] shrink-0 border-r border-black/5 bg-white flex flex-col min-h-0">
+      <div className="grid grid-cols-5 border-b border-black/5 bg-white">
         {TABS.map((tab) => (
           <button
             key={tab.id}
@@ -122,7 +122,7 @@ export function LeftSidebar() {
                 key={t.id}
                 type="button"
                 onClick={() => applyGallery(t.design, t.subject)}
-                className="w-full text-left p-3 rounded-xl border border-black/5 bg-surface hover:border-primary/40 hover:shadow-sm transition-all"
+                className="w-full text-left p-3 rounded-xl bg-white ring-1 ring-slate-200/80 hover:border-primary/40 hover:shadow-sm transition-all"
               >
                 <p className="text-sm font-semibold text-gray-900">{t.name}</p>
                 <p className="text-xs text-gray-500 mt-0.5">{t.description}</p>

@@ -34,7 +34,7 @@ export function PostConfigSideSheet({
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-            className="fixed top-0 right-0 z-50 flex h-full w-full max-w-[520px] flex-col bg-surface-muted p-3 shadow-2xl sm:p-4"
+            className="fixed top-0 right-0 z-50 flex h-full w-full max-w-[520px] flex-col bg-white p-3 shadow-2xl sm:p-4"
           >
             <div className="mb-2 flex shrink-0 justify-end">
               <button

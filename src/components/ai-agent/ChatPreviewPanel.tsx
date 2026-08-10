@@ -50,7 +50,7 @@ const BotAvatar: React.FC<BotAvatarProps> = ({ avatarUrl, size = 'sm', alt = 'Ag
       <img
         src={avatarUrl}
         alt={alt}
-        className={`${dim} rounded-full object-cover border border-black/5 shrink-0 bg-surface`}
+        className={`${dim} rounded-full object-cover border border-black/5 shrink-0 bg-white`}
       />
     );
   }
@@ -206,7 +206,7 @@ export const ChatPreviewPanel: React.FC<Props> = ({
   const isEmpty = messages.length === 0 && !loading && !error;
 
   return (
-    <aside className="w-full xl:w-[320px] shrink-0 border border-black/5 rounded-xl bg-surface flex flex-col h-[420px] sm:h-[520px] xl:sticky xl:top-6">
+    <aside className="w-full xl:w-[320px] shrink-0 border border-black/5 rounded-xl bg-white flex flex-col h-[420px] sm:h-[520px] xl:sticky xl:top-6">
       <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-black/5 shrink-0">
         <div className="min-w-0">
           <h4 className="text-sm font-bold text-[#111827]">Test conversation</h4>
@@ -251,7 +251,7 @@ export const ChatPreviewPanel: React.FC<Props> = ({
             <div key={idx} className="flex items-end gap-2">
               <BotAvatar avatarUrl={avatarUrl} size="sm" />
               <div className="max-w-[85%]">
-                <div className="rounded-2xl rounded-bl-md bg-surface border border-black/5 text-[#111827] px-3 py-2 text-sm">
+                <div className="rounded-2xl rounded-bl-md bg-white ring-1 ring-slate-200/80 text-[#111827] px-3 py-2 text-sm">
                   {msg.content}
                 </div>
                 {msg.billingMode !== 'byok' &&
@@ -270,7 +270,7 @@ export const ChatPreviewPanel: React.FC<Props> = ({
         {loading && (
           <div className="flex items-end gap-2">
             <BotAvatar avatarUrl={avatarUrl} size="sm" />
-            <div className="rounded-2xl rounded-bl-md bg-surface border border-black/5 px-4 py-3 flex items-center gap-1">
+            <div className="rounded-2xl rounded-bl-md bg-white ring-1 ring-slate-200/80 px-4 py-3 flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-[#6B7280] animate-bounce [animation-delay:0ms]" />
               <span className="w-1.5 h-1.5 rounded-full bg-[#6B7280] animate-bounce [animation-delay:150ms]" />
               <span className="w-1.5 h-1.5 rounded-full bg-[#6B7280] animate-bounce [animation-delay:300ms]" />
@@ -284,7 +284,7 @@ export const ChatPreviewPanel: React.FC<Props> = ({
       </div>
 
       {lastMeta ? (
-        <div className="px-3 py-1.5 border-t border-black/5 bg-surface-muted shrink-0">
+        <div className="px-3 py-1.5 border-t border-black/5 bg-white shrink-0">
           {lastMeta.billingMode === 'byok' ? (
             <p className="text-[10px] text-slate-500 leading-snug">
               You&apos;re using your own AI provider. Check usage and billing in your provider&apos;s
@@ -300,7 +300,7 @@ export const ChatPreviewPanel: React.FC<Props> = ({
       ) : null}
 
       <div className="p-3 border-t border-black/5 shrink-0">
-        <div className="flex items-center gap-2 bg-surface-muted border border-black/5 rounded-xl px-3 py-2">
+        <div className="flex items-center gap-2 bg-white border border-black/5 rounded-xl px-3 py-2">
           <input
             ref={inputRef}
             type="text"

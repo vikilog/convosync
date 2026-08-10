@@ -188,7 +188,7 @@ function WhatsAppPieTooltip({
   if (!active || !payload?.length) return null;
   const row = payload[0].payload;
   return (
-    <div className="rounded-lg border border-black/5 bg-surface px-3 py-2 text-xs shadow-lg">
+    <div className="rounded-lg bg-white ring-1 ring-slate-200/80 px-3 py-2 text-xs shadow-lg">
       <p className="font-semibold text-slate-900">{row.name}</p>
       <p className="mt-1 text-slate-600">{formatTokens(row.value)}</p>
       <p className="text-slate-500">{formatCount(row.count)} conversations</p>
@@ -206,7 +206,7 @@ function DailyTokensTooltip({
   if (!active || !payload?.length) return null;
   const row = payload[0].payload;
   return (
-    <div className="rounded-lg border border-black/5 bg-surface px-2.5 py-1.5 text-xs shadow-md">
+    <div className="rounded-lg bg-white ring-1 ring-slate-200/80 px-2.5 py-1.5 text-xs shadow-md">
       Day {row.day}: {formatCount(row.tokens)} tokens
     </div>
   );
@@ -236,7 +236,7 @@ function UsageCostSkeleton() {
         {Array.from({ length: 4 }).map((_, i) => (
           <div
             key={`usage-stat-${i}`}
-            className="rounded-xl border border-black/5 bg-surface p-4 space-y-3 animate-pulse"
+            className="rounded-xl bg-white ring-1 ring-slate-200/80 p-4 space-y-3 animate-pulse"
           >
             <div className="flex items-start gap-3">
               <div className="h-10 w-10 rounded-lg skel shrink-0" />
@@ -250,7 +250,7 @@ function UsageCostSkeleton() {
         ))}
       </div>
 
-      <div className="rounded-xl border border-black/5 bg-surface p-5 space-y-4 animate-pulse">
+      <div className="rounded-xl bg-white ring-1 ring-slate-200/80 p-5 space-y-4 animate-pulse">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-full skel" />
@@ -273,7 +273,7 @@ function UsageCostSkeleton() {
         </div>
       </div>
 
-      <div className="rounded-xl border border-black/5 bg-surface p-5 space-y-4 animate-pulse">
+      <div className="rounded-xl bg-white ring-1 ring-slate-200/80 p-5 space-y-4 animate-pulse">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-full skel" />
@@ -401,7 +401,7 @@ export const UsageCost: React.FC = () => {
               onChange={(e) => setSelectedMonth(e.target.value)}
               aria-label="Select billing month"
               disabled={loading}
-              className="cursor-pointer appearance-none rounded-lg border border-black/5 bg-surface py-2 pl-9 pr-9 text-sm font-medium text-slate-800 shadow-sm transition-colors hover:border-black/10 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10 disabled:opacity-60"
+              className="cursor-pointer appearance-none rounded-lg bg-white ring-1 ring-slate-200/80 py-2 pl-9 pr-9 text-sm font-medium text-slate-800 shadow-sm transition-colors hover:border-black/10 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10 disabled:opacity-60"
             >
               {monthOptions.map((m) => (
                 <option key={m.value} value={m.value}>
@@ -413,7 +413,7 @@ export const UsageCost: React.FC = () => {
           </div>
           <button
             type="button"
-            className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-black/5 bg-surface px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:border-black/10 hover:bg-surface-muted"
+            className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-white ring-1 ring-slate-200/80 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:border-black/10 hover:bg-surface-muted"
           >
             <Download className="h-4 w-4" />
             Export Report
@@ -470,7 +470,7 @@ export const UsageCost: React.FC = () => {
         />
       </div>
 
-      <section className="rounded-xl border border-black/5 bg-surface p-4 md:p-5">
+      <section className="rounded-xl bg-white ring-1 ring-slate-200/80 p-4 md:p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-start gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#25D366]/10 text-[#128C7E]">
@@ -603,7 +603,7 @@ export const UsageCost: React.FC = () => {
         </div>
       </section>
 
-      <section className="rounded-xl border border-black/5 bg-surface p-4 md:p-5">
+      <section className="rounded-xl bg-white ring-1 ring-slate-200/80 p-4 md:p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-start gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-600">
@@ -801,7 +801,7 @@ export const UsageCost: React.FC = () => {
         )}
       </section>
 
-      <section className="rounded-xl border border-black/5 bg-surface p-4 md:p-5">
+      <section className="rounded-xl bg-white ring-1 ring-slate-200/80 p-4 md:p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-start gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-violet-50 text-violet-600">

@@ -302,7 +302,7 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
   return (
     <div className="flex flex-col h-full min-h-0 bg-[#eef0f3] overflow-hidden">
       {/* Top bar */}
-      <div className="h-14 shrink-0 bg-surface border-b border-slate-200 px-5 grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+      <div className="h-14 shrink-0 bg-white border-b border-slate-200 px-5 grid grid-cols-[1fr_auto_1fr] items-center gap-4">
         <div className="flex items-center gap-2 min-w-0">
           <input
             type="text"

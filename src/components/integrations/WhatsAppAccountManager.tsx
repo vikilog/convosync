@@ -32,7 +32,7 @@ function AccountMetric({
   tone?: 'default' | 'success';
 }) {
   return (
-    <div className="rounded-xl border border-black/5 bg-surface-muted px-3 py-2.5 min-w-[7.5rem]">
+    <div className="rounded-xl bg-surface-muted px-3 py-2.5 min-w-[7.5rem]">
       <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">{label}</p>
       <p
         className={`mt-0.5 text-sm font-semibold truncate ${
@@ -55,7 +55,7 @@ export function WhatsAppAccountManager({
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
-      <header className="rounded-2xl border border-black/5 bg-surface p-5 sm:p-6">
+      <header className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-5 sm:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#25D366] text-white shadow-sm">
@@ -70,7 +70,7 @@ export function WhatsAppAccountManager({
             </div>
           </div>
           <div className="flex flex-wrap gap-2 sm:justify-end">
-            <div className="rounded-xl border border-black/5 bg-surface-muted px-3 py-2 text-center min-w-[5.5rem]">
+            <div className="rounded-xl bg-surface-muted px-3 py-2 text-center min-w-[5.5rem]">
               <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
                 Connected
               </p>
@@ -100,7 +100,7 @@ export function WhatsAppAccountManager({
             return (
               <article
                 key={account.id}
-                className="group rounded-2xl border border-black/5 bg-surface p-4 sm:p-5 transition-colors duration-200 hover:border-black/10 hover:bg-surface-muted/40"
+                className="group rounded-2xl bg-white ring-1 ring-slate-200/80 p-4 sm:p-5 transition-colors duration-200 hover:border-black/10 hover:bg-surface-muted/40"
               >
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div className="flex gap-4 min-w-0">
@@ -137,7 +137,7 @@ export function WhatsAppAccountManager({
                       <button
                         type="button"
                         onClick={() => onEditProfile(account)}
-                        className="inline-flex items-center gap-2 rounded-xl border border-black/5 bg-surface-muted px-3.5 py-2 text-sm font-semibold text-slate-800 transition-colors duration-200 hover:bg-primary/10 hover:text-primary hover:border-primary/20 cursor-pointer"
+                        className="inline-flex items-center gap-2 rounded-xl bg-surface-muted px-3.5 py-2 text-sm font-semibold text-slate-800 transition-colors duration-200 hover:bg-primary/10 hover:text-primary hover:border-primary/20 cursor-pointer"
                       >
                         <Settings2 className="h-4 w-4" aria-hidden />
                         Edit profile

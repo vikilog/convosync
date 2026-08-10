@@ -305,7 +305,7 @@ export const SideNavBar: React.FC = () => {
       <aside
         className={`${
           sidebarCollapsed && isLargeScreen ? 'w-[72px]' : 'w-[min(260px,85vw)] lg:w-[220px]'
-        } fixed left-0 top-0 z-50 flex h-screen shrink-0 flex-col overflow-x-hidden overflow-y-auto border-r border-black/5 bg-surface-muted transition-transform duration-200 ease-out selection:bg-primary/15 lg:static lg:z-0 lg:translate-x-0 lg:transition-[width] ${
+        } fixed left-0 top-0 z-50 flex h-screen shrink-0 flex-col overflow-x-hidden overflow-y-auto border-r border-black/5 bg-white transition-transform duration-200 ease-out selection:bg-primary/15 lg:static lg:z-0 lg:translate-x-0 lg:transition-[width] ${
           isLargeScreen || mobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -430,7 +430,7 @@ export const SideNavBar: React.FC = () => {
                               />
                               {!sidebarCollapsed && <span className="truncate">{item.label}</span>}
                               {item.pulse ? (
-                                <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full border-2 border-surface-muted bg-red-500 animate-pulse" />
+                                <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full border-2 border-white bg-red-500 animate-pulse" />
                               ) : null}
                               {sidebarCollapsed && item.badge ? (
                                 <span className="absolute -right-1 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-channel-green px-1 text-[10px] font-bold text-white">

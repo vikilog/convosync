@@ -215,7 +215,7 @@ export function PlanCustomizer({ pricingRules, initialQuote, onSaved }: PlanCust
   }
 
   return (
-    <section className="rounded-2xl border border-black/5 bg-surface p-6 shadow-sm">
+    <section className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-6 shadow-sm">
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-sm font-bold uppercase tracking-widest text-sky-600">

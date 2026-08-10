@@ -206,7 +206,7 @@ export const SkillEditor: React.FC<Props> = ({ agentId, skillId, avatarUrl }) =>
                 <MoreHorizontal className="w-5 h-5" />
               </button>
               {menuOpen && (
-                <div className="absolute right-0 mt-1 w-44 bg-surface border border-black/5 rounded-xl shadow-lg z-20 overflow-hidden">
+                <div className="absolute right-0 mt-1 w-44 bg-white ring-1 ring-slate-200/80 rounded-xl shadow-lg z-20 overflow-hidden">
                   {skill.status === 'live' && (
                     <button
                       type="button"
@@ -275,7 +275,7 @@ export const SkillEditor: React.FC<Props> = ({ agentId, skillId, avatarUrl }) =>
           />
 
           {showSlashMenu && filteredCommands.length > 0 && (
-            <div className="absolute left-0 mt-1 w-64 bg-surface border border-black/5 rounded-xl shadow-lg z-10 overflow-hidden">
+            <div className="absolute left-0 mt-1 w-64 bg-white ring-1 ring-slate-200/80 rounded-xl shadow-lg z-10 overflow-hidden">
               {filteredCommands.map((cmd) => (
                 <button
                   key={cmd.id}

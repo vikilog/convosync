@@ -60,11 +60,11 @@ export function BuilderCanvas({ onGenerateWithAi }: Props) {
 
   return (
     <div
-      className="flex-1 min-h-0 min-w-0 overflow-y-auto bg-surface flex flex-col"
+      className="flex-1 min-h-0 min-w-0 overflow-y-auto bg-white flex flex-col"
       onClick={() => selectBlock(null)}
     >
       <div
-        className="w-full flex-1 min-h-full bg-surface"
+        className="w-full flex-1 min-h-full bg-white"
         style={
           singleFullHtml
             ? undefined

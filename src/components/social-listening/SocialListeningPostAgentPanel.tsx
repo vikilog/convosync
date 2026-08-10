@@ -138,7 +138,7 @@ export function SocialListeningPostAgentPanel({
   };
 
   return (
-    <section className="relative flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border border-black/5 bg-surface shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+    <section className="relative flex h-full min-h-0 flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
       <div className="flex shrink-0 items-center justify-between gap-2 border-b border-black/5 px-3.5 py-3">
         <div className="min-w-0">
           <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-neutral-400">
@@ -170,7 +170,7 @@ export function SocialListeningPostAgentPanel({
           </div>
         ) : (
           <>
-            <div className="rounded-xl border border-black/5 bg-surface-muted/40 p-3">
+            <div className="rounded-xl bg-surface-muted/40 p-3">
               <div className="flex items-start gap-2">
                 <Route className="mt-0.5 h-4 w-4 shrink-0 text-sky-600" />
                 <div className="min-w-0 flex-1">
@@ -182,7 +182,7 @@ export function SocialListeningPostAgentPanel({
                   <label className="mt-2 block text-[11px] font-semibold uppercase tracking-wide text-neutral-400">
                     Automation
                     <select
-                      className="mt-1 w-full cursor-pointer rounded-lg border border-black/5 bg-surface px-2.5 py-2 text-sm font-semibold text-gray-800 outline-none focus:border-sky-200 focus:ring-2 focus:ring-sky-100"
+                      className="mt-1 w-full cursor-pointer rounded-lg bg-white ring-1 ring-slate-200/80 px-2.5 py-2 text-sm font-semibold text-gray-800 outline-none focus:border-sky-200 focus:ring-2 focus:ring-sky-100"
                       value={commentJourneyId}
                       onChange={(e) => setCommentJourneyId(e.target.value)}
                     >

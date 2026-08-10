@@ -201,16 +201,16 @@ export function ContactDetailView({ contactId }: { contactId: string }) {
 
   if (loading) {
     return (
-      <div className="h-full min-h-[calc(100vh-64px)] overflow-y-auto bg-surface-muted">
+      <div className="h-full min-h-[calc(100vh-64px)] overflow-y-auto bg-white">
         <div className="mx-auto max-w-5xl px-4 py-6 md:px-8 space-y-6 animate-pulse">
           <div className="h-4 w-24 rounded bg-black/5" />
-          <div className="h-36 rounded-2xl bg-surface border border-black/5" />
+          <div className="h-36 rounded-2xl bg-white ring-1 ring-slate-200/80" />
           <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="h-16 rounded-xl bg-surface border border-black/5" />
+              <div key={i} className="h-16 rounded-xl bg-white ring-1 ring-slate-200/80" />
             ))}
           </div>
-          <div className="h-48 rounded-2xl bg-surface border border-black/5" />
+          <div className="h-48 rounded-2xl bg-white ring-1 ring-slate-200/80" />
         </div>
       </div>
     );
@@ -218,7 +218,7 @@ export function ContactDetailView({ contactId }: { contactId: string }) {
 
   if (error || !overview) {
     return (
-      <div className="h-full min-h-[calc(100vh-64px)] overflow-y-auto bg-surface-muted p-6">
+      <div className="h-full min-h-[calc(100vh-64px)] overflow-y-auto bg-white p-6">
         <button
           type="button"
           onClick={() => navigate(pathForContactsList())}
@@ -275,7 +275,7 @@ export function ContactDetailView({ contactId }: { contactId: string }) {
       };
 
   return (
-    <div className="relative h-full min-h-0 overflow-y-auto bg-surface-muted">
+    <div className="relative h-full min-h-0 overflow-y-auto bg-white">
       <div
         className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-[radial-gradient(ellipse_at_top,_rgba(6,78,59,0.07),_transparent_65%)]"
         aria-hidden
@@ -296,7 +296,7 @@ export function ContactDetailView({ contactId }: { contactId: string }) {
         {/* Identity */}
         <motion.header
           {...fade}
-          className="rounded-2xl border border-black/5 bg-surface px-5 py-5 md:px-7 md:py-6"
+          className="rounded-2xl bg-white ring-1 ring-slate-200/80 px-5 py-5 md:px-7 md:py-6"
         >
           <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
             <div className="flex min-w-0 items-start gap-4">
@@ -401,7 +401,7 @@ export function ContactDetailView({ contactId }: { contactId: string }) {
               return (
                 <li
                   key={row.contactId}
-                  className={`rounded-2xl border border-black/5 bg-surface border-l-4 ${tone.accent} p-4 transition-colors duration-200`}
+                  className={`rounded-2xl bg-white ring-1 ring-slate-200/80 border-l-4 ${tone.accent} p-4 transition-colors duration-200`}
                 >
                   <div className="flex items-start gap-3">
                     <div
@@ -485,7 +485,7 @@ export function ContactDetailView({ contactId }: { contactId: string }) {
           <div className="min-w-0 space-y-6">
             <motion.section
               {...fade}
-              className="min-w-0 overflow-hidden rounded-2xl border border-black/5 bg-surface p-5"
+              className="min-w-0 overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200/80 p-5"
               aria-labelledby="campaigns-heading"
             >
               <h2 id="campaigns-heading" className="text-sm font-bold text-slate-800">
@@ -527,7 +527,7 @@ export function ContactDetailView({ contactId }: { contactId: string }) {
 
             <motion.section
               {...fade}
-              className="min-w-0 overflow-hidden rounded-2xl border border-black/5 bg-surface p-5"
+              className="min-w-0 overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200/80 p-5"
               aria-labelledby="ig-comments-heading"
             >
               <h2 id="ig-comments-heading" className="text-sm font-bold text-slate-800">
@@ -622,7 +622,7 @@ export function ContactDetailView({ contactId }: { contactId: string }) {
               }
             />
             {!journey ? (
-              <div className="rounded-2xl border border-dashed border-black/10 bg-surface/60 p-5">
+              <div className="rounded-2xl border border-dashed border-black/10 bg-surface-muted/50 p-5">
                 <p className="text-sm font-bold text-slate-700">Lead journey</p>
                 <p className="mt-1 text-xs leading-relaxed text-slate-500">
                   When this person is converted from Social Listening, the funnel timeline will

@@ -247,7 +247,7 @@ export const ImportContactsModal: React.FC<Props> = ({ open, onClose, onImported
                 <div className="flex-1 min-h-0 rounded-xl border border-black/5 overflow-hidden flex flex-col">
                   <div className="flex-1 min-h-0 overflow-auto">
                     <table className="w-full text-left text-xs">
-                      <thead className="bg-surface-muted sticky top-0 z-10">
+                      <thead className="bg-white sticky top-0 z-10">
                         <tr>
                           <th className="px-2 py-2 font-semibold w-10">#</th>
                           <th className="px-2 py-2 font-semibold">Name</th>

@@ -70,7 +70,7 @@ export const MessagePerformanceChart: React.FC<MessagePerformanceChartProps> = (
   const ranges: Array<7 | 14 | 30> = [7, 14, 30];
 
   return (
-    <div className="flex h-full flex-col rounded-xl border border-black/5 bg-surface p-5">
+    <div className="flex h-full flex-col rounded-xl bg-white p-5 ring-1 ring-slate-200/80">
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="font-display text-lg font-medium text-neutral-900">Message performance</h2>

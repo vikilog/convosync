@@ -36,7 +36,7 @@ export const StatCard: React.FC<StatCardProps> = ({
   footer,
   trend,
 }) => (
-  <div className="relative overflow-hidden rounded-xl border border-black/5 bg-surface transition-shadow duration-200 hover:shadow-sm">
+  <div className="relative overflow-hidden rounded-xl bg-white ring-1 ring-slate-200/80 transition-shadow duration-200 hover:shadow-sm">
     <div className={`absolute inset-x-0 top-0 h-0.5 ${ACCENT[variant]}`} />
 
     <div className="flex items-start gap-4 p-4">

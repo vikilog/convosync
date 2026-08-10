@@ -158,7 +158,7 @@ export const AgentListRow: React.FC<SharedProps> = ({ agent, onEdit, onDelete, d
 
 export const AgentGridCard: React.FC<SharedProps> = ({ agent, onEdit, onDelete, deleting }) => {
   return (
-    <div className="group relative flex flex-col rounded-xl border border-black/5 bg-surface p-4 hover:border-primary/20 hover:shadow-sm transition-all duration-200">
+    <div className="group relative flex flex-col rounded-xl bg-white ring-1 ring-slate-200/80 p-4 hover:border-primary/20 hover:shadow-sm transition-all duration-200">
       <div className="flex items-start justify-between gap-2">
         <button type="button" onClick={onEdit} className="flex items-start gap-3 min-w-0 flex-1 text-left cursor-pointer">
           <AgentAvatar agent={agent} size="lg" />

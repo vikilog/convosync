@@ -223,7 +223,7 @@ export const CannedResponsesPanel: React.FC<Props> = ({
   const previewName = mediaFile?.name || selectedItem?.mediaFileName || 'attachment';
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-black/5 bg-surface">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-xl bg-white ring-1 ring-slate-200/80">
       <div className="shrink-0 border-b border-black/5 px-5 py-4 sm:px-6">
         <h2 className="text-lg font-semibold text-dark-navy">Canned Response</h2>
         <p className="mt-1 text-sm text-neutral-500">
@@ -247,7 +247,7 @@ export const CannedResponsesPanel: React.FC<Props> = ({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by short code or content"
-            className="w-full rounded-xl border border-black/5 bg-surface-muted py-2 pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-primary/15"
+            className="w-full rounded-xl bg-surface-muted py-2 pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-primary/15"
           />
         </div>
       </div>
@@ -337,14 +337,14 @@ export const CannedResponsesPanel: React.FC<Props> = ({
                         setShortcut(e.target.value.replace(/\s/g, '').slice(0, SHORTCUT_MAX))
                       }
                       placeholder="Text that trigger canned responses"
-                      className="w-full rounded-xl border border-black/5 bg-surface-muted px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/15"
+                      className="w-full rounded-xl bg-surface-muted px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/15"
                     />
                   </div>
 
                   <div className="flex min-h-0 flex-1 flex-col">
                     <label className="mb-1.5 text-sm font-semibold text-dark-navy">Content</label>
                     <div className="flex min-h-[280px] flex-1 flex-col overflow-hidden rounded-xl border border-black/5">
-                      <div className="relative flex items-center gap-1 border-b border-black/5 bg-surface-muted px-2 py-1.5">
+                      <div className="relative flex items-center gap-1 border-b border-black/5 bg-white px-2 py-1.5">
                         <div ref={emojiRef} className="relative">
                           <button
                             type="button"
@@ -355,7 +355,7 @@ export const CannedResponsesPanel: React.FC<Props> = ({
                             <Smile className="h-4 w-4" />
                           </button>
                           {showEmoji && (
-                            <div className="absolute left-0 top-full z-10 mt-1 flex w-[200px] flex-wrap gap-1 rounded-xl border border-black/5 bg-surface p-2">
+                            <div className="absolute left-0 top-full z-10 mt-1 flex w-[200px] flex-wrap gap-1 rounded-xl bg-white ring-1 ring-slate-200/80 p-2">
                               {QUICK_EMOJIS.map((emoji) => (
                                 <button
                                   key={emoji}
@@ -389,7 +389,7 @@ export const CannedResponsesPanel: React.FC<Props> = ({
                         />
                       </div>
                       {hasMediaAttached && (
-                        <div className="flex items-center gap-3 border-b border-black/5 bg-surface-muted px-3 py-2">
+                        <div className="flex items-center gap-3 border-b border-black/5 bg-white px-3 py-2">
                           {previewMime.startsWith('image/') && existingMediaUrl ? (
                             <img
                               src={existingMediaUrl}
@@ -397,7 +397,7 @@ export const CannedResponsesPanel: React.FC<Props> = ({
                               className="h-14 w-14 rounded-lg border border-black/5 object-cover"
                             />
                           ) : (
-                            <div className="flex h-14 w-14 items-center justify-center rounded-lg border border-black/5 bg-surface">
+                            <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-white ring-1 ring-slate-200/80">
                               <FileText className="h-6 w-6 text-neutral-400" />
                             </div>
                           )}
@@ -426,7 +426,7 @@ export const CannedResponsesPanel: React.FC<Props> = ({
                         value={content}
                         onChange={(e) => setContent(e.target.value.slice(0, CONTENT_MAX))}
                         placeholder="Please enter a content"
-                        className="min-h-[180px] w-full flex-1 resize-none bg-surface p-3 text-sm outline-none"
+                        className="min-h-[180px] w-full flex-1 resize-none bg-white p-3 text-sm outline-none"
                       />
                       <div className="border-t border-black/5 px-3 py-1.5 text-right text-xs text-neutral-400">
                         {content.length}/{CONTENT_MAX}

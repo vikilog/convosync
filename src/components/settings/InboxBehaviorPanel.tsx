@@ -388,7 +388,7 @@ export function InboxBehaviorPanel() {
                 value={newGroupName}
                 onChange={(e) => setNewGroupName(e.target.value)}
                 placeholder="New group name"
-                className="flex-1 rounded-lg border-[0.5px] border-border-subtle bg-surface px-3 py-2 text-sm"
+                className="flex-1 rounded-lg border-[0.5px] border-border-subtle bg-white px-3 py-2 text-sm"
               />
               <button
                 type="button"
@@ -406,7 +406,7 @@ export function InboxBehaviorPanel() {
                 return (
                   <div
                     key={group.id}
-                    className="rounded-lg border-[0.5px] border-border-subtle bg-surface p-3"
+                    className="rounded-lg border-[0.5px] border-border-subtle bg-white p-3"
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span className="text-sm font-semibold text-dark-navy">{group.name}</span>
@@ -496,7 +496,7 @@ export function InboxBehaviorPanel() {
                 <div
                   key={rule.id}
                   className={`flex items-center justify-between gap-3 rounded-lg border-[0.5px] p-3 ${
-                    rule.enabled ? 'border-border-subtle bg-surface' : 'border-border-subtle bg-surface opacity-60'
+                    rule.enabled ? 'border-border-subtle bg-white' : 'border-border-subtle bg-white opacity-60'
                   }`}
                 >
                   <div className="flex items-center gap-2">
@@ -570,7 +570,7 @@ export function InboxBehaviorPanel() {
             onClick={() => !savingRule && setShowRuleForm(false)}
             aria-hidden
           />
-          <div className="relative w-full max-w-lg space-y-4 rounded-2xl border border-black/5 bg-surface p-6 shadow-xl max-h-[90vh] overflow-y-auto">
+          <div className="relative w-full max-w-lg space-y-4 rounded-2xl bg-white ring-1 ring-slate-200/80 p-6 shadow-xl max-h-[90vh] overflow-y-auto">
             <h3 className="text-base font-black text-gray-950">
               {editingRuleId ? 'Edit rule' : 'New rule'}
             </h3>
@@ -704,7 +704,7 @@ export function InboxBehaviorPanel() {
                 <select
                   value={ruleForm.actionGroupId}
                   onChange={(e) => setRuleForm((prev) => ({ ...prev, actionGroupId: e.target.value }))}
-                  className="w-full rounded-xl border border-black/5 bg-surface px-3 py-2 text-sm"
+                  className="w-full rounded-xl bg-white ring-1 ring-slate-200/80 px-3 py-2 text-sm"
                 >
                   <option value="">Select a group…</option>
                   {groups.map((g) => (
@@ -717,7 +717,7 @@ export function InboxBehaviorPanel() {
                 <select
                   value={ruleForm.actionUserId}
                   onChange={(e) => setRuleForm((prev) => ({ ...prev, actionUserId: e.target.value }))}
-                  className="w-full rounded-xl border border-black/5 bg-surface px-3 py-2 text-sm"
+                  className="w-full rounded-xl bg-white ring-1 ring-slate-200/80 px-3 py-2 text-sm"
                 >
                   <option value="">Select a member…</option>
                   {members.map((m) => (

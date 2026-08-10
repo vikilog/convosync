@@ -650,7 +650,7 @@ const CampaignListPanel: React.FC<{
   ];
 
   return (
-    <div className="flex h-full min-h-0 flex-1 flex-col overflow-y-auto bg-surface-muted selection:bg-primary/15">
+    <div className="flex h-full min-h-0 flex-1 flex-col overflow-y-auto bg-white selection:bg-primary/15">
       <div className="w-full max-w-none space-y-4 px-3 py-4 sm:px-4 sm:py-5">
         {/* Header — title left, tools right */}
         <div className="relative overflow-hidden rounded-xl bg-white ring-1 ring-slate-200/80">
@@ -687,7 +687,7 @@ const CampaignListPanel: React.FC<{
                 type="button"
                 onClick={onRefresh}
                 disabled={loading}
-                className="inline-flex min-h-10 cursor-pointer items-center gap-1.5 rounded-xl border border-black/5 bg-surface px-3 py-2 text-meta font-bold text-gray-800 transition-colors duration-200 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex min-h-10 cursor-pointer items-center gap-1.5 rounded-xl bg-white ring-1 ring-slate-200/80 px-3 py-2 text-meta font-bold text-gray-800 transition-colors duration-200 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden /> : null}
                 Refresh
@@ -706,7 +706,7 @@ const CampaignListPanel: React.FC<{
         {/* Summary metrics — derived from loaded list */}
         {!loading && (
           <div
-            className="grid grid-cols-2 overflow-hidden rounded-2xl bg-surface ring-1 ring-slate-200/80 sm:grid-cols-4 sm:divide-x sm:divide-y-0 divide-y divide-black/[0.04]"
+            className="grid grid-cols-2 overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200/80 sm:grid-cols-4 sm:divide-x sm:divide-y-0 divide-y divide-black/[0.04]"
             aria-label="Campaign summary"
           >
             {statCells.map((cell) => (
@@ -763,7 +763,7 @@ const CampaignListPanel: React.FC<{
             )}
           </div>
         ) : (
-          <div className="overflow-hidden rounded-2xl bg-surface ring-1 ring-slate-200/80">
+          <div className="overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200/80">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[780px] text-left">
                 <thead>
@@ -1845,8 +1845,8 @@ const CampaignsWorkspace: React.FC = () => {
   const isEditingScheduled = Boolean(editingCampaignId);
 
   return (
-    <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden bg-surface-muted selection:bg-primary/15">
-      <div className="shrink-0 border-b border-black/5 bg-surface px-4 py-3 md:px-6">
+    <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden bg-white selection:bg-primary/15">
+      <div className="shrink-0 border-b border-black/5 bg-white px-4 py-3 md:px-6">
         <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3">
           <button
             type="button"
@@ -1912,7 +1912,7 @@ const CampaignsWorkspace: React.FC = () => {
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden xl:flex-row">
-      <section className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden border-black/5 bg-surface xl:border-r">
+      <section className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden border-black/5 bg-white xl:border-r">
         <div
           className={`min-h-0 flex-1 px-4 py-5 text-left md:px-8 md:py-6 ${
             formPrimaryLayout ? 'w-full' : 'max-w-2xl'
@@ -1923,7 +1923,7 @@ const CampaignsWorkspace: React.FC = () => {
           }`}
         >
           {campaignLaunched ? (
-            <div className="bg-surface border border-black/5 p-8 rounded-2xl shadow-xl flex flex-col items-center text-center space-y-4">
+            <div className="bg-white ring-1 ring-slate-200/80 p-8 rounded-2xl shadow-xl flex flex-col items-center text-center space-y-4">
               <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center border-4 border-primary/15">
                 <CheckCheck className="w-8 h-8" />
               </div>
@@ -2017,7 +2017,7 @@ const CampaignsWorkspace: React.FC = () => {
                           className={`relative flex min-h-[168px] flex-col rounded-2xl border-2 p-4 text-left transition-all ${
                             selected
                               ? 'shadow-md'
-                              : 'border-black/5 bg-surface hover:border-black/10 hover:shadow-sm'
+                              : 'border-black/5 bg-white hover:border-black/10 hover:shadow-sm'
                           } ${isEditingScheduled && !selected ? 'cursor-not-allowed opacity-45' : ''}`}
                           style={
                             selected
@@ -2840,12 +2840,12 @@ const CampaignsWorkspace: React.FC = () => {
         </div>
 
         {!campaignLaunched && (
-          <div className="flex shrink-0 items-center justify-between border-t border-black/5 bg-surface px-4 py-3 md:px-8">
+          <div className="flex shrink-0 items-center justify-between border-t border-black/5 bg-white px-4 py-3 md:px-8">
             <button
               type="button"
               onClick={() => setCurrentStep((p) => Math.max(0, p - 1))}
               disabled={currentStep === 0}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-black/5 bg-surface px-4 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-surface-muted disabled:opacity-40"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-white ring-1 ring-slate-200/80 px-4 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-surface-muted disabled:opacity-40"
             >
               <ArrowLeft className="h-4 w-4" /> Back
             </button>

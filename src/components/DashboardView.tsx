@@ -120,18 +120,18 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   if (loading) {
     return (
       <div
-        className="w-full space-y-5 pb-10"
+        className="w-full min-h-full space-y-5 bg-white pb-10"
         aria-busy="true"
         aria-label="Loading dashboard"
       >
         <div className="h-10 w-48 rounded-lg skel animate-pulse" />
-        <div className="h-14 rounded-xl border border-black/5 bg-surface animate-pulse" />
+        <div className="h-14 rounded-xl bg-white ring-1 ring-slate-200/80 animate-pulse" />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <div
               key={`stat-skel-${i}`}
-              className="relative overflow-hidden rounded-xl border border-black/5 bg-surface p-4 animate-pulse"
+              className="relative overflow-hidden rounded-xl bg-white ring-1 ring-slate-200/80 p-4 animate-pulse"
             >
               <div className="absolute inset-x-0 top-0 h-0.5 skel" />
               <div className="flex items-start justify-between gap-3">
@@ -145,7 +145,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           ))}
         </div>
 
-        <div className="rounded-xl border border-black/5 bg-surface p-5 space-y-4 animate-pulse">
+        <div className="rounded-xl bg-white ring-1 ring-slate-200/80 p-5 space-y-4 animate-pulse">
           <div className="flex items-center justify-between gap-3">
             <div className="h-4 w-44 rounded skel" />
             <div className="h-8 w-28 rounded-lg skel" />
@@ -164,7 +164,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
-          <div className="lg:col-span-3 rounded-xl border border-black/5 bg-surface p-5 space-y-4 animate-pulse">
+          <div className="lg:col-span-3 rounded-xl bg-white ring-1 ring-slate-200/80 p-5 space-y-4 animate-pulse">
             <div className="flex items-center justify-between gap-3">
               <div className="h-4 w-48 rounded skel" />
               <div className="flex gap-2">
@@ -175,7 +175,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
             <div className="h-56 rounded-xl skel" />
           </div>
-          <div className="lg:col-span-2 rounded-xl border border-black/5 bg-surface p-5 space-y-4 animate-pulse">
+          <div className="lg:col-span-2 rounded-xl bg-white ring-1 ring-slate-200/80 p-5 space-y-4 animate-pulse">
             <div className="h-4 w-36 rounded skel" />
             <div className="space-y-3">
               {Array.from({ length: 4 }).map((_, i) => (
@@ -188,7 +188,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
         </div>
 
-        <div className="rounded-xl border border-black/5 bg-surface p-5 space-y-4 animate-pulse">
+        <div className="rounded-xl bg-white ring-1 ring-slate-200/80 p-5 space-y-4 animate-pulse">
           <div className="flex items-center justify-between gap-3">
             <div className="h-4 w-40 rounded skel" />
             <div className="h-8 w-24 rounded-lg skel" />
@@ -210,7 +210,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   }
 
   return (
-    <div className="w-full space-y-5 pb-10">
+    <div className="w-full min-h-full space-y-5 bg-white pb-10">
       <OnboardingProfileBanner />
 
       <BottomStatusBar

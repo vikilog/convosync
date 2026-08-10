@@ -27,7 +27,7 @@ export const CreateAgentModal: React.FC<Props> = ({
       initial={{ scale: 0.96, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       exit={{ scale: 0.96, opacity: 0 }}
-      className="bg-surface rounded-2xl w-full max-w-md border border-black/5 p-6 shadow-2xl"
+      className="bg-white rounded-2xl w-full max-w-md border border-black/5 p-6 shadow-2xl"
     >
       <div className="flex justify-between items-start pb-4 border-b border-gray-100">
         <div>
@@ -56,7 +56,7 @@ export const CreateAgentModal: React.FC<Props> = ({
             value={name}
             onChange={(e) => onNameChange(e.target.value)}
             placeholder="e.g. Support Bot"
-            className="w-full bg-surface-muted border border-black/5 rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+            className="w-full bg-white border border-black/5 rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
           />
         </div>
 

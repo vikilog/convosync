@@ -211,7 +211,7 @@ export function SubscriptionPanel({
         </div>
       ) : null}
 
-      <section className="rounded-xl border border-black/5 bg-surface p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+      <section className="rounded-xl bg-white ring-1 ring-slate-200/80 p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
         <p className="text-xl font-bold text-slate-900">{PLAN_NAME}</p>
         <p className="mt-1 text-2xl font-bold text-slate-900">
           ₹{PLAN_PRICE_INR.toLocaleString('en-IN')}
@@ -223,7 +223,7 @@ export function SubscriptionPanel({
             className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold ${
               active
                 ? 'bg-primary/10 text-primary ring-1 ring-primary/20'
-                : 'bg-surface-muted text-slate-600 ring-1 ring-black/5'
+                : 'bg-white text-slate-600 ring-1 ring-black/5'
             }`}
           >
             {active ? <Check className="h-3.5 w-3.5" /> : null}
@@ -266,7 +266,7 @@ export function SubscriptionPanel({
         )}
       </section>
 
-      <section className="rounded-xl border border-black/5 bg-surface p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+      <section className="rounded-xl bg-white ring-1 ring-slate-200/80 p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
         <h3 className="text-sm font-bold uppercase tracking-wide text-slate-500">
           What&apos;s included
         </h3>

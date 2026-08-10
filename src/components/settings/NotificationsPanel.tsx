@@ -386,7 +386,7 @@ export function NotificationsPanel() {
                 <h2 className="text-lg font-bold tracking-tight text-dark-navy">
                   Human handoff
                 </h2>
-                <span className="rounded-full bg-surface-muted px-2.5 py-0.5 text-[11px] font-semibold text-slate-600">
+                <span className="rounded-full bg-white px-2.5 py-0.5 text-[11px] font-semibold text-slate-600">
                   escalate_to_human
                 </span>
               </div>
@@ -433,7 +433,7 @@ export function NotificationsPanel() {
                 className={`flex h-10 w-10 items-center justify-center rounded-xl ${
                   channels.email.enabled
                     ? 'bg-primary text-white'
-                    : 'bg-surface-muted text-slate-500'
+                    : 'bg-white text-slate-500'
                 }`}
               >
                 <Mail className="h-4 w-4" aria-hidden />
@@ -468,7 +468,7 @@ export function NotificationsPanel() {
                     key={v.key}
                     type="button"
                     onClick={() => insertVariable(v.key)}
-                    className="cursor-pointer rounded-lg border border-border-subtle bg-surface px-2.5 py-1 font-mono text-[11px] font-medium text-slate-700 transition-colors duration-200 hover:border-primary/30 hover:bg-accent-green-bg hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                    className="cursor-pointer rounded-lg border border-border-subtle bg-white px-2.5 py-1 font-mono text-[11px] font-medium text-slate-700 transition-colors duration-200 hover:border-primary/30 hover:bg-accent-green-bg hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                   >
                     {`{{${v.key}}}`}
                   </button>
@@ -512,7 +512,7 @@ export function NotificationsPanel() {
               />
             </div>
 
-            <div className="rounded-xl border border-dashed border-border-strong/60 bg-surface px-4 py-3">
+            <div className="rounded-xl border border-dashed border-border-strong/60 bg-white px-4 py-3">
               <div className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
                 <Sparkles className="h-3.5 w-3.5" aria-hidden />
                 Preview
@@ -569,7 +569,7 @@ export function NotificationsPanel() {
               </button>
 
               {members.length > 0 ? (
-                <ul className="mb-2 max-h-40 space-y-1 overflow-y-auto rounded-xl border border-border-subtle bg-surface p-1.5">
+                <ul className="mb-2 max-h-40 space-y-1 overflow-y-auto rounded-xl border border-border-subtle bg-white p-1.5">
                   {members.map((m) => {
                     const on = channels.email.recipients.userIds.includes(m.userId);
                     return (
@@ -626,7 +626,7 @@ export function NotificationsPanel() {
                 className={`flex h-10 w-10 items-center justify-center rounded-xl ${
                   channels.whatsapp.enabled
                     ? 'bg-channel-green text-white'
-                    : 'bg-surface-muted text-slate-500'
+                    : 'bg-white text-slate-500'
                 }`}
               >
                 <MessageCircle className="h-4 w-4" aria-hidden />
@@ -678,7 +678,7 @@ export function NotificationsPanel() {
                 <p className="mb-2 text-xs font-semibold uppercase tracking-[0.06em] text-slate-500">
                   Team phones
                 </p>
-                <ul className="max-h-28 space-y-1 overflow-y-auto rounded-xl border border-border-subtle bg-surface p-1.5">
+                <ul className="max-h-28 space-y-1 overflow-y-auto rounded-xl border border-border-subtle bg-white p-1.5">
                   {members
                     .filter((m) => m.phone)
                     .map((m) => {
@@ -761,7 +761,7 @@ export function NotificationsPanel() {
             </div>
 
             {selectedTemplate && (selectedTemplate.variables?.length ?? 0) > 0 ? (
-              <div className="space-y-3 rounded-xl border border-border-subtle bg-surface p-3.5">
+              <div className="space-y-3 rounded-xl border border-border-subtle bg-white p-3.5">
                 <p className="text-xs font-semibold uppercase tracking-[0.06em] text-slate-500">
                   Map template variables
                 </p>

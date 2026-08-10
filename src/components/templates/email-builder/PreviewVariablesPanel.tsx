@@ -4,7 +4,7 @@ import { VariablePreviewForm } from './VariablePreviewForm';
 
 export function PreviewVariablesPanel() {
   return (
-    <aside className="w-[300px] shrink-0 border-l border-black/5 bg-surface flex flex-col min-h-0">
+    <aside className="w-[300px] shrink-0 border-l border-black/5 bg-white flex flex-col min-h-0">
       <div className="px-4 py-3 border-b border-black/5">
         <div className="flex items-center gap-2">
           <Braces className="w-4 h-4 text-primary" />

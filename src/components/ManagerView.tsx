@@ -599,7 +599,7 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
               Back to requirements
             </button>
 
-            <div className="bg-surface border border-black/5 rounded-2xl p-6 sm:p-8 shadow-sm">
+            <div className="bg-white ring-1 ring-slate-200/80 rounded-2xl p-6 sm:p-8 shadow-sm">
               <span className="inline-block px-3 py-1 rounded-full text-sm font-black uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 mb-4">
                 Step 2 — Connect Meta Account
               </span>
@@ -634,7 +634,7 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
               Back to requirements
             </button>
 
-            <div className="bg-surface border border-black/5 rounded-2xl p-6 sm:p-8 shadow-sm">
+            <div className="bg-white ring-1 ring-slate-200/80 rounded-2xl p-6 sm:p-8 shadow-sm">
               <span className="inline-block px-3 py-1 rounded-full text-sm font-black uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 mb-4">
                 Step 2 — Connect WhatsApp
               </span>

@@ -174,7 +174,7 @@ export function AutomationControlsPanel() {
           onChange={(e) => setDefaultText(e.target.value)}
           rows={3}
           placeholder="Thanks for messaging us — a teammate will get back shortly."
-          className="w-full rounded-lg border-[0.5px] border-border-subtle bg-surface px-3 py-2 text-sm text-dark-navy focus:outline-none focus:ring-2 focus:ring-primary/20"
+          className="w-full rounded-lg border-[0.5px] border-border-subtle bg-white px-3 py-2 text-sm text-dark-navy focus:outline-none focus:ring-2 focus:ring-primary/20"
           disabled={!defaultEnabled}
         />
       </section>
@@ -202,7 +202,7 @@ export function AutomationControlsPanel() {
           {menuItems.map((item, index) => (
             <div
               key={item.id}
-              className="grid gap-2 rounded-lg border-[0.5px] border-border-subtle bg-surface p-2.5 sm:grid-cols-[1fr_110px_1fr_auto]"
+              className="grid gap-2 rounded-lg border-[0.5px] border-border-subtle bg-white p-2.5 sm:grid-cols-[1fr_110px_1fr_auto]"
             >
               <input
                 value={item.title}
