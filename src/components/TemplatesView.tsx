@@ -702,22 +702,38 @@ function WhatsAppCard({
         className="pt-2 border-t border-gray-50 mt-2.5 flex flex-wrap justify-between items-center gap-1.5"
         onClick={(e) => e.stopPropagation()}
       >
-        <span className="text-xs font-bold text-gray-400">{template.lastUpdated}</span>
+        <span className="text-xs font-bold text-gray-400">
+          <span className="font-mono text-gray-500">{template.language}</span>
+          {template.lastUpdated ? ` · ${template.lastUpdated}` : ''}
+        </span>
         <div className="flex gap-1">
-          {template.status !== 'Approved' && template.id && (
-            <>
-              <button type="button" title="Edit" onClick={onEdit} className="p-1 rounded-md hover:bg-gray-100 text-gray-600">
-                <Pencil className="w-3 h-3" />
-              </button>
-              {(template.status === 'Draft' ||
-                template.status === 'Rejected' ||
-                template.status === 'Paused') && (
-                <button type="button" title="Submit to Meta" onClick={onSubmit} className="p-1 rounded-md hover:bg-[#e7f5f0] text-[#008069]">
-                  <Send className="w-3 h-3" />
-                </button>
-              )}
-            </>
+          {template.id && (
+            <button
+              type="button"
+              title={
+                template.status === 'Approved'
+                  ? 'Edit language / view template'
+                  : 'Edit'
+              }
+              onClick={onEdit}
+              className="p-1 rounded-md hover:bg-gray-100 text-gray-600"
+            >
+              <Pencil className="w-3 h-3" />
+            </button>
           )}
+          {template.id &&
+            (template.status === 'Draft' ||
+              template.status === 'Rejected' ||
+              template.status === 'Paused') && (
+              <button
+                type="button"
+                title="Submit to Meta"
+                onClick={onSubmit}
+                className="p-1 rounded-md hover:bg-[#e7f5f0] text-[#008069]"
+              >
+                <Send className="w-3 h-3" />
+              </button>
+            )}
           {template.id && (
             <button type="button" title="Delete" onClick={onDelete} className="p-1 rounded-md hover:bg-red-50 text-red-500">
               <Trash2 className="w-3 h-3" />

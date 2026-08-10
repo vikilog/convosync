@@ -45,12 +45,12 @@ import {
   type HeaderFormat,
 } from './templateBuilderUtils';
 const LANGUAGE_OPTIONS = [
-  { value: 'en_US', label: 'English (US)' },
-  { value: 'en_GB', label: 'English (UK)' },
-  { value: 'en', label: 'English (maps to en_US)' },
-  { value: 'hi', label: 'Hindi' },
-  { value: 'es', label: 'Spanish' },
-  { value: 'pt_BR', label: 'Portuguese (BR)' },
+  { value: 'en_US', label: 'English (US) · en_US' },
+  { value: 'en', label: 'English · en' },
+  { value: 'en_GB', label: 'English (UK) · en_GB' },
+  { value: 'hi', label: 'Hindi · hi' },
+  { value: 'es', label: 'Spanish · es' },
+  { value: 'pt_BR', label: 'Portuguese (BR) · pt_BR' },
 ];
 
 const CATEGORIES: {
@@ -196,8 +196,12 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
   const [error, setError] = useState('');
 
   const varCount = useMemo(() => countBodyVariables(bodyPattern), [bodyPattern]);
+  const languageOptions = useMemo(() => {
+    if (LANGUAGE_OPTIONS.some((l) => l.value === language)) return LANGUAGE_OPTIONS;
+    return [...LANGUAGE_OPTIONS, { value: language, label: language }];
+  }, [language]);
   const languageLabel =
-    LANGUAGE_OPTIONS.find((l) => l.value === language)?.label ?? language;
+    languageOptions.find((l) => l.value === language)?.label ?? language;
 
   const previewMediaUrl = localMediaPreviewUrl || headerMediaPreviewUrl;
 
@@ -370,6 +374,21 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
   const handleSave = async (asDraft: boolean) => {
     setSaving(true);
     setError('');
+
+    // Meta locks approved content; only local language can be corrected for send.
+    if (isEdit && template?.id && template.status === 'Approved') {
+      try {
+        await api.updateTemplate(template.id, { language });
+        onSaved();
+        onBack();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Could not save template');
+      } finally {
+        setSaving(false);
+      }
+      return;
+    }
+
     let safeName: string;
     try {
       safeName = assertValidTemplateName(name);
@@ -437,7 +456,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
     try {
       if (isEdit && template?.id) {
         await api.updateTemplate(template.id, payload);
-        if (!asDraft && submitToMeta && template.status !== 'Approved') {
+        if (!asDraft && submitToMeta) {
           await api.submitTemplate(template.id);
         }
       } else {
@@ -452,7 +471,8 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
     }
   };
 
-  const nameLocked = isEdit && template?.status === 'Approved';
+  const contentLocked = isEdit && template?.status === 'Approved';
+  const nameLocked = contentLocked;
   const displayName = sanitizeDisplayName(name) || 'name_will_appear_here';
   const sidebarOffset = useSidebarOffset();
   const isMediaHeader =
@@ -483,22 +503,28 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
+          {!contentLocked && (
+            <button
+              type="button"
+              disabled={saving}
+              onClick={() => handleSave(true)}
+              className="px-4 py-2 text-sm font-semibold text-[#050505] bg-surface-muted hover:bg-black/[0.06] border border-black/5 rounded-lg disabled:opacity-50"
+            >
+              Save as draft
+            </button>
+          )}
           <button
             type="button"
-            disabled={saving || nameLocked}
-            onClick={() => handleSave(true)}
-            className="px-4 py-2 text-sm font-semibold text-[#050505] bg-surface-muted hover:bg-black/[0.06] border border-black/5 rounded-lg disabled:opacity-50"
-          >
-            Save as draft
-          </button>
-          <button
-            type="button"
-            disabled={saving || nameLocked}
+            disabled={saving}
             onClick={() => handleSave(false)}
             className="px-4 py-2 text-sm font-semibold text-white bg-primary hover:bg-primary-hover rounded-lg flex items-center gap-2 disabled:opacity-50"
           >
             {saving && <Loader2 className="w-4 h-4 animate-spin" />}
-            {submitToMeta ? 'Submit template' : 'Save'}
+            {contentLocked
+              ? 'Save language'
+              : submitToMeta
+                ? 'Submit template'
+                : 'Save'}
           </button>
         </div>
       </header>
@@ -509,7 +535,15 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
         </div>
       )}
 
-      {!nameLocked && !submitToMeta && (
+      {contentLocked && (
+        <div className="mx-5 mt-2 px-4 py-2.5 bg-sky-50 border border-sky-200 rounded-lg text-sm text-sky-950 shrink-0">
+          <strong>Approved on Meta:</strong> content is locked. You can fix the{' '}
+          <strong>language code</strong> so campaigns/sends match Meta (e.g. <code>en</code> vs{' '}
+          <code>en_US</code>). Or use <strong>Fetch from Meta</strong> to refresh language from Meta.
+        </div>
+      )}
+
+      {!contentLocked && !submitToMeta && (
         <div className="mx-5 mt-2 px-4 py-2.5 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-900 shrink-0">
           <strong>Draft only:</strong> This template will stay in ConvoSync and will{' '}
           <strong>not appear in Meta WhatsApp Manager</strong> until you submit it. Use{' '}
@@ -526,7 +560,11 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                   {CATEGORIES.map((c) => (
                     <label
                       key={c.value}
-                      className={`flex flex-col gap-1.5 rounded-lg border-2 p-3 transition-colors duration-200 cursor-pointer h-full ${
+                      className={`flex flex-col gap-1.5 rounded-lg border-2 p-3 transition-colors duration-200 h-full ${
+                        contentLocked
+                          ? 'cursor-not-allowed opacity-70'
+                          : 'cursor-pointer'
+                      } ${
                         category === c.value
                           ? 'border-primary bg-primary/10'
                           : 'border-black/5 bg-surface-muted/60 hover:border-primary/30'
@@ -538,7 +576,8 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                           name="category"
                           checked={category === c.value}
                           onChange={() => setCategory(c.value)}
-                          className="accent-primary cursor-pointer"
+                          disabled={contentLocked}
+                          className="accent-primary cursor-pointer disabled:cursor-not-allowed"
                         />
                         <p className="text-sm font-semibold text-[#050505]">{c.title}</p>
                       </div>
@@ -593,19 +632,29 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                       onChange={(e) => setLanguage(e.target.value)}
                       className="w-full cursor-pointer rounded-lg border border-black/10 bg-surface-muted px-3 py-2.5 text-sm text-[#050505] outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/15"
                     >
-                      {LANGUAGE_OPTIONS.map((l) => (
+                      {languageOptions.map((l) => (
                         <option key={l.value} value={l.value}>
                           {l.label}
                         </option>
                       ))}
                     </select>
+                    <p className="mt-1 text-meta text-[#65676b]">
+                      Must match Meta exactly (<code className="font-mono">{language}</code>).{' '}
+                      <code className="font-mono">en</code> and <code className="font-mono">en_US</code>{' '}
+                      are different templates.
+                    </p>
                   </div>
                 </div>
               </Section>
             </div>
 
             <Section title="Content" subtitle="Header, body, footer and buttons">
-              <div className="pt-2 grid grid-cols-1 xl:grid-cols-2 gap-4 xl:gap-6">
+              <fieldset
+                disabled={contentLocked}
+                className={`pt-2 grid grid-cols-1 xl:grid-cols-2 gap-4 xl:gap-6 border-0 p-0 m-0 min-w-0 ${
+                  contentLocked ? 'opacity-60' : ''
+                }`}
+              >
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-semibold text-[#050505] mb-2">
@@ -942,7 +991,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                     </div>
                   )}
 
-                  {!nameLocked && (
+                  {!contentLocked && (
                     <label className="flex items-start gap-3 p-3 bg-surface-muted rounded-lg border border-black/5 cursor-pointer h-fit">
                       <input
                         type="checkbox"
@@ -961,7 +1010,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                     </label>
                   )}
                 </div>
-              </div>
+              </fieldset>
             </Section>
           </div>
         </div>

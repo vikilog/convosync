@@ -9,6 +9,7 @@ import {
   ArrowLeft,
   CheckCheck,
   Loader2,
+  Pencil,
   RefreshCw,
   X,
 } from 'lucide-react';
@@ -30,8 +31,12 @@ import {
   CampaignRecordStatus,
 } from '../../types';
 import { api } from '../../lib/api';
+import {
+  isScheduledCampaignEditable,
+  SCHEDULED_CAMPAIGN_EDIT_BLOCKED_HINT,
+} from '../../lib/campaignScheduleEdit';
 import { mapCampaignDetailFromApi } from '../../lib/mappers';
-import { pathForTab } from '../../routes';
+import { pathForNewCampaign, pathForTab } from '../../routes';
 import { CampaignDetailAnalytics } from './CampaignDetailAnalytics';
 import { ResendButton } from '../shared/ResendButton';
 
@@ -366,6 +371,10 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
     loadDetail();
   }, [loadDetail]);
 
+  const openFullEdit = () => {
+    navigate(pathForNewCampaign(), { state: { editCampaignId: campaignId } });
+  };
+
   const failedRecipients = useMemo(
     () =>
       (detail?.recipients ?? []).filter((r) => FAILED_STATUSES.has(r.status.toLowerCase())),
@@ -402,6 +411,10 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
   };
 
   const isEmail = detail?.channel === 'email';
+  const canEditSchedule = detail
+    ? isScheduledCampaignEditable(detail.status, detail.scheduledAt)
+    : false;
+  const isScheduled = detail?.status === 'Scheduled';
 
   const detailRows = useMemo((): [string, string][] => {
     if (!detail) return [];
@@ -489,14 +502,28 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
               </span>
             )}
           </div>
-          <button
-            type="button"
-            onClick={loadDetail}
-            aria-label="Refresh"
-            className="cursor-pointer p-1.5 bg-surface-muted border border-black/5 hover:bg-surface text-gray-600 rounded-xl flex items-center transition-colors duration-200"
-          >
-            <RefreshCw className="w-3.5 h-3.5" aria-hidden />
-          </button>
+          <div className="flex items-center gap-2">
+            {isScheduled && (
+              <button
+                type="button"
+                onClick={() => canEditSchedule && openFullEdit()}
+                disabled={!canEditSchedule}
+                title={canEditSchedule ? 'Edit campaign' : SCHEDULED_CAMPAIGN_EDIT_BLOCKED_HINT}
+                className="cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-surface-muted border border-black/5 hover:bg-surface text-gray-700 rounded-xl text-xs font-bold disabled:cursor-not-allowed disabled:opacity-45 transition-colors duration-200"
+              >
+                <Pencil className="w-3.5 h-3.5" aria-hidden />
+                Edit
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={loadDetail}
+              aria-label="Refresh"
+              className="cursor-pointer p-1.5 bg-surface-muted border border-black/5 hover:bg-surface text-gray-600 rounded-xl flex items-center transition-colors duration-200"
+            >
+              <RefreshCw className="w-3.5 h-3.5" aria-hidden />
+            </button>
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-x-5 gap-y-1 text-meta font-bold text-gray-500 pt-1 border-t border-black/5">

@@ -31,6 +31,13 @@ import {
   FileText,
   Images,
   Pencil,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  CircleDashed,
+  PlayCircle,
+  ChevronUp,
+  ChevronDown,
 } from 'lucide-react';
 import {
   CAMPAIGN_CHANNELS,
@@ -44,8 +51,20 @@ import {
   InstagramCampaignConfig,
 } from '../types';
 import { api, parseApiError } from '../lib/api';
+import {
+  campaignWhenAt,
+  nextCampaignListSort,
+  sortCampaignsForList,
+  type CampaignListSortDir,
+  type CampaignListSortKey,
+} from '../lib/campaignListSort';
 import { useKeepAliveActivation } from './KeepAlive';
-import { mapTemplateFromApi, mapCampaignFromApi, mapEmailTemplateFromApi } from '../lib/mappers';
+import {
+  mapTemplateFromApi,
+  mapCampaignFromApi,
+  mapEmailTemplateFromApi,
+  mapCampaignDetailFromApi,
+} from '../lib/mappers';
 import {
   applyEmailTemplateVariables,
   mergePreviewVariables,
@@ -63,6 +82,15 @@ import {
   type PickedGalleryImage,
 } from './media/MediaGalleryPickerModal';
 import { campaignIdFromPath, pathForCampaign, pathForNewCampaign, isNewCampaignPath, pathForTab } from '../routes';
+import {
+  defaultScheduleLocal,
+  isScheduledCampaignEditable,
+  isoToLocalDateTime,
+  localDateTimeToIso,
+  SCHEDULED_CAMPAIGN_EDIT_BLOCKED_HINT,
+  wizardSeedFromCampaignDetail,
+  type ScheduledWizardSeed,
+} from '../lib/campaignScheduleEdit';
 import { formatCc } from '../lib/convocoins';
 import { WALLET_CC_RATES } from '../lib/walletPricing';
 import { CampaignDetailView } from './campaigns/CampaignDetailView';
@@ -75,6 +103,12 @@ function galleryFilterForHeader(format: 'image' | 'video' | 'document'): MediaGa
   if (format === 'video') return 'video';
   if (format === 'document') return 'pdf';
   return 'image';
+}
+
+/** List Tag column: "All" for all-contacts; otherwise Tag(s) label from segmentLabel. */
+function campaignListTagLabel(segmentLabel: string): string {
+  if (!segmentLabel || segmentLabel === 'All contacts') return 'All';
+  return segmentLabel;
 }
 
 type AudienceSegment = { id: string; name: string; count: number; icon: string };
@@ -472,30 +506,38 @@ const WhatsAppPreview: React.FC<{
 
 type CampaignViewMode = 'list' | 'create';
 
-const CAMPAIGN_STATUS_STYLE: Record<CampaignRecordStatus, string> = {
-  Draft: 'bg-gray-100 text-gray-600 border-gray-200',
-  Scheduled: 'bg-amber-50 text-amber-800 border-amber-100',
-  Running: 'bg-blue-50 text-blue-700 border-blue-100',
-  Completed: 'bg-green-50 text-green-700 border-green-100',
-  Failed: 'bg-red-50 text-red-700 border-red-100',
+/** Status icon colors — same palette as the old text badges. */
+const CAMPAIGN_STATUS_ICON: Record<
+  CampaignRecordStatus,
+  { Icon: typeof CheckCircle2; className: string }
+> = {
+  Draft: { Icon: CircleDashed, className: 'text-gray-500' },
+  Scheduled: { Icon: Clock, className: 'text-amber-700' },
+  Running: { Icon: PlayCircle, className: 'text-blue-600' },
+  Completed: { Icon: CheckCircle2, className: 'text-green-700' },
+  Failed: { Icon: XCircle, className: 'text-red-600' },
 };
 
-function defaultScheduleLocal(): { date: string; time: string } {
-  const d = new Date(Date.now() + 60 * 60 * 1000);
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return {
-    date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
-    time: `${pad(d.getHours())}:${pad(d.getMinutes())}`,
-  };
+/** Progress fill — mirrors analytics funnel accents (failed red, done primary, running blue). */
+function campaignProgressAccent(status: CampaignRecordStatus): string {
+  if (status === 'Failed') return '#b91c1c';
+  if (status === 'Completed') return 'var(--color-primary, #064e3b)';
+  if (status === 'Running') return '#2563eb';
+  return '#64748b';
 }
 
-function localDateTimeToIso(date: string, time: string): string {
-  const local = new Date(`${date}T${time}:00`);
-  if (Number.isNaN(local.getTime())) {
-    throw new Error('Invalid schedule date or time');
-  }
-  return local.toISOString();
+/** Auto-names are "template · Channel · date"; list title shows the template part only. */
+function campaignListTitle(name: string): string {
+  const cleaned = name.replace(/\s·\s(?:WhatsApp|Email|Instagram)\s·\s.+$/i, '').trim();
+  return cleaned || name;
 }
+
+function campaignProgressPct(sent: number, total: number): number {
+  if (total <= 0) return 0;
+  return Math.min(100, Math.max(0, (sent / total) * 100));
+}
+
+const LIST_EASE = [0.22, 1, 0.36, 1] as const;
 
 function formatCampaignDate(iso: string | null): string {
   if (!iso) return '—';
@@ -507,6 +549,17 @@ function formatCampaignDate(iso: string | null): string {
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
+  });
+}
+
+function formatCampaignDateShort(iso: string | null): string {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '—';
+  return d.toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
   });
 }
 
@@ -538,7 +591,19 @@ const CampaignListPanel: React.FC<{
   onCreate: () => void;
   onRefresh: () => void;
   onOpenCampaign: (id: string) => void;
-}> = ({ campaigns, loading, error, search, onSearchChange, onCreate, onRefresh, onOpenCampaign }) => {
+}> = ({
+  campaigns,
+  loading,
+  error,
+  search,
+  onSearchChange,
+  onCreate,
+  onRefresh,
+  onOpenCampaign,
+}) => {
+  const reduceMotion = useReducedMotion();
+  const [sortKey, setSortKey] = useState<CampaignListSortKey>('created');
+  const [sortDir, setSortDir] = useState<CampaignListSortDir>('desc');
   const q = search.trim().toLowerCase();
   const filtered = campaigns.filter(
     (c) =>
@@ -546,171 +611,336 @@ const CampaignListPanel: React.FC<{
       c.segmentLabel.toLowerCase().includes(q) ||
       c.channel.includes(q)
   );
+  const displayed = sortCampaignsForList(filtered, sortKey, sortDir);
+
+  const onSortHeader = (key: CampaignListSortKey) => {
+    const next = nextCampaignListSort(sortKey, sortDir, key);
+    setSortKey(next.key);
+    setSortDir(next.dir);
+  };
+
+  // Summary from full loaded list (not search-filtered) so cards stay stable while typing.
+  const stats = {
+    total: campaigns.length,
+    completed: campaigns.reduce((n, c) => n + (c.status === 'Completed' ? 1 : 0), 0),
+    failed: campaigns.reduce((n, c) => n + (c.status === 'Failed' ? 1 : 0), 0),
+    scheduled: campaigns.reduce((n, c) => n + (c.status === 'Scheduled' ? 1 : 0), 0),
+  };
+
+  const rowListVariants = {
+    hidden: {},
+    visible: {
+      transition: reduceMotion ? { staggerChildren: 0 } : { staggerChildren: 0.035 },
+    },
+  };
+  const rowItemVariants = {
+    hidden: reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 6 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: reduceMotion ? 0 : 0.28, ease: LIST_EASE },
+    },
+  };
+
+  const statCells: Array<{ label: string; value: number; tone?: string }> = [
+    { label: 'Total campaigns', value: stats.total },
+    { label: 'Completed', value: stats.completed, tone: 'text-primary' },
+    { label: 'Failed', value: stats.failed, tone: stats.failed > 0 ? 'text-red-700' : undefined },
+    { label: 'Scheduled', value: stats.scheduled, tone: stats.scheduled > 0 ? 'text-amber-800' : undefined },
+  ];
 
   return (
-    <div className="flex h-full min-h-0 flex-1 flex-col space-y-4 overflow-y-auto bg-surface-muted p-6 selection:bg-primary/15">
-      <div className="p-4 bg-surface border border-black/5 rounded-2xl flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h2 className="text-base font-black text-gray-900 flex items-center gap-2">
-            <Megaphone className="w-5 h-5 text-primary" />
-            Campaigns
-          </h2>
-          <p className="text-xs text-gray-400 mt-0.5 font-medium">
-            Broadcast messages to your contacts on WhatsApp, Email, and Instagram.
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="relative w-48 sm:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => onSearchChange(e.target.value)}
-              placeholder="Search campaigns..."
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl py-1.5 pl-9 pr-3 text-meta font-semibold outline-none focus:ring-2 focus:ring-primary/15"
-            />
+    <div className="flex h-full min-h-0 flex-1 flex-col overflow-y-auto bg-surface-muted selection:bg-primary/15">
+      <div className="w-full max-w-none space-y-4 px-3 py-4 sm:px-4 sm:py-5">
+        {/* Header — title left, tools right */}
+        <div className="relative overflow-hidden rounded-xl bg-white ring-1 ring-slate-200/80">
+          <div className="absolute inset-x-0 top-0 h-0.5 bg-primary" />
+          <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:p-5">
+            <div className="min-w-0">
+              <h2 className="flex items-center gap-2 text-base font-black tracking-tight text-gray-900">
+                <Megaphone className="h-5 w-5 shrink-0 text-primary" aria-hidden />
+                Campaigns
+              </h2>
+              <p className="mt-0.5 text-xs font-medium text-gray-400">
+                Broadcast messages to your contacts on WhatsApp, Email, and Instagram.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+              <div className="relative min-w-[12rem] flex-1 sm:w-64 sm:flex-none">
+                <label htmlFor="campaigns-search" className="sr-only">
+                  Search campaigns
+                </label>
+                <Search
+                  className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400"
+                  aria-hidden
+                />
+                <input
+                  id="campaigns-search"
+                  type="search"
+                  value={search}
+                  onChange={(e) => onSearchChange(e.target.value)}
+                  placeholder="Search campaigns…"
+                  className="w-full min-h-10 rounded-lg border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm font-semibold text-gray-900 outline-none transition-colors duration-200 placeholder:text-slate-400 focus:border-primary/40 focus:bg-white focus:ring-2 focus:ring-primary/15"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={onRefresh}
+                disabled={loading}
+                className="inline-flex min-h-10 cursor-pointer items-center gap-1.5 rounded-xl border border-black/5 bg-surface px-3 py-2 text-meta font-bold text-gray-800 transition-colors duration-200 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden /> : null}
+                Refresh
+              </button>
+              <button
+                type="button"
+                onClick={onCreate}
+                className="inline-flex min-h-10 cursor-pointer items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-meta font-bold text-white shadow-sm shadow-primary/15 transition-colors duration-200 hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+              >
+                <Plus className="h-3.5 w-3.5" aria-hidden /> Create campaign
+              </button>
+            </div>
           </div>
-          <button
-            type="button"
-            onClick={onRefresh}
-            disabled={loading}
-            className="px-3 py-2 bg-surface border border-black/5 hover:bg-gray-50 text-gray-800 rounded-xl text-meta font-bold flex items-center gap-1.5 disabled:opacity-60"
-          >
-            {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
-            Refresh
-          </button>
-          <button
-            type="button"
-            onClick={onCreate}
-            className="px-3 py-2 bg-primary hover:bg-primary-hover text-white rounded-xl text-meta font-bold flex items-center gap-1.5 shadow-sm shadow-primary/15"
-          >
-            <Plus className="w-3.5 h-3.5" /> Create campaign
-          </button>
         </div>
-      </div>
 
-      {error && (
-        <p className="text-sm font-bold text-red-600 bg-red-50 border border-red-100 rounded-xl px-3 py-2">
-          {error}
-        </p>
-      )}
+        {/* Summary metrics — derived from loaded list */}
+        {!loading && (
+          <div
+            className="grid grid-cols-2 overflow-hidden rounded-2xl bg-surface ring-1 ring-slate-200/80 sm:grid-cols-4 sm:divide-x sm:divide-y-0 divide-y divide-black/[0.04]"
+            aria-label="Campaign summary"
+          >
+            {statCells.map((cell) => (
+              <div key={cell.label} className="min-w-0 px-4 py-4 sm:px-5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-gray-400">
+                  {cell.label}
+                </p>
+                <p
+                  className={`mt-1.5 text-[1.75rem] font-semibold leading-none tracking-tight tabular-nums ${
+                    cell.tone ?? 'text-gray-900'
+                  }`}
+                >
+                  {cell.value.toLocaleString()}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
 
-      {loading ? (
-        <div className="flex justify-center py-16 text-gray-400">
-          <Loader2 className="w-8 h-8 animate-spin" />
-        </div>
-      ) : filtered.length === 0 ? (
-        <div className="bg-surface border border-dashed border-black/10 rounded-2xl p-12 text-center">
-          <Megaphone className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-          <p className="text-sm font-bold text-gray-600">
-            {campaigns.length === 0 ? 'No campaigns yet' : 'No campaigns match your search'}
+        {error && (
+          <p
+            className="rounded-xl border border-red-100 bg-red-50 px-3 py-2 text-sm font-bold text-red-600"
+            role="alert"
+          >
+            {error}
           </p>
-          <p className="text-xs text-gray-400 mt-1 max-w-md mx-auto">
-            {campaigns.length === 0
-              ? 'Create your first broadcast to reach contacts with approved WhatsApp templates.'
-              : 'Try a different search term.'}
-          </p>
-          {campaigns.length === 0 && (
-            <button
-              type="button"
-              onClick={onCreate}
-              className="mt-4 px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-xl text-sm font-bold inline-flex items-center gap-1.5"
-            >
-              <Plus className="w-3.5 h-3.5" /> Create campaign
-            </button>
-          )}
-        </div>
-      ) : (
-        <div className="bg-surface border border-black/5 rounded-2xl overflow-hidden shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[720px] text-left">
-              <thead>
-                <tr className="border-b border-black/5 bg-surface-muted text-sm font-black uppercase tracking-wider text-gray-400">
-                  <th className="px-4 py-3">Campaign</th>
-                  <th className="px-4 py-3">Channel</th>
-                  <th className="px-4 py-3">Audience</th>
-                  <th className="px-4 py-3">Sent</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">When</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200">
-                {filtered.map((campaign) => {
-                  const ch = CAMPAIGN_CHANNELS.find((c) => c.id === campaign.channel);
-                  return (
-                    <tr
-                      key={campaign.id}
-                      onClick={() => onOpenCampaign(campaign.id)}
-                      className="hover:bg-slate-50 transition-colors cursor-pointer"
-                    >
-                      <td className="px-4 py-3">
-                        <p className="text-sm font-bold text-gray-900">{campaign.name}</p>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <ChannelIcon channel={campaign.channel} size={16} />
-                          <span className="text-sm font-bold text-gray-700">{ch?.name ?? campaign.channel}</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <p className="text-sm font-bold text-gray-800">
-                          {campaign.totalRecipients.toLocaleString()} contacts
-                        </p>
-                        <p className="text-xs text-gray-400 font-medium mt-0.5">{campaign.segmentLabel}</p>
-                      </td>
-                      <td className="px-4 py-3">
-                        <p className="text-xs font-mono font-bold text-gray-800">
-                          {campaign.sentCount.toLocaleString()}
-                          <span className="text-gray-400 font-medium">
-                            {' '}
-                            / {campaign.totalRecipients.toLocaleString()}
-                          </span>
-                        </p>
-                        {campaign.readCount > 0 && (
-                          <p className="text-xs text-gray-400 mt-0.5">
-                            {campaign.readCount.toLocaleString()} read
-                          </p>
-                        )}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span
-                          className={`inline-flex text-sm font-black px-2 py-0.5 rounded-lg border ${CAMPAIGN_STATUS_STYLE[campaign.status]}`}
+        )}
+
+        {loading ? (
+          <div className="flex justify-center py-16 text-gray-400" aria-busy="true">
+            <Loader2 className="h-8 w-8 animate-spin" aria-hidden />
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-black/10 bg-white px-6 py-12 text-center ring-1 ring-slate-200/60">
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
+              <Megaphone className="h-6 w-6" aria-hidden />
+            </div>
+            <p className="text-sm font-bold text-gray-600">
+              {campaigns.length === 0 ? 'No campaigns yet' : 'No campaigns match your search'}
+            </p>
+            <p className="mx-auto mt-1 max-w-md text-xs font-medium text-gray-400">
+              {campaigns.length === 0
+                ? 'Create your first broadcast to reach contacts with approved WhatsApp templates.'
+                : 'Try a different search term.'}
+            </p>
+            {campaigns.length === 0 && (
+              <button
+                type="button"
+                onClick={onCreate}
+                className="mt-4 inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-white transition-colors duration-200 hover:bg-primary-hover"
+              >
+                <Plus className="h-3.5 w-3.5" aria-hidden /> Create campaign
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="overflow-hidden rounded-2xl bg-surface ring-1 ring-slate-200/80">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[780px] text-left">
+                <thead>
+                  <tr className="border-b border-black/[0.04] bg-primary/[0.04]">
+                    {(
+                      [
+                        { label: 'Campaign' },
+                        { label: 'Channel' },
+                        { label: 'Audience' },
+                        { label: 'Tag' },
+                        { label: 'Progress' },
+                        { label: 'Status' },
+                        { label: 'Created', sort: 'created' as const },
+                        { label: 'When', sort: 'when' as const },
+                      ] as const
+                    ).map((col) => {
+                      const sortable = 'sort' in col ? col.sort : undefined;
+                      const active = sortable != null && sortKey === sortable;
+                      const ariaSort = !sortable
+                        ? undefined
+                        : active
+                          ? sortDir === 'asc'
+                            ? 'ascending'
+                            : 'descending'
+                          : 'none';
+                      return (
+                        <th
+                          key={col.label}
+                          scope="col"
+                          aria-sort={ariaSort}
+                          className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-gray-400"
                         >
-                          {campaign.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        {campaign.status === 'Scheduled' && campaign.scheduledAt ? (
-                          <>
-                            <p className="text-meta font-bold text-amber-800">
-                              {formatCampaignDate(campaign.scheduledAt)}
+                          {sortable ? (
+                            <button
+                              type="button"
+                              onClick={() => onSortHeader(sortable)}
+                              className="inline-flex cursor-pointer items-center gap-1 rounded-md text-inherit transition-colors duration-150 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                            >
+                              {col.label}
+                              {active ? (
+                                sortDir === 'asc' ? (
+                                  <ChevronUp className="h-3 w-3 shrink-0 text-primary" aria-hidden />
+                                ) : (
+                                  <ChevronDown className="h-3 w-3 shrink-0 text-primary" aria-hidden />
+                                )
+                              ) : null}
+                            </button>
+                          ) : (
+                            col.label
+                          )}
+                        </th>
+                      );
+                    })}
+                  </tr>
+                </thead>
+                <motion.tbody
+                  className="divide-y divide-black/[0.04]"
+                  variants={rowListVariants}
+                  initial="hidden"
+                  animate="visible"
+                >
+                  {displayed.map((campaign, rowIndex) => {
+                    const ch = CAMPAIGN_CHANNELS.find((c) => c.id === campaign.channel);
+                    const channelLabel = ch?.name ?? campaign.channel;
+                    const statusMeta = CAMPAIGN_STATUS_ICON[campaign.status];
+                    const StatusIcon = statusMeta.Icon;
+                    const pct = campaignProgressPct(
+                      campaign.sentCount,
+                      campaign.totalRecipients
+                    );
+                    const accent = campaignProgressAccent(campaign.status);
+                    const whenAt = campaignWhenAt(campaign);
+                    return (
+                      <motion.tr
+                        key={campaign.id}
+                        variants={rowItemVariants}
+                        onClick={() => onOpenCampaign(campaign.id)}
+                        className="cursor-pointer transition-colors duration-150 hover:bg-primary/[0.04]"
+                      >
+                        <td className="px-4 py-3 align-middle">
+                          <p className="text-sm font-bold leading-snug text-gray-900">
+                            {campaignListTitle(campaign.name)}
+                          </p>
+                        </td>
+                        <td className="px-4 py-3 align-middle">
+                          <span
+                            className="inline-flex"
+                            title={channelLabel}
+                            aria-label={channelLabel}
+                          >
+                            <ChannelIcon channel={campaign.channel} size={18} />
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 align-middle">
+                          <p className="text-sm font-bold tabular-nums text-gray-800">
+                            {campaign.totalRecipients.toLocaleString()} contacts
+                          </p>
+                        </td>
+                        <td className="px-4 py-3 align-middle">
+                          <p className="max-w-[12rem] truncate text-sm font-medium text-gray-700">
+                            {campaignListTagLabel(campaign.segmentLabel)}
+                          </p>
+                        </td>
+                        <td className="px-4 py-3 align-middle">
+                          <div className="flex min-w-[9rem] max-w-[12rem] items-center gap-2.5">
+                            <div className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-sm bg-black/[0.04]">
+                              <motion.div
+                                className="h-full origin-left rounded-sm"
+                                style={{
+                                  backgroundColor: accent,
+                                  width: `${Math.max(pct, pct > 0 ? 2 : 0)}%`,
+                                }}
+                                initial={reduceMotion ? false : { scaleX: 0 }}
+                                animate={{ scaleX: 1 }}
+                                transition={{
+                                  delay: reduceMotion ? 0 : 0.06 + rowIndex * 0.03,
+                                  duration: reduceMotion ? 0 : 0.45,
+                                  ease: LIST_EASE,
+                                }}
+                                role="progressbar"
+                                aria-valuenow={Math.round(pct)}
+                                aria-valuemin={0}
+                                aria-valuemax={100}
+                                aria-label={`Sent ${campaign.sentCount} of ${campaign.totalRecipients}`}
+                              />
+                            </div>
+                            <span className="shrink-0 text-xs font-semibold tabular-nums text-gray-700">
+                              {campaign.sentCount.toLocaleString()}
+                              <span className="font-medium text-gray-400">
+                                /{campaign.totalRecipients.toLocaleString()}
+                              </span>
+                            </span>
+                          </div>
+                          {campaign.readCount > 0 && (
+                            <p className="mt-1 text-[11px] font-medium text-gray-400">
+                              {campaign.readCount.toLocaleString()} read
                             </p>
-                            <p className="text-xs text-amber-700/70 mt-0.5 font-semibold">Scheduled</p>
-                          </>
-                        ) : campaign.sentAt ? (
-                          <>
-                            <p className="text-meta font-bold text-gray-700">
-                              {formatCampaignDate(campaign.sentAt)}
+                          )}
+                        </td>
+                        <td className="px-4 py-3 align-middle">
+                          <span
+                            className={`inline-flex ${statusMeta.className}`}
+                            title={campaign.status}
+                            aria-label={campaign.status}
+                          >
+                            <StatusIcon className="h-4 w-4" aria-hidden />
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 align-middle">
+                          <p className="text-meta font-bold tabular-nums text-gray-700">
+                            {formatCampaignDateShort(campaign.createdAt)}
+                          </p>
+                        </td>
+                        <td className="px-4 py-3 align-middle">
+                          {whenAt ? (
+                            <p
+                              className={`text-meta font-bold tabular-nums ${
+                                campaign.status === 'Scheduled' && campaign.scheduledAt
+                                  ? 'text-amber-800'
+                                  : 'text-gray-700'
+                              }`}
+                            >
+                              {formatCampaignDate(whenAt)}
                             </p>
-                            <p className="text-xs text-gray-400 mt-0.5">Sent</p>
-                          </>
-                        ) : (
-                          <>
-                            <p className="text-meta font-bold text-gray-700">
-                              {formatCampaignDate(campaign.createdAt)}
-                            </p>
-                            <p className="text-xs text-gray-400 mt-0.5">Created</p>
-                          </>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                          ) : (
+                            <p className="text-meta font-medium text-gray-400">—</p>
+                          )}
+                        </td>
+                      </motion.tr>
+                    );
+                  })}
+                </motion.tbody>
+              </table>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
@@ -725,6 +955,12 @@ const CampaignsWorkspace: React.FC = () => {
   const [listLoading, setListLoading] = useState(true);
   const [listError, setListError] = useState<string | null>(null);
   const [listSearch, setListSearch] = useState('');
+  const [editingCampaignId, setEditingCampaignId] = useState<string | null>(null);
+  const [campaignName, setCampaignName] = useState('');
+  /** When set, audience/template loaders apply this seed instead of first-item defaults. */
+  const pendingEditSeedRef = useRef<ScheduledWizardSeed | null>(null);
+  const skipHeaderResetRef = useRef(false);
+  const editLoadSeqRef = useRef(0);
 
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedChannel, setSelectedChannel] = useState<CampaignChannel>('whatsapp');
@@ -814,6 +1050,11 @@ const CampaignsWorkspace: React.FC = () => {
   }, []);
 
   const resetWizard = useCallback(() => {
+    editLoadSeqRef.current += 1;
+    pendingEditSeedRef.current = null;
+    skipHeaderResetRef.current = false;
+    setEditingCampaignId(null);
+    setCampaignName('');
     setCurrentStep(0);
     setSelectedChannel('whatsapp');
     setSelectedAudienceType('segment');
@@ -847,6 +1088,76 @@ const CampaignsWorkspace: React.FC = () => {
     }
   };
 
+  const applyEditSeedToWizard = useCallback((seed: ScheduledWizardSeed) => {
+    pendingEditSeedRef.current = seed;
+    skipHeaderResetRef.current = true;
+    setCampaignName(seed.name);
+    setSelectedChannel(seed.channel);
+    setSelectedAudienceType(seed.audienceType);
+    setSelectedSegmentIds(seed.segmentIds);
+    setIsScheduled(true);
+    const local = isoToLocalDateTime(seed.scheduledAt);
+    setScheduledDate(local.date);
+    setScheduledTime(local.time);
+    setCurrentStep(1);
+    if (seed.channel === 'whatsapp' && seed.templateName) {
+      setSelectedTemplateName(seed.templateName);
+      setVariableMappings({ ...seed.variableMappings });
+    }
+    if (seed.channel === 'email' && seed.templateId) {
+      setSelectedEmailTemplateId(seed.templateId);
+      setEmailVariableMappings({ ...seed.variableMappings });
+    }
+    if (seed.headerMediaStorageKey || seed.headerMediaAssetId) {
+      setHeaderMediaStorageKey(seed.headerMediaStorageKey);
+      setHeaderMediaMimeType(seed.headerMediaMimeType);
+      setHeaderMediaFileName(seed.headerMediaFileName);
+      setHeaderMediaAssetId(seed.headerMediaAssetId);
+      if (seed.headerMediaStorageKey) {
+        setHeaderMediaPreviewUrl(api.templateHeaderMediaUrl(seed.headerMediaStorageKey));
+      }
+    }
+  }, []);
+
+  const openEditWizard = useCallback(
+    async (campaignId: string) => {
+      resetWizard();
+      const seq = ++editLoadSeqRef.current;
+      setEditingCampaignId(campaignId);
+      setViewMode('create');
+      setLaunching(true);
+      // Detail handoff uses location.state; list edit stays in this workspace (no state).
+      if (!isNewCampaignPath(location.pathname)) {
+        navigate(pathForNewCampaign());
+      }
+      try {
+        const raw = (await api.getCampaign(campaignId)) as Record<string, unknown>;
+        if (seq !== editLoadSeqRef.current) return;
+        const detail = mapCampaignDetailFromApi(raw);
+        if (!isScheduledCampaignEditable(detail.status, detail.scheduledAt)) {
+          setLaunchError(SCHEDULED_CAMPAIGN_EDIT_BLOCKED_HINT);
+          setLaunching(false);
+          return;
+        }
+        const seed = wizardSeedFromCampaignDetail(detail);
+        if (!seed) {
+          setLaunchError('Campaign has no schedule to edit.');
+          setLaunching(false);
+          return;
+        }
+        applyEditSeedToWizard(seed);
+        setEditingCampaignId(campaignId);
+        setLaunchError(null);
+      } catch (err) {
+        if (seq !== editLoadSeqRef.current) return;
+        setLaunchError(err instanceof Error ? err.message : 'Failed to load campaign for edit');
+      } finally {
+        if (seq === editLoadSeqRef.current) setLaunching(false);
+      }
+    },
+    [applyEditSeedToWizard, location.pathname, navigate, resetWizard]
+  );
+
   const backToList = () => {
     resetWizard();
     setViewMode('list');
@@ -857,11 +1168,17 @@ const CampaignsWorkspace: React.FC = () => {
   };
 
   useEffect(() => {
+    const state = location.state as { editCampaignId?: string } | null;
+    if (state?.editCampaignId) {
+      navigate(location.pathname, { replace: true, state: {} });
+      void openEditWizard(state.editCampaignId);
+      return;
+    }
     if (isNewCampaignPath(location.pathname) && viewMode !== 'create') {
       resetWizard();
       setViewMode('create');
     }
-  }, [location.pathname, viewMode, resetWizard]);
+  }, [location.pathname, location.state, viewMode, resetWizard, openEditWizard, navigate]);
 
   useEffect(() => {
     if (viewMode !== 'create') return;
@@ -875,6 +1192,12 @@ const CampaignsWorkspace: React.FC = () => {
         if (cancelled) return;
         const data = raw as CampaignAudienceResponse;
         setAudienceData(data);
+        const seed = pendingEditSeedRef.current;
+        if (seed && seed.channel === selectedChannel) {
+          setSelectedAudienceType(seed.audienceType);
+          setSelectedSegmentIds(seed.segmentIds);
+          return;
+        }
         const tagSegments = data.segments.filter((s) => s.id !== 'all');
         if (tagSegments.length > 0) {
           setSelectedSegmentIds([tagSegments[0].id]);
@@ -994,6 +1317,28 @@ const CampaignsWorkspace: React.FC = () => {
           .map((t) => mapTemplateFromApi(t))
           .filter((t) => t.status === 'Approved');
         setTemplates(mapped);
+        const seed = pendingEditSeedRef.current;
+        if (seed?.channel === 'whatsapp') {
+          const match =
+            mapped.find((t) => seed.templateId && t.id === seed.templateId) ??
+            mapped.find((t) => seed.templateName && t.name === seed.templateName) ??
+            null;
+          if (match) {
+            skipHeaderResetRef.current = true;
+            setSelectedTemplateName(match.name);
+            setVariableMappings({ ...seed.variableMappings });
+            if (seed.headerMediaStorageKey || seed.headerMediaAssetId) {
+              setHeaderMediaStorageKey(seed.headerMediaStorageKey);
+              setHeaderMediaMimeType(seed.headerMediaMimeType);
+              setHeaderMediaFileName(seed.headerMediaFileName);
+              setHeaderMediaAssetId(seed.headerMediaAssetId);
+              if (seed.headerMediaStorageKey) {
+                setHeaderMediaPreviewUrl(api.templateHeaderMediaUrl(seed.headerMediaStorageKey));
+              }
+            }
+          }
+          return;
+        }
         if (mapped[0]) {
           setSelectedTemplateName(mapped[0].name);
           setVariableMappings((prev) => defaultWaVariableMappings(mapped[0].variables, prev));
@@ -1032,6 +1377,24 @@ const CampaignsWorkspace: React.FC = () => {
           .map((t) => mapEmailTemplateFromApi(t))
           .filter((t) => t.status === 'active');
         setEmailTemplates(mapped);
+        const seed = pendingEditSeedRef.current;
+        if (seed?.channel === 'email') {
+          const match =
+            mapped.find((t) => seed.templateId && t.id === seed.templateId) ?? mapped[0] ?? null;
+          if (match?.id) {
+            setSelectedEmailTemplateId(match.id);
+            setEmailVariableMappings(() => {
+              const next: Record<string, string> = {};
+              for (const v of match.variables) {
+                if (!CONTACT_AUTO_EMAIL_VARIABLES.has(v)) {
+                  next[v] = seed.variableMappings[v] ?? '';
+                }
+              }
+              return next;
+            });
+          }
+          return;
+        }
         if (mapped[0]) {
           setSelectedEmailTemplateId(mapped[0].id ?? '');
           setEmailVariableMappings((prev) => {
@@ -1116,6 +1479,10 @@ const CampaignsWorkspace: React.FC = () => {
 
   useEffect(() => {
     // Reset campaign override when template changes; keep template sample preview.
+    if (skipHeaderResetRef.current) {
+      skipHeaderResetRef.current = false;
+      return;
+    }
     clearHeaderMediaOverride();
     setHeaderMediaEditOpen(false);
     if (
@@ -1291,6 +1658,7 @@ const CampaignsWorkspace: React.FC = () => {
 
   const handleLaunchCampaign = async () => {
     setLaunchError(null);
+    const isEditing = Boolean(editingCampaignId);
 
     if (selectedChannel === 'instagram') {
       setLaunchError('Instagram campaigns are preview-only right now. Use WhatsApp or Email to send.');
@@ -1306,8 +1674,10 @@ const CampaignsWorkspace: React.FC = () => {
       return;
     }
 
+    // Edit must stay scheduled — no immediate send / duplicate create.
+    const mustSchedule = isEditing || isScheduled;
     let scheduledAtIso: string | undefined;
-    if (isScheduled) {
+    if (mustSchedule) {
       try {
         scheduledAtIso = localDateTimeToIso(scheduledDate, scheduledTime);
       } catch {
@@ -1321,7 +1691,7 @@ const CampaignsWorkspace: React.FC = () => {
     }
 
     let templateId: string | undefined;
-    let campaignName: string;
+    let resolvedName: string;
     let mappings: Record<string, string>;
 
     if (selectedChannel === 'whatsapp') {
@@ -1340,7 +1710,9 @@ const CampaignsWorkspace: React.FC = () => {
         return;
       }
       templateId = activeTemplate.id;
-      campaignName = `${activeTemplate.name} · ${chConfig.name} · ${new Date().toLocaleDateString()}`;
+      resolvedName =
+        campaignName.trim() ||
+        `${activeTemplate.name} · ${chConfig.name} · ${new Date().toLocaleDateString()}`;
       mappings = variableMappings;
     } else if (selectedChannel === 'email') {
       if (!activeEmailTemplate?.id) {
@@ -1353,7 +1725,9 @@ const CampaignsWorkspace: React.FC = () => {
         return;
       }
       templateId = activeEmailTemplate.id;
-      campaignName = `${activeEmailTemplate.name} · ${chConfig.name} · ${new Date().toLocaleDateString()}`;
+      resolvedName =
+        campaignName.trim() ||
+        `${activeEmailTemplate.name} · ${chConfig.name} · ${new Date().toLocaleDateString()}`;
       mappings = emailVariableMappings;
     } else {
       setLaunchError('This channel is not supported for sending yet.');
@@ -1383,18 +1757,41 @@ const CampaignsWorkspace: React.FC = () => {
             }
           : {};
 
+      const audiencePayload = {
+        channel: selectedChannel,
+        segmentId: segmentIds[0] ?? 'all',
+        segmentIds,
+        variableMappings: mappings,
+        ...headerMediaFilter,
+      };
+
+      if (isEditing && editingCampaignId && scheduledAtIso) {
+        await api.updateCampaign(editingCampaignId, {
+          name: resolvedName,
+          templateId,
+          channel: selectedChannel,
+          audienceType: selectedAudienceType === 'all' ? 'all' : 'segment',
+          audienceFilter: audiencePayload,
+          scheduledAt: scheduledAtIso,
+        });
+        pendingEditSeedRef.current = null;
+        setLaunchResult({
+          sentCount: 0,
+          totalRecipients: audienceCount(),
+          scheduled: true,
+        });
+        setLastCreatedCampaignId(editingCampaignId);
+        setCampaignLaunched(true);
+        loadCampaigns();
+        return;
+      }
+
       const created = (await api.createCampaign({
-        name: campaignName,
+        name: resolvedName,
         templateId,
         channel: selectedChannel,
         audienceType: selectedAudienceType === 'all' ? 'all' : 'segment',
-        audienceFilter: {
-          channel: selectedChannel,
-          segmentId: segmentIds[0] ?? 'all',
-          segmentIds,
-          variableMappings: mappings,
-          ...headerMediaFilter,
-        },
+        audienceFilter: audiencePayload,
         ...(scheduledAtIso ? { scheduledAt: scheduledAtIso } : {}),
       })) as { id: string; status?: string };
 
@@ -1444,6 +1841,8 @@ const CampaignsWorkspace: React.FC = () => {
       />
     );
   }
+
+  const isEditingScheduled = Boolean(editingCampaignId);
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden bg-surface-muted selection:bg-primary/15">
@@ -1530,7 +1929,11 @@ const CampaignsWorkspace: React.FC = () => {
               </div>
               <div>
                 <h4 className="font-bold text-gray-900 text-base">
-                  {launchResult?.scheduled ? 'Campaign Scheduled!' : 'Campaign Sent!'}
+                  {isEditingScheduled
+                    ? 'Campaign Updated!'
+                    : launchResult?.scheduled
+                      ? 'Campaign Scheduled!'
+                      : 'Campaign Sent!'}
                 </h4>
                 <p className="text-xs text-gray-400 mt-1">
                   {launchResult?.scheduled
@@ -1547,7 +1950,12 @@ const CampaignsWorkspace: React.FC = () => {
                   ...(showsCcCostEstimate()
                     ? [['Estimated Cost', estimatedCost()] as const]
                     : []),
-                  ['Timing', isScheduled ? `${scheduledDate} ${scheduledTime}` : 'Immediately'],
+                  [
+                    'Timing',
+                    isScheduled || isEditingScheduled
+                      ? `${scheduledDate} ${scheduledTime}`
+                      : 'Immediately',
+                  ],
                 ].map(([k, v]) => (
                   <div key={k} className="flex justify-between py-2 text-sm font-bold">
                     <span className="text-gray-400">{k}</span>
@@ -1572,13 +1980,15 @@ const CampaignsWorkspace: React.FC = () => {
                     View insights
                   </button>
                 )}
-                <button
-                  type="button"
-                  onClick={() => resetWizard()}
-                  className="px-6 py-2 bg-white hover:bg-gray-50 border border-slate-200 text-gray-700 text-sm font-bold rounded-xl"
-                >
-                  Create another
-                </button>
+                {!isEditingScheduled && (
+                  <button
+                    type="button"
+                    onClick={() => resetWizard()}
+                    className="px-6 py-2 bg-white hover:bg-gray-50 border border-slate-200 text-gray-700 text-sm font-bold rounded-xl"
+                  >
+                    Create another
+                  </button>
+                )}
               </div>
             </div>
           ) : (
@@ -1587,7 +1997,11 @@ const CampaignsWorkspace: React.FC = () => {
                 <div className="space-y-4">
                   <div>
                     <h3 className="font-bold text-gray-900 text-sm">Select Channel</h3>
-                    <p className="text-xs text-gray-400 mt-0.5">Choose which channel to send your campaign through.</p>
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      {isEditingScheduled
+                        ? 'Channel is locked for scheduled campaigns.'
+                        : 'Choose which channel to send your campaign through.'}
+                    </p>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     {SELECTABLE_CAMPAIGN_CHANNELS.map((ch) => {
@@ -1596,12 +2010,15 @@ const CampaignsWorkspace: React.FC = () => {
                         <button
                           key={ch.id}
                           type="button"
-                          onClick={() => setSelectedChannel(ch.id)}
+                          disabled={isEditingScheduled && !selected}
+                          onClick={() => {
+                            if (!isEditingScheduled) setSelectedChannel(ch.id);
+                          }}
                           className={`relative flex min-h-[168px] flex-col rounded-2xl border-2 p-4 text-left transition-all ${
                             selected
                               ? 'shadow-md'
                               : 'border-black/5 bg-surface hover:border-black/10 hover:shadow-sm'
-                          }`}
+                          } ${isEditingScheduled && !selected ? 'cursor-not-allowed opacity-45' : ''}`}
                           style={
                             selected
                               ? {
@@ -2319,9 +2736,23 @@ const CampaignsWorkspace: React.FC = () => {
                   <div>
                     <h3 className="font-bold text-gray-900 text-sm">Schedule & Dispatch Review</h3>
                     <p className="text-xs text-gray-400 mt-0.5">
-                      Review campaign details and schedule or send immediately.
+                      {isEditingScheduled
+                        ? 'Update audience, message, name, and send time. Stays scheduled — no duplicate send.'
+                        : 'Review campaign details and schedule or send immediately.'}
                     </p>
                   </div>
+
+                  {isEditingScheduled && (
+                    <label className="block space-y-1.5 bg-white border border-slate-200 p-4 rounded-xl">
+                      <span className="text-sm font-bold text-gray-900">Campaign name</span>
+                      <input
+                        type="text"
+                        value={campaignName}
+                        onChange={(e) => setCampaignName(e.target.value)}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 px-3 text-sm font-bold outline-none focus:ring-2 focus:ring-primary/15"
+                      />
+                    </label>
+                  )}
 
                   {showsCcCostEstimate() ? (
                     <div className="p-4 bg-primary/5 border border-primary/10 rounded-xl flex items-center justify-between gap-3">
@@ -2346,16 +2777,21 @@ const CampaignsWorkspace: React.FC = () => {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm font-bold text-gray-900">Schedule for later</p>
-                        <p className="text-xs text-gray-400 font-bold">Defer broadcast to a specific time</p>
+                        <p className="text-xs text-gray-400 font-bold">
+                          {isEditingScheduled
+                            ? 'Scheduled campaigns must keep a future send time'
+                            : 'Defer broadcast to a specific time'}
+                        </p>
                       </div>
                       <input
                         type="checkbox"
-                        checked={isScheduled}
+                        checked={isScheduled || isEditingScheduled}
+                        disabled={isEditingScheduled}
                         onChange={(e) => setIsScheduled(e.target.checked)}
-                        className="w-4 h-4 accent-primary cursor-pointer"
+                        className="w-4 h-4 accent-primary cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
                       />
                     </div>
-                    {isScheduled && (
+                    {(isScheduled || isEditingScheduled) && (
                       <div className="grid grid-cols-2 gap-3 pt-2">
                         <input
                           type="date"
@@ -2430,12 +2866,16 @@ const CampaignsWorkspace: React.FC = () => {
               >
                 <Play className="h-3.5 w-3.5 fill-white" />
                 {launching
-                  ? isScheduled
-                    ? 'Scheduling…'
-                    : 'Sending…'
-                  : isScheduled
-                    ? `Schedule · ${scheduledDate} ${scheduledTime}`
-                    : 'Launch campaign'}
+                  ? isEditingScheduled
+                    ? 'Saving…'
+                    : isScheduled
+                      ? 'Scheduling…'
+                      : 'Sending…'
+                  : isEditingScheduled
+                    ? `Save · ${scheduledDate} ${scheduledTime}`
+                    : isScheduled
+                      ? `Schedule · ${scheduledDate} ${scheduledTime}`
+                      : 'Launch campaign'}
               </button>
             )}
           </div>

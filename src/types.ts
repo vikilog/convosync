@@ -238,6 +238,8 @@ export interface CampaignDetail {
   channel: CampaignChannel;
   segmentLabel: string;
   audienceType: string;
+  /** Resolved tag ids / `all` from audienceFilter (for wizard hydration). */
+  segmentIds: string[];
   totalRecipients: number;
   sentCount: number;
   deliveredCount: number;
@@ -258,6 +260,10 @@ export interface CampaignDetail {
     status: string;
   } | null;
   variableMappings: Record<string, string>;
+  headerMediaStorageKey: string | null;
+  headerMediaMimeType: string | null;
+  headerMediaFileName: string | null;
+  headerMediaAssetId: string | null;
   insights: CampaignInsights;
   analytics: CampaignAnalytics | null;
   recipients: CampaignRecipientInsight[];

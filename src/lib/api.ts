@@ -882,6 +882,17 @@ export const api = {
   getCampaigns: () => get('/campaigns'),
   getCampaign: (id: string) => get(`/campaigns/${id}`),
   createCampaign: (data: unknown) => post('/campaigns', data),
+  updateCampaign: (
+    id: string,
+    data: {
+      name?: string;
+      templateId?: string;
+      channel?: string;
+      audienceType?: string;
+      audienceFilter?: Record<string, unknown>;
+      scheduledAt?: string;
+    }
+  ) => patch(`/campaigns/${id}`, data),
   sendCampaign: (id: string) => post(`/campaigns/${id}/send`),
   resendCampaignFailed: (id: string) =>
     post(`/campaigns/${id}/resend-failed`, {}) as Promise<{

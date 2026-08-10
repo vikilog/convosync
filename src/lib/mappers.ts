@@ -81,13 +81,18 @@ function formatInstagramCount(value: string | undefined): string | undefined {
 export function mapContactFromApi(raw: Record<string, unknown>, conv?: Record<string, unknown>): Contact {
   const customFields = (raw.customFields as Record<string, string>) || {};
   const source = String(raw.source ?? '—');
-  const channel =
-    conv?.channel === 'instagram' || source === 'Instagram'
-      ? 'instagram'
-      : conv?.channel === 'messenger' || source === 'Messenger'
-        ? 'messenger'
-        : 'whatsapp';
   const phone = String(raw.phone);
+  // Prefer conversation.channel when present — source alone mis-labels healed
+  // rows (e.g. Messenger fb: contact still tagged source=Instagram) into the IG tab.
+  const convChannel = conv?.channel ? String(conv.channel) : '';
+  const channel =
+    convChannel === 'instagram' || convChannel === 'messenger' || convChannel === 'whatsapp'
+      ? (convChannel as 'instagram' | 'messenger' | 'whatsapp')
+      : phone.startsWith('ig:') || source === 'Instagram'
+        ? 'instagram'
+        : phone.startsWith('fb:') || source === 'Messenger'
+          ? 'messenger'
+          : 'whatsapp';
   const instagramUsername = customFields.instagramUsername;
   const handle =
     channel === 'instagram'
@@ -537,6 +542,10 @@ export function mapCampaignDetailFromApi(raw: Record<string, unknown>): Campaign
         ? filter.channel
         : 'whatsapp';
 
+  const segmentIds = Array.isArray(filter.segmentIds)
+    ? filter.segmentIds.map(String)
+    : [String(filter.segmentId ?? (String(campaign.audienceType ?? 'all') === 'all' ? 'all' : 'all'))];
+
   const insightsRaw = (raw.insights ?? {}) as Record<string, unknown>;
   const insights: CampaignInsights = {
     totalRecipients: Number(insightsRaw.totalRecipients ?? 0),
@@ -572,7 +581,9 @@ export function mapCampaignDetailFromApi(raw: Record<string, unknown>): Campaign
       }
     : null;
 
-  const variableMappingsRaw = raw.variableMappings as Record<string, unknown> | undefined;
+  const variableMappingsRaw =
+    (raw.variableMappings as Record<string, unknown> | undefined) ??
+    (filter.variableMappings as Record<string, unknown> | undefined);
   const variableMappings: Record<string, string> = {};
   if (variableMappingsRaw && typeof variableMappingsRaw === 'object') {
     for (const [key, value] of Object.entries(variableMappingsRaw)) {
@@ -605,6 +616,7 @@ export function mapCampaignDetailFromApi(raw: Record<string, unknown>): Campaign
     channel,
     segmentLabel: String(raw.segmentLabel ?? 'All contacts'),
     audienceType: String(campaign.audienceType ?? 'all'),
+    segmentIds,
     totalRecipients: Number(campaign.totalRecipients ?? 0),
     sentCount: Number(campaign.sentCount ?? 0),
     deliveredCount: Number(campaign.deliveredCount ?? 0),
@@ -614,6 +626,14 @@ export function mapCampaignDetailFromApi(raw: Record<string, unknown>): Campaign
     scheduledAt: campaign.scheduledAt ? String(campaign.scheduledAt) : null,
     template,
     variableMappings,
+    headerMediaStorageKey:
+      typeof filter.headerMediaStorageKey === 'string' ? filter.headerMediaStorageKey : null,
+    headerMediaMimeType:
+      typeof filter.headerMediaMimeType === 'string' ? filter.headerMediaMimeType : null,
+    headerMediaFileName:
+      typeof filter.headerMediaFileName === 'string' ? filter.headerMediaFileName : null,
+    headerMediaAssetId:
+      typeof filter.headerMediaAssetId === 'string' ? filter.headerMediaAssetId : null,
     insights,
     analytics,
     recipients,
