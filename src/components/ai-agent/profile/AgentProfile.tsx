@@ -10,7 +10,6 @@ import {
 } from 'lucide-react';
 import type { AgentActionConfig, AgentProfileData, ToneOfVoice } from '../types';
 import { LANGUAGE_LABELS } from '../types';
-import { ChatPreviewPanel } from '../ChatPreviewPanel';
 import { EditProfileModal } from './EditProfileModal';
 import { InfoTooltip } from './InfoTooltip';
 import { InstructionToolbar } from './InstructionToolbar';
@@ -193,37 +192,36 @@ export const AgentProfile: React.FC<Props> = ({
 
   return (
     <>
-      <div className="flex flex-col xl:flex-row gap-6 w-full pb-6">
-        <div className="flex-1 min-w-0 space-y-6">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <h2 className="text-xl font-bold text-[#111827]">Profile</h2>
-              <p className="text-sm text-[#6B7280] mt-1">
-                Setup the personality and the conversation rules of AI Agent
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center gap-2 sm:justify-end">
-              <span
-                className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ${
-                  local.isPublished
-                    ? 'bg-primary/10 text-primary'
-                    : 'bg-amber-50 text-amber-700'
-                }`}
-              >
-                {local.isPublished ? 'Published · Live' : 'Draft · Unpublished'}
-              </span>
-              <button
-                type="button"
-                disabled={saving}
-                onClick={() => setShowPublishConfirm(true)}
-                className="inline-flex items-center rounded-xl bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-hover disabled:opacity-60"
-              >
-                {local.isPublished ? 'Republish' : 'Publish'}
-              </button>
-            </div>
+      <div className="w-full max-w-4xl space-y-6 pb-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h2 className="text-xl font-bold text-[#111827]">Profile</h2>
+            <p className="text-sm text-[#6B7280] mt-1">
+              Setup the personality and the conversation rules of AI Agent
+            </p>
           </div>
+          <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+            <span
+              className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ${
+                local.isPublished
+                  ? 'bg-primary/10 text-primary'
+                  : 'bg-amber-50 text-amber-700'
+              }`}
+            >
+              {local.isPublished ? 'Published · Live' : 'Draft · Unpublished'}
+            </span>
+            <button
+              type="button"
+              disabled={saving}
+              onClick={() => setShowPublishConfirm(true)}
+              className="inline-flex items-center rounded-xl bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-hover disabled:opacity-60"
+            >
+              {local.isPublished ? 'Republish' : 'Publish'}
+            </button>
+          </div>
+        </div>
 
-          <section className="bg-white ring-1 ring-slate-200/80 rounded-xl p-5 relative">
+        <section className="bg-white ring-1 ring-slate-200/80 rounded-xl p-5 relative">
             <button
               type="button"
               onClick={() => setShowEdit(true)}
@@ -561,17 +559,6 @@ export const AgentProfile: React.FC<Props> = ({
               Helps the AI Agent understand your industry, products, and services
             </p>
           </section>
-        </div>
-
-        <ChatPreviewPanel
-          agentId={local.id}
-          agentName={local.name}
-          avatarUrl={local.avatarUrl}
-          welcomeMessage={
-            local.welcomeMessageEnabled ? local.welcomeMessageText : null
-          }
-          language={local.fallbackLanguage}
-        />
       </div>
 
       {toast && (

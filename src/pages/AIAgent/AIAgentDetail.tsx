@@ -1,6 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ChevronDown, ChevronRight, CloudCheck } from 'lucide-react';
+import {
+  ArrowLeft,
+  ChevronDown,
+  ChevronRight,
+  CloudCheck,
+  MessageSquare,
+} from 'lucide-react';
 import type { AgentBot } from '../../types';
 import type { AgentProfileData } from '../../components/ai-agent/types';
 import { api } from '../../lib/api';
@@ -19,6 +25,7 @@ import {
   RuleBasedFlowBuilder,
   defaultAgentFlowDefinition,
 } from '../../components/ai-agent/RuleBasedFlowBuilder';
+import { ChatPreviewPanel } from '../../components/ai-agent/ChatPreviewPanel';
 import type { AgentFlowDefinition } from '../../types';
 
 type Props = {
@@ -62,6 +69,7 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
   const [error, setError] = useState<string | null>(null);
   const [capabilitiesOpen, setCapabilitiesOpen] = useState(true);
   const [lastAutoSavedAt, setLastAutoSavedAt] = useState<string | null>(null);
+  const [testOpen, setTestOpen] = useState(false);
 
   const loadAgent = useCallback(async () => {
     setLoading(true);
@@ -207,10 +215,24 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
     : mobileNavOptions.find((opt) => pathname.startsWith(opt.value))?.value ??
       pathForAgent(agentId, 'profile');
 
+  const openTest = () => setTestOpen(true);
+  const closeTest = () => setTestOpen(false);
+
+  const renderTestAgentButton = () => (
+    <button
+      type="button"
+      onClick={openTest}
+      className="inline-flex items-center gap-1.5 rounded-xl border border-black/5 bg-white px-3 py-2 text-sm font-bold text-[#111827] hover:border-primary hover:text-primary transition-colors cursor-pointer"
+    >
+      <MessageSquare className="w-4 h-4" />
+      Test Agent
+    </button>
+  );
+
   return (
     <div className="flex-1 w-full pb-12 text-left">
       <div className="flex flex-col lg:flex-row w-full min-h-[calc(100vh-12rem)] gap-0">
-        <div className="lg:hidden mb-4">
+        <div className="lg:hidden mb-4 flex items-center gap-2">
           <label htmlFor="agent-section-mobile" className="sr-only">
             Agent section
           </label>
@@ -218,7 +240,7 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
             id="agent-section-mobile"
             value={mobileNavValue}
             onChange={(e) => navigate(e.target.value)}
-            className="w-full rounded-xl bg-white ring-1 ring-slate-200/80 px-3 py-2.5 text-sm font-semibold text-[#111827]"
+            className="min-w-0 flex-1 rounded-xl bg-white ring-1 ring-slate-200/80 px-3 py-2.5 text-sm font-semibold text-[#111827]"
           >
             {mobileNavOptions.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -226,26 +248,31 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
               </option>
             ))}
           </select>
+          {renderTestAgentButton()}
         </div>
 
         <aside className="hidden lg:block w-[280px] shrink-0 border border-black/5 rounded-xl bg-white p-4 h-fit sticky top-6">
-          <button
-            type="button"
-            onClick={() => navigate(pathForTab('ai-agent'))}
-            className="flex items-center gap-2 text-sm font-bold text-[#6B7280] hover:text-[#111827] mb-1"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="truncate" title={agent.name}>
-              {agent.name}
-            </span>
-          </button>
-          {lastAutoSavedAt && section === 'profile' && (
-            <p className="flex items-center gap-1.5 text-xs text-[#6B7280] mb-4 pl-6">
-              <CloudCheck className="w-3.5 h-3.5 text-primary" />
-              Auto Saved at {lastAutoSavedAt}
-            </p>
-          )}
-          {!lastAutoSavedAt && <div className="mb-4" />}
+          <div className="flex items-start justify-between gap-2 mb-1">
+            <button
+              type="button"
+              onClick={() => navigate(pathForTab('ai-agent'))}
+              className="flex min-w-0 items-center gap-2 text-sm font-bold text-[#6B7280] hover:text-[#111827]"
+            >
+              <ArrowLeft className="w-4 h-4 shrink-0" />
+              <span className="truncate" title={agent.name}>
+                {agent.name}
+              </span>
+            </button>
+          </div>
+          <div className="mb-4 flex flex-col gap-2">
+            {lastAutoSavedAt && section === 'profile' ? (
+              <p className="flex items-center gap-1.5 text-xs text-[#6B7280] pl-6">
+                <CloudCheck className="w-3.5 h-3.5 text-primary" />
+                Auto Saved at {lastAutoSavedAt}
+              </p>
+            ) : null}
+            <div className="pl-6">{renderTestAgentButton()}</div>
+          </div>
 
           <nav className="space-y-1">
             <NavLink to={pathForAgent(agentId, 'profile')} className={navLinkClass}>
@@ -291,7 +318,7 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
           )}
 
           {skillId ? (
-            <SkillEditor agentId={agentId} skillId={skillId} avatarUrl={agent.avatarUrl} />
+            <SkillEditor agentId={agentId} skillId={skillId} />
           ) : section === 'skills' ? (
             <SkillsList agentId={agentId} />
           ) : section === 'knowledge' ? (
@@ -314,6 +341,38 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
             />
           )}
         </div>
+      </div>
+
+      {/* Keep panel mounted so mid-test chat survives open/close (Restart still clears). */}
+      <div
+        className={`fixed inset-0 z-50 flex justify-end ${
+          testOpen ? '' : 'pointer-events-none invisible'
+        }`}
+        aria-hidden={!testOpen}
+      >
+        <button
+          type="button"
+          className={`absolute inset-0 bg-gray-900/40 transition-opacity ${
+            testOpen ? 'opacity-100' : 'opacity-0'
+          }`}
+          aria-label="Close test conversation"
+          tabIndex={testOpen ? 0 : -1}
+          onClick={closeTest}
+        />
+        <aside
+          className={`relative flex h-full w-full max-w-[400px] flex-col bg-white shadow-2xl transition-transform duration-200 ${
+            testOpen ? 'translate-x-0' : 'translate-x-full'
+          }`}
+          aria-label="Test conversation"
+        >
+          <ChatPreviewPanel
+            agentId={agent.id}
+            agentName={agent.name}
+            avatarUrl={agent.avatarUrl}
+            language={agent.fallbackLanguage ?? 'english'}
+            onClose={closeTest}
+          />
+        </aside>
       </div>
     </div>
   );

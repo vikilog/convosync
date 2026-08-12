@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Bot, RefreshCw, Send } from 'lucide-react';
+import { Bot, RefreshCw, Send, X } from 'lucide-react';
 import { api } from '../../lib/api';
 import { mapAgentFromApi } from '../../lib/mappers';
 
@@ -33,6 +33,7 @@ type Props = {
   avatarUrl?: string | null;
   welcomeMessage?: string | null;
   language?: string;
+  onClose?: () => void;
 };
 
 type BotAvatarProps = {
@@ -91,6 +92,7 @@ export const ChatPreviewPanel: React.FC<Props> = ({
   avatarUrl: avatarUrlProp,
   welcomeMessage: _welcomeMessage,
   language: _language = 'english',
+  onClose,
 }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
@@ -206,7 +208,7 @@ export const ChatPreviewPanel: React.FC<Props> = ({
   const isEmpty = messages.length === 0 && !loading && !error;
 
   return (
-    <aside className="w-full xl:w-[320px] shrink-0 border border-black/5 rounded-xl bg-white flex flex-col h-[420px] sm:h-[520px] xl:sticky xl:top-6">
+    <div className="flex h-full min-h-0 flex-col bg-white">
       <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-black/5 shrink-0">
         <div className="min-w-0">
           <h4 className="text-sm font-bold text-[#111827]">Test conversation</h4>
@@ -226,6 +228,16 @@ export const ChatPreviewPanel: React.FC<Props> = ({
             <RefreshCw className="w-3.5 h-3.5" />
             Restart
           </button>
+          {onClose ? (
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-50 hover:text-slate-600 cursor-pointer"
+              aria-label="Close test conversation"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          ) : null}
         </div>
       </div>
 
@@ -321,6 +333,6 @@ export const ChatPreviewPanel: React.FC<Props> = ({
           </button>
         </div>
       </div>
-    </aside>
+    </div>
   );
 };

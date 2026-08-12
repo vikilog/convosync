@@ -4,14 +4,12 @@ import { ArrowLeft, MoreHorizontal, Play } from 'lucide-react';
 import type { AgentSkill } from '../types';
 import { api } from '../../../lib/api';
 import { pathForAgent } from '../../../routes';
-import { ChatPreviewPanel } from '../ChatPreviewPanel';
 
 type SaveState = 'idle' | 'saving' | 'saved' | 'error';
 
 type Props = {
   agentId: string;
   skillId: string;
-  avatarUrl?: string | null;
 };
 
 const SLASH_COMMANDS = [
@@ -33,7 +31,7 @@ function mapSkill(raw: Record<string, unknown>): AgentSkill {
   };
 }
 
-export const SkillEditor: React.FC<Props> = ({ agentId, skillId, avatarUrl }) => {
+export const SkillEditor: React.FC<Props> = ({ agentId, skillId }) => {
   const navigate = useNavigate();
   const [skill, setSkill] = useState<AgentSkill | null>(null);
   const [loading, setLoading] = useState(true);
@@ -169,8 +167,7 @@ export const SkillEditor: React.FC<Props> = ({ agentId, skillId, avatarUrl }) =>
   );
 
   return (
-    <div className="flex gap-6 w-full">
-      <div className="flex-1 min-w-0 max-w-3xl mx-auto">
+    <div className="w-full max-w-3xl mx-auto">
         <div className="flex items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-3 min-w-0">
             <button
@@ -290,9 +287,6 @@ export const SkillEditor: React.FC<Props> = ({ agentId, skillId, avatarUrl }) =>
             </div>
           )}
         </section>
-      </div>
-
-      <ChatPreviewPanel agentId={agentId} avatarUrl={avatarUrl} />
     </div>
   );
 };
