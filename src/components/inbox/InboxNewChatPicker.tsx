@@ -44,7 +44,7 @@ function accountLabel(acc: WhatsAppInboxAccount): string {
 export type InboxEmailSendPayload = {
   contactId: string;
   subject: string;
-  text: string;
+  text?: string;
   html?: string;
   templateId?: string;
 };
@@ -131,12 +131,8 @@ export function InboxNewChatPicker({
     setTemplatesLoading(true);
     try {
       const raw = (await api.getEmailTemplates()) as EmailTemplateOption[];
-      const list = (raw ?? []).filter((t) => t.id && t.name);
-      list.sort((a, b) => {
-        if (a.status === 'active' && b.status !== 'active') return -1;
-        if (b.status === 'active' && a.status !== 'active') return 1;
-        return a.name.localeCompare(b.name);
-      });
+      const list = (raw ?? []).filter((t) => t.id && t.name && t.status === 'active');
+      list.sort((a, b) => a.name.localeCompare(b.name));
       setTemplates(list);
     } catch {
       setTemplates([]);
@@ -222,7 +218,7 @@ export function InboxNewChatPicker({
       setFieldError('Subject is required.');
       return;
     }
-    if (!message.trim() && !htmlBody?.trim()) {
+    if (!templateId && !message.trim() && !htmlBody?.trim()) {
       setFieldError('Message is required.');
       return;
     }
@@ -233,12 +229,16 @@ export function InboxNewChatPicker({
 
     setSending(true);
     try {
+      // templateId → server loads HTML from template (campaign path). Custom → html+text multipart.
       await onSendEmail({
         contactId: emailContact.id,
         subject: subject.trim(),
-        text: message.trim(),
-        ...(htmlBody?.trim() ? { html: htmlBody } : {}),
-        ...(templateId ? { templateId } : {}),
+        ...(templateId
+          ? { templateId, ...(message.trim() ? { text: message.trim() } : {}) }
+          : {
+              text: message.trim(),
+              ...(htmlBody?.trim() ? { html: htmlBody } : {}),
+            }),
       });
     } catch {
       // Parent surfaces error
@@ -384,7 +384,6 @@ export function InboxNewChatPicker({
                     <option value="">No template — write your own</option>
                     {templates.map((t) => (
                       <option key={t.id} value={t.id}>
-                        {t.status === 'active' ? '● ' : ''}
                         {t.name}
                       </option>
                     ))}
@@ -418,7 +417,9 @@ export function InboxNewChatPicker({
                     value={message}
                     onChange={(e) => {
                       setMessage(e.target.value);
+                      // Body edit leaves template path — send as custom multipart instead.
                       setHtmlBody(undefined);
+                      setTemplateId('');
                       setFieldError(null);
                     }}
                     rows={7}
