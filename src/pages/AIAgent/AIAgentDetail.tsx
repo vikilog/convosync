@@ -5,7 +5,6 @@ import {
   ChevronDown,
   ChevronRight,
   CloudCheck,
-  MessageSquare,
 } from 'lucide-react';
 import type { AgentBot } from '../../types';
 import type { AgentProfileData } from '../../components/ai-agent/types';
@@ -52,6 +51,7 @@ function toProfileData(agent: AgentBot): AgentProfileData {
     voiceSttProvider: agent.voiceSttProvider || 'cartesia',
     voiceTtsProvider: agent.voiceTtsProvider || 'cartesia',
     voiceTtsVoiceId: agent.voiceTtsVoiceId ?? null,
+    similarityLowThreshold: agent.similarityLowThreshold ?? null,
   };
 }
 
@@ -101,21 +101,28 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
     }
   };
 
-  const buildProfilePayload = (patch: Partial<AgentProfileData>) => ({
-    name: patch.name,
-    description: patch.description,
-    avatarUrl: patch.avatarUrl,
-    toneOfVoice: patch.toneOfVoice,
-    fallbackLanguage: patch.fallbackLanguage,
-    instructions: patch.instructions,
-    brandBackground: patch.brandBackground,
-    actions: patch.actions,
-    voiceAgentEnabled: patch.voiceAgentEnabled,
-    voiceSttProvider: patch.voiceSttProvider,
-    voiceTtsProvider: patch.voiceTtsProvider,
-    voiceTtsVoiceId: patch.voiceTtsVoiceId,
-    isPublished: patch.isPublished,
-  });
+  const buildProfilePayload = (patch: Partial<AgentProfileData>) => {
+    const payload: Record<string, unknown> = {
+      name: patch.name,
+      description: patch.description,
+      avatarUrl: patch.avatarUrl,
+      toneOfVoice: patch.toneOfVoice,
+      fallbackLanguage: patch.fallbackLanguage,
+      instructions: patch.instructions,
+      brandBackground: patch.brandBackground,
+      actions: patch.actions,
+      voiceAgentEnabled: patch.voiceAgentEnabled,
+      voiceSttProvider: patch.voiceSttProvider,
+      voiceTtsProvider: patch.voiceTtsProvider,
+      voiceTtsVoiceId: patch.voiceTtsVoiceId,
+      isPublished: patch.isPublished,
+    };
+    // Omit null so autosave of other fields does not clear a server/env default override.
+    if (typeof patch.similarityLowThreshold === 'number') {
+      payload.similarityLowThreshold = patch.similarityLowThreshold;
+    }
+    return payload;
+  };
 
   const handleProfileUpdate = (patch: Partial<AgentProfileData>) => {
     if (!agent) return;
@@ -135,6 +142,7 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
       voiceSttProvider: mergedProfile.voiceSttProvider,
       voiceTtsProvider: mergedProfile.voiceTtsProvider,
       voiceTtsVoiceId: mergedProfile.voiceTtsVoiceId,
+      similarityLowThreshold: mergedProfile.similarityLowThreshold,
       isPublished: mergedProfile.isPublished,
     });
     void persist({
@@ -150,6 +158,9 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
       voiceSttProvider: mergedProfile.voiceSttProvider,
       voiceTtsProvider: mergedProfile.voiceTtsProvider,
       voiceTtsVoiceId: mergedProfile.voiceTtsVoiceId,
+      ...(typeof mergedProfile.similarityLowThreshold === 'number'
+        ? { similarityLowThreshold: mergedProfile.similarityLowThreshold }
+        : {}),
       isPublished: mergedProfile.isPublished,
     }).then(() => {
       setLastAutoSavedAt(formatSavedTime(new Date()));
@@ -218,21 +229,10 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
   const openTest = () => setTestOpen(true);
   const closeTest = () => setTestOpen(false);
 
-  const renderTestAgentButton = () => (
-    <button
-      type="button"
-      onClick={openTest}
-      className="inline-flex items-center gap-1.5 rounded-xl border border-black/5 bg-white px-3 py-2 text-sm font-bold text-[#111827] hover:border-primary hover:text-primary transition-colors cursor-pointer"
-    >
-      <MessageSquare className="w-4 h-4" />
-      Test Agent
-    </button>
-  );
-
   return (
     <div className="flex-1 w-full pb-12 text-left">
       <div className="flex flex-col lg:flex-row w-full min-h-[calc(100vh-12rem)] gap-0">
-        <div className="lg:hidden mb-4 flex items-center gap-2">
+        <div className="lg:hidden mb-4">
           <label htmlFor="agent-section-mobile" className="sr-only">
             Agent section
           </label>
@@ -240,7 +240,7 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
             id="agent-section-mobile"
             value={mobileNavValue}
             onChange={(e) => navigate(e.target.value)}
-            className="min-w-0 flex-1 rounded-xl bg-white ring-1 ring-slate-200/80 px-3 py-2.5 text-sm font-semibold text-[#111827]"
+            className="w-full rounded-xl bg-white ring-1 ring-slate-200/80 px-3 py-2.5 text-sm font-semibold text-[#111827]"
           >
             {mobileNavOptions.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -248,7 +248,6 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
               </option>
             ))}
           </select>
-          {renderTestAgentButton()}
         </div>
 
         <aside className="hidden lg:block w-[280px] shrink-0 border border-black/5 rounded-xl bg-white p-4 h-fit sticky top-6">
@@ -264,17 +263,14 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
               </span>
             </button>
           </div>
-          <div className="mb-4 flex flex-col gap-2">
-            {lastAutoSavedAt && section === 'profile' ? (
-              <p className="flex items-center gap-1.5 text-xs text-[#6B7280] pl-6">
-                <CloudCheck className="w-3.5 h-3.5 text-primary" />
-                Auto Saved at {lastAutoSavedAt}
-              </p>
-            ) : null}
-            <div className="pl-6">{renderTestAgentButton()}</div>
-          </div>
+          {lastAutoSavedAt && section === 'profile' ? (
+            <p className="mb-4 flex items-center gap-1.5 text-xs text-[#6B7280] pl-6">
+              <CloudCheck className="w-3.5 h-3.5 text-primary" />
+              Auto Saved at {lastAutoSavedAt}
+            </p>
+          ) : null}
 
-          <nav className="space-y-1">
+          <nav className={`space-y-1 ${lastAutoSavedAt && section === 'profile' ? '' : 'mt-3'}`}>
             <NavLink to={pathForAgent(agentId, 'profile')} className={navLinkClass}>
               Profile
             </NavLink>
@@ -336,6 +332,7 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
               profile={toProfileData(agent)}
               onUpdate={handleProfileUpdate}
               onPublish={handlePublish}
+              onTestAgent={openTest}
               saving={saving}
               onSaved={() => setLastAutoSavedAt(formatSavedTime(new Date()))}
             />

@@ -420,6 +420,12 @@ export function mapAgentFromApi(raw: Record<string, unknown>): AgentBot {
       raw.voiceTtsVoiceId == null || raw.voiceTtsVoiceId === ''
         ? null
         : String(raw.voiceTtsVoiceId),
+    similarityLowThreshold: (() => {
+      const rules = raw.escalationRules;
+      if (!rules || typeof rules !== 'object' || Array.isArray(rules)) return null;
+      const v = (rules as Record<string, unknown>).similarityLowThreshold;
+      return typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 1 ? v : null;
+    })(),
     isPublished: Boolean(raw.isPublished),
     publishedAt: raw.publishedAt ? String(raw.publishedAt) : null,
     conversationsCount: Number(raw.conversationsCount ?? 0),

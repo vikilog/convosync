@@ -49,6 +49,11 @@ export interface AgentProfileData {
   voiceSttProvider: string;
   voiceTtsProvider: string;
   voiceTtsVoiceId: string | null;
+  /**
+   * Knowledge match / escalate low bar (0–1).
+   * null = use server env default (SIMILARITY_LOW_THRESHOLD ≈ 0.70).
+   */
+  similarityLowThreshold: number | null;
 }
 
 export interface AgentSkill {

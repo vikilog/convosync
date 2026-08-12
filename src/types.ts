@@ -444,6 +444,8 @@ export interface AgentBot {
   voiceSttProvider?: string;
   voiceTtsProvider?: string;
   voiceTtsVoiceId?: string | null;
+  /** 0–1 knowledge match threshold; null = env default. */
+  similarityLowThreshold?: number | null;
   isPublished?: boolean;
   publishedAt?: string | null;
   conversationsCount: number;

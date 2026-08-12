@@ -5,6 +5,7 @@ import {
   ChevronDown,
   Coffee,
   Handshake,
+  MessageSquare,
   Pencil,
   Smile,
 } from 'lucide-react';
@@ -19,10 +20,14 @@ import { WritingGuideDrawer } from './WritingGuideDrawer';
 import { INSTRUCTIONS_PLACEHOLDER, TONE_OPTIONS } from './constants';
 import { defaultAgentActions } from './constants';
 
+/** Matches backend SIMILARITY_LOW_THRESHOLD default when agent has no override. */
+const DEFAULT_SIMILARITY_LOW_THRESHOLD = 0.7;
+
 type Props = {
   profile: AgentProfileData;
   onUpdate: (patch: Partial<AgentProfileData>) => void;
   onPublish: (patch: Partial<AgentProfileData>) => Promise<void>;
+  onTestAgent?: () => void;
   saving?: boolean;
   onSaved?: () => void;
 };
@@ -100,6 +105,7 @@ export const AgentProfile: React.FC<Props> = ({
   profile,
   onUpdate,
   onPublish,
+  onTestAgent,
   saving,
   onSaved,
 }) => {
@@ -201,6 +207,16 @@ export const AgentProfile: React.FC<Props> = ({
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+            {onTestAgent ? (
+              <button
+                type="button"
+                onClick={onTestAgent}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-black/5 bg-white px-3 py-2 text-sm font-bold text-[#111827] hover:border-primary hover:text-primary transition-colors cursor-pointer"
+              >
+                <MessageSquare className="w-4 h-4" />
+                Test Agent
+              </button>
+            ) : null}
             <span
               className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ${
                 local.isPublished
@@ -308,6 +324,43 @@ export const AgentProfile: React.FC<Props> = ({
               </select>
               <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280] pointer-events-none" />
             </div>
+          </section>
+
+          <section className="bg-white ring-1 ring-slate-200/80 rounded-xl p-5">
+            <div className="flex items-center justify-between gap-2 mb-1">
+              <div className="flex items-center gap-2">
+                <label
+                  htmlFor="knowledge-match-threshold"
+                  className="text-sm font-medium text-[#111827]"
+                >
+                  Knowledge match threshold
+                </label>
+                <InfoTooltip text="Minimum embedding similarity to use Knowledge Base. Below this, the agent escalates instead of guessing." />
+              </div>
+              <span className="text-xs font-bold text-[#374151] tabular-nums">
+                {Math.round(
+                  (local.similarityLowThreshold ?? DEFAULT_SIMILARITY_LOW_THRESHOLD) * 100
+                )}
+                %
+              </span>
+            </div>
+            <input
+              id="knowledge-match-threshold"
+              type="range"
+              min={0}
+              max={100}
+              step={1}
+              value={Math.round(
+                (local.similarityLowThreshold ?? DEFAULT_SIMILARITY_LOW_THRESHOLD) * 100
+              )}
+              onChange={(e) =>
+                patchLocal({ similarityLowThreshold: Number(e.target.value) / 100 })
+              }
+              className="mt-2 w-full accent-[var(--color-primary,#4f46e5)]"
+            />
+            <p className="mt-1.5 text-xs text-[#6B7280]">
+              Default 70%. Higher = stricter KB matches; lower = more answers from weaker matches.
+            </p>
           </section>
 
           <section className="bg-white ring-1 ring-slate-200/80 rounded-xl p-5 space-y-3">
