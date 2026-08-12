@@ -20,7 +20,8 @@ export type ChatMessageType =
   | 'document'
   | 'sticker'
   | 'location'
-  | 'template';
+  | 'template'
+  | 'email';
 
 export interface ChatMessageMedia {
   mimeType?: string;
@@ -52,6 +53,13 @@ export interface ChatMessage {
   revoked?: boolean;
   /** Optimistic local preview while outbound media is uploading */
   localPreviewUrl?: string;
+  /** Email / WA template chrome in Inbox */
+  templateName?: string;
+  templateId?: string;
+  /** Email subject (outbound email / email template) */
+  emailSubject?: string;
+  /** Email open/click tracking — provider reported a link click */
+  clicked?: boolean;
 }
 
 export interface ContactAttribute {

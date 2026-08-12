@@ -262,6 +262,19 @@ export function mapMessageFromApi(raw: Record<string, unknown>): ChatMessage {
     deliveryError,
     retryCount: typeof raw.retryCount === 'number' ? raw.retryCount : undefined,
     revoked,
+    templateName:
+      typeof metadata?.templateName === 'string' && metadata.templateName
+        ? metadata.templateName
+        : undefined,
+    templateId:
+      typeof metadata?.templateId === 'string' && metadata.templateId
+        ? metadata.templateId
+        : undefined,
+    emailSubject:
+      typeof metadata?.subject === 'string' && metadata.subject
+        ? metadata.subject
+        : undefined,
+    clicked: metadata?.clicked === true,
   };
 }
 

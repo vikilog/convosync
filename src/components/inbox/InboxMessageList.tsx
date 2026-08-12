@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import { Check, CheckCheck, Loader2, PauseCircle, X } from 'lucide-react';
+import { Check, CheckCheck, Loader2, MousePointerClick, PauseCircle, X } from 'lucide-react';
 import type { ChatMessage } from '../../types';
 import { formatMessageClock } from '../../lib/formatDates';
 import { ResendButton } from '../shared/ResendButton';
@@ -143,6 +143,64 @@ const MessageBubble: React.FC<{
     )
   ) : null;
 
+  const isEmailTemplateBubble =
+    channel === 'email' &&
+    !isDeleted &&
+    (messageType === 'template' || Boolean(message.templateName) || Boolean(message.templateId));
+
+  const emailBodyText = (() => {
+    if (!message.emailSubject) return message.content;
+    const subject = message.emailSubject.trim();
+    const body = message.content.trim();
+    if (!body || body === subject) return '';
+    // Older sends stored `${subject}\n\n${body}` in content — strip subject prefix.
+    if (body.startsWith(`${subject}\n\n`)) return body.slice(subject.length + 2).trim();
+    return body;
+  })();
+
+  const renderEmailTemplateBody = (opts: { onDark: boolean }) => (
+    <div className="text-left space-y-1.5">
+      <div className="flex flex-wrap items-center gap-1.5">
+        <span
+          className={`text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded ${
+            opts.onDark
+              ? 'bg-white/15 text-white/90'
+              : 'bg-emerald-50 text-emerald-800 border border-emerald-100'
+          }`}
+        >
+          Template
+        </span>
+        {message.templateName ? (
+          <span
+            className={`text-[11px] font-semibold truncate max-w-[220px] ${
+              opts.onDark ? 'text-white/80' : 'text-gray-500'
+            }`}
+          >
+            {message.templateName}
+          </span>
+        ) : null}
+      </div>
+      {message.emailSubject ? (
+        <p
+          className={`text-sm font-bold leading-snug break-words ${
+            opts.onDark ? 'text-white' : 'text-gray-900'
+          }`}
+        >
+          {message.emailSubject}
+        </p>
+      ) : null}
+      {emailBodyText ? (
+        <p
+          className={`text-sm leading-relaxed whitespace-pre-wrap break-words ${
+            opts.onDark ? 'text-white/90' : 'text-gray-700'
+          }`}
+        >
+          {emailBodyText}
+        </p>
+      ) : null}
+    </div>
+  );
+
   const motionProps = reduceMotion
     ? {}
     : {
@@ -269,6 +327,37 @@ const MessageBubble: React.FC<{
         ? 'bg-[#0084ff] border-[#0084ff] text-white'
         : 'bg-channel-green border-channel-green text-white';
 
+  const footerStatus =
+    !isContact &&
+    (message.status === 'sending' ? (
+      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+    ) : message.status === 'failed' ? (
+      <span title={message.deliveryError || 'Delivery failed'}>
+        <X className="w-3.5 h-3.5 text-red-500" />
+      </span>
+    ) : message.status === 'read' ? (
+      <CheckCheck
+        className={`w-3.5 h-3.5 ${
+          channel === 'instagram' ? 'text-sky-500' : channel === 'email' ? 'text-sky-500' : 'text-accent-green'
+        }`}
+      />
+    ) : message.status === 'delivered' ? (
+      <CheckCheck className="w-3.5 h-3.5 text-gray-400" />
+    ) : (
+      <Check className="w-3.5 h-3.5 text-gray-400" />
+    ));
+
+  const footerClickBadge =
+    !isContact && message.clicked ? (
+      <span
+        title="Link clicked"
+        className="inline-flex items-center gap-0.5 rounded-full bg-violet-50 text-violet-700 border border-violet-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide"
+      >
+        <MousePointerClick className="w-3 h-3" strokeWidth={2.5} aria-hidden />
+        Clicked
+      </span>
+    ) : null;
+
   return (
     <motion.div
       {...motionProps}
@@ -277,7 +366,9 @@ const MessageBubble: React.FC<{
       } ${message.status === 'sending' ? 'opacity-90' : ''}`}
     >
       <div
-        className={`relative p-3.5 shadow-sm border font-medium text-sm leading-relaxed whitespace-pre-wrap break-words rounded-2xl ${
+        className={`relative p-3.5 shadow-sm border font-medium text-sm leading-relaxed break-words rounded-2xl ${
+          isEmailTemplateBubble ? '' : 'whitespace-pre-wrap'
+        } ${
           isContact
             ? 'bg-white border-black/5 text-gray-900 rounded-tl-md'
             : `${outboundClass} rounded-tr-md border-transparent`
@@ -291,30 +382,16 @@ const MessageBubble: React.FC<{
         )}
         {isDeleted
           ? 'This message was deleted'
-          : message.content === '[media]'
-            ? 'Media'
-            : message.content}
+          : isEmailTemplateBubble
+            ? renderEmailTemplateBody({ onDark: !isContact })
+            : message.content === '[media]'
+              ? 'Media'
+              : message.content}
       </div>
-      <div className="flex items-center gap-1 mt-1 text-meta text-gray-400 font-bold font-mono px-1">
+      <div className="flex items-center gap-1.5 mt-1 text-meta text-gray-400 font-bold font-mono px-1">
         <span>{time}</span>
-        {!isContact &&
-          (message.status === 'sending' ? (
-            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-          ) : message.status === 'failed' ? (
-            <span title={message.deliveryError || 'Delivery failed'}>
-              <X className="w-3.5 h-3.5 text-red-500" />
-            </span>
-          ) : message.status === 'read' ? (
-            <CheckCheck
-              className={`w-3.5 h-3.5 ${
-                channel === 'instagram' ? 'text-sky-500' : 'text-accent-green'
-              }`}
-            />
-          ) : message.status === 'delivered' ? (
-            <CheckCheck className="w-3.5 h-3.5 text-gray-400" />
-          ) : (
-            <Check className="w-3.5 h-3.5 text-gray-400" />
-          ))}
+        {footerStatus}
+        {footerClickBadge}
       </div>
       {!isContact && message.status === 'failed' && (
         <>

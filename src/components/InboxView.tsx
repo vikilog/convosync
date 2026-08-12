@@ -1022,9 +1022,10 @@ export const InboxView: React.FC = () => {
     const onMessageStatus = (payload: {
       messageId: string;
       status: string;
+      clicked?: boolean;
       errors?: Array<{ code?: number; title?: string; message?: string }>;
     }) => {
-      const { messageId, status, errors } = payload;
+      const { messageId, status, clicked, errors } = payload;
       if (!messageId || !status) return;
       const err = errors?.[0];
       const deliveryError = err
@@ -1047,8 +1048,16 @@ export const InboxView: React.FC = () => {
             const cutoff = new Date(anchor.createdAt).getTime();
             next[convId] = msgs.map((m) => {
               if (m.sender === 'contact') return m;
+              if (m.id === messageId) {
+                return {
+                  ...m,
+                  status: 'read',
+                  ...(clicked || m.clicked ? { clicked: true } : {}),
+                  ...(deliveryError ? { deliveryError } : {}),
+                };
+              }
               if (m.status === 'read') return m;
-              if (m.id === messageId || new Date(m.createdAt).getTime() <= cutoff) {
+              if (new Date(m.createdAt).getTime() <= cutoff) {
                 return { ...m, status: 'read' };
               }
               return m;
@@ -1059,6 +1068,7 @@ export const InboxView: React.FC = () => {
                 ? {
                     ...m,
                     status: status as ChatMessage['status'],
+                    ...(clicked || m.clicked ? { clicked: true } : {}),
                     ...(deliveryError ? { deliveryError } : {}),
                   }
                 : m
