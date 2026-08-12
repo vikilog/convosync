@@ -7,6 +7,12 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { X, Plus, Info, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { api } from '../../lib/api';
+import {
+  dialForCountry,
+  listDialCodeOptions,
+  splitPhone,
+  toE164,
+} from '../../lib/locale/dialCodes';
 import { ContactLeadJourneyPanel } from '../leads/ContactLeadJourneyPanel';
 import { ContactLinkedChannelsPanel } from './ContactLinkedChannelsPanel';
 import { TagChipInput } from '../tags/TagChipInput';
@@ -41,12 +47,8 @@ type Props = {
   editContact?: ContactEditPayload | null;
 };
 
-const COUNTRY_CODES = [
-  { code: '+91', label: 'IN +91' },
-  { code: '+1', label: 'US +1' },
-  { code: '+971', label: 'AE +971' },
-  { code: '+44', label: 'UK +44' },
-];
+const DIAL_OPTIONS = listDialCodeOptions();
+const DEFAULT_DIAL = dialForCountry('IN');
 
 type Member = { userId: string; name: string; email: string };
 
@@ -55,20 +57,6 @@ const LEAD_JOURNEY_FIELD = 'leadJourney';
 
 function isSyntheticChannelPhone(phone: string): boolean {
   return phone.startsWith('fb:') || phone.startsWith('ig:');
-}
-
-function parsePhoneParts(phone: string): { countryCode: string; local: string } {
-  if (!phone.startsWith('+')) {
-    return { countryCode: '+91', local: phone.replace(/\D/g, '') };
-  }
-  const match = COUNTRY_CODES.map((c) => c.code)
-    .sort((a, b) => b.length - a.length)
-    .find((code) => phone.startsWith(code));
-  if (!match) return { countryCode: '+91', local: phone.replace(/\D/g, '') };
-  return {
-    countryCode: match,
-    local: phone.slice(match.length).replace(/\D/g, ''),
-  };
 }
 
 function customFieldsToRows(fields: Record<string, string> | undefined): { key: string; value: string }[] {
@@ -86,7 +74,7 @@ function customFieldsToRows(fields: Record<string, string> | undefined): { key: 
 export function AddContactDrawer({ open, onClose, onCreated, onSaved, editContact }: Props) {
   const isEdit = Boolean(editContact?.id);
   const [nickname, setNickname] = useState('');
-  const [countryCode, setCountryCode] = useState('+91');
+  const [phoneDial, setPhoneDial] = useState(DEFAULT_DIAL);
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [ownerId, setOwnerId] = useState('');
@@ -111,14 +99,15 @@ export function AddContactDrawer({ open, onClose, onCreated, onSaved, editContac
 
   useEffect(() => {
     if (!open || !editContact) return;
-    const { countryCode: cc, local } = parsePhoneParts(editContact.phone);
+    const cf = editContact.customFields ?? {};
+    const countryHint = typeof cf.country === 'string' ? cf.country : undefined;
+    const { dial, national } = splitPhone(editContact.phone, countryHint);
     setNickname(editContact.name);
-    setCountryCode(cc);
-    setPhone(local);
+    setPhoneDial(dial);
+    setPhone(national);
     setEmail(editContact.email ?? '');
     setTags(editContact.tags ?? []);
     setExcludeFromInsights(Boolean(editContact.excludeFromInsights));
-    const cf = editContact.customFields ?? {};
     setOwnerId(typeof cf.ownerId === 'string' ? cf.ownerId : '');
     const rows = customFieldsToRows(cf);
     setCustomAttrs(rows);
@@ -128,7 +117,7 @@ export function AddContactDrawer({ open, onClose, onCreated, onSaved, editContac
 
   const reset = () => {
     setNickname('');
-    setCountryCode('+91');
+    setPhoneDial(DEFAULT_DIAL);
     setPhone('');
     setEmail('');
     setOwnerId('');
@@ -144,13 +133,7 @@ export function AddContactDrawer({ open, onClose, onCreated, onSaved, editContac
     onClose();
   };
 
-  const fullPhone = useMemo(() => {
-    const digits = phone.replace(/\D/g, '');
-    const cc = countryCode.replace(/\D/g, '');
-    if (!digits) return '';
-    if (digits.startsWith(cc)) return `+${digits}`;
-    return `${countryCode}${digits}`;
-  }, [countryCode, phone]);
+  const fullPhone = useMemo(() => toE164(phoneDial, phone), [phoneDial, phone]);
 
   const phoneLocked =
     isEdit &&
@@ -291,15 +274,19 @@ export function AddContactDrawer({ open, onClose, onCreated, onSaved, editContac
                       className="mt-1.5 w-full text-sm border border-slate-200 rounded-lg px-3 py-2.5 bg-gray-50 text-gray-500"
                     />
                   ) : (
-                    <div className="mt-1.5 flex gap-2">
+                    <div className="mt-1.5 flex min-w-0 items-stretch gap-2">
                       <select
-                        value={countryCode}
-                        onChange={(e) => setCountryCode(e.target.value)}
-                        className="w-[100px] shrink-0 text-sm border border-slate-200 rounded-lg px-2 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        value={phoneDial}
+                        onChange={(e) => setPhoneDial(e.target.value)}
+                        aria-label="Country code"
+                        className="w-auto max-w-[7.5rem] shrink-0 cursor-pointer text-sm border border-slate-200 rounded-lg px-2 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"
                       >
-                        {COUNTRY_CODES.map((c) => (
-                          <option key={c.code} value={c.code}>
-                            {c.label}
+                        {!DIAL_OPTIONS.some((o) => o.dial === phoneDial) && (
+                          <option value={phoneDial}>{phoneDial}</option>
+                        )}
+                        {DIAL_OPTIONS.map((o) => (
+                          <option key={o.dial} value={o.dial}>
+                            {o.label}
                           </option>
                         ))}
                       </select>
@@ -309,7 +296,7 @@ export function AddContactDrawer({ open, onClose, onCreated, onSaved, editContac
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         placeholder="Phone number"
-                        className="flex-1 text-sm border border-slate-200 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        className="min-w-0 flex-1 text-sm border border-slate-200 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20"
                       />
                     </div>
                   )}
