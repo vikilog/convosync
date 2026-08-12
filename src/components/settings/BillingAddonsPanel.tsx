@@ -22,6 +22,7 @@ export type AddonCatalogEntry = {
 
 type BillingAddonsPanelProps = {
   addonCatalog: AddonCatalogEntry[];
+  currency?: 'INR' | 'USD';
   fx?: {
     usdInrRate: number;
     fetchedAt: string;
@@ -35,7 +36,12 @@ function formatUsdPerUnit(usd: number): string {
   return `$${usd.toFixed(2)}`;
 }
 
-export function BillingAddonsPanel({ addonCatalog, fx, onPurchased }: BillingAddonsPanelProps) {
+export function BillingAddonsPanel({
+  addonCatalog,
+  currency = 'INR',
+  fx,
+  onPurchased,
+}: BillingAddonsPanelProps) {
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [checkoutType, setCheckoutType] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -57,13 +63,14 @@ export function BillingAddonsPanel({ addonCatalog, fx, onPurchased }: BillingAdd
         orderId: string;
         keyId: string;
         amountPaise: number;
+        currency?: string;
       };
 
       await openRazorpayCheckout({
         key: order.keyId,
         order_id: order.orderId,
         amount: order.amountPaise,
-        currency: 'INR',
+        currency: order.currency ?? 'INR',
         name: 'ConvoSync',
         description: `${entry.label} add-on`,
         theme: { color: '#0284c7' },
@@ -115,7 +122,7 @@ export function BillingAddonsPanel({ addonCatalog, fx, onPurchased }: BillingAdd
             <p className="mt-2 text-sm font-semibold text-slate-900">
               {formatUsdPerUnit(entry.usdPerUnit)} / {entry.unitLabel}{' '}
               <span className="font-normal text-slate-500">
-                ({formatInrPaise(entry.unitPaise)} per block)
+                ({formatInrPaise(entry.unitPaise, currency)} per block)
               </span>
             </p>
           </div>
@@ -177,7 +184,9 @@ export function BillingAddonsPanel({ addonCatalog, fx, onPurchased }: BillingAdd
 
           <div className="text-right">
             <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Total</p>
-            <p className="mt-1 text-base font-semibold text-slate-900">{formatInrPaise(totalPaise)}</p>
+            <p className="mt-1 text-base font-semibold text-slate-900">
+              {formatInrPaise(totalPaise, currency)}
+            </p>
           </div>
 
           <button

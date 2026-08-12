@@ -1,3 +1,5 @@
+export type BillingCurrency = 'INR' | 'USD';
+
 export function formatInrAmount(rupees: number, decimals = 2): string {
   return new Intl.NumberFormat('en-IN', {
     style: 'currency',
@@ -7,7 +9,16 @@ export function formatInrAmount(rupees: number, decimals = 2): string {
   }).format(rupees);
 }
 
+/** Format minor units (paise or cents) for invoice/checkout display. */
 export function formatInrPaise(paise: number, currency = 'INR'): string {
+  if (currency === 'USD') {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(paise / 100);
+  }
   if (currency !== 'INR') {
     return `${(paise / 100).toFixed(2)} ${currency}`;
   }
@@ -16,6 +27,18 @@ export function formatInrPaise(paise: number, currency = 'INR'): string {
     currency: 'INR',
     maximumFractionDigits: 0,
   }).format(paise / 100);
+}
+
+export function formatMoneyMajor(amount: number, currency: BillingCurrency): string {
+  if (currency === 'USD') {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  }
+  return `₹${amount.toLocaleString('en-IN')}`;
 }
 
 export function formatBillingDate(iso: string | null): string {

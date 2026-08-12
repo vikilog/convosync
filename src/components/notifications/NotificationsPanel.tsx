@@ -1,6 +1,15 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { CheckCheck, Megaphone, AlertTriangle, CheckCircle2, Info, XCircle } from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
+import {
+  CheckCheck,
+  Megaphone,
+  AlertTriangle,
+  CheckCircle2,
+  Info,
+  XCircle,
+  X,
+  Activity,
+} from 'lucide-react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { api } from '../../lib/api';
 import { formatNotificationRelativeTime } from '../../lib/notificationTime';
 import { getSocket } from '../../lib/socket';
@@ -24,7 +33,10 @@ const TABS = [
   { id: 'all', label: 'All' },
   { id: 'campaigns', label: 'Campaigns' },
   { id: 'system', label: 'System' },
+  { id: 'activity', label: 'Activity' },
 ] as const;
+
+type TabId = (typeof TABS)[number]['id'];
 
 function SeverityIcon({ severity }: { severity: string }) {
   const cls = 'h-4 w-4 shrink-0';
@@ -56,30 +68,41 @@ type Props = {
   open: boolean;
   onClose: () => void;
   onUnreadChange?: (n: number) => void;
-  /** Extra classes for the panel shell (e.g. sidebar-anchored fixed position). */
-  panelClassName?: string;
 };
 
 export const NotificationsPanel: React.FC<Props> = ({
   open,
   onClose,
   onUnreadChange,
-  panelClassName,
 }) => {
-  const [tab, setTab] = useState<(typeof TABS)[number]['id']>('all');
+  const reduceMotion = useReducedMotion();
+  const [tab, setTab] = useState<TabId>('all');
   const [items, setItems] = useState<InAppNotification[]>([]);
   const [loading, setLoading] = useState(false);
+  const isActivity = tab === 'activity';
 
   const load = useCallback(async () => {
     setLoading(true);
+    setItems([]);
     try {
-      const res = await api.getInAppNotifications({
-        category: tab === 'all' ? undefined : tab,
-        limit: 40,
-      });
-      setItems(res.items ?? []);
-      const unreadRes = await api.getInAppNotificationUnreadCount();
-      onUnreadChange?.(unreadRes.unread ?? 0);
+      if (tab === 'activity') {
+        const res = await api.getRecentActivity(40);
+        setItems(
+          (res.items ?? []).map((i) => ({
+            ...i,
+            unread: false,
+            forBell: false,
+          }))
+        );
+      } else {
+        const res = await api.getInAppNotifications({
+          category: tab === 'all' ? undefined : tab,
+          limit: 40,
+        });
+        setItems(res.items ?? []);
+        const unreadRes = await api.getInAppNotificationUnreadCount();
+        onUnreadChange?.(unreadRes.unread ?? 0);
+      }
     } catch {
       // ignore
     } finally {
@@ -92,9 +115,19 @@ export const NotificationsPanel: React.FC<Props> = ({
   }, [open, load]);
 
   useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
+
+  useEffect(() => {
     const s = getSocket();
     const onNote = (payload: InAppNotification) => {
       if (payload.forBell === false) return;
+      if (tab === 'activity') return;
       setItems((prev) => {
         if (prev.some((p) => p.id === payload.id)) return prev;
         if (tab !== 'all' && payload.category !== tab) return prev;
@@ -132,37 +165,57 @@ export const NotificationsPanel: React.FC<Props> = ({
     <AnimatePresence>
       {open && (
         <>
-          <button
+          <motion.button
             type="button"
-            className="fixed inset-0 z-[60] cursor-default bg-transparent"
             aria-label="Close notifications"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: reduceMotion ? 0 : 0.18 }}
+            className="fixed inset-0 z-[60] cursor-pointer border-0 bg-gray-900/35"
             onClick={onClose}
           />
-          <motion.div
-            initial={{ opacity: 0, y: 6, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 4, scale: 0.98 }}
-            transition={{ duration: 0.15 }}
-            className={
-              panelClassName ??
-              'absolute right-0 top-full z-[70] mt-2 flex w-[min(380px,calc(100vw-1.5rem))] flex-col overflow-hidden rounded-xl border border-black/8 bg-white shadow-lg shadow-black/10'
-            }
+          <motion.aside
             role="dialog"
+            aria-modal="true"
             aria-label="Notifications"
+            initial={reduceMotion ? false : { x: '100%' }}
+            animate={{ x: 0 }}
+            exit={reduceMotion ? undefined : { x: '100%' }}
+            transition={
+              reduceMotion
+                ? { duration: 0 }
+                : { type: 'spring', damping: 28, stiffness: 320 }
+            }
+            className="fixed inset-y-0 right-0 z-[70] flex w-full max-w-[min(400px,92vw)] flex-col overflow-hidden bg-white shadow-2xl ring-1 ring-black/5"
           >
-            <div className="flex items-center justify-between border-b border-black/5 px-4 py-3">
-              <h3 className="text-sm font-semibold text-neutral-900">Notifications</h3>
-              <button
-                type="button"
-                onClick={() => void markAll()}
-                className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:text-primary-hover"
-              >
-                <CheckCheck className="h-3.5 w-3.5" />
-                Mark all read
-              </button>
+            <div className="flex shrink-0 items-center justify-between border-b border-black/5 px-4 py-3">
+              <h3 className="text-sm font-semibold text-neutral-900">
+                {isActivity ? 'Recent activity' : 'Notifications'}
+              </h3>
+              <div className="flex items-center gap-1">
+                {!isActivity && (
+                  <button
+                    type="button"
+                    onClick={() => void markAll()}
+                    className="inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-primary hover:bg-[#e8ece8] hover:text-primary-hover"
+                  >
+                    <CheckCheck className="h-3.5 w-3.5" />
+                    Mark all read
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 hover:bg-black/[0.04] hover:text-neutral-700"
+                  aria-label="Close"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
             </div>
 
-            <div className="flex gap-1 border-b border-black/5 px-2 py-2">
+            <div className="flex shrink-0 gap-1 border-b border-black/5 px-2 py-2">
               {TABS.map((t) => (
                 <button
                   key={t.id}
@@ -179,49 +232,72 @@ export const NotificationsPanel: React.FC<Props> = ({
               ))}
             </div>
 
-            <div className="max-h-[min(420px,60vh)] overflow-y-auto">
+            <div className="min-h-0 flex-1 overflow-y-auto">
               {loading && items.length === 0 ? (
                 <p className="px-4 py-8 text-center text-sm text-neutral-400">Loading…</p>
               ) : items.length === 0 ? (
                 <div className="flex flex-col items-center gap-2 px-4 py-10 text-center">
-                  <Megaphone className="h-8 w-8 text-neutral-300" />
-                  <p className="text-sm text-neutral-500">No notifications yet</p>
+                  {isActivity ? (
+                    <Activity className="h-8 w-8 text-neutral-300" />
+                  ) : (
+                    <Megaphone className="h-8 w-8 text-neutral-300" />
+                  )}
+                  <p className="text-sm text-neutral-500">
+                    {isActivity ? 'No recent activity' : 'No notifications yet'}
+                  </p>
                 </div>
               ) : (
                 <ul className="divide-y divide-black/5">
                   {items.map((item) => (
                     <li key={item.id}>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (item.unread) void markOne(item.id);
-                        }}
-                        className={`flex w-full gap-3 px-4 py-3 text-left transition-colors hover:bg-black/[0.02] ${
-                          item.unread ? 'bg-[#f4f7f5]' : ''
-                        }`}
-                      >
-                        <div className="mt-0.5">
-                          <SeverityIcon severity={item.severity} />
+                      {isActivity ? (
+                        <div className="flex w-full gap-3 px-4 py-3 text-left">
+                          <div className="mt-0.5">
+                            <SeverityIcon severity={item.severity} />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm text-neutral-800">
+                              <span className="font-medium text-neutral-900">{item.title}</span>
+                              <span className="text-neutral-500"> — {item.message}</span>
+                            </p>
+                            <p className="mt-1 text-[11px] text-neutral-400">
+                              {formatNotificationRelativeTime(Date.parse(item.createdAt))}
+                            </p>
+                          </div>
                         </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-xs font-medium text-neutral-500">{item.title}</p>
-                          <p className="mt-0.5 text-sm text-neutral-700">
-                            {emphasizeEntity(item.message)}
-                          </p>
-                          <p className="mt-1 text-[11px] text-neutral-400">
-                            {formatNotificationRelativeTime(Date.parse(item.createdAt))}
-                          </p>
-                        </div>
-                        {item.unread && (
-                          <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />
-                        )}
-                      </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (item.unread) void markOne(item.id);
+                          }}
+                          className={`flex w-full gap-3 px-4 py-3 text-left transition-colors hover:bg-black/[0.02] ${
+                            item.unread ? 'bg-[#f4f7f5]' : ''
+                          }`}
+                        >
+                          <div className="mt-0.5">
+                            <SeverityIcon severity={item.severity} />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-xs font-medium text-neutral-500">{item.title}</p>
+                            <p className="mt-0.5 text-sm text-neutral-700">
+                              {emphasizeEntity(item.message)}
+                            </p>
+                            <p className="mt-1 text-[11px] text-neutral-400">
+                              {formatNotificationRelativeTime(Date.parse(item.createdAt))}
+                            </p>
+                          </div>
+                          {item.unread && (
+                            <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />
+                          )}
+                        </button>
+                      )}
                     </li>
                   ))}
                 </ul>
               )}
             </div>
-          </motion.div>
+          </motion.aside>
         </>
       )}
     </AnimatePresence>

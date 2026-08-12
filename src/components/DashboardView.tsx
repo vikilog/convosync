@@ -7,16 +7,14 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Users, Send, Clock, Activity } from 'lucide-react';
 import { useKeepAliveActivation } from './KeepAlive';
-import { TeamMember, QuickCampaign } from '../types';
+import { QuickCampaign } from '../types';
 import { api } from '../lib/api';
-import { mapChartDay, mapQuickCampaignFromApi, mapTeamMemberFromApi } from '../lib/mappers';
+import { mapChartDay, mapQuickCampaignFromApi } from '../lib/mappers';
 import { OnboardingProfileBanner } from './onboarding/OnboardingProfileBanner';
 import { StatCard } from './dashboard/StatCard';
 import { MessagePerformanceChart } from './dashboard/MessagePerformanceChart';
 import { RecentCampaignsPanel } from './dashboard/RecentCampaignsPanel';
 import { UpcomingCampaignsPanel } from './dashboard/UpcomingCampaignsPanel';
-import { TeamPerformanceSection } from './dashboard/TeamPerformanceSection';
-import { RecentActivityPanel } from './dashboard/RecentActivityPanel';
 import { BottomStatusBar } from './dashboard/BottomStatusBar';
 import { useCountUp } from '../hooks/useCountUp';
 import {
@@ -24,7 +22,7 @@ import {
   isChartEmpty,
   type ChartPoint,
 } from '../lib/chartUtils';
-import { pathForSettingsSection, pathForTab, pathForCampaign } from '../routes';
+import { pathForTab, pathForCampaign } from '../routes';
 
 interface DashboardViewProps {
   onAddContact?: () => void;
@@ -47,7 +45,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const [activeJourneys, setActiveJourneys] = useState(0);
   const [pausedJourneys, setPausedJourneys] = useState(0);
   const [performanceData, setPerformanceData] = useState<ChartPoint[]>([]);
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [quickCampaigns, setQuickCampaigns] = useState<QuickCampaign[]>([]);
   const [upcomingCampaigns, setUpcomingCampaigns] = useState<QuickCampaign[]>([]);
   const [chartRange, setChartRange] = useState<ChartRange>(7);
@@ -67,11 +64,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
   const loadDashboard = useCallback(async () => {
     try {
-      const [stats, chart, team, campaigns, upcoming, whatsapp, agents] =
+      const [stats, chart, campaigns, upcoming, whatsapp, agents] =
         await Promise.all([
           api.getDashboardStats(),
           api.getMessageChart(chartRange),
-          api.getTeamStats(),
           api.getRecentCampaigns(),
           api.getUpcomingCampaigns(),
           api.getWhatsAppStatus().catch(() => null),
@@ -87,7 +83,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           (row) => mapChartDay(row, { compact: chartRange > 7 })
         )
       );
-      setTeamMembers(team.map((m: Record<string, unknown>) => mapTeamMemberFromApi(m)));
       setQuickCampaigns(
         campaigns.map((c: Record<string, unknown>) => mapQuickCampaignFromApi(c))
       );
@@ -188,24 +183,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
           </div>
         </div>
-
-        <div className="rounded-xl bg-white ring-1 ring-slate-200/80 p-5 space-y-4 animate-pulse">
-          <div className="flex items-center justify-between gap-3">
-            <div className="h-4 w-40 rounded skel" />
-            <div className="h-8 w-24 rounded-lg skel" />
-          </div>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={`team-skel-${i}`} className="flex items-center gap-3 rounded-xl border border-black/5 p-3">
-                <div className="h-10 w-10 rounded-full skel shrink-0" />
-                <div className="flex-1 space-y-2">
-                  <div className="h-3 w-2/3 rounded skel" />
-                  <div className="h-2.5 w-1/2 rounded skel" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
     );
   }
@@ -289,14 +266,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           />
         </div>
       </div>
-
-      <RecentActivityPanel />
-
-      <TeamPerformanceSection
-        members={teamMembers}
-        onInvite={() => navigate(pathForSettingsSection('users'))}
-        onViewReport={() => navigate(pathForTab('reports'))}
-      />
     </div>
   );
 };

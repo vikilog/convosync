@@ -164,13 +164,14 @@ export function PlanCustomizer({ pricingRules, initialQuote, onSaved }: PlanCust
         orderId: string;
         keyId: string;
         amountPaise: number;
+        currency?: string;
       };
 
       await openRazorpayCheckout({
         key: order.keyId,
         order_id: order.orderId,
         amount: order.amountPaise,
-        currency: 'INR',
+        currency: order.currency ?? 'INR',
         name: 'ConvoSync',
         description: 'Custom plan — first month',
         theme: { color: '#0284c7' },

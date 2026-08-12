@@ -59,6 +59,23 @@ type PlanFeatures = {
   channels: string;
 };
 
+type BillingCurrency = 'INR' | 'USD';
+
+type PendingBillingOffer = {
+  id: string;
+  planId: string;
+  plan?: { id: string; slug: string; name: string };
+  billingCycle: BillingCycle;
+  currency: BillingCurrency;
+  amountMinor: number;
+  offerType: 'subscription' | 'payment_link';
+  status: 'pending' | 'paid' | 'cancelled';
+  razorpaySubscriptionId: string | null;
+  shortUrl: string | null;
+  keyId: string | null;
+  note: string | null;
+};
+
 type TenantPlan = {
   id: string;
   planId: string;
@@ -68,6 +85,10 @@ type TenantPlan = {
   annualPrice?: number;
   priceMonthlyPaise?: number | null;
   priceAnnualPaise?: number | null;
+  priceMonthlyUsd?: number | null;
+  priceAnnualUsd?: number | null;
+  priceMonthlyCents?: number | null;
+  priceAnnualCents?: number | null;
   features: PlanFeatures;
   popular: boolean;
   emailsPerMonth?: string | number | null;
@@ -96,6 +117,8 @@ type SubscriptionPayload = {
     planName?: string | null;
   } | null;
   plans: TenantPlan[];
+  currency?: BillingCurrency;
+  country?: string;
 };
 
 type UsageMetric = {
@@ -186,29 +209,17 @@ const PLAN_ICONS: Record<string, ComponentType<{ className?: string }>> = {
 
 const springSoft = { type: 'spring' as const, stiffness: 380, damping: 32, mass: 0.8 };
 
-function formatLimit(value: string | number | null | undefined): string {
-  if (value == null) return '—';
-  if (value === 'unlimited' || value === 'Unlimited') return 'Unlimited';
-  if (value === 'custom' || value === 'Custom') return 'Custom';
-  if (typeof value === 'number') return value.toLocaleString('en-IN');
-  return String(value);
-}
-
 function planHighlights(plan: TenantPlan): string[] {
   const f = plan.features;
   const lines: string[] = [
     f.channels,
-    `${f.teamMembers} seats · ${f.aiAgents} AI Agent${f.aiAgents === '1' ? '' : 's'}`,
+    `${f.teamMembers} seats`,
+    `${f.aiAgents} AI Agent${f.aiAgents === '1' ? '' : 's'}`,
   ];
   if (plan.aiCopilot) lines.push('AI Copilot included');
-  const emails = formatLimit(plan.emailsPerMonth);
   const wallet = plan.walletCredits ?? '—';
-  if (emails !== '—' || wallet !== '—') {
-    lines.push(
-      emails === 'Custom' || wallet === 'Custom'
-        ? 'Negotiated wallet & email volume'
-        : `${emails} emails / mo · ${wallet} wallet`
-    );
+  if (wallet !== '—') {
+    lines.push(wallet === 'Custom' ? 'Negotiated wallet' : `${wallet} wallet`);
   }
   if (plan.ctwaAds) lines.push('CTWA / Ads + Advanced reports');
   else if (plan.socialListening || plan.voiceAgent || plan.developers) {
@@ -221,12 +232,19 @@ function planHighlights(plan: TenantPlan): string[] {
     if (bits.length) lines.push(bits.join(' · '));
   }
   if (plan.prioritySupport) lines.push('Priority support');
-  return lines.slice(0, 5);
+  // ponytail: seats + AI are separate bullets now; 6 keeps Business feature row visible
+  return lines.slice(0, 6);
 }
 
-function isCustomPriced(plan: TenantPlan): boolean {
+function isCustomPriced(plan: TenantPlan, currency: BillingCurrency = 'INR'): boolean {
   if (plan.isCustom) return true;
   if (plan.priceLabel?.toLowerCase() === 'custom') return true;
+  if (currency === 'USD') {
+    if (plan.priceMonthlyUsd == null || plan.priceMonthlyUsd <= 0) {
+      if (!plan.priceMonthlyCents && !plan.priceAnnualCents) return true;
+    }
+    return false;
+  }
   if (plan.price == null || plan.price <= 0) return true;
   if (!plan.priceMonthlyPaise && !plan.priceAnnualPaise) return true;
   return false;
@@ -246,7 +264,23 @@ function contactSalesUrl(): string {
   return landing ? `${landing}/#help-support` : 'mailto:hello@convosync.io';
 }
 
-function planAmountPaise(plan: TenantPlan, cycle: BillingCycle): number | null {
+function planAmountMinor(
+  plan: TenantPlan,
+  cycle: BillingCycle,
+  currency: BillingCurrency
+): number | null {
+  if (currency === 'USD') {
+    if (cycle === 'annual') {
+      return (
+        plan.priceAnnualCents ??
+        (plan.priceAnnualUsd != null ? Math.round(plan.priceAnnualUsd * 100) : null)
+      );
+    }
+    return (
+      plan.priceMonthlyCents ??
+      (plan.priceMonthlyUsd != null ? Math.round(plan.priceMonthlyUsd * 100) : null)
+    );
+  }
   if (cycle === 'annual') {
     return (
       plan.priceAnnualPaise ??
@@ -256,33 +290,72 @@ function planAmountPaise(plan: TenantPlan, cycle: BillingCycle): number | null {
   return plan.priceMonthlyPaise ?? (plan.price != null ? Math.round(plan.price * 100) : null);
 }
 
-function formatPaise(paise: number): string {
-  return `₹${(paise / 100).toLocaleString('en-IN')}`;
+function formatMinor(minor: number, currency: BillingCurrency): string {
+  if (currency === 'USD') {
+    return `$${(minor / 100).toLocaleString('en-US', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    })}`;
+  }
+  return `₹${(minor / 100).toLocaleString('en-IN')}`;
 }
 
-function priceForCycle(plan: TenantPlan, cycle: BillingCycle): {
-  inr: number | null;
+function priceForCycle(
+  plan: TenantPlan,
+  cycle: BillingCycle,
+  currency: BillingCurrency
+): {
+  amount: number | null;
   label: string;
 } {
-  if (isCustomPriced(plan)) {
-    return { inr: null, label: plan.priceLabel ?? 'Custom' };
+  if (isCustomPriced(plan, currency)) {
+    return { amount: null, label: plan.priceLabel ?? 'Custom' };
+  }
+  if (currency === 'USD') {
+    if (cycle === 'annual') {
+      const annual =
+        plan.priceAnnualUsd ??
+        (plan.priceAnnualCents != null ? plan.priceAnnualCents / 100 : null);
+      if (annual != null) {
+        return { amount: annual, label: `$${annual.toLocaleString('en-US')}` };
+      }
+    }
+    const monthly =
+      plan.priceMonthlyUsd ??
+      (plan.priceMonthlyCents != null ? plan.priceMonthlyCents / 100 : null);
+    return {
+      amount: monthly,
+      label: monthly != null ? `$${monthly.toLocaleString('en-US')}` : plan.priceLabel ?? '—',
+    };
   }
   if (cycle === 'annual') {
     const annual =
       plan.annualPrice ?? (plan.priceAnnualPaise != null ? plan.priceAnnualPaise / 100 : null);
     if (annual != null) {
-      return { inr: annual, label: `₹${annual.toLocaleString('en-IN')}` };
+      return { amount: annual, label: `₹${annual.toLocaleString('en-IN')}` };
     }
   }
   const monthly =
     plan.price ?? (plan.priceMonthlyPaise != null ? plan.priceMonthlyPaise / 100 : null);
   return {
-    inr: monthly,
+    amount: monthly,
     label: monthly != null ? `₹${monthly.toLocaleString('en-IN')}` : plan.priceLabel ?? '—',
   };
 }
 
-function annualSavingsPct(plan: TenantPlan): number | null {
+function annualSavingsPct(plan: TenantPlan, currency: BillingCurrency): number | null {
+  if (currency === 'USD') {
+    const monthly =
+      plan.priceMonthlyUsd ??
+      (plan.priceMonthlyCents != null ? plan.priceMonthlyCents / 100 : null);
+    const annual =
+      plan.priceAnnualUsd ??
+      (plan.priceAnnualCents != null ? plan.priceAnnualCents / 100 : null);
+    if (monthly == null || annual == null || monthly <= 0) return null;
+    const fullYear = monthly * 12;
+    if (annual >= fullYear) return null;
+    return Math.round(((fullYear - annual) / fullYear) * 100);
+  }
   const monthly = plan.price ?? (plan.priceMonthlyPaise != null ? plan.priceMonthlyPaise / 100 : null);
   const annual =
     plan.annualPrice ?? (plan.priceAnnualPaise != null ? plan.priceAnnualPaise / 100 : null);
@@ -327,21 +400,28 @@ export function PlansPanel() {
   const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
   const [couponBusy, setCouponBusy] = useState(false);
   const [couponError, setCouponError] = useState<string | null>(null);
+  const [pendingOffers, setPendingOffers] = useState<PendingBillingOffer[]>([]);
+  const [offerPayBusy, setOfferPayBusy] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const [sub, bill] = await Promise.all([
+      const [sub, bill, offersRes] = await Promise.all([
         api.getSubscription() as Promise<SubscriptionPayload>,
         api.getBillingWorkspace() as Promise<BillingWorkspace>,
+        api.getBillingOffers().catch(() => ({ offers: [] })) as Promise<{
+          offers: PendingBillingOffer[];
+        }>,
       ]);
       setSubscription(sub);
       setBilling(bill);
+      setPendingOffers(offersRes.offers ?? []);
     } catch (err) {
       setError(formatCatchError(err));
       setSubscription(null);
       setBilling(null);
+      setPendingOffers([]);
     } finally {
       setLoading(false);
     }
@@ -381,16 +461,21 @@ export function PlansPanel() {
     [plans, currentSlug]
   );
 
+  const currency: BillingCurrency = subscription?.currency ?? 'INR';
+
   const maxAnnualSave = useMemo(() => {
     let max = 0;
     for (const p of plans) {
-      const pct = annualSavingsPct(p);
+      const pct = annualSavingsPct(p, currency);
       if (pct != null && pct > max) max = pct;
     }
     return max;
-  }, [plans]);
+  }, [plans, currency]);
 
-  const hasAnnual = plans.some((p) => p.annualPrice != null || (p.priceAnnualPaise ?? 0) > 0);
+  const hasAnnual =
+    currency === 'USD'
+      ? plans.some((p) => p.priceAnnualUsd != null || (p.priceAnnualCents ?? 0) > 0)
+      : plans.some((p) => p.annualPrice != null || (p.priceAnnualPaise ?? 0) > 0);
   const paid = billing ? hasPaidSubscription(billing) : false;
   const status = billing
     ? subscriptionStatusLabel(billing.subscriptionStatus, billing.billingSubscription?.status)
@@ -429,7 +514,7 @@ export function PlansPanel() {
       };
 
   function openCheckoutModal(plan: TenantPlan) {
-    if (isCustomPriced(plan)) {
+    if (isCustomPriced(plan, currency)) {
       window.open(contactSalesUrl(), '_blank', 'noopener,noreferrer');
       return;
     }
@@ -457,7 +542,7 @@ export function PlansPanel() {
       return;
     }
 
-    const amountPaise = planAmountPaise(plan, cycle);
+    const amountPaise = planAmountMinor(plan, cycle, currency);
     if (!amountPaise) {
       setCouponError('Cannot apply a coupon to this billing cycle.');
       return;
@@ -501,7 +586,7 @@ export function PlansPanel() {
 
   async function handleConfirmCheckout() {
     const plan = checkoutPlan;
-    if (!plan || isCustomPriced(plan)) return;
+    if (!plan || isCustomPriced(plan, currency)) return;
 
     setCheckoutSlug(plan.id);
     setError(null);
@@ -509,7 +594,7 @@ export function PlansPanel() {
     try {
       const couponCode = appliedCoupon?.code ?? (couponInput.trim() || undefined);
       if (couponCode) {
-        const amountPaise = planAmountPaise(plan, cycle);
+        const amountPaise = planAmountMinor(plan, cycle, currency);
         if (amountPaise) {
           const result = (await api.validateBillingCoupon({
             code: couponCode,
@@ -534,9 +619,11 @@ export function PlansPanel() {
         orderId?: string;
         keyId: string;
         amountPaise: number;
+        currency?: BillingCurrency;
       };
 
       const useOrderCheckout = created.checkoutMode === 'order' || Boolean(created.orderId);
+      const checkoutCurrency = created.currency ?? currency;
 
       await openRazorpayCheckout({
         key: created.keyId,
@@ -544,8 +631,12 @@ export function PlansPanel() {
         description: `${plan.name} (${cycle})`,
         theme: { color: BRAND_PURPLE },
         ...(useOrderCheckout
-          ? { order_id: created.orderId, amount: created.amountPaise, currency: 'INR' }
-          : { subscription_id: created.subscriptionId }),
+          ? {
+              order_id: created.orderId,
+              amount: created.amountPaise,
+              currency: checkoutCurrency,
+            }
+          : { subscription_id: created.subscriptionId, currency: checkoutCurrency }),
         onSuccess: async (response) => {
           if (useOrderCheckout) {
             if (!response.razorpay_order_id || !response.razorpay_signature) {
@@ -607,12 +698,59 @@ export function PlansPanel() {
     }
   }
 
+  async function handlePayOffer(offer: PendingBillingOffer) {
+    setOfferPayBusy(offer.id);
+    setError(null);
+    try {
+      if (offer.offerType === 'payment_link' || (!offer.razorpaySubscriptionId && offer.shortUrl)) {
+        if (!offer.shortUrl) throw new Error('Payment link is not available yet');
+        window.open(offer.shortUrl, '_blank', 'noopener,noreferrer');
+        return;
+      }
+      if (!offer.razorpaySubscriptionId || !offer.keyId) {
+        if (offer.shortUrl) {
+          window.open(offer.shortUrl, '_blank', 'noopener,noreferrer');
+          return;
+        }
+        throw new Error('Checkout is not ready for this offer');
+      }
+      const planName = offer.plan?.name ?? 'subscription';
+      await openRazorpayCheckout({
+        key: offer.keyId,
+        name: 'ConvoSync',
+        description: `${planName} (${offer.billingCycle})`,
+        theme: { color: BRAND_PURPLE },
+        subscription_id: offer.razorpaySubscriptionId,
+        currency: offer.currency,
+        onSuccess: async (response) => {
+          if (!response.razorpay_subscription_id || !response.razorpay_signature) {
+            throw new Error('Incomplete subscription payment response');
+          }
+          await api.verifyBillingSubscription({
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_subscription_id: response.razorpay_subscription_id,
+            razorpay_signature: response.razorpay_signature,
+          });
+          setActionMessage(`You're now on ${planName}.`);
+          await load();
+          dispatchCompanyUpdated({});
+        },
+      });
+    } catch (err) {
+      const message = formatCatchError(err);
+      if (message !== 'Payment cancelled') setError(message);
+    } finally {
+      setOfferPayBusy(null);
+    }
+  }
+
   function ctaLabel(plan: TenantPlan): string {
     if (plan.id === currentSlug) return 'Current plan';
-    if (isCustomPriced(plan)) return 'Contact sales';
+    if (isCustomPriced(plan, currency)) return 'Contact sales';
     if (!currentSlug || !paid) return 'Subscribe';
-    const currentPrice = currentPlan?.price ?? 0;
-    const nextPrice = plan.price ?? 0;
+    const currentPrice =
+      currency === 'USD' ? (currentPlan?.priceMonthlyUsd ?? 0) : (currentPlan?.price ?? 0);
+    const nextPrice = currency === 'USD' ? (plan.priceMonthlyUsd ?? 0) : (plan.price ?? 0);
     if (nextPrice > currentPrice) return 'Upgrade';
     if (nextPrice < currentPrice) return 'Switch plan';
     return 'Select plan';
@@ -638,9 +776,9 @@ export function PlansPanel() {
     );
   }
 
-  const currentPrice = currentPlan ? priceForCycle(currentPlan, 'monthly') : null;
+  const currentPrice = currentPlan ? priceForCycle(currentPlan, 'monthly', currency) : null;
   const CurrentIcon = currentPlan ? (PLAN_ICONS[currentPlan.id] ?? Sparkles) : Sparkles;
-  const checkoutPrice = checkoutPlan ? priceForCycle(checkoutPlan, cycle) : null;
+  const checkoutPrice = checkoutPlan ? priceForCycle(checkoutPlan, cycle, currency) : null;
   const checkoutBusy = checkoutPlan ? checkoutSlug === checkoutPlan.id : false;
 
   return (
@@ -678,6 +816,53 @@ export function PlansPanel() {
               {actionMessage}
             </motion.div>
           ) : null}
+          {pendingOffers.map((offer) => {
+            const major = offer.amountMinor / 100;
+            const amountLabel =
+              offer.currency === 'USD'
+                ? `$${major.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`
+                : `₹${major.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
+            const busy = offerPayBusy === offer.id;
+            return (
+              <motion.div
+                key={offer.id}
+                role="status"
+                initial={reduceMotion ? false : { opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                className="flex flex-col gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-amber-950">
+                    {offer.offerType === 'payment_link'
+                      ? 'Complete your payment'
+                      : 'Complete your subscription'}
+                  </p>
+                  <p className="mt-0.5 text-sm text-amber-900/80">
+                    {offer.plan?.name ?? 'Plan'} · {amountLabel}/{offer.billingCycle}
+                    {offer.offerType === 'payment_link' ? (
+                      <span className="ml-1 inline-flex rounded-full bg-amber-200/80 px-2 py-0.5 text-[11px] font-bold text-amber-950">
+                        Payment link (not recurring)
+                      </span>
+                    ) : (
+                      <span className="ml-1 inline-flex rounded-full bg-amber-200/80 px-2 py-0.5 text-[11px] font-bold text-amber-950">
+                        Subscription
+                      </span>
+                    )}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void handlePayOffer(offer)}
+                  className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-amber-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-amber-950 disabled:opacity-60"
+                >
+                  {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wallet className="h-4 w-4" />}
+                  Pay now
+                </button>
+              </motion.div>
+            );
+          })}
         </AnimatePresence>
 
         {/* Bento: current + upgrade nudge */}
@@ -700,7 +885,7 @@ export function PlansPanel() {
                     <h2 className="font-display text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
                       {currentPlan.name}
                     </h2>
-                    {currentPrice?.inr != null ? (
+                    {currentPrice?.amount != null ? (
                       <p className="text-lg font-semibold text-slate-700">
                         {currentPrice.label}
                         <span className="text-sm font-medium text-slate-500">/mo</span>
@@ -789,8 +974,8 @@ export function PlansPanel() {
                 {recommended ? recommended.name : 'Browse plans'}
               </h3>
               <p className="mt-2 text-sm leading-relaxed text-white/80">
-                {recommended && !isCustomPriced(recommended)
-                  ? `More seats, channels, and AI — from ₹${(recommended.price ?? 0).toLocaleString('en-IN')}/mo.`
+                {recommended && !isCustomPriced(recommended, currency)
+                  ? `More seats, channels, and AI — from ${priceForCycle(recommended, 'monthly', currency).label}/mo.`
                   : recommended
                     ? 'Custom scale, priority onboarding, and negotiated volume.'
                     : 'Compare tiers and upgrade when you are ready.'}
@@ -800,7 +985,7 @@ export function PlansPanel() {
               type="button"
               whileTap={reduceMotion ? undefined : { scale: 0.98 }}
               onClick={() => {
-                if (recommended && isCustomPriced(recommended)) {
+                if (recommended && isCustomPriced(recommended, currency)) {
                   window.open(contactSalesUrl(), '_blank', 'noopener,noreferrer');
                   return;
                 }
@@ -816,7 +1001,7 @@ export function PlansPanel() {
               className="mt-6 inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-white px-4 py-2.5 text-sm font-bold text-primary transition-colors duration-200 hover:bg-accent-green-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               {recommended
-                ? isCustomPriced(recommended)
+                ? isCustomPriced(recommended, currency)
                   ? 'Talk to sales'
                   : `Upgrade to ${recommended.name}`
                 : 'Browse plans'}
@@ -965,13 +1150,13 @@ export function PlansPanel() {
         >
           {plans.map((plan) => {
             const isCurrent = plan.id === currentSlug;
-            const custom = isCustomPriced(plan);
-            const price = priceForCycle(plan, cycle);
+            const custom = isCustomPriced(plan, currency);
+            const price = priceForCycle(plan, cycle, currency);
             const busy = checkoutSlug === plan.id;
             const highlights = planHighlights(plan);
             const label = ctaLabel(plan);
             const Icon = PLAN_ICONS[plan.id] ?? Sparkles;
-            const savePct = cycle === 'annual' ? annualSavingsPct(plan) : null;
+            const savePct = cycle === 'annual' ? annualSavingsPct(plan, currency) : null;
             const featured = plan.popular && !isCurrent;
 
             return (
@@ -1034,15 +1219,19 @@ export function PlansPanel() {
                         <p className="font-display text-3xl font-bold tracking-tight text-slate-950">
                           {price.label}
                         </p>
-                        {price.inr != null ? (
+                        {price.amount != null ? (
                           <span className="text-sm font-medium text-slate-500">
                             /{cycle === 'annual' ? 'yr' : 'mo'}
                           </span>
                         ) : null}
                       </div>
-                      {cycle === 'annual' && price.inr != null && plan.price != null ? (
+                      {cycle === 'annual' && price.amount != null ? (
                         <p className="mt-1 text-xs text-slate-500">
-                          ≈ ₹{Math.round(price.inr / 12).toLocaleString('en-IN')}/mo billed yearly
+                          ≈{' '}
+                          {currency === 'USD'
+                            ? `$${Math.round(price.amount / 12).toLocaleString('en-US')}`
+                            : `₹${Math.round(price.amount / 12).toLocaleString('en-IN')}`}
+                          /mo billed yearly
                         </p>
                       ) : (
                         <p className="mt-1 text-xs text-slate-500">Unlimited contacts</p>
@@ -1098,7 +1287,9 @@ export function PlansPanel() {
           variants={itemVariants}
           className="pb-1 text-center text-xs leading-relaxed text-slate-500"
         >
-          Prices in INR · UPI & cards via Razorpay · Cancel anytime before the next billing date
+          {currency === 'USD'
+            ? 'Prices in USD · Cards via Razorpay · Cancel anytime before the next billing date'
+            : 'Prices in INR · UPI & cards via Razorpay · Cancel anytime before the next billing date'}
         </motion.p>
       </div>
 
@@ -1133,22 +1324,26 @@ export function PlansPanel() {
                 <p className="mt-1 font-display text-xl font-bold text-slate-950">{checkoutPlan.name}</p>
                 <div className="mt-1 flex flex-wrap items-baseline gap-1.5">
                   <p className="text-2xl font-bold text-slate-900">{checkoutPrice?.label ?? '—'}</p>
-                  {checkoutPrice?.inr != null ? (
+                  {checkoutPrice?.amount != null ? (
                     <span className="text-sm font-medium text-slate-500">
                       /{cycle === 'annual' ? 'yr' : 'mo'}
                     </span>
                   ) : null}
                 </div>
-                {cycle === 'annual' && checkoutPrice?.inr != null && checkoutPlan.price != null ? (
+                {cycle === 'annual' && checkoutPrice?.amount != null ? (
                   <p className="mt-1 text-xs text-slate-600">
-                    ≈ ₹{Math.round(checkoutPrice.inr / 12).toLocaleString('en-IN')}/mo billed yearly
+                    ≈{' '}
+                    {currency === 'USD'
+                      ? `$${Math.round(checkoutPrice.amount / 12).toLocaleString('en-US')}`
+                      : `₹${Math.round(checkoutPrice.amount / 12).toLocaleString('en-IN')}`}
+                    /mo billed yearly
                   </p>
                 ) : null}
                 {appliedCoupon ? (
                   <p className="mt-2 text-sm font-semibold text-primary">
-                    Pay {formatPaise(appliedCoupon.finalAmountPaise)}{' '}
+                    Pay {formatMinor(appliedCoupon.finalAmountPaise, currency)}{' '}
                     <span className="font-normal text-slate-500 line-through">
-                      {formatPaise(appliedCoupon.originalAmountPaise)}
+                      {formatMinor(appliedCoupon.originalAmountPaise, currency)}
                     </span>
                   </p>
                 ) : null}
@@ -1215,7 +1410,7 @@ export function PlansPanel() {
                   <p className="mt-2 text-sm text-slate-700">
                     <span className="font-semibold text-primary">{appliedCoupon.code}</span>
                     {' · '}
-                    {formatPaise(appliedCoupon.discountPaise)} off
+                    {formatMinor(appliedCoupon.discountPaise, currency)} off
                   </p>
                 ) : null}
               </div>
@@ -1245,7 +1440,7 @@ export function PlansPanel() {
                 {checkoutBusy
                   ? 'Opening…'
                   : appliedCoupon
-                    ? `Pay ${formatPaise(appliedCoupon.finalAmountPaise)}`
+                    ? `Pay ${formatMinor(appliedCoupon.finalAmountPaise, currency)}`
                     : 'Continue to pay'}
               </button>
             </div>

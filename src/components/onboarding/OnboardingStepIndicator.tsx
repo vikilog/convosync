@@ -10,20 +10,30 @@ export function OnboardingStepIndicator({ currentStep }: Props) {
     id: index + 1,
     label,
   }));
+  const pct = Math.round((currentStep / steps.length) * 100);
 
   return (
     <nav aria-label="Onboarding progress" className="w-full">
-      <div className="mb-3 flex items-center justify-between text-xs text-gray-500">
-        <span className="font-semibold">Step {currentStep} of {steps.length}</span>
-        <span>{Math.round((currentStep / steps.length) * 100)}% complete</span>
+      <div className="mb-3 flex items-center justify-between text-xs text-slate-600">
+        <span className="font-semibold">
+          Step {currentStep} of {steps.length}
+        </span>
+        <span className="font-medium tabular-nums">{pct}% complete</span>
       </div>
-      <div className="h-2 w-full overflow-hidden rounded-full bg-[#ece9ff]">
+      <div
+        className="h-2 w-full overflow-hidden rounded-full bg-accent-green-bg"
+        role="progressbar"
+        aria-valuemin={1}
+        aria-valuemax={steps.length}
+        aria-valuenow={currentStep}
+        aria-label={`Onboarding step ${currentStep} of ${steps.length}`}
+      >
         <div
-          className="h-full rounded-full bg-primary transition-all duration-300"
+          className="h-full rounded-full bg-primary transition-[width] duration-300 ease-out motion-reduce:transition-none"
           style={{ width: `${(currentStep / steps.length) * 100}%` }}
         />
       </div>
-      <ol className="mt-4 hidden gap-2 md:grid md:grid-cols-7">
+      <ol className="mt-5 hidden gap-1.5 md:grid md:grid-cols-7">
         {steps.map((step) => {
           const isComplete = step.id < currentStep;
           const isActive = step.id === currentStep;
@@ -31,20 +41,24 @@ export function OnboardingStepIndicator({ currentStep }: Props) {
             <li key={step.id} className="flex flex-col items-center gap-1.5 text-center">
               <span
                 className={[
-                  'flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold transition-colors',
+                  'flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold transition-colors duration-200',
                   isComplete
                     ? 'bg-primary text-white'
                     : isActive
                       ? 'bg-primary text-white ring-4 ring-primary/15'
-                      : 'border border-slate-200 bg-white text-gray-400',
+                      : 'border border-slate-200 bg-white text-slate-400',
                 ].join(' ')}
               >
-                {isComplete ? <Check className="h-4 w-4" strokeWidth={3} /> : step.id}
+                {isComplete ? (
+                  <Check className="h-4 w-4" strokeWidth={3} aria-hidden />
+                ) : (
+                  step.id
+                )}
               </span>
               <span
                 className={[
-                  'text-sm font-semibold leading-tight',
-                  isActive ? 'text-primary' : isComplete ? 'text-gray-700' : 'text-gray-400',
+                  'text-[11px] font-semibold leading-tight',
+                  isActive ? 'text-primary' : isComplete ? 'text-slate-700' : 'text-slate-400',
                 ].join(' ')}
               >
                 {step.label}

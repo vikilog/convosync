@@ -126,10 +126,12 @@ function buildCheckoutOptions(
   prefill: NonNullable<RazorpayCheckoutOptions['prefill']>
 ): RazorpayCheckoutOptions {
   const isSubscription = Boolean(options.subscription_id);
+  const currency = options.currency ?? 'INR';
+  const isInr = currency === 'INR';
 
   return {
     ...options,
-    currency: options.currency ?? 'INR',
+    currency,
     prefill,
     // Required for subscription auth / mandate flows, and for saving payment methods
     ...(isSubscription || (options.save && options.customer_id)
@@ -139,17 +141,30 @@ function buildCheckoutOptions(
       display: {
         language: 'en',
         preferences: { show_default_blocks: true },
-        blocks: {
-          banks: {
-            name: 'Pay via Card / Netbanking',
-            instruments: [{ method: 'card' }, { method: 'netbanking' }],
-          },
-          upi: {
-            name: 'Pay via UPI',
-            instruments: [{ method: 'upi' }],
-          },
-        },
-        sequence: ['block.upi', 'block.banks'],
+        // UPI / netbanking are India-only; international checkout is card-first.
+        ...(isInr
+          ? {
+              blocks: {
+                banks: {
+                  name: 'Pay via Card / Netbanking',
+                  instruments: [{ method: 'card' }, { method: 'netbanking' }],
+                },
+                upi: {
+                  name: 'Pay via UPI',
+                  instruments: [{ method: 'upi' }],
+                },
+              },
+              sequence: ['block.upi', 'block.banks'],
+            }
+          : {
+              blocks: {
+                cards: {
+                  name: 'Pay via Card',
+                  instruments: [{ method: 'card' }],
+                },
+              },
+              sequence: ['block.cards'],
+            }),
         ...options.config?.display,
       },
       ...options.config,
@@ -173,11 +188,13 @@ export async function openRazorpayCheckout(
 
   const { onSuccess, onDismiss, autoPrefillContact = true, ...checkoutOptions } = options;
 
+  const currency = checkoutOptions.currency ?? 'INR';
   const prefill = autoPrefillContact
     ? await resolveCheckoutPrefill(checkoutOptions.prefill)
     : (checkoutOptions.prefill ?? {});
 
-  if (!prefill.contact) {
+  // UPI (INR) requires a phone; international card checkout does not.
+  if (currency === 'INR' && !prefill.contact) {
     throw new Error(
       'Add a phone number in Settings → Company profile before paying (required for UPI).'
     );

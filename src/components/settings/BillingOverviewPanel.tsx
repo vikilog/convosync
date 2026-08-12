@@ -45,6 +45,8 @@ type BillingTransaction = {
 
 type BillingWorkspace = {
   subscriptionStatus: string;
+  currency?: 'INR' | 'USD';
+  country?: string;
   wallet?: {
     balancePaise: number;
     balanceInr: number;
@@ -458,6 +460,7 @@ export function BillingOverviewPanel() {
       {data.addonCatalog && data.addonCatalog.length > 0 && (
         <BillingAddonsPanel
           addonCatalog={data.addonCatalog}
+          currency={data.currency ?? 'INR'}
           fx={data.fx ?? null}
           onPurchased={load}
         />
@@ -581,7 +584,7 @@ export function BillingOverviewPanel() {
 
       <p className="flex items-center gap-2 text-xs text-slate-500">
         <Calendar className="h-3.5 w-3.5" />
-        All amounts are in INR. Payment provider: Razorpay.
+        Amounts shown in the invoice currency (INR or USD). Payment provider: Razorpay.
       </p>
     </div>
   );

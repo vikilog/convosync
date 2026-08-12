@@ -105,6 +105,8 @@ export function WalletPanel() {
   const [wallet, setWallet] = useState<WalletSummary | null>(null);
   const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
   const [allTransactions, setAllTransactions] = useState<WalletTransaction[] | null>(null);
+  const [billingCurrency, setBillingCurrency] = useState<'INR' | 'USD'>('INR');
+  const [usdInrRate, setUsdInrRate] = useState(83);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -125,14 +127,25 @@ export function WalletPanel() {
     setLoading(true);
     setError(null);
     try {
-      const [walletRes, txRes] = await Promise.all([
+      const [walletRes, txRes, billingRes] = await Promise.all([
         api.getBillingWallet(),
         api.getBillingWalletTransactions(5),
+        api.getBillingWorkspace().catch(() => null),
       ]);
       const walletData = walletRes as WalletSummary;
       setWallet(walletData);
       setAlertDraft(String(paiseToCc(walletData.lowBalanceThresholdPaise)));
       setTransactions((txRes as { transactions: WalletTransaction[] }).transactions ?? []);
+      const billing = billingRes as {
+        currency?: 'INR' | 'USD';
+        fx?: { usdInrRate?: number };
+      } | null;
+      if (billing?.currency === 'USD' || billing?.currency === 'INR') {
+        setBillingCurrency(billing.currency);
+      }
+      if (billing?.fx?.usdInrRate && billing.fx.usdInrRate > 0) {
+        setUsdInrRate(billing.fx.usdInrRate);
+      }
     } catch (err) {
       setError(formatCatchError(err));
     } finally {
@@ -235,7 +248,9 @@ export function WalletPanel() {
       return;
     }
     setError(null);
-    setRechargeQuote(computeWalletRechargeQuote(cc));
+    setRechargeQuote(
+      computeWalletRechargeQuote(cc, { currency: billingCurrency, usdInrRate })
+    );
     setShowRechargeConfirm(true);
   }
 
@@ -248,7 +263,7 @@ export function WalletPanel() {
         amountPaise: quote.totalPaise,
         creditAmountPaise: quote.basePaise,
         description: `ConvoCoins recharge · ${formatCc(quote.cc)}`,
-      })) as { orderId: string; keyId: string; amountPaise: number };
+      })) as { orderId: string; keyId: string; amountPaise: number; currency?: string };
 
       setShowRechargeConfirm(false);
       setRechargeQuote(null);
@@ -257,7 +272,7 @@ export function WalletPanel() {
         key: order.keyId,
         order_id: order.orderId,
         amount: order.amountPaise,
-        currency: 'INR',
+        currency: order.currency ?? quote.currency,
         name: 'ConvoSync',
         description: `ConvoCoins recharge · ${formatCc(quote.cc)}`,
         theme: { color: BRAND_PURPLE },

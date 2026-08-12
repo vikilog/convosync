@@ -437,6 +437,7 @@ export const api = {
   }) => post('/workspace/subscription/quote', data),
 
   getBillingWorkspace: () => get('/billing/workspace'),
+  getBillingOffers: () => get('/billing/offers'),
   getBillingWallet: () => get('/billing/wallet'),
   getBillingWalletTransactions: (limit = 50) =>
     get('/billing/wallet/transactions', { limit: String(limit) }),

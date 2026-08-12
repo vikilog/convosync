@@ -104,6 +104,42 @@ body {
   background: #94a3b8;
 }
 
+/* Attention pulse when a new forBell notification arrives while the sheet is closed */
+@keyframes notif-bell-wiggle {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  15% {
+    transform: rotate(-14deg);
+  }
+  30% {
+    transform: rotate(12deg);
+  }
+  45% {
+    transform: rotate(-10deg);
+  }
+  60% {
+    transform: rotate(8deg);
+  }
+  75% {
+    transform: rotate(-4deg);
+  }
+}
+
+.notif-bell-attention {
+  animation: notif-bell-wiggle 0.85s ease-in-out infinite;
+  transform-origin: top center;
+  color: #dc2626;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notif-bell-attention {
+    animation: none;
+    opacity: 1;
+  }
+}
+
 /* Custom visual styles */
 .dot-grid {
   background-image: radial-gradient(#cbd5e1 1.5px, transparent 1.5px);

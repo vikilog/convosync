@@ -6,9 +6,10 @@
 import { Loader2, X } from 'lucide-react';
 import { BRAND_PURPLE, CONVOCOIN_ASSET, formatCc } from '../../lib/convocoins';
 import {
-  formatInr,
+  formatWalletMoney,
   type WalletRechargeQuote,
   WALLET_RAZORPAY_FEE_RATE,
+  WALLET_RAZORPAY_INTL_FEE_RATE,
   WALLET_RECHARGE_GST_RATE,
 } from '../../lib/walletRechargeQuote';
 
@@ -28,6 +29,12 @@ export function RechargeConfirmDialog({
   onConfirm,
 }: RechargeConfirmDialogProps) {
   if (!open || !quote) return null;
+
+  const isUsd = quote.currency === 'USD';
+  const feeRate = isUsd ? WALLET_RAZORPAY_INTL_FEE_RATE : WALLET_RAZORPAY_FEE_RATE;
+  const baseDisplay = isUsd ? (quote.baseUsd ?? 0) : quote.baseInr;
+  const feeDisplay = isUsd ? (quote.feeUsd ?? 0) : quote.razorpayFeeInr;
+  const totalDisplay = isUsd ? (quote.totalUsd ?? 0) : quote.totalInr;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
@@ -67,22 +74,34 @@ export function RechargeConfirmDialog({
           <div className="mt-4 space-y-2 text-sm">
             <div className="flex items-center justify-between gap-3">
               <span className="text-slate-600">Recharge amount</span>
-              <span className="font-medium text-slate-900">{formatInr(quote.baseInr)}</span>
+              <span className="font-medium text-slate-900">
+                {formatWalletMoney(baseDisplay, quote.currency)}
+              </span>
             </div>
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-slate-600">GST ({Math.round(WALLET_RECHARGE_GST_RATE * 100)}%)</span>
-              <span className="font-medium text-slate-900">{formatInr(quote.gstInr)}</span>
-            </div>
+            {!isUsd ? (
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-slate-600">
+                  GST ({Math.round(WALLET_RECHARGE_GST_RATE * 100)}%)
+                </span>
+                <span className="font-medium text-slate-900">
+                  {formatWalletMoney(quote.gstInr, 'INR')}
+                </span>
+              </div>
+            ) : null}
             <div className="flex items-center justify-between gap-3">
               <span className="text-slate-600">
-                Razorpay fee (~{Math.round(WALLET_RAZORPAY_FEE_RATE * 100)}%)
+                Razorpay fee (~{Math.round(feeRate * 100)}%)
               </span>
-              <span className="font-medium text-slate-900">{formatInr(quote.razorpayFeeInr)}</span>
+              <span className="font-medium text-slate-900">
+                {formatWalletMoney(feeDisplay, quote.currency)}
+              </span>
             </div>
             <div className="my-2 h-px bg-[#E5E7EB]" />
             <div className="flex items-center justify-between gap-3">
               <span className="font-semibold text-slate-900">Total payable</span>
-              <span className="text-lg font-bold text-slate-900">{formatInr(quote.totalInr)}</span>
+              <span className="text-lg font-bold text-slate-900">
+                {formatWalletMoney(totalDisplay, quote.currency)}
+              </span>
             </div>
           </div>
 
@@ -109,7 +128,7 @@ export function RechargeConfirmDialog({
             style={{ backgroundColor: BRAND_PURPLE }}
           >
             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            {busy ? 'Opening…' : `Pay ${formatInr(quote.totalInr)}`}
+            {busy ? 'Opening…' : `Pay ${formatWalletMoney(totalDisplay, quote.currency)}`}
           </button>
         </div>
       </div>

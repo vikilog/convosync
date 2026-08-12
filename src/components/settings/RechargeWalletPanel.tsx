@@ -18,6 +18,7 @@ import {
   paiseToCc,
 } from '../../lib/convocoins';
 import { openRazorpayCheckout } from '../../lib/razorpay';
+import { computeWalletRechargeQuote } from '../../lib/walletRechargeQuote';
 
 type WalletSummary = {
   balancePaise: number;
@@ -133,6 +134,8 @@ export function RechargeWalletPanel({
   const [wallet, setWallet] = useState<WalletSummary | null>(null);
   const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
   const [allTransactions, setAllTransactions] = useState<WalletTransaction[] | null>(null);
+  const [billingCurrency, setBillingCurrency] = useState<'INR' | 'USD'>('INR');
+  const [usdInrRate, setUsdInrRate] = useState(83);
   const [loading, setLoading] = useState(true);
   const [checkoutBusy, setCheckoutBusy] = useState(false);
   const [settingsBusy, setSettingsBusy] = useState(false);
@@ -148,14 +151,25 @@ export function RechargeWalletPanel({
     setLoading(true);
     setError(null);
     try {
-      const [walletRes, txRes] = await Promise.all([
+      const [walletRes, txRes, billingRes] = await Promise.all([
         api.getBillingWallet(),
         api.getBillingWalletTransactions(8),
+        api.getBillingWorkspace().catch(() => null),
       ]);
       const summary = walletRes as WalletSummary;
       setWallet(summary);
       setAlertDraft(String(paiseToCc(summary.lowBalanceThresholdPaise)));
       setTransactions((txRes as { transactions: WalletTransaction[] }).transactions ?? []);
+      const billing = billingRes as {
+        currency?: 'INR' | 'USD';
+        fx?: { usdInrRate?: number };
+      } | null;
+      if (billing?.currency === 'USD' || billing?.currency === 'INR') {
+        setBillingCurrency(billing.currency);
+      }
+      if (billing?.fx?.usdInrRate && billing.fx.usdInrRate > 0) {
+        setUsdInrRate(billing.fx.usdInrRate);
+      }
     } catch (err) {
       setError(formatCatchError(err));
     } finally {
@@ -194,22 +208,30 @@ export function RechargeWalletPanel({
     setCheckoutBusy(true);
     setError(null);
     try {
-      const amountPaise = ccToPaise(cc);
+      // INR: keep face-value charge (legacy). USD: FX quote + fee, credit still CC units.
+      const quote =
+        billingCurrency === 'USD'
+          ? computeWalletRechargeQuote(cc, { currency: 'USD', usdInrRate })
+          : null;
+      const amountPaise = quote?.totalPaise ?? ccToPaise(cc);
+      const creditAmountPaise = quote?.basePaise ?? ccToPaise(cc);
       const order = (await api.createBillingOrder({
         purpose: 'wallet_topup',
         amountPaise,
+        creditAmountPaise,
         description: `ConvoCoins recharge · ${formatCc(cc)}`,
       })) as {
         orderId: string;
         keyId: string;
         amountPaise: number;
+        currency?: string;
       };
 
       await openRazorpayCheckout({
         key: order.keyId,
         order_id: order.orderId,
         amount: order.amountPaise,
-        currency: 'INR',
+        currency: order.currency ?? billingCurrency,
         name: 'ConvoSync',
         description: 'ConvoCoins recharge',
         theme: { color: BRAND_PURPLE },
