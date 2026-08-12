@@ -199,8 +199,8 @@ export function InboxNewChatPicker({
     const tpl = templates.find((t) => t.id === id);
     if (!tpl) return;
     setSubject(tpl.subject || '');
-    const text = (tpl.textBody?.trim() || stripHtmlToText(tpl.htmlBody || '')).trim();
-    setMessage(text);
+    // Always derive compose preview from HTML — persisted textBody can be stale/collapsed.
+    setMessage(stripHtmlToText(tpl.htmlBody || '').trim());
     setHtmlBody(tpl.htmlBody || undefined);
   };
 

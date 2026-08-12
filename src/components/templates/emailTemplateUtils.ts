@@ -66,15 +66,37 @@ export function defaultEmailHtmlBody(): string {
 <a href="{{cta_url}}" style="display:inline-block;background:#6366f1;color:#fff;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:600;">Get started</a>`;
 }
 
+/** Decode common entities; loop catches double-encoding (&amp;nbsp; → &nbsp; → space). */
+function decodeHtmlEntities(value: string): string {
+  let s = value;
+  for (let i = 0; i < 2; i += 1) {
+    s = s
+      .replace(/&nbsp;/gi, ' ')
+      .replace(/&#160;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&apos;/g, "'");
+  }
+  return s;
+}
+
+/** HTML → plain text; keep breaks, never leave literal &nbsp;. */
 export function stripHtmlToText(html: string): string {
-  return html
+  const withBreaks = html
     .replace(/<style[\s\S]*?<\/style>/gi, '')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&nbsp;/gi, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/\s+/g, ' ')
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/(p|div|tr|h[1-6]|li|blockquote|table|ul|ol|hr)>/gi, '\n')
+    .replace(/<hr[^>]*>/gi, '\n')
+    .replace(/<[^>]+>/g, '');
+
+  return decodeHtmlEntities(withBreaks)
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n[ \t]+/g, '\n')
+    .replace(/[ \t]{2,}/g, ' ')
+    .replace(/\n{3,}/g, '\n\n')
     .trim();
 }

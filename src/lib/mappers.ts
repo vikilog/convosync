@@ -274,6 +274,10 @@ export function mapMessageFromApi(raw: Record<string, unknown>): ChatMessage {
       typeof metadata?.subject === 'string' && metadata.subject
         ? metadata.subject
         : undefined,
+    emailHtml:
+      typeof metadata?.html === 'string' && metadata.html.trim()
+        ? metadata.html
+        : undefined,
     clicked: metadata?.clicked === true,
   };
 }

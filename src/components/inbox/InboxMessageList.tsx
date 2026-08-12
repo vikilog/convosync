@@ -37,6 +37,13 @@ type Props = {
 
 const WA_DELETED_MESSAGE = 'This message was deleted';
 
+/** Inner body for bubble — strip outer html/body chrome from full email documents. */
+function emailHtmlFragment(html: string): string {
+  const trimmed = html.trim();
+  const body = trimmed.match(/<body[^>]*>([\s\S]*)<\/body>/i);
+  return (body?.[1] ?? trimmed).trim();
+}
+
 export function InboxMessageListSkeleton({ channel }: { channel: Channel }) {
   const isWhatsApp = channel === 'whatsapp';
   return (
@@ -158,6 +165,10 @@ const MessageBubble: React.FC<{
     return body;
   })();
 
+  const emailHtml = message.emailHtml?.trim()
+    ? emailHtmlFragment(message.emailHtml)
+    : '';
+
   const renderEmailTemplateBody = (opts: { onDark: boolean }) => (
     <div className="text-left space-y-1.5">
       <div className="flex flex-wrap items-center gap-1.5">
@@ -189,7 +200,15 @@ const MessageBubble: React.FC<{
           {message.emailSubject}
         </p>
       ) : null}
-      {emailBodyText ? (
+      {emailHtml ? (
+        // Agent-authored template HTML (same trust as GmailReadingPane).
+        <div className="rounded-lg bg-white text-gray-900 overflow-hidden max-h-[420px] overflow-y-auto">
+          <div
+            className="email-inbox-html p-2 text-left text-[13px] leading-relaxed [&_*]:max-w-full [&_a]:text-emerald-700 [&_a]:underline [&_img]:max-w-full [&_img]:h-auto [&_table]:w-full [&_td]:align-top"
+            dangerouslySetInnerHTML={{ __html: emailHtml }}
+          />
+        </div>
+      ) : emailBodyText ? (
         <p
           className={`text-sm leading-relaxed whitespace-pre-wrap break-words ${
             opts.onDark ? 'text-white/90' : 'text-gray-700'

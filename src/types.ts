@@ -58,6 +58,8 @@ export interface ChatMessage {
   templateId?: string;
   /** Email subject (outbound email / email template) */
   emailSubject?: string;
+  /** Rendered email HTML for Inbox bubble (template / compose) */
+  emailHtml?: string;
   /** Email open/click tracking — provider reported a link click */
   clicked?: boolean;
 }
