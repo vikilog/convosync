@@ -1051,6 +1051,8 @@ export const api = {
   getAgentSkills: (agentId: string) => get(`/agents/${agentId}/skills`),
   createAgentSkill: (agentId: string, data: unknown) =>
     post(`/agents/${agentId}/skills`, data),
+  bulkCreateAgentSkills: (agentId: string, data: { skills: unknown[] }) =>
+    post(`/agents/${agentId}/skills/bulk`, data),
   updateAgentSkill: (agentId: string, skillId: string, data: unknown) =>
     put(`/agents/${agentId}/skills/${skillId}`, data),
   publishAgentSkill: (agentId: string, skillId: string) =>
@@ -1059,6 +1061,8 @@ export const api = {
     del(`/agents/${agentId}/skills/${skillId}`),
 
   getAgentKnowledge: (agentId: string) => get(`/agents/${agentId}/knowledge`),
+  getAgentKnowledgeItem: (agentId: string, kId: string) =>
+    get(`/agents/${agentId}/knowledge/${kId}`),
   createAgentKnowledge: (agentId: string, data: unknown) =>
     post(`/agents/${agentId}/knowledge`, data),
   updateAgentKnowledge: (agentId: string, kId: string, data: unknown) =>

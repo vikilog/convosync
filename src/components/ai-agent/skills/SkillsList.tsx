@@ -17,6 +17,10 @@ function mapSkill(raw: Record<string, unknown>): AgentSkill {
     title: String(raw.title),
     trigger: String(raw.trigger ?? ''),
     instructions: String(raw.instructions ?? ''),
+    description: (raw.description as string | null) ?? null,
+    knowledgeItemIds: Array.isArray(raw.knowledgeItemIds)
+      ? raw.knowledgeItemIds.map(String)
+      : [],
     status: raw.status === 'live' ? 'live' : 'draft',
     createdAt: String(raw.createdAt ?? new Date().toISOString()),
   };
@@ -28,7 +32,9 @@ export const SkillsList: React.FC<Props> = ({ agentId }) => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [showNew, setShowNew] = useState(false);
+  const [modalMode, setModalMode] = useState<'single' | 'bulk'>('single');
   const [creating, setCreating] = useState(false);
+  const [bulkErrors, setBulkErrors] = useState<string[]>([]);
 
   const loadSkills = useCallback(async () => {
     setLoading(true);
@@ -48,11 +54,14 @@ export const SkillsList: React.FC<Props> = ({ agentId }) => {
 
   const handleCreate = async (draft: SkillDraft) => {
     setCreating(true);
+    setBulkErrors([]);
     try {
       const created = await api.createAgentSkill(agentId, {
         title: draft.title,
         trigger: draft.trigger,
         instructions: draft.instructions,
+        description: draft.description ?? null,
+        knowledgeItemIds: draft.knowledgeItemIds ?? [],
       });
       const skill = mapSkill(created as Record<string, unknown>);
       setShowNew(false);
@@ -62,9 +71,49 @@ export const SkillsList: React.FC<Props> = ({ agentId }) => {
     }
   };
 
-  const filtered = skills.filter((s) =>
-    s.title.toLowerCase().includes(search.toLowerCase())
-  );
+  const handleBulkCreate = async (drafts: SkillDraft[]) => {
+    setCreating(true);
+    setBulkErrors([]);
+    try {
+      const res = (await api.bulkCreateAgentSkills(agentId, {
+        skills: drafts.map((d) => ({
+          title: d.title,
+          trigger: d.trigger ?? '',
+          instructions: d.instructions ?? '',
+          description: d.description ?? null,
+          knowledgeItemIds: d.knowledgeItemIds ?? [],
+          status: d.status ?? 'draft',
+        })),
+      })) as {
+        created: number;
+        failed: number;
+        results: Array<
+          | { ok: true; index: number; skill: Record<string, unknown> }
+          | { ok: false; index: number; error: string }
+        >;
+      };
+      const errors = res.results
+        .filter((r): r is { ok: false; index: number; error: string } => !r.ok)
+        .map((r) => `Row ${r.index + 1}: ${r.error}`);
+      setBulkErrors(errors);
+      await loadSkills();
+      if (res.failed === 0) {
+        setShowNew(false);
+      }
+    } catch (err) {
+      setBulkErrors([err instanceof Error ? err.message : 'Bulk create failed']);
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const filtered = skills.filter((s) => {
+    const q = search.toLowerCase();
+    return (
+      s.title.toLowerCase().includes(q) ||
+      (s.description ?? '').toLowerCase().includes(q)
+    );
+  });
 
   return (
     <div className="w-full">
@@ -78,19 +127,39 @@ export const SkillsList: React.FC<Props> = ({ agentId }) => {
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => setShowNew(true)}
+            onClick={() => {
+              setModalMode('bulk');
+              setBulkErrors([]);
+              setShowNew(true);
+            }}
+            className="px-4 py-2 border border-black/5 text-[#111827] rounded-xl text-sm font-bold hover:bg-surface-muted"
+          >
+            Bulk add
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setModalMode('single');
+              setBulkErrors([]);
+              setShowNew(true);
+            }}
             className="px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-xl text-sm font-bold"
           >
             + New Skill
           </button>
-          <button
-            type="button"
-            className="px-4 py-2 border border-black/5 text-[#111827] rounded-xl text-sm font-bold hover:bg-surface-muted"
-          >
-            Learn more
-          </button>
         </div>
       </div>
+
+      {bulkErrors.length > 0 && (
+        <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <p className="font-semibold mb-1">Some rows failed</p>
+          <ul className="list-disc pl-4 space-y-0.5">
+            {bulkErrors.map((e) => (
+              <li key={e}>{e}</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <div className="flex items-center gap-3 mb-6">
         <div className="relative flex-1 max-w-md">
@@ -142,6 +211,9 @@ export const SkillsList: React.FC<Props> = ({ agentId }) => {
                   {skill.status === 'live' ? 'Live' : 'Draft'}
                 </span>
               </div>
+              {skill.description ? (
+                <p className="text-sm text-[#6B7280] mt-1.5 line-clamp-2">{skill.description}</p>
+              ) : null}
               <p className="text-xs text-[#6B7280] mt-2">
                 Created {new Date(skill.createdAt).toLocaleDateString()}
               </p>
@@ -152,8 +224,11 @@ export const SkillsList: React.FC<Props> = ({ agentId }) => {
 
       {showNew && (
         <NewSkillModal
+          agentId={agentId}
+          mode={modalMode}
           onClose={() => setShowNew(false)}
           onCreate={(draft) => void handleCreate(draft)}
+          onBulkCreate={(drafts) => void handleBulkCreate(drafts)}
           creating={creating}
         />
       )}

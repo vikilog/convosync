@@ -57,6 +57,8 @@ export interface AgentSkill {
   title: string;
   trigger: string;
   instructions: string;
+  description?: string | null;
+  knowledgeItemIds?: string[];
   status: SkillStatus;
   createdAt: string;
 }
