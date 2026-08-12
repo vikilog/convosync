@@ -20,6 +20,7 @@ import {
   PanelRightOpen,
   Search,
   PauseCircle,
+  Mail,
 } from 'lucide-react';
 import { Contact, ChatMessage, type ChatMessageType } from '../types';
 import { api, formatCatchError, getUserName, SendFailedError } from '../lib/api';
@@ -54,6 +55,7 @@ import { useKeepAliveActivation, useKeepAliveActive } from './KeepAlive';
 import { ConnectChannelEmpty } from './ConnectChannelEmpty';
 import { InboxAssigneePicker } from './inbox/InboxAssigneePicker';
 import { InboxNewChatPicker } from './inbox/InboxNewChatPicker';
+import type { InboxEmailSendPayload } from './inbox/InboxNewChatPicker';
 import { InboxTemplatePicker } from './inbox/InboxTemplatePicker';
 import { InboxCannedResponsePicker, type CannedSelection } from './inbox/InboxCannedResponsePicker';
 import {
@@ -202,6 +204,9 @@ function inboxChannelLineLabel(
   if (channel === 'messenger') {
     return messengerLabel || null;
   }
+  if (channel === 'email') {
+    return thread.email || thread.handle || null;
+  }
   return null;
 }
 
@@ -209,6 +214,7 @@ function inboxChannelLineClass(thread: InboxThread): string {
   const channel = contactChannel(thread);
   if (channel === 'instagram') return 'text-[#C13584]';
   if (channel === 'messenger') return 'text-[#1877F2]';
+  if (channel === 'email') return 'text-emerald-800';
   return 'text-[#128C7E]';
 }
 
@@ -385,13 +391,15 @@ const FILTER_TABS = [
 
 const CHANNEL_TABS: { id: InboxChannel; label: string }[] = [
   { id: 'whatsapp', label: 'WhatsApp' },
+  { id: 'email', label: 'Email' },
   { id: 'instagram', label: 'Instagram' },
   { id: 'messenger', label: 'Messenger' },
 ];
 
-function contactChannel(contact: Contact): 'whatsapp' | 'instagram' | 'messenger' {
+function contactChannel(contact: Contact): 'whatsapp' | 'instagram' | 'messenger' | 'email' {
   if (contact.channel === 'instagram') return 'instagram';
   if (contact.channel === 'messenger') return 'messenger';
+  if (contact.channel === 'email') return 'email';
   return 'whatsapp';
 }
 
@@ -399,6 +407,7 @@ function channelLabel(contact: Contact): string {
   const channel = contactChannel(contact);
   if (channel === 'instagram') return 'Instagram';
   if (channel === 'messenger') return 'Messenger';
+  if (channel === 'email') return 'Email';
   return 'WhatsApp';
 }
 
@@ -424,6 +433,7 @@ export const InboxView: React.FC = () => {
     instagramInboxLabel,
     messengerConnected,
     messengerInboxLabel,
+    emailConnected,
     channelsReady,
   } = useInboxAssigneeMeta();
   const [mobilePane, setMobilePane] = useState<'list' | 'chat'>('list');
@@ -493,11 +503,18 @@ export const InboxView: React.FC = () => {
       CHANNEL_TABS.filter((tab) => {
         if (!isInboxChannelAllowed(tab.id, inboxScope)) return false;
         if (tab.id === 'whatsapp') return whatsappAccounts.length > 0;
+        if (tab.id === 'email') return emailConnected;
         if (tab.id === 'instagram') return instagramConnected;
         if (tab.id === 'messenger') return messengerConnected;
         return false;
       }),
-    [inboxScope, whatsappAccounts.length, instagramConnected, messengerConnected]
+    [
+      inboxScope,
+      whatsappAccounts.length,
+      emailConnected,
+      instagramConnected,
+      messengerConnected,
+    ]
   );
 
   const newChatWhatsAppAccounts = useMemo(
@@ -1522,6 +1539,45 @@ export const InboxView: React.FC = () => {
     [selectThread]
   );
 
+  const startEmailChat = useCallback(
+    async (payload: InboxEmailSendPayload) => {
+      setSendError(null);
+      let result: {
+        conversation?: Record<string, unknown>;
+        message?: Record<string, unknown>;
+      };
+      try {
+        result = (await api.sendInboxEmail(payload)) as typeof result;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Could not send email';
+        setSendError(message);
+        throw err;
+      }
+      const conv = result.conversation;
+      if (!conv?.id) {
+        const message = 'Email sent but conversation was not returned';
+        setSendError(message);
+        throw new Error(message);
+      }
+      const contact = (conv.contact as Record<string, unknown>) ?? {};
+      const conversationId = String(conv.id);
+      const mapped = mapInboxThread(contact, conv, conversationId);
+      const assignee = encodeAssigneeFromConv(conv);
+
+      setAssignedToByConversationId((prev) => ({ ...prev, [conversationId]: assignee }));
+      setInboxThreads((prev) => mergeInboxThreads(prev, mapped));
+      if (result.message) {
+        setChatHistories((prev) =>
+          appendChatMessage(prev, conversationId, mapMessageFromApi(result.message!))
+        );
+      }
+      selectThread(conversationId);
+      setChannelFilter('email');
+      setNewChatOpen(false);
+    },
+    [selectThread]
+  );
+
   const handleDeleteConversation = async () => {
     if (!selectedThread) return;
     const label = selectedThread.name || contactDisplayHandle(selectedThread);
@@ -1637,9 +1693,11 @@ export const InboxView: React.FC = () => {
   const channelEmptyMessage =
     channelFilter === 'whatsapp'
       ? 'No WhatsApp conversations yet.'
-      : channelFilter === 'messenger'
-        ? 'No Messenger conversations yet.'
-        : 'No Instagram conversations yet.';
+      : channelFilter === 'email'
+        ? 'No email conversations yet.'
+        : channelFilter === 'messenger'
+          ? 'No Messenger conversations yet.'
+          : 'No Instagram conversations yet.';
 
   async function handleInstagramSync(opts?: { loadMore?: boolean }) {
     setInstagramSyncing(true);
@@ -1672,7 +1730,7 @@ export const InboxView: React.FC = () => {
             : channelEmptyMessage;
 
   const hasConnectedChannel =
-    whatsappAccounts.length > 0 || instagramConnected || messengerConnected;
+    whatsappAccounts.length > 0 || emailConnected || instagramConnected || messengerConnected;
   const showConnectChannelEmpty = channelsReady && !hasConnectedChannel;
 
   if (showConnectChannelEmpty) {
@@ -1758,7 +1816,9 @@ export const InboxView: React.FC = () => {
                     ? 'text-[#E1306C]'
                     : tab.id === 'messenger'
                       ? 'text-[#1877F2]'
-                      : 'text-[#25D366]'
+                      : tab.id === 'email'
+                        ? 'text-emerald-800'
+                        : 'text-[#25D366]'
                   : 'text-slate-500'
               }`;
               return (
@@ -1780,19 +1840,22 @@ export const InboxView: React.FC = () => {
                     <InstagramIcon className={iconClass} />
                   ) : tab.id === 'messenger' ? (
                     <MessengerIcon className={iconClass} />
+                  ) : tab.id === 'email' ? (
+                    <Mail className={iconClass} aria-hidden />
                   ) : (
                     <WhatsAppIcon className={iconClass} />
                   )}
                 </button>
               );
             })}
-            {channelFilter === 'whatsapp' && whatsappAccounts.length > 0 ? (
+            {(channelFilter === 'whatsapp' && whatsappAccounts.length > 0) ||
+            (channelFilter === 'email' && emailConnected) ? (
               <button
                 type="button"
                 onClick={() => setNewChatOpen(true)}
                 className="shrink-0 cursor-pointer rounded-lg bg-primary p-1.5 text-white transition-colors duration-200 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
-                title="New WhatsApp chat"
-                aria-label="New WhatsApp chat"
+                title={channelFilter === 'email' ? 'New email' : 'New WhatsApp chat'}
+                aria-label={channelFilter === 'email' ? 'New email' : 'New WhatsApp chat'}
               >
                 <Plus className="h-3.5 w-3.5" />
               </button>
@@ -1924,7 +1987,9 @@ export const InboxView: React.FC = () => {
                             ? 'text-[#E1306C]'
                             : ch === 'messenger'
                               ? 'text-[#1877F2]'
-                              : 'text-[#25D366]'
+                              : ch === 'email'
+                                ? 'text-emerald-800'
+                                : 'text-[#25D366]'
                         }`}
                         aria-label={channelLabel(thread)}
                       >
@@ -1932,6 +1997,8 @@ export const InboxView: React.FC = () => {
                           <InstagramIcon className="h-2.5 w-2.5" />
                         ) : ch === 'messenger' ? (
                           <MessengerIcon className="h-2.5 w-2.5" />
+                        ) : ch === 'email' ? (
+                          <Mail className="h-2.5 w-2.5" aria-hidden />
                         ) : (
                           <WhatsAppIcon className="h-2.5 w-2.5" />
                         )}
@@ -2285,6 +2352,22 @@ export const InboxView: React.FC = () => {
                 </p>
               )}
 
+              {selectedChannel === 'email' ? (
+                <div className="flex items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50/80 px-3 py-2.5">
+                  <p className="text-xs font-bold text-emerald-900 min-w-0">
+                    Email thread — use New Conversation to send another message.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setNewChatOpen(true)}
+                    className="shrink-0 inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg bg-emerald-900 text-white text-xs font-bold hover:bg-emerald-950"
+                  >
+                    <Mail className="w-3.5 h-3.5" />
+                    New email
+                  </button>
+                </div>
+              ) : (
+              <>
               {pendingComposerFile && (
                 <div className="mb-2 flex items-center gap-2 rounded-lg border border-black/5 bg-surface-muted px-3 py-2">
                   {pendingComposerFile.type.startsWith('image/') && pendingComposerPreview ? (
@@ -2474,6 +2557,8 @@ export const InboxView: React.FC = () => {
                   </button>
                 </div>
               </div>
+              </>
+              )}
             </div>
           </>
         )}
@@ -2536,6 +2621,9 @@ export const InboxView: React.FC = () => {
         open={newChatOpen}
         onClose={() => setNewChatOpen(false)}
         onSelectContact={startWhatsAppChat}
+        onSendEmail={startEmailChat}
+        initialChannel={channelFilter === 'email' ? 'email' : 'whatsapp'}
+        emailReady={emailConnected}
         whatsappAccounts={newChatWhatsAppAccounts}
         onAddNewContact={(phoneNumberId) => {
           setNewChatPhoneNumberId(phoneNumberId);

@@ -905,6 +905,13 @@ export const api = {
       contactId,
       ...(phoneNumberId ? { phoneNumberId } : {}),
     }),
+  sendInboxEmail: (data: {
+    contactId: string;
+    subject: string;
+    text?: string;
+    html?: string;
+    templateId?: string;
+  }) => post('/conversations/email/send', data),
   getMessages: (
     convId: string,
     params?: { limit?: number; before?: string }

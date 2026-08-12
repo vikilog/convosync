@@ -72,7 +72,7 @@ export interface Contact {
   status: 'Open' | 'Pending' | 'Resolved';
   assignedAgent: string;
   source: string;
-  channel?: 'whatsapp' | 'instagram' | 'messenger';
+  channel?: 'whatsapp' | 'instagram' | 'messenger' | 'email';
   /** Meta phone_number_id for WhatsApp inbox routing */
   channelAccountId?: string | null;
   handle?: string;

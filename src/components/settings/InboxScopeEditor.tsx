@@ -32,6 +32,7 @@ const CHANNEL_LABELS: Record<InboxChannel, string> = {
   whatsapp: 'WhatsApp',
   instagram: 'Instagram',
   messenger: 'Messenger',
+  email: 'Email',
 };
 
 function waLabel(acc: WhatsAppAccount) {
@@ -195,7 +196,23 @@ export function InboxScopeEditor({ value, onChange, disabled }: InboxScopeEditor
               Loading connected accounts…
             </div>
           ) : (
-            (['whatsapp', 'instagram', 'messenger'] as InboxChannel[]).map((channel) => {
+            (['whatsapp', 'instagram', 'messenger', 'email'] as InboxChannel[]).map((channel) => {
+              if (channel === 'email') {
+                return (
+                  <div key={channel} className="space-y-1.5">
+                    <label className="flex items-center gap-2 text-sm font-bold text-gray-800">
+                      <input
+                        type="checkbox"
+                        className="accent-sky-600"
+                        checked={channels.has(channel)}
+                        disabled={disabled}
+                        onChange={() => toggleChannel(channel)}
+                      />
+                      {CHANNEL_LABELS[channel]}
+                    </label>
+                  </div>
+                );
+              }
               const list =
                 channel === 'whatsapp'
                   ? whatsappAccounts.map((a) => ({

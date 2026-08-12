@@ -1,4 +1,4 @@
-export type InboxChannel = 'whatsapp' | 'instagram' | 'messenger';
+export type InboxChannel = 'whatsapp' | 'instagram' | 'messenger' | 'email';
 
 export type InboxScope = {
   mode: 'all' | 'restricted';
@@ -8,7 +8,7 @@ export type InboxScope = {
 
 export const FULL_INBOX_SCOPE: InboxScope = { mode: 'all' };
 
-const INBOX_CHANNELS: InboxChannel[] = ['whatsapp', 'instagram', 'messenger'];
+const INBOX_CHANNELS: InboxChannel[] = ['whatsapp', 'instagram', 'messenger', 'email'];
 
 export function parseInboxScope(value: unknown): InboxScope | null {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
@@ -67,6 +67,8 @@ export function isConversationInInboxScope(
   const allowed = restrictedChannelAccess(scope).get(ch);
   if (!allowed) return false;
   if (allowed === 'all') return true;
+  // email has no per-account ids — channel allow is enough
+  if (ch === 'email') return true;
   if (!conversation.channelAccountId) return false;
   return allowed.includes(conversation.channelAccountId);
 }
@@ -76,7 +78,14 @@ export function formatInboxScopeSummary(scope: InboxScope): string {
   const parts: string[] = [];
   const access = restrictedChannelAccess(scope);
   for (const [ch, allowed] of access) {
-    const label = ch === 'whatsapp' ? 'WhatsApp' : ch === 'instagram' ? 'Instagram' : 'Messenger';
+    const label =
+      ch === 'whatsapp'
+        ? 'WhatsApp'
+        : ch === 'instagram'
+          ? 'Instagram'
+          : ch === 'messenger'
+            ? 'Messenger'
+            : 'Email';
     if (allowed === 'all') parts.push(label);
     else parts.push(`${label} (${allowed.length})`);
   }
@@ -84,5 +93,5 @@ export function formatInboxScopeSummary(scope: InboxScope): string {
 }
 
 export function defaultRestrictedInboxScope(): InboxScope {
-  return { mode: 'restricted', channels: ['whatsapp', 'instagram', 'messenger'] };
+  return { mode: 'restricted', channels: ['whatsapp', 'instagram', 'messenger', 'email'] };
 }

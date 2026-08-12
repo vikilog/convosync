@@ -86,8 +86,11 @@ export function mapContactFromApi(raw: Record<string, unknown>, conv?: Record<st
   // rows (e.g. Messenger fb: contact still tagged source=Instagram) into the IG tab.
   const convChannel = conv?.channel ? String(conv.channel) : '';
   const channel =
-    convChannel === 'instagram' || convChannel === 'messenger' || convChannel === 'whatsapp'
-      ? (convChannel as 'instagram' | 'messenger' | 'whatsapp')
+    convChannel === 'instagram' ||
+    convChannel === 'messenger' ||
+    convChannel === 'whatsapp' ||
+    convChannel === 'email'
+      ? (convChannel as 'instagram' | 'messenger' | 'whatsapp' | 'email')
       : phone.startsWith('ig:') || source === 'Instagram'
         ? 'instagram'
         : phone.startsWith('fb:') || source === 'Messenger'
@@ -105,7 +108,11 @@ export function mapContactFromApi(raw: Record<string, unknown>, conv?: Record<st
         ? phone.startsWith('fb:')
           ? `Messenger user ${phone.slice(3, 9)}…`
           : phone
-        : phone;
+        : channel === 'email'
+          ? raw.email
+            ? String(raw.email)
+            : phone
+          : phone;
 
   return {
     id: String(raw.id),

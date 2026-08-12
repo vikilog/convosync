@@ -14,7 +14,7 @@ import { MessageAttachment } from './MessageAttachment';
 const WA_CHAT_BG = '#e5ddd5';
 const EASE = [0.22, 1, 0.36, 1] as const;
 
-type Channel = 'whatsapp' | 'instagram' | 'messenger';
+type Channel = 'whatsapp' | 'instagram' | 'messenger' | 'email';
 
 export type AutomationWaitingBanner = {
   automationLabel: string;
@@ -78,6 +78,7 @@ function channelAccentBar(channel: Channel): string {
     return 'bg-gradient-to-b from-[#833AB4] via-[#C13584] to-[#E1306C]';
   }
   if (channel === 'messenger') return 'bg-[#0084ff]';
+  if (channel === 'email') return 'bg-emerald-800';
   return 'bg-[#25D366]';
 }
 
