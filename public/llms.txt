@@ -1,0 +1,31 @@
+# ConvoSync
+
+> Shared WhatsApp Business inbox for teams — reply as a group from one number, automate conversations with AI agents, run WhatsApp broadcast campaigns, and accept payments with WhatsApp Pay. Also covers Instagram DMs and email.
+
+ConvoSync is a B2B SaaS product built by Lazybinary. It answers the questions teams usually search for one at a time — "whatsapp business multiple agents same number," "whatsapp shared inbox for team," "ai chatbot for whatsapp business," "whatsapp bulk broadcast tool," "connect whatsapp to crm" — as a single platform: a shared team inbox, WhatsApp Business API access, AI agents, campaign broadcasts, and a lightweight CRM together.
+
+## Product
+
+- [Homepage](https://www.convosync.io/): Product overview, pricing, and marketing site.
+- [Start a free trial](https://app.convosync.io/signup): 14-day free trial, no credit card required.
+- [Sign in](https://app.convosync.io/login): Access an existing ConvoSync workspace.
+- [Privacy Policy](https://app.convosync.io/privacy)
+- [Terms of Service](https://app.convosync.io/terms)
+
+## Capabilities
+
+- **WhatsApp Inbox** — Shared team inbox for WhatsApp conversations: assign chats to teammates, apply labels, add internal notes, use quick replies, and see full conversation history.
+- **Message Templates** — Meta-approved WhatsApp message templates (text, media, or interactive buttons) with variables, typically approved within 1–24 hours.
+- **Campaigns** — Bulk WhatsApp broadcasts to CSV-uploaded contact lists, scheduled or sent immediately, with delivered/read/replied analytics and A/B testing on paid plans.
+- **Journey Builder** — Visual drag-and-drop automation builder with triggers (inbound message, contact tag, campaign reply), actions (send message, assign agent, add tag, wait), and if/else branching — used for lead nurturing, onboarding, and re-engagement.
+- **AI Agent** — Configurable 24/7 chatbot (autonomous, responsive, or rule-based) with a knowledge base built from documents, Q&A pairs, or web URLs, plus escalation and handoff rules, in any language.
+- **Contacts & CRM** — Contact directory with CSV import, custom attributes, tags for segmentation, and a per-contact activity timeline.
+- **Reports & Analytics** — Message delivery rates, campaign performance, agent response time, conversation volume trends, and AI agent resolution rate.
+- **WhatsApp Pay** — Payment requests, settlements, and invoice status tracked directly inside the chat.
+- **Instagram Automation** — Automated DM and comment replies with triggers and quick replies.
+- **Meta & Google Ads** — Click-to-WhatsApp campaign management and ad performance tracking.
+
+## Company
+
+- Legal entity: Lazybinary Pvt Ltd
+- Support: support@convosync.io

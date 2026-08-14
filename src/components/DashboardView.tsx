@@ -5,24 +5,39 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, Send, Clock, Activity } from 'lucide-react';
+import { Users, Send, Clock, Activity, Inbox, CalendarClock, TrendingUp } from 'lucide-react';
 import { useKeepAliveActivation } from './KeepAlive';
 import { QuickCampaign } from '../types';
-import { api } from '../lib/api';
+import { api, getUserName } from '../lib/api';
 import { mapChartDay, mapQuickCampaignFromApi } from '../lib/mappers';
 import { OnboardingProfileBanner } from './onboarding/OnboardingProfileBanner';
-import { StatCard } from './dashboard/StatCard';
+import { DashboardStatRail, type DashboardStat } from './dashboard/DashboardStatRail';
 import { MessagePerformanceChart } from './dashboard/MessagePerformanceChart';
-import { RecentCampaignsPanel } from './dashboard/RecentCampaignsPanel';
-import { UpcomingCampaignsPanel } from './dashboard/UpcomingCampaignsPanel';
-import { BottomStatusBar } from './dashboard/BottomStatusBar';
+import { DashboardCampaignsPanel } from './dashboard/DashboardCampaignsPanel';
+import { NeedsReplyPanel, type WaitingConversation } from './dashboard/NeedsReplyPanel';
+import { AiAgentsPanel, type DashboardAgent } from './dashboard/AiAgentsPanel';
+import { ChannelsPanel, type DashboardChannel } from './dashboard/ChannelsPanel';
+import { TeamPanel, type DashboardTeamMember } from './dashboard/TeamPanel';
 import { useCountUp } from '../hooks/useCountUp';
 import {
   normalizeChartData,
   isChartEmpty,
+  getTimeGreeting,
+  getFirstName,
   type ChartPoint,
 } from '../lib/chartUtils';
-import { pathForTab, pathForCampaign } from '../routes';
+import {
+  channelAllowedByPlan,
+  planFeaturesFromSubscription,
+  PLAN_UPGRADE_PATH,
+  type PlanFeatureFlags,
+} from '../lib/planEntitlements';
+import {
+  pathForTab,
+  pathForCampaign,
+  pathForIntegrationsChannel,
+  pathForSettingsSection,
+} from '../routes';
 
 interface DashboardViewProps {
   onAddContact?: () => void;
@@ -42,19 +57,25 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const navigate = useNavigate();
   const [totalContacts, setTotalContacts] = useState(0);
   const [messagesToday, setMessagesToday] = useState(0);
-  const [activeJourneys, setActiveJourneys] = useState(0);
-  const [pausedJourneys, setPausedJourneys] = useState(0);
+  const [publishedAutomations, setPublishedAutomations] = useState(0);
+  const [draftAutomations, setDraftAutomations] = useState(0);
+  const [automationRuns, setAutomationRuns] = useState(0);
+  const [openConversations, setOpenConversations] = useState(0);
   const [performanceData, setPerformanceData] = useState<ChartPoint[]>([]);
   const [quickCampaigns, setQuickCampaigns] = useState<QuickCampaign[]>([]);
   const [upcomingCampaigns, setUpcomingCampaigns] = useState<QuickCampaign[]>([]);
+  const [waitingConversations, setWaitingConversations] = useState<WaitingConversation[]>([]);
+  const [agents, setAgents] = useState<DashboardAgent[]>([]);
+  const [channels, setChannels] = useState<DashboardChannel[]>([]);
+  const [teamMembers, setTeamMembers] = useState<DashboardTeamMember[]>([]);
   const [chartRange, setChartRange] = useState<ChartRange>(7);
-  const [whatsappConnected, setWhatsappConnected] = useState(false);
-  const [activeAgents, setActiveAgents] = useState(0);
   const [loading, setLoading] = useState(true);
 
   const contactsCount = useCountUp(totalContacts, 1000);
   const messagesCount = useCountUp(messagesToday, 1000);
-  const journeysCount = useCountUp(activeJourneys, 1000);
+  const automationsCount = useCountUp(publishedAutomations, 1000);
+  const openConversationsCount = useCountUp(openConversations, 1000);
+  const scheduledCampaignsCount = useCountUp(upcomingCampaigns.length, 1000);
 
   const chartData = useMemo(() => {
     return normalizeChartData(performanceData, chartRange);
@@ -62,22 +83,134 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
   const showChartEmpty = useMemo(() => isChartEmpty(chartData), [chartData]);
 
+  const messagesSpark = useMemo(() => {
+    const values = chartData.map((d) => d.sent);
+    return values.length >= 2 && !showChartEmpty ? values : undefined;
+  }, [chartData, showChartEmpty]);
+
+  const stats: DashboardStat[] = useMemo(
+    () => [
+      {
+        key: 'contacts',
+        icon: Users,
+        label: 'Total contacts',
+        value: contactsCount.toLocaleString(),
+        meta: (
+          <span className="inline-flex shrink-0 items-center gap-0.5 text-[11px] font-semibold text-primary">
+            <TrendingUp className="h-3 w-3" aria-hidden />
+            +8%
+          </span>
+        ),
+      },
+      {
+        key: 'messages',
+        icon: Send,
+        label: 'Messages today',
+        value: messagesCount.toLocaleString(),
+        spark: messagesSpark,
+      },
+      {
+        key: 'conversations',
+        icon: Inbox,
+        label: 'Open conversations',
+        value: openConversationsCount.toLocaleString(),
+      },
+      {
+        key: 'scheduled',
+        icon: CalendarClock,
+        label: 'Scheduled campaigns',
+        value: scheduledCampaignsCount.toLocaleString(),
+      },
+      {
+        key: 'response',
+        icon: Clock,
+        label: 'Avg response time',
+        value: (
+          <span>
+            4m <span className="text-lg font-medium text-neutral-400">32s</span>
+          </span>
+        ),
+      },
+      {
+        key: 'automations',
+        icon: Activity,
+        label: 'Automations',
+        value: automationsCount.toLocaleString(),
+        meta: (
+          <span className="flex shrink-0 items-center gap-1.5">
+            {draftAutomations > 0 ? (
+              <span className="rounded-md bg-amber-50 px-1.5 py-0.5 text-[11px] font-medium text-amber-700">
+                {draftAutomations} draft
+              </span>
+            ) : null}
+            <span className="text-[11px] text-neutral-400">
+              {automationRuns.toLocaleString()} runs
+            </span>
+          </span>
+        ),
+      },
+    ],
+    [
+      contactsCount,
+      messagesCount,
+      messagesSpark,
+      openConversationsCount,
+      scheduledCampaignsCount,
+      automationsCount,
+      draftAutomations,
+      automationRuns,
+    ]
+  );
+
   const loadDashboard = useCallback(async () => {
     try {
-      const [stats, chart, campaigns, upcoming, whatsapp, agents] =
-        await Promise.all([
-          api.getDashboardStats(),
-          api.getMessageChart(chartRange),
-          api.getRecentCampaigns(),
-          api.getUpcomingCampaigns(),
-          api.getWhatsAppStatus().catch(() => null),
-          api.getAgents().catch(() => []),
-        ]);
+      const [
+        stats,
+        chart,
+        campaigns,
+        upcoming,
+        openConvos,
+        agentRows,
+        whatsappRes,
+        instagramRes,
+        messengerRes,
+        emailRes,
+        subscriptionRes,
+        waJourneys,
+        igJourneys,
+        workspaceMembers,
+        teamStats,
+      ] = await Promise.all([
+        api.getDashboardStats(),
+        api.getMessageChart(chartRange),
+        api.getRecentCampaigns(),
+        api.getUpcomingCampaigns(),
+        api.getConversations({ status: 'open' }).catch(() => []),
+        api.getAgents().catch(() => []),
+        api.getWhatsAppAccounts().catch(() => ({ accounts: [] })),
+        api.getInstagramAccounts().catch(() => ({ accounts: [] })),
+        api.getMessengerAccounts().catch(() => ({ accounts: [] })),
+        api.getEmailIntegration().catch(() => ({ enabled: false })),
+        api.getSubscription().catch(() => null),
+        api.getJourneys().catch(() => []),
+        api.getInstagramJourneys().catch(() => []),
+        api.getWorkspaceMembers().catch(() => []),
+        api.getTeamStats().catch(() => []),
+      ]);
 
       setTotalContacts(stats.totalContacts ?? 0);
       setMessagesToday(stats.messagesToday ?? 0);
-      setActiveJourneys(stats.activeJourneys ?? 0);
-      setPausedJourneys(stats.pausedJourneys ?? 0);
+      setOpenConversations(stats.openConversations ?? 0);
+
+      const allAutomations = [
+        ...(Array.isArray(waJourneys) ? waJourneys : []),
+        ...(Array.isArray(igJourneys) ? igJourneys : []),
+      ] as Array<{ status: 'draft' | 'published'; _count?: { executions?: number } }>;
+      setPublishedAutomations(allAutomations.filter((j) => j.status === 'published').length);
+      setDraftAutomations(allAutomations.filter((j) => j.status === 'draft').length);
+      setAutomationRuns(
+        allAutomations.reduce((sum, j) => sum + (j._count?.executions ?? 0), 0)
+      );
       setPerformanceData(
         (chart as { date: string; sent: number; delivered: number; read: number }[]).map(
           (row) => mapChartDay(row, { compact: chartRange > 7 })
@@ -90,14 +223,116 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         upcoming.map((c: Record<string, unknown>) => mapQuickCampaignFromApi(c))
       );
 
-      const wa = whatsapp as { connected?: boolean } | null;
-      setWhatsappConnected(Boolean(wa?.connected));
-
-      const agentList = Array.isArray(agents) ? agents : [];
-      const enabled = agentList.filter(
-        (a: { isEnabled?: boolean }) => a.isEnabled !== false
+      const waiting = (
+        Array.isArray(openConvos) ? openConvos : []
+      ) as Array<{
+        id: string;
+        channel: string;
+        lastMessage?: string | null;
+        lastMessageAt?: string | null;
+        unreadCount?: number;
+        contact?: { name?: string; avatar?: string | null };
+      }>;
+      setWaitingConversations(
+        waiting
+          .filter((c) => (c.unreadCount ?? 0) > 0 && c.lastMessageAt)
+          .sort(
+            (a, b) =>
+              new Date(a.lastMessageAt as string).getTime() -
+              new Date(b.lastMessageAt as string).getTime()
+          )
+          .map((c) => ({
+            id: c.id,
+            contactName: c.contact?.name || 'Unknown',
+            contactAvatar: c.contact?.avatar,
+            channel: c.channel,
+            lastMessage: c.lastMessage || '',
+            lastMessageAt: c.lastMessageAt as string,
+          }))
       );
-      setActiveAgents(enabled.length);
+
+      const agentList = (Array.isArray(agentRows) ? agentRows : []) as Array<{
+        id: string;
+        name: string;
+        role?: string;
+        avatarUrl?: string | null;
+        isEnabled?: boolean;
+      }>;
+      setAgents(
+        agentList.map((a) => ({
+          id: a.id,
+          name: a.name,
+          role: a.role || 'AI agent',
+          avatarUrl: a.avatarUrl,
+          isEnabled: Boolean(a.isEnabled),
+        }))
+      );
+
+      const plan = planFeaturesFromSubscription(
+        (subscriptionRes as { currentPlan?: PlanFeatureFlags | null } | null)?.currentPlan
+      );
+      const whatsappAccounts = (whatsappRes as { accounts?: unknown[] })?.accounts ?? [];
+      const instagramAccounts = (instagramRes as { accounts?: unknown[] })?.accounts ?? [];
+      const messengerAccounts = (messengerRes as { accounts?: unknown[] })?.accounts ?? [];
+      const email = emailRes as { enabled?: boolean; providerLabel?: string | null };
+
+      setChannels([
+        {
+          kind: 'whatsapp',
+          label: 'WhatsApp',
+          connected: whatsappAccounts.length > 0,
+          allowedByPlan: channelAllowedByPlan(plan, 'whatsapp'),
+          detail:
+            whatsappAccounts.length > 0
+              ? `${whatsappAccounts.length} number${whatsappAccounts.length === 1 ? '' : 's'} connected`
+              : undefined,
+        },
+        {
+          kind: 'instagram',
+          label: 'Instagram',
+          connected: instagramAccounts.length > 0,
+          allowedByPlan: channelAllowedByPlan(plan, 'instagram'),
+        },
+        {
+          kind: 'messenger',
+          label: 'Messenger',
+          connected: messengerAccounts.length > 0,
+          allowedByPlan: channelAllowedByPlan(plan, 'messenger'),
+        },
+        {
+          kind: 'email',
+          label: 'Email',
+          connected: Boolean(email.enabled),
+          allowedByPlan: channelAllowedByPlan(plan, 'email'),
+          detail: email.providerLabel || undefined,
+        },
+      ]);
+
+      const members = (Array.isArray(workspaceMembers) ? workspaceMembers : []) as Array<{
+        id: string;
+        userId: string;
+        name: string;
+        role: string;
+        avatar?: string | null;
+        isOwner: boolean;
+      }>;
+      const memberStats = (Array.isArray(teamStats) ? teamStats : []) as Array<{
+        id: string;
+        conversationsCount?: number;
+      }>;
+      const conversationsByUserId = new Map(
+        memberStats.map((s) => [s.id, s.conversationsCount ?? 0])
+      );
+      setTeamMembers(
+        members.map((m) => ({
+          id: m.id,
+          name: m.name,
+          role: m.role,
+          avatar: m.avatar,
+          isOwner: m.isOwner,
+          conversationsCount: conversationsByUserId.get(m.userId),
+        }))
+      );
     } catch (err) {
       console.error(err);
     } finally {
@@ -120,43 +355,18 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         aria-busy="true"
         aria-label="Loading dashboard"
       >
-        <div className="h-10 w-48 rounded-lg skel animate-pulse" />
-        <div className="h-14 rounded-xl bg-white ring-1 ring-slate-200/80 animate-pulse" />
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div
-              key={`stat-skel-${i}`}
-              className="relative overflow-hidden rounded-xl bg-white ring-1 ring-slate-200/80 p-4 animate-pulse"
-            >
-              <div className="absolute inset-x-0 top-0 h-0.5 skel" />
-              <div className="flex items-start justify-between gap-3">
-                <div className="space-y-3 flex-1 pt-1">
-                  <div className="h-3 w-24 rounded skel" />
-                  <div className="h-8 w-20 rounded skel" />
-                </div>
-                <div className="h-10 w-10 rounded-xl skel shrink-0" />
-              </div>
-            </div>
-          ))}
+        <div className="space-y-2">
+          <div className="h-3 w-40 rounded skel" />
+          <div className="h-8 w-72 rounded-lg skel" />
         </div>
 
-        <div className="rounded-xl bg-white ring-1 ring-slate-200/80 p-5 space-y-4 animate-pulse">
-          <div className="flex items-center justify-between gap-3">
-            <div className="h-4 w-44 rounded skel" />
-            <div className="h-8 w-28 rounded-lg skel" />
-          </div>
-          <div className="space-y-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={`upcoming-skel-${i}`} className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl skel shrink-0" />
-                <div className="flex-1 space-y-2">
-                  <div className="h-3 w-1/2 rounded skel" />
-                  <div className="h-2.5 w-1/3 rounded skel" />
-                </div>
-              </div>
-            ))}
-          </div>
+        <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl bg-slate-100 ring-1 ring-slate-200/80 animate-pulse sm:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={`stat-skel-${i}`} className="space-y-3 bg-white p-4">
+              <div className="h-3 w-20 rounded skel" />
+              <div className="h-7 w-16 rounded skel" />
+            </div>
+          ))}
         </div>
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
@@ -183,71 +393,57 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
           </div>
         </div>
+
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
+          <div className="lg:col-span-3 rounded-xl bg-white ring-1 ring-slate-200/80 p-5 space-y-3 animate-pulse">
+            <div className="h-4 w-32 rounded skel" />
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={`camp-skel-${i}`} className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-lg skel shrink-0" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-3 w-1/2 rounded skel" />
+                  <div className="h-2.5 w-1/3 rounded skel" />
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="lg:col-span-2 rounded-xl bg-white ring-1 ring-slate-200/80 p-5 space-y-3 animate-pulse">
+            <div className="h-4 w-24 rounded skel" />
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={`agent-skel-${i}`} className="flex items-center gap-3">
+                <div className="h-8 w-8 rounded-full skel shrink-0" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-3 w-1/2 rounded skel" />
+                  <div className="h-2.5 w-1/3 rounded skel" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
 
+  const firstName = getFirstName(getUserName() || 'there');
+
   return (
     <div className="w-full min-h-full space-y-5 bg-white pb-10">
-      <OnboardingProfileBanner />
-
-      <BottomStatusBar
-        whatsappConnected={whatsappConnected}
-        activeAgents={activeAgents}
-        onNewCampaign={onNewCampaign}
-        onNewJourney={onNewJourney}
-        onAddContact={onAddContact}
-        onImportCSV={onImportCSV}
-      />
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard
-          variant="contacts"
-          icon={Users}
-          value={contactsCount.toLocaleString()}
-          label="Total contacts"
-          trend="+8%"
-        />
-
-        <StatCard
-          variant="messages"
-          icon={Send}
-          value={messagesCount.toLocaleString()}
-          label="Messages today"
-        />
-
-        <StatCard
-          variant="response"
-          icon={Clock}
-          value={
-            <span>
-              4m <span className="text-lg font-medium text-neutral-400">32s</span>
-            </span>
-          }
-          label="Avg response time"
-        />
-
-        <StatCard
-          variant="journeys"
-          icon={Activity}
-          value={journeysCount.toLocaleString()}
-          label="Active journeys"
-          badge={
-            pausedJourneys > 0 ? (
-              <span className="rounded-md bg-amber-50 px-1.5 py-0.5 text-[11px] font-medium text-amber-700">
-                {pausedJourneys} paused
-              </span>
-            ) : null
-          }
-        />
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h1 className="font-display text-2xl font-medium tracking-tight text-neutral-900">
+          {getTimeGreeting()}, {firstName}
+        </h1>
+        <p className="text-xs font-semibold uppercase tracking-wide text-neutral-400">
+          {new Date().toLocaleDateString('en-GB', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+          })}
+        </p>
       </div>
 
-      <UpcomingCampaignsPanel
-        campaigns={upcomingCampaigns}
-        onNewCampaign={onNewCampaign}
-        onViewAll={() => navigate(pathForTab('campaigns'))}
-        onOpenCampaign={(id) => navigate(pathForCampaign(id))}
-      />
+      <OnboardingProfileBanner />
+
+      <DashboardStatRail stats={stats} />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-5 lg:items-stretch">
         <div className="lg:col-span-3">
@@ -259,12 +455,31 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           />
         </div>
         <div className="lg:col-span-2">
-          <RecentCampaignsPanel
-            campaigns={quickCampaigns}
+          <DashboardCampaignsPanel
+            upcoming={upcomingCampaigns}
+            recent={quickCampaigns}
             onNewCampaign={onNewCampaign}
             onViewAll={() => navigate(pathForTab('campaigns'))}
+            onOpenCampaign={(id) => navigate(pathForCampaign(id))}
           />
         </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:items-stretch">
+        <NeedsReplyPanel
+          conversations={waitingConversations}
+          onOpenInbox={() => navigate(pathForTab('inbox'))}
+        />
+        <AiAgentsPanel agents={agents} onViewAll={() => navigate(pathForTab('ai-agent'))} />
+        <ChannelsPanel
+          channels={channels}
+          onConnect={(kind) => navigate(pathForIntegrationsChannel(kind))}
+          onUpgrade={() => navigate(PLAN_UPGRADE_PATH)}
+        />
+        <TeamPanel
+          members={teamMembers}
+          onViewAll={() => navigate(pathForSettingsSection('users'))}
+        />
       </div>
     </div>
   );

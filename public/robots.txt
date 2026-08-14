@@ -1,10 +1,7 @@
 User-agent: *
-Allow: /
+Disallow: /
 Allow: /privacy
 Allow: /terms
-Disallow: /dashboard
-Disallow: /inbox
-Disallow: /login
-Disallow: /signup
+Allow: /llms.txt
 
-Sitemap: https://convosync.io/sitemap.xml
+Sitemap: https://app.convosync.io/sitemap.xml

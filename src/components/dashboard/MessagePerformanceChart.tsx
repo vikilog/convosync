@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import {
-  LineChart,
+  ComposedChart,
+  Area,
   Line,
   XAxis,
   YAxis,
@@ -39,7 +40,7 @@ function ChartTooltip({
   const colors: Record<string, string> = {
     sent: 'bg-sky-500',
     delivered: 'bg-primary',
-    read: 'bg-neutral-300',
+    read: 'bg-neutral-400',
   };
 
   return (
@@ -127,7 +128,13 @@ export const MessagePerformanceChart: React.FC<MessagePerformanceChartProps> = (
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={240}>
-            <LineChart data={data} margin={{ top: 4, right: 4, left: -12, bottom: 0 }}>
+            <ComposedChart data={data} margin={{ top: 4, right: 4, left: -12, bottom: 0 }}>
+              <defs>
+                <linearGradient id="sentFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#0284c7" stopOpacity={0.16} />
+                  <stop offset="100%" stopColor="#0284c7" stopOpacity={0} />
+                </linearGradient>
+              </defs>
               <CartesianGrid stroke="#ebe8e2" strokeDasharray="3 3" vertical={false} />
               <XAxis
                 dataKey="day"
@@ -142,16 +149,17 @@ export const MessagePerformanceChart: React.FC<MessagePerformanceChartProps> = (
                 width={36}
               />
               <Tooltip content={<ChartTooltip />} />
-              <Line
-                type="monotone"
+              <Area
+                type="linear"
                 dataKey="sent"
                 stroke="#0284c7"
                 strokeWidth={2}
+                fill="url(#sentFill)"
                 dot={false}
                 activeDot={{ r: 4 }}
               />
               <Line
-                type="monotone"
+                type="linear"
                 dataKey="delivered"
                 stroke="#064e3b"
                 strokeWidth={2}
@@ -159,15 +167,15 @@ export const MessagePerformanceChart: React.FC<MessagePerformanceChartProps> = (
                 activeDot={{ r: 4 }}
               />
               <Line
-                type="monotone"
+                type="linear"
                 dataKey="read"
-                stroke="#d4d4d4"
+                stroke="#a3a3a3"
                 strokeWidth={1.5}
                 strokeDasharray="4 4"
                 dot={false}
                 activeDot={{ r: 3 }}
               />
-            </LineChart>
+            </ComposedChart>
           </ResponsiveContainer>
         )}
       </div>

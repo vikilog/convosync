@@ -1289,7 +1289,7 @@ Click the button below to learn more.
 Best regards,
 The ConvoSync Team`,
   ctaText: 'View Offer →',
-  ctaUrl: 'https://convosync.io',
+  ctaUrl: 'https://www.convosync.io',
 };
 
 export interface InstagramCampaignConfig {

@@ -1,7 +1,13 @@
 import React from 'react';
 import { LucideIcon, TrendingUp } from 'lucide-react';
 
-export type StatCardVariant = 'contacts' | 'messages' | 'response' | 'journeys';
+export type StatCardVariant =
+  | 'contacts'
+  | 'messages'
+  | 'response'
+  | 'journeys'
+  | 'conversations'
+  | 'scheduled';
 
 interface StatCardProps {
   variant: StatCardVariant;
@@ -13,18 +19,13 @@ interface StatCardProps {
   trend?: string;
 }
 
-const ACCENT: Record<StatCardVariant, string> = {
-  contacts: 'bg-sky-500',
-  messages: 'bg-primary',
-  response: 'bg-amber-500',
-  journeys: 'bg-violet-500',
-};
-
 const ICON: Record<StatCardVariant, string> = {
   contacts: 'bg-sky-50 text-sky-600',
   messages: 'bg-[#e8f0ec] text-primary',
   response: 'bg-amber-50 text-amber-600',
   journeys: 'bg-violet-50 text-violet-600',
+  conversations: 'bg-teal-50 text-teal-600',
+  scheduled: 'bg-slate-100 text-slate-600',
 };
 
 export const StatCard: React.FC<StatCardProps> = ({
@@ -36,9 +37,7 @@ export const StatCard: React.FC<StatCardProps> = ({
   footer,
   trend,
 }) => (
-  <div className="relative overflow-hidden rounded-xl bg-white ring-1 ring-slate-200/80 transition-shadow duration-200 hover:shadow-sm">
-    <div className={`absolute inset-x-0 top-0 h-0.5 ${ACCENT[variant]}`} />
-
+  <div className="rounded-xl bg-white ring-1 ring-slate-200/80 transition-shadow duration-200 hover:shadow-sm">
     <div className="flex items-start gap-4 p-4">
       <div
         className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg ${ICON[variant]}`}

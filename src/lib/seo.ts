@@ -4,15 +4,19 @@ import { PRODUCT_DOMAIN, PRODUCT_NAME } from './brand';
 
 export const SITE_NAME = PRODUCT_NAME;
 export const SITE_DESCRIPTION =
-  'ConvoSync unifies WhatsApp, Instagram, email, and AI agents into one workspace — inbox, campaigns, journeys, WhatsApp Pay, and Meta Ads for growing teams.';
+  'Manage WhatsApp, Instagram, and email in one shared inbox. Automate replies with AI agents, run WhatsApp campaigns, and accept payments with WhatsApp Pay.';
 
-export const SEO_IMAGE_PATH = '/seo.png';
-export const SEO_IMAGE_WIDTH = 1731;
-export const SEO_IMAGE_HEIGHT = 909;
-export const DEFAULT_SITE_ORIGIN = `https://${PRODUCT_DOMAIN}`;
+export const SEO_IMAGE_PATH = '/seo.jpg';
+export const SEO_IMAGE_WIDTH = 1200;
+export const SEO_IMAGE_HEIGHT = 630;
+/**
+ * This app deploys at app.PRODUCT_DOMAIN — the apex domain is the separate
+ * marketing site (VITE_LANDING_URL). Do not point this at PRODUCT_DOMAIN directly.
+ */
+export const DEFAULT_SITE_ORIGIN = `https://app.${PRODUCT_DOMAIN}`;
 
 /** Public routes that get static HTML meta at build time for link-preview crawlers. */
-export const PUBLIC_PRERENDER_PATHS = ['/signup', '/login'] as const;
+export const PUBLIC_PRERENDER_PATHS = ['/signup', '/login', '/privacy', '/terms'] as const;
 
 export type PageSeo = {
   title: string;
@@ -148,11 +152,13 @@ export function seoForPath(
   options?: { managerOnboarding?: boolean }
 ): PageSeo {
   if (pathname === '/' || pathname === '') {
+    // Redirect-only route (HomeRoute in App.tsx) — never renders content itself,
+    // so it has nothing to index. The marketing homepage lives on the apex domain.
     return {
-      title: 'Complete Customer Ops Platform for Growing Teams',
+      title: 'ConvoSync',
       description: SITE_DESCRIPTION,
       path: '/',
-      robots: 'index, follow',
+      robots: PRIVATE_ROBOTS,
     };
   }
 
@@ -293,7 +299,7 @@ export function buildSeoHeadHtml(seo: PageSeo, origin: string): string {
     <meta property="og:url" content="${escapeHtml(meta.canonical)}" />
     <meta property="og:image" content="${escapeHtml(meta.imageUrl)}" />
     <meta property="og:image:secure_url" content="${escapeHtml(meta.imageUrl)}" />
-    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:image:width" content="${SEO_IMAGE_WIDTH}" />
     <meta property="og:image:height" content="${SEO_IMAGE_HEIGHT}" />
     <meta property="og:image:alt" content="${escapeHtml(meta.imageAlt)}" />
@@ -341,7 +347,7 @@ export function applyPageSeo(seo: PageSeo) {
   upsertMeta('meta[property="og:url"]', 'property', 'og:url', meta.canonical);
   upsertMeta('meta[property="og:image"]', 'property', 'og:image', meta.imageUrl);
   upsertMeta('meta[property="og:image:secure_url"]', 'property', 'og:image:secure_url', meta.imageUrl);
-  upsertMeta('meta[property="og:image:type"]', 'property', 'og:image:type', 'image/png');
+  upsertMeta('meta[property="og:image:type"]', 'property', 'og:image:type', 'image/jpeg');
   upsertMeta('meta[property="og:image:width"]', 'property', 'og:image:width', String(SEO_IMAGE_WIDTH));
   upsertMeta('meta[property="og:image:height"]', 'property', 'og:image:height', String(SEO_IMAGE_HEIGHT));
   upsertMeta('meta[property="og:image:alt"]', 'property', 'og:image:alt', meta.imageAlt);

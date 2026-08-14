@@ -205,7 +205,7 @@ export function SettingsView() {
             section === 'alerts' ? 'p-2 md:p-3' : 'p-3 md:p-4'
           }`}
         >
-          {section !== 'alerts' && section !== 'subscription' ? (
+          {section !== 'alerts' && section !== 'subscription' && section !== 'profile' ? (
             <div className="mb-3 rounded-2xl bg-white ring-1 ring-slate-200/80 px-4 py-3 shadow-sm md:mb-4 md:px-5">
               <h1 className="text-xl font-bold tracking-tight text-slate-900 md:text-2xl">{title}</h1>
               <p className="mt-0.5 text-xs text-slate-500 md:text-sm">{subtitle}</p>
