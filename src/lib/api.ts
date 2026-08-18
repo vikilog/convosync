@@ -881,6 +881,8 @@ export const api = {
       success: boolean;
       tag: string;
       deleted: number;
+      failed: number;
+      errors: { contactId: string; error: string }[];
     }>,
   getSegments: () => get('/contacts/segments'),
   getCampaignAudience: (channel: 'whatsapp' | 'email' | 'instagram') =>
@@ -943,12 +945,26 @@ export const api = {
     if (!res.ok) await parseSendFailure(res);
     return res.json();
   },
-  fetchMessageAttachment: async (messageId: string): Promise<Blob> => {
-    const res = await fetch(`${resolveApiBaseUrl()}/conversations/messages/${messageId}/attachment`, {
-      headers: authHeaders(),
-    });
+  fetchMessageAttachment: async (messageId: string, index?: number): Promise<Blob> => {
+    const qs = index !== undefined ? `?index=${index}` : '';
+    const res = await fetch(
+      `${resolveApiBaseUrl()}/conversations/messages/${messageId}/attachment${qs}`,
+      { headers: authHeaders() }
+    );
     await assertOk(res);
     return res.blob();
+  },
+  sendCarouselMessage: async (convId: string, files: File[], caption?: string) => {
+    const form = new FormData();
+    for (const file of files) form.append('file', file);
+    if (caption?.trim()) form.append('caption', caption.trim());
+    const res = await fetch(`${resolveApiBaseUrl()}/conversations/${convId}/messages/carousel`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: form,
+    });
+    if (!res.ok) await parseSendFailure(res);
+    return res.json();
   },
   resendMessage: (messageId: string) =>
     post(`/conversations/messages/${messageId}/resend`, {}) as Promise<Record<string, unknown>>,
@@ -2025,6 +2041,30 @@ export const api = {
       pageId
         ? `/messenger/disconnect?pageId=${encodeURIComponent(pageId)}`
         : '/messenger/disconnect'
+    ),
+
+  getTelegramAccounts: () =>
+    get('/telegram/accounts') as Promise<{
+      accounts: Array<{
+        id: string;
+        botId: string;
+        botUsername?: string;
+        botName?: string;
+        label: string;
+      }>;
+    }>,
+  connectTelegram: (botToken: string) =>
+    post('/telegram/connect', { botToken }) as Promise<{
+      success: boolean;
+      botId: string;
+      botUsername?: string;
+      botName?: string;
+      webhookRegistered: boolean;
+      webhookError?: string;
+    }>,
+  disconnectTelegram: (botId?: string) =>
+    del(
+      botId ? `/telegram/disconnect?botId=${encodeURIComponent(botId)}` : '/telegram/disconnect'
     ),
 
   getFacebookOAuthState: () =>

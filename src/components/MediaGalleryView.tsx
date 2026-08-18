@@ -140,10 +140,30 @@ export const MediaGalleryView: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<MediaAsset | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const submittingRef = useRef(false);
   const [toast, setToast] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  // Per-item busy tracking (Set, not a single id) — every tile has its own
+  // independent toggle/delete action, so a single shared busy id would
+  // silently re-enable a DIFFERENT item's menu while one item's request is
+  // still in flight. The ref mirror rejects a same-tick double-fire (menu
+  // reopened and re-clicked before React has re-rendered) synchronously.
+  const [busyIds, setBusyIds] = useState<Set<string>>(new Set());
+  const busyRef = useRef<Set<string>>(new Set());
+  const markBusy = useCallback((id: string) => {
+    busyRef.current.add(id);
+    setBusyIds(new Set(busyRef.current));
+  }, []);
+  const clearBusy = useCallback((id: string) => {
+    busyRef.current.delete(id);
+    setBusyIds(new Set(busyRef.current));
+  }, []);
+  // Upload-form request generation — guards against a slow, since-superseded
+  // save (e.g. from a first upload the user closed mid-request) clobbering
+  // whatever the user has since typed into a newer form session.
+  const formGenerationRef = useRef(0);
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -217,33 +237,73 @@ export const MediaGalleryView: React.FC = () => {
     };
   }, [openMenuId]);
 
-  // Auth-fetch image thumbnails for gallery cards
+  // Auth-fetch image thumbnails for gallery cards. Only fetches ids not
+  // already cached — this effect depends on the whole `items` array, which
+  // gets a new reference on every setItems call (toggling or deleting one
+  // unrelated item included), and re-fetching every thumbnail from scratch
+  // each time was wasteful network + blob-URL churn across the whole grid.
+  const fetchedThumbIdsRef = useRef<Set<string>>(new Set());
+  const thumbnailsRef = useRef<Record<string, string>>({});
+  useEffect(() => {
+    thumbnailsRef.current = thumbnails;
+  }, [thumbnails]);
+  // Revoke every remaining blob URL on unmount (leaving the gallery tab) —
+  // the per-item revocation above only fires while items are individually
+  // removed from the list, not for the whole batch still cached at unmount.
+  useEffect(() => {
+    return () => {
+      for (const id of Object.keys(thumbnailsRef.current)) {
+        URL.revokeObjectURL(thumbnailsRef.current[id]);
+      }
+    };
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
-    const created: string[] = [];
-    const imageItems = items.filter((i) => i.type === 'image');
+    const currentIds = new Set(items.map((i) => i.id));
+
+    // Drop cached thumbnails for items no longer present (deleted).
+    setThumbnails((prev) => {
+      let changed = false;
+      const next = { ...prev };
+      for (const id of Object.keys(prev)) {
+        if (!currentIds.has(id)) {
+          URL.revokeObjectURL(prev[id]);
+          delete next[id];
+          fetchedThumbIdsRef.current.delete(id);
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+
+    const toFetch = items.filter(
+      (i) => i.type === 'image' && !fetchedThumbIdsRef.current.has(i.id)
+    );
+    if (toFetch.length === 0) return;
+    for (const item of toFetch) fetchedThumbIdsRef.current.add(item.id);
 
     void (async () => {
-      const next: Record<string, string> = {};
+      const updates: Record<string, string> = {};
       await Promise.all(
-        imageItems.map(async (item) => {
+        toFetch.map(async (item) => {
           try {
             const blob = await api.fetchMediaGalleryFile(item.id);
             if (cancelled || !blob.type.startsWith('image/')) return;
-            const url = URL.createObjectURL(blob);
-            created.push(url);
-            next[item.id] = url;
+            updates[item.id] = URL.createObjectURL(blob);
           } catch {
-            /* keep icon fallback */
+            fetchedThumbIdsRef.current.delete(item.id);
+            /* keep icon fallback, allow retry on next items change */
           }
         })
       );
-      if (!cancelled) setThumbnails(next);
+      if (!cancelled && Object.keys(updates).length > 0) {
+        setThumbnails((prev) => ({ ...prev, ...updates }));
+      }
     })();
 
     return () => {
       cancelled = true;
-      created.forEach((url) => URL.revokeObjectURL(url));
     };
   }, [items]);
 
@@ -261,11 +321,13 @@ export const MediaGalleryView: React.FC = () => {
   };
 
   const openCreate = () => {
+    formGenerationRef.current += 1;
     resetForm();
     setShowForm(true);
   };
 
   const openEdit = (item: MediaAsset) => {
+    formGenerationRef.current += 1;
     resetForm();
     setEditing(item);
     setTitle(item.title);
@@ -275,6 +337,13 @@ export const MediaGalleryView: React.FC = () => {
     setTags(item.tags.join(', '));
     setShowForm(true);
     setOpenMenuId(null);
+  };
+
+  const closeForm = () => {
+    if (submitting) return;
+    formGenerationRef.current += 1;
+    setShowForm(false);
+    resetForm();
   };
 
   const pickFile = (incoming: File | null | undefined) => {
@@ -295,6 +364,7 @@ export const MediaGalleryView: React.FC = () => {
   };
 
   const handleSave = async () => {
+    if (submittingRef.current) return;
     if (!title.trim() || !description.trim()) {
       setError('Title and description are required');
       return;
@@ -303,8 +373,12 @@ export const MediaGalleryView: React.FC = () => {
       setError('Title, description, and file are required');
       return;
     }
+    submittingRef.current = true;
     setSubmitting(true);
     setError(null);
+    const myGeneration = formGenerationRef.current;
+    const isEdit = Boolean(editing);
+    const editingId = editing?.id;
     const usageList = usage
       .split(',')
       .map((u) => u.trim())
@@ -314,8 +388,8 @@ export const MediaGalleryView: React.FC = () => {
       .map((t) => t.trim())
       .filter(Boolean);
     try {
-      if (editing) {
-        await api.updateMediaGalleryItemForm(editing.id, {
+      if (isEdit && editingId) {
+        await api.updateMediaGalleryItemForm(editingId, {
           title: title.trim(),
           description: description.trim(),
           scope,
@@ -323,8 +397,16 @@ export const MediaGalleryView: React.FC = () => {
           tags: tagList,
           file,
         });
-        setShowForm(false);
-        resetForm();
+        // If the user closed this form and opened a different one (new
+        // upload, or editing a different item) while this request was in
+        // flight, formGenerationRef has moved on — closing/resetting now
+        // would blow away whatever they've since typed into that newer
+        // session. The save itself already succeeded either way; just
+        // don't touch the form that's no longer this request's.
+        if (formGenerationRef.current === myGeneration) {
+          setShowForm(false);
+          resetForm();
+        }
         setToast(file ? 'Image replaced and details saved' : 'Media details saved');
       } else {
         await api.createMediaGalleryItem({
@@ -335,40 +417,65 @@ export const MediaGalleryView: React.FC = () => {
           tags: tagList,
           file: file!,
         });
-        setShowForm(false);
-        resetForm();
+        if (formGenerationRef.current === myGeneration) {
+          setShowForm(false);
+          resetForm();
+        }
         setToast('Uploaded to S3 and saved in gallery');
       }
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : editing ? 'Update failed' : 'Upload failed');
+      if (formGenerationRef.current === myGeneration) {
+        setError(err instanceof Error ? err.message : isEdit ? 'Update failed' : 'Upload failed');
+      }
     } finally {
-      setSubmitting(false);
+      submittingRef.current = false;
+      if (formGenerationRef.current === myGeneration) {
+        setSubmitting(false);
+      }
     }
   };
 
   const toggleActive = async (item: MediaAsset) => {
     setOpenMenuId(null);
+    if (busyRef.current.has(item.id)) return;
+    markBusy(item.id);
+    // Capture the target value now — applying `!i.isActive` re-read from
+    // whatever state happens to be current when the response lands (rather
+    // than the value this specific request actually asked the server to
+    // set) let two overlapping toggles land in the wrong order: the second
+    // response's flip-from-current could undo the first response's result,
+    // leaving the UI showing the opposite of what the server has stored.
+    const nextActive = !item.isActive;
     try {
-      await api.updateMediaGalleryItem(item.id, { isActive: !item.isActive });
+      await api.updateMediaGalleryItem(item.id, { isActive: nextActive });
       setItems((prev) =>
-        prev.map((i) => (i.id === item.id ? { ...i, isActive: !i.isActive } : i))
+        prev.map((i) => (i.id === item.id ? { ...i, isActive: nextActive } : i))
       );
-      setToast(item.isActive ? 'Media deactivated' : 'Media activated');
+      setToast(nextActive ? 'Media activated' : 'Media deactivated');
     } catch {
       setToast('Could not update media');
+    } finally {
+      clearBusy(item.id);
     }
   };
 
   const handleDelete = async (item: MediaAsset) => {
     setOpenMenuId(null);
-    if (!window.confirm(`Delete “${item.title}”?`)) return;
+    if (busyRef.current.has(item.id)) return;
+    const usageNote = item.usage.length
+      ? ` It's currently set to be used by: ${item.usage.join(', ')}.`
+      : '';
+    if (!window.confirm(`Delete "${item.title}"?${usageNote}`)) return;
+    markBusy(item.id);
     try {
       await api.deleteMediaGalleryItem(item.id);
       setItems((prev) => prev.filter((i) => i.id !== item.id));
       setToast('Media deleted');
-    } catch {
-      setToast('Could not delete media');
+    } catch (err) {
+      setToast(err instanceof Error ? err.message : 'Could not delete media');
+    } finally {
+      clearBusy(item.id);
     }
   };
 
@@ -638,13 +745,18 @@ export const MediaGalleryView: React.FC = () => {
                           aria-label={`Actions for ${item.title}`}
                           aria-haspopup="menu"
                           aria-expanded={menuOpen}
+                          disabled={busyIds.has(item.id)}
                           onClick={() =>
                             setOpenMenuId((id) => (id === item.id ? null : item.id))
                           }
-                          className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg bg-white/90 text-slate-600 opacity-100 shadow-sm ring-1 ring-slate-200/80 transition-opacity duration-150 hover:bg-white hover:text-slate-900 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100 data-[open=true]:opacity-100"
+                          className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg bg-white/90 text-slate-600 opacity-100 shadow-sm ring-1 ring-slate-200/80 transition-opacity duration-150 hover:bg-white hover:text-slate-900 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100 data-[open=true]:opacity-100"
                           data-open={menuOpen}
                         >
-                          <MoreHorizontal className="h-4 w-4" aria-hidden />
+                          {busyIds.has(item.id) ? (
+                            <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                          ) : (
+                            <MoreHorizontal className="h-4 w-4" aria-hidden />
+                          )}
                         </button>
                         <AnimatePresence>
                           {menuOpen && (
@@ -741,12 +853,10 @@ export const MediaGalleryView: React.FC = () => {
                 </div>
                 <button
                   type="button"
-                  onClick={() => {
-                    setShowForm(false);
-                    resetForm();
-                  }}
+                  onClick={closeForm}
+                  disabled={submitting}
                   aria-label="Close dialog"
-                  className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-xl text-slate-500 transition-colors duration-200 hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-xl text-slate-500 transition-colors duration-200 hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <X className="h-5 w-5" aria-hidden />
                 </button>
@@ -926,11 +1036,9 @@ export const MediaGalleryView: React.FC = () => {
               <div className="flex shrink-0 flex-col-reverse gap-2 border-t border-black/5 px-5 py-4 sm:flex-row sm:justify-end sm:gap-3 sm:px-6">
                 <button
                   type="button"
-                  onClick={() => {
-                    setShowForm(false);
-                    resetForm();
-                  }}
-                  className="min-h-11 cursor-pointer rounded-xl px-4 py-2 text-sm font-bold text-slate-500 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  onClick={closeForm}
+                  disabled={submitting}
+                  className="min-h-11 cursor-pointer rounded-xl px-4 py-2 text-sm font-bold text-slate-500 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   Cancel
                 </button>

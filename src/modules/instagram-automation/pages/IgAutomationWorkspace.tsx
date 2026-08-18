@@ -51,8 +51,15 @@ export function IgAutomationWorkspace() {
 
   return (
     <IgJourneyBuilder
+      key={activeJourney.id}
       journey={activeJourney}
       onBack={() => {
+        if (
+          useIgBuilderStore.getState().isDirty &&
+          !window.confirm('You have unsaved changes. Leave without saving?')
+        ) {
+          return;
+        }
         setDirty(false);
         navigate(pathForTab('automations'));
       }}

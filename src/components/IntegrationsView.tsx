@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { FC, ReactNode } from 'react';
-import { useCallback, useEffect, useState } from 'react';
+import type { FC } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   integrationsSubpageFromPath,
@@ -48,6 +48,8 @@ import {
 } from './integrations/WhatsAppProfileSideSheet';
 import { InstagramConnectPanel } from './instagram';
 import { MessengerConnectPanel } from './messenger';
+import { TelegramConnectPanel, TelegramBrandIcon } from './integrations/TelegramConnectPanel';
+import { ChannelReconnectDialog, type ReconnectAlert } from './integrations/ChannelReconnectDialog';
 import { EmailPanel } from './integrations/EmailPanel';
 import { GooglePanel } from './integrations/GooglePanel';
 import { MetaAdsIntegrationPanel } from './integrations/MetaAdsIntegrationPanel';
@@ -55,6 +57,7 @@ import { GoogleAdsIntegrationPanel } from './integrations/GoogleAdsIntegrationPa
 import { AiProviderPanel } from './settings/AiProviderPanel';
 import {
   clearStoredConnectError,
+  GOOGLE_ADS_CONNECT_ERROR_KEY,
   META_ADS_CONNECT_ERROR_KEY,
   readStoredConnectError,
 } from './integrations/IntegrationConnectError';
@@ -66,6 +69,7 @@ type ChannelView =
   | 'whatsapp-coexistence'
   | 'instagram'
   | 'messenger'
+  | 'telegram'
   | 'sms'
   | 'email'
   | 'google'
@@ -78,6 +82,7 @@ function channelViewFromLocation(pathname: string, search: string): ChannelView 
   const sub = integrationsSubpageFromPath(pathname);
   if (sub === 'email') return 'email';
   if (sub === 'ai') return 'ai';
+  if (sub === 'telegram') return 'telegram';
 
   const channel = new URLSearchParams(search).get('channel');
   // Legacy query → treated as page views until redirect runs
@@ -88,6 +93,7 @@ function channelViewFromLocation(pathname: string, search: string): ChannelView 
   if (channel === 'whatsapp-coexistence') return 'whatsapp-coexistence';
   if (channel === 'instagram') return 'instagram';
   if (channel === 'messenger') return 'messenger';
+  if (channel === 'telegram') return 'telegram';
   if (channel === 'meta-ads') return 'meta-ads';
   if (channel === 'google-ads') return 'google-ads';
   return 'hub';
@@ -207,6 +213,14 @@ type MessengerAccountSummary = {
   label?: string;
 };
 
+type TelegramAccountSummary = {
+  id: string;
+  botId: string;
+  botUsername?: string;
+  botName?: string;
+  label: string;
+};
+
 type EmailIntegrationSummary = {
   connected: boolean;
   defaultSenderEmail?: string;
@@ -222,7 +236,7 @@ type ChannelUsageSummary = {
 };
 
 type ConnectedChannelCardProps = {
-  channel: 'whatsapp' | 'instagram' | 'messenger' | 'email';
+  channel: 'whatsapp' | 'instagram' | 'messenger' | 'email' | 'telegram';
   channelLabel: string;
   title: string;
   subtitle: string;
@@ -258,7 +272,9 @@ function ConnectedChannelCard({
         ? 'bg-[#e8f4ff]'
         : channel === 'email'
           ? 'bg-[#e8f4ff]'
-          : 'bg-[#fce8f0]';
+          : channel === 'telegram'
+            ? 'bg-[#e8f6fd]'
+            : 'bg-[#fce8f0]';
   const iconColor =
     channel === 'whatsapp'
       ? 'text-channel-green'
@@ -266,7 +282,9 @@ function ConnectedChannelCard({
         ? 'text-[#1877F2]'
         : channel === 'email'
           ? 'text-channel-blue'
-          : 'text-[#C13584]';
+          : channel === 'telegram'
+            ? 'text-[#229ED9]'
+            : 'text-[#C13584]';
   const borderAccent =
     channel === 'whatsapp'
       ? 'border-channel-green/20'
@@ -274,7 +292,9 @@ function ConnectedChannelCard({
         ? 'border-[#1877F2]/25'
         : channel === 'email'
           ? 'border-channel-blue/25'
-          : 'border-[#E1306C]/25';
+          : channel === 'telegram'
+            ? 'border-[#229ED9]/25'
+            : 'border-[#E1306C]/25';
   const syncBtnClass =
     channel === 'instagram'
       ? 'text-[#C13584] bg-[#fce8f0] border-[#E1306C]/20 hover:bg-[#fad9e8]'
@@ -286,7 +306,9 @@ function ConnectedChannelCard({
       ? 'text-channel-blue bg-[#e8f4ff] border-channel-blue/25 hover:bg-[#d9ecff]'
       : channel === 'messenger'
         ? 'text-[#1877F2] bg-[#e8f4ff] border-[#1877F2]/20 hover:bg-[#d9ecff]'
-        : 'text-channel-green bg-[#e6f7ec] border-channel-green/20 hover:bg-[#d4f5df]';
+        : channel === 'telegram'
+          ? 'text-[#229ED9] bg-[#e8f6fd] border-[#229ED9]/20 hover:bg-[#d8f0fc]'
+          : 'text-channel-green bg-[#e6f7ec] border-channel-green/20 hover:bg-[#d4f5df]';
   const liveBadgeClass =
     connectionStatus === 'expired' || connectionStatus === 'revoked'
       ? 'bg-red-50 text-red-700 border-red-200'
@@ -298,7 +320,9 @@ function ConnectedChannelCard({
             ? 'bg-[#e6f7ec] text-channel-green border-channel-green/20'
             : channel === 'email' || channel === 'messenger'
               ? 'bg-[#e8f4ff] text-channel-blue border-channel-blue/25'
-              : 'bg-[#fce8f0] text-[#C13584] border-[#E1306C]/20';
+              : channel === 'telegram'
+                ? 'bg-[#e8f6fd] text-[#229ED9] border-[#229ED9]/25'
+                : 'bg-[#fce8f0] text-[#C13584] border-[#E1306C]/20';
   const liveBadgeText =
     connectionStatus === 'expired'
       ? 'Expired'
@@ -342,6 +366,8 @@ function ConnectedChannelCard({
               <Facebook className={`w-4 h-4 ${iconColor}`} />
             ) : channel === 'email' ? (
               <Mail className={`w-4 h-4 ${iconColor}`} />
+            ) : channel === 'telegram' ? (
+              <TelegramBrandIcon className={`w-4 h-4 ${iconColor}`} />
             ) : (
               <Instagram className={`w-4 h-4 ${iconColor}`} />
             )}
@@ -507,42 +533,6 @@ function WhatsAppGroupedCard({ accounts, onManage, onEditProfile }: WhatsAppGrou
   );
 }
 
-function ConnectedAdsToolCard({
-  title,
-  subtitle,
-  accountName,
-  icon,
-  onManage,
-}: {
-  title: string;
-  subtitle: string;
-  accountName: string;
-  icon: ReactNode;
-  onManage: () => void;
-}) {
-  return (
-    <article className="bg-white rounded-xl border border-black/5 p-3.5 flex flex-col gap-2.5 h-full shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-      <div className="flex items-start gap-2.5 min-w-0">
-        <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-sky-50 border border-black/5">
-          {icon}
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-meta font-black uppercase tracking-wide text-sky-600">{title}</p>
-          <p className="text-sm font-black text-gray-950 truncate">{accountName}</p>
-          <p className="text-xs text-gray-500 font-medium mt-0.5">{subtitle}</p>
-        </div>
-      </div>
-      <button
-        type="button"
-        onClick={onManage}
-        className="mt-auto w-full px-3 py-2 rounded-lg text-sm font-bold text-primary bg-primary/10 border border-primary/20 hover:bg-primary/15 transition-colors cursor-pointer"
-      >
-        Manage
-      </button>
-    </article>
-  );
-}
-
 type IntegrationsViewProps = {
   isActive?: boolean;
 };
@@ -557,6 +547,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
   const [whatsappAccounts, setWhatsappAccounts] = useState<WhatsAppAccountSummary[]>([]);
   const [instagramAccounts, setInstagramAccounts] = useState<InstagramAccountSummary[]>([]);
   const [messengerAccounts, setMessengerAccounts] = useState<MessengerAccountSummary[]>([]);
+  const [telegramAccounts, setTelegramAccounts] = useState<TelegramAccountSummary[]>([]);
   const [disconnectingKey, setDisconnectingKey] = useState<string | null>(null);
   const [instagramConnectError, setInstagramConnectError] = useState('');
   const [googleConnectError, setGoogleConnectError] = useState('');
@@ -566,8 +557,22 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
   const [messengerAutoLaunch, setMessengerAutoLaunch] = useState(false);
   const [messengerSyncing, setMessengerSyncing] = useState(false);
   const [messengerSyncMessage, setMessengerSyncMessage] = useState('');
+  const [telegramBotToken, setTelegramBotToken] = useState('');
+  const [telegramConnecting, setTelegramConnecting] = useState(false);
+  const [telegramError, setTelegramError] = useState('');
+  const [telegramInfo, setTelegramInfo] = useState('');
   const [instagramSyncing, setInstagramSyncing] = useState(false);
   const [instagramSyncMessage, setInstagramSyncMessage] = useState('');
+  // In-memory only (no persistence) — a page refresh should always re-show the
+  // dialog if a channel still needs reconnecting.
+  const [reconnectDialogDismissed, setReconnectDialogDismissed] = useState(false);
+  const reconnectSnoozeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (reconnectSnoozeTimerRef.current) clearTimeout(reconnectSnoozeTimerRef.current);
+    };
+  }, []);
   const [emailStatus, setEmailStatus] = useState<EmailIntegrationSummary>({
     connected: false,
     verifiedDomainCount: 0,
@@ -580,10 +585,6 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
   const [aiProviderConfigured, setAiProviderConfigured] = useState(false);
   const [hubLoading, setHubLoading] = useState(true);
   const [waProfileTarget, setWaProfileTarget] = useState<WhatsAppProfileTarget | null>(null);
-  const [metaAdsConnected, setMetaAdsConnected] = useState(false);
-  const [googleAdsConnected, setGoogleAdsConnected] = useState(false);
-  const [metaAdsAccountName, setMetaAdsAccountName] = useState<string | null>(null);
-  const [googleAdsAccountName, setGoogleAdsAccountName] = useState<string | null>(null);
   const [adsToolsRefreshKey, setAdsToolsRefreshKey] = useState(0);
   const [metaAdsConnectError, setMetaAdsConnectError] = useState<string | null>(() => {
     if (typeof window === 'undefined') return null;
@@ -592,6 +593,15 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
     return (
       readStoredConnectError(META_ADS_CONNECT_ERROR_KEY) ||
       'Meta Ads connection failed. Please try again.'
+    );
+  });
+  const [googleAdsConnectError, setGoogleAdsConnectError] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('google_ads_error') !== '1') return null;
+    return (
+      readStoredConnectError(GOOGLE_ADS_CONNECT_ERROR_KEY) ||
+      'Google Ads connection failed. Please try again.'
     );
   });
   const channelBlocked = (channel: 'whatsapp' | 'instagram' | 'messenger' | 'email') =>
@@ -644,26 +654,12 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
     navigate(pathForIntegrationsChannel('ai'));
   }, [navigate]);
 
-  const loadAdsToolsStatus = useCallback(() => {
-    if (!localStorage.getItem('convosync_token')) return Promise.resolve();
-    return Promise.all([
-      api.getMetaAdsAccount().then((res) => {
-        setMetaAdsConnected(Boolean(res.connected && res.account));
-        setMetaAdsAccountName(res.account?.name ?? null);
-      }),
-      api.getGoogleAdsAccount().then((res) => {
-        setGoogleAdsConnected(Boolean(res.connected && res.account));
-        setGoogleAdsAccountName(res.account?.name ?? null);
-      }),
-    ]).catch(() => {
-      setMetaAdsConnected(false);
-      setGoogleAdsConnected(false);
-    });
-  }, []);
-
-  const notifyAdsToolsChanged = useCallback(() => {
-    void loadAdsToolsStatus();
-  }, [loadAdsToolsStatus]);
+  const openTelegramChannel = useCallback(() => {
+    setTelegramError('');
+    setTelegramInfo('');
+    setView('telegram');
+    navigate(pathForIntegrationsChannel('telegram'));
+  }, [navigate]);
 
   const loadWhatsappAccounts = useCallback(() => {
     if (!localStorage.getItem('convosync_token')) return Promise.resolve();
@@ -691,6 +687,16 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
       .getMessengerAccounts()
       .then((data: { accounts?: MessengerAccountSummary[] }) => {
         setMessengerAccounts(data.accounts ?? []);
+      })
+      .catch(console.error);
+  }, []);
+
+  const loadTelegramAccounts = useCallback(() => {
+    if (!localStorage.getItem('convosync_token')) return Promise.resolve();
+    return api
+      .getTelegramAccounts()
+      .then((data: { accounts?: TelegramAccountSummary[] }) => {
+        setTelegramAccounts(data.accounts ?? []);
       })
       .catch(console.error);
   }, []);
@@ -804,13 +810,13 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
     void Promise.all([
       loadWhatsappAccounts(),
       loadInstagramAccounts(),
+      loadMessengerAccounts(),
+      loadTelegramAccounts(),
       loadEmailStatus(),
+      loadBillingUsage(),
     ]).finally(() => {
       if (!cancelled) setHubLoading(false);
     });
-    loadMessengerAccounts();
-    loadBillingUsage();
-    loadAdsToolsStatus();
     return () => {
       cancelled = true;
     };
@@ -819,9 +825,9 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
     loadWhatsappAccounts,
     loadInstagramAccounts,
     loadMessengerAccounts,
+    loadTelegramAccounts,
     loadEmailStatus,
     loadBillingUsage,
-    loadAdsToolsStatus,
   ]);
 
   useEffect(() => {
@@ -848,74 +854,70 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
 
   useEffect(() => {
     if (!isActive) return;
+    // All branches mutate the same `next` and commit once at the end — reading
+    // from the stale outer `searchParams` per-branch let independently-computed
+    // deletions stomp each other when two completion flags land in one render.
+    const next = new URLSearchParams(searchParams);
+    let changed = false;
+
     if (searchParams.get('whatsapp_connected') === '1') {
       void loadWhatsappAccounts();
       setView('whatsapp');
-      const next = new URLSearchParams(searchParams);
       next.delete('whatsapp_connected');
       if (!next.get('channel')) next.set('channel', 'whatsapp');
-      setSearchParams(next, { replace: true });
+      changed = true;
     }
     if (searchParams.get('whatsapp_error') === '1') {
       setView('whatsapp');
-      const next = new URLSearchParams(searchParams);
       next.delete('whatsapp_error');
       if (!next.get('channel')) next.set('channel', 'whatsapp');
-      setSearchParams(next, { replace: true });
+      changed = true;
     }
     if (searchParams.get('instagram_connected') === '1') {
       void loadInstagramAccounts();
       void loadMessengerAccounts();
       setView('hub');
       setInstagramConnectError('');
-      const next = new URLSearchParams(searchParams);
       next.delete('instagram_connected');
-      setSearchParams(next, { replace: true });
+      changed = true;
     }
     if (searchParams.get('instagram_error') === '1') {
       setInstagramConnectError('Instagram connection failed. Please try again.');
       setView('instagram');
-      const next = new URLSearchParams(searchParams);
       next.delete('instagram_error');
-      setSearchParams(next, { replace: true });
+      changed = true;
     }
     if (searchParams.get('messenger_connected') === '1') {
       void loadMessengerAccounts();
       setView('hub');
       setMessengerConnectError('');
-      const next = new URLSearchParams(searchParams);
       next.delete('messenger_connected');
-      setSearchParams(next, { replace: true });
+      changed = true;
     }
     if (searchParams.get('messenger_error') === '1') {
       setMessengerConnectError('Messenger connection failed. Please try again.');
       setView('messenger');
-      const next = new URLSearchParams(searchParams);
       next.delete('messenger_error');
-      setSearchParams(next, { replace: true });
+      changed = true;
     }
     if (searchParams.get('google_connected') === '1') {
       const channel = searchParams.get('channel');
       if (channel === 'google-ads') {
         setView('google-ads');
         setAdsToolsRefreshKey((k) => k + 1);
-        void loadAdsToolsStatus();
       } else {
         setView('google');
         setGoogleConnectError('');
         setGoogleRefreshKey((k) => k + 1);
       }
-      const next = new URLSearchParams(searchParams);
       next.delete('google_connected');
-      setSearchParams(next, { replace: true });
+      changed = true;
     }
     if (searchParams.get('meta_ads_connected') === '1') {
       setView('meta-ads');
       setAdsToolsRefreshKey((k) => k + 1);
-      void loadAdsToolsStatus();
-      const next = new URLSearchParams(searchParams);
       next.delete('meta_ads_connected');
-      setSearchParams(next, { replace: true });
+      changed = true;
     }
     if (searchParams.get('meta_ads_error') === '1') {
       setView('meta-ads');
@@ -923,23 +925,31 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
         readStoredConnectError(META_ADS_CONNECT_ERROR_KEY) ||
           'Meta Ads connection failed. Please try again.'
       );
-      const next = new URLSearchParams(searchParams);
       next.delete('meta_ads_error');
-      setSearchParams(next, { replace: true });
+      changed = true;
+    }
+    if (searchParams.get('google_ads_error') === '1') {
+      setView('google-ads');
+      setGoogleAdsConnectError(
+        readStoredConnectError(GOOGLE_ADS_CONNECT_ERROR_KEY) ||
+          'Google Ads connection failed. Please try again.'
+      );
+      next.delete('google_ads_error');
+      changed = true;
     }
     if (searchParams.get('google_error') === '1') {
       setGoogleConnectError('Google connection failed. Please try again.');
       setView('google');
-      const next = new URLSearchParams(searchParams);
       next.delete('google_error');
-      setSearchParams(next, { replace: true });
+      changed = true;
     }
+
+    if (changed) setSearchParams(next, { replace: true });
   }, [
     isActive,
     loadInstagramAccounts,
     loadMessengerAccounts,
     loadWhatsappAccounts,
-    loadAdsToolsStatus,
     searchParams,
     setSearchParams,
   ]);
@@ -949,6 +959,48 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
     try {
       await api.disconnectInstagram(instagramUserId);
       await loadInstagramAccounts();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setDisconnectingKey(null);
+    }
+  };
+
+  const handleTelegramConnect = async () => {
+    const token = telegramBotToken.trim();
+    if (!token) {
+      setTelegramError('Enter the bot token BotFather gave you.');
+      return;
+    }
+    setTelegramError('');
+    setTelegramInfo('');
+    setTelegramConnecting(true);
+    try {
+      const result = await api.connectTelegram(token);
+      await loadTelegramAccounts();
+      setTelegramBotToken('');
+      if (!result.webhookRegistered) {
+        setTelegramError(
+          `Connected @${result.botUsername || result.botId}, but Telegram couldn't reach this server yet (${result.webhookError || 'webhook registration failed'}). Messages won't arrive until this backend has a public HTTPS URL — expected on localhost.`
+        );
+        return;
+      }
+      setTelegramInfo(
+        `Connected @${result.botUsername || result.botId}. Redirecting to integrations…`
+      );
+      setTimeout(() => goToHub(), 900);
+    } catch (err) {
+      setTelegramError(err instanceof Error ? err.message : 'Failed to connect Telegram bot');
+    } finally {
+      setTelegramConnecting(false);
+    }
+  };
+
+  const handleTelegramDisconnect = async (botId: string) => {
+    setDisconnectingKey(`tg:${botId}`);
+    try {
+      await api.disconnectTelegram(botId);
+      await loadTelegramAccounts();
     } catch (err) {
       console.error(err);
     } finally {
@@ -1113,6 +1165,30 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
         {instagramConnectError && (
           <p className="text-sm font-bold text-red-500">{instagramConnectError}</p>
         )}
+      </div>
+    );
+  }
+
+  if (view === 'telegram') {
+    return (
+      <div className="w-full pb-12 space-y-6 animate-scale-up max-w-3xl mx-auto">
+        <button
+          type="button"
+          onClick={goToHub}
+          className="inline-flex items-center gap-1.5 text-sm font-bold text-gray-500 hover:text-primary transition-colors"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          Back to integrations
+        </button>
+
+        <TelegramConnectPanel
+          botToken={telegramBotToken}
+          onBotTokenChange={setTelegramBotToken}
+          onConnect={() => void handleTelegramConnect()}
+          connecting={telegramConnecting}
+          error={telegramError}
+          info={telegramInfo}
+        />
       </div>
     );
   }
@@ -1307,7 +1383,6 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
             setMetaAdsConnectError(null);
             clearStoredConnectError(META_ADS_CONNECT_ERROR_KEY);
           }}
-          onStatusChange={notifyAdsToolsChanged}
         />
       </div>
     );
@@ -1335,7 +1410,11 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
         <GoogleAdsIntegrationPanel
           key={adsToolsRefreshKey}
           enabled={isActive}
-          onStatusChange={notifyAdsToolsChanged}
+          connectError={googleAdsConnectError}
+          onDismissConnectError={() => {
+            setGoogleAdsConnectError(null);
+            clearStoredConnectError(GOOGLE_ADS_CONNECT_ERROR_KEY);
+          }}
         />
       </div>
     );
@@ -1418,15 +1497,49 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
   );
   const instagramConnected = instagramAccounts.length > 0;
   const messengerConnected = messengerAccounts.length > 0;
+  const telegramConnected = telegramAccounts.length > 0;
   const emailConnected = emailStatus.connected;
   const hasConnectedChannels =
-    whatsappConnected || instagramConnected || messengerConnected || emailConnected;
+    whatsappConnected ||
+    instagramConnected ||
+    messengerConnected ||
+    telegramConnected ||
+    emailConnected;
   const hasAddableChannels =
     !whatsappConnected ||
     !coexistenceConnected ||
     !instagramConnected ||
     !messengerConnected ||
+    !telegramConnected ||
     !emailConnected;
+
+  const reconnectAlerts: ReconnectAlert[] = instagramAccounts
+    .filter((a) => a.statusLabel === 'expired' || a.statusLabel === 'revoked')
+    .map((a) => ({
+      id: `ig:${a.instagramUserId}`,
+      channelLabel: 'Instagram',
+      title: a.username ? `@${a.username}` : a.displayName || a.pageName || 'Instagram',
+      reason: a.statusLabel as 'expired' | 'revoked',
+    }));
+
+  /** "Remind me later" — hide the dialog, then bring it back in 5 minutes if still unresolved. */
+  const snoozeReconnectDialog = () => {
+    setReconnectDialogDismissed(true);
+    if (reconnectSnoozeTimerRef.current) clearTimeout(reconnectSnoozeTimerRef.current);
+    reconnectSnoozeTimerRef.current = setTimeout(
+      () => setReconnectDialogDismissed(false),
+      5 * 60 * 1000
+    );
+  };
+
+  const handleReconnectAlert = (alert: ReconnectAlert) => {
+    // Actively reconnecting — no need to snooze/re-show.
+    setReconnectDialogDismissed(true);
+    if (reconnectSnoozeTimerRef.current) clearTimeout(reconnectSnoozeTimerRef.current);
+    if (alert.channelLabel === 'Instagram') {
+      handleInstagramConnect();
+    }
+  };
 
   if (hubLoading) {
     return (
@@ -1611,6 +1724,25 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
                 disconnecting={disconnectingKey === `fb:${account.pageId}`}
               />
             ))}
+
+            {telegramAccounts.map((account) => (
+              <ConnectedChannelCard
+                key={account.botId}
+                channel="telegram"
+                channelLabel="Telegram"
+                title={account.botName || account.label}
+                subtitle={account.botUsername ? `@${account.botUsername}` : 'Connected bot'}
+                onDisconnect={() => {
+                  if (
+                    !window.confirm(`Disconnect ${account.label}? Its inbox connection will stop.`)
+                  ) {
+                    return;
+                  }
+                  void handleTelegramDisconnect(account.botId);
+                }}
+                disconnecting={disconnectingKey === `tg:${account.botId}`}
+              />
+            ))}
           </div>
           {instagramSyncMessage ? (
             <p className="mt-2 text-xs font-medium text-gray-500">{instagramSyncMessage}</p>
@@ -1676,6 +1808,18 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
               />
             )}
 
+            {!telegramConnected && (
+              <IntegrationCard
+                title="Telegram"
+                description="Connect a Telegram bot for inbox messaging, automated replies, and AI-powered support."
+                icon={TelegramBrandIcon}
+                iconBgClass="bg-[#e8f6fd]"
+                iconClass="text-[#229ED9]"
+                connectLabel="Connect"
+                onConnect={openTelegramChannel}
+              />
+            )}
+
             {!emailConnected && (
               <IntegrationCard
                 title="Email"
@@ -1725,6 +1869,13 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
         account={waProfileTarget}
         onClose={() => setWaProfileTarget(null)}
         onSaved={() => void loadWhatsappAccounts()}
+      />
+
+      <ChannelReconnectDialog
+        open={!reconnectDialogDismissed}
+        alerts={reconnectAlerts}
+        onReconnect={handleReconnectAlert}
+        onDismiss={snoozeReconnectDialog}
       />
     </div>
   );

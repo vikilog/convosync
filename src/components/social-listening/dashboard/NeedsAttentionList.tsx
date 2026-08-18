@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AlertTriangle, CheckCircle2, ExternalLink, RefreshCw, Siren } from 'lucide-react';
 import { api } from '../../../lib/api';
@@ -36,12 +36,17 @@ export function NeedsAttentionList({
   loading: boolean;
   onChanged: () => void;
 }) {
-  const [busyId, setBusyId] = useState<string | null>(null);
+  const [busyIds, setBusyIds] = useState<Set<string>>(new Set());
+  const busyRef = useRef<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
 
   const runAction = async (item: NeedsAttentionItem) => {
     if (item.suggestedAction === 'open_review') return;
-    setBusyId(item.id);
+    // Synchronous re-entrancy guard — a second click on the same item before
+    // React re-renders the disabled button must not fire a second request.
+    if (busyRef.current.has(item.id)) return;
+    busyRef.current.add(item.id);
+    setBusyIds(new Set(busyRef.current));
     setError(null);
     try {
       if (item.suggestedAction === 'retry_dm') {
@@ -62,7 +67,8 @@ export function NeedsAttentionList({
       }
       setError(message);
     } finally {
-      setBusyId(null);
+      busyRef.current.delete(item.id);
+      setBusyIds(new Set(busyRef.current));
     }
   };
 
@@ -180,12 +186,12 @@ export function NeedsAttentionList({
                 ) : (
                   <button
                     type="button"
-                    disabled={busyId === item.id}
+                    disabled={busyIds.has(item.id)}
                     onClick={() => void runAction(item)}
                     className="inline-flex shrink-0 cursor-pointer items-center gap-1 self-center rounded-lg bg-primary px-2.5 py-1.5 text-[11px] font-bold text-white hover:bg-primary-hover disabled:opacity-60"
                   >
-                    <ActionIcon className={`h-3 w-3 ${busyId === item.id ? 'animate-spin' : ''}`} />
-                    {busyId === item.id ? '…' : actionLabel}
+                    <ActionIcon className={`h-3 w-3 ${busyIds.has(item.id) ? 'animate-spin' : ''}`} />
+                    {busyIds.has(item.id) ? '…' : actionLabel}
                   </button>
                 )}
               </li>

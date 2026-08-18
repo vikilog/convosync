@@ -68,7 +68,7 @@ export function PreviewPane() {
             title="Email preview"
             srcDoc={previewHtml}
             className="w-full flex-1 border-0 bg-white min-h-[calc(100vh-12rem)]"
-            sandbox="allow-same-origin"
+            sandbox=""
           />
         </div>
       </div>

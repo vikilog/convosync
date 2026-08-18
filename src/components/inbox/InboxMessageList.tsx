@@ -3,13 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useLayoutEffect, useRef } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { Check, CheckCheck, Loader2, MousePointerClick, PauseCircle, X } from 'lucide-react';
 import type { ChatMessage } from '../../types';
 import { formatMessageClock } from '../../lib/formatDates';
+import { sanitizeEmailHtml } from '../../lib/sanitizeHtml';
 import { ResendButton } from '../shared/ResendButton';
 import { MessageAttachment } from './MessageAttachment';
+import { CarouselAttachment } from './CarouselAttachment';
 
 const WA_CHAT_BG = '#e5ddd5';
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -33,6 +35,9 @@ type Props = {
   resendingId?: string | null;
   onResend?: (messageId: string) => void;
   automationWaiting?: AutomationWaitingBanner | null;
+  hasMoreOlder?: boolean;
+  loadingOlder?: boolean;
+  onLoadOlder?: () => void;
 };
 
 const WA_DELETED_MESSAGE = 'This message was deleted';
@@ -118,7 +123,8 @@ const MessageBubble: React.FC<{
       messageType === 'audio' ||
       messageType === 'document' ||
       messageType === 'sticker' ||
-      messageType === 'location');
+      messageType === 'location' ||
+      messageType === 'carousel');
   const isRichMessage = hasMediaAttachment;
 
   const deliveryStatusIcon = !isContact ? (
@@ -166,7 +172,7 @@ const MessageBubble: React.FC<{
   })();
 
   const emailHtml = message.emailHtml?.trim()
-    ? emailHtmlFragment(message.emailHtml)
+    ? sanitizeEmailHtml(emailHtmlFragment(message.emailHtml))
     : '';
 
   const renderEmailTemplateBody = (opts: { onDark: boolean }) => (
@@ -201,7 +207,9 @@ const MessageBubble: React.FC<{
         </p>
       ) : null}
       {emailHtml ? (
-        // Agent-authored template HTML (same trust as GmailReadingPane).
+        // Sanitized via sanitizeEmailHtml above — inbound email ingestion
+        // isn't wired yet, but this only stays self-XSS-only by that
+        // accident of scope, not by any check in this component.
         <div className="rounded-lg bg-white text-gray-900 overflow-hidden max-h-[420px] overflow-y-auto">
           <div
             className="email-inbox-html p-2 text-left text-[13px] leading-relaxed [&_*]:max-w-full [&_a]:text-emerald-700 [&_a]:underline [&_img]:max-w-full [&_img]:h-auto [&_table]:w-full [&_td]:align-top"
@@ -256,7 +264,11 @@ const MessageBubble: React.FC<{
               aria-hidden
             />
           )}
-          <MessageAttachment message={message} />
+          {messageType === 'carousel' ? (
+            <CarouselAttachment message={message} />
+          ) : (
+            <MessageAttachment message={message} />
+          )}
           <span className="absolute bottom-1.5 right-1.5 z-10 flex items-center gap-0.5 rounded-md bg-black/50 px-1.5 py-0.5 text-xs text-white leading-none">
             {time}
             {deliveryStatusIcon}
@@ -456,9 +468,31 @@ export const InboxMessageList: React.FC<Props> = ({
   resendingId = null,
   onResend,
   automationWaiting = null,
+  hasMoreOlder = false,
+  loadingOlder = false,
+  onLoadOlder,
 }) => {
   const isWhatsApp = channel === 'whatsapp';
   const reduceMotion = useReducedMotion();
+  const containerRef = useRef<HTMLDivElement>(null);
+  // Prepending older messages above the current view would otherwise yank
+  // the scroll position to the top — capture the pre-prepend scrollHeight on
+  // click, then shift scrollTop by the delta once the taller content lands.
+  const pendingScrollAdjustRef = useRef<number | null>(null);
+
+  useLayoutEffect(() => {
+    const el = containerRef.current;
+    const prevHeight = pendingScrollAdjustRef.current;
+    if (prevHeight == null || !el) return;
+    pendingScrollAdjustRef.current = null;
+    el.scrollTop += el.scrollHeight - prevHeight;
+  }, [messages]);
+
+  const handleLoadOlderClick = () => {
+    if (!onLoadOlder || !containerRef.current) return;
+    pendingScrollAdjustRef.current = containerRef.current.scrollHeight;
+    onLoadOlder();
+  };
 
   if (loading) {
     return <InboxMessageListSkeleton channel={channel} />;
@@ -483,6 +517,7 @@ export const InboxMessageList: React.FC<Props> = ({
     <AnimatePresence mode="wait">
       <motion.div
         key={conversationId || 'thread'}
+        ref={containerRef}
         initial={reduceMotion ? false : { opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         exit={reduceMotion ? undefined : { opacity: 0, y: -4 }}
@@ -490,6 +525,23 @@ export const InboxMessageList: React.FC<Props> = ({
         className={`flex-1 overflow-y-auto px-3 py-3 space-y-1 ${isWhatsApp ? '' : 'p-4 space-y-3'}`}
         style={isWhatsApp ? { backgroundColor: WA_CHAT_BG } : undefined}
       >
+        {hasMoreOlder && (
+          <div className="flex justify-center pb-2">
+            <button
+              type="button"
+              onClick={handleLoadOlderClick}
+              disabled={loadingOlder}
+              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-meta font-bold shadow-sm transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
+                isWhatsApp
+                  ? 'bg-[#ffffffd9] text-[#54656f] hover:bg-white'
+                  : 'bg-surface/90 text-gray-600 ring-1 ring-black/5 hover:bg-surface'
+              }`}
+            >
+              {loadingOlder ? <Loader2 className="h-3 w-3 animate-spin" /> : null}
+              {loadingOlder ? 'Loading…' : 'Load older messages'}
+            </button>
+          </div>
+        )}
         {messages.map((group) => (
           <div key={group.dateKey} className={isWhatsApp ? 'space-y-1.5' : 'space-y-3'}>
             <div className="flex justify-center select-none py-2">

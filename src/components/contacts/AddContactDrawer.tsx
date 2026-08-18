@@ -147,9 +147,15 @@ export function AddContactDrawer({ open, onClose, onCreated, onSaved, editContac
       setError('Nickname is required.');
       return;
     }
-    if (!phoneLocked && (!fullPhone || fullPhone.length < 8)) {
-      setError('A valid phone number is required.');
-      return;
+    if (!phoneLocked) {
+      // Matches the backend's own 10-15 digit range (normalizeVerificationPhone,
+      // the CSV import validator) — a plain length check on the E.164 string
+      // (which includes the leading +) let obviously-invalid numbers through.
+      const phoneDigits = fullPhone.replace(/\D/g, '');
+      if (phoneDigits.length < 10 || phoneDigits.length > 15) {
+        setError('Enter a valid phone number with country code.');
+        return;
+      }
     }
 
     const customFields: Record<string, string> = {};

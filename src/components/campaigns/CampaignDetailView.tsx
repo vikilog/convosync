@@ -36,6 +36,7 @@ import {
   SCHEDULED_CAMPAIGN_EDIT_BLOCKED_HINT,
 } from '../../lib/campaignScheduleEdit';
 import { mapCampaignDetailFromApi } from '../../lib/mappers';
+import { formatCampaignDateTime as formatDate } from '../../lib/campaignFormat';
 import { pathForNewCampaign, pathForTab } from '../../routes';
 import { CampaignDetailAnalytics } from './CampaignDetailAnalytics';
 import { ResendButton } from '../shared/ResendButton';
@@ -48,6 +49,7 @@ const STATUS_STYLE: Record<CampaignRecordStatus, string> = {
   Running: 'bg-blue-50 text-blue-700 border-blue-100',
   Completed: 'bg-green-50 text-green-700 border-green-100',
   Failed: 'bg-red-50 text-red-700 border-red-100',
+  Cancelled: 'bg-gray-100 text-gray-600 border-gray-200',
 };
 
 const MESSAGE_STATUS_STYLE: Record<string, string> = {
@@ -63,19 +65,6 @@ const MESSAGE_STATUS_STYLE: Record<string, string> = {
   bounced: 'text-red-800 bg-red-50/90 ring-red-200/70',
   rejected: 'text-red-800 bg-red-50/90 ring-red-200/70',
 };
-
-function formatDate(iso: string | null): string {
-  if (!iso) return '—';
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return '—';
-  return d.toLocaleString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
 
 const WhatsAppMessagePreview: React.FC<{ body: string }> = ({ body }) => (
   <div className="w-full bg-[#efeae2] rounded-2xl p-4 border border-slate-200">

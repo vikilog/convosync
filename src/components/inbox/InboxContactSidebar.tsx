@@ -38,6 +38,7 @@ type Props = {
   automationLabel?: string;
   onEditContact: () => void;
   onDeleteChat: () => void;
+  onBlacklistContact: () => void;
   onViewAudits: () => void;
   contactHandle: string;
   onClose?: () => void;
@@ -73,6 +74,7 @@ export const InboxContactSidebar: React.FC<Props> = ({
   automationLabel,
   onEditContact,
   onDeleteChat,
+  onBlacklistContact,
   onViewAudits,
   contactHandle,
   onClose,
@@ -317,10 +319,12 @@ export const InboxContactSidebar: React.FC<Props> = ({
 
           <button
             type="button"
-            className="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-gray-900 px-3 py-2.5 text-xs font-bold text-white transition-colors hover:bg-gray-950"
+            onClick={onBlacklistContact}
+            disabled={contact.tags.includes('Blocked')}
+            className="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-gray-900 px-3 py-2.5 text-xs font-bold text-white transition-colors hover:bg-gray-950 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <Ban className="h-3.5 w-3.5 text-[#fca5a5]" />
-            Blacklist contact
+            {contact.tags.includes('Blocked') ? 'Blacklisted' : 'Blacklist contact'}
           </button>
         </div>
       )}

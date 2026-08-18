@@ -61,6 +61,16 @@ export function JourneyBuilder({ journey, onBack }: Props) {
   const isPublished = journey.status === 'published';
   const isSaved = !isDirty && !nameChanged;
 
+  useEffect(() => {
+    if (isSaved) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [isSaved]);
+
   const persistName = async (name: string) => {
     if (name !== journey.name) {
       await updateJourney.mutateAsync({ name });
@@ -76,6 +86,10 @@ export function JourneyBuilder({ journey, onBack }: Props) {
       await persistName(name);
       await saveGraph.mutateAsync(graph);
       setDirty(false);
+      // Cache now holds exactly what we saved — safe to stop shadowing it,
+      // so a later external refetch (e.g. keep-alive tab reactivation) is
+      // actually reflected instead of being silently ignored forever.
+      setDraftGraph(undefined);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Save failed');
     } finally {
@@ -90,6 +104,7 @@ export function JourneyBuilder({ journey, onBack }: Props) {
       if (isDirty && graph) {
         await saveGraph.mutateAsync(graph);
         setDirty(false);
+        setDraftGraph(undefined);
       }
       await publish.mutateAsync();
     } catch (err) {

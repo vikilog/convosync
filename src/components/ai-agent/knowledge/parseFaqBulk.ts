@@ -30,43 +30,69 @@ function fromJson(text: string): FaqPair[] | null {
   }
 }
 
-/** Minimal CSV: question,answer header (quoted fields ok). */
-function fromCsv(text: string): FaqPair[] | null {
-  const lines = text.split(/\r?\n/).filter((l) => l.trim());
-  if (lines.length < 2) return null;
+/**
+ * Splits CSV text into rows of trimmed cells in a single pass, honoring
+ * quoted fields per RFC 4180 — including ones that contain an embedded
+ * newline (e.g. a multi-line answer exported from Excel/Sheets). Splitting
+ * on newlines before parsing quotes (the old approach) tears such a field
+ * apart before the quote-aware logic ever sees it.
+ */
+function parseCsvRows(text: string): string[][] {
+  const normalized = text.replace(/\r\n?/g, '\n');
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let cur = '';
+  let inQ = false;
 
-  const splitCsv = (line: string): string[] => {
-    const cells: string[] = [];
-    let cur = '';
-    let inQ = false;
-    for (let i = 0; i < line.length; i++) {
-      const ch = line[i];
+  for (let i = 0; i < normalized.length; i++) {
+    const ch = normalized[i];
+    if (inQ) {
       if (ch === '"') {
-        if (inQ && line[i + 1] === '"') {
+        if (normalized[i + 1] === '"') {
           cur += '"';
           i++;
         } else {
-          inQ = !inQ;
+          inQ = false;
         }
-      } else if (ch === ',' && !inQ) {
-        cells.push(cur);
-        cur = '';
       } else {
         cur += ch;
       }
+      continue;
     }
-    cells.push(cur);
-    return cells.map((c) => c.trim());
-  };
+    if (ch === '"') {
+      inQ = true;
+    } else if (ch === ',') {
+      row.push(cur);
+      cur = '';
+    } else if (ch === '\n') {
+      row.push(cur);
+      rows.push(row);
+      row = [];
+      cur = '';
+    } else {
+      cur += ch;
+    }
+  }
+  row.push(cur);
+  rows.push(row);
 
-  const heads = splitCsv(lines[0]).map((h) => h.toLowerCase().replace(/^"|"$/g, ''));
+  return rows
+    .map((r) => r.map((c) => c.trim()))
+    .filter((r) => r.length > 1 || r[0] !== '');
+}
+
+/** Minimal CSV: question,answer header (quoted fields ok, including multi-line ones). */
+function fromCsv(text: string): FaqPair[] | null {
+  const rows = parseCsvRows(text);
+  if (rows.length < 2) return null;
+
+  const heads = rows[0].map((h) => h.toLowerCase());
   const qi = heads.findIndex((h) => h === 'question' || h === 'q');
   const ai = heads.findIndex((h) => h === 'answer' || h === 'a');
   if (qi < 0 || ai < 0) return null;
 
   const out: FaqPair[] = [];
-  for (const line of lines.slice(1)) {
-    const cells = splitCsv(line).map((c) => c.replace(/^"|"$/g, ''));
+  for (const cells of rows.slice(1)) {
     flush(out, cells[qi] ?? '', cells[ai] ?? '');
   }
   return out.length ? out : null;

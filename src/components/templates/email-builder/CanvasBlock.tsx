@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { Copy, GripVertical, Trash2 } from 'lucide-react';
 import type { BrandSettings, EmailBlock } from './types';
 import { isFullHtmlDocument } from './renderHtml';
+import { sanitizeEmailHtml } from '../../../lib/sanitizeHtml';
 
 type Props = {
   block: EmailBlock;
@@ -30,6 +31,12 @@ export function CanvasBlock({
   const htmlRaw = block.type === 'html' ? String(block.props.rawHtml ?? '') : '';
   const fullHtmlDoc = block.type === 'html' && isFullHtmlDocument(htmlRaw);
   const htmlSrcDoc = useMemo(() => (fullHtmlDoc ? htmlRaw : ''), [fullHtmlDoc, htmlRaw]);
+  // Fragment path only — the full-document case is isolated in a
+  // sandbox="" iframe above and never touches dangerouslySetInnerHTML.
+  const htmlSanitized = useMemo(
+    () => (!fullHtmlDoc ? sanitizeEmailHtml(htmlRaw) : ''),
+    [fullHtmlDoc, htmlRaw]
+  );
 
   const renderContent = () => {
     const p = block.props;
@@ -120,7 +127,7 @@ export function CanvasBlock({
         return (
           <div
             className="prose prose-sm max-w-none text-gray-700"
-            dangerouslySetInnerHTML={{ __html: htmlRaw }}
+            dangerouslySetInnerHTML={{ __html: htmlSanitized }}
           />
         );
       default:

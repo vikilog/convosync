@@ -29,6 +29,17 @@ const STATUS_STYLES: Record<KnowledgeStatus, string> = {
   failed: 'bg-red-100 text-red-700',
 };
 
+function qnaPairCount(item: KnowledgeItem): number | null {
+  if (item.type !== 'qna' || !item.content) return null;
+  try {
+    const parsed = JSON.parse(item.content) as unknown;
+    if (Array.isArray(parsed) && parsed.length > 1) return parsed.length;
+  } catch {
+    /* not multi-pair JSON */
+  }
+  return null;
+}
+
 function mapItem(raw: Record<string, unknown>): KnowledgeItem {
   const typeRaw = String(raw.type ?? 'document');
   const type: KnowledgeType =
@@ -213,6 +224,11 @@ export const KnowledgeBase: React.FC<Props> = ({ agentId }) => {
                     >
                       {item.status}
                     </span>
+                    {qnaPairCount(item) !== null && (
+                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                        {qnaPairCount(item)} pairs
+                      </span>
+                    )}
                   </div>
                   <p className="text-xs text-[#6B7280] mt-1">
                     {TYPE_LABELS[item.type]} · Added{' '}

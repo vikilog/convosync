@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import type { GmailMessageDetail } from './types';
 import { avatarTone, displayName, formatDetailDate, initials, senderEmail } from './utils';
+import { sanitizeEmailHtml } from '../../../lib/sanitizeHtml';
 
 type GmailReadingPaneProps = {
   detail: GmailMessageDetail | null;
@@ -141,7 +142,7 @@ export function GmailReadingPane({
                   <div
                     className="prose prose-sm sm:prose-base max-w-none text-gray-800 leading-relaxed dark:prose-invert [&_*]:max-w-full [&_a]:text-primary [&_a]:break-all [&_table]:!w-full [&_table]:block [&_table]:max-w-full [&_table]:overflow-x-auto [&_img]:max-w-full [&_img]:h-auto [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_td]:break-words [&_th]:break-words"
                     style={{ overflowWrap: 'anywhere' }}
-                    dangerouslySetInnerHTML={{ __html: detail.bodyHtml }}
+                    dangerouslySetInnerHTML={{ __html: sanitizeEmailHtml(detail.bodyHtml) }}
                   />
                 </div>
               ) : (

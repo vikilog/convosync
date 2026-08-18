@@ -38,8 +38,22 @@ function cellValue(contact: Contact, id: ExportColumnId): string {
   }
 }
 
+/**
+ * Defuses CSV/formula injection: a cell starting with =, +, -, @, or a tab
+ * is interpreted as a formula by Excel/Sheets on open, even when quoted —
+ * quoting alone does not stop it. Prefixing with a single quote forces the
+ * cell to render as text instead. Contact fields (name, tags, source) can
+ * contain attacker-controlled text from an external channel or a prior
+ * import, so this runs on every export regardless of source.
+ */
+function defuseFormulaInjection(v: string): string {
+  if (/^[=+\-@\t]/.test(v)) return `'${v}`;
+  return v;
+}
+
 function csvEscape(v: string): string {
-  return `"${v.replace(/"/g, '""')}"`;
+  const safe = defuseFormulaInjection(v);
+  return `"${safe.replace(/"/g, '""')}"`;
 }
 
 /** Build CSV for selected columns in EXPORT_COLUMNS order (stable header order). */

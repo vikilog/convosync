@@ -59,8 +59,11 @@ export function useSaveJourneyGraph(journeyId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (graph: JourneyGraph) => api.saveJourneyGraph(journeyId, graph),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['journeys', journeyId, 'graph'] });
+    onSuccess: (_data, graph) => {
+      // Write the saved graph straight into the cache instead of invalidating
+      // it — invalidate+refetch is async, so the builder's draftGraph can't
+      // safely be cleared until the cache reflects what was just saved.
+      qc.setQueryData(['journeys', journeyId, 'graph'], graph);
       qc.invalidateQueries({ queryKey: ['journeys'] });
     },
   });

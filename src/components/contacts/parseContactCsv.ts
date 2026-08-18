@@ -12,28 +12,63 @@ export type ContactCsvParseResult = {
   skipped: number[];
 };
 
-function splitCsvLine(line: string): string[] {
-  const cells: string[] = [];
+/**
+ * Tokenizes the WHOLE file in one pass, tracking quote state across line
+ * boundaries — a newline inside a quoted field (e.g. a multi-line name or
+ * notes value exported from Excel/Google Contacts) is part of that cell's
+ * content, not a row separator. Splitting on raw newlines before parsing
+ * quotes (the previous approach) corrupted any row containing one.
+ */
+function parseCsvRows(text: string): string[][] {
+  const rows: string[][] = [];
+  let row: string[] = [];
   let cur = '';
-  let inQ = false;
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i];
-    if (ch === '"') {
-      if (inQ && line[i + 1] === '"') {
-        cur += '"';
-        i++;
+  let inQuotes = false;
+  let sawAnyCell = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (text[i + 1] === '"') {
+          cur += '"';
+          i++;
+        } else {
+          inQuotes = false;
+        }
       } else {
-        inQ = !inQ;
+        cur += ch;
       }
-    } else if (ch === ',' && !inQ) {
-      cells.push(cur);
+      continue;
+    }
+    if (ch === '"') {
+      inQuotes = true;
+      sawAnyCell = true;
+    } else if (ch === ',') {
+      row.push(cur);
       cur = '';
+      sawAnyCell = true;
+    } else if (ch === '\r') {
+      // Ignore — a following \n (or end of input) terminates the row.
+    } else if (ch === '\n') {
+      row.push(cur);
+      rows.push(row);
+      row = [];
+      cur = '';
+      sawAnyCell = false;
     } else {
       cur += ch;
+      sawAnyCell = true;
     }
   }
-  cells.push(cur);
-  return cells.map((c) => c.trim().replace(/^"|"$/g, ''));
+  if (sawAnyCell || cur || row.length) {
+    row.push(cur);
+    rows.push(row);
+  }
+
+  return rows
+    .map((r) => r.map((c) => c.trim()))
+    .filter((r) => r.some((c) => c !== ''));
 }
 
 function normalizeHeader(h: string): string {
@@ -54,10 +89,10 @@ function normalizePhone(raw: string): string {
  * Tags: semicolon or pipe separated in one cell.
  */
 export function parseContactCsv(text: string): ContactCsvParseResult {
-  const lines = text.split(/\r?\n/).filter((l) => l.trim());
-  if (lines.length < 2) return { rows: [], skipped: [] };
+  const allRows = parseCsvRows(text);
+  if (allRows.length < 2) return { rows: [], skipped: [] };
 
-  const heads = splitCsvLine(lines[0]).map(normalizeHeader);
+  const heads = allRows[0].map(normalizeHeader);
   const nameI = heads.findIndex((h) => h === 'name' || h === 'fullname' || h === 'contactname');
   const phoneI = heads.findIndex(
     (h) => h === 'phone' || h === 'mobile' || h === 'phonenumber' || h === 'whatsapp'
@@ -72,8 +107,8 @@ export function parseContactCsv(text: string): ContactCsvParseResult {
   const rows: ContactCsvRow[] = [];
   const skipped: number[] = [];
 
-  for (let i = 1; i < lines.length; i++) {
-    const cells = splitCsvLine(lines[i]);
+  for (let i = 1; i < allRows.length; i++) {
+    const cells = allRows[i];
     const name = (cells[nameI] ?? '').trim();
     const phone = normalizePhone(cells[phoneI] ?? '');
     if (!name || phone.length < 6) {

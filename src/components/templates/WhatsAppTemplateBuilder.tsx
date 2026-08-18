@@ -193,7 +193,17 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
   const [variableSamples, setVariableSamples] = useState<string[]>([]);
   const [submitToMeta, setSubmitToMeta] = useState(true);
   const [saving, setSaving] = useState(false);
+  const savingRef = useRef(false);
   const [error, setError] = useState('');
+  // Unsaved-changes guard for the back button. Compares current field
+  // values against a snapshot of what hydration just set them to, rather
+  // than a "did hydration just run" flag — the hydration effect's setState
+  // calls land over one or more extra render passes, so a flag consumed on
+  // the first post-hydration effect run fires too early (before the
+  // hydrated values have actually settled) and falsely marks a freshly
+  // loaded template as dirty.
+  const [isDirty, setIsDirty] = useState(false);
+  const hydratedSnapshotRef = useRef('');
 
   const varCount = useMemo(() => countBodyVariables(bodyPattern), [bodyPattern]);
   const languageOptions = useMemo(() => {
@@ -259,7 +269,84 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
     }
     setError('');
     setMediaError('');
+
+    // Mirrors exactly what the branches above just set, computed straight
+    // from `template` rather than read back from state — the state won't
+    // reflect these values until a later render, but this snapshot is
+    // correct immediately.
+    const bt = template?.buttonType as ButtonKind | undefined;
+    hydratedSnapshotRef.current = JSON.stringify(
+      template
+        ? {
+            name: template.name,
+            category: template.category,
+            language: template.language || 'en_US',
+            headerFormat: headerFormatFromApi(template.headerFormat, Boolean(template.header)),
+            header: template.header || '',
+            headerMediaHandle: '',
+            headerMediaStorageKey: template.headerMediaStorageKey || '',
+            bodyPattern: template.bodyPattern,
+            footer: template.footer || '',
+            buttonKind: bt && bt !== 'none' ? bt : 'none',
+            buttonText: template.buttonText || '',
+            buttonUrl: template.buttonUrl || '',
+            buttonPhone: template.buttonPhoneNumber || '',
+            variableSamples: template.variables?.length ? [...template.variables] : [],
+          }
+        : {
+            name: '',
+            category: 'Utility',
+            language: 'en_US',
+            headerFormat: 'none',
+            header: '',
+            headerMediaHandle: '',
+            headerMediaStorageKey: '',
+            bodyPattern: 'Hello {{1}}, thank you for your order {{2}}.',
+            footer: '',
+            buttonKind: 'none',
+            buttonText: '',
+            buttonUrl: '',
+            buttonPhone: '',
+            variableSamples: ['John', 'ORD-12345'],
+          }
+    );
+    setIsDirty(false);
   }, [template]);
+
+  useEffect(() => {
+    const current = JSON.stringify({
+      name,
+      category,
+      language,
+      headerFormat,
+      header,
+      headerMediaHandle,
+      headerMediaStorageKey,
+      bodyPattern,
+      footer,
+      buttonKind,
+      buttonText,
+      buttonUrl,
+      buttonPhone,
+      variableSamples,
+    });
+    setIsDirty(current !== hydratedSnapshotRef.current);
+  }, [
+    name,
+    category,
+    language,
+    headerFormat,
+    header,
+    headerMediaHandle,
+    headerMediaStorageKey,
+    bodyPattern,
+    footer,
+    buttonKind,
+    buttonText,
+    buttonUrl,
+    buttonPhone,
+    variableSamples,
+  ]);
 
   function clearMediaState() {
     setHeaderMediaHandle('');
@@ -372,103 +459,119 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
   };
 
   const handleSave = async (asDraft: boolean) => {
+    // The Save/Submit button's disabled state lags a tick behind a fast
+    // double-click — this ref rejects the second invocation synchronously.
+    if (savingRef.current) return;
+
+    const willSubmitToMeta = !asDraft && submitToMeta && !contentLocked;
+    if (
+      willSubmitToMeta &&
+      !window.confirm(
+        "Submit this template to Meta for review? This can't be undone, and review can take up to 24 hours."
+      )
+    ) {
+      return;
+    }
+
+    savingRef.current = true;
     setSaving(true);
     setError('');
 
-    // Meta locks approved content; only local language can be corrected for send.
-    if (isEdit && template?.id && template.status === 'Approved') {
+    try {
+      // Meta locks approved content; only local language can be corrected for send.
+      if (isEdit && template?.id && template.status === 'Approved') {
+        try {
+          await api.updateTemplate(template.id, { language });
+          onSaved();
+          onBack();
+        } catch (err) {
+          setError(err instanceof Error ? err.message : 'Could not save template');
+        }
+        return;
+      }
+
+      let safeName: string;
       try {
-        await api.updateTemplate(template.id, { language });
+        safeName = assertValidTemplateName(name);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Enter a valid template name.');
+        return;
+      }
+      if (!bodyPattern.trim()) {
+        setError('Message body is required.');
+        return;
+      }
+      if (
+        (headerFormat === 'image' || headerFormat === 'video' || headerFormat === 'document') &&
+        !headerMediaHandle &&
+        !headerMediaStorageKey
+      ) {
+        setError('Upload a sample file for the media header.');
+        return;
+      }
+      if (buttonKind === 'URL' && !buttonUrl.trim()) {
+        setError('Enter a website URL for the button.');
+        return;
+      }
+      if (buttonKind === 'PHONE_NUMBER' && !buttonPhone.trim()) {
+        setError('Enter a phone number for the call button.');
+        return;
+      }
+      if (buttonKind !== 'none' && !buttonText.trim()) {
+        setError('Enter button label text.');
+        return;
+      }
+
+      const apiHeaderFormat = headerFormatToApi(headerFormat);
+      const payload = {
+        name: safeName,
+        category,
+        language,
+        bodyPattern: bodyPattern.trim(),
+        header: headerFormat === 'text' && header.trim() ? header.trim() : null,
+        headerFormat: apiHeaderFormat,
+        headerMediaHandle: headerMediaHandle || null,
+        headerMediaStorageKey: headerMediaStorageKey || null,
+        headerMediaMimeType: headerMediaMimeType || null,
+        headerMediaFileName: headerMediaFileName || null,
+        footer: footer.trim() || null,
+        variables: variableSamples,
+        variableSamples,
+        buttonType: buttonKind === 'none' ? null : buttonKind,
+        buttonText: buttonKind === 'none' ? null : buttonText.trim() || null,
+        buttonUrl: buttonKind === 'URL' ? buttonUrl.trim() || null : null,
+        buttonPhoneNumber: buttonKind === 'PHONE_NUMBER' ? buttonPhone.trim() || null : null,
+        buttonUrlSample:
+          buttonKind === 'URL' && /\{\{\d+\}\}/.test(buttonUrl)
+            ? buttonUrlSample.trim() || 'sample_link_id'
+            : null,
+        submitToMeta: asDraft ? false : submitToMeta,
+      };
+
+      try {
+        if (isEdit && template?.id) {
+          await api.updateTemplate(template.id, payload);
+          if (!asDraft && submitToMeta) {
+            await api.submitTemplate(template.id);
+          }
+        } else {
+          await api.createTemplate(payload);
+        }
+        setIsDirty(false);
         onSaved();
         onBack();
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Could not save template');
-      } finally {
-        setSaving(false);
       }
-      return;
-    }
-
-    let safeName: string;
-    try {
-      safeName = assertValidTemplateName(name);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Enter a valid template name.');
-      setSaving(false);
-      return;
-    }
-    if (!bodyPattern.trim()) {
-      setError('Message body is required.');
-      setSaving(false);
-      return;
-    }
-    if (
-      (headerFormat === 'image' || headerFormat === 'video' || headerFormat === 'document') &&
-      !headerMediaHandle &&
-      !headerMediaStorageKey
-    ) {
-      setError('Upload a sample file for the media header.');
-      setSaving(false);
-      return;
-    }
-    if (buttonKind === 'URL' && !buttonUrl.trim()) {
-      setError('Enter a website URL for the button.');
-      setSaving(false);
-      return;
-    }
-    if (buttonKind === 'PHONE_NUMBER' && !buttonPhone.trim()) {
-      setError('Enter a phone number for the call button.');
-      setSaving(false);
-      return;
-    }
-    if (buttonKind !== 'none' && !buttonText.trim()) {
-      setError('Enter button label text.');
-      setSaving(false);
-      return;
-    }
-
-    const apiHeaderFormat = headerFormatToApi(headerFormat);
-    const payload = {
-      name: safeName,
-      category,
-      language,
-      bodyPattern: bodyPattern.trim(),
-      header: headerFormat === 'text' && header.trim() ? header.trim() : null,
-      headerFormat: apiHeaderFormat,
-      headerMediaHandle: headerMediaHandle || null,
-      headerMediaStorageKey: headerMediaStorageKey || null,
-      headerMediaMimeType: headerMediaMimeType || null,
-      headerMediaFileName: headerMediaFileName || null,
-      footer: footer.trim() || null,
-      variables: variableSamples,
-      variableSamples,
-      buttonType: buttonKind === 'none' ? null : buttonKind,
-      buttonText: buttonKind === 'none' ? null : buttonText.trim() || null,
-      buttonUrl: buttonKind === 'URL' ? buttonUrl.trim() || null : null,
-      buttonPhoneNumber: buttonKind === 'PHONE_NUMBER' ? buttonPhone.trim() || null : null,
-      buttonUrlSample:
-        buttonKind === 'URL' && /\{\{\d+\}\}/.test(buttonUrl)
-          ? buttonUrlSample.trim() || 'sample_link_id'
-          : null,
-      submitToMeta: asDraft ? false : submitToMeta,
-    };
-
-    try {
-      if (isEdit && template?.id) {
-        await api.updateTemplate(template.id, payload);
-        if (!asDraft && submitToMeta) {
-          await api.submitTemplate(template.id);
-        }
-      } else {
-        await api.createTemplate(payload);
-      }
-      onSaved();
-      onBack();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not save template');
     } finally {
+      savingRef.current = false;
       setSaving(false);
     }
+  };
+
+  const handleBack = () => {
+    if (isDirty && !window.confirm('Discard unsaved changes to this template?')) return;
+    onBack();
   };
 
   const contentLocked = isEdit && template?.status === 'Approved';
@@ -487,7 +590,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
         <div className="flex items-center gap-3 min-w-0">
           <button
             type="button"
-            onClick={onBack}
+            onClick={handleBack}
             className="p-2 rounded-full hover:bg-surface-muted text-[#050505] transition-colors"
             aria-label="Back to templates"
           >

@@ -1,4 +1,5 @@
 import type { BrandSettings, EmailBlock, EmailDesignDocument } from './types';
+import { sanitizeEmailHtml } from '../../../lib/sanitizeHtml';
 
 function esc(s: string): string {
   return s
@@ -22,10 +23,10 @@ function renderBlock(block: EmailBlock, brand: BrandSettings): string {
       const level = (p.level as string) === 'h2' ? 'h2' : 'h1';
       const size = level === 'h2' ? '20px' : '26px';
       const color = (p.color as string) || textColor;
-      return `<tr><td style="padding:16px 24px 8px;${alignStyle(String(p.align ?? 'left'))}"><${level} style="margin:0;font-size:${size};line-height:1.3;color:${color};font-family:${brand.fontFamily};">${String(p.text ?? '')}</${level}></td></tr>`;
+      return `<tr><td style="padding:16px 24px 8px;${alignStyle(String(p.align ?? 'left'))}"><${level} style="margin:0;font-size:${size};line-height:1.3;color:${color};font-family:${brand.fontFamily};">${esc(String(p.text ?? ''))}</${level}></td></tr>`;
     }
     case 'text':
-      return `<tr><td style="padding:8px 24px;${alignStyle(String(p.align ?? 'left'))}"><p style="margin:0;font-size:${Number(p.fontSize) || 16}px;line-height:1.65;color:${textColor};font-family:${brand.fontFamily};">${String(p.content ?? '').replace(/\n/g, '<br/>')}</p></td></tr>`;
+      return `<tr><td style="padding:8px 24px;${alignStyle(String(p.align ?? 'left'))}"><p style="margin:0;font-size:${Number(p.fontSize) || 16}px;line-height:1.65;color:${textColor};font-family:${brand.fontFamily};">${esc(String(p.content ?? '')).replace(/\n/g, '<br/>')}</p></td></tr>`;
     case 'image': {
       const src = String(p.src ?? '');
       const alt = esc(String(p.alt ?? ''));
@@ -46,15 +47,28 @@ function renderBlock(block: EmailBlock, brand: BrandSettings): string {
       return `<tr><td style="padding:16px 24px;${alignStyle(String(p.align ?? 'center'))}"><a href="${esc(url)}" style="display:inline-block;background:${bg};color:${fg};text-decoration:none;padding:14px 28px;border-radius:${radius}px;font-weight:600;font-size:15px;font-family:${brand.fontFamily};">${esc(label)}</a></td></tr>`;
     }
     case 'columns':
-      return `<tr><td style="padding:12px 24px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td width="50%" valign="top" style="padding-right:8px;font-size:15px;line-height:1.6;color:${textColor};font-family:${brand.fontFamily};">${String(p.left ?? '')}</td><td width="50%" valign="top" style="padding-left:8px;font-size:15px;line-height:1.6;color:${textColor};font-family:${brand.fontFamily};">${String(p.right ?? '')}</td></tr></table></td></tr>`;
+      return `<tr><td style="padding:12px 24px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td width="50%" valign="top" style="padding-right:8px;font-size:15px;line-height:1.6;color:${textColor};font-family:${brand.fontFamily};">${esc(String(p.left ?? ''))}</td><td width="50%" valign="top" style="padding-left:8px;font-size:15px;line-height:1.6;color:${textColor};font-family:${brand.fontFamily};">${esc(String(p.right ?? ''))}</td></tr></table></td></tr>`;
     case 'divider':
       return `<tr><td style="padding:8px 24px;"><hr style="border:none;border-top:${Number(p.thickness) || 1}px solid ${String(p.color ?? '#e2e8f0')};margin:0;" /></td></tr>`;
     case 'spacer':
       return `<tr><td style="height:${Number(p.height) || 24}px;line-height:${Number(p.height) || 24}px;font-size:1px;">&nbsp;</td></tr>`;
     case 'footer':
-      return `<tr><td style="padding:20px 24px;${alignStyle(String(p.align ?? 'center'))}"><p style="margin:0;font-size:12px;line-height:1.5;color:#9ca3af;font-family:${brand.fontFamily};">${String(p.text ?? '')}</p></td></tr>`;
-    case 'html':
-      return `<tr><td style="padding:12px 24px;">${String(p.rawHtml ?? '')}</td></tr>`;
+      return `<tr><td style="padding:20px 24px;${alignStyle(String(p.align ?? 'center'))}"><p style="margin:0;font-size:12px;line-height:1.5;color:#9ca3af;font-family:${brand.fontFamily};">${esc(String(p.text ?? ''))}</p></td></tr>`;
+    case 'html': {
+      // The one block type meant to hold real markup — sanitize (not
+      // escape) so it survives as HTML with <script>/event-handler/
+      // javascript: payloads stripped, instead of raw-injecting whatever
+      // was typed into the "Custom HTML" textarea straight into the
+      // htmlBody that gets persisted and later sent to real recipients.
+      const raw = String(p.rawHtml ?? '');
+      if (isFullHtmlDocument(raw)) {
+        // A full document dropped into a single html block is rendered in
+        // a sandboxed iframe everywhere it's previewed (CanvasBlock.tsx) —
+        // leave it untouched here too rather than mangling <head>/<body>.
+        return raw;
+      }
+      return `<tr><td style="padding:12px 24px;">${sanitizeEmailHtml(raw)}</td></tr>`;
+    }
     default:
       return '';
   }

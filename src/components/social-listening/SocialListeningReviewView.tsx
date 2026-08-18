@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import {
   LayoutGrid,
@@ -163,6 +163,15 @@ export const SocialListeningReviewView: React.FC = () => {
     return selectedItems.every((i) => triageSectionFor(i) === first) ? first : null;
   }, [selectedItems]);
 
+  const [queueError, setQueueError] = useState('');
+  // Synchronous mirror of in-flight ids — the optimistic status flip in
+  // markStatus already disables most buttons on the next render, but a
+  // ref-based guard also rejects a same-tick double-fire (e.g. a fast
+  // double-click) that lands before React has re-rendered. runningIds is
+  // the state-backed twin used purely to drive the BulkActionBar busy UI.
+  const runningRef = useRef<Set<string>>(new Set());
+  const [runningIds, setRunningIds] = useState<Set<string>>(new Set());
+
   const markStatus = (ids: string[], status: ReviewStatus) => {
     patchPendingCache(ids, status);
     setSelected((prev) => {
@@ -176,11 +185,37 @@ export const SocialListeningReviewView: React.FC = () => {
     ids: string[],
     action: 'approve_dm' | 'approve_reply' | 'escalate' | 'ignore'
   ) => {
+    const targetIds = ids.filter((id) => !runningRef.current.has(id));
+    if (targetIds.length === 0) return;
+    for (const id of targetIds) runningRef.current.add(id);
+    setRunningIds(new Set(runningRef.current));
+    setQueueError('');
+
     const reviewStatus: ReviewStatus = action === 'ignore' ? 'ignored' : 'approved';
-    markStatus(ids, reviewStatus);
-    await Promise.allSettled(
-      ids.map((id) => api.socialListeningCommentAction(id, { action }))
+    markStatus(targetIds, reviewStatus);
+    const results = await Promise.allSettled(
+      targetIds.map((id) => api.socialListeningCommentAction(id, { action }))
     );
+
+    const failedIds = targetIds.filter((_, i) => results[i].status === 'rejected');
+    if (failedIds.length > 0) {
+      // Roll back the optimistic status so failed items reappear in the
+      // queue instead of silently vanishing as if they'd been handled.
+      patchPendingCache(failedIds, 'pending');
+      setSelected((prev) => {
+        const next = new Set(prev);
+        for (const id of failedIds) next.add(id);
+        return next;
+      });
+      setQueueError(
+        failedIds.length === targetIds.length
+          ? 'Action failed — the item was put back in the queue. Please try again.'
+          : `${failedIds.length} of ${targetIds.length} failed and were put back in the queue.`
+      );
+    }
+
+    for (const id of targetIds) runningRef.current.delete(id);
+    setRunningIds(new Set(runningRef.current));
     invalidate();
   };
 
@@ -193,6 +228,12 @@ export const SocialListeningReviewView: React.FC = () => {
       return;
     }
     const kind = primaryActionFor(section).kind;
+    if (
+      kind === 'approve_dm' &&
+      !window.confirm('Send this DM to the customer now? This cannot be undone.')
+    ) {
+      return;
+    }
     void runQueueAction(
       [id],
       kind === 'approve_dm'
@@ -224,8 +265,11 @@ export const SocialListeningReviewView: React.FC = () => {
     }
   };
 
+  const confirmAddLeadRef = useRef(false);
   const confirmAddLead = async () => {
     if (!addLeadCommentId || !pickFunnelId) return;
+    if (confirmAddLeadRef.current) return;
+    confirmAddLeadRef.current = true;
     const id = addLeadCommentId;
     setAddLeadBusyId(id);
     setAddLeadError('');
@@ -242,6 +286,7 @@ export const SocialListeningReviewView: React.FC = () => {
     } catch (err) {
       setAddLeadError(err instanceof Error ? err.message : 'Failed to add lead');
     } finally {
+      confirmAddLeadRef.current = false;
       setAddLeadBusyId(null);
     }
   };
@@ -356,6 +401,15 @@ export const SocialListeningReviewView: React.FC = () => {
           className="rounded-xl border border-red-100 bg-red-50 px-4 py-2 text-sm font-bold text-red-600"
         >
           {loadError}
+        </p>
+      )}
+
+      {queueError && (
+        <p
+          role="alert"
+          className="rounded-xl border border-red-100 bg-red-50 px-4 py-2 text-sm font-bold text-red-600"
+        >
+          {queueError}
         </p>
       )}
 
@@ -553,11 +607,20 @@ export const SocialListeningReviewView: React.FC = () => {
         <BulkActionBar
           selectedCount={selected.size}
           unifiedSection={unifiedSection}
+          busy={[...selected].some((id) => runningIds.has(id))}
           onClear={() => setSelected(new Set())}
           onIgnore={() => void runQueueAction([...selected], 'ignore')}
           onApprove={() => {
             if (!unifiedSection) return;
             const kind = primaryActionFor(unifiedSection).kind;
+            if (
+              kind === 'approve_dm' &&
+              !window.confirm(
+                `Send a DM to all ${selected.size} selected customers now? This cannot be undone.`
+              )
+            ) {
+              return;
+            }
             void runQueueAction(
               [...selected],
               kind === 'approve_dm'

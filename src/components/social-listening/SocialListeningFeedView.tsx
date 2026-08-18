@@ -78,6 +78,16 @@ export const SocialListeningFeedView: React.FC = () => {
     setSelectedIgId(accounts[0].instagramUserId);
   }, [accounts, selectedIgId]);
 
+  // Load-more pagination state is scoped to whichever account it was
+  // fetched for — without this, switching accounts kept the previous
+  // account's extra-loaded posts (and its next-page cursor) around, so they
+  // leaked into the new account's feed and "Load more" paginated with the
+  // wrong account's cursor.
+  useEffect(() => {
+    setExtraItems([]);
+    setExtraCursor(null);
+  }, [selectedIgId]);
+
   const profileQ = useListeningProfile(selectedIgId);
   const mediaQ = useListeningMedia(selectedIgId);
 

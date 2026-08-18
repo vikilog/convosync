@@ -25,11 +25,10 @@ const DEFAULT_SIMILARITY_LOW_THRESHOLD = 0.7;
 
 type Props = {
   profile: AgentProfileData;
-  onUpdate: (patch: Partial<AgentProfileData>) => void;
-  onPublish: (patch: Partial<AgentProfileData>) => Promise<void>;
+  /** Resolves to whether the save actually succeeded, so callers can react to failure. */
+  onUpdate: (patch: Partial<AgentProfileData>) => Promise<boolean>;
   onTestAgent?: () => void;
   saving?: boolean;
-  onSaved?: () => void;
 };
 
 const TONE_ICONS: Record<ToneOfVoice, React.ReactNode> = {
@@ -101,15 +100,20 @@ function profilesEqual(a: AgentProfileData, b: AgentProfileData): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
 }
 
+/** Seed real default actions into state instead of deriving them only for
+ * display — a display-only fallback can't be the target of `updateAction`'s
+ * edits, which is what silently discarded toggles on a fresh agent before. */
+function withDefaultActions(p: AgentProfileData): AgentProfileData {
+  return p.actions.length > 0 ? p : { ...p, actions: defaultAgentActions() };
+}
+
 export const AgentProfile: React.FC<Props> = ({
   profile,
   onUpdate,
-  onPublish,
   onTestAgent,
   saving,
-  onSaved,
 }) => {
-  const [local, setLocal] = useState(profile);
+  const [local, setLocal] = useState(() => withDefaultActions(profile));
   const [showEdit, setShowEdit] = useState(false);
   const [actionsOpen, setActionsOpen] = useState(true);
   const [showTemplates, setShowTemplates] = useState(false);
@@ -127,7 +131,7 @@ export const AgentProfile: React.FC<Props> = ({
 
   useEffect(() => {
     if (!dirtyRef.current) {
-      setLocal(profile);
+      setLocal(withDefaultActions(profile));
     }
   }, [profile]);
 
@@ -140,9 +144,12 @@ export const AgentProfile: React.FC<Props> = ({
   const flushSave = useCallback(() => {
     if (!dirtyRef.current) return;
     dirtyRef.current = false;
-    onUpdate({ ...local });
-    onSaved?.();
-  }, [local, onUpdate, onSaved]);
+    void onUpdate({ ...local }).then((ok) => {
+      // Save failed — keep the edit marked dirty so the next debounce/interval retries it,
+      // instead of silently treating an unsaved edit as clean.
+      if (!ok) dirtyRef.current = true;
+    });
+  }, [local, onUpdate]);
 
   const patchLocal = useCallback((patch: Partial<AgentProfileData>) => {
     setLocal((prev) => {
@@ -188,13 +195,19 @@ export const AgentProfile: React.FC<Props> = ({
 
   const handlePublish = async () => {
     setShowPublishConfirm(false);
-    await onPublish({ isPublished: true });
-    patchLocal({ isPublished: true });
-    setToast('Agent published successfully!');
+    // Flush the current draft (not just {isPublished: true}) through the same
+    // save path as autosave, so an edit still sitting in the debounce window
+    // isn't excluded from what goes live.
+    if (debounceRef.current) window.clearTimeout(debounceRef.current);
+    dirtyRef.current = false;
+    const ok = await onUpdate({ ...local, isPublished: true, isEnabled: true });
+    if (ok) {
+      setToast('Agent published successfully!');
+    } else {
+      dirtyRef.current = true;
+      setToast('Failed to publish. Please try again.');
+    }
   };
-
-  const actions =
-    local.actions.length > 0 ? local.actions : defaultAgentActions();
 
   return (
     <>
@@ -577,7 +590,7 @@ export const AgentProfile: React.FC<Props> = ({
                   )}
                 </div>
                 )}
-                {actions.map((action) => (
+                {local.actions.map((action) => (
                   <ActionCard
                     key={action.type}
                     action={action}

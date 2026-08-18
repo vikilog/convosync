@@ -97,8 +97,15 @@ export function JourneyWorkspace() {
 
     return (
       <JourneyBuilder
+        key={activeJourney.id}
         journey={activeJourney}
         onBack={() => {
+          if (
+            useJourneyBuilderStore.getState().isDirty &&
+            !window.confirm('You have unsaved changes. Leave without saving?')
+          ) {
+            return;
+          }
           setDirty(false);
           navigate(pathForTab('automations'));
         }}

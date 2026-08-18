@@ -88,14 +88,17 @@ export function mapContactFromApi(raw: Record<string, unknown>, conv?: Record<st
   const channel =
     convChannel === 'instagram' ||
     convChannel === 'messenger' ||
+    convChannel === 'telegram' ||
     convChannel === 'whatsapp' ||
     convChannel === 'email'
-      ? (convChannel as 'instagram' | 'messenger' | 'whatsapp' | 'email')
+      ? (convChannel as 'instagram' | 'messenger' | 'telegram' | 'whatsapp' | 'email')
       : phone.startsWith('ig:') || source === 'Instagram'
         ? 'instagram'
         : phone.startsWith('fb:') || source === 'Messenger'
           ? 'messenger'
-          : 'whatsapp';
+          : phone.startsWith('tg:') || source === 'Telegram'
+            ? 'telegram'
+            : 'whatsapp';
   const instagramUsername = customFields.instagramUsername;
   const handle =
     channel === 'instagram'
@@ -108,11 +111,15 @@ export function mapContactFromApi(raw: Record<string, unknown>, conv?: Record<st
         ? phone.startsWith('fb:')
           ? `Messenger user ${phone.slice(3, 9)}…`
           : phone
-        : channel === 'email'
-          ? raw.email
-            ? String(raw.email)
+        : channel === 'telegram'
+          ? phone.startsWith('tg:')
+            ? `Telegram chat ${phone.slice(3, 9)}…`
             : phone
-          : phone;
+          : channel === 'email'
+            ? raw.email
+              ? String(raw.email)
+              : phone
+            : phone;
 
   return {
     id: String(raw.id),
@@ -167,7 +174,8 @@ function mapMessageMediaFromApi(metadata: unknown): ChatMessage['media'] | undef
     m.mimeType ||
     m.fileName ||
     m.latitude != null ||
-    m.longitude != null;
+    m.longitude != null ||
+    (Array.isArray(m.items) && m.items.length > 0);
   if (!hasMedia) return undefined;
   return {
     mimeType: m.mimeType ? String(m.mimeType) : undefined,
@@ -279,6 +287,13 @@ export function mapMessageFromApi(raw: Record<string, unknown>): ChatMessage {
         ? metadata.html
         : undefined,
     clicked: metadata?.clicked === true,
+    carouselItems: Array.isArray(metadata?.items)
+      ? (metadata!.items as Array<Record<string, unknown>>).map((item) => ({
+          mimeType: item.mimeType ? String(item.mimeType) : undefined,
+          fileName: item.fileName ? String(item.fileName) : undefined,
+          hasFile: Boolean(item.storageKey),
+        }))
+      : undefined,
   };
 }
 
@@ -456,6 +471,7 @@ function mapCampaignStatus(statusRaw: string): CampaignRecordStatus {
   if (s === 'running') return 'Running';
   if (s === 'completed') return 'Completed';
   if (s === 'failed') return 'Failed';
+  if (s === 'cancelled') return 'Cancelled';
   return 'Draft';
 }
 
@@ -572,9 +588,18 @@ export function mapCampaignDetailFromApi(raw: Record<string, unknown>): Campaign
         ? filter.channel
         : 'whatsapp';
 
+  // Mirrors the backend's own resolveSegmentIdsFromFilter fallback chain
+  // (segmentIds → segmentId → tag → all) — the old code's inner ternary had
+  // both branches returning 'all', so any campaign resolved via filter.tag
+  // (rather than segmentId/segmentIds) silently displayed and re-saved as
+  // "All contacts" every time it was reopened for edit.
   const segmentIds = Array.isArray(filter.segmentIds)
     ? filter.segmentIds.map(String)
-    : [String(filter.segmentId ?? (String(campaign.audienceType ?? 'all') === 'all' ? 'all' : 'all'))];
+    : typeof filter.segmentId === 'string' && filter.segmentId.trim()
+      ? [filter.segmentId.trim()]
+      : typeof filter.tag === 'string' && filter.tag.trim()
+        ? [`tag:${filter.tag.trim()}`]
+        : ['all'];
 
   const insightsRaw = (raw.insights ?? {}) as Record<string, unknown>;
   const insights: CampaignInsights = {

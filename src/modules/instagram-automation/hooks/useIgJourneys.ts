@@ -52,8 +52,11 @@ export function useSaveIgJourneyGraph(journeyId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (graph: IgJourneyGraph) => api.saveInstagramJourneyGraph(journeyId, graph),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['instagram-journeys', journeyId, 'graph'] });
+    onSuccess: (_data, graph) => {
+      // Write the saved graph straight into the cache instead of invalidating
+      // it — invalidate+refetch is async, so the builder's draftGraph can't
+      // safely be cleared until the cache reflects what was just saved.
+      qc.setQueryData(['instagram-journeys', journeyId, 'graph'], graph);
       qc.invalidateQueries({ queryKey: ['instagram-journeys'] });
     },
   });

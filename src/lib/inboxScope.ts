@@ -1,4 +1,4 @@
-export type InboxChannel = 'whatsapp' | 'instagram' | 'messenger' | 'email';
+export type InboxChannel = 'whatsapp' | 'instagram' | 'messenger' | 'email' | 'telegram';
 
 export type InboxScope = {
   mode: 'all' | 'restricted';
@@ -8,7 +8,7 @@ export type InboxScope = {
 
 export const FULL_INBOX_SCOPE: InboxScope = { mode: 'all' };
 
-const INBOX_CHANNELS: InboxChannel[] = ['whatsapp', 'instagram', 'messenger', 'email'];
+const INBOX_CHANNELS: InboxChannel[] = ['whatsapp', 'instagram', 'messenger', 'email', 'telegram'];
 
 export function parseInboxScope(value: unknown): InboxScope | null {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
@@ -85,7 +85,9 @@ export function formatInboxScopeSummary(scope: InboxScope): string {
           ? 'Instagram'
           : ch === 'messenger'
             ? 'Messenger'
-            : 'Email';
+            : ch === 'telegram'
+              ? 'Telegram'
+              : 'Email';
     if (allowed === 'all') parts.push(label);
     else parts.push(`${label} (${allowed.length})`);
   }
@@ -93,5 +95,8 @@ export function formatInboxScopeSummary(scope: InboxScope): string {
 }
 
 export function defaultRestrictedInboxScope(): InboxScope {
-  return { mode: 'restricted', channels: ['whatsapp', 'instagram', 'messenger', 'email'] };
+  return {
+    mode: 'restricted',
+    channels: ['whatsapp', 'instagram', 'messenger', 'email', 'telegram'],
+  };
 }

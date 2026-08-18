@@ -39,7 +39,9 @@ export const MetaAdsIntegrationPanel: React.FC<MetaAdsIntegrationPanelProps> = (
   const [connecting, setConnecting] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [switchingAccount, setSwitchingAccount] = useState(false);
+  const [disconnecting, setDisconnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [adAccountsError, setAdAccountsError] = useState<string | null>(null);
   const onStatusChangeRef = useRef(onStatusChange);
   onStatusChangeRef.current = onStatusChange;
 
@@ -55,13 +57,18 @@ export const MetaAdsIntegrationPanel: React.FC<MetaAdsIntegrationPanelProps> = (
         try {
           const res = await api.getMetaAdAccounts();
           setAdAccounts(res.accounts);
-        } catch {
+          setAdAccountsError(null);
+        } catch (err) {
           setAdAccounts([]);
+          setAdAccountsError(
+            err instanceof Error ? err.message : 'Failed to load ad accounts'
+          );
         }
       } else {
         setConnected(false);
         setAccount(null);
         setAdAccounts([]);
+        setAdAccountsError(null);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load Meta Ads');
@@ -107,6 +114,7 @@ export const MetaAdsIntegrationPanel: React.FC<MetaAdsIntegrationPanelProps> = (
 
   const handleDisconnect = async () => {
     if (!window.confirm('Disconnect Meta Ads from this workspace?')) return;
+    setDisconnecting(true);
     try {
       await api.disconnectMetaAds();
       setConnected(false);
@@ -115,6 +123,8 @@ export const MetaAdsIntegrationPanel: React.FC<MetaAdsIntegrationPanelProps> = (
       onStatusChangeRef.current?.();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to disconnect');
+    } finally {
+      setDisconnecting(false);
     }
   };
 
@@ -241,12 +251,19 @@ export const MetaAdsIntegrationPanel: React.FC<MetaAdsIntegrationPanelProps> = (
             <button
               type="button"
               onClick={() => void handleDisconnect()}
-              className="px-3 py-2 border border-red-200 rounded-xl text-sm font-bold text-red-600 hover:bg-red-50 cursor-pointer"
+              disabled={disconnecting}
+              className="px-3 py-2 border border-red-200 rounded-xl text-sm font-bold text-red-600 hover:bg-red-50 cursor-pointer disabled:opacity-50"
             >
-              Disconnect
+              {disconnecting ? 'Disconnecting…' : 'Disconnect'}
             </button>
           </div>
         </div>
+
+        {adAccountsError && (
+          <p className="text-xs font-medium text-red-700 bg-red-50 border border-red-100 rounded-xl px-3 py-2">
+            Couldn't load ad accounts: {adAccountsError}
+          </p>
+        )}
 
         {adAccounts.length > 1 && (
           <div>

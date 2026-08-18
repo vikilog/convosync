@@ -180,7 +180,7 @@ const StageColumn: React.FC<{
   isFinal?: boolean;
   leads: Lead[];
   canDelete: boolean;
-  convertingId: string | null;
+  convertingIds: Set<string>;
   onOpen: (lead: Lead) => void;
   onConvert: (lead: Lead) => void;
   onRename: (stageId: string, name: string) => Promise<void>;
@@ -191,7 +191,7 @@ const StageColumn: React.FC<{
   isFinal,
   leads,
   canDelete,
-  convertingId,
+  convertingIds,
   onOpen,
   onConvert,
   onRename,
@@ -299,7 +299,7 @@ const StageColumn: React.FC<{
             key={lead.id}
             lead={lead}
             showConvert={Boolean(isFinal) && !lead.contactId}
-            convertBusy={convertingId === lead.id}
+            convertBusy={convertingIds.has(lead.id)}
             onOpen={() => onOpen(lead)}
             onConvert={() => onConvert(lead)}
           />
@@ -417,9 +417,19 @@ export const LeadsKanbanView: React.FC = () => {
   const [boardIsFinal, setBoardIsFinal] = useState(false);
   const [addBoardOpen, setAddBoardOpen] = useState(false);
   const [boardSaving, setBoardSaving] = useState(false);
-  const [convertingId, setConvertingId] = useState<string | null>(null);
+  // Set, not a single id — converting two different leads at once is fine;
+  // a single shared value previously meant clicking convert on lead B while
+  // lead A was still in flight silently re-enabled A's button (the id moved
+  // to B), even though A's request hadn't finished.
+  const [convertingIds, setConvertingIds] = useState<Set<string>>(new Set());
+  const convertingRef = useRef<Set<string>>(new Set());
   const [insightsKey, setInsightsKey] = useState(0);
-  const drawerPersistTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Keyed per lead id — a single shared timer previously meant editing
+  // Lead B before Lead A's debounced save fired would clearTimeout and
+  // silently drop Lead A's edit forever (never sent, no error, reverts on
+  // refresh).
+  const drawerPersistTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  const dragGenerationRef = useRef<Record<string, number>>({});
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } })
@@ -455,7 +465,9 @@ export const LeadsKanbanView: React.FC = () => {
 
   useEffect(() => {
     return () => {
-      if (drawerPersistTimer.current) clearTimeout(drawerPersistTimer.current);
+      for (const key of Object.keys(drawerPersistTimers.current)) {
+        clearTimeout(drawerPersistTimers.current[key]);
+      }
     };
   }, []);
 
@@ -562,6 +574,13 @@ export const LeadsKanbanView: React.FC = () => {
 
     const prevStageId = current.stageId;
     const prevStageName = current.stage;
+    // Per-lead generation so an out-of-order response from an earlier drag
+    // of THIS SAME lead can't clobber a newer, already-applied move — either
+    // by overwriting it with stale success data, or by wrongly rolling it
+    // back to an even older stage on a late failure.
+    const generation = (dragGenerationRef.current[leadId] ?? 0) + 1;
+    dragGenerationRef.current[leadId] = generation;
+
     setLeads((prev) =>
       prev.map((l) =>
         l.id === leadId
@@ -575,9 +594,12 @@ export const LeadsKanbanView: React.FC = () => {
       )
     );
     try {
-      await persistLead(leadId, { stageId: nextStage.id, stage: nextStage.name });
+      const res = await api.updateLead(leadId, { stageId: nextStage.id });
+      if (dragGenerationRef.current[leadId] !== generation) return;
+      setLeads((prev) => prev.map((l) => (l.id === leadId ? (res.lead as Lead) : l)));
       setInsightsKey((k) => k + 1);
-    } catch {
+    } catch (err) {
+      if (dragGenerationRef.current[leadId] !== generation) return;
       setLeads((prev) =>
         prev.map((l) =>
           l.id === leadId
@@ -585,6 +607,7 @@ export const LeadsKanbanView: React.FC = () => {
             : l
         )
       );
+      setLoadError(err instanceof Error ? err.message : 'Failed to move lead');
     }
   };
 
@@ -658,7 +681,16 @@ export const LeadsKanbanView: React.FC = () => {
   };
 
   const convertLead = async (lead: Lead) => {
-    setConvertingId(lead.id);
+    // The ref is checked synchronously (state isn't visible until the next
+    // render) so a fast double-click can't fire two overlapping conversion
+    // requests for the same lead.
+    if (convertingRef.current.has(lead.id)) return;
+    const confirmed = window.confirm(
+      `Convert ${lead.name || 'this lead'} to a contact? This can't be undone from here.`
+    );
+    if (!confirmed) return;
+    convertingRef.current.add(lead.id);
+    setConvertingIds((prev) => new Set(prev).add(lead.id));
     setLoadError(null);
     try {
       const res = await api.convertLeadToContact(lead.id);
@@ -678,7 +710,12 @@ export const LeadsKanbanView: React.FC = () => {
       }
       setLoadError(message);
     } finally {
-      setConvertingId(null);
+      convertingRef.current.delete(lead.id);
+      setConvertingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(lead.id);
+        return next;
+      });
     }
   };
 
@@ -956,7 +993,7 @@ export const LeadsKanbanView: React.FC = () => {
                     isFinal={stage.isFinal}
                     leads={byStage[stage.id] ?? []}
                     canDelete={boardStages.length > 1}
-                    convertingId={convertingId}
+                    convertingIds={convertingIds}
                     onOpen={(lead) => setSelectedId(lead.id)}
                     onConvert={(lead) => void convertLead(lead)}
                     onRename={renameBoard}
@@ -1003,9 +1040,11 @@ export const LeadsKanbanView: React.FC = () => {
           if (next.notes !== prev.notes) patch.notes = next.notes;
           if (next.requirement !== prev.requirement) patch.requirement = next.requirement;
           if (Object.keys(patch).length === 0) return;
-          if (drawerPersistTimer.current) clearTimeout(drawerPersistTimer.current);
+          const existingTimer = drawerPersistTimers.current[next.id];
+          if (existingTimer) clearTimeout(existingTimer);
           const delay = stageChanged ? 0 : 450;
-          drawerPersistTimer.current = setTimeout(() => {
+          drawerPersistTimers.current[next.id] = setTimeout(() => {
+            delete drawerPersistTimers.current[next.id];
             void persistLead(next.id, patch);
           }, delay);
         }}

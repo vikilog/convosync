@@ -7,10 +7,12 @@ export const BulkActionBar: React.FC<{
   selectedCount: number;
   /** null when mixed intents selected */
   unifiedSection: TriageSectionId | null;
+  /** true while a queued action for the current selection is in flight */
+  busy?: boolean;
   onApprove: () => void;
   onIgnore: () => void;
   onClear: () => void;
-}> = ({ selectedCount, unifiedSection, onApprove, onIgnore, onClear }) => {
+}> = ({ selectedCount, unifiedSection, busy, onApprove, onIgnore, onClear }) => {
   if (selectedCount === 0) return null;
 
   const mixed = unifiedSection === null;
@@ -48,23 +50,25 @@ export const BulkActionBar: React.FC<{
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
+          disabled={busy}
           onClick={onClear}
-          className="cursor-pointer rounded-xl px-3 py-1.5 text-xs font-bold text-white/70 hover:bg-white/10 hover:text-white"
+          className="cursor-pointer rounded-xl px-3 py-1.5 text-xs font-bold text-white/70 hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
         >
           Clear
         </button>
         <button
           type="button"
+          disabled={busy}
           onClick={onIgnore}
-          className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-bold hover:bg-white/15"
+          className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-bold hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <X className="h-3.5 w-3.5" />
-          Ignore Selected ({selectedCount})
+          {busy ? 'Working…' : `Ignore Selected (${selectedCount})`}
         </button>
         <span className="relative inline-flex">
           <button
             type="button"
-            disabled={mixed}
+            disabled={mixed || busy}
             onClick={onApprove}
             title={
               mixed
@@ -78,7 +82,7 @@ export const BulkActionBar: React.FC<{
             }`}
           >
             <Check className="h-3.5 w-3.5" />
-            {approveLabel} ({selectedCount})
+            {busy ? 'Working…' : `${approveLabel} (${selectedCount})`}
           </button>
         </span>
       </div>

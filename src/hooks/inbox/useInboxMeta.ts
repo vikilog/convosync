@@ -104,6 +104,20 @@ export function useMessengerAccounts() {
   });
 }
 
+export function useTelegramAccounts() {
+  return useQuery({
+    queryKey: ['telegram-accounts'],
+    queryFn: async () => {
+      const data = (await api.getTelegramAccounts().catch(() => ({ accounts: [] }))) as {
+        accounts?: Array<{ botId?: string; botUsername?: string; botName?: string; label?: string }>;
+      };
+      return data.accounts ?? [];
+    },
+    staleTime: META_STALE_MS,
+    refetchOnWindowFocus: true,
+  });
+}
+
 export function useEmailIntegration() {
   return useQuery({
     queryKey: ['email-integration'],
@@ -131,6 +145,7 @@ export function useInboxAssigneeMeta() {
   const wa = useWhatsAppAccounts();
   const ig = useInstagramAccounts();
   const messenger = useMessengerAccounts();
+  const telegram = useTelegramAccounts();
   const email = useEmailIntegration();
 
   const teamAgents = useMemo<InboxNamedOption[]>(
@@ -202,6 +217,12 @@ export function useInboxAssigneeMeta() {
     ? fbList[0].label || fbList[0].displayName || fbList[0].pageName || 'Messenger'
     : null;
 
+  const tgList = telegram.data ?? [];
+  const telegramConnected = tgList.length > 0;
+  const telegramInboxLabel = telegramConnected
+    ? tgList[0].label || (tgList[0].botUsername ? `@${tgList[0].botUsername}` : 'Telegram')
+    : null;
+
   const emailConnected = email.data?.connected === true;
 
   return {
@@ -218,8 +239,11 @@ export function useInboxAssigneeMeta() {
     instagramInboxLabel,
     messengerConnected,
     messengerInboxLabel,
+    telegramConnected,
+    telegramInboxLabel,
     emailConnected,
-    /** True once WA / IG / Messenger / Email account queries have settled. */
-    channelsReady: wa.isFetched && ig.isFetched && messenger.isFetched && email.isFetched,
+    /** True once WA / IG / Messenger / Telegram / Email account queries have settled. */
+    channelsReady:
+      wa.isFetched && ig.isFetched && messenger.isFetched && telegram.isFetched && email.isFetched,
   };
 }

@@ -24,8 +24,13 @@ export function countBodyVariables(body: string): number {
   for (const m of body.matchAll(/\{\{(\d+)\}\}/g)) {
     found.add(parseInt(m[1], 10));
   }
-  if (found.size === 0) return 0;
-  return Math.max(...found);
+  // The count of distinct placeholders, not the highest index — Meta (and
+  // this app's own backend validation) requires consecutive {{1}}..{{n}}
+  // with no gaps, so for any well-formed body these are equal. Using the
+  // max index instead diverges the moment a body has a gap (e.g. {{1}} and
+  // {{3}} with no {{2}}), generating one extra sample-value input for a
+  // placeholder that doesn't exist in the body at all.
+  return found.size;
 }
 
 export function nextVariableIndex(body: string): number {

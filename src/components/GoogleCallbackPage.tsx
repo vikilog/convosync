@@ -8,6 +8,10 @@ import {
   readStoredGoogleOAuthRedirectUri,
 } from '../lib/googleOAuth';
 import { pathForTab } from '../routes';
+import {
+  GOOGLE_ADS_CONNECT_ERROR_KEY,
+  storeConnectError,
+} from './integrations/IntegrationConnectError';
 
 /**
  * Google OAuth redirect landing for workspace-level Google account connect.
@@ -35,24 +39,46 @@ export function GoogleCallbackPage() {
       sessionStorage.getItem(GOOGLE_OAUTH_RETURN_PATH_KEY) ||
       `${pathForTab('integrations')}?channel=google&google_connected=1`;
 
+    // Failed attempts must land back on whichever panel started the flow (Google
+    // Ads vs. the generic Google Workspace connect) instead of always bouncing
+    // to the generic screen — derive that target from the same returnPath the
+    // success branch already uses.
+    const isAdsReturn = (() => {
+      try {
+        return new URL(returnPath, window.location.origin).searchParams.get('channel') === 'google-ads';
+      } catch {
+        return false;
+      }
+    })();
+    const failPath = isAdsReturn
+      ? `${pathForTab('integrations')}?channel=google-ads&google_ads_error=1`
+      : `${pathForTab('integrations')}?channel=google&google_error=1`;
+
     const finish = (path: string, delayMs = 1200) => {
       sessionStorage.removeItem(GOOGLE_OAUTH_RETURN_PATH_KEY);
       setTimeout(() => navigate(path, { replace: true }), delayMs);
     };
 
+    const fail = (detail: string, delayMs = 2500) => {
+      if (isAdsReturn) storeConnectError(GOOGLE_ADS_CONNECT_ERROR_KEY, detail);
+      finish(failPath, delayMs);
+    };
+
     if (error) {
       exchangedRef.current = true;
       clearOAuthStorage();
-      setMessage(errorDescription || error);
-      finish(`${pathForTab('integrations')}?channel=google&google_error=1`, 2500);
+      const detail = errorDescription || error;
+      setMessage(detail);
+      fail(detail);
       return;
     }
 
     if (!code) {
       exchangedRef.current = true;
       clearOAuthStorage();
-      setMessage('No authorization code received from Google.');
-      finish(`${pathForTab('integrations')}?channel=google`, 2500);
+      const detail = 'No authorization code received from Google.';
+      setMessage(detail);
+      fail(detail);
       return;
     }
 
@@ -75,7 +101,7 @@ export function GoogleCallbackPage() {
           if (err.message) text = err.message;
         }
         setMessage(text);
-        finish(`${pathForTab('integrations')}?channel=google&google_error=1`, 3500);
+        fail(text, 3500);
       });
   }, [navigate, searchParams]);
 

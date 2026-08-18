@@ -38,6 +38,7 @@ import {
   PlayCircle,
   ChevronUp,
   ChevronDown,
+  AlertTriangle,
 } from 'lucide-react';
 import {
   CAMPAIGN_CHANNELS,
@@ -87,10 +88,13 @@ import {
   isScheduledCampaignEditable,
   isoToLocalDateTime,
   localDateTimeToIso,
+  minScheduleTimeFor,
   SCHEDULED_CAMPAIGN_EDIT_BLOCKED_HINT,
+  todayLocal,
   wizardSeedFromCampaignDetail,
   type ScheduledWizardSeed,
 } from '../lib/campaignScheduleEdit';
+import { formatCampaignDateTime as formatCampaignDate } from '../lib/campaignFormat';
 import { formatCc } from '../lib/convocoins';
 import { WALLET_CC_RATES } from '../lib/walletPricing';
 import { CampaignDetailView } from './campaigns/CampaignDetailView';
@@ -116,6 +120,7 @@ type AudienceSegment = { id: string; name: string; count: number; icon: string }
 type CampaignAudienceResponse = {
   channel: CampaignChannel;
   total: number;
+  excludedCount?: number;
   segments: AudienceSegment[];
 };
 
@@ -516,6 +521,7 @@ const CAMPAIGN_STATUS_ICON: Record<
   Running: { Icon: PlayCircle, className: 'text-blue-600' },
   Completed: { Icon: CheckCircle2, className: 'text-green-700' },
   Failed: { Icon: XCircle, className: 'text-red-600' },
+  Cancelled: { Icon: XCircle, className: 'text-gray-500' },
 };
 
 /** Progress fill — mirrors analytics funnel accents (failed red, done primary, running blue). */
@@ -539,18 +545,17 @@ function campaignProgressPct(sent: number, total: number): number {
 
 const LIST_EASE = [0.22, 1, 0.36, 1] as const;
 
-function formatCampaignDate(iso: string | null): string {
-  if (!iso) return '—';
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return '—';
-  return d.toLocaleString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
+/** Schedule times are entered/interpreted in whatever timezone the browser is set
+ * to, with no indicator anywhere — silently wrong if a teammate opens the same
+ * scheduled campaign from a different-timezone browser and re-saves without
+ * touching the time fields. Computed once; a session's timezone doesn't change. */
+const SCHEDULE_TIMEZONE_LABEL = (() => {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+  } catch {
+    return '';
+  }
+})();
 
 function formatCampaignDateShort(iso: string | null): string {
   if (!iso) return '—';
@@ -961,6 +966,13 @@ const CampaignsWorkspace: React.FC = () => {
   const pendingEditSeedRef = useRef<ScheduledWizardSeed | null>(null);
   const skipHeaderResetRef = useRef(false);
   const editLoadSeqRef = useRef(0);
+  // Synchronous guard — `launching` state alone can't block a fast double-click
+  // firing this handler twice before React commits the disabled state.
+  const launchingRef = useRef(false);
+  // If createCampaign succeeds but the immediate sendCampaign call that
+  // follows it fails, this remembers the created campaign so a retry resumes
+  // sending it instead of calling createCampaign again and duplicating it.
+  const pendingSendCampaignIdRef = useRef<string | null>(null);
 
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedChannel, setSelectedChannel] = useState<CampaignChannel>('whatsapp');
@@ -1053,6 +1065,8 @@ const CampaignsWorkspace: React.FC = () => {
     editLoadSeqRef.current += 1;
     pendingEditSeedRef.current = null;
     skipHeaderResetRef.current = false;
+    launchingRef.current = false;
+    pendingSendCampaignIdRef.current = null;
     setEditingCampaignId(null);
     setCampaignName('');
     setCurrentStep(0);
@@ -1088,6 +1102,21 @@ const CampaignsWorkspace: React.FC = () => {
     }
   };
 
+  // Header media is seeded twice: immediately for a template already known
+  // (applyEditSeedToWizard) and again once the async template list resolves
+  // and confirms the match (the whatsapp-templates effect below) — same
+  // fields either way.
+  const applySeedHeaderMedia = useCallback((seed: ScheduledWizardSeed) => {
+    if (!seed.headerMediaStorageKey && !seed.headerMediaAssetId) return;
+    setHeaderMediaStorageKey(seed.headerMediaStorageKey);
+    setHeaderMediaMimeType(seed.headerMediaMimeType);
+    setHeaderMediaFileName(seed.headerMediaFileName);
+    setHeaderMediaAssetId(seed.headerMediaAssetId);
+    if (seed.headerMediaStorageKey) {
+      setHeaderMediaPreviewUrl(api.templateHeaderMediaUrl(seed.headerMediaStorageKey));
+    }
+  }, []);
+
   const applyEditSeedToWizard = useCallback((seed: ScheduledWizardSeed) => {
     pendingEditSeedRef.current = seed;
     skipHeaderResetRef.current = true;
@@ -1108,16 +1137,8 @@ const CampaignsWorkspace: React.FC = () => {
       setSelectedEmailTemplateId(seed.templateId);
       setEmailVariableMappings({ ...seed.variableMappings });
     }
-    if (seed.headerMediaStorageKey || seed.headerMediaAssetId) {
-      setHeaderMediaStorageKey(seed.headerMediaStorageKey);
-      setHeaderMediaMimeType(seed.headerMediaMimeType);
-      setHeaderMediaFileName(seed.headerMediaFileName);
-      setHeaderMediaAssetId(seed.headerMediaAssetId);
-      if (seed.headerMediaStorageKey) {
-        setHeaderMediaPreviewUrl(api.templateHeaderMediaUrl(seed.headerMediaStorageKey));
-      }
-    }
-  }, []);
+    applySeedHeaderMedia(seed);
+  }, [applySeedHeaderMedia]);
 
   const openEditWizard = useCallback(
     async (campaignId: string) => {
@@ -1327,15 +1348,7 @@ const CampaignsWorkspace: React.FC = () => {
             skipHeaderResetRef.current = true;
             setSelectedTemplateName(match.name);
             setVariableMappings({ ...seed.variableMappings });
-            if (seed.headerMediaStorageKey || seed.headerMediaAssetId) {
-              setHeaderMediaStorageKey(seed.headerMediaStorageKey);
-              setHeaderMediaMimeType(seed.headerMediaMimeType);
-              setHeaderMediaFileName(seed.headerMediaFileName);
-              setHeaderMediaAssetId(seed.headerMediaAssetId);
-              if (seed.headerMediaStorageKey) {
-                setHeaderMediaPreviewUrl(api.templateHeaderMediaUrl(seed.headerMediaStorageKey));
-              }
-            }
+            applySeedHeaderMedia(seed);
           }
           return;
         }
@@ -1357,7 +1370,7 @@ const CampaignsWorkspace: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [viewMode]);
+  }, [viewMode, applySeedHeaderMedia]);
 
   const [emailTemplates, setEmailTemplates] = useState<EmailTemplateRecord[]>([]);
   const [emailTemplatesLoading, setEmailTemplatesLoading] = useState(true);
@@ -1446,6 +1459,8 @@ const CampaignsWorkspace: React.FC = () => {
   const [scheduledTime, setScheduledTime] = useState(() => defaultScheduleLocal().time);
   const [campaignLaunched, setCampaignLaunched] = useState(false);
   const [launching, setLaunching] = useState(false);
+  const [showSendConfirm, setShowSendConfirm] = useState(false);
+  const sendConfirmedRef = useRef(false);
   const [launchError, setLaunchError] = useState<string | null>(null);
   const [launchResult, setLaunchResult] = useState<{
     sentCount: number;
@@ -1529,6 +1544,11 @@ const CampaignsWorkspace: React.FC = () => {
     if (selectedSegmentIds.length === 1 && audienceContactsLoading) {
       return audienceData?.segments.find((s) => s.id === selectedSegmentIds[0])?.count ?? 0;
     }
+    // Multi-tag mid-fetch: audienceContactsTotal is still the PREVIOUS
+    // selection's total — the union fetch for the current selection hasn't
+    // resolved yet. Falling through to it showed a stale contact count and
+    // cost estimate for the instant a new tag was added/removed.
+    if (selectedSegmentIds.length > 1 && audienceContactsLoading) return 0;
     return audienceContactsTotal;
   };
 
@@ -1636,6 +1656,17 @@ const CampaignsWorkspace: React.FC = () => {
   };
 
   const handleWizardNext = () => {
+    if (currentStep === 1) {
+      if (selectedAudienceType === 'segment' && selectedSegmentIds.length === 0) {
+        setLaunchError('Select at least one tag for the campaign audience.');
+        return;
+      }
+      if (audienceCount() === 0) {
+        setLaunchError('Your audience is empty. Add contacts or choose a different segment.');
+        return;
+      }
+      setLaunchError(null);
+    }
     if (currentStep === 2 && selectedChannel === 'whatsapp') {
       if (!activeTemplate?.id) {
         setLaunchError('Select an approved WhatsApp template before continuing.');
@@ -1657,36 +1688,52 @@ const CampaignsWorkspace: React.FC = () => {
   };
 
   const handleLaunchCampaign = async () => {
+    // Synchronous check-and-set — blocks a fast double-click/double-fire that
+    // would otherwise slip through before the `launching` state re-render
+    // lands and the button actually becomes disabled. For a bulk broadcast a
+    // slipped-through second call means messaging the whole audience twice.
+    if (launchingRef.current) return;
+    launchingRef.current = true;
+    // Validation failures return before setLaunching(true)'s try/finally
+    // below, so they need their own explicit reset of the guard.
+    const fail = (msg: string) => {
+      setLaunchError(msg);
+      launchingRef.current = false;
+    };
     setLaunchError(null);
     const isEditing = Boolean(editingCampaignId);
 
     if (selectedChannel === 'instagram') {
-      setLaunchError('Instagram campaigns are preview-only right now. Use WhatsApp or Email to send.');
-      return;
+      return fail('Instagram campaigns are preview-only right now. Use WhatsApp or Email to send.');
     }
 
     if (selectedAudienceType === 'segment' && selectedSegmentIds.length === 0) {
-      setLaunchError('Select at least one tag for the campaign audience.');
-      return;
+      return fail('Select at least one tag for the campaign audience.');
     }
     if (audienceCount() === 0) {
-      setLaunchError('Your audience is empty. Add contacts or choose a different segment.');
-      return;
+      return fail('Your audience is empty. Add contacts or choose a different segment.');
     }
 
     // Edit must stay scheduled — no immediate send / duplicate create.
     const mustSchedule = isEditing || isScheduled;
+
+    // Sending now is irreversible (unlike a scheduled send, which can be
+    // cancelled) — require an explicit confirmation before it fires.
+    if (!mustSchedule && !sendConfirmedRef.current) {
+      launchingRef.current = false;
+      setShowSendConfirm(true);
+      return;
+    }
+
     let scheduledAtIso: string | undefined;
     if (mustSchedule) {
       try {
         scheduledAtIso = localDateTimeToIso(scheduledDate, scheduledTime);
       } catch {
-        setLaunchError('Pick a valid schedule date and time.');
-        return;
+        return fail('Pick a valid schedule date and time.');
       }
       if (new Date(scheduledAtIso).getTime() <= Date.now() + 30_000) {
-        setLaunchError('Schedule time must be at least 30 seconds in the future.');
-        return;
+        return fail('Schedule time must be at least 30 seconds in the future.');
       }
     }
 
@@ -1696,18 +1743,15 @@ const CampaignsWorkspace: React.FC = () => {
 
     if (selectedChannel === 'whatsapp') {
       if (!activeTemplate?.id) {
-        setLaunchError('Select an approved WhatsApp template before launching.');
-        return;
+        return fail('Select an approved WhatsApp template before launching.');
       }
       if (activeTemplate.variables.some((v) => !variableMappings[v]?.trim())) {
-        setLaunchError('Fill in all template variables before launching.');
-        return;
+        return fail('Fill in all template variables before launching.');
       }
       if (requiresHeaderMedia && !hasHeaderMediaReady) {
-        setLaunchError(
+        return fail(
           `This template needs a ${waHeaderFormat} header. Upload media or pick from the gallery before launching.`
         );
-        return;
       }
       templateId = activeTemplate.id;
       resolvedName =
@@ -1716,13 +1760,11 @@ const CampaignsWorkspace: React.FC = () => {
       mappings = variableMappings;
     } else if (selectedChannel === 'email') {
       if (!activeEmailTemplate?.id) {
-        setLaunchError('Select an active email template before launching.');
-        return;
+        return fail('Select an active email template before launching.');
       }
       const manualVars = activeEmailTemplate.variables.filter((v) => !CONTACT_AUTO_EMAIL_VARIABLES.has(v));
       if (manualVars.some((v) => !emailVariableMappings[v]?.trim())) {
-        setLaunchError('Fill in all campaign template variables before launching.');
-        return;
+        return fail('Fill in all campaign template variables before launching.');
       }
       templateId = activeEmailTemplate.id;
       resolvedName =
@@ -1730,8 +1772,7 @@ const CampaignsWorkspace: React.FC = () => {
         `${activeEmailTemplate.name} · ${chConfig.name} · ${new Date().toLocaleDateString()}`;
       mappings = emailVariableMappings;
     } else {
-      setLaunchError('This channel is not supported for sending yet.');
-      return;
+      return fail('This channel is not supported for sending yet.');
     }
 
     const segmentIds = selectedAudienceType === 'all' ? ['all'] : selectedSegmentIds;
@@ -1786,14 +1827,22 @@ const CampaignsWorkspace: React.FC = () => {
         return;
       }
 
-      const created = (await api.createCampaign({
-        name: resolvedName,
-        templateId,
-        channel: selectedChannel,
-        audienceType: selectedAudienceType === 'all' ? 'all' : 'segment',
-        audienceFilter: audiencePayload,
-        ...(scheduledAtIso ? { scheduledAt: scheduledAtIso } : {}),
-      })) as { id: string; status?: string };
+      // A prior attempt may have already created this campaign and only
+      // failed on the sendCampaign call after it — resume sending that same
+      // campaign instead of calling createCampaign again and duplicating it.
+      let created: { id: string; status?: string };
+      if (pendingSendCampaignIdRef.current) {
+        created = { id: pendingSendCampaignIdRef.current };
+      } else {
+        created = (await api.createCampaign({
+          name: resolvedName,
+          templateId,
+          channel: selectedChannel,
+          audienceType: selectedAudienceType === 'all' ? 'all' : 'segment',
+          audienceFilter: audiencePayload,
+          ...(scheduledAtIso ? { scheduledAt: scheduledAtIso } : {}),
+        })) as { id: string; status?: string };
+      }
 
       if (scheduledAtIso || created.status === 'scheduled') {
         setLaunchResult({
@@ -1807,10 +1856,12 @@ const CampaignsWorkspace: React.FC = () => {
         return;
       }
 
+      pendingSendCampaignIdRef.current = created.id;
       const result = (await api.sendCampaign(created.id)) as {
         sentCount?: number;
         totalRecipients?: number;
       };
+      pendingSendCampaignIdRef.current = null;
 
       setLaunchResult({
         sentCount: result.sentCount ?? 0,
@@ -1824,7 +1875,15 @@ const CampaignsWorkspace: React.FC = () => {
       setLaunchError(err instanceof Error ? err.message : parseApiError(String(err)));
     } finally {
       setLaunching(false);
+      launchingRef.current = false;
+      sendConfirmedRef.current = false;
     }
+  };
+
+  const confirmSendNow = () => {
+    setShowSendConfirm(false);
+    sendConfirmedRef.current = true;
+    handleLaunchCampaign();
   };
 
   if (viewMode === 'list') {
@@ -2150,6 +2209,14 @@ const CampaignsWorkspace: React.FC = () => {
                       );
                     })}
                   </div>
+
+                  {!audienceLoading && (audienceData?.excludedCount ?? 0) > 0 && (
+                    <p className="shrink-0 text-xs font-medium text-slate-400">
+                      {audienceData?.excludedCount} contact
+                      {audienceData?.excludedCount === 1 ? '' : 's'} excluded automatically
+                      (unsubscribed or blocked) — not counted above.
+                    </p>
+                  )}
 
                   <AnimatePresence initial={false}>
                     {selectedAudienceType === 'segment' && (
@@ -2796,16 +2863,21 @@ const CampaignsWorkspace: React.FC = () => {
                         <input
                           type="date"
                           value={scheduledDate}
-                          min={defaultScheduleLocal().date}
+                          min={todayLocal()}
                           onChange={(e) => setScheduledDate(e.target.value)}
                           className="bg-slate-50 border border-slate-200 rounded-xl py-2 px-3 text-xs outline-none font-bold"
                         />
                         <input
                           type="time"
                           value={scheduledTime}
+                          min={minScheduleTimeFor(scheduledDate)}
                           onChange={(e) => setScheduledTime(e.target.value)}
                           className="bg-slate-50 border border-slate-200 rounded-xl py-2 px-3 text-xs outline-none font-bold"
                         />
+                        <p className="col-span-2 text-[11px] font-medium text-gray-400">
+                          Times shown in your browser's timezone
+                          {SCHEDULE_TIMEZONE_LABEL ? ` (${SCHEDULE_TIMEZONE_LABEL})` : ''}.
+                        </p>
                       </div>
                     )}
                   </div>
@@ -2814,15 +2886,15 @@ const CampaignsWorkspace: React.FC = () => {
                     <ShieldCheck className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                     <div>
                       <p className="text-sm font-bold text-primary uppercase tracking-wider mb-1">
-                        Compliance Check Passed
+                        Before you send
                       </p>
                       <p className="text-xs text-gray-400 font-bold leading-normal">
                         {selectedChannel === 'whatsapp' &&
-                          'Template approved by Meta. Quality rating: High. Within daily messaging limits.'}
+                          'Template approved by Meta. Audience automatically excludes unsubscribed and blocked contacts.'}
                         {selectedChannel === 'email' &&
-                          'Unsubscribe link will be auto-added. CAN-SPAM and GDPR compliant.'}
+                          'Every email includes a working one-click unsubscribe link. Audience automatically excludes unsubscribed and blocked contacts. You are responsible for your own legal compliance (CAN-SPAM, GDPR, etc.).'}
                         {selectedChannel === 'instagram' &&
-                          'Message complies with Instagram DM policies. Only opted-in contacts targeted.'}
+                          "Instagram campaigns are preview-only right now — sending isn't available yet."}
                       </p>
                     </div>
                   </div>
@@ -2984,6 +3056,60 @@ const CampaignsWorkspace: React.FC = () => {
           filterType={galleryFilterForHeader(waHeaderFormat)}
         />
       )}
+
+      <AnimatePresence>
+        {showSendConfirm && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowSendConfirm(false)}
+          >
+            <motion.div
+              role="dialog"
+              aria-labelledby="send-confirm-title"
+              className="w-full max-w-sm overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl"
+              initial={{ scale: 0.96, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.96, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-start gap-3 px-5 pt-5">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-50 text-amber-600">
+                  <AlertTriangle className="h-4.5 w-4.5" />
+                </span>
+                <div>
+                  <h2 id="send-confirm-title" className="text-sm font-black text-gray-900">
+                    Send to {audienceCount().toLocaleString()} contacts now?
+                  </h2>
+                  <p className="mt-1 text-xs text-gray-500">
+                    This sends {chConfig.name} messages immediately and can&apos;t be undone.
+                    Schedule for later instead if you want a chance to cancel.
+                  </p>
+                </div>
+              </div>
+              <div className="mt-4 flex items-center justify-end gap-2 border-t border-slate-100 px-5 py-3">
+                <button
+                  type="button"
+                  onClick={() => setShowSendConfirm(false)}
+                  className="rounded-lg px-3.5 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-surface-muted"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmSendNow}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-primary/15 transition-colors hover:bg-primary-hover"
+                >
+                  <Play className="h-3.5 w-3.5 fill-white" />
+                  Send now
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

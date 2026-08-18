@@ -9,15 +9,20 @@ import {
 import { AdAccount } from '../../types';
 import { GoogleIcon } from '../ads/GoogleIcon';
 import { fmtInr } from '../ads/utils';
+import { IntegrationConnectError } from './IntegrationConnectError';
 
 type GoogleAdsIntegrationPanelProps = {
   enabled?: boolean;
   onStatusChange?: () => void;
+  connectError?: string | null;
+  onDismissConnectError?: () => void;
 };
 
 export const GoogleAdsIntegrationPanel: React.FC<GoogleAdsIntegrationPanelProps> = ({
   enabled = true,
   onStatusChange,
+  connectError,
+  onDismissConnectError,
 }) => {
   const [connected, setConnected] = useState(false);
   const [account, setAccount] = useState<AdAccount | null>(null);
@@ -25,6 +30,7 @@ export const GoogleAdsIntegrationPanel: React.FC<GoogleAdsIntegrationPanelProps>
   const [loading, setLoading] = useState(true);
   const [connecting, setConnecting] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const [disconnecting, setDisconnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const onStatusChangeRef = useRef(onStatusChange);
   onStatusChangeRef.current = onStatusChange;
@@ -46,7 +52,8 @@ export const GoogleAdsIntegrationPanel: React.FC<GoogleAdsIntegrationPanelProps>
         const active = (connRes.connections ?? []).find((c) => c.status === 'active');
         setLinkedEmail(active?.email ?? null);
       }
-    } catch {
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load Google Ads');
       setConnected(false);
       setAccount(null);
       try {
@@ -70,6 +77,7 @@ export const GoogleAdsIntegrationPanel: React.FC<GoogleAdsIntegrationPanelProps>
   const handleConnect = async () => {
     setConnecting(true);
     setError(null);
+    onDismissConnectError?.();
     try {
       sessionStorage.setItem(
         GOOGLE_OAUTH_RETURN_PATH_KEY,
@@ -86,14 +94,16 @@ export const GoogleAdsIntegrationPanel: React.FC<GoogleAdsIntegrationPanelProps>
 
   const handleDisconnect = async () => {
     if (!window.confirm('Disconnect Google Ads from this workspace?')) return;
+    setDisconnecting(true);
     try {
       await api.disconnectGoogleAds();
       setConnected(false);
       setAccount(null);
       onStatusChangeRef.current?.();
-    } catch {
-      setLinkedEmail(null);
-      onStatusChangeRef.current?.();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to disconnect');
+    } finally {
+      setDisconnecting(false);
     }
   };
 
@@ -109,6 +119,15 @@ export const GoogleAdsIntegrationPanel: React.FC<GoogleAdsIntegrationPanelProps>
   if (connected && account) {
     return (
       <div className="space-y-4 max-w-3xl">
+        {connectError ? (
+          <IntegrationConnectError
+            title="Google Ads connection failed"
+            message="Your last connection attempt did not complete."
+            detail={connectError}
+            onRetry={() => void handleConnect()}
+            retrying={connecting}
+          />
+        ) : null}
         {error && (
           <p className="text-sm font-medium text-red-700 bg-red-50 border border-red-100 rounded-xl px-4 py-2">
             {error}
@@ -145,9 +164,10 @@ export const GoogleAdsIntegrationPanel: React.FC<GoogleAdsIntegrationPanelProps>
               <button
                 type="button"
                 onClick={() => void handleDisconnect()}
-                className="px-3 py-2 border border-red-200 rounded-xl text-sm font-bold text-red-600 hover:bg-red-50 cursor-pointer"
+                disabled={disconnecting}
+                className="px-3 py-2 border border-red-200 rounded-xl text-sm font-bold text-red-600 hover:bg-red-50 cursor-pointer disabled:opacity-50"
               >
-                Disconnect
+                {disconnecting ? 'Disconnecting…' : 'Disconnect'}
               </button>
             </div>
           </div>
@@ -157,7 +177,17 @@ export const GoogleAdsIntegrationPanel: React.FC<GoogleAdsIntegrationPanelProps>
   }
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4 max-w-lg">
+    <div className="space-y-4 max-w-lg">
+      {connectError ? (
+        <IntegrationConnectError
+          title="Google Ads connection failed"
+          message="We could not connect your Google Ads account. Check the details below and try again."
+          detail={connectError}
+          onRetry={() => void handleConnect()}
+          retrying={connecting}
+        />
+      ) : null}
+      <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4">
       <div className="flex items-start gap-3">
         <div className="p-2.5 bg-white border border-slate-200 rounded-xl shrink-0">
           <GoogleIcon className="w-5 h-5" />
@@ -192,6 +222,7 @@ export const GoogleAdsIntegrationPanel: React.FC<GoogleAdsIntegrationPanelProps>
         <Link2 className="w-4 h-4" />
         {connecting ? 'Redirecting…' : linkedEmail ? 'Authorize Google Ads' : 'Connect with Google'}
       </button>
+      </div>
     </div>
   );
 };

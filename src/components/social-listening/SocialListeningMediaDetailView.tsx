@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Clapperboard,
@@ -165,7 +165,7 @@ function CommentRow({
   replyToId,
   replyText,
   replySending,
-  actionBusyId,
+  actionBusyIds,
   addLeadBusyId,
   resolvedLeadId,
   hideIdentity,
@@ -185,7 +185,7 @@ function CommentRow({
   replyToId: string | null;
   replyText: string;
   replySending: boolean;
-  actionBusyId: string | null;
+  actionBusyIds: Set<string>;
   addLeadBusyId: string | null;
   /** Lead for this commenter (any of their comments / workspace lead). */
   resolvedLeadId?: string | null;
@@ -204,7 +204,7 @@ function CommentRow({
   onAddLead: (comment: ListeningComment) => void;
 }) {
   const isReplying = replyToId === comment.id;
-  const busy = actionBusyId === (comment.socialCommentId || comment.id);
+  const busy = actionBusyIds.has(comment.socialCommentId || comment.id);
   const addLeadBusy = addLeadBusyId === comment.socialCommentId;
   const primary = primaryActionForComment({
     intentLabel: comment.intentLabel ?? null,
@@ -436,7 +436,7 @@ function CommentRow({
               replyToId={replyToId}
               replyText={replyText}
               replySending={replySending}
-              actionBusyId={actionBusyId}
+              actionBusyIds={actionBusyIds}
               addLeadBusyId={addLeadBusyId}
               resolvedLeadId={resolvedLeadId ?? comment.leadId}
               onStartReply={onStartReply}
@@ -461,7 +461,7 @@ function CommentClub({
   replyToId,
   replyText,
   replySending,
-  actionBusyId,
+  actionBusyIds,
   addLeadBusyId,
   onStartReply,
   onChangeReply,
@@ -482,7 +482,7 @@ function CommentClub({
   replyToId: string | null;
   replyText: string;
   replySending: boolean;
-  actionBusyId: string | null;
+  actionBusyIds: Set<string>;
   addLeadBusyId: string | null;
   onStartReply: (id: string, suggested?: string | null) => void;
   onChangeReply: (text: string) => void;
@@ -505,7 +505,7 @@ function CommentClub({
             replyToId={replyToId}
             replyText={replyText}
             replySending={replySending}
-            actionBusyId={actionBusyId}
+            actionBusyIds={actionBusyIds}
             addLeadBusyId={addLeadBusyId}
             resolvedLeadId={club.leadId}
             hideIdentity
@@ -549,7 +549,20 @@ export const SocialListeningMediaDetailView: React.FC = () => {
   const [replyText, setReplyText] = useState('');
   const [replySending, setReplySending] = useState(false);
   const [replyError, setReplyError] = useState('');
-  const [actionBusyId, setActionBusyId] = useState<string | null>(null);
+  const [actionBusyIds, setActionBusyIds] = useState<Set<string>>(new Set());
+  // Synchronous mirror of actionBusyIds — a click handler must be able to
+  // reject re-entry before React has re-rendered the disabled button, since
+  // a fast double-click (or a click on a still-in-flight row) fires before
+  // state updates are visible.
+  const actionBusyRef = useRef<Set<string>>(new Set());
+  const markBusy = useCallback((id: string) => {
+    actionBusyRef.current.add(id);
+    setActionBusyIds(new Set(actionBusyRef.current));
+  }, []);
+  const clearBusy = useCallback((id: string) => {
+    actionBusyRef.current.delete(id);
+    setActionBusyIds(new Set(actionBusyRef.current));
+  }, []);
   const [pendingAction, setPendingAction] = useState<
     'approve_dm' | 'approve_reply' | 'escalate' | 'ignore' | 'review' | null
   >(null);
@@ -558,6 +571,7 @@ export const SocialListeningMediaDetailView: React.FC = () => {
   const [pickFunnelId, setPickFunnelId] = useState('');
   const [funnelsLoading, setFunnelsLoading] = useState(false);
   const [addLeadBusy, setAddLeadBusy] = useState(false);
+  const confirmAddLeadRef = useRef(false);
   const [addLeadError, setAddLeadError] = useState('');
   const [postLeadFunnelId, setPostLeadFunnelId] = useState<string | null>(null);
 
@@ -632,7 +646,8 @@ export const SocialListeningMediaDetailView: React.FC = () => {
     message?: string
   ) => {
     if (!comment.socialCommentId) return;
-    setActionBusyId(comment.socialCommentId);
+    if (actionBusyRef.current.has(comment.socialCommentId)) return;
+    markBusy(comment.socialCommentId);
     setReplyError('');
     const optimistic =
       action === 'ignore'
@@ -671,7 +686,7 @@ export const SocialListeningMediaDetailView: React.FC = () => {
       setReplyError(parseApiError(err));
       await load({ quiet: true });
     } finally {
-      setActionBusyId(null);
+      clearBusy(comment.socialCommentId);
       invalidate();
     }
   };
@@ -761,6 +776,8 @@ export const SocialListeningMediaDetailView: React.FC = () => {
 
   const confirmAddLead = async () => {
     if (!addLeadCommentId || !pickFunnelId) return;
+    if (confirmAddLeadRef.current) return;
+    confirmAddLeadRef.current = true;
     setAddLeadBusy(true);
     setAddLeadError('');
     try {
@@ -779,6 +796,7 @@ export const SocialListeningMediaDetailView: React.FC = () => {
     } catch (err) {
       setAddLeadError(parseApiError(err));
     } finally {
+      confirmAddLeadRef.current = false;
       setAddLeadBusy(false);
     }
   };
@@ -945,7 +963,7 @@ export const SocialListeningMediaDetailView: React.FC = () => {
                       replyToId={replyToId}
                       replyText={replyText}
                       replySending={replySending}
-                      actionBusyId={actionBusyId}
+                      actionBusyIds={actionBusyIds}
                       addLeadBusyId={addLeadBusy ? addLeadCommentId : null}
                       onStartReply={(id, suggested) => {
                         setReplyToId(id);
@@ -965,19 +983,21 @@ export const SocialListeningMediaDetailView: React.FC = () => {
                       onIgnore={(c) => void runAction(c, 'ignore')}
                       onRetryClassify={(c) => {
                         if (!c.socialCommentId) return;
-                        setActionBusyId(c.socialCommentId);
+                        if (actionBusyRef.current.has(c.socialCommentId)) return;
+                        markBusy(c.socialCommentId);
                         void api
                           .classifySocialListeningComment(c.socialCommentId)
                           .then(() => load({ quiet: true }))
                           .catch((err) => setReplyError(parseApiError(err)))
                           .finally(() => {
-                            setActionBusyId(null);
+                            clearBusy(c.socialCommentId!);
                             invalidate();
                           });
                       }}
                       onRetryDm={(c) => {
                         if (!c.socialCommentId) return;
-                        setActionBusyId(c.socialCommentId);
+                        if (actionBusyRef.current.has(c.socialCommentId)) return;
+                        markBusy(c.socialCommentId);
                         setReplyError('');
                         void api
                           .retrySocialListeningDm(c.socialCommentId, instagramUserId)
@@ -1000,7 +1020,7 @@ export const SocialListeningMediaDetailView: React.FC = () => {
                           })
                           .catch((err) => setReplyError(parseApiError(err)))
                           .finally(() => {
-                            setActionBusyId(null);
+                            clearBusy(c.socialCommentId!);
                             invalidate();
                           });
                       }}

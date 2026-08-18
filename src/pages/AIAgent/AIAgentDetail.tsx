@@ -20,10 +20,7 @@ import { AgentProfile } from '../../components/ai-agent/profile/AgentProfile';
 import { SkillsList } from '../../components/ai-agent/skills/SkillsList';
 import { SkillEditor } from '../../components/ai-agent/skills/SkillEditor';
 import { KnowledgeBase } from '../../components/ai-agent/knowledge/KnowledgeBase';
-import {
-  RuleBasedFlowBuilder,
-  defaultAgentFlowDefinition,
-} from '../../components/ai-agent/RuleBasedFlowBuilder';
+import { RuleBasedFlowBuilder } from '../../components/ai-agent/RuleBasedFlowBuilder';
 import { ChatPreviewPanel } from '../../components/ai-agent/ChatPreviewPanel';
 import type { AgentFlowDefinition } from '../../types';
 
@@ -88,14 +85,16 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
     void loadAgent();
   }, [loadAgent]);
 
-  const persist = async (patch: Record<string, unknown>) => {
+  const persist = async (patch: Record<string, unknown>): Promise<boolean> => {
     setSaving(true);
     setError(null);
     try {
       const updated = await api.updateAgent(agentId, patch);
       setAgent(mapAgentFromApi(updated as Record<string, unknown>));
+      return true;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save');
+      return false;
     } finally {
       setSaving(false);
     }
@@ -116,6 +115,7 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
       voiceTtsProvider: patch.voiceTtsProvider,
       voiceTtsVoiceId: patch.voiceTtsVoiceId,
       isPublished: patch.isPublished,
+      isEnabled: patch.isEnabled,
     };
     // Omit null so autosave of other fields does not clear a server/env default override.
     if (typeof patch.similarityLowThreshold === 'number') {
@@ -124,8 +124,12 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
     return payload;
   };
 
-  const handleProfileUpdate = (patch: Partial<AgentProfileData>) => {
-    if (!agent) return;
+  // Single funnel for every profile change, including publish (which is just
+  // a patch with isPublished/isEnabled set) — one save path means one place
+  // that needs to get optimistic-update, rollback, and payload-shape right.
+  const handleProfileUpdate = async (patch: Partial<AgentProfileData>): Promise<boolean> => {
+    if (!agent) return false;
+    const previousAgent = agent;
     const profilePatch = toProfileData(agent);
     const mergedProfile = { ...profilePatch, ...patch };
     setAgent({
@@ -144,39 +148,15 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
       voiceTtsVoiceId: mergedProfile.voiceTtsVoiceId,
       similarityLowThreshold: mergedProfile.similarityLowThreshold,
       isPublished: mergedProfile.isPublished,
+      isEnabled: mergedProfile.isEnabled,
     });
-    void persist({
-      name: mergedProfile.name,
-      description: mergedProfile.description,
-      avatarUrl: mergedProfile.avatarUrl,
-      toneOfVoice: mergedProfile.toneOfVoice,
-      fallbackLanguage: mergedProfile.fallbackLanguage,
-      instructions: mergedProfile.instructions,
-      brandBackground: mergedProfile.brandBackground,
-      actions: mergedProfile.actions,
-      voiceAgentEnabled: mergedProfile.voiceAgentEnabled,
-      voiceSttProvider: mergedProfile.voiceSttProvider,
-      voiceTtsProvider: mergedProfile.voiceTtsProvider,
-      voiceTtsVoiceId: mergedProfile.voiceTtsVoiceId,
-      ...(typeof mergedProfile.similarityLowThreshold === 'number'
-        ? { similarityLowThreshold: mergedProfile.similarityLowThreshold }
-        : {}),
-      isPublished: mergedProfile.isPublished,
-    }).then(() => {
+    const ok = await persist(buildProfilePayload(mergedProfile));
+    if (ok) {
       setLastAutoSavedAt(formatSavedTime(new Date()));
-    });
-  };
-
-  const handlePublish = async (patch: Partial<AgentProfileData>) => {
-    if (!agent) return;
-    const merged = { ...agent, ...patch, isPublished: true, isEnabled: true };
-    setAgent(merged);
-    await persist({
-      ...buildProfilePayload({ ...toProfileData(agent), ...patch }),
-      isPublished: true,
-      isEnabled: true,
-    });
-    setLastAutoSavedAt(formatSavedTime(new Date()));
+    } else {
+      setAgent(previousAgent);
+    }
+    return ok;
   };
 
   if (loading) {
@@ -322,7 +302,7 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
           ) : section === 'flows' && agent.category === 'rule_based' ? (
             <div className="h-full min-h-[520px] w-full rounded-xl border border-black/5 overflow-hidden bg-[#eef0f3]">
               <RuleBasedFlowBuilder
-                flow={agent.flowDefinition ?? defaultAgentFlowDefinition()}
+                flow={agent.flowDefinition}
                 saving={saving}
                 onSave={(flow: AgentFlowDefinition) => void persist({ flowDefinition: flow })}
               />
@@ -331,10 +311,8 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
             <AgentProfile
               profile={toProfileData(agent)}
               onUpdate={handleProfileUpdate}
-              onPublish={handlePublish}
               onTestAgent={openTest}
               saving={saving}
-              onSaved={() => setLastAutoSavedAt(formatSavedTime(new Date()))}
             />
           )}
         </div>

@@ -109,6 +109,10 @@ export const ChatPreviewPanel: React.FC<Props> = ({
   } | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  // Bumped on every send and on restart; a resolved response only gets applied
+  // if it's still the current generation, so a Restart clicked mid-reply can't
+  // have a stale message/conversationId land in the freshly-cleared chat.
+  const requestIdRef = useRef(0);
 
   const avatarUrl = avatarUrlProp !== undefined ? avatarUrlProp : fetchedAvatarUrl;
 
@@ -135,6 +139,7 @@ export const ChatPreviewPanel: React.FC<Props> = ({
   }, [messages, loading, error, lastMeta]);
 
   const handleRestart = () => {
+    requestIdRef.current += 1;
     setConversationId(null);
     setMessages([]);
     setInput('');
@@ -147,6 +152,7 @@ export const ChatPreviewPanel: React.FC<Props> = ({
   const sendMessage = async () => {
     const text = input.trim();
     if (!text || loading) return;
+    const requestId = ++requestIdRef.current;
 
     const userMessage: ChatMessage = {
       role: 'user',
@@ -165,6 +171,8 @@ export const ChatPreviewPanel: React.FC<Props> = ({
         conversationId: conversationId ?? undefined,
         channel: 'preview',
       })) as { success?: boolean; data?: ChatApiResponse };
+
+      if (requestIdRef.current !== requestId) return; // restarted mid-flight — discard
 
       const data = res.data ?? (res as unknown as ChatApiResponse);
 
@@ -191,10 +199,13 @@ export const ChatPreviewPanel: React.FC<Props> = ({
         },
       ]);
     } catch {
+      if (requestIdRef.current !== requestId) return;
       setError('Something went wrong. Please try again.');
     } finally {
-      setLoading(false);
-      inputRef.current?.focus();
+      if (requestIdRef.current === requestId) {
+        setLoading(false);
+        inputRef.current?.focus();
+      }
     }
   };
 
@@ -268,7 +279,7 @@ export const ChatPreviewPanel: React.FC<Props> = ({
                 </div>
                 {msg.billingMode !== 'byok' &&
                 msg.tokensUsed != null &&
-                msg.tokensUsed > 0 ? (
+                (msg.tokensUsed > 0 || msg.fromCache) ? (
                   <p className="mt-1 pl-1 text-[10px] font-medium text-slate-400 tabular-nums">
                     {formatTokenCount(msg.tokensUsed)} tokens
                     {msg.fromCache ? ' · cache' : ''}

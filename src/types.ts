@@ -21,7 +21,8 @@ export type ChatMessageType =
   | 'sticker'
   | 'location'
   | 'template'
-  | 'email';
+  | 'email'
+  | 'carousel';
 
 export interface ChatMessageMedia {
   mimeType?: string;
@@ -36,6 +37,13 @@ export interface ChatMessageMedia {
   locationAddress?: string;
 }
 
+/** One item inside a Telegram album (carousel) message. */
+export interface ChatMessageCarouselItem {
+  mimeType?: string;
+  fileName?: string;
+  hasFile: boolean;
+}
+
 export interface ChatMessage {
   id: string;
   sender: 'contact' | 'agent' | 'system';
@@ -43,6 +51,10 @@ export interface ChatMessage {
   content: string;
   type?: ChatMessageType;
   media?: ChatMessageMedia;
+  /** type === 'carousel' — Telegram album items; shared caption lives on `media.caption`. */
+  carouselItems?: ChatMessageCarouselItem[];
+  /** Optimistic local previews for a carousel while it's still uploading. */
+  localPreviewUrls?: string[];
   createdAt?: string;
   timestamp: string;
   status?: 'sending' | 'sent' | 'delivered' | 'read' | 'failed' | 'resend_pending' | 'resent';
@@ -82,7 +94,7 @@ export interface Contact {
   status: 'Open' | 'Pending' | 'Resolved';
   assignedAgent: string;
   source: string;
-  channel?: 'whatsapp' | 'instagram' | 'messenger' | 'email';
+  channel?: 'whatsapp' | 'instagram' | 'messenger' | 'email' | 'telegram';
   /** Meta phone_number_id for WhatsApp inbox routing */
   channelAccountId?: string | null;
   handle?: string;
@@ -148,7 +160,13 @@ export interface EmailTemplateRecord {
   updatedAt?: string;
 }
 
-export type CampaignRecordStatus = 'Draft' | 'Scheduled' | 'Running' | 'Completed' | 'Failed';
+export type CampaignRecordStatus =
+  | 'Draft'
+  | 'Scheduled'
+  | 'Running'
+  | 'Completed'
+  | 'Failed'
+  | 'Cancelled';
 
 export interface CampaignRecord {
   id: string;

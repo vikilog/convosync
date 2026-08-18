@@ -87,6 +87,32 @@ export function isoToLocalDateTime(iso: string | null | undefined): { date: stri
   return defaultScheduleLocal(d.getTime());
 }
 
+/**
+ * Today's date in the date <input>'s own YYYY-MM-DD shape — always
+ * selectable regardless of time of day. The old `min` used
+ * defaultScheduleLocal().date (computed from "1 hour from now"), which
+ * rolled to tomorrow's date late at night and blocked picking a
+ * legitimately-future time later today.
+ */
+export function todayLocal(now = Date.now()): string {
+  const d = new Date(now);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+/**
+ * Minimum selectable time for the time <input> — "now" when the selected
+ * date is today (any time-of-day is fine for a future date). Previously the
+ * time input had no lower bound at all, so a same-day past time was only
+ * caught by the generic error after clicking Launch.
+ */
+export function minScheduleTimeFor(selectedDate: string, now = Date.now()): string | undefined {
+  if (selectedDate !== todayLocal(now)) return undefined;
+  const d = new Date(now);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
 export function localDateTimeToIso(date: string, time: string): string {
   const local = new Date(`${date}T${time}:00`);
   if (Number.isNaN(local.getTime())) {

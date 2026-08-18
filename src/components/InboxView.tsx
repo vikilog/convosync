@@ -21,6 +21,7 @@ import {
   Search,
   PauseCircle,
   Mail,
+  X,
 } from 'lucide-react';
 import { Contact, ChatMessage, type ChatMessageType } from '../types';
 import { api, formatCatchError, getUserName, SendFailedError } from '../lib/api';
@@ -58,6 +59,9 @@ import { InboxNewChatPicker } from './inbox/InboxNewChatPicker';
 import type { InboxEmailSendPayload } from './inbox/InboxNewChatPicker';
 import { InboxTemplatePicker } from './inbox/InboxTemplatePicker';
 import { InboxCannedResponsePicker, type CannedSelection } from './inbox/InboxCannedResponsePicker';
+import { type PickedGalleryImage } from './media/MediaGalleryPickerModal';
+import { telegramFileSizeError } from '../lib/telegramMediaLimits';
+import { SendMediaDialog } from './inbox/SendMediaDialog';
 import {
   InboxMessageList,
   type AutomationWaitingBanner,
@@ -76,6 +80,7 @@ import {
 } from '../lib/instagramSyncEvents';
 
 const IG_INBOX_HAS_MORE_KEY = 'convosync:ig:inboxHasMore';
+const MESSAGE_PAGE_SIZE = 50;
 
 type AgentOption = { id: string; name: string };
 type BotOption = { id: string; name: string };
@@ -189,7 +194,8 @@ function inboxChannelLineLabel(
   thread: InboxThread,
   whatsappAccounts: WhatsAppInboxAccount[],
   instagramLabel: string | null,
-  messengerLabel: string | null
+  messengerLabel: string | null,
+  telegramLabel: string | null
 ): string | null {
   const channel = contactChannel(thread);
   if (channel === 'whatsapp') {
@@ -204,6 +210,9 @@ function inboxChannelLineLabel(
   if (channel === 'messenger') {
     return messengerLabel || null;
   }
+  if (channel === 'telegram') {
+    return telegramLabel || thread.handle || null;
+  }
   if (channel === 'email') {
     return thread.email || thread.handle || null;
   }
@@ -214,22 +223,39 @@ function inboxChannelLineClass(thread: InboxThread): string {
   const channel = contactChannel(thread);
   if (channel === 'instagram') return 'text-[#C13584]';
   if (channel === 'messenger') return 'text-[#1877F2]';
+  if (channel === 'telegram') return 'text-[#229ED9]';
   if (channel === 'email') return 'text-emerald-800';
   return 'text-[#128C7E]';
 }
 
+function isPendingMessageId(id: string): boolean {
+  return id.startsWith('pending-');
+}
+
 function dedupeChatMessages(messages: ChatMessage[]): ChatMessage[] {
   const seenIds = new Set<string>();
-  const seenContent = new Set<string>();
   const result: ChatMessage[] = [];
 
   for (const msg of messages) {
     if (seenIds.has(msg.id)) continue;
-    const minuteBucket = msg.createdAt ? msg.createdAt.slice(0, 16) : '';
-    const contentKey = `${msg.sender}|${msg.content}|${minuteBucket}`;
-    if (seenContent.has(contentKey)) continue;
+    // Only collapses a leftover optimistic placeholder once its confirmed
+    // counterpart is present in the same list — two fully-confirmed
+    // messages are never merged by content alone, so a contact (or agent)
+    // genuinely repeating the same text within a minute isn't silently
+    // hidden from view, even after a full reload.
+    if (isPendingMessageId(msg.id)) {
+      const minuteBucket = msg.createdAt ? msg.createdAt.slice(0, 16) : '';
+      const hasConfirmedMatch = messages.some(
+        (other) =>
+          other.id !== msg.id &&
+          !isPendingMessageId(other.id) &&
+          other.sender === msg.sender &&
+          other.content === msg.content &&
+          (other.createdAt ? other.createdAt.slice(0, 16) : '') === minuteBucket
+      );
+      if (hasConfirmedMatch) continue;
+    }
     seenIds.add(msg.id);
-    seenContent.add(contentKey);
     result.push(msg);
   }
 
@@ -286,6 +312,15 @@ function previewLabelForFile(file: File, caption?: string): string {
   return file.name || '📎 Document';
 }
 
+/** Media Gallery hands back a signed URL, not a File — fetch it into one so
+ * the picked-from-gallery path can reuse the exact same upload pipeline. */
+async function urlToFile(url: string, filename: string): Promise<File> {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('Failed to load file from Media Gallery');
+  const blob = await res.blob();
+  return new File([blob], filename, { type: blob.type });
+}
+
 function replaceChatMessage(
   prev: Record<string, ChatMessage[]>,
   conversationId: string,
@@ -325,8 +360,15 @@ function appendChatMessage(
 ): Record<string, ChatMessage[]> {
   const history = prev[conversationId] || [];
   if (history.some((m) => m.id === msg.id)) return prev;
+  // Only collapses an optimistic placeholder against its confirmed
+  // counterpart (id-keyed reconciliation via replaceChatMessage handles the
+  // normal case; this is the fallback for a confirmation arriving via
+  // socket before/instead of the HTTP response) — two fully-confirmed
+  // messages are never merged by content alone, so a genuinely repeated
+  // message isn't silently dropped.
   const duplicateContent = history.some(
     (m) =>
+      (isPendingMessageId(m.id) || isPendingMessageId(msg.id)) &&
       m.sender === msg.sender &&
       m.content === msg.content &&
       m.createdAt &&
@@ -372,6 +414,14 @@ function MessengerIcon({ className }: { className?: string }) {
   );
 }
 
+function TelegramIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M22.05 2.53a1.68 1.68 0 00-1.72-.28L1.9 9.6a1.6 1.6 0 00.1 3.02l4.7 1.47 1.82 5.84a1.61 1.61 0 002.63.7l2.6-2.32 4.6 3.4a1.66 1.66 0 002.6-1L22.7 4.1a1.68 1.68 0 00-.65-1.57zM9.4 14.6l-1.15 3.7-1.14-3.66 10.1-8.02z" />
+    </svg>
+  );
+}
+
 interface WhatsAppInboxAccount {
   phoneNumberId: string;
   phoneNumber?: string;
@@ -394,11 +444,15 @@ const CHANNEL_TABS: { id: InboxChannel; label: string }[] = [
   { id: 'email', label: 'Email' },
   { id: 'instagram', label: 'Instagram' },
   { id: 'messenger', label: 'Messenger' },
+  { id: 'telegram', label: 'Telegram' },
 ];
 
-function contactChannel(contact: Contact): 'whatsapp' | 'instagram' | 'messenger' | 'email' {
+function contactChannel(
+  contact: Contact
+): 'whatsapp' | 'instagram' | 'messenger' | 'email' | 'telegram' {
   if (contact.channel === 'instagram') return 'instagram';
   if (contact.channel === 'messenger') return 'messenger';
+  if (contact.channel === 'telegram') return 'telegram';
   if (contact.channel === 'email') return 'email';
   return 'whatsapp';
 }
@@ -407,6 +461,7 @@ function channelLabel(contact: Contact): string {
   const channel = contactChannel(contact);
   if (channel === 'instagram') return 'Instagram';
   if (channel === 'messenger') return 'Messenger';
+  if (channel === 'telegram') return 'Telegram';
   if (channel === 'email') return 'Email';
   return 'WhatsApp';
 }
@@ -433,6 +488,8 @@ export const InboxView: React.FC = () => {
     instagramInboxLabel,
     messengerConnected,
     messengerInboxLabel,
+    telegramConnected,
+    telegramInboxLabel,
     emailConnected,
     channelsReady,
   } = useInboxAssigneeMeta();
@@ -443,6 +500,8 @@ export const InboxView: React.FC = () => {
   const [selectedConversationId, setSelectedConversationId] = useState<string>('');
   const [chatHistories, setChatHistories] = useState<Record<string, ChatMessage[]>>({});
   const [messagesLoading, setMessagesLoading] = useState(false);
+  const [messagesHasMore, setMessagesHasMore] = useState<Record<string, boolean>>({});
+  const [loadingOlderMessages, setLoadingOlderMessages] = useState(false);
   const [assignedToByConversationId, setAssignedToByConversationId] = useState<
     Record<string, string>
   >({});
@@ -482,6 +541,13 @@ export const InboxView: React.FC = () => {
   const [newChatPhoneNumberId, setNewChatPhoneNumberId] = useState<string | undefined>();
   const [auditsOpen, setAuditsOpen] = useState(false);
   const [sendingMedia, setSendingMedia] = useState(false);
+  const [sendingText, setSendingText] = useState(false);
+  // Synchronous guard: `sendingMedia` state isn't visible until the next
+  // render, so a fast double-click/Enter-repeat can fire handleSendMessage
+  // or handleSendAttachment twice before either state update lands —
+  // sending the message to the customer twice. A ref is checked
+  // synchronously and closes that window; state still drives the UI.
+  const sendingRef = useRef(false);
   const [resendingMessageId, setResendingMessageId] = useState<string | null>(null);
   const [composerActionsOpen, setComposerActionsOpen] = useState(false);
   const inboxTabActive = useKeepAliveActive();
@@ -506,6 +572,7 @@ export const InboxView: React.FC = () => {
         if (tab.id === 'email') return emailConnected;
         if (tab.id === 'instagram') return instagramConnected;
         if (tab.id === 'messenger') return messengerConnected;
+        if (tab.id === 'telegram') return telegramConnected;
         return false;
       }),
     [
@@ -514,6 +581,7 @@ export const InboxView: React.FC = () => {
       emailConnected,
       instagramConnected,
       messengerConnected,
+      telegramConnected,
     ]
   );
 
@@ -835,12 +903,14 @@ export const InboxView: React.FC = () => {
           )
         );
 
-        const res = await api.getMessages(selectedConversationId);
+        const res = await api.getMessages(selectedConversationId, { limit: MESSAGE_PAGE_SIZE });
         if (cancelled) return;
+        const { hasMore } = normalizeMessagesResponse(res);
         setChatHistories((prev) => ({
           ...prev,
           [selectedConversationId]: historyFromMessagesResponse(res),
         }));
+        setMessagesHasMore((prev) => ({ ...prev, [selectedConversationId]: hasMore }));
         setAssignedToByConversationId((prev) => ({
           ...prev,
           [selectedConversationId]: encodeAssigneeFromConv(conv as Record<string, unknown>),
@@ -1139,6 +1209,17 @@ export const InboxView: React.FC = () => {
     };
     socket.on('instagram_sync_progress', onInstagramSyncProgress);
 
+    // A dropped-then-restored connection (flaky network, brief server
+    // restart) misses every event broadcast during the gap — the tab may
+    // never have gone hidden, so the visibilitychange refresh above never
+    // fires either. Catch up explicitly on reconnect.
+    const onReconnect = () => {
+      void loadConversations({ silent: true });
+      const activeId = selectedConversationIdRef.current;
+      if (activeId) void reloadMessagesForConversation(activeId);
+    };
+    socket.io.on('reconnect', onReconnect);
+
     return () => {
       socket.off('new_message', onNewMessage);
       socket.off('conversation_updated', onConversationUpdated);
@@ -1147,12 +1228,16 @@ export const InboxView: React.FC = () => {
       socket.off('conversation_event', onConversationEvent);
       socket.off('messenger_sync_progress', onMessengerSyncProgress);
       socket.off('instagram_sync_progress', onInstagramSyncProgress);
+      socket.io.off('reconnect', onReconnect);
     };
-  }, [inboxThreads, ingestConversation, loadConversations, sumUnreadForNav]);
+    // inboxThreads intentionally omitted — handlers read inboxThreadsRef.current
+    // instead so this effect doesn't tear down and re-register all socket
+    // listeners on nearly every incoming event.
+  }, [ingestConversation, loadConversations, sumUnreadForNav]);
 
   const messageEndRef = useRef<HTMLDivElement>(null);
-  const mediaInputRef = useRef<HTMLInputElement>(null);
   const composerActionsRef = useRef<HTMLDivElement>(null);
+  const [sendMediaDialogOpen, setSendMediaDialogOpen] = useState(false);
 
   useEffect(() => {
     if (!composerActionsOpen) return;
@@ -1317,7 +1402,8 @@ export const InboxView: React.FC = () => {
   };
 
   const handleSendAttachment = async (file: File) => {
-    if (!selectedThread || sendingMedia) return;
+    if (!selectedThread || sendingMedia || sendingRef.current) return;
+    sendingRef.current = true;
     const convId = selectedThread.conversationId;
     const caption = messageInput.trim();
     const pendingId = `pending-${Date.now()}`;
@@ -1383,7 +1469,105 @@ export const InboxView: React.FC = () => {
       console.error(err);
     } finally {
       setSendingMedia(false);
-      if (mediaInputRef.current) mediaInputRef.current.value = '';
+      sendingRef.current = false;
+    }
+  };
+
+  /** Telegram-only album (sendMediaGroup) — 2-10 photos/videos, one shared caption. */
+  const handleSendCarousel = async (files: File[]) => {
+    if (!selectedThread || sendingMedia || sendingRef.current || files.length < 2) return;
+    sendingRef.current = true;
+    const convId = selectedThread.conversationId;
+    const caption = messageInput.trim();
+    const pendingId = `pending-${Date.now()}`;
+    const localPreviewUrls = files.map((f) => URL.createObjectURL(f));
+    const preview = caption || `📷 Album (${files.length} items)`;
+    const pendingMessage: ChatMessage = {
+      id: pendingId,
+      sender: 'agent',
+      senderName: getUserName() || 'Agent',
+      content: preview,
+      type: 'carousel',
+      media: { caption: caption || undefined },
+      carouselItems: files.map((f) => ({ mimeType: f.type, fileName: f.name, hasFile: true })),
+      localPreviewUrls,
+      createdAt: new Date().toISOString(),
+      timestamp: 'Just now',
+      status: 'sending',
+    };
+
+    setSendError(null);
+    setSendingMedia(true);
+    setMessageInput('');
+    clearPendingComposerMedia();
+    setChatHistories((prev) => appendChatMessage(prev, convId, pendingMessage));
+    setInboxThreads((prev) =>
+      bumpInboxThread(prev, convId, {
+        lastMessage: preview,
+        unreadCount: 0,
+        lastActive: 'Just now',
+      })
+    );
+
+    try {
+      const sent = await api.sendCarouselMessage(convId, files, caption || undefined);
+      const newMessage = {
+        ...mapMessageFromApi(sent as Record<string, unknown>),
+        localPreviewUrls,
+        status: 'sent' as const,
+      };
+      setChatHistories((prev) => replaceChatMessage(prev, convId, pendingId, newMessage));
+      setInboxThreads((prev) =>
+        bumpInboxThread(prev, convId, {
+          lastMessage: newMessage.content,
+          unreadCount: 0,
+          lastActive: 'Just now',
+        })
+      );
+      setJourneyProgressRefresh((n) => n + 1);
+    } catch (err) {
+      setChatHistories((prev) => removeChatMessage(prev, convId, pendingId));
+      if (caption) setMessageInput(caption);
+      localPreviewUrls.forEach((u) => URL.revokeObjectURL(u));
+      setSendError(err instanceof Error ? err.message : 'Failed to send album');
+      console.error(err);
+    } finally {
+      setSendingMedia(false);
+      sendingRef.current = false;
+    }
+  };
+
+  const handleGallerySinglePick = async (image: PickedGalleryImage) => {
+    try {
+      const file = await urlToFile(image.url, image.filename || image.title);
+      if (selectedContact && contactChannel(selectedContact) === 'telegram') {
+        const sizeError = telegramFileSizeError(file);
+        if (sizeError) {
+          setSendError(sizeError);
+          return;
+        }
+      }
+      await handleSendAttachment(file);
+    } catch (err) {
+      setSendError(err instanceof Error ? err.message : 'Failed to load file from Media Gallery');
+    }
+  };
+
+  const handleGalleryMultiplePick = async (images: PickedGalleryImage[]) => {
+    try {
+      const files = await Promise.all(
+        images.map((img) => urlToFile(img.url, img.filename || img.title))
+      );
+      if (selectedContact && contactChannel(selectedContact) === 'telegram') {
+        const sizeError = files.map(telegramFileSizeError).find(Boolean);
+        if (sizeError) {
+          setSendError(sizeError);
+          return;
+        }
+      }
+      await handleSendCarousel(files);
+    } catch (err) {
+      setSendError(err instanceof Error ? err.message : 'Failed to load files from Media Gallery');
     }
   };
 
@@ -1392,6 +1576,12 @@ export const InboxView: React.FC = () => {
     setMessageInput(selection.message);
     clearPendingComposerMedia();
     if (!selection.hasMedia) return;
+    // Media messages are only supported on WhatsApp, Instagram, and
+    // Messenger (backend guard in routes/conversations.ts) — attaching the
+    // canned response's media on any other channel (e.g. Email) would only
+    // fail at send time with a confusing error, so just keep the text.
+    const channel = selectedContact ? contactChannel(selectedContact) : null;
+    if (channel !== 'whatsapp' && channel !== 'instagram' && channel !== 'messenger') return;
     try {
       const blob = await api.fetchCannedResponseMedia(selection.cannedId);
       const fileName = selection.mediaFileName || 'attachment';
@@ -1412,6 +1602,9 @@ export const InboxView: React.FC = () => {
       return;
     }
     if (!messageInput.trim()) return;
+    if (sendingRef.current) return;
+    sendingRef.current = true;
+    setSendingText(true);
 
     const content = messageInput.trim();
     const convId = selectedThread.conversationId;
@@ -1457,6 +1650,9 @@ export const InboxView: React.FC = () => {
       }
       setSendError(err instanceof Error ? err.message : 'Failed to send message');
       console.error(err);
+    } finally {
+      sendingRef.current = false;
+      setSendingText(false);
     }
   };
 
@@ -1498,6 +1694,40 @@ export const InboxView: React.FC = () => {
       setSendError(err instanceof Error ? err.message : 'Resend failed');
     } finally {
       setResendingMessageId(null);
+    }
+  };
+
+  const handleLoadOlderMessages = async () => {
+    if (!selectedThread || loadingOlderMessages) return;
+    const convId = selectedThread.conversationId;
+    const history = chatHistories[convId] ?? [];
+    const oldestReal = history.find((m) => m.sender !== 'system' && !isPendingMessageId(m.id));
+    if (!oldestReal) return;
+
+    setLoadingOlderMessages(true);
+    try {
+      const res = await api.getMessages(convId, {
+        limit: MESSAGE_PAGE_SIZE,
+        before: oldestReal.id,
+      });
+      const { messages: olderRaw, events, hasMore } = normalizeMessagesResponse(res);
+      const olderMapped = olderRaw.map((m) => mapMessageFromApi(m));
+      setChatHistories((prev) => {
+        const current = prev[convId] ?? [];
+        // `events` is always the conversation's COMPLETE event list
+        // regardless of pagination — re-deriving all event bubbles fresh
+        // against the union of both windows (rather than trying to merge
+        // incrementally) keeps them correctly interleaved, and
+        // dedupeChatMessages' id-based check safely collapses any repeats.
+        const currentRealOnly = current.filter((m) => m.sender !== 'system');
+        const merged = mergeMessagesAndEvents([...olderMapped, ...currentRealOnly], events);
+        return { ...prev, [convId]: dedupeChatMessages(merged) };
+      });
+      setMessagesHasMore((prev) => ({ ...prev, [convId]: hasMore }));
+    } catch (err) {
+      setSendError(err instanceof Error ? err.message : 'Failed to load older messages');
+    } finally {
+      setLoadingOlderMessages(false);
     }
   };
 
@@ -1618,6 +1848,26 @@ export const InboxView: React.FC = () => {
       setSelectedConversationId('');
     } catch (err) {
       setSendError(err instanceof Error ? err.message : 'Failed to delete chat');
+    }
+  };
+
+  const handleBlacklistContact = async () => {
+    if (!selectedThread || selectedThread.tags.includes('Blocked')) return;
+    const label = selectedThread.name || contactDisplayHandle(selectedThread);
+    const confirmed = window.confirm(
+      `Blacklist ${label}? They'll be excluded from future campaigns.`
+    );
+    if (!confirmed) return;
+
+    setSendError(null);
+    try {
+      // Matches backend's contactOptOut.service.ts BLOCKED_TAG — campaign
+      // audience building already excludes contacts carrying this tag.
+      const nextTags = Array.from(new Set([...selectedThread.tags, 'Blocked']));
+      await api.updateContact(selectedThread.id, { tags: nextTags });
+      // Local state updates via the contact_updated socket event this call triggers.
+    } catch (err) {
+      setSendError(err instanceof Error ? err.message : 'Failed to blacklist contact');
     }
   };
 
@@ -1776,6 +2026,7 @@ export const InboxView: React.FC = () => {
         },
         onEditContact: () => void openEditContact(),
         onDeleteChat: () => void handleDeleteConversation(),
+        onBlacklistContact: () => void handleBlacklistContact(),
         onViewAudits: () => setAuditsOpen(true),
         onClose: () => setDetailsOpen(false),
       }
@@ -1826,9 +2077,11 @@ export const InboxView: React.FC = () => {
                     ? 'text-[#E1306C]'
                     : tab.id === 'messenger'
                       ? 'text-[#1877F2]'
-                      : tab.id === 'email'
-                        ? 'text-emerald-800'
-                        : 'text-[#25D366]'
+                      : tab.id === 'telegram'
+                        ? 'text-[#229ED9]'
+                        : tab.id === 'email'
+                          ? 'text-emerald-800'
+                          : 'text-[#25D366]'
                   : 'text-slate-500'
               }`;
               return (
@@ -1850,6 +2103,8 @@ export const InboxView: React.FC = () => {
                     <InstagramIcon className={iconClass} />
                   ) : tab.id === 'messenger' ? (
                     <MessengerIcon className={iconClass} />
+                  ) : tab.id === 'telegram' ? (
+                    <TelegramIcon className={iconClass} />
                   ) : tab.id === 'email' ? (
                     <Mail className={iconClass} aria-hidden />
                   ) : (
@@ -1997,9 +2252,11 @@ export const InboxView: React.FC = () => {
                             ? 'text-[#E1306C]'
                             : ch === 'messenger'
                               ? 'text-[#1877F2]'
-                              : ch === 'email'
-                                ? 'text-emerald-800'
-                                : 'text-[#25D366]'
+                              : ch === 'telegram'
+                                ? 'text-[#229ED9]'
+                                : ch === 'email'
+                                  ? 'text-emerald-800'
+                                  : 'text-[#25D366]'
                         }`}
                         aria-label={channelLabel(thread)}
                       >
@@ -2007,6 +2264,8 @@ export const InboxView: React.FC = () => {
                           <InstagramIcon className="h-2.5 w-2.5" />
                         ) : ch === 'messenger' ? (
                           <MessengerIcon className="h-2.5 w-2.5" />
+                        ) : ch === 'telegram' ? (
+                          <TelegramIcon className="h-2.5 w-2.5" />
                         ) : ch === 'email' ? (
                           <Mail className="h-2.5 w-2.5" aria-hidden />
                         ) : (
@@ -2194,7 +2453,8 @@ export const InboxView: React.FC = () => {
                         selectedThread,
                         whatsappAccounts,
                         instagramInboxLabel,
-                        messengerInboxLabel
+                        messengerInboxLabel,
+                        telegramInboxLabel
                       );
                       return line ? (
                         <p
@@ -2278,6 +2538,9 @@ export const InboxView: React.FC = () => {
               resendingId={resendingMessageId}
               onResend={(id) => void handleResendMessage(id)}
               automationWaiting={automationWaitingBanner}
+              hasMoreOlder={Boolean(selectedConversationId && messagesHasMore[selectedConversationId])}
+              loadingOlder={loadingOlderMessages}
+              onLoadOlder={() => void handleLoadOlderMessages()}
             />
 
             <div className="border-t border-black/5 bg-surface p-2.5 text-left">
@@ -2357,9 +2620,17 @@ export const InboxView: React.FC = () => {
                 })()}
 
               {sendError && (
-                <p className="mb-2 text-sm font-semibold text-danger-red bg-red-50 border border-red-100 rounded-lg px-3 py-2">
-                  {sendError}
-                </p>
+                <div className="mb-2 flex items-start justify-between gap-2 text-sm font-semibold text-danger-red bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+                  <p className="min-w-0 flex-1">{sendError}</p>
+                  <button
+                    type="button"
+                    onClick={() => setSendError(null)}
+                    className="shrink-0 cursor-pointer rounded p-0.5 text-danger-red/70 hover:bg-red-100 hover:text-danger-red"
+                    aria-label="Dismiss error"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
               )}
 
               {selectedChannel === 'email' ? (
@@ -2403,15 +2674,18 @@ export const InboxView: React.FC = () => {
                 </div>
               )}
 
-              <input
-                ref={mediaInputRef}
-                type="file"
-                className="hidden"
-                accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) void handleSendAttachment(file);
+              <SendMediaDialog
+                open={sendMediaDialogOpen}
+                onClose={() => setSendMediaDialogOpen(false)}
+                allowMultiSelect={Boolean(selectedContact && contactChannel(selectedContact) === 'telegram')}
+                enforceTelegramLimits={Boolean(selectedContact && contactChannel(selectedContact) === 'telegram')}
+                maxSelect={10}
+                onDeviceFiles={(files) => {
+                  if (files.length === 1) void handleSendAttachment(files[0]);
+                  else if (files.length >= 2) void handleSendCarousel(files);
                 }}
+                onGalleryPick={(image) => void handleGallerySinglePick(image)}
+                onGalleryPickMultiple={(images) => void handleGalleryMultiplePick(images)}
               />
 
               <div
@@ -2468,19 +2742,20 @@ export const InboxView: React.FC = () => {
                         className="absolute bottom-full right-0 z-50 mb-2 w-[min(240px,calc(100vw-2rem))] rounded-2xl bg-surface py-1.5 shadow-lg shadow-black/10 ring-1 ring-slate-200/80"
                       >
                         {(contactChannel(selectedContact) === 'whatsapp' ||
-                          contactChannel(selectedContact) === 'instagram') && (
+                          contactChannel(selectedContact) === 'instagram' ||
+                          contactChannel(selectedContact) === 'telegram') && (
                           <button
                             type="button"
                             role="menuitem"
                             disabled={sendingMedia}
                             onClick={() => {
                               setComposerActionsOpen(false);
-                              mediaInputRef.current?.click();
+                              setSendMediaDialogOpen(true);
                             }}
                             className="flex w-full cursor-pointer items-center gap-3 px-3 py-2.5 text-sm font-semibold text-gray-700 transition-colors duration-200 hover:bg-primary/5 hover:text-primary disabled:opacity-40"
                           >
                             <Paperclip className="h-4 w-4 shrink-0" />
-                            Attach media
+                            Media
                           </button>
                         )}
                         <button
@@ -2511,7 +2786,8 @@ export const InboxView: React.FC = () => {
                           Canned responses
                         </button>
                         {contactChannel(selectedContact) !== 'instagram' &&
-                          contactChannel(selectedContact) !== 'messenger' && (
+                          contactChannel(selectedContact) !== 'messenger' &&
+                          contactChannel(selectedContact) !== 'telegram' && (
                             <button
                               type="button"
                               role="menuitem"
@@ -2555,11 +2831,13 @@ export const InboxView: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleSendMessage}
-                    disabled={(!messageInput.trim() && !pendingComposerFile) || sendingMedia}
+                    disabled={
+                      (!messageInput.trim() && !pendingComposerFile) || sendingMedia || sendingText
+                    }
                     className="ml-0.5 inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl bg-channel-green text-white shadow-sm shadow-emerald-600/15 transition-colors duration-200 hover:bg-[#20bd5a] disabled:cursor-not-allowed disabled:opacity-40"
-                    aria-label={sendingMedia ? 'Sending' : 'Send message'}
+                    aria-label={sendingMedia || sendingText ? 'Sending' : 'Send message'}
                   >
-                    {sendingMedia ? (
+                    {sendingMedia || sendingText ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
                       <Send className="h-4 w-4" />

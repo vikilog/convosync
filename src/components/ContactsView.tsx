@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Search,
@@ -126,6 +126,10 @@ const ContactsWorkspace: React.FC = () => {
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(true);
+  // fetchPage is invoked from several places (filter changes, pagination,
+  // keep-alive resume) that can race — a slower earlier request landing
+  // after a newer one must not overwrite the newer, correct results.
+  const fetchGenerationRef = useRef(0);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
@@ -192,12 +196,16 @@ const ContactsWorkspace: React.FC = () => {
 
   const fetchPage = useCallback(
     async (pageCursor: string | null, options?: { silent?: boolean }) => {
+      const generation = ++fetchGenerationRef.current;
       if (!options?.silent) setLoading(true);
       try {
         const [res, tagsRes] = await Promise.all([
           api.getContacts(buildListParams(pageCursor)),
           api.getContactTags().catch(() => ({ tags: [] as string[] })),
         ]);
+        // A newer fetchPage call has since started — this response is for
+        // filters/page the user has already moved away from.
+        if (fetchGenerationRef.current !== generation) return;
         setContacts((res.items ?? []).map((c) => mapContactFromApi(c)));
         setNextCursor(res.nextCursor ?? null);
         setHasMore(Boolean(res.hasMore));
@@ -205,7 +213,7 @@ const ContactsWorkspace: React.FC = () => {
       } catch (err) {
         console.error(err);
       } finally {
-        if (!options?.silent) setLoading(false);
+        if (fetchGenerationRef.current === generation && !options?.silent) setLoading(false);
       }
     },
     [buildListParams]
@@ -363,9 +371,14 @@ const ContactsWorkspace: React.FC = () => {
         `Delete ${count} contact${count === 1 ? '' : 's'} with tag "${tag}"? This will also delete related conversations, messages, and journey history. The tag itself will not be removed.`
       );
       if (!confirmed) return;
-      await api.deleteContactsByTag(tag);
+      const result = await api.deleteContactsByTag(tag);
       setSelectedIds(new Set());
       reloadCurrent({ silent: true });
+      if (result.failed > 0) {
+        window.alert(
+          `Deleted ${result.deleted} of ${result.deleted + result.failed} contacts with tag "${tag}" — ${result.failed} failed and were left in place. Try again for the remaining ones.`
+        );
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to delete contacts by tag';
       window.alert(message);

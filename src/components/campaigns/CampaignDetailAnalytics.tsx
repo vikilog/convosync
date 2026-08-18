@@ -16,6 +16,11 @@ import {
   YAxis,
 } from 'recharts';
 import type { CampaignAnalytics, CampaignChannel } from '../../types';
+import { formatCampaignDateTime } from '../../lib/campaignFormat';
+
+function formatDate(iso: string | null): string {
+  return formatCampaignDateTime(iso, { includeYear: false });
+}
 
 /** Stage accents — green only on delivered; others stay neutral/ink. */
 const STAGE_ACCENT: Record<string, string> = {
@@ -37,18 +42,6 @@ function formatMedian(ms: number | null): string {
   const h = Math.floor(ms / (60 * 60_000));
   const m = Math.round((ms % (60 * 60_000)) / 60_000);
   return m > 0 ? `${h}h ${m}m` : `${h}h`;
-}
-
-function formatDate(iso: string | null): string {
-  if (!iso) return '—';
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return '—';
-  return d.toLocaleString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
 }
 
 const QuietEmpty: React.FC<{ title: string; description: string; className?: string }> = ({

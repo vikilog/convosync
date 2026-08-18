@@ -41,4 +41,21 @@ if (defaults.join(',') !== 'name,phone,email,source,tags') throw new Error(Strin
 
 if (EXPORT_COLUMNS.length !== 5) throw new Error('expected 5 columns');
 
+// CSV/formula-injection defense — a name/tag starting with =, +, -, @, or a
+// tab must be prefixed with a single quote so Excel/Sheets render it as
+// text instead of evaluating it as a formula on open.
+const malicious: Contact[] = [
+  {
+    ...sample[0],
+    id: 'c2',
+    name: '=cmd|\'/C calc\'!A0',
+    tags: ['+HYPERLINK("http://evil.test")'],
+  },
+];
+const maliciousCsv = buildContactsCsv(malicious, ['name', 'tags']);
+if (!maliciousCsv.includes('"\'=cmd')) throw new Error(`name not defused: ${maliciousCsv}`);
+if (!maliciousCsv.includes('"\'+HYPERLINK')) throw new Error(`tag not defused: ${maliciousCsv}`);
+// A normal name must be untouched (no stray leading quote).
+if (!csv.includes('"Alice"')) throw new Error('normal name should not be prefixed');
+
 console.log('exportContactsCsv.check.ts: ok');

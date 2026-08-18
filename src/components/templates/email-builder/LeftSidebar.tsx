@@ -187,7 +187,11 @@ export function LeftSidebar() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => setSections(deleteSection(s.id))}
+                        onClick={() => {
+                          if (window.confirm(`Delete saved section "${s.name}"?`)) {
+                            setSections(deleteSection(s.id));
+                          }
+                        }}
                         className="p-1 text-gray-400 hover:text-red-500"
                         aria-label="Delete section"
                       >

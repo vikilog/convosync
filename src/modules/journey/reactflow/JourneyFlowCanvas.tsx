@@ -11,6 +11,8 @@ import {
   Background,
   BackgroundVariant,
   addEdge,
+  applyEdgeChanges,
+  applyNodeChanges,
   useEdgesState,
   useNodesState,
   useReactFlow,
@@ -105,8 +107,8 @@ export function JourneyFlowCanvas({
     return graphToFlow(g);
   }, [graph]);
 
-  const [nodes, setNodes, onNodesChange] = useNodesState<Node>(seed.nodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(seed.edges);
+  const [nodes, setNodes] = useNodesState<Node>(seed.nodes);
+  const [edges, setEdges] = useEdgesState<Edge>(seed.edges);
 
   useEffect(() => {
     const g = graph && graph.nodes.length > 0 ? graph : createStarterGraph();
@@ -359,25 +361,31 @@ export function JourneyFlowCanvas({
           defaultEdgeOptions={defaultEdgeOptions}
           edgeTypes={flowEdgeTypes}
           onNodesChange={(changes) => {
-            onNodesChange(changes);
-            if (changes.some((c) => c.type === 'position' && c.dragging === false)) {
-              syncGraph(nodes, edges);
-            }
-            if (changes.some((c) => c.type === 'remove')) {
-              setTimeout(() => syncGraph(nodes, edges), 0);
-            }
+            // Apply via the returned array (not the outer `nodes` closure, which
+            // still holds the pre-change positions) so a drag-release or delete
+            // syncs the actual new state instead of reverting it by one step.
+            setNodes((nds) => {
+              const next = applyNodeChanges(changes, nds);
+              const committed = changes.some(
+                (c) => (c.type === 'position' && c.dragging === false) || c.type === 'remove'
+              );
+              if (committed) syncGraph(next, edges);
+              return next;
+            });
           }}
           onEdgesChange={(changes) => {
-            onEdgesChange(changes);
-            if (changes.some((c) => c.type === 'remove')) {
-              setTimeout(() => syncGraph(nodes, edges), 0);
-            }
+            setEdges((eds) => {
+              const next = applyEdgeChanges(changes, eds);
+              if (changes.some((c) => c.type === 'remove')) {
+                syncGraph(nodes, next);
+              }
+              return next;
+            });
           }}
           onConnect={onConnect}
           nodeTypes={journeyNodeTypes}
           onDrop={onDrop}
           onDragOver={onDragOver}
-          onNodeDragStop={() => syncGraph(nodes, edges)}
           onNodeClick={(_, node) => {
             setAddMenuAnchor(null);
             onSelectNode?.(node);

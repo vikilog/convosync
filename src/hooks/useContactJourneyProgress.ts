@@ -34,6 +34,11 @@ export function useContactJourneyProgress(
   const [progress, setProgress] = useState<ContactJourneyProgress | null>(null);
   const [initialLoading, setInitialLoading] = useState(false);
   const loadedForContactRef = useRef<string | null>(null);
+  // Always reflects the contact the hook is CURRENTLY rendering for — used
+  // to detect a rapid contact switch that happened while a fetch for the
+  // previous contact was still in flight.
+  const activeContactIdRef = useRef<string | null>(contactId);
+  activeContactIdRef.current = contactId;
 
   const fetchProgress = useCallback(
     async (options?: { silent?: boolean }) => {
@@ -54,6 +59,10 @@ export function useContactJourneyProgress(
           : api.getContactJourneyProgress(contactId))) as
           | ContactJourneyProgress
           | { active: false };
+        // The user may have switched to a different contact while this
+        // request was in flight — a stale response must not overwrite the
+        // now-active contact's progress banner.
+        if (activeContactIdRef.current !== contactId) return;
         const next = data && 'executionId' in data ? data : null;
         const snapshot = progressSnapshot(next);
 
@@ -63,9 +72,9 @@ export function useContactJourneyProgress(
         });
         loadedForContactRef.current = contactId;
       } catch {
-        if (!silent) setProgress(null);
+        if (activeContactIdRef.current === contactId && !silent) setProgress(null);
       } finally {
-        if (!silent) setInitialLoading(false);
+        if (activeContactIdRef.current === contactId && !silent) setInitialLoading(false);
       }
     },
     [contactId, channel]

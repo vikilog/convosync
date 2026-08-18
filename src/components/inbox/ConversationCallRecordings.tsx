@@ -341,10 +341,17 @@ export function ConversationCallRecordings({ conversationId }: { conversationId:
   const fileInputRef = useRef<HTMLInputElement>(null);
   const rowsRef = useRef(rows);
   rowsRef.current = rows;
+  // Always reflects the conversation this component is CURRENTLY showing —
+  // a slow fetch started for a previous conversation must not overwrite the
+  // now-active conversation's rows/loading/error state once it resolves.
+  const activeConversationIdRef = useRef(conversationId);
+  activeConversationIdRef.current = conversationId;
 
   const applyRows = useCallback((conversationId: string, next: Row[]) => {
     writeRowsCache(conversationId, next);
-    setRows(next);
+    if (activeConversationIdRef.current === conversationId) {
+      setRows(next);
+    }
   }, []);
 
   const load = useCallback(
@@ -373,9 +380,13 @@ export function ConversationCallRecordings({ conversationId }: { conversationId:
         const next = await pending;
         applyRows(conversationId, next);
       } catch (err) {
-        if (!hit) setError(formatCatchError(err));
+        if (!hit && activeConversationIdRef.current === conversationId) {
+          setError(formatCatchError(err));
+        }
       } finally {
-        setLoading(false);
+        if (activeConversationIdRef.current === conversationId) {
+          setLoading(false);
+        }
       }
     },
     [applyRows, conversationId]

@@ -23,4 +23,21 @@ try {
 }
 if (!threw) throw new Error('expected missing name/phone headers to throw');
 
+// A quoted field containing an embedded newline (common when a CSV is
+// exported from Excel/Google Contacts with a multi-line name/notes value)
+// must stay part of that one row/cell, not get split into two garbage rows.
+const withEmbeddedNewline = `name,phone,tags
+"Smith, John\nJr.",+919876543210,VIP
+Dana,+15550100,`;
+const embedded = parseContactCsv(withEmbeddedNewline);
+if (embedded.rows.length !== 2) {
+  throw new Error(`expected 2 rows with embedded newline intact, got ${embedded.rows.length}`);
+}
+if (embedded.rows[0].name !== 'Smith, John\nJr.') {
+  throw new Error(`embedded-newline name corrupted: ${JSON.stringify(embedded.rows[0].name)}`);
+}
+if (embedded.rows[1].phone !== '+15550100') {
+  throw new Error(`next row misaligned after embedded newline: ${embedded.rows[1].phone}`);
+}
+
 console.log('parseContactCsv.check.ts: ok');

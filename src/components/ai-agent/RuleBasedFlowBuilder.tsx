@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   BarChart3,
   ChevronDown,
@@ -147,6 +147,18 @@ type Props = {
 
 export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) => {
   const [definition, setDefinition] = useState<AgentFlowDefinition>(() => flow ?? defaultFlow());
+  // `flow` only changes identity when the parent adopts a genuinely new
+  // server value (initial load, or after this component's own onSave
+  // round-trips) — see AIAgentDetail, which passes agent.flowDefinition
+  // directly rather than a freshly-allocated fallback each render. Resync
+  // local state to it then, instead of freezing the lazy initializer above.
+  const syncedFlowRef = useRef(flow);
+  useEffect(() => {
+    if (flow && flow !== syncedFlowRef.current) {
+      syncedFlowRef.current = flow;
+      setDefinition(flow);
+    }
+  }, [flow]);
   const [toolboxOpen, setToolboxOpen] = useState(true);
   const [activeTab, setActiveTab] = useState<'build' | 'analysis'>('build');
   const [triggerPanelOpen, setTriggerPanelOpen] = useState(false);
@@ -176,7 +188,7 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
     return 'WhatsApp template quick reply';
   }, [definition.triggerType, definition.keywordMatchRule, definition.keywordList]);
 
-  const addNode = useCallback((type: AgentFlowNodeType) => {
+  const addNode = useCallback((type: AgentFlowNodeType, insertAt?: number) => {
     setDefinition((prev) => {
       const node: AgentFlowNode = {
         id: `node_${Date.now()}_${prev.nodes.length}`,
@@ -185,7 +197,9 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
         x: 0,
         y: 0,
       };
-      return { ...prev, nodes: [...prev.nodes, node] };
+      const index = insertAt ?? prev.nodes.length;
+      const nodes = [...prev.nodes.slice(0, index), node, ...prev.nodes.slice(index)];
+      return { ...prev, nodes };
     });
   }, []);
 
@@ -683,7 +697,7 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
                   ) : (
                     definition.nodes.map((node, i) => (
                       <React.Fragment key={node.id}>
-                        <FlowConnector onAdd={() => addNode(node.type)} />
+                        <FlowConnector onAdd={() => addNode(node.type, i)} />
                         <FlowNodeCard
                           headerClass="bg-primary"
                           title={node.title}

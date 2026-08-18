@@ -30,6 +30,16 @@ export const AiAgentEditorView: React.FC<Props> = ({ agentId, pathname }) => {
   const [error, setError] = useState<string | null>(null);
   const [savedHint, setSavedHint] = useState(false);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const savedHintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Cancel any pending debounced save / "Saved" hint on unmount, so navigating
+  // away mid-debounce doesn't fire a save request or setState afterward.
+  useEffect(() => {
+    return () => {
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+      if (savedHintTimer.current) clearTimeout(savedHintTimer.current);
+    };
+  }, []);
 
   const loadAgent = useCallback(async () => {
     setLoading(true);
@@ -56,7 +66,8 @@ export const AiAgentEditorView: React.FC<Props> = ({ agentId, pathname }) => {
         const updated = await api.updateAgent(agentId, patch);
         setAgent(mapAgentFromApi(updated as Record<string, unknown>));
         setSavedHint(true);
-        window.setTimeout(() => setSavedHint(false), 1500);
+        if (savedHintTimer.current) clearTimeout(savedHintTimer.current);
+        savedHintTimer.current = window.setTimeout(() => setSavedHint(false), 1500);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to save');
       } finally {

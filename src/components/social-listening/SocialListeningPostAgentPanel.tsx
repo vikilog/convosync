@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Bot, Loader2, Route } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { api } from '../../lib/api';
@@ -50,6 +50,7 @@ export function SocialListeningPostAgentPanel({
   const [funnels, setFunnels] = useState<Array<{ id: string; name: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const savingRef = useRef(false);
   const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
@@ -93,6 +94,11 @@ export function SocialListeningPostAgentPanel({
   }, [postId]);
 
   const save = async () => {
+    // The Save button's disabled state lags a tick behind a fast
+    // double-click — this ref rejects the second invocation synchronously,
+    // before React has re-rendered, so two identical PATCHes don't race.
+    if (savingRef.current) return;
+    savingRef.current = true;
     setSaving(true);
     setError(null);
     try {
@@ -133,6 +139,7 @@ export function SocialListeningPostAgentPanel({
       }
       setError(message);
     } finally {
+      savingRef.current = false;
       setSaving(false);
     }
   };

@@ -23,6 +23,14 @@ const csv = parseFaqBulk(`question,answer
 Hours?,Mon-Fri`);
 assert.equal(csv.length, 2);
 
+const csvMultiline = parseFaqBulk(
+  'question,answer\n"Return policy?","Line1\nLine2"\nHours?,Mon-Fri'
+);
+assert.equal(csvMultiline.length, 2);
+assert.equal(csvMultiline[0].question, 'Return policy?');
+assert.equal(csvMultiline[0].answer, 'Line1\nLine2');
+assert.equal(csvMultiline[1].question, 'Hours?');
+
 const json = parseFaqBulk(`[{"q":"Hi?","a":"Hello"}]`);
 assert.equal(json[0].question, 'Hi?');
 

@@ -94,6 +94,22 @@ export const TemplatesView: React.FC = () => {
   const [editingWa, setEditingWa] = useState<CampaignTemplate | null>(null);
   const [editingEmail, setEditingEmail] = useState<EmailTemplateRecord | null>(null);
   const [actionError, setActionError] = useState('');
+  // Per-row busy tracking (Set, not a single id) — each card has its own
+  // independent Delete/Submit button, so a single shared busy id would
+  // silently re-enable a DIFFERENT row's button while one row's request is
+  // still in flight. The ref mirror rejects a same-tick double click (e.g.
+  // a fast double-click on Submit) before React has re-rendered the
+  // disabled state.
+  const [busyIds, setBusyIds] = useState<Set<string>>(new Set());
+  const busyRef = useRef<Set<string>>(new Set());
+  const markBusy = useCallback((id: string) => {
+    busyRef.current.add(id);
+    setBusyIds(new Set(busyRef.current));
+  }, []);
+  const clearBusy = useCallback((id: string) => {
+    busyRef.current.delete(id);
+    setBusyIds(new Set(busyRef.current));
+  }, []);
 
   useEffect(() => {
     if (!channelsReady || isBuilder) return;
@@ -307,22 +323,39 @@ export const TemplatesView: React.FC = () => {
 
   const handleDeleteWa = async (t: CampaignTemplate) => {
     if (!t.id) return;
+    if (busyRef.current.has(t.id)) return;
     if (!window.confirm(`Delete template "${t.name}" from Meta and this workspace?`)) return;
+    markBusy(t.id);
+    setActionError('');
     try {
       await api.deleteTemplate(t.id);
       await loadWhatsApp();
     } catch (err) {
       setActionError(err instanceof Error ? err.message : 'Delete failed');
+    } finally {
+      clearBusy(t.id);
     }
   };
 
   const handleSubmitWa = async (t: CampaignTemplate) => {
     if (!t.id) return;
+    if (busyRef.current.has(t.id)) return;
+    if (
+      !window.confirm(
+        `Submit "${t.name}" to Meta for review? This can't be undone, and review can take up to 24 hours.`
+      )
+    ) {
+      return;
+    }
+    markBusy(t.id);
+    setActionError('');
     try {
       await api.submitTemplate(t.id);
       await loadWhatsApp();
     } catch (err) {
       setActionError(err instanceof Error ? err.message : 'Submit failed');
+    } finally {
+      clearBusy(t.id);
     }
   };
 
@@ -346,12 +379,17 @@ export const TemplatesView: React.FC = () => {
 
   const handleDeleteEmail = async (t: EmailTemplateRecord) => {
     if (!t.id) return;
+    if (busyRef.current.has(t.id)) return;
     if (!window.confirm(`Delete email template "${t.name}"?`)) return;
+    markBusy(t.id);
+    setActionError('');
     try {
       await api.deleteEmailTemplate(t.id);
       await loadEmail();
     } catch (err) {
       setActionError(err instanceof Error ? err.message : 'Delete failed');
+    } finally {
+      clearBusy(t.id);
     }
   };
 
@@ -555,6 +593,7 @@ export const TemplatesView: React.FC = () => {
               <WhatsAppCard
                 key={template.id ?? template.name}
                 template={template}
+                busy={Boolean(template.id && busyIds.has(template.id))}
                 onOpen={() => openWaBuilder(template)}
                 onEdit={() => openWaBuilder(template)}
                 onSubmit={() => void handleSubmitWa(template)}
@@ -572,6 +611,7 @@ export const TemplatesView: React.FC = () => {
             <EmailCard
               key={template.id ?? template.name}
               template={template}
+              busy={Boolean(template.id && busyIds.has(template.id))}
               onOpen={() => openEmailBuilder(template)}
               onEdit={() => openEmailBuilder(template)}
               onDelete={() => void handleDeleteEmail(template)}
@@ -616,6 +656,7 @@ function EmptyState({ channel, onCreate }: { channel: Channel; onCreate: () => v
 
 function WhatsAppCard({
   template,
+  busy,
   onOpen,
   onEdit,
   onSubmit,
@@ -623,6 +664,7 @@ function WhatsAppCard({
   onDelete,
 }: {
   template: CampaignTemplate;
+  busy?: boolean;
   onOpen: () => void;
   onEdit: () => void;
   onSubmit: () => void;
@@ -716,7 +758,8 @@ function WhatsAppCard({
                   : 'Edit'
               }
               onClick={onEdit}
-              className="p-1 rounded-md hover:bg-gray-100 text-gray-600"
+              disabled={busy}
+              className="p-1 rounded-md hover:bg-gray-100 text-gray-600 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <Pencil className="w-3 h-3" />
             </button>
@@ -729,14 +772,29 @@ function WhatsAppCard({
                 type="button"
                 title="Submit to Meta"
                 onClick={onSubmit}
-                className="p-1 rounded-md hover:bg-[#e7f5f0] text-[#008069]"
+                disabled={busy}
+                className="p-1 rounded-md hover:bg-[#e7f5f0] text-[#008069] disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                <Send className="w-3 h-3" />
+                {busy ? (
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                ) : (
+                  <Send className="w-3 h-3" />
+                )}
               </button>
             )}
           {template.id && (
-            <button type="button" title="Delete" onClick={onDelete} className="p-1 rounded-md hover:bg-red-50 text-red-500">
-              <Trash2 className="w-3 h-3" />
+            <button
+              type="button"
+              title="Delete"
+              onClick={onDelete}
+              disabled={busy}
+              className="p-1 rounded-md hover:bg-red-50 text-red-500 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {busy ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                <Trash2 className="w-3 h-3" />
+              )}
             </button>
           )}
         </div>
@@ -747,11 +805,13 @@ function WhatsAppCard({
 
 function EmailCard({
   template,
+  busy,
   onOpen,
   onEdit,
   onDelete,
 }: {
   template: EmailTemplateRecord;
+  busy?: boolean;
   onOpen: () => void;
   onEdit: () => void;
   onDelete: () => void;
@@ -809,12 +869,28 @@ function EmailCard({
           Updated {formatUpdated(template.updatedAt)}
         </span>
         <div className="flex gap-1">
-          <button type="button" title="Edit" onClick={onEdit} className="p-1 rounded-md hover:bg-gray-100 text-gray-600">
+          <button
+            type="button"
+            title="Edit"
+            onClick={onEdit}
+            disabled={busy}
+            className="p-1 rounded-md hover:bg-gray-100 text-gray-600 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
             <Pencil className="w-3 h-3" />
           </button>
           {template.id && (
-            <button type="button" title="Delete" onClick={onDelete} className="p-1 rounded-md hover:bg-red-50 text-red-500">
-              <Trash2 className="w-3 h-3" />
+            <button
+              type="button"
+              title="Delete"
+              onClick={onDelete}
+              disabled={busy}
+              className="p-1 rounded-md hover:bg-red-50 text-red-500 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {busy ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                <Trash2 className="w-3 h-3" />
+              )}
             </button>
           )}
         </div>

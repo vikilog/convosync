@@ -3,7 +3,7 @@
  * @license SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ArrowLeft,
   Code2,
@@ -48,7 +48,16 @@ export function EmailBuilderShell({ template, onBack, onSaved }: Props) {
 
   const [viewMode, setViewMode] = useState<ViewMode>('edit');
   const [saving, setSaving] = useState(false);
+  const savingRef = useRef(false);
   const [error, setError] = useState('');
+  // Unsaved-changes guard for the back button. Compares current store
+  // values against a snapshot of what hydration just set them to, rather
+  // than a "did hydration just run" flag — initDesign's store updates can
+  // land over more than one render pass, so a flag consumed on the first
+  // post-hydration effect run fires before the hydrated values have
+  // actually settled and falsely marks a freshly loaded template as dirty.
+  const [isDirty, setIsDirty] = useState(false);
+  const hydratedSnapshotRef = useRef('');
 
   useEffect(() => {
     const design = designFromApi(template?.designJson, template?.htmlBody ?? '');
@@ -57,10 +66,48 @@ export function EmailBuilderShell({ template, onBack, onSaved }: Props) {
       subject: template?.subject ?? '',
       status: template?.status ?? 'draft',
     });
+    hydratedSnapshotRef.current = JSON.stringify({
+      name: template?.name ?? '',
+      subject: template?.subject ?? '',
+      blocks: design.blocks,
+      brand: design.brand,
+    });
+    setIsDirty(false);
   }, [template, initDesign]);
 
-  const buildPayload = (publish: boolean) => {
-    const design = { version: 1 as const, blocks, brand };
+  useEffect(() => {
+    const current = JSON.stringify({ name, subject, blocks, brand });
+    setIsDirty(current !== hydratedSnapshotRef.current);
+  }, [name, subject, blocks, brand]);
+
+  const buildPayload = async (publish: boolean) => {
+    // Image blocks picked from Media Gallery carry a stable mediaAssetId
+    // alongside `src`, but `src` itself is a presigned S3 URL that expires
+    // after 7 days — persisting it verbatim as the source of truth (like
+    // the Instagram automation builder correctly avoids doing for its own
+    // media picks) meant any template not re-saved within that window
+    // rendered with a dead image link. Re-mint a fresh URL for every
+    // gallery-sourced image block on each save, so the link stays valid
+    // for a full 7 days from whenever the template was last saved rather
+    // than from whenever the image was originally picked.
+    const refreshedBlocks = await Promise.all(
+      blocks.map(async (block) => {
+        const mediaAssetId = block.props.mediaAssetId;
+        if (block.type !== 'image' || typeof mediaAssetId !== 'string' || !mediaAssetId) {
+          return block;
+        }
+        try {
+          const signed = await api.getMediaGallerySignedUrl(mediaAssetId);
+          return { ...block, props: { ...block.props, src: signed.url } };
+        } catch {
+          // Asset may have been deleted/deactivated since it was picked —
+          // keep whatever src is already there rather than failing the save.
+          return block;
+        }
+      })
+    );
+
+    const design = { version: 1 as const, blocks: refreshedBlocks, brand };
     const htmlBody = renderDesignToFullHtml(design);
     const variables = extractEmailTemplateVariables(subject, htmlBody);
     return {
@@ -75,6 +122,9 @@ export function EmailBuilderShell({ template, onBack, onSaved }: Props) {
   };
 
   const handleSave = async (publish: boolean) => {
+    // The Save/Publish buttons' disabled state lags a tick behind a fast
+    // double-click — this ref rejects the second invocation synchronously.
+    if (savingRef.current) return;
     setError('');
     if (!subject.trim()) {
       setError('Subject line is required.');
@@ -84,24 +134,33 @@ export function EmailBuilderShell({ template, onBack, onSaved }: Props) {
       setError('Add at least one block to your email.');
       return;
     }
+    savingRef.current = true;
     setSaving(true);
     try {
-      const payload = buildPayload(publish);
+      const payload = await buildPayload(publish);
       if (template?.id) {
         await api.updateEmailTemplate(template.id, payload);
+        setIsDirty(false);
         onSaved(template.id);
       } else {
         const created = (await api.createEmailTemplate({
           ...payload,
           status: publish ? 'active' : 'draft',
         })) as { id?: string };
+        setIsDirty(false);
         onSaved(created?.id ? String(created.id) : undefined);
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to save template');
     } finally {
+      savingRef.current = false;
       setSaving(false);
     }
+  };
+
+  const handleBack = () => {
+    if (isDirty && !window.confirm('Discard unsaved changes to this email template?')) return;
+    onBack();
   };
 
   const sidebarOffset = useSidebarOffset();
@@ -114,7 +173,7 @@ export function EmailBuilderShell({ template, onBack, onSaved }: Props) {
       <header className="shrink-0 flex items-center gap-3 px-4 py-2.5 border-b border-black/5 bg-white">
         <button
           type="button"
-          onClick={onBack}
+          onClick={handleBack}
           className="p-2 rounded-lg hover:bg-surface-muted text-gray-600"
           aria-label="Back"
         >

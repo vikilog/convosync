@@ -32,6 +32,7 @@ const CHANNEL_LABELS: Record<InboxChannel, string> = {
   whatsapp: 'WhatsApp',
   instagram: 'Instagram',
   messenger: 'Messenger',
+  telegram: 'Telegram',
   email: 'Email',
 };
 
@@ -44,27 +45,35 @@ export function InboxScopeEditor({ value, onChange, disabled }: InboxScopeEditor
   const [whatsappAccounts, setWhatsappAccounts] = useState<WhatsAppAccount[]>([]);
   const [instagramAccounts, setInstagramAccounts] = useState<SocialAccount[]>([]);
   const [messengerAccounts, setMessengerAccounts] = useState<SocialAccount[]>([]);
+  const [telegramAccounts, setTelegramAccounts] = useState<SocialAccount[]>([]);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       setLoading(true);
       try {
-        const [waRaw, igRaw, msRaw] = await Promise.all([
+        const [waRaw, igRaw, msRaw, tgRaw] = await Promise.all([
           api.getWhatsAppAccounts() as Promise<WhatsAppAccount[] | { accounts?: WhatsAppAccount[] }>,
           api.getInstagramAccounts() as Promise<{ accounts?: SocialAccount[] }>,
           api.getMessengerAccounts() as Promise<{ accounts?: SocialAccount[] }>,
+          api.getTelegramAccounts() as Promise<{
+            accounts?: Array<{ id: string; botId: string; botUsername?: string; botName?: string; label: string }>;
+          }>,
         ]);
         if (cancelled) return;
         const waList = Array.isArray(waRaw) ? waRaw : (waRaw.accounts ?? []);
         setWhatsappAccounts(waList);
         setInstagramAccounts(igRaw.accounts ?? []);
         setMessengerAccounts(msRaw.accounts ?? []);
+        setTelegramAccounts(
+          (tgRaw.accounts ?? []).map((a) => ({ pageId: a.botId, label: a.label }))
+        );
       } catch {
         if (!cancelled) {
           setWhatsappAccounts([]);
           setInstagramAccounts([]);
           setMessengerAccounts([]);
+          setTelegramAccounts([]);
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -196,7 +205,7 @@ export function InboxScopeEditor({ value, onChange, disabled }: InboxScopeEditor
               Loading connected accounts…
             </div>
           ) : (
-            (['whatsapp', 'instagram', 'messenger', 'email'] as InboxChannel[]).map((channel) => {
+            (['whatsapp', 'instagram', 'messenger', 'telegram', 'email'] as InboxChannel[]).map((channel) => {
               if (channel === 'email') {
                 return (
                   <div key={channel} className="space-y-1.5">
@@ -224,10 +233,15 @@ export function InboxScopeEditor({ value, onChange, disabled }: InboxScopeEditor
                         id: a.pageId,
                         label: a.label || a.username || a.displayName || a.pageId,
                       }))
-                    : messengerAccounts.map((a) => ({
-                        id: a.pageId,
-                        label: a.label || a.displayName || a.pageId,
-                      }));
+                    : channel === 'telegram'
+                      ? telegramAccounts.map((a) => ({
+                          id: a.pageId,
+                          label: a.label || a.pageId,
+                        }))
+                      : messengerAccounts.map((a) => ({
+                          id: a.pageId,
+                          label: a.label || a.displayName || a.pageId,
+                        }));
 
               return (
                 <div key={channel} className="space-y-1.5">

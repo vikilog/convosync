@@ -180,19 +180,21 @@ export type IntegrationsChannel =
   | 'google'
   | 'meta-ads'
   | 'google-ads'
-  | 'messenger';
+  | 'messenger'
+  | 'telegram';
 
-/** Email + AI use path pages; WhatsApp / Instagram (and others for now) use ?channel=. */
+/** Email + AI + Telegram use path pages; WhatsApp / Instagram (and others for now) use ?channel=. */
 export function pathForIntegrationsChannel(channel: IntegrationsChannel): string {
   if (channel === 'email') return '/integrations/email';
   if (channel === 'ai') return '/integrations/ai';
+  if (channel === 'telegram') return '/integrations/telegram';
   return `/integrations?channel=${channel}`;
 }
 
-export function integrationsSubpageFromPath(pathname: string): 'email' | 'ai' | null {
+export function integrationsSubpageFromPath(pathname: string): 'email' | 'ai' | 'telegram' | null {
   const parts = pathname.replace(/^\//, '').split('/').filter(Boolean);
   if (parts[0] !== 'integrations') return null;
-  if (parts[1] === 'email' || parts[1] === 'ai') return parts[1];
+  if (parts[1] === 'email' || parts[1] === 'ai' || parts[1] === 'telegram') return parts[1];
   return null;
 }
 

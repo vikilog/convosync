@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import {
   CheckCircle2,
@@ -58,6 +58,7 @@ export function LeadDetailDrawer({
   const [tab, setTab] = useState<DrawerTab>('origin');
   const [converting, setConverting] = useState(false);
   const [convertError, setConvertError] = useState('');
+  const convertingRef = useRef(false);
 
   if (!lead) return null;
 
@@ -73,6 +74,15 @@ export function LeadDetailDrawer({
   };
 
   const convert = async () => {
+    // The `converting`/`disabled` state isn't visible until the next
+    // render, so a fast double-click can fire two overlapping conversion
+    // requests before it updates.
+    if (convertingRef.current) return;
+    const confirmed = window.confirm(
+      `Convert ${lead.name || 'this lead'} to a contact? This can't be undone from here.`
+    );
+    if (!confirmed) return;
+    convertingRef.current = true;
     setConverting(true);
     setConvertError('');
     try {
@@ -93,6 +103,7 @@ export function LeadDetailDrawer({
       }
       setConvertError(message);
     } finally {
+      convertingRef.current = false;
       setConverting(false);
     }
   };
