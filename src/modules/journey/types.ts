@@ -5,6 +5,7 @@ export type JourneyNodeType =
   | 'SEND_MESSAGE'
   | 'ASK_QUESTION'
   | 'BUTTONS'
+  | 'SEND_FLOW'
   | 'ASSIGN_TO'
   | 'WAIT'
   | 'GOTO_STEP'
@@ -70,6 +71,7 @@ export const NODE_LABELS: Record<JourneyNodeType, string> = {
   SEND_MESSAGE: 'Send Message',
   ASK_QUESTION: 'Ask Question',
   BUTTONS: 'Buttons',
+  SEND_FLOW: 'Send Flow',
   ASSIGN_TO: 'Assign To',
   WAIT: 'Wait',
   GOTO_STEP: 'Go to Step',
@@ -142,6 +144,18 @@ export const DEFAULT_NODE_DATA: Record<JourneyNodeType, Record<string, unknown>>
       { id: 'btn_b', title: 'Option B' },
     ],
     simulateTyping: false,
+  },
+  SEND_FLOW: {
+    flowId: '',
+    text: '',
+    ctaLabel: 'Open',
+    headerText: '',
+    saveFieldsPrefix: 'flow_',
+    mapNameField: '',
+    mapPhoneField: '',
+    mapEmailField: '',
+    funnelId: '',
+    stageId: '',
   },
   ASSIGN_TO: { assigneeType: 'user', assigneeId: '' },
   WAIT: {

@@ -5,13 +5,16 @@
 
 import React, { useLayoutEffect, useRef } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import { Check, CheckCheck, Loader2, MousePointerClick, PauseCircle, X } from 'lucide-react';
+import { Check, CheckCheck, ClipboardCheck, Loader2, MousePointerClick, PauseCircle, X } from 'lucide-react';
 import type { ChatMessage } from '../../types';
 import { formatMessageClock } from '../../lib/formatDates';
 import { sanitizeEmailHtml } from '../../lib/sanitizeHtml';
+import { api } from '../../lib/api';
 import { ResendButton } from '../shared/ResendButton';
 import { MessageAttachment } from './MessageAttachment';
 import { CarouselAttachment } from './CarouselAttachment';
+import { WhatsAppTemplateMessageBubble } from '../templates/WhatsAppTemplatePreview';
+import { headerFormatFromApi, type ButtonKind } from '../templates/templateBuilderUtils';
 
 const WA_CHAT_BG = '#e5ddd5';
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -83,6 +86,11 @@ export function InboxMessageListSkeleton({ channel }: { channel: Channel }) {
       })}
     </div>
   );
+}
+
+function humanizeFieldName(name: string): string {
+  const spaced = name.replace(/_/g, ' ').trim();
+  return spaced.charAt(0).toUpperCase() + spaced.slice(1);
 }
 
 function channelAccentBar(channel: Channel): string {
@@ -291,6 +299,96 @@ const MessageBubble: React.FC<{
                 loading={resending}
                 onClick={() => onResend(message.id)}
               />
+            )}
+          </>
+        )}
+      </motion.div>
+    );
+  }
+
+  if (isWhatsApp && !isDeleted && message.flowResponseFields) {
+    const entries = Object.entries(message.flowResponseFields);
+    return (
+      <motion.div
+        {...motionProps}
+        className={`flex flex-col max-w-[min(72%,420px)] w-fit ${
+          isContact ? 'items-start mr-auto' : 'items-end ml-auto'
+        }`}
+      >
+        <div className="w-full bg-white rounded-lg rounded-tl-sm shadow-[0_1px_0.5px_rgba(11,20,26,0.13)] overflow-hidden">
+          <div className="flex items-center gap-1.5 px-3.5 pt-3 pb-2 border-b border-[#e9edef]">
+            <ClipboardCheck className="w-4 h-4 text-channel-green shrink-0" />
+            <span className="text-sm font-bold text-[#111b21] truncate">
+              {message.flowResponseName || 'Flow'} completed
+            </span>
+          </div>
+          {entries.length > 0 && (
+            <dl className="px-3.5 py-2.5 space-y-2">
+              {entries.map(([key, val]) => (
+                <div key={key}>
+                  <dt className="text-[11px] font-bold uppercase tracking-wide text-[#667781]">
+                    {humanizeFieldName(key)}
+                  </dt>
+                  <dd className="text-sm text-[#111b21] break-words">{String(val)}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
+        </div>
+        <div className="flex items-center gap-1.5 mt-1 text-meta text-gray-400 font-bold font-mono px-1">
+          <span>{time}</span>
+          {deliveryStatusIcon}
+        </div>
+      </motion.div>
+    );
+  }
+
+  if (isWhatsApp && messageType === 'template' && !isDeleted) {
+    const headerFormat = headerFormatFromApi(
+      message.waTemplateHeaderFormat,
+      Boolean(message.waTemplateHeader)
+    );
+    const headerMediaPreviewUrl = message.waTemplateHeaderMediaStorageKey
+      ? api.templateHeaderMediaUrl(message.waTemplateHeaderMediaStorageKey)
+      : undefined;
+    const buttonType = (message.waTemplateButtonType as '' | ButtonKind) || '';
+
+    return (
+      <motion.div
+        {...motionProps}
+        className={`flex flex-col max-w-[min(72%,420px)] w-fit ${
+          isContact ? 'items-start mr-auto' : 'items-end ml-auto'
+        } ${message.status === 'sending' ? 'opacity-90' : ''}`}
+      >
+        <WhatsAppTemplateMessageBubble
+          headerFormat={headerFormat}
+          header={message.waTemplateHeader || ''}
+          headerMediaPreviewUrl={headerMediaPreviewUrl}
+          headerMediaFileName={message.waTemplateHeaderMediaFileName}
+          bodyRendered={message.content}
+          footer={message.waTemplateFooter || ''}
+          buttonType={buttonType}
+          buttonText={message.waTemplateButtonText || ''}
+          hideFooterTime
+        />
+        <div className="flex items-center gap-1.5 mt-1 text-meta text-gray-400 font-bold font-mono px-1">
+          <span>{time}</span>
+          {deliveryStatusIcon}
+        </div>
+        {isJourneyMessage && (
+          <p className="text-xs text-[#667781] font-medium mt-0.5 leading-tight px-1">
+            Automated · Journey
+          </p>
+        )}
+        {!isContact && message.status === 'failed' && (
+          <>
+            {message.deliveryError && (
+              <p className="text-xs text-red-600 mt-1 leading-tight px-1 max-w-full">
+                {message.deliveryError}
+              </p>
+            )}
+            {onResend && (
+              <ResendButton loading={resending} onClick={() => onResend(message.id)} />
             )}
           </>
         )}

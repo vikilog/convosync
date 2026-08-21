@@ -285,7 +285,7 @@ export function pathForLeadFunnel(funnelId: string): string {
   return `/leads/${funnelId}`;
 }
 
-export type TemplateChannel = 'whatsapp' | 'email' | 'canned';
+export type TemplateChannel = 'whatsapp' | 'email' | 'canned' | 'flow';
 
 export type TemplateEditorRoute = {
   channel: TemplateChannel | null;
@@ -302,7 +302,7 @@ export function templateEditorFromPath(pathname: string): TemplateEditorRoute {
     return { channel: null, mode: 'list', id: null };
   }
   const ch = parts[1];
-  if (ch !== 'whatsapp' && ch !== 'email' && ch !== 'canned') {
+  if (ch !== 'whatsapp' && ch !== 'email' && ch !== 'canned' && ch !== 'flow') {
     return { channel: null, mode: 'list', id: null };
   }
   const channel = ch as TemplateChannel;
@@ -319,6 +319,7 @@ export function pathForTemplatesList(channel?: TemplateChannel): string {
   if (channel === 'email') return '/templates/email';
   if (channel === 'whatsapp') return '/templates/whatsapp';
   if (channel === 'canned') return '/templates/canned';
+  if (channel === 'flow') return '/templates/flow';
   return '/templates';
 }
 

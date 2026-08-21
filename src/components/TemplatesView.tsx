@@ -6,7 +6,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useKeepAliveActivation } from './KeepAlive';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Plus, Search, Pencil, Trash2, Send, Loader2, Mail, MessageCircle, MessageSquareText, RefreshCw } from 'lucide-react';
+import { Plus, Search, Pencil, Trash2, Send, Loader2, Mail, MessageCircle, MessageSquareText, RefreshCw, LayoutGrid } from 'lucide-react';
 import { CampaignTemplate, EmailTemplateRecord } from '../types';
 import { api } from '../lib/api';
 import { mapTemplateFromApi } from '../lib/mappers';
@@ -34,6 +34,8 @@ import {
   type CannedResponseRecord,
 } from './templates/CannedResponseModal';
 import { CannedResponsesPanel } from './templates/CannedResponsesPanel';
+import { WhatsAppFlowsView } from './templates/WhatsAppFlowsView';
+import { WhatsAppFlowEditor } from './templates/WhatsAppFlowEditor';
 
 function waButtonKind(raw?: string): '' | ButtonKind {
   if (raw === 'URL' || raw === 'QUICK_REPLY' || raw === 'PHONE_NUMBER') return raw;
@@ -100,6 +102,7 @@ export const TemplatesView: React.FC = () => {
   // still in flight. The ref mirror rejects a same-tick double click (e.g.
   // a fast double-click on Submit) before React has re-rendered the
   // disabled state.
+  const [flowEnabled, setFlowEnabled] = useState(false);
   const [busyIds, setBusyIds] = useState<Set<string>>(new Set());
   const busyRef = useRef<Set<string>>(new Set());
   const markBusy = useCallback((id: string) => {
@@ -170,6 +173,13 @@ export const TemplatesView: React.FC = () => {
   useEffect(() => {
     if (!isBuilder) void loadAll();
   }, [loadAll, isBuilder]);
+
+  useEffect(() => {
+    api
+      .getWhatsAppFlowIntegration()
+      .then((res: { enabled?: boolean }) => setFlowEnabled(Boolean(res.enabled)))
+      .catch(() => setFlowEnabled(false));
+  }, []);
 
   useKeepAliveActivation(() => {
     if (!isBuilderRef.current) void loadAll({ silent: true });
@@ -307,6 +317,10 @@ export const TemplatesView: React.FC = () => {
         onSaved={() => void loadWhatsApp()}
       />
     );
+  }
+
+  if (isBuilder && editorRoute.channel === 'flow') {
+    return <WhatsAppFlowEditor flowId={editorRoute.mode === 'edit' ? editorRoute.id : null} onBack={closeBuilder} />;
   }
 
   const handleSync = async () => {
@@ -488,6 +502,20 @@ export const TemplatesView: React.FC = () => {
           <MessageSquareText className="w-3.5 h-3.5" />
           Canned response
         </button>
+        {flowEnabled && (
+          <button
+            type="button"
+            onClick={() => navigate(pathForTemplatesList('flow'))}
+            className={`px-3 py-2 rounded-xl text-sm font-bold border inline-flex items-center gap-1.5 ${
+              channel === 'flow'
+                ? 'bg-primary text-white border-primary'
+                : 'bg-white text-gray-700 border-black/5'
+            }`}
+          >
+            <LayoutGrid className="w-3.5 h-3.5" />
+            Flows
+          </button>
+        )}
       </div>
 
       <p className="shrink-0 text-xs text-gray-500">
@@ -511,6 +539,10 @@ export const TemplatesView: React.FC = () => {
             onSave={handleSaveCanned}
             onDelete={handleDeleteCanned}
           />
+        </div>
+      ) : channel === 'flow' ? (
+        <div className="min-h-0 flex-1 overflow-hidden">
+          <WhatsAppFlowsView />
         </div>
       ) : (
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto">

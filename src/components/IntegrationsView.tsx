@@ -580,6 +580,11 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
   });
   const [enablingEmail, setEnablingEmail] = useState(false);
   const [emailError, setEmailError] = useState('');
+  const [whatsAppFlowStatus, setWhatsAppFlowStatus] = useState<{
+    enabled: boolean;
+    requestedAt: string | null;
+  }>({ enabled: false, requestedAt: null });
+  const [requestingFlowAccess, setRequestingFlowAccess] = useState(false);
   const [channelUsage, setChannelUsage] = useState<ChannelUsageSummary | null>(null);
   const [planFeatures, setPlanFeatures] = useState<PlanFeatureFlags | null>(null);
   const [aiProviderConfigured, setAiProviderConfigured] = useState(false);
@@ -723,6 +728,38 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
       .catch(console.error);
   }, []);
 
+  const loadWhatsAppFlowStatus = useCallback(() => {
+    if (!localStorage.getItem('convosync_token')) return Promise.resolve();
+    return api
+      .getWhatsAppFlowIntegration()
+      .then((res: { enabled?: boolean; requestedAt?: string | null }) => {
+        setWhatsAppFlowStatus({
+          enabled: Boolean(res.enabled),
+          requestedAt: res.requestedAt ?? null,
+        });
+      })
+      .catch(console.error);
+  }, []);
+
+  const handleRequestFlowAccess = useCallback(async () => {
+    if (requestingFlowAccess || whatsAppFlowStatus.requestedAt || whatsAppFlowStatus.enabled) return;
+    setRequestingFlowAccess(true);
+    try {
+      const res = (await api.requestWhatsAppFlowAccess()) as {
+        enabled?: boolean;
+        requestedAt?: string | null;
+      };
+      setWhatsAppFlowStatus({
+        enabled: Boolean(res.enabled),
+        requestedAt: res.requestedAt ?? null,
+      });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setRequestingFlowAccess(false);
+    }
+  }, [requestingFlowAccess, whatsAppFlowStatus.requestedAt, whatsAppFlowStatus.enabled]);
+
   const loadBillingUsage = useCallback(() => {
     if (!localStorage.getItem('convosync_token')) return Promise.resolve();
     return Promise.all([
@@ -813,6 +850,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
       loadMessengerAccounts(),
       loadTelegramAccounts(),
       loadEmailStatus(),
+      loadWhatsAppFlowStatus(),
       loadBillingUsage(),
     ]).finally(() => {
       if (!cancelled) setHubLoading(false);
@@ -827,6 +865,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
     loadMessengerAccounts,
     loadTelegramAccounts,
     loadEmailStatus,
+    loadWhatsAppFlowStatus,
     loadBillingUsage,
   ]);
 
@@ -1860,6 +1899,29 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
               }
               openAiChannel();
             }}
+          />
+
+          <IntegrationCard
+            title="WhatsApp Flow"
+            description="Send interactive multi-screen forms inside WhatsApp — booking, surveys, lead capture. Access is granted after review."
+            icon={LayoutGrid}
+            iconBgClass="bg-[#e6f7ec]"
+            iconClass="text-channel-green"
+            connectLabel={
+              whatsAppFlowStatus.enabled
+                ? 'Enabled'
+                : whatsAppFlowStatus.requestedAt
+                  ? 'Requested'
+                  : requestingFlowAccess
+                    ? 'Requesting…'
+                    : 'Request access'
+            }
+            connectDisabled={
+              whatsAppFlowStatus.enabled ||
+              Boolean(whatsAppFlowStatus.requestedAt) ||
+              requestingFlowAccess
+            }
+            onConnect={() => void handleRequestFlowAccess()}
           />
         </div>
       </section>

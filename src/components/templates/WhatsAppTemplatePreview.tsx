@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { FileText, Image as ImageIcon, Phone, Video } from 'lucide-react';
+import { FileText, Image as ImageIcon, LayoutGrid, Phone, Video } from 'lucide-react';
 import { renderBodyWithSamples, type HeaderFormat, type ButtonKind } from './templateBuilderUtils';
 
 const CHAT_BG_STYLE: React.CSSProperties = {
@@ -30,7 +30,7 @@ type Props = {
   compact?: boolean;
 };
 
-function MessageBubble({
+export function WhatsAppTemplateMessageBubble({
   headerFormat,
   header,
   headerMediaPreviewUrl,
@@ -40,6 +40,7 @@ function MessageBubble({
   buttonType,
   buttonText,
   compact,
+  hideFooterTime,
 }: {
   headerFormat: HeaderFormat;
   header: string;
@@ -50,6 +51,8 @@ function MessageBubble({
   buttonType: '' | ButtonKind;
   buttonText: string;
   compact?: boolean;
+  /** Inbox bubbles already show the real send time in their own chrome — skip the placeholder here. */
+  hideFooterTime?: boolean;
 }) {
   const showTextHeader = headerFormat === 'text' && header.trim();
   const showMediaHeader =
@@ -116,9 +119,11 @@ function MessageBubble({
       {footer.trim() && (
         <p className="px-3.5 pb-2 text-meta text-[#667781]">{footer}</p>
       )}
-      <div className="px-3.5 pb-2 flex justify-end">
-        <span className="text-xs text-[#667781]">12:00</span>
-      </div>
+      {!hideFooterTime && (
+        <div className="px-3.5 pb-2 flex justify-end">
+          <span className="text-xs text-[#667781]">12:00</span>
+        </div>
+      )}
 
       {buttonText.trim() && buttonType && buttonType !== 'none' && (
         <div className="border-t border-[#e9edef]">
@@ -135,6 +140,7 @@ function MessageBubble({
               </svg>
             )}
             {buttonType === 'PHONE_NUMBER' && <Phone className="w-4 h-4" />}
+            {buttonType === 'FLOW' && <LayoutGrid className="w-4 h-4" />}
             {buttonText}
           </button>
         </div>
@@ -164,7 +170,7 @@ export const WhatsAppTemplatePreview: React.FC<Props> = ({
   );
 
   const bubble = (
-    <MessageBubble
+    <WhatsAppTemplateMessageBubble
       headerFormat={headerFormat}
       header={header}
       headerMediaPreviewUrl={headerMediaPreviewUrl}

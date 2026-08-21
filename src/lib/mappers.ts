@@ -278,6 +278,48 @@ export function mapMessageFromApi(raw: Record<string, unknown>): ChatMessage {
       typeof metadata?.templateId === 'string' && metadata.templateId
         ? metadata.templateId
         : undefined,
+    waTemplateHeaderFormat:
+      typeof metadata?.headerFormat === 'string' && metadata.headerFormat
+        ? metadata.headerFormat
+        : undefined,
+    waTemplateHeader:
+      typeof metadata?.header === 'string' && metadata.header ? metadata.header : undefined,
+    waTemplateHeaderMediaStorageKey:
+      typeof metadata?.headerMediaStorageKey === 'string' && metadata.headerMediaStorageKey
+        ? metadata.headerMediaStorageKey
+        : undefined,
+    waTemplateHeaderMediaMimeType:
+      typeof metadata?.headerMediaMimeType === 'string' && metadata.headerMediaMimeType
+        ? metadata.headerMediaMimeType
+        : undefined,
+    waTemplateHeaderMediaFileName:
+      typeof metadata?.headerMediaFileName === 'string' && metadata.headerMediaFileName
+        ? metadata.headerMediaFileName
+        : undefined,
+    waTemplateFooter:
+      typeof metadata?.footer === 'string' && metadata.footer ? metadata.footer : undefined,
+    waTemplateButtonType:
+      typeof metadata?.buttonType === 'string' && metadata.buttonType
+        ? metadata.buttonType
+        : undefined,
+    waTemplateButtonText:
+      typeof metadata?.buttonText === 'string' && metadata.buttonText
+        ? metadata.buttonText
+        : undefined,
+    waTemplateButtonUrl:
+      typeof metadata?.buttonUrl === 'string' && metadata.buttonUrl
+        ? metadata.buttonUrl
+        : undefined,
+    waTemplateButtonPhoneNumber:
+      typeof metadata?.buttonPhoneNumber === 'string' && metadata.buttonPhoneNumber
+        ? metadata.buttonPhoneNumber
+        : undefined,
+    flowResponseName:
+      typeof metadata?.flowName === 'string' && metadata.flowName ? metadata.flowName : undefined,
+    flowResponseFields:
+      metadata?.fields && typeof metadata.fields === 'object' && !Array.isArray(metadata.fields)
+        ? (metadata.fields as Record<string, unknown>)
+        : undefined,
     emailSubject:
       typeof metadata?.subject === 'string' && metadata.subject
         ? metadata.subject
@@ -329,6 +371,7 @@ export function mapTemplateFromApi(raw: Record<string, unknown>): CampaignTempla
     buttonText: raw.buttonText ? String(raw.buttonText) : undefined,
     buttonUrl: raw.buttonUrl ? String(raw.buttonUrl) : undefined,
     buttonPhoneNumber: raw.buttonPhoneNumber ? String(raw.buttonPhoneNumber) : undefined,
+    buttonFlowId: raw.buttonFlowId ? String(raw.buttonFlowId) : undefined,
     rejectionReason: raw.rejectionReason ? String(raw.rejectionReason) : undefined,
   };
 }

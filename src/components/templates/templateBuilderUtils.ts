@@ -1,6 +1,6 @@
 export type HeaderFormat = 'none' | 'text' | 'image' | 'video' | 'document';
 
-export type ButtonKind = 'none' | 'QUICK_REPLY' | 'URL' | 'PHONE_NUMBER';
+export type ButtonKind = 'none' | 'QUICK_REPLY' | 'URL' | 'PHONE_NUMBER' | 'FLOW';
 
 export function headerFormatToApi(format: HeaderFormat): 'TEXT' | 'IMAGE' | 'VIDEO' | 'DOCUMENT' | null {
   if (format === 'text') return 'TEXT';

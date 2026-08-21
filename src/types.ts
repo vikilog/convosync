@@ -68,6 +68,20 @@ export interface ChatMessage {
   /** Email / WA template chrome in Inbox */
   templateName?: string;
   templateId?: string;
+  /** WhatsApp template presentation — how the template actually looked when sent (header/footer/buttons). */
+  waTemplateHeaderFormat?: string;
+  waTemplateHeader?: string;
+  waTemplateHeaderMediaStorageKey?: string;
+  waTemplateHeaderMediaMimeType?: string;
+  waTemplateHeaderMediaFileName?: string;
+  waTemplateFooter?: string;
+  waTemplateButtonType?: string;
+  waTemplateButtonText?: string;
+  waTemplateButtonUrl?: string;
+  waTemplateButtonPhoneNumber?: string;
+  /** WhatsApp Flow submission (interactive.nfm_reply) — the completed form's answers. */
+  flowResponseName?: string;
+  flowResponseFields?: Record<string, unknown>;
   /** Email subject (outbound email / email template) */
   emailSubject?: string;
   /** Rendered email HTML for Inbox bubble (template / compose) */
@@ -144,6 +158,7 @@ export interface CampaignTemplate {
   buttonText?: string;
   buttonUrl?: string;
   buttonPhoneNumber?: string;
+  buttonFlowId?: string;
   rejectionReason?: string;
 }
 

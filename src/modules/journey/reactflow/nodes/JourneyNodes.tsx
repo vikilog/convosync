@@ -43,6 +43,9 @@ type JourneyNodeData = {
   funnelId?: string;
   stageId?: string;
   buttons?: { id: string; title: string }[];
+  flowId?: string;
+  ctaLabel?: string;
+  headerText?: string;
   paths?: { id: string; label?: string; weight?: number }[];
   targetNodeId?: string;
   responseMappings?: { jsonPath: string; attributeKey: string }[];
@@ -248,6 +251,27 @@ export function ButtonsNode(props: NodeProps) {
   );
 }
 
+export function SendFlowNode(props: NodeProps) {
+  const d = props.data as JourneyNodeData;
+  return (
+    <ActionNode
+      props={props}
+      stepName="Send Flow"
+      body={
+        <div className="space-y-1.5">
+          <MessageBody text={d.text} emptyHint="Add a message" />
+          <div className="flex items-center gap-1">
+            <span className="rounded-full border-[0.5px] border-border-subtle bg-white px-1.5 py-0.5 text-[9px] font-medium text-slate-500">
+              {d.flowId ? `▤ ${d.ctaLabel || 'Open'}` : 'No flow selected'}
+            </span>
+          </div>
+        </div>
+      }
+      bodyPlaceholder={null}
+    />
+  );
+}
+
 export function RandomizerNode(props: NodeProps) {
   const d = props.data as JourneyNodeData;
   const paths = Array.isArray(d.paths) ? d.paths : [];
@@ -447,6 +471,7 @@ export const journeyNodeTypes = {
   SEND_MESSAGE: SendMessageNode,
   ASK_QUESTION: AskQuestionNode,
   BUTTONS: ButtonsNode,
+  SEND_FLOW: SendFlowNode,
   ASSIGN_TO: AssignToNode,
   WAIT: WaitNode,
   GOTO_STEP: GotoStepNode,

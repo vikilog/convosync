@@ -29,6 +29,12 @@ type FunnelOption = {
   stages: Array<{ id: string; name: string; position: number }>;
 };
 
+type FlowOption = {
+  id: string;
+  name: string;
+  status: string;
+};
+
 type Props = {
   node: Node | null;
   graph?: JourneyGraph | null;
@@ -121,6 +127,7 @@ function normalizePaths(raw: unknown): PathRow[] {
 export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButtonAction, onFocusNode }: Props) {
   const [local, setLocal] = useState<Record<string, unknown>>({});
   const [funnels, setFunnels] = useState<FunnelOption[]>([]);
+  const [flows, setFlows] = useState<FlowOption[]>([]);
   const [editingButtonId, setEditingButtonId] = useState<string | null>(null);
   const { data: journeys = [] } = useJourneys();
 
@@ -137,7 +144,7 @@ export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButt
   }, [node?.id, node?.data]);
 
   useEffect(() => {
-    if (node?.type !== 'ADD_TO_FUNNEL') return;
+    if (node?.type !== 'ADD_TO_FUNNEL' && node?.type !== 'SEND_FLOW') return;
     let cancelled = false;
     api
       .getLeadFunnels()
@@ -146,6 +153,22 @@ export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButt
       })
       .catch(() => {
         if (!cancelled) setFunnels([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [node?.type]);
+
+  useEffect(() => {
+    if (node?.type !== 'SEND_FLOW') return;
+    let cancelled = false;
+    api
+      .listWhatsAppFlows()
+      .then((res: { items?: FlowOption[] }) => {
+        if (!cancelled) setFlows((res.items ?? []).filter((f) => f.status === 'published'));
+      })
+      .catch(() => {
+        if (!cancelled) setFlows([]);
       });
     return () => {
       cancelled = true;
@@ -700,6 +723,157 @@ export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButt
               onChange={(e) => patch('value', e.target.value)}
             />
           </label>
+        </>
+      )}
+
+      {type === 'SEND_FLOW' && (
+        <>
+          <label className="block text-sm font-semibold text-gray-700">
+            WhatsApp Flow
+            <select
+              className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+              value={String(local.flowId ?? '')}
+              onChange={(e) => patch('flowId', e.target.value)}
+            >
+              <option value="">Select a published flow…</option>
+              {flows.map((f) => (
+                <option key={f.id} value={f.id}>
+                  {f.name}
+                </option>
+              ))}
+            </select>
+            {flows.length === 0 && (
+              <p className="mt-1 text-xs text-slate-500">
+                No published flows yet — publish one in Templates → Flows first.
+              </p>
+            )}
+          </label>
+          <label className="block text-sm font-semibold text-gray-700">
+            Message text
+            <textarea
+              rows={2}
+              className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+              placeholder="Please fill out this quick form"
+              value={String(local.text ?? '')}
+              onChange={(e) => patch('text', e.target.value)}
+            />
+          </label>
+          <label className="block text-sm font-semibold text-gray-700">
+            Header text (optional)
+            <input
+              type="text"
+              className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+              value={String(local.headerText ?? '')}
+              onChange={(e) => patch('headerText', e.target.value)}
+            />
+          </label>
+          <label className="block text-sm font-semibold text-gray-700">
+            Button label
+            <input
+              type="text"
+              maxLength={30}
+              className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+              value={String(local.ctaLabel ?? '')}
+              onChange={(e) => patch('ctaLabel', e.target.value)}
+            />
+          </label>
+          <label className="block text-sm font-semibold text-gray-700">
+            Save submitted fields with prefix
+            <input
+              type="text"
+              className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm font-mono"
+              placeholder="flow_"
+              value={String(local.saveFieldsPrefix ?? '')}
+              onChange={(e) => patch('saveFieldsPrefix', e.target.value)}
+            />
+          </label>
+          <p className="text-xs leading-relaxed text-slate-500">
+            Every answer the contact submits is saved as a contact custom field, e.g.{' '}
+            <code className="font-mono">{String(local.saveFieldsPrefix ?? 'flow_')}full_name</code>. The
+            journey pauses here until the flow is submitted, then continues to the next step.
+          </p>
+
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 space-y-3">
+            <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+              Map answers to contact (optional)
+            </p>
+            <p className="text-[11px] leading-relaxed text-slate-500">
+              Enter the flow's field name (shown as <code className="font-mono">answer is saved as</code>{' '}
+              in the flow builder) to update the contact's real name/phone/email instead of just a
+              custom field.
+            </p>
+            <label className="block text-sm font-semibold text-gray-700">
+              Name field
+              <input
+                type="text"
+                className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm font-mono"
+                placeholder="full_name"
+                value={String(local.mapNameField ?? '')}
+                onChange={(e) => patch('mapNameField', e.target.value)}
+              />
+            </label>
+            <label className="block text-sm font-semibold text-gray-700">
+              Phone field
+              <input
+                type="text"
+                className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm font-mono"
+                placeholder="phone"
+                value={String(local.mapPhoneField ?? '')}
+                onChange={(e) => patch('mapPhoneField', e.target.value)}
+              />
+            </label>
+            <label className="block text-sm font-semibold text-gray-700">
+              Email field
+              <input
+                type="text"
+                className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm font-mono"
+                placeholder="email"
+                value={String(local.mapEmailField ?? '')}
+                onChange={(e) => patch('mapEmailField', e.target.value)}
+              />
+            </label>
+          </div>
+
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 space-y-3">
+            <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
+              Add to funnel (optional)
+            </p>
+            <label className="block text-sm font-semibold text-gray-700">
+              Lead funnel
+              <select
+                className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                value={String(local.funnelId ?? '')}
+                onChange={(e) => patchMany({ funnelId: e.target.value, stageId: '' })}
+              >
+                <option value="">Don't add to a funnel</option>
+                {funnels.map((f) => (
+                  <option key={f.id} value={f.id}>
+                    {f.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {Boolean(local.funnelId) && (
+              <label className="block text-sm font-semibold text-gray-700">
+                Board (optional)
+                <select
+                  className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                  value={String(local.stageId ?? '')}
+                  onChange={(e) => patch('stageId', e.target.value)}
+                >
+                  <option value="">Default (first board)</option>
+                  {(funnels.find((f) => f.id === local.funnelId)?.stages ?? []).map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+            <p className="text-[11px] leading-relaxed text-slate-500">
+              Creates or updates a lead for this contact using the name/phone/email mapped above.
+            </p>
+          </div>
         </>
       )}
 

@@ -8,6 +8,7 @@ import {
   Globe,
   HelpCircle,
   Inbox,
+  LayoutGrid,
   MessageSquare,
   MousePointerClick,
   Play,
@@ -55,6 +56,12 @@ export const STEP_VISUALS: Record<JourneyNodeType, StepVisual> = {
     accent: 'text-violet-700',
     accentBg: 'bg-violet-100',
     nodeBar: 'bg-violet-500',
+  },
+  SEND_FLOW: {
+    icon: LayoutGrid,
+    accent: 'text-channel-green',
+    accentBg: 'bg-accent-green-bg',
+    nodeBar: 'bg-channel-green',
   },
   ASSIGN_TO: {
     icon: UserPlus,

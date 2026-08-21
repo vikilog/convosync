@@ -12,6 +12,7 @@ import {
   FileText,
   HelpCircle,
   Image as ImageIcon,
+  LayoutGrid,
   Loader2,
   Pencil,
   Phone,
@@ -111,6 +112,12 @@ const BUTTON_OPTIONS: {
     desc: 'Dial a phone number',
     icon: <Phone className="w-4 h-4" />,
   },
+  {
+    value: 'FLOW',
+    label: 'Open a Flow',
+    desc: 'Open a WhatsApp Flow form — works outside the 24h chat window',
+    icon: <LayoutGrid className="w-4 h-4" />,
+  },
 ];
 
 type Props = {
@@ -189,6 +196,8 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
   const [buttonUrl, setButtonUrl] = useState('');
   const [buttonPhone, setButtonPhone] = useState('');
   const [buttonUrlSample, setButtonUrlSample] = useState('sample_payment_id');
+  const [buttonFlowId, setButtonFlowId] = useState('');
+  const [publishedFlows, setPublishedFlows] = useState<Array<{ id: string; name: string }>>([]);
   const [showButtonMenu, setShowButtonMenu] = useState(false);
   const [variableSamples, setVariableSamples] = useState<string[]>([]);
   const [submitToMeta, setSubmitToMeta] = useState(true);
@@ -222,6 +231,24 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
   }, [localMediaPreviewUrl]);
 
   useEffect(() => {
+    if (buttonKind !== 'FLOW') return;
+    let cancelled = false;
+    api
+      .listWhatsAppFlows()
+      .then((res: { items?: Array<{ id: string; name: string; status: string }> }) => {
+        if (!cancelled) {
+          setPublishedFlows((res.items ?? []).filter((f) => f.status === 'published'));
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setPublishedFlows([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [buttonKind]);
+
+  useEffect(() => {
     if (template) {
       setName(template.name);
       setCategory(template.category);
@@ -248,6 +275,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
       setButtonUrl(template.buttonUrl || '');
       setButtonPhone(template.buttonPhoneNumber || '');
       setButtonUrlSample('sample_payment_id');
+      setButtonFlowId(template.buttonFlowId || '');
       setVariableSamples(template.variables?.length ? [...template.variables] : []);
       setSubmitToMeta(false);
     } else {
@@ -264,6 +292,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
       setButtonUrl('');
       setButtonPhone('');
       setButtonUrlSample('sample_payment_id');
+      setButtonFlowId('');
       setVariableSamples(['John', 'ORD-12345']);
       setSubmitToMeta(true);
     }
@@ -291,6 +320,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
             buttonText: template.buttonText || '',
             buttonUrl: template.buttonUrl || '',
             buttonPhone: template.buttonPhoneNumber || '',
+            buttonFlowId: template.buttonFlowId || '',
             variableSamples: template.variables?.length ? [...template.variables] : [],
           }
         : {
@@ -307,6 +337,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
             buttonText: '',
             buttonUrl: '',
             buttonPhone: '',
+            buttonFlowId: '',
             variableSamples: ['John', 'ORD-12345'],
           }
     );
@@ -328,6 +359,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
       buttonText,
       buttonUrl,
       buttonPhone,
+      buttonFlowId,
       variableSamples,
     });
     setIsDirty(current !== hydratedSnapshotRef.current);
@@ -345,6 +377,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
     buttonText,
     buttonUrl,
     buttonPhone,
+    buttonFlowId,
     variableSamples,
   ]);
 
@@ -436,6 +469,9 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
       setButtonPhone('');
     } else if (kind === 'URL') {
       setButtonPhone('');
+    } else if (kind === 'FLOW') {
+      setButtonUrl('');
+      setButtonPhone('');
     } else {
       setButtonUrl('');
     }
@@ -517,6 +553,10 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
         setError('Enter a phone number for the call button.');
         return;
       }
+      if (buttonKind === 'FLOW' && !buttonFlowId.trim()) {
+        setError('Select a published flow for the button.');
+        return;
+      }
       if (buttonKind !== 'none' && !buttonText.trim()) {
         setError('Enter button label text.');
         return;
@@ -541,6 +581,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
         buttonText: buttonKind === 'none' ? null : buttonText.trim() || null,
         buttonUrl: buttonKind === 'URL' ? buttonUrl.trim() || null : null,
         buttonPhoneNumber: buttonKind === 'PHONE_NUMBER' ? buttonPhone.trim() || null : null,
+        buttonFlowId: buttonKind === 'FLOW' ? buttonFlowId.trim() || null : null,
         buttonUrlSample:
           buttonKind === 'URL' && /\{\{\d+\}\}/.test(buttonUrl)
             ? buttonUrlSample.trim() || 'sample_link_id'
@@ -1009,7 +1050,9 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                                   ? 'Visit website'
                                   : buttonKind === 'PHONE_NUMBER'
                                     ? 'Call us'
-                                    : 'Quick reply'
+                                    : buttonKind === 'FLOW'
+                                      ? 'Open'
+                                      : 'Quick reply'
                               }
                               className="w-full bg-surface-muted rounded-lg px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
                             />
@@ -1059,6 +1102,29 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                               />
                               <p className="text-meta text-[#65676b] mt-1">
                                 Include country code, e.g. +91 for India
+                              </p>
+                            </div>
+                          )}
+                          {buttonKind === 'FLOW' && (
+                            <div>
+                              <label className="block text-meta font-semibold text-[#65676b] mb-1">
+                                Flow
+                              </label>
+                              <select
+                                value={buttonFlowId}
+                                onChange={(e) => setButtonFlowId(e.target.value)}
+                                className="w-full bg-surface-muted rounded-lg px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
+                              >
+                                <option value="">Select a published flow</option>
+                                {publishedFlows.map((f) => (
+                                  <option key={f.id} value={f.id}>
+                                    {f.name}
+                                  </option>
+                                ))}
+                              </select>
+                              <p className="text-meta text-[#65676b] mt-1">
+                                Only published flows can be attached — this opens outside the 24h
+                                chat window.
                               </p>
                             </div>
                           )}

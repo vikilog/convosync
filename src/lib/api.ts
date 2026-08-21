@@ -115,6 +115,43 @@ async function parseSendFailure(res: Response): Promise<never> {
   }
 }
 
+/** Meta rejects a flow publish with per-field validation detail — surface it, not just the top-line message. */
+export class FlowValidationError extends Error {
+  validationErrors: unknown[];
+  constructor(message: string, validationErrors: unknown[]) {
+    super(message);
+    this.name = 'FlowValidationError';
+    this.validationErrors = validationErrors;
+  }
+}
+
+async function publishWhatsAppFlowRequest(id: string) {
+  const res = await fetch(apiUrl(`/whatsapp-flows/${id}/publish`), {
+    method: 'POST',
+    headers: authHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify({}),
+  });
+  if (res.status === 401) {
+    const text = await res.text();
+    forceLogoutToLogin();
+    throw new Error(parseApiError(text) || 'Unauthorized');
+  }
+  if (!res.ok) {
+    const text = await res.text();
+    try {
+      const body = JSON.parse(text) as { error?: string; validationErrors?: unknown[] };
+      if (body.validationErrors?.length) {
+        throw new FlowValidationError(body.error || 'Meta rejected the flow JSON', body.validationErrors);
+      }
+      throw new Error(body.error || parseApiError(text));
+    } catch (err) {
+      if (err instanceof FlowValidationError) throw err;
+      throw new Error(parseApiError(text));
+    }
+  }
+  return res.json();
+}
+
 export function setToken(token: string) {
   handlingUnauthorized = false;
   localStorage.setItem('convosync_token', token);
@@ -569,6 +606,25 @@ export const api = {
   getDeveloperAiSync: () => get('/developers/ai-sync'),
   getDeveloperAiSyncEvents: () => get('/developers/ai-sync/events'),
   rebuildDeveloperKnowledge: () => post('/developers/ai-sync/rebuild', {}),
+
+  getWhatsAppFlowIntegration: () => get('/integrations/whatsapp-flow'),
+  requestWhatsAppFlowAccess: () => post('/integrations/whatsapp-flow/request-access', {}),
+
+  listWhatsAppFlows: () => get('/whatsapp-flows'),
+  getWhatsAppFlow: (id: string) => get(`/whatsapp-flows/${id}`),
+  createWhatsAppFlow: (data: { name: string; flowJson: unknown; categories?: string[] }) =>
+    post('/whatsapp-flows', data),
+  updateWhatsAppFlow: (
+    id: string,
+    data: { name?: string; flowJson?: unknown; categories?: string[] }
+  ) => put(`/whatsapp-flows/${id}`, data),
+  deleteWhatsAppFlow: (id: string) => del(`/whatsapp-flows/${id}`),
+  publishWhatsAppFlow: (id: string) => publishWhatsAppFlowRequest(id),
+  getWhatsAppFlowMetaStatus: (id: string) => get(`/whatsapp-flows/${id}/meta-status`),
+  sendTestWhatsAppFlow: (
+    id: string,
+    data: { phone: string; bodyText?: string; ctaLabel?: string }
+  ) => post(`/whatsapp-flows/${id}/send-test`, data),
 
   getEmailIntegration: () => get('/email/integration'),
   enableEmailIntegration: () => post('/email/integration/enable', {}),

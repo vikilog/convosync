@@ -28,6 +28,12 @@ export const JOURNEY_STEP_CATALOG: StepCatalogItem[] = [
     category: 'messages',
   },
   {
+    type: 'SEND_FLOW',
+    label: 'Send Flow',
+    description: 'Send a WhatsApp Flow form and wait for it to be submitted',
+    category: 'messages',
+  },
+  {
     type: 'ASSIGN_TO',
     label: 'Assign To',
     description: 'Assign the conversation to a user, AI, bot, or journey',
