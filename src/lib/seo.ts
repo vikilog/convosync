@@ -96,6 +96,10 @@ const TAB_SEO: Record<AppTab, Omit<PageSeo, 'path'>> = {
     title: 'Lead funnel',
     description: 'Kanban pipeline for Instagram-qualified leads from first comment to close.',
   },
+  data: {
+    title: 'Data Tables',
+    description: 'Design your own tables, connect them to a WhatsApp Flow, or enter data by hand.',
+  },
   ctwa: {
     title: 'Ads Manager',
     description: 'Connect Meta and Google Ads, run Click-to-WhatsApp campaigns, and track performance.',

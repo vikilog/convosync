@@ -44,8 +44,13 @@ export const SETTINGS_NAV: SettingsNavGroup[] = [
     items: [
       { id: 'subscription', label: 'Plans' },
       { id: 'wallet', label: 'Wallet' },
+      { id: 'usage', label: 'Usage' },
       { id: 'invoices', label: 'Invoice logs' },
     ],
+  },
+  {
+    title: 'AI',
+    items: [{ id: 'web-widget', label: 'Website Widget' }],
   },
 ];
 
@@ -59,6 +64,7 @@ export const SETTINGS_SECTION_TITLES: Record<SettingsSection, string> = {
   holidays: 'Holidays',
   alerts: 'Human Handoff',
   wallet: 'Wallet',
+  usage: 'Usage',
   subscription: 'Plans',
   billing: 'Billing overview',
   recharge: 'ConvoCoins',
@@ -72,4 +78,5 @@ export const SETTINGS_SECTION_TITLES: Record<SettingsSection, string> = {
   'ai-knowledge': 'AI Knowledge',
   'ai-provider': 'AI Provider',
   'calling-tags': 'Calling tags',
+  'web-widget': 'Website Widget',
 };

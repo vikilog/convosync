@@ -22,6 +22,7 @@ import {
   PauseCircle,
   Mail,
   X,
+  OctagonX,
 } from 'lucide-react';
 import { Contact, ChatMessage, type ChatMessageType } from '../types';
 import { api, formatCatchError, getUserName, SendFailedError } from '../lib/api';
@@ -532,6 +533,7 @@ export const InboxView: React.FC = () => {
   const [pendingComposerPreview, setPendingComposerPreview] = useState<string | null>(null);
 
   const [activeAssigneeValue, setActiveAssigneeValue] = useState<string>('');
+  const [stoppingAutomation, setStoppingAutomation] = useState(false);
   const [chatStatus, setChatStatus] = useState<'Open' | 'Pending' | 'Resolved'>('Open');
   const [journeyProgressRefresh, setJourneyProgressRefresh] = useState(0);
   const [editContactOpen, setEditContactOpen] = useState(false);
@@ -2003,6 +2005,24 @@ export const InboxView: React.FC = () => {
     );
   }
 
+  const activeAssigneeType = decodeAssigneeValue(activeAssigneeValue).assigneeType;
+  const isAutomationActive =
+    activeAssigneeType === 'journey' ||
+    activeAssigneeType === 'ai' ||
+    activeAssigneeType === 'ai_agent' ||
+    activeAssigneeType === 'rule_based';
+
+  const handleStopAutomation = async () => {
+    if (stoppingAutomation) return;
+    setStoppingAutomation(true);
+    setActiveAssigneeValue('');
+    try {
+      await persistConversation({ assigneeType: null, assigneeId: null });
+    } finally {
+      setStoppingAutomation(false);
+    }
+  };
+
   const profileSidebarProps = selectedContact
     ? {
         contact: selectedContact,
@@ -2491,6 +2511,19 @@ export const InboxView: React.FC = () => {
                     }}
                   />
                 </div>
+
+                {isAutomationActive && (
+                  <button
+                    type="button"
+                    onClick={() => void handleStopAutomation()}
+                    disabled={stoppingAutomation}
+                    title="Stop automation for this conversation"
+                    className="hidden items-center gap-1.5 rounded-xl border border-red-100 bg-red-50 px-2.5 py-1.5 text-xs font-bold text-red-600 hover:bg-red-100 disabled:opacity-50 lg:flex"
+                  >
+                    <OctagonX className="h-3.5 w-3.5" />
+                    Stop
+                  </button>
+                )}
 
                 <div
                   className={`flex items-center rounded-xl px-2.5 py-1.5 ring-1 ${

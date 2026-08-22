@@ -29,10 +29,11 @@ export function hasWorkspacePermission(
 export function settingsSectionPermission(section: string): WorkspacePermission | null {
   if (section === 'profile') return null;
   if (section === 'users') return 'users';
-  if (['wallet', 'subscription', 'billing', 'recharge', 'invoices'].includes(section)) return 'billing';
+  if (['wallet', 'usage', 'subscription', 'billing', 'recharge', 'invoices'].includes(section))
+    return 'billing';
   if (section.startsWith('contact-')) return 'contacts';
   if (['inbox-tags', 'canned-response', 'calling-tags'].includes(section)) return 'inbox';
-  if (['ai-copilot', 'ai-knowledge', 'ai-provider'].includes(section)) return 'ai';
+  if (['ai-copilot', 'ai-knowledge', 'ai-provider', 'web-widget'].includes(section)) return 'ai';
   return 'settings';
 }
 
@@ -65,6 +66,8 @@ export function tabPermission(tab: string): WorkspacePermission | null {
     case 'leads':
       // ponytail: UI mock pages — no backend permission yet; gate later when APIs land
       return null;
+    case 'data':
+      return 'campaigns';
     case 'ai-agent':
     case 'media-gallery':
       return 'ai';
@@ -140,6 +143,7 @@ const NAV_TAB_ORDER = [
   'media-gallery',
   'social-listening',
   'leads',
+  'data',
   'manager',
   'ctwa',
   'facebook',

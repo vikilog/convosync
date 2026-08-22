@@ -626,6 +626,50 @@ export const api = {
     data: { phone: string; bodyText?: string; ctaLabel?: string }
   ) => post(`/whatsapp-flows/${id}/send-test`, data),
 
+  listDataTables: () => get('/data-tables'),
+  getDataTable: (id: string) => get(`/data-tables/${id}`),
+  createDataTable: (data: {
+    name: string;
+    description?: string;
+    columns: Array<{ label: string; type: string; options?: string[] }>;
+  }) => post('/data-tables', data),
+  updateDataTable: (id: string, data: { name?: string; description?: string | null }) =>
+    put(`/data-tables/${id}`, data),
+  deleteDataTable: (id: string) => del(`/data-tables/${id}`),
+  addDataTableColumn: (
+    id: string,
+    data: { label: string; type: string; options?: string[] }
+  ) => post(`/data-tables/${id}/columns`, data),
+  updateDataTableColumn: (
+    id: string,
+    columnId: string,
+    data: { label?: string; options?: string[] }
+  ) => put(`/data-tables/${id}/columns/${columnId}`, data),
+  deleteDataTableColumn: (id: string, columnId: string) =>
+    del(`/data-tables/${id}/columns/${columnId}`),
+  listDataTableRows: (id: string, params?: { limit?: number; cursor?: string }) =>
+    get(`/data-tables/${id}/rows`, params as Record<string, string> | undefined),
+  createDataTableRow: (id: string, data: Record<string, unknown>) =>
+    post(`/data-tables/${id}/rows`, { data }),
+  updateDataTableRow: (id: string, rowId: string, data: Record<string, unknown>) =>
+    put(`/data-tables/${id}/rows/${rowId}`, { data }),
+  deleteDataTableRow: (id: string, rowId: string) => del(`/data-tables/${id}/rows/${rowId}`),
+  getDataTableFlows: (id: string) => get(`/data-tables/${id}/flows`),
+  connectDataTableFlow: (id: string, data: { flowId: string; fieldMap: Record<string, string> }) =>
+    put(`/data-tables/${id}/connect-flow`, data),
+  disconnectDataTableFlow: (id: string, flowId: string) =>
+    del(`/data-tables/${id}/connect-flow/${flowId}`),
+
+  getWebWidget: () => get('/web-widget'),
+  updateWebWidget: (data: {
+    enabled?: boolean;
+    botName?: string;
+    greeting?: string;
+    accentColor?: string;
+    agentId?: string | null;
+  }) => put('/web-widget', data),
+  regenerateWebWidgetToken: () => post('/web-widget/regenerate-token', {}),
+
   getEmailIntegration: () => get('/email/integration'),
   enableEmailIntegration: () => post('/email/integration/enable', {}),
   disableEmailIntegration: () => del('/email/integration'),

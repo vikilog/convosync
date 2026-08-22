@@ -5,6 +5,7 @@ import {
   Image as ImageIcon,
   Loader2,
   MoreHorizontal,
+  Music,
   Pencil,
   Plus,
   Power,
@@ -23,7 +24,7 @@ import {
 import { PlanUpgradeBanner } from './PlanUpgradeBanner';
 
 type MediaScope = 'customer' | 'partner' | 'both';
-type MediaType = 'image' | 'pdf' | 'video' | 'document';
+type MediaType = 'image' | 'pdf' | 'video' | 'audio' | 'document';
 
 type MediaAsset = {
   id: string;
@@ -41,8 +42,37 @@ type MediaAsset = {
 };
 
 const ACCEPT =
-  'image/jpeg,image/png,image/webp,image/gif,application/pdf,video/mp4,.pdf,.doc,.docx';
-const MAX_BYTES = 16 * 1024 * 1024;
+  'image/jpeg,image/png,image/webp,image/gif,application/pdf,video/mp4,video/webm,video/quicktime,audio/mpeg,audio/mp3,audio/ogg,audio/wav,audio/mp4,audio/aac,.pdf,.doc,.docx';
+
+/** Mirrors backend MEDIA_MAX_BYTES (media-storage.ts) — WhatsApp Cloud API's own per-type caps. */
+const MEDIA_MAX_BYTES: Record<MediaType, number> = {
+  image: 5 * 1024 * 1024,
+  video: 16 * 1024 * 1024,
+  audio: 16 * 1024 * 1024,
+  pdf: 100 * 1024 * 1024,
+  document: 100 * 1024 * 1024,
+};
+
+const MEDIA_TYPE_LABEL: Record<MediaType, string> = {
+  image: 'Images',
+  video: 'Videos',
+  audio: 'Audio files',
+  pdf: 'PDFs',
+  document: 'Documents',
+};
+
+function mediaTypeFromFile(file: File): MediaType {
+  if (file.type.startsWith('image/')) return 'image';
+  if (file.type.startsWith('video/')) return 'video';
+  if (file.type.startsWith('audio/')) return 'audio';
+  if (file.type === 'application/pdf' || /\.pdf$/i.test(file.name)) return 'pdf';
+  return 'document';
+}
+
+function formatMb(bytes: number): string {
+  const mb = bytes / (1024 * 1024);
+  return Number.isInteger(mb) ? `${mb} MB` : `${mb.toFixed(1)} MB`;
+}
 
 /** Dense tile width — caps card growth so 2 items never become half-page monsters. */
 const GRID_COLS = 'repeat(auto-fill, minmax(min(100%, 200px), 220px))';
@@ -57,7 +87,11 @@ function normalizeMediaDescription(raw: unknown): string {
 function mapAsset(raw: Record<string, unknown>): MediaAsset {
   const typeRaw = String(raw.type ?? 'document');
   const type: MediaType =
-    typeRaw === 'image' || typeRaw === 'pdf' || typeRaw === 'video' || typeRaw === 'document'
+    typeRaw === 'image' ||
+    typeRaw === 'pdf' ||
+    typeRaw === 'video' ||
+    typeRaw === 'audio' ||
+    typeRaw === 'document'
       ? typeRaw
       : 'document';
   const scopeRaw = String(raw.scope ?? 'customer');
@@ -112,16 +146,27 @@ const TYPE_ICON: Record<MediaType, React.ReactNode> = {
   image: <ImageIcon className="w-5 h-5" aria-hidden />,
   pdf: <FileText className="w-5 h-5" aria-hidden />,
   video: <Video className="w-5 h-5" aria-hidden />,
+  audio: <Music className="w-5 h-5" aria-hidden />,
   document: <FileText className="w-5 h-5" aria-hidden />,
 };
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
-function isAllowedFile(file: File): boolean {
-  if (file.size > MAX_BYTES) return false;
-  if (file.type.startsWith('image/') || file.type.startsWith('video/')) return true;
+function isRecognizedFileType(file: File): boolean {
+  if (
+    file.type.startsWith('image/') ||
+    file.type.startsWith('video/') ||
+    file.type.startsWith('audio/')
+  ) {
+    return true;
+  }
   if (file.type === 'application/pdf') return true;
   return /\.(pdf|doc|docx)$/i.test(file.name);
+}
+
+function isAllowedFile(file: File): boolean {
+  if (!isRecognizedFileType(file)) return false;
+  return file.size <= MEDIA_MAX_BYTES[mediaTypeFromFile(file)];
 }
 
 export const MediaGalleryView: React.FC = () => {
@@ -348,12 +393,13 @@ export const MediaGalleryView: React.FC = () => {
 
   const pickFile = (incoming: File | null | undefined) => {
     if (!incoming) return;
-    if (!isAllowedFile(incoming)) {
-      setError(
-        incoming.size > MAX_BYTES
-          ? 'File must be 16 MB or smaller'
-          : 'Use an image, PDF, or Word document'
-      );
+    if (!isRecognizedFileType(incoming)) {
+      setError('Use an image, video, audio file, PDF, or Word document');
+      return;
+    }
+    const type = mediaTypeFromFile(incoming);
+    if (incoming.size > MEDIA_MAX_BYTES[type]) {
+      setError(`${MEDIA_TYPE_LABEL[type]} must be ${formatMb(MEDIA_MAX_BYTES[type])} or smaller`);
       return;
     }
     setError(null);
@@ -931,9 +977,15 @@ export const MediaGalleryView: React.FC = () => {
                     {file
                       ? `${formatBytes(file.size)} · Will upload to S3`
                       : editing
-                        ? 'Keep current file, or pick a new image/PDF/DOC · max 16 MB'
-                        : 'Images, PDF, DOC · max 16 MB'}
+                        ? 'Keep current file, or pick a new one below'
+                        : 'Images, video, audio, PDF, DOC'}
                   </p>
+                  {!file && (
+                    <p className="mt-1 text-[11px] text-slate-400">
+                      Images {formatMb(MEDIA_MAX_BYTES.image)} · Video/Audio{' '}
+                      {formatMb(MEDIA_MAX_BYTES.video)} · PDF/DOC {formatMb(MEDIA_MAX_BYTES.pdf)}
+                    </p>
+                  )}
                   {file && (
                     <button
                       type="button"

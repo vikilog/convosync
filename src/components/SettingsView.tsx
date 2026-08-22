@@ -30,6 +30,8 @@ import { AiCopilotPanel } from './settings/AiCopilotPanel';
 import { WalletPanel } from './settings/WalletPanel';
 import { PlansPanel } from './settings/PlansPanel';
 import { InvoiceLogsPanel } from './settings/InvoiceLogsPanel';
+import { UsageCost } from '../pages/UsageCost';
+import { WebWidgetPanel } from './settings/WebWidgetPanel';
 import { AutomationSettingsPanel } from './settings/AutomationSettingsPanel';
 import { InboxBehaviorPanel } from './settings/InboxBehaviorPanel';
 import { NotificationsPanel } from './settings/NotificationsPanel';
@@ -50,6 +52,8 @@ function SettingsPanel({ section }: { section: SettingsSection }) {
   if (section === 'ai-copilot') return <AiCopilotPanel />;
   if (section === 'subscription') return <PlansPanel />;
   if (section === 'wallet') return <WalletPanel />;
+  if (section === 'usage') return <UsageCost />;
+  if (section === 'web-widget') return <WebWidgetPanel />;
   if (section === 'invoices') return <InvoiceLogsPanel />;
   return <SettingsPlaceholder title={SETTINGS_SECTION_TITLES[section]} />;
 }
@@ -64,7 +68,11 @@ export function SettingsView() {
       ? 'Your current plan, upgrades, and the full pricing catalog.'
       : section === 'wallet'
         ? 'ConvoCoins balance, usage rates, and wallet top-ups.'
-        : section === 'invoices'
+        : section === 'usage'
+          ? 'Token usage and cost breakdown across messaging, AI, and calling.'
+          : section === 'web-widget'
+            ? 'Embed an AI chat bubble on your own website, backed by your AI Knowledge base.'
+            : section === 'invoices'
           ? 'Razorpay payment and order IDs for charges, renewals, and add-ons.'
           : section === 'automation'
             ? 'Pause automations, default reply, persistent menu, and your workspace tag registry.'

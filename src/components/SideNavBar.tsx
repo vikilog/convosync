@@ -19,8 +19,6 @@ import {
   CalendarDays,
   Code2,
   BarChart3,
-  Receipt,
-  Wallet,
   ChevronDown,
   PanelLeft,
   PanelLeftClose,
@@ -31,6 +29,7 @@ import {
   UsersRound,
   MessageSquare,
   Bell,
+  Table2,
 } from 'lucide-react';
 import { useSidebar } from '../contexts/SidebarContext';
 import { api, getWorkspaceId } from '../lib/api';
@@ -49,10 +48,7 @@ import {
   INBOX_UNREAD_TOTAL_EVENT,
 } from '../lib/inboxEvents';
 import { TEAM_CHAT_UNREAD_TOTAL_EVENT } from '../lib/teamChatEvents';
-import { fetchWalletBalanceCc, WALLET_BALANCE_EVENT } from '../lib/walletEvents';
 import { COMPANY_UPDATED_EVENT } from '../lib/companyEvents';
-import { formatCc } from '../lib/convocoins';
-import { ConvoCoinIcon } from './ConvoCoinIcon';
 import { NotificationsPanel } from './notifications/NotificationsPanel';
 import type { WorkspaceSummary } from './WorkspaceSwitcherDialog';
 
@@ -98,7 +94,6 @@ export const SideNavBar: React.FC = () => {
   const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(null);
   const [inboxUnreadTotal, setInboxUnreadTotal] = useState(0);
   const [teamChatUnreadTotal, setTeamChatUnreadTotal] = useState(0);
-  const [walletBalanceCc, setWalletBalanceCc] = useState<number | null>(null);
   const [connectedGoogleTools, setConnectedGoogleTools] = useState<GoogleToolProduct[]>([]);
   const [googleToolsOpen, setGoogleToolsOpen] = useState(() =>
     location.pathname.startsWith('/google-tools')
@@ -232,19 +227,6 @@ export const SideNavBar: React.FC = () => {
     return () => window.removeEventListener(TEAM_CHAT_UNREAD_TOTAL_EVENT, onTeamUnread);
   }, [activeWorkspace?.id]);
 
-  useEffect(() => {
-    const onWalletBalance = (event: Event) => {
-      const balanceCc = (event as CustomEvent<{ balanceCc: number }>).detail?.balanceCc;
-      if (typeof balanceCc === 'number') setWalletBalanceCc(balanceCc);
-    };
-
-    window.addEventListener(WALLET_BALANCE_EVENT, onWalletBalance);
-    void fetchWalletBalanceCc()
-      .then(setWalletBalanceCc)
-      .catch(() => setWalletBalanceCc(null));
-
-    return () => window.removeEventListener(WALLET_BALANCE_EVENT, onWalletBalance);
-  }, [activeWorkspace?.id]);
 
   const displayName = activeWorkspace?.name ?? 'ConvoSync';
   const displayCompanyName = companyName || displayName;
@@ -279,6 +261,7 @@ export const SideNavBar: React.FC = () => {
         { id: 'ai-agent', label: 'AI Agent', icon: Bot },
         { id: 'social-listening', label: 'Social Listening', icon: Ear },
         { id: 'leads', label: 'Leads', icon: UsersRound },
+        { id: 'data', label: 'Data', icon: Table2 },
         { id: 'media-gallery', label: 'Media Gallery', icon: Images },
       ],
     },
@@ -286,8 +269,6 @@ export const SideNavBar: React.FC = () => {
       label: 'Systems',
       items: [
         { id: 'integrations', label: 'Integrations', icon: Plug },
-        { id: 'usage-cost', label: 'Usage', icon: Receipt },
-        { id: 'wallet', label: 'Wallet', icon: Wallet, path: pathForSettingsSection('wallet') },
         { id: 'settings', label: 'Settings', icon: Settings },
       ],
     },
@@ -420,17 +401,13 @@ export const SideNavBar: React.FC = () => {
                   const isLeads = item.id === 'leads';
                   const isAutomations = item.id === 'automations';
                   const isSettings = item.id === 'settings';
-                  const isWallet = item.id === 'wallet';
                   const isSocialListening = item.id === 'social-listening';
                   const itemPath = item.path ?? pathForTab(item.id);
-                  const onWalletPage = location.pathname.startsWith('/settings/wallet');
-                  const onSettingsPage =
-                    location.pathname.startsWith('/settings') && !onWalletPage;
+                  const onSettingsPage = location.pathname.startsWith('/settings');
                   const onAutomationsPage = location.pathname.startsWith('/automations');
 
                   const isIntegrations = item.id === 'integrations';
                   const isItemActive = (isActive: boolean) => {
-                    if (isWallet) return onWalletPage;
                     if (isSettings) return onSettingsPage;
                     if (isAutomations) return onAutomationsPage;
                     return (
@@ -448,13 +425,7 @@ export const SideNavBar: React.FC = () => {
                     <NavLink
                       key={item.id}
                       to={itemPath}
-                      title={
-                        sidebarCollapsed
-                          ? isWallet && walletBalanceCc != null
-                            ? `${item.label} · ${formatCc(walletBalanceCc, { compact: true })}`
-                            : item.label
-                          : undefined
-                      }
+                      title={sidebarCollapsed ? item.label : undefined}
                       className={({ isActive }) =>
                         navLinkClass(isItemActive(isActive), sidebarCollapsed)
                       }
@@ -488,19 +459,7 @@ export const SideNavBar: React.FC = () => {
                                   {item.badge > 99 ? '99+' : item.badge}
                                 </span>
                               ) : null}
-                              {sidebarCollapsed && isWallet && walletBalanceCc != null ? (
-                                <span className="absolute -right-1 -top-1 inline-flex max-w-[2.75rem] items-center gap-0.5 truncate rounded-full bg-amber-50 py-0.5 pl-0.5 pr-1 text-[9px] font-bold tabular-nums text-amber-800 ring-1 ring-amber-200">
-                                  <ConvoCoinIcon size={10} />
-                                  {walletBalanceCc > 999 ? '999+' : walletBalanceCc.toFixed(2)}
-                                </span>
-                              ) : null}
                             </div>
-                            {!sidebarCollapsed && isWallet && walletBalanceCc != null ? (
-                              <span className="ml-auto inline-flex shrink-0 items-center gap-1 text-[11px] font-semibold tabular-nums text-amber-700">
-                                <ConvoCoinIcon size={12} />
-                                {formatCc(walletBalanceCc, { compact: true })}
-                              </span>
-                            ) : null}
                             {!sidebarCollapsed && item.badge ? (
                               <span className="flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-channel-green px-1.5 text-xs font-bold text-white">
                                 {item.badge > 99 ? '99+' : item.badge}

@@ -36,7 +36,6 @@ import { IntegrationsView } from './components/IntegrationsView';
 import { GoogleToolsView } from './components/google-tools/GoogleToolsView';
 import { DevelopersView } from './components/DevelopersView';
 import { SettingsView } from './components/SettingsView';
-import { UsageCost } from './pages/UsageCost';
 import {
   SocialListeningDashboardView,
   SocialListeningFeedView,
@@ -44,6 +43,7 @@ import {
   SocialListeningReviewView,
 } from './components/social-listening';
 import { LeadsKanbanView } from './components/leads';
+import { DataTablesView } from './components/data-tables/DataTablesView';
 import { motion } from 'motion/react';
 import { tabFromPath, pathForTab, pathForNewCampaign, isNewCampaignPath, type AppTab } from './routes';
 import { KeepAlive } from './components/KeepAlive';
@@ -221,6 +221,7 @@ function AppShellLayout({
               : activeTab === 'google-tools' ||
                   activeTab === 'templates' ||
                   activeTab === 'leads' ||
+                  activeTab === 'data' ||
                   activeTab === 'social-listening' ||
                   activeTab === 'automations'
                 ? 'px-2 md:px-4 py-2 md:py-3 flex-1 min-h-0 min-w-0 overflow-hidden'
@@ -239,6 +240,7 @@ function AppShellLayout({
               activeTab === 'google-tools' ||
               activeTab === 'templates' ||
               activeTab === 'leads' ||
+              activeTab === 'data' ||
               activeTab === 'social-listening' ||
               activeTab === 'automations' ||
               campaignCreateWizard
@@ -333,6 +335,11 @@ function AppShellLayout({
                 </RequireConnectedChannel>
               </KeepAlive>
             )}
+            {mountedTabs.has('data') && (
+              <KeepAlive active={activeTab === 'data'}>
+                <DataTablesView />
+              </KeepAlive>
+            )}
             {mountedTabs.has('ctwa') && (
               <KeepAlive active={activeTab === 'ctwa'}>
                 <AdsView />
@@ -366,11 +373,6 @@ function AppShellLayout({
             {mountedTabs.has('integrations') && (
               <KeepAlive active={activeTab === 'integrations'}>
                 <IntegrationsView isActive={activeTab === 'integrations'} />
-              </KeepAlive>
-            )}
-            {mountedTabs.has('usage-cost') && (
-              <KeepAlive active={activeTab === 'usage-cost'}>
-                <UsageCost />
               </KeepAlive>
             )}
             {mountedTabs.has('google-tools') && (
@@ -601,6 +603,8 @@ export default function App() {
       <Route path="/journey" element={<Navigate to="/automations" replace />} />
       <Route path="/instagram-automation/:id" element={<LegacyInstagramAutomationRedirect />} />
       <Route path="/instagram-automation" element={<Navigate to="/automations" replace />} />
+      {/* Usage moved into Settings */}
+      <Route path="/usage-cost" element={<Navigate to="/settings/usage" replace />} />
       <Route
         path="/templates/*"
         element={
