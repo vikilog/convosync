@@ -1,5 +1,5 @@
 import React from 'react';
-import { Instagram, Sparkles } from 'lucide-react';
+import { Facebook, Instagram, Sparkles } from 'lucide-react';
 import { REVIEW_CARD_SHELL, SECTION_THEMES } from './intentConfig';
 import type { ReviewComment, TriageSectionId } from './types';
 import { timeAgo } from '../leads/types';
@@ -36,6 +36,10 @@ export const ReviewRow: React.FC<{
           alt=""
           className="h-8 w-8 shrink-0 rounded-full object-cover border border-black/5"
         />
+      ) : item.platform === 'facebook' ? (
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#e8f4ff] text-[#1877F2]">
+          <Facebook className="h-3.5 w-3.5" />
+        </div>
       ) : (
         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#fce8f0] text-[#C13584]">
           <Instagram className="h-3.5 w-3.5" />

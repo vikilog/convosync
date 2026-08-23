@@ -10,6 +10,7 @@ export function sectionForClassification(input: {
   if (input.classificationStatus !== 'classified' || !input.intentLabel) return null;
   return triageSectionFor({
     id: '_',
+    platform: 'instagram',
     username: '',
     profilePicUrl: null,
     commentText: '',

@@ -3,6 +3,7 @@ import {
   AlertTriangle,
   Check,
   Eye,
+  Facebook,
   Instagram,
   Sparkles,
   X,
@@ -60,6 +61,10 @@ export const ReviewCardTile: React.FC<{
               alt=""
               className="h-5 w-5 rounded-full object-cover"
             />
+          ) : item.platform === 'facebook' ? (
+            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#e8f4ff] text-[#1877F2]">
+              <Facebook className="h-2.5 w-2.5" />
+            </div>
           ) : (
             <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#fce8f0] text-[#C13584]">
               <Instagram className="h-2.5 w-2.5" />

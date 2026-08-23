@@ -14,6 +14,10 @@ import { ReviewCard } from './ReviewCard';
 import { ReviewCardTile } from './ReviewCardTile';
 import { ReviewRow } from './ReviewRow';
 import { SocialListeningSubNav } from './SocialListeningSubNav';
+import {
+  SocialListeningPlatformSwitcher,
+  useSocialListeningPlatform,
+} from './SocialListeningPlatformSwitcher';
 import { SECTION_ORDER, SECTION_THEMES, primaryActionFor } from './intentConfig';
 import {
   sortByNewest,
@@ -64,8 +68,9 @@ function ReviewSkeleton() {
 export const SocialListeningReviewView: React.FC = () => {
   const qc = useQueryClient();
   const invalidate = useInvalidateSocialListening();
-  const pendingQ = useSocialListeningComments('new');
-  const allQ = useSocialListeningComments('all');
+  const platform = useSocialListeningPlatform();
+  const pendingQ = useSocialListeningComments('new', platform);
+  const allQ = useSocialListeningComments('all', platform);
 
   const items = pendingQ.data ?? [];
   const recentHandled = useMemo(
@@ -100,11 +105,11 @@ export const SocialListeningReviewView: React.FC = () => {
   const patchPendingCache = useCallback(
     (ids: string[], status: ReviewStatus) => {
       const idSet = new Set(ids);
-      qc.setQueryData<ReviewComment[]>(slKeys.comments('new'), (prev) =>
+      qc.setQueryData<ReviewComment[]>(slKeys.comments('new', platform), (prev) =>
         (prev ?? []).map((i) => (idSet.has(i.id) ? { ...i, status } : i))
       );
     },
-    [qc]
+    [qc, platform]
   );
 
   const statusScoped = useMemo(
@@ -277,7 +282,7 @@ export const SocialListeningReviewView: React.FC = () => {
       const res = await api.createLead({ socialCommentId: id, funnelId: pickFunnelId });
       const leadId = res.lead?.id;
       if (leadId) {
-        qc.setQueryData<ReviewComment[]>(slKeys.comments('all'), (prev) =>
+        qc.setQueryData<ReviewComment[]>(slKeys.comments('all', platform), (prev) =>
           (prev ?? []).map((c) => (c.id === id ? { ...c, leadId } : c))
         );
       }
@@ -393,7 +398,7 @@ export const SocialListeningReviewView: React.FC = () => {
 
   return (
     <div className="relative flex h-full min-h-0 flex-1 flex-col gap-4 overflow-y-auto bg-white p-4 md:p-6 selection:bg-sky-500/15">
-      <SocialListeningSubNav />
+      <SocialListeningSubNav trailing={<SocialListeningPlatformSwitcher />} />
 
       {loadError && (
         <p

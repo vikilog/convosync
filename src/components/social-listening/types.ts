@@ -14,8 +14,11 @@ export type TriageSectionId =
   | 'questions'
   | 'low_confidence';
 
+export type SocialListeningPlatform = 'instagram' | 'facebook';
+
 export type ReviewComment = {
   id: string;
+  platform: SocialListeningPlatform;
   username: string;
   profilePicUrl: string | null;
   commentText: string;

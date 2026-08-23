@@ -37,9 +37,12 @@ function mapSettings(s: Record<string, unknown>): SocialListeningSettingsState {
 
 export function SocialListeningPostAgentPanel({
   postId,
+  platform = 'instagram',
   onSaved,
 }: {
   postId: string;
+  /** Instagram Automation (journey trigger) is Instagram-only — hidden for Facebook posts. */
+  platform?: 'instagram' | 'facebook';
   onSaved?: (leadFunnelId: string | null) => void;
 }) {
   const qc = useQueryClient();
@@ -177,38 +180,40 @@ export function SocialListeningPostAgentPanel({
           </div>
         ) : (
           <>
-            <div className="rounded-xl bg-surface-muted/40 p-3">
-              <div className="flex items-start gap-2">
-                <Route className="mt-0.5 h-4 w-4 shrink-0 text-sky-600" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-bold text-gray-900">Instagram Automation</p>
-                  <p className="mt-0.5 text-xs text-gray-500">
-                    Start a published automation when someone comments on this post. Leave off to
-                    use global Comment-on-post triggers (keyword match) instead.
-                  </p>
-                  <label className="mt-2 block text-[11px] font-semibold uppercase tracking-wide text-neutral-400">
-                    Automation
-                    <select
-                      className="mt-1 w-full cursor-pointer rounded-lg bg-white ring-1 ring-slate-200/80 px-2.5 py-2 text-sm font-semibold text-gray-800 outline-none focus:border-sky-200 focus:ring-2 focus:ring-sky-100"
-                      value={commentJourneyId}
-                      onChange={(e) => setCommentJourneyId(e.target.value)}
-                    >
-                      <option value="">Off — no post-specific automation</option>
-                      {publishedJourneys.map((j) => (
-                        <option key={j.id} value={j.id}>
-                          {j.name}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  {publishedJourneys.length === 0 && (
-                    <p className="mt-1.5 text-xs text-amber-700">
-                      Publish an Instagram Automation with a Comment on post trigger first.
+            {platform === 'instagram' && (
+              <div className="rounded-xl bg-surface-muted/40 p-3">
+                <div className="flex items-start gap-2">
+                  <Route className="mt-0.5 h-4 w-4 shrink-0 text-sky-600" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-bold text-gray-900">Instagram Automation</p>
+                    <p className="mt-0.5 text-xs text-gray-500">
+                      Start a published automation when someone comments on this post. Leave off to
+                      use global Comment-on-post triggers (keyword match) instead.
                     </p>
-                  )}
+                    <label className="mt-2 block text-[11px] font-semibold uppercase tracking-wide text-neutral-400">
+                      Automation
+                      <select
+                        className="mt-1 w-full cursor-pointer rounded-lg bg-white ring-1 ring-slate-200/80 px-2.5 py-2 text-sm font-semibold text-gray-800 outline-none focus:border-sky-200 focus:ring-2 focus:ring-sky-100"
+                        value={commentJourneyId}
+                        onChange={(e) => setCommentJourneyId(e.target.value)}
+                      >
+                        <option value="">Off — no post-specific automation</option>
+                        {publishedJourneys.map((j) => (
+                          <option key={j.id} value={j.id}>
+                            {j.name}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    {publishedJourneys.length === 0 && (
+                      <p className="mt-1.5 text-xs text-amber-700">
+                        Publish an Instagram Automation with a Comment on post trigger first.
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
             <div>
               <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-neutral-400">

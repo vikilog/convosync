@@ -20,7 +20,7 @@ export function FacebookCallbackPage() {
       sessionStorage.removeItem(FACEBOOK_OAUTH_REDIRECT_STORAGE_KEY);
       setMessage(errorDescription || error);
       const t = setTimeout(
-        () => navigate(`${pathForTab('facebook')}?facebook_error=1`),
+        () => navigate(`${pathForTab('integrations')}?facebook_error=1`),
         2500
       );
       return () => clearTimeout(t);
@@ -29,13 +29,13 @@ export function FacebookCallbackPage() {
     if (!code) {
       sessionStorage.removeItem(FACEBOOK_OAUTH_REDIRECT_STORAGE_KEY);
       setMessage('No authorization code received from Meta.');
-      const t = setTimeout(() => navigate(pathForTab('facebook')), 2500);
+      const t = setTimeout(() => navigate(pathForTab('integrations')), 2500);
       return () => clearTimeout(t);
     }
 
     if (!redirectUri) {
       setMessage('Missing OAuth redirect URI. Start connect again from Facebook Pages.');
-      const t = setTimeout(() => navigate(pathForTab('facebook')), 2500);
+      const t = setTimeout(() => navigate(pathForTab('integrations')), 2500);
       return () => clearTimeout(t);
     }
 
@@ -49,7 +49,7 @@ export function FacebookCallbackPage() {
             : '';
         setMessage(`Connected: ${data.pageName || 'Facebook Page'}${scopeNote}`);
         setTimeout(
-          () => navigate(`${pathForTab('facebook')}?facebook_connected=1`),
+          () => navigate(`${pathForTab('integrations')}?facebook_connected=1`),
           data.missingScopes?.length ? 3500 : 1500
         );
       })
@@ -77,7 +77,7 @@ export function FacebookCallbackPage() {
         }
         setMessage(text);
         setTimeout(
-          () => navigate(`${pathForTab('facebook')}?facebook_error=1`),
+          () => navigate(`${pathForTab('integrations')}?facebook_error=1`),
           3500
         );
       });

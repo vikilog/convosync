@@ -118,6 +118,21 @@ export function useTelegramAccounts() {
   });
 }
 
+export function useFacebookPageConnection() {
+  return useQuery({
+    queryKey: ['facebook-page-connection'],
+    queryFn: async () => {
+      const data = (await api.getFacebookPage().catch(() => ({ connected: false }))) as {
+        connected: boolean;
+        page?: { name?: string };
+      };
+      return { connected: Boolean(data.connected), pageName: data.page?.name ?? null };
+    },
+    staleTime: META_STALE_MS,
+    refetchOnWindowFocus: true,
+  });
+}
+
 export function useEmailIntegration() {
   return useQuery({
     queryKey: ['email-integration'],
@@ -147,6 +162,7 @@ export function useInboxAssigneeMeta() {
   const messenger = useMessengerAccounts();
   const telegram = useTelegramAccounts();
   const email = useEmailIntegration();
+  const facebookPage = useFacebookPageConnection();
 
   const teamAgents = useMemo<InboxNamedOption[]>(
     () => (team.data ?? []).map((a) => ({ id: a.id, name: a.name })),
@@ -224,6 +240,10 @@ export function useInboxAssigneeMeta() {
     : null;
 
   const emailConnected = email.data?.connected === true;
+  const facebookPageConnected = facebookPage.data?.connected === true;
+  const facebookPageInboxLabel = facebookPageConnected
+    ? facebookPage.data?.pageName || 'Facebook Page'
+    : null;
 
   return {
     currentUserId: me.data?.id || getUserId() || '',
@@ -242,8 +262,15 @@ export function useInboxAssigneeMeta() {
     telegramConnected,
     telegramInboxLabel,
     emailConnected,
-    /** True once WA / IG / Messenger / Telegram / Email account queries have settled. */
+    facebookPageConnected,
+    facebookPageInboxLabel,
+    /** True once WA / IG / Messenger / Telegram / Email / Facebook Page queries have settled. */
     channelsReady:
-      wa.isFetched && ig.isFetched && messenger.isFetched && telegram.isFetched && email.isFetched,
+      wa.isFetched &&
+      ig.isFetched &&
+      messenger.isFetched &&
+      telegram.isFetched &&
+      email.isFetched &&
+      facebookPage.isFetched,
   };
 }

@@ -6,6 +6,7 @@ import {
 } from './types';
 
 const base = (partial: Partial<ReviewComment> & Pick<ReviewComment, 'id' | 'intent' | 'confidence'>): ReviewComment => ({
+  platform: 'instagram',
   username: 'u',
   profilePicUrl: null,
   commentText: 'x',

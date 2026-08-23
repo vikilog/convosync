@@ -4,6 +4,7 @@ import {
   AlertTriangle,
   Check,
   Eye,
+  Facebook,
   Instagram,
   MessageCircle,
   Send,
@@ -87,6 +88,10 @@ export const ReviewCard: React.FC<{
                 alt=""
                 className="h-10 w-10 shrink-0 rounded-full object-cover border border-black/5"
               />
+            ) : item.platform === 'facebook' ? (
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#e8f4ff] text-[#1877F2]">
+                <Facebook className="h-4 w-4" aria-hidden />
+              </div>
             ) : (
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#fce8f0] text-[#C13584]">
                 <Instagram className="h-4 w-4" aria-hidden />
@@ -135,7 +140,7 @@ export const ReviewCard: React.FC<{
                 className="h-9 w-9 shrink-0 rounded-md object-cover border border-black/5"
               />
               <p className="min-w-0 truncate text-xs text-slate-500">
-                {item.postCaption || 'Instagram post'}
+                {item.postCaption || (item.platform === 'facebook' ? 'Facebook post' : 'Instagram post')}
               </p>
             </div>
           )}

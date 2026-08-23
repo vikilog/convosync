@@ -5,17 +5,22 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../../lib/api';
 import type { DashboardRange } from '../dashboard/StatCardRow';
-import type { ReviewComment, ReviewStatus } from '../types';
+import type { ReviewComment, ReviewStatus, SocialListeningPlatform } from '../types';
 
 export const slKeys = {
   all: ['social-listening'] as const,
-  accounts: () => [...slKeys.all, 'ig-accounts'] as const,
-  comments: (status: string) => [...slKeys.all, 'comments', status] as const,
-  stats: (range: string) => [...slKeys.all, 'dashboard-stats', range] as const,
-  intents: (range: string) => [...slKeys.all, 'intent-breakdown', range] as const,
-  attention: () => [...slKeys.all, 'needs-attention'] as const,
-  activity: () => [...slKeys.all, 'activity'] as const,
-  topPosts: (range: string) => [...slKeys.all, 'top-posts', range] as const,
+  accounts: () => [...slKeys.all, 'instagram-accounts'] as const,
+  comments: (status: string, platform?: string) =>
+    [...slKeys.all, 'comments', status, platform ?? 'all-platforms'] as const,
+  stats: (range: string, platform?: string) =>
+    [...slKeys.all, 'dashboard-stats', range, platform ?? 'all-platforms'] as const,
+  intents: (range: string, platform?: string) =>
+    [...slKeys.all, 'intent-breakdown', range, platform ?? 'all-platforms'] as const,
+  attention: (platform?: string) =>
+    [...slKeys.all, 'needs-attention', platform ?? 'all-platforms'] as const,
+  activity: (platform?: string) => [...slKeys.all, 'activity', platform ?? 'all-platforms'] as const,
+  topPosts: (range: string, platform?: string) =>
+    [...slKeys.all, 'top-posts', range, platform ?? 'all-platforms'] as const,
   postAutomation: (postIdsKey: string) =>
     [...slKeys.all, 'post-automation', postIdsKey] as const,
   listeningProfile: (igId: string) => [...slKeys.all, 'profile', igId] as const,
@@ -24,6 +29,9 @@ export const slKeys = {
     [...slKeys.all, 'media-detail', mediaId, igId ?? ''] as const,
   mediaComments: (mediaId: string, igId?: string) =>
     [...slKeys.all, 'media-comments', mediaId, igId ?? ''] as const,
+  facebookPosts: () => [...slKeys.all, 'facebook-posts'] as const,
+  facebookPostComments: (postId: string) =>
+    [...slKeys.all, 'facebook-post-comments', postId] as const,
 };
 
 const STALE_MS = 30_000;
@@ -31,6 +39,7 @@ const REFETCH_MS = 60_000;
 
 export type ApiReviewComment = {
   id: string;
+  platform: ReviewComment['platform'];
   username: string;
   profilePicUrl: string | null;
   commentText: string;
@@ -52,6 +61,7 @@ export type ApiReviewComment = {
 export function mapApiReviewComment(c: ApiReviewComment): ReviewComment {
   return {
     id: c.id,
+    platform: c.platform,
     username: c.username,
     profilePicUrl: c.profilePicUrl,
     commentText: c.commentText,
@@ -97,11 +107,14 @@ export function useInstagramAccountsQuery() {
   });
 }
 
-export function useSocialListeningComments(status: string = 'new') {
+export function useSocialListeningComments(
+  status: string = 'new',
+  platform?: SocialListeningPlatform
+) {
   return useQuery({
-    queryKey: slKeys.comments(status),
+    queryKey: slKeys.comments(status, platform),
     queryFn: async () => {
-      const res = await api.getSocialListeningComments({ status });
+      const res = await api.getSocialListeningComments({ status, platform });
       return res.comments.map(mapApiReviewComment);
     },
     staleTime: STALE_MS,
@@ -110,10 +123,10 @@ export function useSocialListeningComments(status: string = 'new') {
   });
 }
 
-export function useDashboardStats(range: DashboardRange) {
+export function useDashboardStats(range: DashboardRange, platform?: SocialListeningPlatform) {
   return useQuery({
-    queryKey: slKeys.stats(range),
-    queryFn: () => api.getSocialListeningDashboardStats(range),
+    queryKey: slKeys.stats(range, platform),
+    queryFn: () => api.getSocialListeningDashboardStats(range, platform),
     staleTime: STALE_MS,
     refetchOnWindowFocus: true,
     refetchInterval: REFETCH_MS,
@@ -121,11 +134,11 @@ export function useDashboardStats(range: DashboardRange) {
   });
 }
 
-export function useIntentBreakdown(range: DashboardRange) {
+export function useIntentBreakdown(range: DashboardRange, platform?: SocialListeningPlatform) {
   return useQuery({
-    queryKey: slKeys.intents(range),
+    queryKey: slKeys.intents(range, platform),
     queryFn: async () => {
-      const res = await api.getSocialListeningIntentBreakdown(range);
+      const res = await api.getSocialListeningIntentBreakdown(range, platform);
       return res.items;
     },
     staleTime: STALE_MS,
@@ -135,11 +148,11 @@ export function useIntentBreakdown(range: DashboardRange) {
   });
 }
 
-export function useNeedsAttention() {
+export function useNeedsAttention(platform?: SocialListeningPlatform) {
   return useQuery({
-    queryKey: slKeys.attention(),
+    queryKey: slKeys.attention(platform),
     queryFn: async () => {
-      const res = await api.getSocialListeningNeedsAttention(25);
+      const res = await api.getSocialListeningNeedsAttention(25, platform);
       return res.items;
     },
     staleTime: STALE_MS,
@@ -148,11 +161,11 @@ export function useNeedsAttention() {
   });
 }
 
-export function useSocialActivity() {
+export function useSocialActivity(platform?: SocialListeningPlatform) {
   return useQuery({
-    queryKey: slKeys.activity(),
+    queryKey: slKeys.activity(platform),
     queryFn: async () => {
-      const res = await api.getSocialListeningActivity(30);
+      const res = await api.getSocialListeningActivity(30, platform);
       return res.events;
     },
     staleTime: STALE_MS,
@@ -161,17 +174,28 @@ export function useSocialActivity() {
   });
 }
 
-export function useTopPosts(range: DashboardRange) {
+export function useTopPosts(range: DashboardRange, platform?: SocialListeningPlatform) {
   return useQuery({
-    queryKey: slKeys.topPosts(range),
+    queryKey: slKeys.topPosts(range, platform),
     queryFn: async () => {
-      const res = await api.getSocialListeningTopPosts(range);
+      const res = await api.getSocialListeningTopPosts(range, 8, platform);
       return res.posts;
     },
     staleTime: STALE_MS,
     refetchOnWindowFocus: true,
     refetchInterval: REFETCH_MS,
     placeholderData: (prev) => prev,
+  });
+}
+
+/** Page-level reach/engagement analytics for the Dashboard's Facebook view. */
+export function useFacebookPageInsights(platform: SocialListeningPlatform) {
+  return useQuery({
+    queryKey: [...slKeys.all, 'facebook-page-insights'] as const,
+    queryFn: () => api.getSocialListeningFacebookInsights(),
+    enabled: platform === 'facebook',
+    staleTime: STALE_MS,
+    refetchOnWindowFocus: true,
   });
 }
 
@@ -194,6 +218,52 @@ export function usePostAutomationMap(postIds: string[]) {
     enabled: postIds.length > 0,
     staleTime: STALE_MS,
     refetchOnWindowFocus: true,
+  });
+}
+
+/** Connected Facebook Page profile (picture/name/category/followers) for the Content tab's profile card. */
+export function useFacebookPageProfile() {
+  return useQuery({
+    queryKey: [...slKeys.all, 'facebook-page-profile'] as const,
+    queryFn: async () => {
+      const res = await api.getFacebookPage();
+      return res.connected ? res.page ?? null : null;
+    },
+    staleTime: STALE_MS,
+    refetchOnWindowFocus: true,
+  });
+}
+
+export function useFacebookListeningPosts() {
+  return useQuery({
+    queryKey: slKeys.facebookPosts(),
+    queryFn: async () => {
+      const res = await api.getFacebookPosts();
+      return res.posts;
+    },
+    staleTime: STALE_MS,
+    refetchOnWindowFocus: true,
+    refetchInterval: REFETCH_MS,
+  });
+}
+
+/** Classified/actionable comments for one Facebook post — same AI pipeline as Instagram, flat (no reply nesting). */
+export function useFacebookPostComments(postId: string | null) {
+  return useQuery({
+    queryKey: slKeys.facebookPostComments(postId || ''),
+    queryFn: async () => {
+      const res = await api.getSocialListeningComments({ status: 'all', postId: postId! });
+      return res.comments;
+    },
+    enabled: Boolean(postId),
+    staleTime: 15_000,
+    refetchOnWindowFocus: true,
+    refetchInterval: (query) => {
+      const rows = query.state.data;
+      if (!rows) return REFETCH_MS;
+      const pending = rows.some((c) => c.classificationStatus === 'pending' || c.classificationStatus == null);
+      return pending ? 2_500 : REFETCH_MS;
+    },
   });
 }
 
@@ -274,11 +344,20 @@ export function useSocialCommentAction() {
       id,
       action,
       message,
+      hidden,
     }: {
       id: string;
-      action: 'approve_dm' | 'approve_reply' | 'escalate' | 'ignore' | 'review';
+      action:
+        | 'approve_dm'
+        | 'approve_reply'
+        | 'escalate'
+        | 'ignore'
+        | 'review'
+        | 'hide_comment'
+        | 'delete_comment';
       message?: string;
-    }) => api.socialListeningCommentAction(id, { action, message }),
+      hidden?: boolean;
+    }) => api.socialListeningCommentAction(id, { action, message, hidden }),
     onSettled: () => {
       invalidate();
     },

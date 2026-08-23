@@ -4,7 +4,7 @@ import { useInboxAssigneeMeta } from '../hooks/inbox/useInboxMeta';
 import { pathForIntegrationsChannel, type IntegrationsChannel } from '../routes';
 import { ConnectChannelEmpty } from './ConnectChannelEmpty';
 
-export type RequiredConnectChannel = 'whatsapp' | 'instagram' | 'messenger' | 'email';
+export type RequiredConnectChannel = 'whatsapp' | 'instagram' | 'messenger' | 'email' | 'facebook';
 
 type Props = {
   children: ReactNode;
@@ -30,6 +30,7 @@ export function RequireConnectedChannel({
     instagramConnected,
     messengerConnected,
     emailConnected,
+    facebookPageConnected,
     channelsReady,
   } = useInboxAssigneeMeta();
 
@@ -38,6 +39,7 @@ export function RequireConnectedChannel({
     instagram: instagramConnected,
     messenger: messengerConnected,
     email: emailConnected,
+    facebook: facebookPageConnected,
   };
 
   const hasRequired = anyOf.some((channel) => connected[channel]);

@@ -31,6 +31,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { api } from '../lib/api';
+import { startFacebookPageConnect } from '../lib/metaOAuth';
 import {
   channelConnectBlockedReason,
   isChannelCountLimitReached,
@@ -236,7 +237,7 @@ type ChannelUsageSummary = {
 };
 
 type ConnectedChannelCardProps = {
-  channel: 'whatsapp' | 'instagram' | 'messenger' | 'email' | 'telegram';
+  channel: 'whatsapp' | 'instagram' | 'messenger' | 'email' | 'telegram' | 'facebook';
   channelLabel: string;
   title: string;
   subtitle: string;
@@ -268,7 +269,7 @@ function ConnectedChannelCard({
   const iconBg =
     channel === 'whatsapp'
       ? 'bg-[#e6f7ec]'
-      : channel === 'messenger'
+      : channel === 'messenger' || channel === 'facebook'
         ? 'bg-[#e8f4ff]'
         : channel === 'email'
           ? 'bg-[#e8f4ff]'
@@ -278,7 +279,7 @@ function ConnectedChannelCard({
   const iconColor =
     channel === 'whatsapp'
       ? 'text-channel-green'
-      : channel === 'messenger'
+      : channel === 'messenger' || channel === 'facebook'
         ? 'text-[#1877F2]'
         : channel === 'email'
           ? 'text-channel-blue'
@@ -288,7 +289,7 @@ function ConnectedChannelCard({
   const borderAccent =
     channel === 'whatsapp'
       ? 'border-channel-green/20'
-      : channel === 'messenger'
+      : channel === 'messenger' || channel === 'facebook'
         ? 'border-[#1877F2]/25'
         : channel === 'email'
           ? 'border-channel-blue/25'
@@ -318,7 +319,7 @@ function ConnectedChannelCard({
           ? 'bg-amber-50 text-amber-800 border-amber-200'
           : channel === 'whatsapp'
             ? 'bg-[#e6f7ec] text-channel-green border-channel-green/20'
-            : channel === 'email' || channel === 'messenger'
+            : channel === 'email' || channel === 'messenger' || channel === 'facebook'
               ? 'bg-[#e8f4ff] text-channel-blue border-channel-blue/25'
               : channel === 'telegram'
                 ? 'bg-[#e8f6fd] text-[#229ED9] border-[#229ED9]/25'
@@ -342,7 +343,9 @@ function ConnectedChannelCard({
           ? 'Token expiring soon — reconnect recommended'
           : channel === 'email'
             ? 'Connected · Ready to send'
-            : 'Connected · Inbox ready';
+            : channel === 'facebook'
+              ? 'Connected · Posts & comments synced'
+              : 'Connected · Inbox ready';
   const metaLine = [subtitle, detail].filter(Boolean).join(' · ');
 
   return (
@@ -362,7 +365,7 @@ function ConnectedChannelCard({
           >
             {channel === 'whatsapp' ? (
               <WhatsAppBrandIcon className={`w-4 h-4 ${iconColor}`} />
-            ) : channel === 'messenger' ? (
+            ) : channel === 'messenger' || channel === 'facebook' ? (
               <Facebook className={`w-4 h-4 ${iconColor}`} />
             ) : channel === 'email' ? (
               <Mail className={`w-4 h-4 ${iconColor}`} />
@@ -548,6 +551,15 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
   const [instagramAccounts, setInstagramAccounts] = useState<InstagramAccountSummary[]>([]);
   const [messengerAccounts, setMessengerAccounts] = useState<MessengerAccountSummary[]>([]);
   const [telegramAccounts, setTelegramAccounts] = useState<TelegramAccountSummary[]>([]);
+  const [facebookPage, setFacebookPage] = useState<{
+    id: string;
+    name: string;
+    category: string;
+    picture: string;
+    followersCount: number;
+  } | null>(null);
+  const [connectingFacebookPage, setConnectingFacebookPage] = useState(false);
+  const [facebookPageError, setFacebookPageError] = useState('');
   const [disconnectingKey, setDisconnectingKey] = useState<string | null>(null);
   const [instagramConnectError, setInstagramConnectError] = useState('');
   const [googleConnectError, setGoogleConnectError] = useState('');
@@ -706,6 +718,16 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
       .catch(console.error);
   }, []);
 
+  const loadFacebookPage = useCallback(() => {
+    if (!localStorage.getItem('convosync_token')) return Promise.resolve();
+    return api
+      .getFacebookPage()
+      .then((data: { connected: boolean; page?: { id: string; name: string; category: string; picture: string; followersCount: number } }) => {
+        setFacebookPage(data.connected && data.page ? data.page : null);
+      })
+      .catch(console.error);
+  }, []);
+
   const loadEmailStatus = useCallback(() => {
     if (!localStorage.getItem('convosync_token')) return Promise.resolve();
     return api
@@ -849,6 +871,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
       loadInstagramAccounts(),
       loadMessengerAccounts(),
       loadTelegramAccounts(),
+      loadFacebookPage(),
       loadEmailStatus(),
       loadWhatsAppFlowStatus(),
       loadBillingUsage(),
@@ -864,6 +887,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
     loadInstagramAccounts,
     loadMessengerAccounts,
     loadTelegramAccounts,
+    loadFacebookPage,
     loadEmailStatus,
     loadWhatsAppFlowStatus,
     loadBillingUsage,
@@ -924,6 +948,19 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
       setInstagramConnectError('Instagram connection failed. Please try again.');
       setView('instagram');
       next.delete('instagram_error');
+      changed = true;
+    }
+    if (searchParams.get('facebook_connected') === '1') {
+      void loadFacebookPage();
+      setView('hub');
+      setFacebookPageError('');
+      next.delete('facebook_connected');
+      changed = true;
+    }
+    if (searchParams.get('facebook_error') === '1') {
+      setFacebookPageError('Facebook Page connection failed. Please try again.');
+      setView('hub');
+      next.delete('facebook_error');
       changed = true;
     }
     if (searchParams.get('messenger_connected') === '1') {
@@ -989,6 +1026,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
     loadInstagramAccounts,
     loadMessengerAccounts,
     loadWhatsappAccounts,
+    loadFacebookPage,
     searchParams,
     setSearchParams,
   ]);
@@ -1059,6 +1097,29 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
     setInstagramAutoLaunch(false);
     await Promise.all([loadInstagramAccounts(), loadMessengerAccounts(), loadBillingUsage()]);
     setView('hub');
+  };
+
+  const handleFacebookPageConnect = async () => {
+    setFacebookPageError('');
+    setConnectingFacebookPage(true);
+    try {
+      await startFacebookPageConnect();
+    } catch (err) {
+      setConnectingFacebookPage(false);
+      setFacebookPageError(err instanceof Error ? err.message : 'Failed to start Facebook login');
+    }
+  };
+
+  const handleFacebookPageDisconnect = async () => {
+    setDisconnectingKey('fbpage');
+    try {
+      await api.disconnectFacebookPage();
+      await loadFacebookPage();
+    } catch (err) {
+      setFacebookPageError(err instanceof Error ? err.message : 'Failed to disconnect Facebook Page');
+    } finally {
+      setDisconnectingKey(null);
+    }
   };
 
   const handleMessengerDisconnect = async (pageId: string) => {
@@ -1538,19 +1599,22 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
   const messengerConnected = messengerAccounts.length > 0;
   const telegramConnected = telegramAccounts.length > 0;
   const emailConnected = emailStatus.connected;
+  const facebookPageConnected = facebookPage !== null;
   const hasConnectedChannels =
     whatsappConnected ||
     instagramConnected ||
     messengerConnected ||
     telegramConnected ||
-    emailConnected;
+    emailConnected ||
+    facebookPageConnected;
   const hasAddableChannels =
     !whatsappConnected ||
     !coexistenceConnected ||
     !instagramConnected ||
     !messengerConnected ||
     !telegramConnected ||
-    !emailConnected;
+    !emailConnected ||
+    !facebookPageConnected;
 
   const reconnectAlerts: ReconnectAlert[] = instagramAccounts
     .filter((a) => a.statusLabel === 'expired' || a.statusLabel === 'revoked')
@@ -1650,6 +1714,12 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
       {emailError && (
         <p className="text-sm font-bold text-red-600 bg-red-50 border border-red-100 rounded-xl px-4 py-2">
           {emailError}
+        </p>
+      )}
+
+      {facebookPageError && (
+        <p className="text-sm font-bold text-red-600 bg-red-50 border border-red-100 rounded-xl px-4 py-2">
+          {facebookPageError}
         </p>
       )}
 
@@ -1782,6 +1852,28 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
                 disconnecting={disconnectingKey === `tg:${account.botId}`}
               />
             ))}
+
+            {facebookPage && (
+              <ConnectedChannelCard
+                channel="facebook"
+                channelLabel="Facebook Page"
+                title={facebookPage.name}
+                subtitle={facebookPage.category || 'Connected Page'}
+                avatarUrl={facebookPage.picture}
+                onManage={() => navigate('/social-listening/content?platform=facebook')}
+                onDisconnect={() => {
+                  if (
+                    !window.confirm(
+                      `Disconnect ${facebookPage.name}? Social Listening comments and analytics for this Page will stop syncing.`
+                    )
+                  ) {
+                    return;
+                  }
+                  void handleFacebookPageDisconnect();
+                }}
+                disconnecting={disconnectingKey === 'fbpage'}
+              />
+            )}
           </div>
           {instagramSyncMessage ? (
             <p className="mt-2 text-xs font-medium text-gray-500">{instagramSyncMessage}</p>
@@ -1844,6 +1936,19 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
                 connectLabel={messengerBlocked ? 'Upgrade plan' : isChannelLimitReached ? 'Limit reached' : 'Connect'}
                 connectDisabled={Boolean(messengerBlocked) || isChannelLimitReached}
                 onConnect={handleMessengerConnect}
+              />
+            )}
+
+            {!facebookPageConnected && (
+              <IntegrationCard
+                title="Facebook Page"
+                description="Connect a Facebook Page to publish posts and let Social Listening classify, triage, and auto-reply to its comments."
+                icon={Facebook}
+                iconBgClass="bg-[#e8f4ff]"
+                iconClass="text-[#1877F2]"
+                connectLabel={connectingFacebookPage ? 'Redirecting…' : 'Connect'}
+                connectDisabled={connectingFacebookPage}
+                onConnect={() => void handleFacebookPageConnect()}
               />
             )}
 

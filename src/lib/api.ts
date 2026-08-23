@@ -1627,13 +1627,19 @@ export const api = {
       message,
       ...(instagramUserId ? { instagramUserId } : {}),
     }) as Promise<{ success: boolean; id: string }>,
-  getSocialListeningComments: (params?: { status?: string; postId?: string }) => {
+  getSocialListeningComments: (params?: {
+    status?: string;
+    postId?: string;
+    platform?: 'instagram' | 'facebook';
+  }) => {
     const q: Record<string, string> = {};
     if (params?.status) q.status = params.status;
     if (params?.postId) q.postId = params.postId;
+    if (params?.platform) q.platform = params.platform;
     return get('/social-listening/comments', q) as Promise<{
       comments: Array<{
         id: string;
+        platform: 'instagram' | 'facebook';
         commentId: string;
         postId: string;
         username: string;
@@ -1653,6 +1659,7 @@ export const api = {
         dmSentAt?: string | null;
         dmStatus?: string | null;
         dmError?: string | null;
+        leadId?: string | null;
         createdAt: string;
         needsReview: boolean;
       }>;
@@ -1673,9 +1680,17 @@ export const api = {
   socialListeningCommentAction: (
     id: string,
     data: {
-      action: 'approve_dm' | 'approve_reply' | 'escalate' | 'ignore' | 'review';
+      action:
+        | 'approve_dm'
+        | 'approve_reply'
+        | 'escalate'
+        | 'ignore'
+        | 'review'
+        | 'hide_comment'
+        | 'delete_comment';
       message?: string;
       instagramUserId?: string;
+      hidden?: boolean;
     }
   ) =>
     post(`/social-listening/comments/${encodeURIComponent(id)}/action`, data) as Promise<{
@@ -1755,8 +1770,11 @@ export const api = {
         autoDmsSentToday: number;
       };
     }>,
-  getSocialListeningDashboardStats: (range: 'today' | '7d' | '30d' | 'all' = '7d') =>
-    get('/social-listening/dashboard/stats', { range }) as Promise<{
+  getSocialListeningDashboardStats: (
+    range: 'today' | '7d' | '30d' | 'all' = '7d',
+    platform?: 'instagram' | 'facebook'
+  ) =>
+    get('/social-listening/dashboard/stats', { range, ...(platform ? { platform } : {}) }) as Promise<{
       range: string;
       totalComments: number;
       pendingReview: number;
@@ -1766,14 +1784,21 @@ export const api = {
       maxAutoDmsPerDay: number;
       autoResponseEnabled: boolean;
     }>,
-  getSocialListeningIntentBreakdown: (range: 'today' | '7d' | '30d' | 'all' = '7d') =>
-    get('/social-listening/dashboard/intent-breakdown', { range }) as Promise<{
+  getSocialListeningIntentBreakdown: (
+    range: 'today' | '7d' | '30d' | 'all' = '7d',
+    platform?: 'instagram' | 'facebook'
+  ) =>
+    get('/social-listening/dashboard/intent-breakdown', {
+      range,
+      ...(platform ? { platform } : {}),
+    }) as Promise<{
       range: string;
       items: Array<{ intent: string; label: string; count: number }>;
     }>,
-  getSocialListeningNeedsAttention: (limit = 25) =>
+  getSocialListeningNeedsAttention: (limit = 25, platform?: 'instagram' | 'facebook') =>
     get('/social-listening/dashboard/needs-attention', {
       limit: String(limit),
+      ...(platform ? { platform } : {}),
     }) as Promise<{
       items: Array<{
         id: string;
@@ -1792,8 +1817,11 @@ export const api = {
         suggestedAction: 'approve_dm' | 'escalate' | 'retry_dm' | 'open_review';
       }>;
     }>,
-  getSocialListeningActivity: (limit = 30) =>
-    get('/social-listening/dashboard/activity', { limit: String(limit) }) as Promise<{
+  getSocialListeningActivity: (limit = 30, platform?: string) =>
+    get('/social-listening/dashboard/activity', {
+      limit: String(limit),
+      ...(platform ? { platform } : {}),
+    }) as Promise<{
       events: Array<{
         id: string;
         eventType: string;
@@ -1804,10 +1832,15 @@ export const api = {
         createdAt: string;
       }>;
     }>,
-  getSocialListeningTopPosts: (range: 'today' | '7d' | '30d' | 'all' = '7d', limit = 8) =>
+  getSocialListeningTopPosts: (
+    range: 'today' | '7d' | '30d' | 'all' = '7d',
+    limit = 8,
+    platform?: 'instagram' | 'facebook'
+  ) =>
     get('/social-listening/dashboard/top-posts', {
       range,
       limit: String(limit),
+      ...(platform ? { platform } : {}),
     }) as Promise<{
       range: string;
       posts: Array<{
@@ -1817,6 +1850,30 @@ export const api = {
         postThumbnailUrl: string;
         postCaption: string;
       }>;
+    }>,
+  getSocialListeningFacebookInsights: () =>
+    get('/social-listening/dashboard/facebook-insights') as Promise<{
+      connected: boolean;
+      error?: string;
+      insights?: {
+        pageFans: number;
+        pageFansDelta: number;
+        pageImpressions: number;
+        pageEngagedUsers: number;
+        pagePostEngagements: number;
+        pageViews: number;
+      };
+      daily?: Array<{
+        date: string;
+        label: string;
+        reach: number;
+        engagedUsers: number;
+        postEngagements: number;
+        pageViews: number;
+        newFollowers: number;
+      }>;
+      grantedScopes?: string[];
+      missingScopes?: string[];
     }>,
   getSocialListeningPostAutomation: (postIds: string[]) =>
     get('/social-listening/posts/automation', {
@@ -2216,12 +2273,6 @@ export const api = {
         canDelete: boolean;
       }>;
     }>,
-  replyFacebookComment: (commentId: string, message: string) =>
-    post(`/facebook/comments/${encodeURIComponent(commentId)}/reply`, { message }),
-  hideFacebookComment: (commentId: string, hidden = true) =>
-    post(`/facebook/comments/${encodeURIComponent(commentId)}/hide`, { hidden }),
-  deleteFacebookComment: (commentId: string) =>
-    del(`/facebook/comments/${encodeURIComponent(commentId)}`),
   createFacebookPost: (message: string, scheduledTime?: string) =>
     post('/facebook/posts', { message, scheduledTime }),
   getFacebookInsights: () =>

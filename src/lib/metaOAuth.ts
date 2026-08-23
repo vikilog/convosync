@@ -1,3 +1,5 @@
+import { api } from './api';
+
 const META_OAUTH_VERSION = 'v19.0';
 
 export function buildMetaOAuthDialogUrl(params: {
@@ -32,6 +34,28 @@ export const FACEBOOK_PAGE_SCOPES = [
   'read_insights',
   'business_management',
 ].join(',');
+
+/** Starts the Facebook Page OAuth dialog and redirects the browser — no /facebook page visit needed. */
+export async function startFacebookPageConnect(options?: { rerequest?: boolean }): Promise<void> {
+  const metaAppId = import.meta.env.VITE_META_APP_ID;
+  if (!metaAppId || metaAppId === 'your_meta_app_id_here') {
+    throw new Error('Meta App ID is missing. Set VITE_META_APP_ID in frontend/.env.');
+  }
+  const oauth = await api.getFacebookOAuthState();
+  const redirectUri = oauth.redirectUri;
+  if (!redirectUri) {
+    throw new Error('Missing redirect URI from server');
+  }
+  sessionStorage.setItem(FACEBOOK_OAUTH_REDIRECT_STORAGE_KEY, redirectUri);
+  const authUrl = buildMetaOAuthDialogUrl({
+    clientId: metaAppId,
+    redirectUri,
+    state: oauth.state,
+    scope: FACEBOOK_PAGE_SCOPES,
+    authType: options?.rerequest ? 'rerequest' : undefined,
+  });
+  window.location.assign(authUrl);
+}
 
 export const META_ADS_OAUTH_REDIRECT_STORAGE_KEY = 'convosync_meta_ads_oauth_redirect';
 export const META_ADS_OAUTH_RETURN_PATH_KEY = 'convosync_meta_ads_oauth_return';

@@ -2,28 +2,34 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Clapperboard,
+  EyeOff,
   ExternalLink,
+  Facebook,
   Heart,
   Instagram,
   MessageCircle,
   RefreshCw,
   Reply,
   Send,
+  Trash2,
   UserPlus,
 } from 'lucide-react';
 import { api } from '../../lib/api';
 import { pathForTab } from '../../routes';
 import { IGNORE_BTN_CLASS } from './intentConfig';
 import { IntentBadge, primaryActionForComment } from './IntentBadge';
-import type { IntentLabel } from './types';
+import type { IntentLabel, SocialListeningPlatform } from './types';
 import {
   slKeys,
+  useFacebookListeningPosts,
+  useFacebookPostComments,
   useInvalidateSocialListening,
   useMediaComments,
   useMediaDetail,
 } from './hooks/useSocialListeningQueries';
 import { useQueryClient } from '@tanstack/react-query';
 import { SocialListeningPostAgentPanel } from './SocialListeningPostAgentPanel';
+import { useSocialListeningPlatform } from './SocialListeningPlatformSwitcher';
 import { clubCommentsByUser, commenterKey } from './commentClub';
 
 function mediaIdFromPath(pathname: string): string | null {
@@ -161,6 +167,7 @@ function CommentsSkeleton({ rows = 4 }: { rows?: number }) {
 
 function CommentRow({
   comment,
+  platform,
   depth,
   replyToId,
   replyText,
@@ -179,8 +186,11 @@ function CommentRow({
   onRetryClassify,
   onRetryDm,
   onAddLead,
+  onHide,
+  onDelete,
 }: {
   comment: ListeningComment;
+  platform: SocialListeningPlatform;
   depth: number;
   replyToId: string | null;
   replyText: string;
@@ -202,6 +212,9 @@ function CommentRow({
   onRetryClassify: (comment: ListeningComment) => void;
   onRetryDm: (comment: ListeningComment) => void;
   onAddLead: (comment: ListeningComment) => void;
+  /** Facebook Page comments only — Meta Graph hide/delete. */
+  onHide: (comment: ListeningComment) => void;
+  onDelete: (comment: ListeningComment) => void;
 }) {
   const isReplying = replyToId === comment.id;
   const busy = actionBusyIds.has(comment.socialCommentId || comment.id);
@@ -234,7 +247,7 @@ function CommentRow({
             <div className="flex items-center gap-2">
               <div className="flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto whitespace-nowrap">
                 <p className="shrink-0 text-sm font-bold text-gray-950">
-                  {comment.username ? `@${comment.username}` : 'Instagram user'}
+                  {comment.username ? `@${comment.username}` : platform === 'facebook' ? 'Facebook user' : 'Instagram user'}
                 </p>
                 {comment.timestamp && (
                   <span className="shrink-0 text-[11px] font-medium text-gray-400">
@@ -336,6 +349,29 @@ function CommentRow({
                 <Reply className="h-3 w-3" />
                 Reply
               </button>
+
+              {platform === 'facebook' && (
+                <>
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => onHide(comment)}
+                    className="inline-flex cursor-pointer items-center gap-1 text-[11px] font-bold text-gray-500 hover:text-amber-700 disabled:opacity-50"
+                  >
+                    <EyeOff className="h-3 w-3" />
+                    Hide
+                  </button>
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => onDelete(comment)}
+                    className="inline-flex cursor-pointer items-center gap-1 text-[11px] font-bold text-gray-500 hover:text-red-600 disabled:opacity-50"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                    Delete
+                  </button>
+                </>
+              )}
             </div>
 
             {isReplying && (
@@ -432,6 +468,7 @@ function CommentRow({
             <CommentRow
               key={reply.id}
               comment={reply}
+              platform={platform}
               depth={depth + 1}
               replyToId={replyToId}
               replyText={replyText}
@@ -448,6 +485,8 @@ function CommentRow({
               onRetryClassify={onRetryClassify}
               onRetryDm={onRetryDm}
               onAddLead={onAddLead}
+              onHide={onHide}
+              onDelete={onDelete}
             />
           ))}
         </div>
@@ -458,6 +497,7 @@ function CommentRow({
 
 function CommentClub({
   club,
+  platform,
   replyToId,
   replyText,
   replySending,
@@ -472,6 +512,8 @@ function CommentClub({
   onRetryClassify,
   onRetryDm,
   onAddLead,
+  onHide,
+  onDelete,
 }: {
   club: {
     key: string;
@@ -479,6 +521,7 @@ function CommentClub({
     leadId: string | null;
     comments: ListeningComment[];
   };
+  platform: SocialListeningPlatform;
   replyToId: string | null;
   replyText: string;
   replySending: boolean;
@@ -493,6 +536,8 @@ function CommentClub({
   onRetryClassify: (comment: ListeningComment) => void;
   onRetryDm: (comment: ListeningComment) => void;
   onAddLead: (comment: ListeningComment) => void;
+  onHide: (comment: ListeningComment) => void;
+  onDelete: (comment: ListeningComment) => void;
 }) {
   return (
     <div className="rounded-xl bg-white ring-1 ring-slate-200/80 p-3">
@@ -501,6 +546,7 @@ function CommentClub({
           <CommentRow
             key={comment.id}
             comment={comment}
+            platform={platform}
             depth={0}
             replyToId={replyToId}
             replyText={replyText}
@@ -519,6 +565,8 @@ function CommentClub({
             onRetryClassify={onRetryClassify}
             onRetryDm={onRetryDm}
             onAddLead={onAddLead}
+            onHide={onHide}
+            onDelete={onDelete}
           />
         ))}
       </div>
@@ -534,15 +582,74 @@ export const SocialListeningMediaDetailView: React.FC = () => {
   const invalidate = useInvalidateSocialListening();
   const mediaId = useMemo(() => mediaIdFromPath(location.pathname), [location.pathname]);
   const instagramUserId = searchParams.get('ig') || undefined;
+  const platform = useSocialListeningPlatform();
 
-  const mediaQ = useMediaDetail(mediaId, instagramUserId);
-  const commentsQ = useMediaComments(mediaId, instagramUserId);
+  const mediaQ = useMediaDetail(platform === 'instagram' ? mediaId : null, instagramUserId);
+  const commentsQ = useMediaComments(platform === 'instagram' ? mediaId : null, instagramUserId);
+  const facebookPostsQ = useFacebookListeningPosts();
+  const facebookCommentsQ = useFacebookPostComments(platform === 'facebook' ? mediaId : null);
 
-  const media = mediaQ.data?.media ?? null;
-  const comments = (commentsQ.data?.comments ?? []) as ListeningComment[];
-  const nextCursor = commentsQ.data?.nextCursor ?? null;
-  const loading = (mediaQ.isLoading || commentsQ.isLoading) && !mediaQ.data && !commentsQ.data;
-  const commentsLoading = commentsQ.isPending || (commentsQ.isFetching && !commentsQ.data);
+  const facebookMedia = useMemo(() => {
+    if (platform !== 'facebook' || !mediaId) return null;
+    const post = (facebookPostsQ.data ?? []).find((p) => p.id === mediaId);
+    if (!post) return null;
+    return {
+      id: post.id,
+      caption: post.message || null,
+      mediaType: 'IMAGE',
+      mediaProductType: null,
+      mediaUrl: post.fullPicture || null,
+      thumbnailUrl: post.fullPicture || null,
+      permalink: post.permalink || null,
+      timestamp: post.createdTime || null,
+      likeCount: post.likesCount ?? null,
+      commentsCount: post.commentsCount ?? null,
+      isReel: false,
+    } as ListeningMediaItem;
+  }, [platform, mediaId, facebookPostsQ.data]);
+
+  const facebookComments = useMemo(() => {
+    if (platform !== 'facebook') return [];
+    return (facebookCommentsQ.data ?? []).map(
+      (c): ListeningComment => ({
+        id: c.commentId,
+        socialCommentId: c.id,
+        text: c.commentText,
+        username: c.username || null,
+        timestamp: c.createdAt,
+        likeCount: null,
+        fromId: null,
+        intent: c.intent,
+        intentLabel: c.intent,
+        confidence: c.confidence,
+        classificationStatus: c.classificationStatus as ListeningComment['classificationStatus'],
+        classificationError: c.classificationError,
+        reviewStatus: c.status,
+        suggestedReply: c.suggestedDm,
+        status: c.rawStatus,
+        publicReplyText: c.publicReplyText ?? null,
+        dmReplyText: c.dmReplyText ?? null,
+        dmSentAt: c.dmSentAt ?? null,
+        dmStatus: c.dmStatus ?? null,
+        dmError: c.dmError ?? null,
+        leadId: c.leadId ?? null,
+        replies: [],
+      })
+    );
+  }, [platform, facebookCommentsQ.data]);
+
+  const media = platform === 'facebook' ? facebookMedia : mediaQ.data?.media ?? null;
+  const comments: ListeningComment[] =
+    platform === 'facebook' ? facebookComments : ((commentsQ.data?.comments ?? []) as ListeningComment[]);
+  const nextCursor = platform === 'facebook' ? null : commentsQ.data?.nextCursor ?? null;
+  const loading =
+    platform === 'facebook'
+      ? (facebookPostsQ.isLoading || facebookCommentsQ.isLoading) && !facebookPostsQ.data && !facebookCommentsQ.data
+      : (mediaQ.isLoading || commentsQ.isLoading) && !mediaQ.data && !commentsQ.data;
+  const commentsLoading =
+    platform === 'facebook'
+      ? facebookCommentsQ.isPending || (facebookCommentsQ.isFetching && !facebookCommentsQ.data)
+      : commentsQ.isPending || (commentsQ.isFetching && !commentsQ.data);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState('');
   const [replyToId, setReplyToId] = useState<string | null>(null);
@@ -598,11 +705,15 @@ export const SocialListeningMediaDetailView: React.FC = () => {
   }, [mediaId]);
 
   const load = useCallback(async (_opts?: { quiet?: boolean }) => {
+    if (platform === 'facebook') {
+      await Promise.all([facebookPostsQ.refetch(), facebookCommentsQ.refetch()]);
+      return;
+    }
     await Promise.all([mediaQ.refetch(), commentsQ.refetch()]);
-  }, [mediaQ, commentsQ]);
+  }, [platform, facebookPostsQ, facebookCommentsQ, mediaQ, commentsQ]);
 
   const loadMoreComments = async () => {
-    if (!mediaId || !nextCursor || loadingMore) return;
+    if (platform === 'facebook' || !mediaId || !nextCursor || loadingMore) return;
     setLoadingMore(true);
     try {
       const page = await api.getInstagramListeningComments(mediaId, {
@@ -625,7 +736,10 @@ export const SocialListeningMediaDetailView: React.FC = () => {
   };
 
   const patchCommentStatus = (socialCommentId: string, status: string, extra?: Partial<ListeningComment>) => {
-    if (!mediaId) return;
+    // Facebook comments live in a differently-shaped cache entry (a flat API
+    // row list, not { comments, nextCursor }) — skip the optimistic patch and
+    // rely on invalidate() below to refetch; the UI catches up within a beat.
+    if (!mediaId || platform === 'facebook') return;
     const walk = (list: ListeningComment[]): ListeningComment[] =>
       list.map((c) => ({
         ...(c.socialCommentId === socialCommentId ? { ...c, status, ...extra } : c),
@@ -691,6 +805,28 @@ export const SocialListeningMediaDetailView: React.FC = () => {
     }
   };
 
+  const runHideOrDelete = async (
+    comment: ListeningComment,
+    action: 'hide_comment' | 'delete_comment'
+  ) => {
+    if (!comment.socialCommentId) return;
+    if (actionBusyRef.current.has(comment.socialCommentId)) return;
+    markBusy(comment.socialCommentId);
+    setReplyError('');
+    try {
+      await api.socialListeningCommentAction(comment.socialCommentId, {
+        action,
+        hidden: true,
+      });
+    } catch (err) {
+      setReplyError(parseApiError(err));
+    } finally {
+      clearBusy(comment.socialCommentId);
+      invalidate();
+      await load({ quiet: true });
+    }
+  };
+
   const sendReply = async () => {
     if (!replyToId || !replyText.trim()) return;
     setReplySending(true);
@@ -737,7 +873,7 @@ export const SocialListeningMediaDetailView: React.FC = () => {
   };
 
   const patchLeadIdForCommenter = (from: ListeningComment, leadId: string) => {
-    if (!mediaId) return;
+    if (!mediaId || platform === 'facebook') return;
     const key = commenterKey(from);
     const walk = (list: ListeningComment[]): ListeningComment[] =>
       list.map((c) => ({
@@ -819,9 +955,11 @@ export const SocialListeningMediaDetailView: React.FC = () => {
           type="button"
           onClick={() =>
             navigate(
-              instagramUserId
-                ? `/social-listening/content?ig=${encodeURIComponent(instagramUserId)}`
-                : '/social-listening/content'
+              platform === 'facebook'
+                ? '/social-listening/content?platform=facebook'
+                : instagramUserId
+                  ? `/social-listening/content?ig=${encodeURIComponent(instagramUserId)}`
+                  : '/social-listening/content'
             )
           }
           className="inline-flex items-center gap-1.5 text-sm font-bold text-gray-500 hover:text-primary"
@@ -836,7 +974,7 @@ export const SocialListeningMediaDetailView: React.FC = () => {
               rel="noreferrer"
               className="inline-flex items-center gap-1 rounded-xl bg-white ring-1 ring-slate-200/80 px-3 py-1.5 text-xs font-bold text-gray-700 hover:bg-surface-muted"
             >
-              Open on Instagram
+              {platform === 'facebook' ? 'Open on Facebook' : 'Open on Instagram'}
               <ExternalLink className="h-3 w-3" />
             </a>
           )}
@@ -888,8 +1026,16 @@ export const SocialListeningMediaDetailView: React.FC = () => {
                   />
                 )
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-[#C13584]">
-                  <Instagram className="h-8 w-8" />
+                <div
+                  className={`flex h-full w-full items-center justify-center ${
+                    platform === 'facebook' ? 'text-[#1877F2]' : 'text-[#C13584]'
+                  }`}
+                >
+                  {platform === 'facebook' ? (
+                    <Facebook className="h-8 w-8" />
+                  ) : (
+                    <Instagram className="h-8 w-8" />
+                  )}
                 </div>
               )}
               {media.isReel && (
@@ -925,6 +1071,7 @@ export const SocialListeningMediaDetailView: React.FC = () => {
           <div className="min-h-0 flex-1">
             <SocialListeningPostAgentPanel
               postId={mediaId}
+              platform={platform}
               onSaved={(funnelId) => setPostLeadFunnelId(funnelId)}
             />
           </div>
@@ -960,6 +1107,7 @@ export const SocialListeningMediaDetailView: React.FC = () => {
                     <CommentClub
                       key={club.key}
                       club={club}
+                      platform={platform}
                       replyToId={replyToId}
                       replyText={replyText}
                       replySending={replySending}
@@ -1025,6 +1173,8 @@ export const SocialListeningMediaDetailView: React.FC = () => {
                           });
                       }}
                       onAddLead={(c) => void openAddLead(c)}
+                      onHide={(c) => void runHideOrDelete(c, 'hide_comment')}
+                      onDelete={(c) => void runHideOrDelete(c, 'delete_comment')}
                     />
                   ))}
                 </div>

@@ -315,7 +315,12 @@ function AppShellLayout({
             )}
             {mountedTabs.has('social-listening') && (
               <KeepAlive active={activeTab === 'social-listening'}>
-                <RequireConnectedChannel>
+                <RequireConnectedChannel
+                  anyOf={['instagram', 'facebook']}
+                  title="Connect Instagram or a Facebook Page first"
+                  description="Social Listening needs a connected Instagram account or Facebook Page to classify and triage comments."
+                  connectChannel="instagram"
+                >
                   {location.pathname.startsWith('/social-listening/review') ? (
                     <SocialListeningReviewView />
                   ) : location.pathname.startsWith('/social-listening/media/') ? (

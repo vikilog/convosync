@@ -25,9 +25,11 @@ export type DashboardStats = {
 export function StatCardRow({
   stats,
   loading,
+  reviewHref = '/social-listening/review',
 }: {
   stats: DashboardStats | null;
   loading: boolean;
+  reviewHref?: string;
 }) {
   if (loading || !stats) {
     return (
@@ -62,7 +64,7 @@ export function StatCardRow({
         value={stats.pendingReview.toLocaleString()}
         footer={
           <Link
-            to="/social-listening/review"
+            to={reviewHref}
             className="text-[11px] font-bold text-amber-700 hover:underline"
           >
             Open review queue →

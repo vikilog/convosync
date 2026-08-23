@@ -1,20 +1,32 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   Bot,
   Clapperboard,
+  Facebook,
   Heart,
   Image as ImageIcon,
   Instagram,
   MessageCircle,
   RefreshCw,
   Sparkles,
+  Unlink,
 } from 'lucide-react';
 import { api } from '../../lib/api';
 import { pathForIntegrationsChannel } from '../../routes';
+import { startFacebookPageConnect } from '../../lib/metaOAuth';
+import { useFacebookPageConnection } from '../../hooks/inbox/useInboxMeta';
 import { SocialListeningSubNav } from './SocialListeningSubNav';
 import {
+  SocialListeningPlatformSwitcher,
+  useSocialListeningPlatform,
+} from './SocialListeningPlatformSwitcher';
+import {
+  useFacebookListeningPosts,
+  useFacebookPageProfile,
   useInstagramAccountsQuery,
+  useInvalidateSocialListening,
   useListeningMedia,
   useListeningProfile,
   usePostAutomationMap,
@@ -56,18 +68,72 @@ function parseApiError(err: unknown): string {
 
 export const SocialListeningFeedView: React.FC = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const igFromUrl = searchParams.get('ig');
   const [selectedIgId, setSelectedIgId] = useState<string | null>(igFromUrl);
+  const platform = useSocialListeningPlatform();
   const [filter, setFilter] = useState<MediaFilter>('all');
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState('');
   const [extraItems, setExtraItems] = useState<ListeningMediaItem[]>([]);
   const [extraCursor, setExtraCursor] = useState<string | null>(null);
   const [insightPostId, setInsightPostId] = useState<string | null>(null);
+  const [connectingFacebook, setConnectingFacebook] = useState(false);
+  const [disconnectingFacebook, setDisconnectingFacebook] = useState(false);
+
+  const qc = useQueryClient();
+  const invalidateSocialListening = useInvalidateSocialListening();
 
   const accountsQ = useInstagramAccountsQuery();
   const accounts = accountsQ.data ?? [];
+
+  const facebookConnectionQ = useFacebookPageConnection();
+  const facebookConnected = facebookConnectionQ.data?.connected ?? false;
+
+  const handleConnectFacebook = async () => {
+    setConnectingFacebook(true);
+    setError('');
+    try {
+      await startFacebookPageConnect();
+    } catch (err) {
+      setConnectingFacebook(false);
+      setError(parseApiError(err));
+    }
+  };
+
+  const handleDisconnectFacebook = async () => {
+    if (
+      !window.confirm(
+        'Disconnect this Facebook Page? Comments, replies, and analytics for it will stop syncing.'
+      )
+    ) {
+      return;
+    }
+    setDisconnectingFacebook(true);
+    try {
+      await api.disconnectFacebookPage();
+      await qc.invalidateQueries({ queryKey: ['facebook-page-connection'] });
+      invalidateSocialListening();
+      if (platform === 'facebook') {
+        const next = new URLSearchParams(searchParams);
+        next.delete('platform');
+        setSearchParams(next);
+      }
+    } catch (err) {
+      setError(parseApiError(err));
+    } finally {
+      setDisconnectingFacebook(false);
+    }
+  };
+  const facebookProfileQ = useFacebookPageProfile();
+  const facebookProfile = platform === 'facebook' ? facebookProfileQ.data ?? null : null;
+  const loadingFacebookProfile = platform === 'facebook' && facebookProfileQ.isLoading && !facebookProfileQ.data;
+  const facebookPostsQ = useFacebookListeningPosts();
+  const facebookPosts = useMemo(
+    () => (platform === 'facebook' ? facebookPostsQ.data ?? [] : []),
+    [platform, facebookPostsQ.data]
+  );
+  const loadingFacebookPosts = platform === 'facebook' && facebookPostsQ.isLoading && !facebookPostsQ.data;
 
   useEffect(() => {
     if (!accounts.length) {
@@ -153,15 +219,159 @@ export const SocialListeningFeedView: React.FC = () => {
   };
 
   const openPostComments = (postId: string) => {
+    if (platform === 'facebook') {
+      navigate(`/social-listening/media/${encodeURIComponent(postId)}?platform=facebook`);
+      return;
+    }
     const path = selectedIgId
       ? `/social-listening/media/${encodeURIComponent(postId)}?ig=${encodeURIComponent(selectedIgId)}`
       : `/social-listening/media/${encodeURIComponent(postId)}`;
     navigate(path);
   };
 
+  if (platform === 'facebook') {
+    return (
+      <div className="relative flex h-full min-h-0 flex-1 flex-col gap-4 overflow-y-auto bg-white p-4 md:p-6">
+        <SocialListeningSubNav trailing={<SocialListeningPlatformSwitcher />} />
+
+        {error && (
+          <p className="rounded-xl border border-red-100 bg-red-50 px-4 py-2 text-sm font-bold text-red-600">
+            {error}
+          </p>
+        )}
+
+        {facebookConnected && (
+          <section className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+            {loadingFacebookProfile && !facebookProfile ? (
+              <div className="flex gap-4 animate-pulse">
+                <div className="h-20 w-20 shrink-0 rounded-2xl bg-slate-100" />
+                <div className="flex-1 space-y-2 py-1">
+                  <div className="h-4 w-40 rounded bg-slate-100" />
+                  <div className="h-3 w-24 rounded bg-slate-100" />
+                </div>
+              </div>
+            ) : facebookProfile ? (
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+                {facebookProfile.picture ? (
+                  <img
+                    src={facebookProfile.picture}
+                    alt=""
+                    className="h-20 w-20 shrink-0 rounded-2xl border border-black/5 object-cover"
+                  />
+                ) : (
+                  <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-[#e8f4ff] text-[#1877F2]">
+                    <Facebook className="h-8 w-8" />
+                  </div>
+                )}
+                <div className="min-w-0 flex-1">
+                  <h1 className="text-lg font-black text-gray-950">{facebookProfile.name}</h1>
+                  <p className="text-sm font-bold text-gray-500">
+                    {[facebookProfile.category, `${formatCount(facebookProfile.followersCount)} followers`]
+                      .filter(Boolean)
+                      .join(' · ')}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => void handleDisconnectFacebook()}
+                  disabled={disconnectingFacebook}
+                  className="inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-xl bg-white px-3 py-1.5 text-xs font-bold text-red-500 ring-1 ring-slate-200/80 hover:border-red-200 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <Unlink className="h-3.5 w-3.5" />
+                  {disconnectingFacebook ? 'Disconnecting…' : 'Disconnect'}
+                </button>
+              </div>
+            ) : null}
+          </section>
+        )}
+
+        {!facebookConnected ? (
+          <div className="flex flex-1 flex-col items-center justify-center rounded-2xl border border-dashed border-black/10 bg-white px-6 py-16 text-center">
+            <Facebook className="mb-3 h-10 w-10 text-[#1877F2]" />
+            <h2 className="text-lg font-black text-gray-950">Connect a Facebook Page</h2>
+            <p className="mt-2 max-w-sm text-sm text-gray-500">
+              Link a Facebook Page to browse posts and let AI classify and triage its comments.
+            </p>
+            <button
+              type="button"
+              onClick={() => void handleConnectFacebook()}
+              disabled={connectingFacebook}
+              className="mt-6 inline-flex items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-black text-white hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {connectingFacebook ? 'Redirecting…' : 'Connect Facebook Page'}
+            </button>
+          </div>
+        ) : loadingFacebookPosts ? (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="aspect-square animate-pulse rounded-xl bg-slate-100" />
+            ))}
+          </div>
+        ) : facebookPosts.length === 0 ? (
+          <div className="flex flex-1 flex-col items-center justify-center rounded-2xl border border-dashed border-black/10 bg-white px-6 py-16 text-center">
+            <ImageIcon className="mb-3 h-10 w-10 text-gray-300" />
+            <h2 className="text-lg font-black text-gray-950">No posts yet</h2>
+            <p className="mt-2 max-w-sm text-sm text-gray-500">
+              Posts from your connected Facebook Page will appear here.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            {facebookPosts.map((post) => (
+              <div
+                key={post.id}
+                role="link"
+                tabIndex={0}
+                onClick={() => openPostComments(post.id)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    openPostComments(post.id);
+                  }
+                }}
+                className="group relative aspect-square cursor-pointer overflow-hidden rounded-xl bg-white ring-1 ring-slate-200/80 text-left shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
+              >
+                {post.fullPicture ? (
+                  <img
+                    src={post.fullPicture}
+                    alt=""
+                    className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.03]"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-slate-50 text-gray-300">
+                    <ImageIcon className="h-8 w-8" />
+                  </div>
+                )}
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2.5 pt-8 opacity-0 transition-opacity group-hover:opacity-100">
+                  {post.message && (
+                    <p className="mb-1 line-clamp-2 pr-2 text-[11px] font-medium text-white/90">
+                      {post.message}
+                    </p>
+                  )}
+                  <div className="flex items-center gap-3 text-[11px] font-bold text-white">
+                    <span className="inline-flex items-center gap-1">
+                      <Heart className="h-3 w-3" />
+                      {formatCount(post.likesCount)}
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <MessageCircle className="h-3 w-3" />
+                      {formatCount(post.commentsCount)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   if (loadingAccounts) {
     return (
       <div className="flex h-full min-h-0 flex-1 flex-col gap-4 overflow-y-auto bg-white p-4 md:p-6">
+        <SocialListeningPlatformSwitcher />
         <div className="h-40 animate-pulse rounded-2xl bg-white ring-1 ring-slate-200/80" />
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
@@ -175,7 +385,7 @@ export const SocialListeningFeedView: React.FC = () => {
   if (!accounts.length) {
     return (
       <div className="flex h-full min-h-0 flex-1 flex-col gap-4 overflow-y-auto bg-white p-4 md:p-6">
-        <SocialListeningSubNav />
+        <SocialListeningSubNav trailing={<SocialListeningPlatformSwitcher />} />
         <div className="flex flex-1 flex-col items-center justify-center rounded-2xl border border-dashed border-black/10 bg-white px-6 py-16 text-center">
           <Instagram className="mb-3 h-10 w-10 text-[#C13584]" />
           <h2 className="text-lg font-black text-gray-950">Connect Instagram</h2>
@@ -198,15 +408,18 @@ export const SocialListeningFeedView: React.FC = () => {
     <div className="relative flex h-full min-h-0 flex-1 flex-col gap-4 overflow-y-auto bg-white p-4 md:p-6">
       <SocialListeningSubNav
         trailing={
-          <button
-            type="button"
-            disabled={!selectedIgId || loadingProfile || loadingMedia}
-            onClick={() => loadFeed()}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-white ring-1 ring-slate-200/80 px-3 py-1.5 text-xs font-bold text-gray-700 hover:bg-surface-muted disabled:opacity-50"
-          >
-            <RefreshCw className={`h-3.5 w-3.5 ${loadingProfile || loadingMedia ? 'animate-spin' : ''}`} />
-            Refresh
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              disabled={!selectedIgId || loadingProfile || loadingMedia}
+              onClick={() => loadFeed()}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-white ring-1 ring-slate-200/80 px-3 py-1.5 text-xs font-bold text-gray-700 hover:bg-surface-muted disabled:opacity-50"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${loadingProfile || loadingMedia ? 'animate-spin' : ''}`} />
+              Refresh
+            </button>
+            <SocialListeningPlatformSwitcher />
+          </div>
         }
       />
 

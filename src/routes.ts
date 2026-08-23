@@ -184,13 +184,15 @@ export type IntegrationsChannel =
   | 'meta-ads'
   | 'google-ads'
   | 'messenger'
-  | 'telegram';
+  | 'telegram'
+  | 'facebook';
 
-/** Email + AI + Telegram use path pages; WhatsApp / Instagram (and others for now) use ?channel=. */
+/** Email + AI + Telegram + Facebook Page use path pages; WhatsApp / Instagram (and others for now) use ?channel=. */
 export function pathForIntegrationsChannel(channel: IntegrationsChannel): string {
   if (channel === 'email') return '/integrations/email';
   if (channel === 'ai') return '/integrations/ai';
   if (channel === 'telegram') return '/integrations/telegram';
+  if (channel === 'facebook') return '/facebook';
   return `/integrations?channel=${channel}`;
 }
 

@@ -8,6 +8,7 @@ export const MOCK_REVIEW_COMMENTS: ReviewComment[] = [
   // —— Sales Interest (≥2) ——
   {
     id: 'rc-1',
+    platform: 'instagram',
     username: 'priya.sharma',
     profilePicUrl: 'https://i.pravatar.cc/80?u=priya',
     commentText: 'This looks amazing! Do you deliver to Mumbai? Need 2 sets for my salon 🙌',
@@ -22,6 +23,7 @@ export const MOCK_REVIEW_COMMENTS: ReviewComment[] = [
   },
   {
     id: 'rc-2',
+    platform: 'instagram',
     username: 'rahul.mehta',
     profilePicUrl: 'https://i.pravatar.cc/80?u=rahul',
     commentText: 'Price please? And is COD available?',
@@ -36,6 +38,7 @@ export const MOCK_REVIEW_COMMENTS: ReviewComment[] = [
   },
   {
     id: 'rc-7',
+    platform: 'instagram',
     username: 'kavya.designs',
     profilePicUrl: 'https://i.pravatar.cc/80?u=kavya',
     commentText: 'Love the packaging! Can I bulk order for my boutique?',
@@ -51,6 +54,7 @@ export const MOCK_REVIEW_COMMENTS: ReviewComment[] = [
   // —— Questions (≥2) ——
   {
     id: 'rc-3',
+    platform: 'instagram',
     username: 'neha.kapoor',
     profilePicUrl: null,
     commentText: 'Is this suitable for dry skin? My dermatologist said I need something gentle.',
@@ -65,6 +69,7 @@ export const MOCK_REVIEW_COMMENTS: ReviewComment[] = [
   },
   {
     id: 'rc-8',
+    platform: 'instagram',
     username: 'rohan.gupta',
     profilePicUrl: 'https://i.pravatar.cc/80?u=rohan',
     commentText: 'What sizes do you ship in? Looking for travel-friendly packaging.',
@@ -80,6 +85,7 @@ export const MOCK_REVIEW_COMMENTS: ReviewComment[] = [
   // —— Complaints (≥2) ——
   {
     id: 'rc-4',
+    platform: 'instagram',
     username: 'amit.verma',
     profilePicUrl: 'https://i.pravatar.cc/80?u=amit',
     commentText: 'Ordered last week and still waiting. Where is my package??',
@@ -94,6 +100,7 @@ export const MOCK_REVIEW_COMMENTS: ReviewComment[] = [
   },
   {
     id: 'rc-9',
+    platform: 'instagram',
     username: 'isha.nair',
     profilePicUrl: 'https://i.pravatar.cc/80?u=isha',
     commentText: 'Product arrived damaged. Bottle leaked all over the box. Very disappointed.',
@@ -109,6 +116,7 @@ export const MOCK_REVIEW_COMMENTS: ReviewComment[] = [
   // —— Low confidence / unclear (≥2) ——
   {
     id: 'rc-10',
+    platform: 'instagram',
     username: 'mystery.user',
     profilePicUrl: null,
     commentText: 'hmm maybe later idk',
@@ -122,6 +130,7 @@ export const MOCK_REVIEW_COMMENTS: ReviewComment[] = [
   },
   {
     id: 'rc-11',
+    platform: 'instagram',
     username: 'vikas.trades',
     profilePicUrl: 'https://i.pravatar.cc/80?u=vikas',
     commentText: 'Same?',
@@ -136,6 +145,7 @@ export const MOCK_REVIEW_COMMENTS: ReviewComment[] = [
   },
   {
     id: 'rc-6',
+    platform: 'instagram',
     username: 'spam.bot99',
     profilePicUrl: null,
     commentText: 'Click here for free followers!!!! www.fakelink.xyz',
@@ -150,6 +160,7 @@ export const MOCK_REVIEW_COMMENTS: ReviewComment[] = [
   // —— Already handled (filter demos) ——
   {
     id: 'rc-5',
+    platform: 'instagram',
     username: 'sneha.r',
     profilePicUrl: 'https://i.pravatar.cc/80?u=sneha',
     commentText: 'Interested! Please DM me the catalogue ✨',
