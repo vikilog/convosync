@@ -252,6 +252,10 @@ export function useFacebookPostComments(postId: string | null) {
   return useQuery({
     queryKey: slKeys.facebookPostComments(postId || ''),
     queryFn: async () => {
+      // Backfills SocialComment from live Graph comments before reading the
+      // classified view — otherwise comments predating the feed webhook
+      // subscription (or missed by it) never show up.
+      await api.getFacebookPostComments(postId!).catch(() => null);
       const res = await api.getSocialListeningComments({ status: 'all', postId: postId! });
       return res.comments;
     },
