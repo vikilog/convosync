@@ -2245,8 +2245,24 @@ export const api = {
       missingScopes?: string[];
       tokenValid?: boolean;
     }>,
-  connectFacebookPage: (code: string, session?: { redirectUri?: string; pageId?: string }) =>
-    post('/facebook/connect', { code, ...session }),
+  connectFacebookPage: (data: {
+    connectToken?: string;
+    pageId?: string;
+    code?: string;
+    redirectUri?: string;
+  }) => post('/facebook/connect', data),
+  previewFacebookConnect: (code: string, session?: { redirectUri?: string }) =>
+    post('/facebook/connect/preview', { code, ...session }) as Promise<{
+      success: boolean;
+      connectToken: string;
+      requiresSelection: boolean;
+      pages: Array<{
+        pageId: string;
+        pageName: string;
+        category?: string;
+        picture?: string;
+      }>;
+    }>,
   disconnectFacebookPage: () => del('/facebook/disconnect'),
   getFacebookPosts: () =>
     get('/facebook/posts') as Promise<{
