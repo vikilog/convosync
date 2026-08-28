@@ -98,6 +98,10 @@ import { formatCampaignDateTime as formatCampaignDate } from '../lib/campaignFor
 import { formatCc } from '../lib/convocoins';
 import { WALLET_CC_RATES } from '../lib/walletPricing';
 import { CampaignDetailView } from './campaigns/CampaignDetailView';
+import { Input } from './ui/input';
+import { Textarea } from './ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Checkbox } from './ui/checkbox';
 
 function isMediaHeaderFormat(format: HeaderFormat): format is 'image' | 'video' | 'document' {
   return format === 'image' || format === 'video' || format === 'document';
@@ -179,7 +183,7 @@ const AudienceContactListPanel: React.FC<{
     : { duration: 0.2, ease: [0.22, 1, 0.36, 1] as const };
 
   return (
-    <div className="relative flex h-full min-h-0 w-full flex-col overflow-hidden rounded-xl bg-white ring-1 ring-slate-200/80">
+    <div className="relative flex h-full min-h-0 w-full flex-col overflow-hidden bg-white border border-swiss-line">
       <div className="absolute inset-x-0 top-0 z-10 h-0.5 bg-primary" />
       <div className="shrink-0 border-b border-slate-100 px-4 py-3">
         <p className="truncate text-sm font-semibold text-slate-900">{segmentLabel}</p>
@@ -247,7 +251,7 @@ const AudienceContactListPanel: React.FC<{
                           {contact.tags.slice(0, 3).map((tag) => (
                             <span
                               key={tag}
-                              className="rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] font-medium text-slate-600"
+                              className="rounded-md border border-swiss-line bg-slate-50 px-1.5 py-0.5 text-[10px] font-medium text-slate-600"
                             >
                               {tag}
                             </span>
@@ -279,7 +283,7 @@ const ChannelIcon: React.FC<{ channel: CampaignChannel; size?: number }> = ({ ch
         <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
       </svg>
     );
-  if (channel === 'email') return <Mail style={{ width: size, height: size, color: '#064e3b' }} />;
+  if (channel === 'email') return <Mail style={{ width: size, height: size, color: '#078038' }} />;
   if (channel === 'instagram')
     return (
       <svg viewBox="0 0 24 24" style={{ width: size, height: size }}>
@@ -368,8 +372,8 @@ const EmailTemplatePreview: React.FC<{
           <div className="w-3 h-3 rounded-full bg-green-400" />
         </div>
         <div className="bg-white rounded-lg p-2 text-xs">
-          <p className="text-gray-400 text-meta font-bold">SUBJECT</p>
-          <p className="font-black text-gray-900 text-xs">{previewSubject || 'Your subject line…'}</p>
+          <p className="text-swiss-faint text-meta font-bold">SUBJECT</p>
+          <p className="font-black text-swiss-ink text-xs">{previewSubject || 'Your subject line…'}</p>
         </div>
       </div>
       <iframe
@@ -390,8 +394,8 @@ const InstagramPreview: React.FC<{ message: string }> = ({ message }) => (
         CS
       </div>
       <div>
-        <p className="text-sm font-black text-gray-900">convosync</p>
-        <p className="text-meta text-gray-400">Active now</p>
+        <p className="text-sm font-black text-swiss-ink">convosync</p>
+        <p className="text-meta text-swiss-faint">Active now</p>
       </div>
     </div>
     <div className="bg-white p-4 min-h-[200px]">
@@ -400,7 +404,7 @@ const InstagramPreview: React.FC<{ message: string }> = ({ message }) => (
           {message.replace('{{first_name}}', 'Rahul') || 'Your Instagram DM here...'}
         </div>
       </div>
-      <p className="text-badge text-gray-400 text-right">Delivered</p>
+      <p className="text-badge text-swiss-faint text-right">Delivered</p>
     </div>
   </div>
 );
@@ -462,7 +466,7 @@ const WhatsAppPreview: React.FC<{
               transition={fade}
               className="space-y-1.5"
             >
-              <div className="max-w-[90%] space-y-2 rounded-r-xl rounded-bl-xl border border-black/5 bg-white p-3 shadow-sm">
+              <div className="max-w-[90%] space-y-2 rounded-r-xl rounded-bl-xl border border-swiss-line bg-white p-3 ">
                 {isMediaHeaderFormat(headerFormat) && (
                   <div className="flex h-24 w-full items-center justify-center overflow-hidden rounded-lg bg-slate-100">
                     {headerFormat === 'image' && headerMediaPreviewUrl ? (
@@ -493,7 +497,7 @@ const WhatsAppPreview: React.FC<{
               {buttons.map((btn, i) => (
                 <div
                   key={`${btn}-${i}`}
-                  className="mt-1.5 max-w-[90%] cursor-default rounded-lg border border-slate-200 bg-white/90 p-2 text-center text-sm font-semibold text-blue-600"
+                  className="mt-1.5 max-w-[90%] cursor-default rounded-lg border border-swiss-line bg-white/90 p-2 text-center text-sm font-semibold text-blue-600"
                 >
                   {btn}
                 </div>
@@ -516,18 +520,18 @@ const CAMPAIGN_STATUS_ICON: Record<
   CampaignRecordStatus,
   { Icon: typeof CheckCircle2; className: string }
 > = {
-  Draft: { Icon: CircleDashed, className: 'text-gray-500' },
+  Draft: { Icon: CircleDashed, className: 'text-swiss-muted' },
   Scheduled: { Icon: Clock, className: 'text-amber-700' },
   Running: { Icon: PlayCircle, className: 'text-blue-600' },
   Completed: { Icon: CheckCircle2, className: 'text-green-700' },
   Failed: { Icon: XCircle, className: 'text-red-600' },
-  Cancelled: { Icon: XCircle, className: 'text-gray-500' },
+  Cancelled: { Icon: XCircle, className: 'text-swiss-muted' },
 };
 
 /** Progress fill — mirrors analytics funnel accents (failed red, done primary, running blue). */
 function campaignProgressAccent(status: CampaignRecordStatus): string {
   if (status === 'Failed') return '#b91c1c';
-  if (status === 'Completed') return 'var(--color-primary, #064e3b)';
+  if (status === 'Completed') return 'var(--color-primary, #078038)';
   if (status === 'Running') return '#2563eb';
   return '#64748b';
 }
@@ -658,15 +662,15 @@ const CampaignListPanel: React.FC<{
     <div className="flex h-full min-h-0 flex-1 flex-col overflow-y-auto bg-white selection:bg-primary/15">
       <div className="w-full max-w-none space-y-4 px-3 py-4 sm:px-4 sm:py-5">
         {/* Header — title left, tools right */}
-        <div className="relative overflow-hidden rounded-xl bg-white ring-1 ring-slate-200/80">
+        <div className="relative overflow-hidden bg-white border border-swiss-line">
           <div className="absolute inset-x-0 top-0 h-0.5 bg-primary" />
           <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:p-5">
             <div className="min-w-0">
-              <h2 className="flex items-center gap-2 text-base font-black tracking-tight text-gray-900">
+              <h2 className="flex items-center gap-2 text-base font-semibold tracking-tight text-swiss-ink">
                 <Megaphone className="h-5 w-5 shrink-0 text-primary" aria-hidden />
                 Campaigns
               </h2>
-              <p className="mt-0.5 text-xs font-medium text-gray-400">
+              <p className="mt-0.5 text-xs font-medium text-swiss-faint">
                 Broadcast messages to your contacts on WhatsApp, Email, and Instagram.
               </p>
             </div>
@@ -676,23 +680,23 @@ const CampaignListPanel: React.FC<{
                   Search campaigns
                 </label>
                 <Search
-                  className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400"
+                  className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-swiss-faint"
                   aria-hidden
                 />
-                <input
+                <Input
                   id="campaigns-search"
                   type="search"
                   value={search}
                   onChange={(e) => onSearchChange(e.target.value)}
                   placeholder="Search campaigns…"
-                  className="w-full min-h-10 rounded-lg border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm font-semibold text-gray-900 outline-none transition-colors duration-200 placeholder:text-slate-400 focus:border-primary/40 focus:bg-white focus:ring-2 focus:ring-primary/15"
+                  className="h-auto min-h-10 rounded-lg border-swiss-line bg-slate-50 py-2 pl-9 pr-3 text-sm font-semibold text-swiss-ink outline-none transition-colors duration-200 placeholder:text-slate-400 focus-visible:border-primary/40 focus-visible:bg-white focus-visible:ring-2 focus-visible:ring-primary/15"
                 />
               </div>
               <button
                 type="button"
                 onClick={onRefresh}
                 disabled={loading}
-                className="inline-flex min-h-10 cursor-pointer items-center gap-1.5 rounded-xl bg-white ring-1 ring-slate-200/80 px-3 py-2 text-meta font-bold text-gray-800 transition-colors duration-200 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex min-h-10 cursor-pointer items-center gap-1.5 bg-white border border-swiss-line px-3 py-2 text-meta font-bold text-swiss-ink transition-colors duration-200 hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden /> : null}
                 Refresh
@@ -700,7 +704,7 @@ const CampaignListPanel: React.FC<{
               <button
                 type="button"
                 onClick={onCreate}
-                className="inline-flex min-h-10 cursor-pointer items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-meta font-bold text-white shadow-sm shadow-primary/15 transition-colors duration-200 hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                className="inline-flex min-h-10 cursor-pointer items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-meta font-bold text-white shadow-primary/15 transition-colors duration-200 hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
               >
                 <Plus className="h-3.5 w-3.5" aria-hidden /> Create campaign
               </button>
@@ -711,17 +715,17 @@ const CampaignListPanel: React.FC<{
         {/* Summary metrics — derived from loaded list */}
         {!loading && (
           <div
-            className="grid grid-cols-2 overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200/80 sm:grid-cols-4 sm:divide-x sm:divide-y-0 divide-y divide-black/[0.04]"
+            className="grid grid-cols-2 overflow-hidden bg-white border border-swiss-line sm:grid-cols-4 sm:divide-x sm:divide-y-0 divide-y divide-black/[0.04]"
             aria-label="Campaign summary"
           >
             {statCells.map((cell) => (
               <div key={cell.label} className="min-w-0 px-4 py-4 sm:px-5">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-gray-400">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-swiss-faint">
                   {cell.label}
                 </p>
                 <p
                   className={`mt-1.5 text-[1.75rem] font-semibold leading-none tracking-tight tabular-nums ${
-                    cell.tone ?? 'text-gray-900'
+                    cell.tone ?? 'text-swiss-ink'
                   }`}
                 >
                   {cell.value.toLocaleString()}
@@ -741,18 +745,18 @@ const CampaignListPanel: React.FC<{
         )}
 
         {loading ? (
-          <div className="flex justify-center py-16 text-gray-400" aria-busy="true">
+          <div className="flex justify-center py-16 text-swiss-faint" aria-busy="true">
             <Loader2 className="h-8 w-8 animate-spin" aria-hidden />
           </div>
         ) : filtered.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-black/10 bg-white px-6 py-12 text-center ring-1 ring-slate-200/60">
+          <div className="border border-dashed border-swiss-line bg-white px-6 py-12 text-center">
             <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
               <Megaphone className="h-6 w-6" aria-hidden />
             </div>
-            <p className="text-sm font-bold text-gray-600">
+            <p className="text-sm font-bold text-swiss-muted">
               {campaigns.length === 0 ? 'No campaigns yet' : 'No campaigns match your search'}
             </p>
-            <p className="mx-auto mt-1 max-w-md text-xs font-medium text-gray-400">
+            <p className="mx-auto mt-1 max-w-md text-xs font-medium text-swiss-faint">
               {campaigns.length === 0
                 ? 'Create your first broadcast to reach contacts with approved WhatsApp templates.'
                 : 'Try a different search term.'}
@@ -768,7 +772,7 @@ const CampaignListPanel: React.FC<{
             )}
           </div>
         ) : (
-          <div className="overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200/80">
+          <div className="overflow-hidden bg-white border border-swiss-line">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[780px] text-left">
                 <thead>
@@ -799,13 +803,13 @@ const CampaignListPanel: React.FC<{
                           key={col.label}
                           scope="col"
                           aria-sort={ariaSort}
-                          className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-gray-400"
+                          className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-swiss-faint"
                         >
                           {sortable ? (
                             <button
                               type="button"
                               onClick={() => onSortHeader(sortable)}
-                              className="inline-flex cursor-pointer items-center gap-1 rounded-md text-inherit transition-colors duration-150 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                              className="inline-flex cursor-pointer items-center gap-1 rounded-md text-inherit transition-colors duration-150 hover:text-swiss-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
                             >
                               {col.label}
                               {active ? (
@@ -849,7 +853,7 @@ const CampaignListPanel: React.FC<{
                         className="cursor-pointer transition-colors duration-150 hover:bg-primary/[0.04]"
                       >
                         <td className="px-4 py-3 align-middle">
-                          <p className="text-sm font-bold leading-snug text-gray-900">
+                          <p className="text-sm font-bold leading-snug text-swiss-ink">
                             {campaignListTitle(campaign.name)}
                           </p>
                         </td>
@@ -863,12 +867,12 @@ const CampaignListPanel: React.FC<{
                           </span>
                         </td>
                         <td className="px-4 py-3 align-middle">
-                          <p className="text-sm font-bold tabular-nums text-gray-800">
+                          <p className="text-sm font-bold tabular-nums text-swiss-ink">
                             {campaign.totalRecipients.toLocaleString()} contacts
                           </p>
                         </td>
                         <td className="px-4 py-3 align-middle">
-                          <p className="max-w-[12rem] truncate text-sm font-medium text-gray-700">
+                          <p className="max-w-[12rem] truncate text-sm font-medium text-swiss-ink">
                             {campaignListTagLabel(campaign.segmentLabel)}
                           </p>
                         </td>
@@ -895,15 +899,15 @@ const CampaignListPanel: React.FC<{
                                 aria-label={`Sent ${campaign.sentCount} of ${campaign.totalRecipients}`}
                               />
                             </div>
-                            <span className="shrink-0 text-xs font-semibold tabular-nums text-gray-700">
+                            <span className="shrink-0 text-xs font-semibold tabular-nums text-swiss-ink">
                               {campaign.sentCount.toLocaleString()}
-                              <span className="font-medium text-gray-400">
+                              <span className="font-medium text-swiss-faint">
                                 /{campaign.totalRecipients.toLocaleString()}
                               </span>
                             </span>
                           </div>
                           {campaign.readCount > 0 && (
-                            <p className="mt-1 text-[11px] font-medium text-gray-400">
+                            <p className="mt-1 text-[11px] font-medium text-swiss-faint">
                               {campaign.readCount.toLocaleString()} read
                             </p>
                           )}
@@ -918,7 +922,7 @@ const CampaignListPanel: React.FC<{
                           </span>
                         </td>
                         <td className="px-4 py-3 align-middle">
-                          <p className="text-meta font-bold tabular-nums text-gray-700">
+                          <p className="text-meta font-bold tabular-nums text-swiss-ink">
                             {formatCampaignDateShort(campaign.createdAt)}
                           </p>
                         </td>
@@ -928,13 +932,13 @@ const CampaignListPanel: React.FC<{
                               className={`text-meta font-bold tabular-nums ${
                                 campaign.status === 'Scheduled' && campaign.scheduledAt
                                   ? 'text-amber-800'
-                                  : 'text-gray-700'
+                                  : 'text-swiss-ink'
                               }`}
                             >
                               {formatCampaignDate(whenAt)}
                             </p>
                           ) : (
-                            <p className="text-meta font-medium text-gray-400">—</p>
+                            <p className="text-meta font-medium text-swiss-faint">—</p>
                           )}
                         </td>
                       </motion.tr>
@@ -1905,12 +1909,12 @@ const CampaignsWorkspace: React.FC = () => {
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden bg-white selection:bg-primary/15">
-      <div className="shrink-0 border-b border-black/5 bg-white px-4 py-3 md:px-6">
+      <div className="shrink-0 border-b border-swiss-line bg-white px-4 py-3 md:px-6">
         <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3">
           <button
             type="button"
             onClick={backToList}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-black/5 px-2.5 py-1.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-surface-muted"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-swiss-line px-2.5 py-1.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-surface-muted"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">All campaigns</span>
@@ -1971,7 +1975,7 @@ const CampaignsWorkspace: React.FC = () => {
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden xl:flex-row">
-      <section className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden border-black/5 bg-white xl:border-r">
+      <section className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden border-swiss-line bg-white xl:border-r">
         <div
           className={`min-h-0 flex-1 px-4 py-5 text-left md:px-8 md:py-6 ${
             formPrimaryLayout ? 'w-full' : 'max-w-2xl'
@@ -1982,19 +1986,19 @@ const CampaignsWorkspace: React.FC = () => {
           }`}
         >
           {campaignLaunched ? (
-            <div className="bg-white ring-1 ring-slate-200/80 p-8 rounded-2xl shadow-xl flex flex-col items-center text-center space-y-4">
+            <div className="bg-white ring-1 ring-swiss-line p-8 rounded-2xl shadow-xl flex flex-col items-center text-center space-y-4">
               <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center border-4 border-primary/15">
                 <CheckCheck className="w-8 h-8" />
               </div>
               <div>
-                <h4 className="font-bold text-gray-900 text-base">
+                <h4 className="font-bold text-swiss-ink text-base">
                   {isEditingScheduled
                     ? 'Campaign Updated!'
                     : launchResult?.scheduled
                       ? 'Campaign Scheduled!'
                       : 'Campaign Sent!'}
                 </h4>
-                <p className="text-xs text-gray-400 mt-1">
+                <p className="text-xs text-swiss-faint mt-1">
                   {launchResult?.scheduled
                     ? `Will send to ${launchResult.totalRecipients.toLocaleString()} contacts on ${scheduledDate} at ${scheduledTime}.`
                     : launchResult
@@ -2002,7 +2006,7 @@ const CampaignsWorkspace: React.FC = () => {
                       : 'Broadcast completed.'}
                 </p>
               </div>
-              <div className="w-full bg-slate-50 p-4 rounded-xl border border-slate-200 divide-y divide-gray-100">
+              <div className="w-full bg-slate-50 p-4 rounded-xl border border-swiss-line divide-y divide-gray-100">
                 {[
                   ['Channel', chConfig.name],
                   ['Audience', `${audienceCount().toLocaleString()} contacts`],
@@ -2017,8 +2021,8 @@ const CampaignsWorkspace: React.FC = () => {
                   ],
                 ].map(([k, v]) => (
                   <div key={k} className="flex justify-between py-2 text-sm font-bold">
-                    <span className="text-gray-400">{k}</span>
-                    <span className="text-gray-900 font-mono">{v}</span>
+                    <span className="text-swiss-faint">{k}</span>
+                    <span className="text-swiss-ink font-mono">{v}</span>
                   </div>
                 ))}
               </div>
@@ -2026,7 +2030,7 @@ const CampaignsWorkspace: React.FC = () => {
                 <button
                   type="button"
                   onClick={backToList}
-                  className="px-6 py-2 bg-white hover:bg-gray-50 border border-slate-200 text-gray-700 text-sm font-bold rounded-xl"
+                  className="px-6 py-2 bg-white hover:bg-gray-50 border border-swiss-line text-swiss-ink text-sm font-bold rounded-xl"
                 >
                   Back to campaigns
                 </button>
@@ -2043,7 +2047,7 @@ const CampaignsWorkspace: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => resetWizard()}
-                    className="px-6 py-2 bg-white hover:bg-gray-50 border border-slate-200 text-gray-700 text-sm font-bold rounded-xl"
+                    className="px-6 py-2 bg-white hover:bg-gray-50 border border-swiss-line text-swiss-ink text-sm font-bold rounded-xl"
                   >
                     Create another
                   </button>
@@ -2055,8 +2059,8 @@ const CampaignsWorkspace: React.FC = () => {
               {currentStep === 0 && (
                 <div className="space-y-4">
                   <div>
-                    <h3 className="font-bold text-gray-900 text-sm">Select Channel</h3>
-                    <p className="text-xs text-gray-400 mt-0.5">
+                    <h3 className="font-bold text-swiss-ink text-sm">Select Channel</h3>
+                    <p className="text-xs text-swiss-faint mt-0.5">
                       {isEditingScheduled
                         ? 'Channel is locked for scheduled campaigns.'
                         : 'Choose which channel to send your campaign through.'}
@@ -2075,8 +2079,8 @@ const CampaignsWorkspace: React.FC = () => {
                           }}
                           className={`relative flex min-h-[168px] flex-col rounded-2xl border-2 p-4 text-left transition-all ${
                             selected
-                              ? 'shadow-md'
-                              : 'border-black/5 bg-white hover:border-black/10 hover:shadow-sm'
+                              ? ''
+                              : 'border-swiss-line bg-white hover:border-black/10 '
                           } ${isEditingScheduled && !selected ? 'cursor-not-allowed opacity-45' : ''}`}
                           style={
                             selected
@@ -2101,8 +2105,8 @@ const CampaignsWorkspace: React.FC = () => {
                           >
                             <ChannelIcon channel={ch.id} size={22} />
                           </div>
-                          <p className="pr-6 text-sm font-bold text-gray-900">{ch.name}</p>
-                          <p className="mt-1 line-clamp-2 flex-1 text-xs leading-relaxed text-gray-500">
+                          <p className="pr-6 text-sm font-bold text-swiss-ink">{ch.name}</p>
+                          <p className="mt-1 line-clamp-2 flex-1 text-xs leading-relaxed text-swiss-muted">
                             {ch.description}
                           </p>
                           <span
@@ -2177,7 +2181,7 @@ const CampaignsWorkspace: React.FC = () => {
                           className={`rounded-xl bg-white p-4 text-left transition-all ${
                             selected
                               ? 'ring-2 ring-primary ring-offset-2 ring-offset-surface'
-                              : 'ring-1 ring-slate-200 hover:ring-slate-300'
+                              : 'ring-1 ring-swiss-line hover:ring-slate-300'
                           }`}
                         >
                           <div className="flex items-start justify-between gap-3">
@@ -2191,7 +2195,7 @@ const CampaignsWorkspace: React.FC = () => {
                               </div>
                             </div>
                             <div className="flex shrink-0 flex-col items-end gap-2">
-                              <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 font-mono text-xs font-medium text-slate-600">
+                              <span className="rounded-md border border-swiss-line bg-slate-50 px-2 py-0.5 font-mono text-xs font-medium text-slate-600">
                                 {opt.count}
                               </span>
                               <span
@@ -2229,7 +2233,7 @@ const CampaignsWorkspace: React.FC = () => {
                           duration: reduceMotion ? 0 : 0.2,
                           ease: [0.22, 1, 0.36, 1],
                         }}
-                        className="flex min-h-0 flex-1 flex-col rounded-xl bg-white ring-1 ring-slate-200"
+                        className="flex min-h-0 flex-1 flex-col bg-white border border-swiss-line"
                       >
                         <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-4 py-3">
                           <div>
@@ -2243,12 +2247,12 @@ const CampaignsWorkspace: React.FC = () => {
                           {taggedSegments.length > 0 && (
                             <div className="relative w-full sm:w-56">
                               <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
-                              <input
+                              <Input
                                 type="search"
                                 value={tagQuery}
                                 onChange={(e) => setTagQuery(e.target.value)}
                                 placeholder="Search tags…"
-                                className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2 pl-8 pr-3 text-sm text-slate-800 outline-none ring-primary/20 placeholder:text-slate-400 focus:border-primary/40 focus:bg-white focus:ring-2"
+                                className="h-auto rounded-lg border-swiss-line bg-slate-50 py-2 pl-8 pr-3 text-sm text-slate-800 outline-none ring-primary/20 placeholder:text-slate-400 focus-visible:border-primary/40 focus-visible:bg-white focus-visible:ring-2"
                               />
                             </div>
                           )}
@@ -2257,12 +2261,12 @@ const CampaignsWorkspace: React.FC = () => {
                           {audienceLoading ? (
                             <p className="text-xs font-medium text-slate-400">Loading tags…</p>
                           ) : taggedSegments.length === 0 ? (
-                            <p className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-500">
+                            <p className="rounded-lg border border-swiss-line bg-slate-50 px-3 py-2 text-xs text-slate-500">
                               No tags on your contacts yet. Add tags from Contacts or use &quot;All
                               contacts&quot;.
                             </p>
                           ) : filteredTaggedSegments.length === 0 ? (
-                            <p className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-500">
+                            <p className="rounded-lg border border-swiss-line bg-slate-50 px-3 py-2 text-xs text-slate-500">
                               No tags match &quot;{tagQuery.trim()}&quot;.
                             </p>
                           ) : (
@@ -2278,7 +2282,7 @@ const CampaignsWorkspace: React.FC = () => {
                                     className={`inline-flex min-h-[44px] items-center gap-2 rounded-lg border px-3 py-2.5 text-left text-sm font-medium transition-colors ${
                                       tagSelected
                                         ? 'border-primary bg-primary/10 text-primary'
-                                        : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50'
+                                        : 'border-swiss-line bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50'
                                     }`}
                                   >
                                     <span
@@ -2341,7 +2345,7 @@ const CampaignsWorkspace: React.FC = () => {
                       {templatesLoading ? (
                         <p className="text-xs font-medium text-slate-400">Loading your templates…</p>
                       ) : templates.length === 0 ? (
-                        <div className="rounded-xl bg-white p-5 text-center ring-1 ring-slate-200">
+                        <div className="bg-white border border-swiss-line p-5 text-center">
                           <p className="text-sm font-semibold text-slate-900">No approved templates</p>
                           <p className="mt-1 text-xs text-slate-500">
                             Create and approve a template in Message Templates first.
@@ -2349,18 +2353,16 @@ const CampaignsWorkspace: React.FC = () => {
                         </div>
                       ) : (
                         <>
-                          <div className="rounded-xl bg-white p-4 ring-1 ring-slate-200">
+                          <div className="bg-white border border-swiss-line p-4">
                             <label
                               htmlFor="wa-campaign-template"
                               className="block text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-400"
                             >
                               Approved Meta template
                             </label>
-                            <select
-                              id="wa-campaign-template"
+                            <Select
                               value={selectedTemplateName}
-                              onChange={(e) => {
-                                const name = e.target.value;
+                              onValueChange={(name) => {
                                 setSelectedTemplateName(name);
                                 const tpl = templates.find((t) => t.name === name);
                                 if (tpl) {
@@ -2369,14 +2371,21 @@ const CampaignsWorkspace: React.FC = () => {
                                   );
                                 }
                               }}
-                              className="mt-2 w-full cursor-pointer rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-primary/20"
                             >
-                              {templates.map((t) => (
-                                <option key={t.id ?? t.name} value={t.name}>
-                                  {t.name} ({t.category})
-                                </option>
-                              ))}
-                            </select>
+                              <SelectTrigger
+                                id="wa-campaign-template"
+                                className="mt-2 h-auto w-full cursor-pointer rounded-lg border-swiss-line bg-slate-50 px-3 py-2.5 text-sm font-semibold text-slate-800 shadow-none focus-visible:ring-2 focus-visible:ring-primary/20"
+                              >
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {templates.map((t) => (
+                                  <SelectItem key={t.id ?? t.name} value={t.name}>
+                                    {t.name} ({t.category})
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                             {activeTemplate && (
                               <p className="mt-2 text-xs font-medium text-slate-500">
                                 Preview updates live as you change template, media, or variables.
@@ -2385,7 +2394,7 @@ const CampaignsWorkspace: React.FC = () => {
                           </div>
 
                           {activeTemplate && requiresHeaderMedia && (
-                            <div className="rounded-xl bg-white p-4 ring-1 ring-slate-200">
+                            <div className="bg-white border border-swiss-line p-4">
                               <div className="flex flex-wrap items-baseline justify-between gap-2">
                                 <div>
                                   <h4 className="text-sm font-semibold text-slate-900">Header media</h4>
@@ -2418,7 +2427,7 @@ const CampaignsWorkspace: React.FC = () => {
                                   type="button"
                                   disabled={headerMediaUploading}
                                   onClick={() => setHeaderMediaEditOpen((o) => !o)}
-                                  className="group relative flex h-20 w-28 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-slate-100 ring-1 ring-slate-200/80 disabled:opacity-60"
+                                  className="group relative flex h-20 w-28 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-slate-100 ring-1 ring-swiss-line disabled:opacity-60"
                                   aria-label={
                                     hasHeaderMediaPreview
                                       ? `Edit header ${waHeaderFormat}`
@@ -2489,7 +2498,7 @@ const CampaignsWorkspace: React.FC = () => {
                                         setHeaderMediaEditOpen(false);
                                         setGalleryPickerOpen(true);
                                       }}
-                                      className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-60"
+                                      className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-swiss-line bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-60"
                                     >
                                       <Images className="h-3.5 w-3.5" aria-hidden />
                                       Gallery
@@ -2512,7 +2521,7 @@ const CampaignsWorkspace: React.FC = () => {
                                   {headerMediaEditOpen && (
                                     <div
                                       role="menu"
-                                      className="absolute left-0 top-full z-20 mt-1.5 w-56 rounded-lg border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/10"
+                                      className="absolute left-0 top-full z-20 mt-1.5 w-56 rounded-lg border border-swiss-line bg-white py-1 shadow-lg shadow-slate-900/10"
                                     >
                                       <button
                                         type="button"
@@ -2565,7 +2574,7 @@ const CampaignsWorkspace: React.FC = () => {
                           )}
 
                           {activeTemplate && activeTemplate.variables.length > 0 && (
-                            <div className="rounded-xl bg-white ring-1 ring-slate-200">
+                            <div className="bg-white border border-swiss-line">
                               <div className="border-b border-slate-100 px-4 py-3">
                                 <h4 className="text-sm font-semibold text-slate-900">
                                   Map variable parameters
@@ -2594,27 +2603,32 @@ const CampaignsWorkspace: React.FC = () => {
                                         </p>
                                       </div>
                                       <div className="space-y-1.5">
-                                        <select
+                                        <Select
                                           value={isKnownField ? current : '__custom__'}
-                                          onChange={(e) => {
-                                            const next = e.target.value;
+                                          onValueChange={(next) => {
                                             setVariableMappings((p) => ({
                                               ...p,
                                               [v]: next === '__custom__' ? '' : next,
                                             }));
                                           }}
-                                          aria-label={`Map variable ${i + 1}`}
-                                          className="w-full cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-primary/20"
                                         >
-                                          {WA_CONTACT_FIELD_OPTIONS.map((o) => (
-                                            <option key={o.value} value={o.value}>
-                                              {o.label}
-                                            </option>
-                                          ))}
-                                          <option value="__custom__">Custom text…</option>
-                                        </select>
+                                          <SelectTrigger
+                                            aria-label={`Map variable ${i + 1}`}
+                                            className="h-auto w-full cursor-pointer rounded-lg border-swiss-line bg-white px-3 py-2 text-xs font-semibold text-slate-800 shadow-none focus-visible:ring-2 focus-visible:ring-primary/20"
+                                          >
+                                            <SelectValue />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            {WA_CONTACT_FIELD_OPTIONS.map((o) => (
+                                              <SelectItem key={o.value} value={o.value}>
+                                                {o.label}
+                                              </SelectItem>
+                                            ))}
+                                            <SelectItem value="__custom__">Custom text…</SelectItem>
+                                          </SelectContent>
+                                        </Select>
                                         {!isKnownField && (
-                                          <input
+                                          <Input
                                             type="text"
                                             value={current}
                                             onChange={(e) =>
@@ -2624,7 +2638,7 @@ const CampaignsWorkspace: React.FC = () => {
                                               }))
                                             }
                                             placeholder="Fixed text for all recipients"
-                                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-primary/20"
+                                            className="h-auto rounded-lg border-swiss-line bg-white px-3 py-2 text-xs font-semibold text-slate-800 outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
                                           />
                                         )}
                                       </div>
@@ -2649,7 +2663,7 @@ const CampaignsWorkspace: React.FC = () => {
                       {emailTemplatesLoading ? (
                         <p className="text-xs font-medium text-slate-400">Loading email templates…</p>
                       ) : emailTemplates.length === 0 ? (
-                        <div className="rounded-xl bg-white p-5 text-center ring-1 ring-slate-200">
+                        <div className="bg-white border border-swiss-line p-5 text-center">
                           <p className="text-sm font-semibold text-slate-900">No active email templates</p>
                           <p className="mt-1 text-xs text-slate-500">
                             Create and activate a template under Email Templates first.
@@ -2657,18 +2671,16 @@ const CampaignsWorkspace: React.FC = () => {
                         </div>
                       ) : (
                         <>
-                          <div className="rounded-xl bg-white p-4 ring-1 ring-slate-200">
+                          <div className="bg-white border border-swiss-line p-4">
                             <label
                               htmlFor="email-campaign-template"
                               className="block text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-400"
                             >
                               Email template
                             </label>
-                            <select
-                              id="email-campaign-template"
+                            <Select
                               value={selectedEmailTemplateId}
-                              onChange={(e) => {
-                                const id = e.target.value;
+                              onValueChange={(id) => {
                                 setSelectedEmailTemplateId(id);
                                 const tpl = emailTemplates.find((t) => t.id === id);
                                 if (tpl) {
@@ -2683,14 +2695,21 @@ const CampaignsWorkspace: React.FC = () => {
                                   });
                                 }
                               }}
-                              className="mt-2 w-full cursor-pointer rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-primary/20"
                             >
-                              {emailTemplates.map((t) => (
-                                <option key={t.id} value={t.id}>
-                                  {t.name}
-                                </option>
-                              ))}
-                            </select>
+                              <SelectTrigger
+                                id="email-campaign-template"
+                                className="mt-2 h-auto w-full cursor-pointer rounded-lg border-swiss-line bg-slate-50 px-3 py-2.5 text-sm font-semibold text-slate-800 shadow-none focus-visible:ring-2 focus-visible:ring-primary/20"
+                              >
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {emailTemplates.map((t) => (
+                                  <SelectItem key={t.id} value={t.id}>
+                                    {t.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                             {activeEmailTemplate && (
                               <p className="mt-2 text-xs font-medium text-slate-500">
                                 Subject:{' '}
@@ -2699,7 +2718,7 @@ const CampaignsWorkspace: React.FC = () => {
                             )}
                           </div>
                           {activeEmailTemplate && activeEmailTemplate.variables.length > 0 && (
-                            <div className="rounded-xl bg-white ring-1 ring-slate-200">
+                            <div className="bg-white border border-swiss-line">
                               <div className="border-b border-slate-100 px-4 py-3">
                                 <h4 className="text-sm font-semibold text-slate-900">
                                   Map variable parameters
@@ -2721,11 +2740,11 @@ const CampaignsWorkspace: React.FC = () => {
                                       </span>
                                       <div>
                                         {fromContact ? (
-                                          <p className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-500">
+                                          <p className="rounded-lg border border-swiss-line bg-slate-50 px-3 py-2 text-xs font-medium text-slate-500">
                                             Filled from each contact ({v.replace(/_/g, ' ')})
                                           </p>
                                         ) : (
-                                          <input
+                                          <Input
                                             type="text"
                                             value={emailVariableMappings[v] || ''}
                                             onChange={(e) =>
@@ -2735,7 +2754,7 @@ const CampaignsWorkspace: React.FC = () => {
                                               }))
                                             }
                                             placeholder={`Value for ${v}`}
-                                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-primary/20"
+                                            className="h-auto rounded-lg border-swiss-line bg-white px-3 py-2 text-xs font-semibold text-slate-800 outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
                                           />
                                         )}
                                       </div>
@@ -2752,21 +2771,21 @@ const CampaignsWorkspace: React.FC = () => {
 
                   {selectedChannel === 'instagram' && (
                     <div className="space-y-4">
-                      <div className="rounded-xl bg-white p-4 ring-1 ring-slate-200">
+                      <div className="bg-white border border-swiss-line p-4">
                         <label
                           htmlFor="ig-campaign-message"
                           className="block text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-400"
                         >
                           DM message
                         </label>
-                        <textarea
+                        <Textarea
                           id="ig-campaign-message"
                           value={igConfig.message}
                           onChange={(e) => setIgConfig({ message: e.target.value })}
                           rows={6}
                           maxLength={1000}
                           placeholder="Write your Instagram DM here. Use {{first_name}} for personalization."
-                          className="mt-2 w-full resize-none rounded-lg border border-slate-200 px-3 py-2.5 text-sm font-medium leading-relaxed text-slate-800 outline-none focus:ring-2 focus:ring-primary/20"
+                          className="mt-2 resize-none rounded-lg border-swiss-line px-3 py-2.5 text-sm font-medium leading-relaxed text-slate-800 outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
                         />
                         <div className="mt-2 flex justify-between gap-3">
                           <p className="text-xs text-slate-400">
@@ -2785,7 +2804,7 @@ const CampaignsWorkspace: React.FC = () => {
                           </p>
                         </div>
                       </div>
-                      <div className="flex gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+                      <div className="flex gap-3 rounded-xl border border-swiss-line bg-slate-50 px-4 py-3">
                         <Globe className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" aria-hidden />
                         <p className="text-xs font-medium leading-relaxed text-slate-600">
                           <span className="font-semibold text-slate-800">Note:</span> Instagram DMs can
@@ -2801,8 +2820,8 @@ const CampaignsWorkspace: React.FC = () => {
               {currentStep === 3 && (
                 <div className="space-y-4 select-none">
                   <div>
-                    <h3 className="font-bold text-gray-900 text-sm">Schedule & Dispatch Review</h3>
-                    <p className="text-xs text-gray-400 mt-0.5">
+                    <h3 className="font-bold text-swiss-ink text-sm">Schedule & Dispatch Review</h3>
+                    <p className="text-xs text-swiss-faint mt-0.5">
                       {isEditingScheduled
                         ? 'Update audience, message, name, and send time. Stays scheduled — no duplicate send.'
                         : 'Review campaign details and schedule or send immediately.'}
@@ -2810,13 +2829,13 @@ const CampaignsWorkspace: React.FC = () => {
                   </div>
 
                   {isEditingScheduled && (
-                    <label className="block space-y-1.5 bg-white border border-slate-200 p-4 rounded-xl">
-                      <span className="text-sm font-bold text-gray-900">Campaign name</span>
-                      <input
+                    <label className="block space-y-1.5 bg-white border border-swiss-line p-4 rounded-xl">
+                      <span className="text-sm font-bold text-swiss-ink">Campaign name</span>
+                      <Input
                         type="text"
                         value={campaignName}
                         onChange={(e) => setCampaignName(e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 px-3 text-sm font-bold outline-none focus:ring-2 focus:ring-primary/15"
+                        className="h-auto rounded-xl border-swiss-line bg-slate-50 px-3 py-2 text-sm font-bold outline-none focus-visible:ring-2 focus-visible:ring-primary/15"
                       />
                     </label>
                   )}
@@ -2828,8 +2847,8 @@ const CampaignsWorkspace: React.FC = () => {
                           <Coins className="w-5 h-5" />
                         </div>
                         <div className="min-w-0">
-                          <p className="text-sm font-bold text-gray-800">Estimated Cost</p>
-                          <p className="text-xs text-gray-400 font-bold mt-0.5 truncate">
+                          <p className="text-sm font-bold text-swiss-ink">Estimated Cost</p>
+                          <p className="text-xs text-swiss-faint font-bold mt-0.5 truncate">
                             {`${audienceCount().toLocaleString()} contacts · ${estimatedCostRateLabel()}`}
                           </p>
                         </div>
@@ -2840,41 +2859,40 @@ const CampaignsWorkspace: React.FC = () => {
                     </div>
                   ) : null}
 
-                  <div className="bg-white border border-slate-200 p-4 rounded-xl space-y-4">
+                  <div className="bg-white border border-swiss-line p-4 rounded-xl space-y-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-bold text-gray-900">Schedule for later</p>
-                        <p className="text-xs text-gray-400 font-bold">
+                        <p className="text-sm font-bold text-swiss-ink">Schedule for later</p>
+                        <p className="text-xs text-swiss-faint font-bold">
                           {isEditingScheduled
                             ? 'Scheduled campaigns must keep a future send time'
                             : 'Defer broadcast to a specific time'}
                         </p>
                       </div>
-                      <input
-                        type="checkbox"
+                      <Checkbox
                         checked={isScheduled || isEditingScheduled}
                         disabled={isEditingScheduled}
-                        onChange={(e) => setIsScheduled(e.target.checked)}
-                        className="w-4 h-4 accent-primary cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+                        onCheckedChange={(checked) => setIsScheduled(checked === true)}
+                        className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
                       />
                     </div>
                     {(isScheduled || isEditingScheduled) && (
                       <div className="grid grid-cols-2 gap-3 pt-2">
-                        <input
+                        <Input
                           type="date"
                           value={scheduledDate}
                           min={todayLocal()}
                           onChange={(e) => setScheduledDate(e.target.value)}
-                          className="bg-slate-50 border border-slate-200 rounded-xl py-2 px-3 text-xs outline-none font-bold"
+                          className="h-auto rounded-xl border-swiss-line bg-slate-50 px-3 py-2 text-xs font-bold outline-none"
                         />
-                        <input
+                        <Input
                           type="time"
                           value={scheduledTime}
                           min={minScheduleTimeFor(scheduledDate)}
                           onChange={(e) => setScheduledTime(e.target.value)}
-                          className="bg-slate-50 border border-slate-200 rounded-xl py-2 px-3 text-xs outline-none font-bold"
+                          className="h-auto rounded-xl border-swiss-line bg-slate-50 px-3 py-2 text-xs font-bold outline-none"
                         />
-                        <p className="col-span-2 text-[11px] font-medium text-gray-400">
+                        <p className="col-span-2 text-[11px] font-medium text-swiss-faint">
                           Times shown in your browser's timezone
                           {SCHEDULE_TIMEZONE_LABEL ? ` (${SCHEDULE_TIMEZONE_LABEL})` : ''}.
                         </p>
@@ -2888,7 +2906,7 @@ const CampaignsWorkspace: React.FC = () => {
                       <p className="text-sm font-bold text-primary uppercase tracking-wider mb-1">
                         Before you send
                       </p>
-                      <p className="text-xs text-gray-400 font-bold leading-normal">
+                      <p className="text-xs text-swiss-faint font-bold leading-normal">
                         {selectedChannel === 'whatsapp' &&
                           'Template approved by Meta. Audience automatically excludes unsubscribed and blocked contacts.'}
                         {selectedChannel === 'email' &&
@@ -2912,12 +2930,12 @@ const CampaignsWorkspace: React.FC = () => {
         </div>
 
         {!campaignLaunched && (
-          <div className="flex shrink-0 items-center justify-between border-t border-black/5 bg-white px-4 py-3 md:px-8">
+          <div className="flex shrink-0 items-center justify-between border-t border-swiss-line bg-white px-4 py-3 md:px-8">
             <button
               type="button"
               onClick={() => setCurrentStep((p) => Math.max(0, p - 1))}
               disabled={currentStep === 0}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-white ring-1 ring-slate-200/80 px-4 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-surface-muted disabled:opacity-40"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-white ring-1 ring-swiss-line px-4 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-surface-muted disabled:opacity-40"
             >
               <ArrowLeft className="h-4 w-4" /> Back
             </button>
@@ -2925,7 +2943,7 @@ const CampaignsWorkspace: React.FC = () => {
               <button
                 type="button"
                 onClick={handleWizardNext}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-5 py-2 text-sm font-semibold text-white shadow-sm shadow-primary/15 transition-colors hover:bg-primary-hover"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-5 py-2 text-sm font-semibold text-white shadow-primary/15 transition-colors hover:bg-primary-hover"
               >
                 Next step <ArrowRight className="h-4 w-4" />
               </button>
@@ -2934,7 +2952,7 @@ const CampaignsWorkspace: React.FC = () => {
                 type="button"
                 onClick={handleLaunchCampaign}
                 disabled={launching}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-primary/15 transition-colors hover:bg-primary-hover disabled:opacity-60"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-primary/15 transition-colors hover:bg-primary-hover disabled:opacity-60"
               >
                 <Play className="h-3.5 w-3.5 fill-white" />
                 {launching
@@ -2957,7 +2975,7 @@ const CampaignsWorkspace: React.FC = () => {
       <section
         className={`flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-slate-50 ${
           formPrimaryLayout
-            ? 'w-full flex-1 p-4 xl:w-[min(400px,34vw)] xl:flex-none xl:border-l xl:border-black/5 lg:p-5'
+            ? 'w-full flex-1 p-4 xl:w-[min(400px,34vw)] xl:flex-none xl:border-l xl:border-swiss-line lg:p-5'
             : 'w-full flex-1 p-5 lg:p-6 xl:w-[min(440px,36vw)] xl:flex-none'
         }`}
       >
@@ -3069,7 +3087,7 @@ const CampaignsWorkspace: React.FC = () => {
             <motion.div
               role="dialog"
               aria-labelledby="send-confirm-title"
-              className="w-full max-w-sm overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl"
+              className="w-full max-w-sm overflow-hidden rounded-2xl border border-swiss-line bg-white shadow-2xl"
               initial={{ scale: 0.96, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.96, opacity: 0 }}
@@ -3080,10 +3098,10 @@ const CampaignsWorkspace: React.FC = () => {
                   <AlertTriangle className="h-4.5 w-4.5" />
                 </span>
                 <div>
-                  <h2 id="send-confirm-title" className="text-sm font-black text-gray-900">
+                  <h2 id="send-confirm-title" className="text-sm font-semibold text-swiss-ink">
                     Send to {audienceCount().toLocaleString()} contacts now?
                   </h2>
-                  <p className="mt-1 text-xs text-gray-500">
+                  <p className="mt-1 text-xs text-swiss-muted">
                     This sends {chConfig.name} messages immediately and can&apos;t be undone.
                     Schedule for later instead if you want a chance to cancel.
                   </p>
@@ -3100,7 +3118,7 @@ const CampaignsWorkspace: React.FC = () => {
                 <button
                   type="button"
                   onClick={confirmSendNow}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-primary/15 transition-colors hover:bg-primary-hover"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-primary/15 transition-colors hover:bg-primary-hover"
                 >
                   <Play className="h-3.5 w-3.5 fill-white" />
                   Send now

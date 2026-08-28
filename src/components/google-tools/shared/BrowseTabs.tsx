@@ -27,7 +27,7 @@ export function BrowseTabs({
           type="button"
           onClick={tab.onClick}
           className={`px-3 py-1.5 rounded-lg text-sm font-bold whitespace-nowrap transition-colors ${
-            tab.active ? `${accentBg} ${accentClass}` : 'text-gray-600 hover:bg-slate-50'
+            tab.active ? `${accentBg} ${accentClass}` : 'text-swiss-muted hover:bg-slate-50'
           }`}
         >
           {tab.label}

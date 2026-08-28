@@ -26,6 +26,7 @@ import { AdsView } from './components/AdsView';
 import { FacebookPageView } from './components/FacebookPageView';
 import { WhatsAppCallbackPage } from './components/WhatsAppCallbackPage';
 import { InstagramCallbackPage } from './components/InstagramCallbackPage';
+import { InstagramBusinessLoginCallbackPage } from './components/InstagramBusinessLoginCallbackPage';
 import { FacebookCallbackPage } from './components/FacebookCallbackPage';
 import { MetaAdsCallbackPage } from './components/MetaAdsCallbackPage';
 import { GoogleCallbackPage } from './components/GoogleCallbackPage';
@@ -44,6 +45,10 @@ import {
 } from './components/social-listening';
 import { LeadsKanbanView } from './components/leads';
 import { DataTablesView } from './components/data-tables/DataTablesView';
+import { AppStoreView } from './modules/apps/store/AppStoreView';
+import { CRMView } from './modules/apps/crm/CRMView';
+import { AttendanceView } from './modules/apps/attendance/AttendanceView';
+import { AppComingSoonView } from './modules/apps/shared/AppComingSoonView';
 import { motion } from 'motion/react';
 import { tabFromPath, pathForTab, pathForNewCampaign, isNewCampaignPath, type AppTab } from './routes';
 import { KeepAlive } from './components/KeepAlive';
@@ -67,6 +72,8 @@ import { CallPage } from './components/calling/CallPage';
 import { CallShortRedirectPage } from './components/calling/CallShortRedirectPage';
 import { OnboardingWizard } from './components/onboarding/OnboardingWizard';
 import { OnboardingGuard } from './components/onboarding/OnboardingGuard';
+import { TooltipProvider } from './components/ui/tooltip';
+import { Toaster } from './components/ui/sonner';
 
 function LegacyWhatsAppAutomationRedirect() {
   const { id } = useParams<{ id: string }>();
@@ -147,6 +154,9 @@ function AppShell() {
     if (activeTab === 'leads' && location.pathname.startsWith('/leads/')) {
       return;
     }
+    if (activeTab === 'crm' && location.pathname.startsWith('/crm/')) {
+      return;
+    }
     if (activeTab === 'automations' && location.pathname.startsWith('/automations')) {
       return;
     }
@@ -222,6 +232,8 @@ function AppShellLayout({
                   activeTab === 'templates' ||
                   activeTab === 'leads' ||
                   activeTab === 'data' ||
+                  activeTab === 'crm' ||
+                  activeTab === 'attendance' ||
                   activeTab === 'social-listening' ||
                   activeTab === 'automations'
                 ? 'px-2 md:px-4 py-2 md:py-3 flex-1 min-h-0 min-w-0 overflow-hidden'
@@ -241,6 +253,8 @@ function AppShellLayout({
               activeTab === 'templates' ||
               activeTab === 'leads' ||
               activeTab === 'data' ||
+              activeTab === 'crm' ||
+              activeTab === 'attendance' ||
               activeTab === 'social-listening' ||
               activeTab === 'automations' ||
               campaignCreateWizard
@@ -343,6 +357,31 @@ function AppShellLayout({
             {mountedTabs.has('data') && (
               <KeepAlive active={activeTab === 'data'}>
                 <DataTablesView />
+              </KeepAlive>
+            )}
+            {mountedTabs.has('app-store') && (
+              <KeepAlive active={activeTab === 'app-store'}>
+                <AppStoreView />
+              </KeepAlive>
+            )}
+            {mountedTabs.has('crm') && (
+              <KeepAlive active={activeTab === 'crm'}>
+                <CRMView />
+              </KeepAlive>
+            )}
+            {mountedTabs.has('attendance') && (
+              <KeepAlive active={activeTab === 'attendance'}>
+                <AttendanceView />
+              </KeepAlive>
+            )}
+            {mountedTabs.has('dasalon-console') && (
+              <KeepAlive active={activeTab === 'dasalon-console'}>
+                <AppComingSoonView appId="dasalon-console" />
+              </KeepAlive>
+            )}
+            {mountedTabs.has('dasalon-partner') && (
+              <KeepAlive active={activeTab === 'dasalon-partner'}>
+                <AppComingSoonView appId="dasalon-partner" />
               </KeepAlive>
             )}
             {mountedTabs.has('ctwa') && (
@@ -482,9 +521,10 @@ function NotFoundRedirect() {
 
 export default function App() {
   return (
-    <>
+    <TooltipProvider delayDuration={200}>
       <DocumentSeo />
       <AnalyticsRoot />
+      <Toaster position="top-right" />
       <Routes>
       <Route path="/login" element={<LoginRedirect />} />
       <Route path="/c/:code" element={<CallShortRedirectPage />} />
@@ -512,6 +552,14 @@ export default function App() {
         element={
           <ProtectedRoute>
             <InstagramCallbackPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/instagram/business-login/callback"
+        element={
+          <ProtectedRoute>
+            <InstagramBusinessLoginCallbackPage />
           </ProtectedRoute>
         }
       />
@@ -564,6 +612,16 @@ export default function App() {
       />
       <Route
         path="/campaigns/*"
+        element={
+          <ProtectedRoute>
+            <OnboardingGuard>
+              <AppShell />
+            </OnboardingGuard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/crm/*"
         element={
           <ProtectedRoute>
             <OnboardingGuard>
@@ -662,7 +720,7 @@ export default function App() {
         }
       />
       <Route path="*" element={<NotFoundRedirect />} />
-    </Routes>
-    </>
+      </Routes>
+    </TooltipProvider>
   );
 }

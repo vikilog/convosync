@@ -32,22 +32,22 @@ function WhatsAppBusinessIllustration() {
       className="relative shrink-0 w-full sm:w-[220px] lg:w-[260px] h-[160px] sm:h-[180px]"
       aria-hidden
     >
-      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#e6f7ec] via-white to-sky-50 border border-slate-200" />
+      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#e6f7ec] via-white to-sky-50 border border-swiss-line" />
       <div className="absolute inset-0 flex items-center justify-center p-6">
         <div className="relative">
           <div className="w-20 h-20 rounded-2xl bg-[#25D366] shadow-lg flex items-center justify-center">
             <MessageCircle className="w-10 h-10 text-white" strokeWidth={1.75} />
           </div>
-          <div className="absolute -top-2 -right-3 p-2 rounded-lg bg-white border border-slate-200 shadow-md text-primary">
+          <div className="absolute -top-2 -right-3 p-2 rounded-lg bg-white border border-swiss-line shadow-md text-primary">
             <Cloud className="w-4 h-4" />
           </div>
           <div className="absolute -bottom-2 -left-3 p-2 rounded-lg bg-primary text-white shadow-md">
             <Zap className="w-3.5 h-3.5" />
           </div>
-          <div className="absolute top-1/2 -right-10 p-1.5 rounded-md bg-white border border-slate-200 text-[#006d2f] shadow-sm">
+          <div className="absolute top-1/2 -right-10 p-1.5 rounded-md bg-white border border-swiss-line text-[#006d2f] shadow-sm">
             <Bot className="w-3.5 h-3.5" />
           </div>
-          <div className="absolute bottom-0 -right-8 p-1.5 rounded-md bg-white border border-slate-200 text-primary shadow-sm">
+          <div className="absolute bottom-0 -right-8 p-1.5 rounded-md bg-white border border-swiss-line text-primary shadow-sm">
             <Webhook className="w-3.5 h-3.5" />
           </div>
         </div>
@@ -69,10 +69,10 @@ export const BusinessApiOnboardingPage: FC<BusinessApiOnboardingPageProps> = ({
           <p className="text-sm font-black uppercase tracking-widest text-primary mb-2">
             WhatsApp Business API
           </p>
-          <h1 className="text-2xl sm:text-3xl font-black text-gray-950 tracking-tight leading-tight">
+          <h1 className="text-2xl sm:text-3xl font-semibold text-gray-950 tracking-tight leading-tight">
             Connect WhatsApp Business API
           </h1>
-          <p className="mt-3 text-sm sm:text-base text-gray-600 font-medium leading-relaxed max-w-xl">
+          <p className="mt-3 text-sm sm:text-base text-swiss-muted font-medium leading-relaxed max-w-xl">
             Set up a dedicated WhatsApp Business account for automation, AI agents, booking
             management, and customer communication.
           </p>
@@ -82,7 +82,7 @@ export const BusinessApiOnboardingPage: FC<BusinessApiOnboardingPageProps> = ({
         </div>
       </header>
 
-      <div className="mb-10 p-5 sm:p-6 bg-white rounded-2xl border border-slate-200 shadow-sm">
+      <div className="mb-10 p-5 sm:p-6 bg-white rounded-2xl border border-swiss-line ">
         <OnboardingStepIndicator steps={BUSINESS_API_PROGRESS_STEPS} activeStep={activeStep} />
       </div>
 

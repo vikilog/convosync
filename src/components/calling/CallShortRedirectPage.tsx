@@ -54,7 +54,7 @@ export function CallShortRedirectPage() {
         <span className="font-display text-lg font-bold text-slate-900">{PRODUCT_NAME}</span>
       </div>
       {error ? (
-        <div className="max-w-sm text-center space-y-3 rounded-3xl border border-slate-200 bg-white p-8 shadow-xl shadow-emerald-900/5">
+        <div className="max-w-sm text-center space-y-3 rounded-3xl border border-swiss-line bg-white p-8 shadow-xl shadow-emerald-900/5">
           <p className="text-sm font-bold text-red-600">{error}</p>
           <p className="text-xs text-slate-500">Ask the business to send a new call link.</p>
           <Link to="/" className="text-sm font-semibold text-emerald-700 underline">

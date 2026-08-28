@@ -40,7 +40,7 @@ export function PostConfigSideSheet({
               <button
                 type="button"
                 onClick={onClose}
-                className="cursor-pointer rounded-lg p-1.5 text-gray-400 hover:bg-white hover:text-gray-700"
+                className="cursor-pointer rounded-lg p-1.5 text-swiss-faint hover:bg-white hover:text-swiss-ink"
                 aria-label="Close"
               >
                 <X className="h-5 w-5" />

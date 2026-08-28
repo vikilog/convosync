@@ -6,6 +6,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { AlertCircle, Loader2, Save, Zap } from 'lucide-react';
 import { api, parseApiError } from '../../lib/api';
+import { Input } from '../ui/input';
+import { Textarea } from '../ui/textarea';
 
 type DeveloperAction = {
   id: string;
@@ -99,7 +101,7 @@ export function ActionsPanel() {
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 text-sm text-gray-500 py-8">
+      <div className="flex items-center gap-2 text-sm text-swiss-muted py-8">
         <Loader2 className="w-4 h-4 animate-spin" />
         Loading actions…
       </div>
@@ -108,7 +110,7 @@ export function ActionsPanel() {
 
   return (
     <div className="space-y-4">
-      <p className="text-xs text-gray-500">
+      <p className="text-xs text-swiss-muted">
         Configure HTTP endpoints for AI Agents and Journey Engine. Each action type maps to one
         external API call.
       </p>
@@ -128,7 +130,7 @@ export function ActionsPanel() {
           return (
             <div
               key={action.actionType}
-              className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm space-y-3"
+              className="rounded-2xl border border-swiss-line bg-white p-4 space-y-3"
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
@@ -137,14 +139,14 @@ export function ActionsPanel() {
                   </div>
                   <div>
                     <code className="text-sm font-bold text-primary">{action.actionType}</code>
-                    <input
+                    <Input
                       value={draft.name}
                       onChange={(e) => updateDraft(action.actionType, { name: e.target.value })}
-                      className="block text-sm font-bold text-gray-900 bg-transparent border-none p-0 focus:ring-0 w-full"
+                      className="h-auto block text-sm font-bold text-swiss-ink bg-transparent border-none p-0 focus:ring-0 w-full"
                     />
                   </div>
                 </div>
-                <label className="flex items-center gap-2 text-sm font-semibold text-gray-600">
+                <label className="flex items-center gap-2 text-sm font-semibold text-swiss-muted">
                   <input
                     type="checkbox"
                     checked={draft.enabled}
@@ -161,7 +163,7 @@ export function ActionsPanel() {
                 <select
                   value={draft.method}
                   onChange={(e) => updateDraft(action.actionType, { method: e.target.value })}
-                  className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-2 text-sm font-semibold"
+                  className="rounded-lg border border-swiss-line bg-slate-50 px-2 py-2 text-sm font-semibold"
                 >
                   {METHODS.map((m) => (
                     <option key={m} value={m}>
@@ -169,13 +171,13 @@ export function ActionsPanel() {
                     </option>
                   ))}
                 </select>
-                <input
+                <Input
                   placeholder="https://api.example.com/..."
                   value={draft.url}
                   onChange={(e) => updateDraft(action.actionType, { url: e.target.value })}
-                  className="md:col-span-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs"
+                  className="h-auto md:col-span-2 rounded-lg border border-swiss-line bg-slate-50 px-3 py-2 text-xs"
                 />
-                <input
+                <Input
                   type="number"
                   min={1000}
                   max={120000}
@@ -183,14 +185,14 @@ export function ActionsPanel() {
                   onChange={(e) =>
                     updateDraft(action.actionType, { timeoutMs: Number(e.target.value) })
                   }
-                  className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-2 text-xs"
+                  className="h-auto rounded-lg border border-swiss-line bg-slate-50 px-2 py-2 text-xs"
                   title="Timeout (ms)"
                 />
               </div>
 
               <div>
-                <label className="text-sm font-bold uppercase text-gray-500">Headers (JSON)</label>
-                <textarea
+                <label className="text-sm font-bold uppercase text-swiss-muted">Headers (JSON)</label>
+                <Textarea
                   rows={3}
                   value={headersStr}
                   onChange={(e) =>
@@ -199,7 +201,7 @@ export function ActionsPanel() {
                       [action.actionType]: e.target.value,
                     }))
                   }
-                  className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-mono"
+                  className="min-h-0 mt-1 w-full rounded-lg border border-swiss-line bg-slate-50 px-3 py-2 text-xs font-mono"
                 />
               </div>
 

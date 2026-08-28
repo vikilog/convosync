@@ -15,6 +15,11 @@ export const VALID_TABS = [
   'social-listening',
   'leads',
   'data',
+  'app-store',
+  'crm',
+  'attendance',
+  'dasalon-console',
+  'dasalon-partner',
   'ctwa',
   'facebook',
   'pay',
@@ -339,4 +344,73 @@ export function isTemplateSubRoute(pathname: string): boolean {
 
 export function pathForSettingsSection(section: SettingsSection): string {
   return `/settings/${section}`;
+}
+
+export type CrmEntityKind = 'account' | 'contact' | 'task';
+
+export type CrmRoute =
+  | { screen: 'accounts' }
+  | { screen: 'account-new' }
+  | { screen: 'account-detail'; accountId: string }
+  | { screen: 'contact-new'; accountId: string }
+  | { screen: 'contact-detail'; accountId: string; contactId: string }
+  | { screen: 'tasks' }
+  | { screen: 'task-new' }
+  | { screen: 'task-edit'; taskId: string }
+  | { screen: 'field-builder'; entity: CrmEntityKind };
+
+export function pathForCrmAccounts(): string {
+  return '/crm';
+}
+
+export function pathForCrmNewAccount(): string {
+  return '/crm/new';
+}
+
+export function pathForCrmAccount(accountId: string): string {
+  return `/crm/${accountId}`;
+}
+
+export function pathForCrmNewContact(accountId: string): string {
+  return `/crm/${accountId}/contacts/new`;
+}
+
+export function pathForCrmContact(accountId: string, contactId: string): string {
+  return `/crm/${accountId}/contacts/${contactId}`;
+}
+
+export function pathForCrmTasks(): string {
+  return '/crm/tasks';
+}
+
+export function pathForCrmNewTask(): string {
+  return '/crm/tasks/new';
+}
+
+export function pathForCrmEditTask(taskId: string): string {
+  return `/crm/tasks/${taskId}/edit`;
+}
+
+export function pathForCrmFieldBuilder(entity: CrmEntityKind): string {
+  return `/crm/fields/${entity}`;
+}
+
+export function crmRouteFromPath(pathname: string): CrmRoute {
+  const parts = pathname.replace(/^\//, '').split('/').filter(Boolean);
+  if (parts[0] !== 'crm' || !parts[1]) return { screen: 'accounts' };
+  if (parts[1] === 'new') return { screen: 'account-new' };
+  if (parts[1] === 'tasks') {
+    if (parts[2] === 'new') return { screen: 'task-new' };
+    if (parts[2] && parts[3] === 'edit') return { screen: 'task-edit', taskId: parts[2] };
+    return { screen: 'tasks' };
+  }
+  if (parts[1] === 'fields' && parts[2]) {
+    return { screen: 'field-builder', entity: parts[2] as CrmEntityKind };
+  }
+  const accountId = parts[1];
+  if (parts[2] === 'contacts') {
+    if (parts[3] === 'new') return { screen: 'contact-new', accountId };
+    if (parts[3]) return { screen: 'contact-detail', accountId, contactId: parts[3] };
+  }
+  return { screen: 'account-detail', accountId };
 }

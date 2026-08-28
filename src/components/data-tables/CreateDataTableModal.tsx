@@ -7,6 +7,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { Loader2, Plus, Trash2 } from 'lucide-react';
 import { api } from '../../lib/api';
 import { DATA_COLUMN_TYPE_OPTIONS, type DataColumnType, type DataTableRecord } from './types';
+import { Input } from '../ui/input';
 
 type DraftColumn = { label: string; type: DataColumnType; options: string };
 
@@ -86,55 +87,55 @@ export function CreateDataTableModal({ open, onClose, onCreated }: Props) {
       <div className="absolute inset-0" onClick={() => !saving && onClose()} aria-hidden />
       <form
         onSubmit={(e) => void handleSubmit(e)}
-        className="relative w-full max-w-lg space-y-4 rounded-2xl bg-white ring-1 ring-slate-200/80 p-6 shadow-xl max-h-[85vh] overflow-y-auto"
+        className="relative w-full max-w-lg space-y-4 bg-white border border-swiss-line p-6 shadow-xl max-h-[85vh] overflow-y-auto"
       >
         <div>
-          <h3 className="text-base font-black text-gray-950">New table</h3>
+          <h3 className="text-base font-semibold text-gray-950">New table</h3>
           <p className="mt-1 text-xs text-slate-500">
             Design the columns now — you can add or remove them later.
           </p>
         </div>
 
         <label className="block space-y-1">
-          <span className="text-sm font-bold text-gray-500 uppercase tracking-wide">
+          <span className="text-sm font-bold text-swiss-muted uppercase tracking-wide">
             Table name <span className="text-red-500">*</span>
           </span>
-          <input
+          <Input
             autoFocus
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Appointment bookings"
-            className="w-full rounded-xl border border-black/5 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+            className="h-auto w-full rounded-xl border border-swiss-line px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
         </label>
 
         <label className="block space-y-1">
-          <span className="text-sm font-bold text-gray-500 uppercase tracking-wide">
+          <span className="text-sm font-bold text-swiss-muted uppercase tracking-wide">
             Description
           </span>
-          <input
+          <Input
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Optional"
-            className="w-full rounded-xl border border-black/5 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+            className="h-auto w-full rounded-xl border border-swiss-line px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
         </label>
 
         <div className="space-y-2">
-          <span className="text-sm font-bold text-gray-500 uppercase tracking-wide">Columns</span>
+          <span className="text-sm font-bold text-swiss-muted uppercase tracking-wide">Columns</span>
           <div className="space-y-2">
             {columns.map((col, i) => (
               <div key={i} className="flex items-start gap-2">
-                <input
+                <Input
                   value={col.label}
                   onChange={(e) => updateColumn(i, { label: e.target.value })}
                   placeholder="Column name"
-                  className="flex-1 rounded-lg border border-black/5 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="h-auto flex-1 rounded-lg border border-swiss-line px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
                 <select
                   value={col.type}
                   onChange={(e) => updateColumn(i, { type: e.target.value as DataColumnType })}
-                  className="w-36 rounded-lg border border-black/5 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="w-36 rounded-lg border border-swiss-line px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                 >
                   {DATA_COLUMN_TYPE_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>
@@ -145,7 +146,7 @@ export function CreateDataTableModal({ open, onClose, onCreated }: Props) {
                 <button
                   type="button"
                   onClick={() => setColumns((prev) => prev.filter((_, idx) => idx !== i))}
-                  className="p-1.5 rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-600"
+                  className="p-1.5 rounded-lg text-swiss-faint hover:bg-red-50 hover:text-red-600"
                   aria-label="Remove column"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
@@ -154,12 +155,12 @@ export function CreateDataTableModal({ open, onClose, onCreated }: Props) {
             ))}
             {columns.map((col, i) =>
               col.type === 'select' ? (
-                <input
+                <Input
                   key={`opts-${i}`}
                   value={col.options}
                   onChange={(e) => updateColumn(i, { options: e.target.value })}
                   placeholder={`Choices for "${col.label || 'column'}", comma separated`}
-                  className="w-full rounded-lg border border-black/5 px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="h-auto w-full rounded-lg border border-swiss-line px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
               ) : null
             )}
@@ -181,7 +182,7 @@ export function CreateDataTableModal({ open, onClose, onCreated }: Props) {
             type="button"
             onClick={onClose}
             disabled={saving}
-            className="cursor-pointer rounded-lg border border-black/5 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-surface-muted disabled:opacity-50"
+            className="cursor-pointer rounded-lg border border-swiss-line px-4 py-2 text-sm font-semibold text-swiss-ink hover:bg-surface-muted disabled:opacity-50"
           >
             Cancel
           </button>

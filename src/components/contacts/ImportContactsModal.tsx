@@ -154,17 +154,17 @@ export const ImportContactsModal: React.FC<Props> = ({ open, onClose, onImported
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-            className="fixed top-0 right-0 h-full w-full max-w-[560px] bg-white border-l border-slate-200 z-50 flex flex-col shadow-2xl"
+            className="fixed top-0 right-0 h-full w-full max-w-[560px] bg-white border-l border-swiss-line z-50 flex flex-col shadow-2xl"
           >
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 shrink-0">
-              <h2 id="import-contacts-title" className="text-base font-bold text-gray-900">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-swiss-line shrink-0">
+              <h2 id="import-contacts-title" className="text-base font-bold text-swiss-ink">
                 Import contacts (CSV)
               </h2>
               <button
                 type="button"
                 onClick={handleClose}
                 disabled={importing}
-                className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+                className="p-1.5 rounded-lg text-swiss-faint hover:text-swiss-ink hover:bg-gray-100 disabled:opacity-50"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -179,12 +179,12 @@ export const ImportContactsModal: React.FC<Props> = ({ open, onClose, onImported
               </p>
 
               <label className="block shrink-0">
-                <span className="text-meta font-semibold text-gray-600">Source</span>
+                <span className="text-meta font-semibold text-swiss-muted">Source</span>
                 <select
                   value={source}
                   onChange={(e) => setSource(e.target.value)}
                   disabled={importing || Boolean(result)}
-                  className="mt-1.5 w-full text-sm border border-slate-200 rounded-lg px-3 py-2.5 font-semibold text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-50"
+                  className="mt-1.5 w-full text-sm border border-swiss-line rounded-lg px-3 py-2.5 font-semibold text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-50"
                 >
                   {IMPORT_SOURCES.map((s) => (
                     <option key={s} value={s}>
@@ -199,7 +199,7 @@ export const ImportContactsModal: React.FC<Props> = ({ open, onClose, onImported
                   type="button"
                   onClick={downloadTemplate}
                   disabled={importing}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-black/5 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-surface-muted disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-swiss-line px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-surface-muted disabled:opacity-50"
                 >
                   <Download className="w-4 h-4" />
                   Template
@@ -244,7 +244,7 @@ export const ImportContactsModal: React.FC<Props> = ({ open, onClose, onImported
               )}
 
               {preview.length > 0 && !result && (
-                <div className="flex-1 min-h-0 rounded-xl border border-black/5 overflow-hidden flex flex-col">
+                <div className="flex-1 min-h-0 rounded-xl border border-swiss-line overflow-hidden flex flex-col">
                   <div className="flex-1 min-h-0 overflow-auto">
                     <table className="w-full text-left text-xs">
                       <thead className="bg-white sticky top-0 z-10">
@@ -258,7 +258,7 @@ export const ImportContactsModal: React.FC<Props> = ({ open, onClose, onImported
                       </thead>
                       <tbody>
                         {preview.map((r, i) => (
-                          <tr key={`${r.phone}-${i}`} className="border-t border-black/5">
+                          <tr key={`${r.phone}-${i}`} className="border-t border-swiss-line">
                             <td className="px-2 py-1.5 text-slate-400 tabular-nums">{i + 1}</td>
                             <td className="px-2 py-1.5 max-w-[9rem] truncate" title={r.name}>
                               {r.name}
@@ -307,7 +307,7 @@ export const ImportContactsModal: React.FC<Props> = ({ open, onClose, onImported
               )}
             </div>
 
-            <div className="shrink-0 flex justify-end gap-2 border-t border-slate-200 px-5 py-3 bg-white">
+            <div className="shrink-0 flex justify-end gap-2 border-t border-swiss-line px-5 py-3 bg-white">
               <button
                 type="button"
                 onClick={handleClose}

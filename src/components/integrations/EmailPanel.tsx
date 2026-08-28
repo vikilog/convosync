@@ -17,6 +17,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { api, formatCatchError } from '../../lib/api';
+import { Input } from '../ui/input';
 import {
   SesProviderFormFields,
   computeSesSenderEmail,
@@ -167,7 +168,7 @@ function statusBadge(status: string) {
     pending: 'bg-[#fff5e6] text-[#f2994a] border-[#f2994a]/30',
     failed: 'bg-red-50 text-red-700 border-red-200',
     sent: 'bg-[#e6f7ec] text-[#006d2f] border-[#5dfd8a]/40',
-    queued: 'bg-gray-50 text-gray-600 border-gray-200',
+    queued: 'bg-gray-50 text-swiss-muted border-gray-200',
     delivered: 'bg-indigo-50 text-indigo-700 border-indigo-200',
     opened: 'bg-sky-50 text-sky-800 border-sky-200',
     clicked: 'bg-violet-50 text-violet-800 border-violet-200',
@@ -175,11 +176,11 @@ function statusBadge(status: string) {
     complained: 'bg-orange-50 text-orange-800 border-orange-200',
     rejected: 'bg-red-50 text-red-700 border-red-200',
     active: 'bg-[#e6f7ec] text-[#006d2f] border-[#5dfd8a]/40',
-    disabled: 'bg-gray-100 text-gray-500 border-gray-200',
+    disabled: 'bg-gray-100 text-swiss-muted border-gray-200',
     credentials_missing: 'bg-amber-50 text-amber-800 border-amber-200',
     connection_failed: 'bg-red-50 text-red-700 border-red-200',
   };
-  return map[status] ?? 'bg-gray-50 text-gray-600 border-gray-200';
+  return map[status] ?? 'bg-gray-50 text-swiss-muted border-gray-200';
 }
 
 function domainFromEmail(email: string | null | undefined): string | null {
@@ -652,7 +653,7 @@ export function EmailPanel() {
             className={`px-3 py-1.5 rounded-lg text-sm font-bold border cursor-pointer transition-colors duration-150 ${
               tab === id
                 ? 'bg-primary text-white border-primary'
-                : 'bg-white text-gray-600 border-slate-200 hover:border-primary/30'
+                : 'bg-white text-swiss-muted border-swiss-line hover:border-primary/30'
             }`}
           >
             {label}
@@ -661,7 +662,7 @@ export function EmailPanel() {
         <button
           type="button"
           onClick={() => void load()}
-          className="ml-auto inline-flex items-center gap-1 px-2 py-1.5 text-sm font-semibold text-gray-500 hover:text-primary cursor-pointer"
+          className="ml-auto inline-flex items-center gap-1 px-2 py-1.5 text-sm font-semibold text-swiss-muted hover:text-primary cursor-pointer"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
           Refresh
@@ -681,7 +682,7 @@ export function EmailPanel() {
       {tab === 'setup' && (
         <div className="space-y-4">
           {loading && providers.length === 0 ? (
-            <div className="flex justify-center py-12 text-gray-400" aria-busy="true">
+            <div className="flex justify-center py-12 text-swiss-faint" aria-busy="true">
               <Loader2 className="w-6 h-6 animate-spin" />
             </div>
           ) : null}
@@ -689,16 +690,16 @@ export function EmailPanel() {
           {/* 1. Active sending identity — mirrors default provider From */}
           <section
             aria-labelledby="email-sending-as-heading"
-            className="bg-white rounded-2xl border border-black/5 p-4"
+            className="bg-white rounded-2xl border border-swiss-line p-4"
           >
             <h4
               id="email-sending-as-heading"
-              className="text-sm font-bold text-gray-900 mb-1 flex items-center gap-2"
+              className="text-sm font-bold text-swiss-ink mb-1 flex items-center gap-2"
             >
               <Globe className="w-4 h-4 text-primary" aria-hidden />
               Sending as
             </h4>
-            <p className="text-xs text-gray-500 mb-3">
+            <p className="text-xs text-swiss-muted mb-3">
               Set by your default provider
               {defaultProvider?.provider === 'AWS_SES'
                 ? ' — choose a From address under AWS SES below.'
@@ -707,14 +708,14 @@ export function EmailPanel() {
             {activeFromEmail ? (
               <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/15 bg-slate-50 px-4 py-3">
                 <div className="min-w-0">
-                  <p className="text-sm font-bold text-gray-900">
+                  <p className="text-sm font-bold text-swiss-ink">
                     {activeDomain ?? activeProviderLabel ?? 'Email'}
                   </p>
-                  <p className="text-sm font-mono text-gray-600 mt-0.5 break-all">
+                  <p className="text-sm font-mono text-swiss-muted mt-0.5 break-all">
                     {activeFromEmail}
                   </p>
                   {activeProviderLabel && (
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-swiss-muted mt-1">
                       Provider · {activeProviderLabel}
                       {defaultProvider?.isDefault ? ' · Default' : ''}
                     </p>
@@ -725,16 +726,16 @@ export function EmailPanel() {
                 </span>
               </div>
             ) : (
-              <p className="text-xs text-gray-500 py-2">
+              <p className="text-xs text-swiss-muted py-2">
                 Connect a provider and choose a From address to start sending.
               </p>
             )}
           </section>
 
           {/* 2. Providers */}
-          <div className="bg-white rounded-2xl border border-black/5 p-4">
+          <div className="bg-white rounded-2xl border border-swiss-line p-4">
             <div className="flex items-center justify-between gap-2 mb-3">
-              <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+              <h4 className="text-sm font-bold text-swiss-ink flex items-center gap-2">
                 <Settings className="w-4 h-4 text-primary" aria-hidden />
                 Providers
               </h4>
@@ -763,28 +764,28 @@ export function EmailPanel() {
                 </button>
               )}
             </div>
-            <p className="text-xs text-gray-500 mb-4">
+            <p className="text-xs text-swiss-muted mb-4">
               Default provider chooses how mail is sent. ConvoSync platform email bills
               ConvoCoins only; your own SES/SMTP/etc. is not metered by ConvoSync. For AWS
               SES, pick a verified From — that sets both your sending email and domain.
             </p>
 
             {providers.length === 0 ? (
-              <p className="text-xs text-gray-500 text-center py-4">Loading providers…</p>
+              <p className="text-xs text-swiss-muted text-center py-4">Loading providers…</p>
             ) : (
               <ul className="space-y-3">
                 {providers.map((p) => (
                   <li
                     key={p.id}
-                    className="border border-slate-200 rounded-xl p-3 space-y-2"
+                    className="border border-swiss-line rounded-xl p-3 space-y-2"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-2">
                       <div>
-                        <p className="text-sm font-bold text-gray-900">
+                        <p className="text-sm font-bold text-swiss-ink">
                           {PROVIDER_LABELS[p.provider]}
                         </p>
                         {p.provider === 'AWS_SES' && p.senderEmail ? (
-                          <p className="text-xs font-mono text-gray-600 mt-0.5 break-all">
+                          <p className="text-xs font-mono text-swiss-muted mt-0.5 break-all">
                             From · {p.senderEmail}
                           </p>
                         ) : null}
@@ -848,7 +849,7 @@ export function EmailPanel() {
                         {p.provider === 'AWS_SES' &&
                         p.trackingStatus === 'enabled' &&
                         p.configurationSetName ? (
-                          <p className="text-xs text-gray-500 mt-1 font-mono">
+                          <p className="text-xs text-swiss-muted mt-1 font-mono">
                             Config set · {p.configurationSetName}
                           </p>
                         ) : null}
@@ -859,7 +860,7 @@ export function EmailPanel() {
                             type="button"
                             disabled={saving}
                             onClick={() => void handleSetDefaultProvider(p.id)}
-                            className="px-2 py-1 text-sm font-bold rounded border border-slate-200 hover:border-primary/30"
+                            className="px-2 py-1 text-sm font-bold rounded border border-swiss-line hover:border-primary/30"
                           >
                             Set default
                           </button>
@@ -868,7 +869,7 @@ export function EmailPanel() {
                           type="button"
                           disabled={saving}
                           onClick={() => void handleTestProvider(p.id)}
-                          className="px-2 py-1 text-sm font-bold rounded border border-slate-200 hover:border-primary/30 inline-flex items-center gap-1"
+                          className="px-2 py-1 text-sm font-bold rounded border border-swiss-line hover:border-primary/30 inline-flex items-center gap-1"
                         >
                           <Zap className="w-3 h-3" />
                           Test
@@ -877,7 +878,7 @@ export function EmailPanel() {
                           type="button"
                           disabled={saving}
                           onClick={() => void handleToggleProviderStatus(p)}
-                          className="px-2 py-1 text-sm font-bold rounded border border-slate-200 hover:border-primary/30"
+                          className="px-2 py-1 text-sm font-bold rounded border border-swiss-line hover:border-primary/30"
                         >
                           {p.status === 'disabled' ? 'Enable' : 'Disable'}
                         </button>
@@ -902,7 +903,7 @@ export function EmailPanel() {
                                 resetSesFormState();
                               }
                             }}
-                            className="px-2 py-1 text-sm font-bold rounded border border-slate-200 hover:border-primary/30"
+                            className="px-2 py-1 text-sm font-bold rounded border border-swiss-line hover:border-primary/30"
                           >
                             Edit
                           </button>
@@ -929,53 +930,53 @@ export function EmailPanel() {
                     {editingProviderId === p.id && (
                       <div className="pt-2 border-t border-gray-100 space-y-2">
                         {p.provider === 'RESEND' || p.provider === 'SENDGRID' ? (
-                          <input
+                          <Input
                             type="password"
                             value={providerForm.apiKey}
                             onChange={(e) =>
                               setProviderForm((f) => ({ ...f, apiKey: e.target.value }))
                             }
                             placeholder="New API key (leave blank to keep current)"
-                            className="w-full text-sm border border-slate-200 rounded-lg px-3 py-2"
+                            className="h-auto w-full text-sm border border-swiss-line rounded-lg px-3 py-2"
                           />
                         ) : null}
                         {p.provider === 'AWS_SES' ? renderSesFields(p.id) : null}
                         {p.provider === 'SMTP' ? (
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            <input
+                            <Input
                               value={providerForm.host}
                               onChange={(e) =>
                                 setProviderForm((f) => ({ ...f, host: e.target.value }))
                               }
                               placeholder="SMTP host"
-                              className="text-sm border border-slate-200 rounded-lg px-3 py-2"
+                              className="h-auto text-sm border border-swiss-line rounded-lg px-3 py-2"
                             />
-                            <input
+                            <Input
                               value={providerForm.port}
                               onChange={(e) =>
                                 setProviderForm((f) => ({ ...f, port: e.target.value }))
                               }
                               placeholder="Port"
-                              className="text-sm border border-slate-200 rounded-lg px-3 py-2"
+                              className="h-auto text-sm border border-swiss-line rounded-lg px-3 py-2"
                             />
-                            <input
+                            <Input
                               value={providerForm.username}
                               onChange={(e) =>
                                 setProviderForm((f) => ({ ...f, username: e.target.value }))
                               }
                               placeholder="Username"
-                              className="text-sm border border-slate-200 rounded-lg px-3 py-2"
+                              className="h-auto text-sm border border-swiss-line rounded-lg px-3 py-2"
                             />
-                            <input
+                            <Input
                               type="password"
                               value={providerForm.password}
                               onChange={(e) =>
                                 setProviderForm((f) => ({ ...f, password: e.target.value }))
                               }
                               placeholder="Password"
-                              className="text-sm border border-slate-200 rounded-lg px-3 py-2"
+                              className="h-auto text-sm border border-swiss-line rounded-lg px-3 py-2"
                             />
-                            <label className="flex items-center gap-2 text-xs text-gray-600 sm:col-span-2">
+                            <label className="flex items-center gap-2 text-xs text-swiss-muted sm:col-span-2">
                               <input
                                 type="checkbox"
                                 checked={providerForm.secure}
@@ -1007,7 +1008,7 @@ export function EmailPanel() {
                           <button
                             type="button"
                             onClick={resetProviderForm}
-                            className="px-3 py-1.5 rounded-lg border border-slate-200 text-sm font-bold text-gray-600"
+                            className="px-3 py-1.5 rounded-lg border border-swiss-line text-sm font-bold text-swiss-muted"
                           >
                             Cancel
                           </button>
@@ -1021,8 +1022,8 @@ export function EmailPanel() {
           </div>
 
           {showAddProvider && (
-            <div className="bg-white rounded-2xl border border-black/5 p-4 space-y-3">
-              <h4 className="text-sm font-bold text-gray-900">Add provider</h4>
+            <div className="bg-white rounded-2xl border border-swiss-line p-4 space-y-3">
+              <h4 className="text-sm font-bold text-swiss-ink">Add provider</h4>
               <select
                 value={providerForm.provider}
                 onChange={(e) => {
@@ -1030,7 +1031,7 @@ export function EmailPanel() {
                   setProviderForm((f) => ({ ...f, provider: next }));
                   if (next !== 'AWS_SES') resetSesFormState();
                 }}
-                className="w-full text-sm border border-slate-200 rounded-lg px-3 py-2"
+                className="w-full text-sm border border-swiss-line rounded-lg px-3 py-2"
               >
                 {availableProviderTypes.map((t) => (
                   <option key={t} value={t}>
@@ -1040,12 +1041,12 @@ export function EmailPanel() {
               </select>
 
               {providerForm.provider === 'RESEND' || providerForm.provider === 'SENDGRID' ? (
-                <input
+                <Input
                   type="password"
                   value={providerForm.apiKey}
                   onChange={(e) => setProviderForm((f) => ({ ...f, apiKey: e.target.value }))}
                   placeholder="API key"
-                  className="w-full text-sm border border-slate-200 rounded-lg px-3 py-2"
+                  className="h-auto w-full text-sm border border-swiss-line rounded-lg px-3 py-2"
                 />
               ) : null}
 
@@ -1053,32 +1054,32 @@ export function EmailPanel() {
 
               {providerForm.provider === 'SMTP' ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <input
+                  <Input
                     value={providerForm.host}
                     onChange={(e) => setProviderForm((f) => ({ ...f, host: e.target.value }))}
                     placeholder="SMTP host"
-                    className="text-sm border border-slate-200 rounded-lg px-3 py-2"
+                    className="h-auto text-sm border border-swiss-line rounded-lg px-3 py-2"
                   />
-                  <input
+                  <Input
                     value={providerForm.port}
                     onChange={(e) => setProviderForm((f) => ({ ...f, port: e.target.value }))}
                     placeholder="Port"
-                    className="text-sm border border-slate-200 rounded-lg px-3 py-2"
+                    className="h-auto text-sm border border-swiss-line rounded-lg px-3 py-2"
                   />
-                  <input
+                  <Input
                     value={providerForm.username}
                     onChange={(e) => setProviderForm((f) => ({ ...f, username: e.target.value }))}
                     placeholder="Username"
-                    className="text-sm border border-slate-200 rounded-lg px-3 py-2"
+                    className="h-auto text-sm border border-swiss-line rounded-lg px-3 py-2"
                   />
-                  <input
+                  <Input
                     type="password"
                     value={providerForm.password}
                     onChange={(e) => setProviderForm((f) => ({ ...f, password: e.target.value }))}
                     placeholder="Password"
-                    className="text-sm border border-slate-200 rounded-lg px-3 py-2"
+                    className="h-auto text-sm border border-swiss-line rounded-lg px-3 py-2"
                   />
-                  <label className="flex items-center gap-2 text-xs text-gray-600 sm:col-span-2">
+                  <label className="flex items-center gap-2 text-xs text-swiss-muted sm:col-span-2">
                     <input
                       type="checkbox"
                       checked={providerForm.secure}
@@ -1092,13 +1093,13 @@ export function EmailPanel() {
               ) : null}
 
               {providerForm.provider === 'CONVOSYNC_MANAGED' ? (
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-swiss-muted">
                   Uses ConvoSync platform email. No API key required. Sends are billed from
                   your ConvoCoins wallet (1 CC per recipient) — not a monthly plan email quota.
                 </p>
               ) : null}
 
-              <label className="flex items-center gap-2 text-xs text-gray-600">
+              <label className="flex items-center gap-2 text-xs text-swiss-muted">
                 <input
                   type="checkbox"
                   checked={providerForm.isDefault}
@@ -1129,7 +1130,7 @@ export function EmailPanel() {
                 <button
                   type="button"
                   onClick={resetProviderForm}
-                  className="px-4 py-2 rounded-lg border border-slate-200 text-sm font-bold text-gray-600"
+                  className="px-4 py-2 rounded-lg border border-swiss-line text-sm font-bold text-swiss-muted"
                 >
                   Cancel
                 </button>
@@ -1140,21 +1141,21 @@ export function EmailPanel() {
           {/* 3. Test send */}
           <section
             aria-labelledby="email-test-send-heading"
-            className="bg-white rounded-2xl border border-black/5 p-4 space-y-3"
+            className="bg-white rounded-2xl border border-swiss-line p-4 space-y-3"
           >
             <h4
               id="email-test-send-heading"
-              className="text-sm font-bold text-gray-900 flex items-center gap-2"
+              className="text-sm font-bold text-swiss-ink flex items-center gap-2"
             >
               <Send className="w-4 h-4 text-primary" aria-hidden />
               Send test email
             </h4>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-swiss-muted">
               Sends with your active From
               {activeFromEmail ? (
                 <>
                   {' '}
-                  (<span className="font-mono text-gray-700">{activeFromEmail}</span>)
+                  (<span className="font-mono text-swiss-ink">{activeFromEmail}</span>)
                 </>
               ) : null}
               .
@@ -1167,14 +1168,14 @@ export function EmailPanel() {
             <label htmlFor="email-test-to" className="sr-only">
               Recipient email
             </label>
-            <input
+            <Input
               id="email-test-to"
               type="email"
               autoComplete="email"
               value={testSend.to}
               onChange={(e) => setTestSend((s) => ({ ...s, to: e.target.value }))}
               placeholder="recipient@example.com"
-              className="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+              className="h-auto w-full text-sm border border-swiss-line rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
             />
             <button
               type="button"
@@ -1189,9 +1190,9 @@ export function EmailPanel() {
       )}
 
       {tab === 'logs' && (
-        <div className="w-full bg-white rounded-2xl border border-black/5 overflow-hidden">
+        <div className="w-full bg-white rounded-2xl border border-swiss-line overflow-hidden">
           {logs.length === 0 ? (
-            <p className="text-xs text-gray-500 text-center py-10">No emails sent yet.</p>
+            <p className="text-xs text-swiss-muted text-center py-10">No emails sent yet.</p>
           ) : (
             <div className="w-full overflow-x-auto">
               {/* ponytail: table-fixed + % cols so logs fill the pane; overflow-x only for narrow viewports */}
@@ -1209,7 +1210,7 @@ export function EmailPanel() {
                   <col className="w-[8%]" />
                   <col className="w-[8%]" />
                 </colgroup>
-                <thead className="bg-slate-50 text-gray-500 font-bold border-b border-slate-200">
+                <thead className="bg-slate-50 text-swiss-muted font-bold border-b border-swiss-line">
                   <tr>
                     <th scope="col" className="px-3 py-2.5 whitespace-nowrap">
                       Time
@@ -1246,7 +1247,7 @@ export function EmailPanel() {
                       key={log.id}
                       className="border-b border-gray-50 hover:bg-slate-50/50 transition-colors duration-150"
                     >
-                      <td className="px-3 py-2.5 text-gray-600 whitespace-nowrap tabular-nums truncate">
+                      <td className="px-3 py-2.5 text-swiss-muted whitespace-nowrap tabular-nums truncate">
                         {formatDate(log.createdAt)}
                       </td>
                       <td
@@ -1261,10 +1262,10 @@ export function EmailPanel() {
                       >
                         {log.recipient}
                       </td>
-                      <td className="px-3 py-2.5 text-gray-800 truncate" title={log.subject}>
+                      <td className="px-3 py-2.5 text-swiss-ink truncate" title={log.subject}>
                         {log.subject}
                       </td>
-                      <td className="px-3 py-2.5 text-gray-500 whitespace-nowrap truncate">
+                      <td className="px-3 py-2.5 text-swiss-muted whitespace-nowrap truncate">
                         {logProviderLabel(log)}
                       </td>
                       <td className="px-3 py-2.5 whitespace-nowrap">
@@ -1285,7 +1286,7 @@ export function EmailPanel() {
                           <td
                             key={step}
                             className={`px-3 py-2.5 whitespace-nowrap tabular-nums truncate ${
-                              at ? 'text-gray-700' : 'text-gray-400'
+                              at ? 'text-swiss-ink' : 'text-swiss-faint'
                             }`}
                           >
                             {formatDate(at)}

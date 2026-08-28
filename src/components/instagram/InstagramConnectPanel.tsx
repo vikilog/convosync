@@ -8,6 +8,7 @@ import { Instagram } from 'lucide-react';
 import { api } from '../../lib/api';
 import {
   buildMetaOAuthDialogUrl,
+  INSTAGRAM_BUSINESS_LOGIN_REDIRECT_STORAGE_KEY,
   INSTAGRAM_OAUTH_REDIRECT_STORAGE_KEY,
   INSTAGRAM_SCOPES,
 } from '../../lib/metaOAuth';
@@ -81,6 +82,20 @@ export function InstagramConnectPanel({
     }
   }, [connectDisabled, connectDisabledMessage, hasValidAppId, metaAppId, onError]);
 
+  const [businessLoginLoading, setBusinessLoginLoading] = useState(false);
+
+  const handleBusinessLoginConnect = useCallback(async () => {
+    setBusinessLoginLoading(true);
+    try {
+      const oauth = await api.getInstagramBusinessLoginConnectUrl();
+      sessionStorage.setItem(INSTAGRAM_BUSINESS_LOGIN_REDIRECT_STORAGE_KEY, oauth.redirectUri);
+      window.location.assign(oauth.oauthDialogUrl);
+    } catch (err) {
+      setBusinessLoginLoading(false);
+      onError?.(err instanceof Error ? err.message : 'Failed to start Instagram login');
+    }
+  }, [onError]);
+
   useEffect(() => {
     if (!autoStart || autoStartTriggered.current || connectDisabled) return;
     autoStartTriggered.current = true;
@@ -96,13 +111,13 @@ export function InstagramConnectPanel({
         <Instagram className="w-3 h-3" />
         Instagram Business
       </span>
-      <h4 className="text-xl font-black text-gray-950">Connect Instagram Business</h4>
-      <p className="mt-2 text-sm text-gray-600 font-medium max-w-xl">
+      <h4 className="text-xl font-semibold text-gray-950">Connect Instagram Business</h4>
+      <p className="mt-2 text-sm text-swiss-muted font-medium max-w-xl">
         Authorize via Facebook Login to link your Instagram Professional account. This powers
         inbox DMs and Social Listening (comment triage).
       </p>
 
-      <ul className="mt-4 space-y-2 text-xs text-gray-500 font-medium">
+      <ul className="mt-4 space-y-2 text-xs text-swiss-muted font-medium">
         <li>• Instagram must be a Professional account (Business or Creator)</li>
         <li>• Instagram must be linked to a Facebook Page you admin</li>
         <li>• Log in with the same Facebook profile that manages that Page</li>
@@ -113,13 +128,27 @@ export function InstagramConnectPanel({
         type="button"
         onClick={() => void handleConnect()}
         disabled={!canConnect}
-        className="mt-6 inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary-hover disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-xl text-sm font-black shadow-md transition-all"
+        className="mt-6 inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary-hover disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-xl text-sm font-black transition-all"
       >
         {loading ? 'Redirecting to Meta…' : connectDisabled ? 'Upgrade plan' : 'Continue with Facebook'}
       </button>
       {connectDisabled && connectDisabledMessage ? (
         <p className="mt-4 text-sm font-bold text-amber-700">{connectDisabledMessage}</p>
       ) : null}
+
+      <div className="mt-6 pt-6 border-t border-swiss-line">
+        <p className="text-xs font-bold text-swiss-muted">
+          Prefer logging in with Instagram directly (no Facebook Page required)?
+        </p>
+        <button
+          type="button"
+          onClick={() => void handleBusinessLoginConnect()}
+          disabled={businessLoginLoading}
+          className="mt-3 inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white border-2 border-[#E1306C]/25 hover:bg-[#fce8f0] disabled:opacity-60 text-[#C13584] rounded-xl text-sm font-black transition-all"
+        >
+          {businessLoginLoading ? 'Redirecting to Instagram…' : 'Continue with Instagram Login'}
+        </button>
+      </div>
     </div>
   );
 }

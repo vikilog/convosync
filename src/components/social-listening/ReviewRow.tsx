@@ -34,7 +34,7 @@ export const ReviewRow: React.FC<{
         <img
           src={item.profilePicUrl}
           alt=""
-          className="h-8 w-8 shrink-0 rounded-full object-cover border border-black/5"
+          className="h-8 w-8 shrink-0 rounded-full object-cover border border-swiss-line"
         />
       ) : item.platform === 'facebook' ? (
         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#e8f4ff] text-[#1877F2]">
@@ -59,9 +59,9 @@ export const ReviewRow: React.FC<{
             <Sparkles className="h-2.5 w-2.5" />
             {item.intent} · {confidencePct}%
           </span>
-          <span className="text-[11px] text-gray-400">{timeAgo(item.createdAt)}</span>
+          <span className="text-[11px] text-swiss-faint">{timeAgo(item.createdAt)}</span>
         </div>
-        <p className="mt-0.5 truncate text-xs text-gray-600">{item.commentText}</p>
+        <p className="mt-0.5 truncate text-xs text-swiss-muted">{item.commentText}</p>
       </button>
     </div>
   );

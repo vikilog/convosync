@@ -152,7 +152,7 @@ export function TagsPanel() {
                   </span>
                 </button>
                 {!isCollapsed && (
-                  <div className="divide-y divide-black/5 border-t border-black/5">
+                  <div className="divide-y divide-swiss-line border-t border-swiss-line">
                     {group.items.map((tag) => (
                       <div key={tag.id} className="flex items-center justify-between gap-2 px-4 py-2.5">
                         <span className="rounded-md bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">

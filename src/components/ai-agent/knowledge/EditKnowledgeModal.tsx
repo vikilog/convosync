@@ -2,6 +2,8 @@ import React, { useMemo, useState } from 'react';
 import { X } from 'lucide-react';
 import type { KnowledgeItem } from '../types';
 import type { QnAPair } from './QnAForm';
+import { Input } from '../../ui/input';
+import { Textarea } from '../../ui/textarea';
 
 export type KnowledgeEditPayload = {
   title: string;
@@ -87,8 +89,8 @@ export const EditKnowledgeModal: React.FC<Props> = ({
 
   return (
     <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-xl border border-black/5 shadow-2xl max-h-[90vh] flex flex-col">
-        <div className="flex justify-between items-center px-6 py-4 border-b border-black/5 shrink-0">
+      <div className="bg-white rounded-2xl w-full max-w-xl border border-swiss-line shadow-2xl max-h-[90vh] flex flex-col">
+        <div className="flex justify-between items-center px-6 py-4 border-b border-swiss-line shrink-0">
           <h3 className="text-base font-bold text-[#111827]">Edit knowledge</h3>
           <button type="button" onClick={onClose} className="text-[#6B7280] hover:text-[#111827]">
             <X className="w-5 h-5" />
@@ -100,22 +102,22 @@ export const EditKnowledgeModal: React.FC<Props> = ({
 
           <label className="block">
             <span className="text-sm font-bold text-[#111827]">Title</span>
-            <input
+            <Input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="mt-1.5 w-full px-3 py-2 border border-black/5 rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+              className="h-auto mt-1.5 w-full px-3 py-2 border border-swiss-line rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
             />
           </label>
 
           {item.type === 'online_data' && (
             <label className="block">
               <span className="text-sm font-bold text-[#111827]">URL</span>
-              <input
+              <Input
                 type="url"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
-                className="mt-1.5 w-full px-3 py-2 border border-black/5 rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                className="h-auto mt-1.5 w-full px-3 py-2 border border-swiss-line rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
               />
             </label>
           )}
@@ -123,8 +125,8 @@ export const EditKnowledgeModal: React.FC<Props> = ({
           {item.type === 'qna' ? (
             <div className="space-y-3">
               {pairs.map((pair, index) => (
-                <div key={index} className="space-y-2 p-3 rounded-xl border border-black/5">
-                  <input
+                <div key={index} className="space-y-2 p-3 rounded-xl border border-swiss-line">
+                  <Input
                     type="text"
                     value={pair.question}
                     onChange={(e) => {
@@ -133,9 +135,9 @@ export const EditKnowledgeModal: React.FC<Props> = ({
                       setPairs(next);
                     }}
                     placeholder="Question"
-                    className="w-full px-3 py-2 border border-black/5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                    className="h-auto w-full px-3 py-2 border border-swiss-line rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/20"
                   />
-                  <textarea
+                  <Textarea
                     value={pair.answer}
                     onChange={(e) => {
                       const next = [...pairs];
@@ -144,7 +146,7 @@ export const EditKnowledgeModal: React.FC<Props> = ({
                     }}
                     placeholder="Answer"
                     rows={3}
-                    className="w-full px-3 py-2 border border-black/5 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/20 resize-none"
+                    className="min-h-0 w-full px-3 py-2 border border-swiss-line rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/20 resize-none"
                   />
                 </div>
               ))}
@@ -161,7 +163,7 @@ export const EditKnowledgeModal: React.FC<Props> = ({
               <span className="text-sm font-bold text-[#111827]">
                 {item.type === 'attachment' ? 'Description' : 'Content'}
               </span>
-              <textarea
+              <Textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 rows={8}
@@ -170,7 +172,7 @@ export const EditKnowledgeModal: React.FC<Props> = ({
                     ? 'Cached page text (optional — re-add URL to refresh from web)'
                     : 'Knowledge content the agent can use…'
                 }
-                className="mt-1.5 w-full px-3 py-2 border border-black/5 rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none resize-y min-h-[140px]"
+                className="min-h-0 mt-1.5 w-full px-3 py-2 border border-swiss-line rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none resize-y min-h-[140px]"
               />
             </label>
           )}
@@ -178,7 +180,7 @@ export const EditKnowledgeModal: React.FC<Props> = ({
           {error && <p className="text-sm text-red-600">{error}</p>}
         </div>
 
-        <div className="flex justify-end gap-3 px-6 py-4 border-t border-black/5 shrink-0">
+        <div className="flex justify-end gap-3 px-6 py-4 border-t border-swiss-line shrink-0">
           <button
             type="button"
             onClick={onClose}

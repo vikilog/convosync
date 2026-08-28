@@ -1,5 +1,7 @@
 import { Plus, Trash2 } from 'lucide-react';
 import type { WebhookResponseMapping } from '../types';
+import { Input } from '../../../components/ui/input';
+import { Textarea } from '../../../components/ui/textarea';
 
 type HeaderRow = { key: string; value: string };
 
@@ -76,23 +78,23 @@ export function WebhookConfig({ local, patch }: Props) {
 
   return (
     <div className="space-y-3">
-      <label className="block text-sm font-semibold text-gray-700">
+      <label className="block text-sm font-semibold text-swiss-ink">
         Request name
-        <input
-          className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+        <Input
+          className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
           value={String(local.name ?? '')}
           onChange={(e) => patch('name', e.target.value)}
           placeholder="e.g. Notify CRM"
         />
-        <span className="mt-1 block text-xs font-normal text-gray-400">
+        <span className="mt-1 block text-xs font-normal text-swiss-faint">
           Shown on the journey canvas and contact journey timeline.
         </span>
       </label>
 
-      <label className="block text-sm font-semibold text-gray-700">
+      <label className="block text-sm font-semibold text-swiss-ink">
         Method
         <select
-          className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+          className="mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
           value={method}
           onChange={(e) => patch('method', e.target.value)}
         >
@@ -101,26 +103,26 @@ export function WebhookConfig({ local, patch }: Props) {
         </select>
       </label>
 
-      <label className="block text-sm font-semibold text-gray-700">
+      <label className="block text-sm font-semibold text-swiss-ink">
         URL
-        <input
-          className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm font-mono text-xs"
+        <Input
+          className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm font-mono text-xs"
           value={String(local.url ?? '')}
           onChange={(e) => patch('url', e.target.value)}
           placeholder="https://api.example.com/hook"
         />
-        <span className="mt-1 block text-xs font-normal text-gray-400">
+        <span className="mt-1 block text-xs font-normal text-swiss-faint">
           Use {'{{contact.name}}'}, {'{{contact.phone}}'}, {'{{contact.email}}'} in URL, headers, or body.
         </span>
       </label>
 
       <div>
         <div className="flex items-center justify-between gap-2">
-          <p className="text-sm font-semibold text-gray-700">Headers</p>
+          <p className="text-sm font-semibold text-swiss-ink">Headers</p>
           <button
             type="button"
             onClick={() => updateHeaders([...headerRows, { key: '', value: '' }])}
-            className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2 py-1 text-xs font-bold text-gray-600 hover:bg-slate-50"
+            className="inline-flex items-center gap-1 rounded-lg border border-swiss-line px-2 py-1 text-xs font-bold text-swiss-muted hover:bg-slate-50"
           >
             <Plus className="h-3.5 w-3.5" />
             Add header
@@ -129,8 +131,8 @@ export function WebhookConfig({ local, patch }: Props) {
         <div className="mt-2 space-y-2">
           {headerRows.map((row, index) => (
             <div key={index} className="flex items-start gap-2">
-              <input
-                className="min-w-0 flex-1 rounded-lg border border-slate-200 px-2 py-1.5 text-sm font-mono text-xs"
+              <Input
+                className="h-auto min-w-0 flex-1 rounded-lg border border-swiss-line px-2 py-1.5 text-sm font-mono text-xs"
                 value={row.key}
                 onChange={(e) => {
                   const next = headerRows.map((r, i) =>
@@ -140,8 +142,8 @@ export function WebhookConfig({ local, patch }: Props) {
                 }}
                 placeholder="Header name"
               />
-              <input
-                className="min-w-0 flex-[1.5] rounded-lg border border-slate-200 px-2 py-1.5 text-sm font-mono text-xs"
+              <Input
+                className="h-auto min-w-0 flex-[1.5] rounded-lg border border-swiss-line px-2 py-1.5 text-sm font-mono text-xs"
                 value={row.value}
                 onChange={(e) => {
                   const next = headerRows.map((r, i) =>
@@ -157,7 +159,7 @@ export function WebhookConfig({ local, patch }: Props) {
                   const next = headerRows.filter((_, i) => i !== index);
                   updateHeaders(next.length ? next : [{ key: '', value: '' }]);
                 }}
-                className="rounded-lg border border-slate-200 p-1.5 text-gray-400 hover:border-rose-200 hover:text-rose-600"
+                className="rounded-lg border border-swiss-line p-1.5 text-swiss-faint hover:border-rose-200 hover:text-rose-600"
                 title="Remove header"
                 disabled={headerRows.length === 1 && !row.key && !row.value}
               >
@@ -183,26 +185,26 @@ export function WebhookConfig({ local, patch }: Props) {
       </div>
 
       {method === 'POST' && (
-        <label className="block text-sm font-semibold text-gray-700">
+        <label className="block text-sm font-semibold text-swiss-ink">
           Request body
-          <textarea
+          <Textarea
             rows={6}
-            className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm font-mono text-xs"
+            className="min-h-0 mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm font-mono text-xs"
             value={bodyText}
             onChange={(e) => patch('body', e.target.value)}
             placeholder={'{\n  "name": "{{contact.name}}",\n  "phone": "{{contact.phone}}"\n}'}
           />
-          <span className="mt-1 block text-xs font-normal text-gray-400">
+          <span className="mt-1 block text-xs font-normal text-swiss-faint">
             JSON or plain text. Variables are replaced at runtime.
           </span>
         </label>
       )}
 
-      <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-3">
+      <div className="rounded-xl border border-swiss-line bg-slate-50/80 p-3">
         <div className="flex items-center justify-between gap-2">
           <div>
-            <p className="text-sm font-semibold text-gray-800">Save response to contact</p>
-            <p className="mt-0.5 text-xs text-gray-500">
+            <p className="text-sm font-semibold text-swiss-ink">Save response to contact</p>
+            <p className="mt-0.5 text-xs text-swiss-muted">
               Extract API fields into customized attributes for later journey steps.
             </p>
           </div>
@@ -211,7 +213,7 @@ export function WebhookConfig({ local, patch }: Props) {
             onClick={() =>
               updateMappings([...displayMappings, { jsonPath: '', attributeKey: '' }])
             }
-            className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-bold text-gray-600 hover:bg-slate-50"
+            className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-swiss-line bg-white px-2 py-1 text-xs font-bold text-swiss-muted hover:bg-slate-50"
           >
             <Plus className="h-3.5 w-3.5" />
             Add field
@@ -227,8 +229,8 @@ export function WebhookConfig({ local, patch }: Props) {
                     JSON path
                   </p>
                 ) : null}
-                <input
-                  className="w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm font-mono text-xs"
+                <Input
+                  className="h-auto w-full rounded-lg border border-swiss-line bg-white px-2 py-1.5 text-sm font-mono text-xs"
                   value={row.jsonPath}
                   onChange={(e) => {
                     const next = displayMappings.map((r, i) =>
@@ -245,8 +247,8 @@ export function WebhookConfig({ local, patch }: Props) {
                     Attribute name
                   </p>
                 ) : null}
-                <input
-                  className="w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm"
+                <Input
+                  className="h-auto w-full rounded-lg border border-swiss-line bg-white px-2 py-1.5 text-sm"
                   value={row.attributeKey}
                   onChange={(e) => {
                     const next = displayMappings.map((r, i) =>
@@ -263,7 +265,7 @@ export function WebhookConfig({ local, patch }: Props) {
                   const next = displayMappings.filter((_, i) => i !== index);
                   updateMappings(next.length ? next : [{ jsonPath: '', attributeKey: '' }]);
                 }}
-                className="mt-5 rounded-lg border border-slate-200 bg-white p-1.5 text-gray-400 hover:border-rose-200 hover:text-rose-600"
+                className="mt-5 rounded-lg border border-swiss-line bg-white p-1.5 text-swiss-faint hover:border-rose-200 hover:text-rose-600"
                 title="Remove mapping"
                 disabled={
                   displayMappings.length === 1 && !row.jsonPath && !row.attributeKey
@@ -275,7 +277,7 @@ export function WebhookConfig({ local, patch }: Props) {
           ))}
         </div>
 
-        <p className="mt-3 text-xs leading-relaxed text-gray-500">
+        <p className="mt-3 text-xs leading-relaxed text-swiss-muted">
           Use dot notation for nested JSON, e.g.{' '}
           <code className="rounded bg-white px-1 py-0.5 font-mono text-[11px]">user.tier</code> or{' '}
           <code className="rounded bg-white px-1 py-0.5 font-mono text-[11px]">items[0].sku</code>.

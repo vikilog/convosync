@@ -6,6 +6,8 @@ import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Building2, Loader2, Phone, X } from 'lucide-react';
 import { api, formatCatchError } from '../../lib/api';
+import { Input } from '../ui/input';
+import { Textarea } from '../ui/textarea';
 
 export type WhatsAppProfileTarget = {
   phoneNumberId: string;
@@ -151,9 +153,9 @@ export function WhatsAppProfileSideSheet({ open, account, onClose, onSaved }: Pr
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-            className="fixed top-0 right-0 z-[79] flex h-full w-full max-w-lg flex-col border-l border-black/5 bg-white shadow-2xl"
+            className="fixed top-0 right-0 z-[79] flex h-full w-full max-w-lg flex-col border-l border-swiss-line bg-white shadow-2xl"
           >
-            <header className="flex items-start justify-between gap-3 border-b border-black/5 px-5 py-4 shrink-0">
+            <header className="flex items-start justify-between gap-3 border-b border-swiss-line px-5 py-4 shrink-0">
               <div className="flex gap-3 min-w-0">
                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                   <Building2 className="h-5 w-5" />
@@ -189,10 +191,10 @@ export function WhatsAppProfileSideSheet({ open, account, onClose, onSaved }: Pr
                         <img
                           src={pictureUrl}
                           alt=""
-                          className="h-14 w-14 rounded-full object-cover border border-black/5 bg-white"
+                          className="h-14 w-14 rounded-full object-cover border border-swiss-line bg-white"
                         />
                       ) : (
-                        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white border border-black/5 text-primary">
+                        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white border border-swiss-line text-primary">
                           <Phone className="h-6 w-6" />
                         </div>
                       )}
@@ -205,12 +207,12 @@ export function WhatsAppProfileSideSheet({ open, account, onClose, onSaved }: Pr
                         </p>
                         <div className="mt-1.5 flex flex-wrap gap-1.5">
                           {qualityRating && (
-                            <span className="rounded-full bg-white border border-black/5 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+                            <span className="rounded-full bg-white border border-swiss-line px-2 py-0.5 text-[10px] font-semibold text-slate-600">
                               Quality · {qualityRating}
                             </span>
                           )}
                           {nameStatus && (
-                            <span className="rounded-full bg-white border border-black/5 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+                            <span className="rounded-full bg-white border border-swiss-line px-2 py-0.5 text-[10px] font-semibold text-slate-600">
                               Name · {nameStatus}
                             </span>
                           )}
@@ -247,13 +249,13 @@ export function WhatsAppProfileSideSheet({ open, account, onClose, onSaved }: Pr
                     <label className={labelClass} htmlFor="wa-about">
                       About ({about.length}/139)
                     </label>
-                    <textarea
+                    <Textarea
                       id="wa-about"
                       value={about}
                       maxLength={139}
                       rows={2}
                       onChange={(e) => setAbout(e.target.value)}
-                      className={inputClass}
+                      className={`min-h-0 ${inputClass}`}
                       placeholder="Short status under your profile photo"
                     />
                   </div>
@@ -262,13 +264,13 @@ export function WhatsAppProfileSideSheet({ open, account, onClose, onSaved }: Pr
                     <label className={labelClass} htmlFor="wa-description">
                       Description ({description.length}/512)
                     </label>
-                    <textarea
+                    <Textarea
                       id="wa-description"
                       value={description}
                       maxLength={512}
                       rows={4}
                       onChange={(e) => setDescription(e.target.value)}
-                      className={inputClass}
+                      className={`min-h-0 ${inputClass}`}
                       placeholder="Tell customers what your business does"
                     />
                   </div>
@@ -277,7 +279,7 @@ export function WhatsAppProfileSideSheet({ open, account, onClose, onSaved }: Pr
                     <label className={labelClass} htmlFor="wa-address">
                       Address
                     </label>
-                    <input
+                    <Input
                       id="wa-address"
                       value={address}
                       maxLength={256}
@@ -291,7 +293,7 @@ export function WhatsAppProfileSideSheet({ open, account, onClose, onSaved }: Pr
                     <label className={labelClass} htmlFor="wa-email">
                       Email
                     </label>
-                    <input
+                    <Input
                       id="wa-email"
                       type="email"
                       value={email}
@@ -326,7 +328,7 @@ export function WhatsAppProfileSideSheet({ open, account, onClose, onSaved }: Pr
                       <label className={labelClass} htmlFor="wa-web1">
                         Website 1
                       </label>
-                      <input
+                      <Input
                         id="wa-web1"
                         value={website1}
                         maxLength={256}
@@ -339,7 +341,7 @@ export function WhatsAppProfileSideSheet({ open, account, onClose, onSaved }: Pr
                       <label className={labelClass} htmlFor="wa-web2">
                         Website 2
                       </label>
-                      <input
+                      <Input
                         id="wa-web2"
                         value={website2}
                         maxLength={256}
@@ -353,7 +355,7 @@ export function WhatsAppProfileSideSheet({ open, account, onClose, onSaved }: Pr
               )}
             </div>
 
-            <footer className="shrink-0 border-t border-black/5 px-5 py-4 flex items-center justify-end gap-2 bg-white">
+            <footer className="shrink-0 border-t border-swiss-line px-5 py-4 flex items-center justify-end gap-2 bg-white">
               <button
                 type="button"
                 onClick={onClose}

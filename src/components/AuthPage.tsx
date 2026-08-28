@@ -16,6 +16,7 @@ import {
   Mail,
   MessageCircle,
 } from 'lucide-react';
+import { Input } from './ui/input';
 import { PRODUCT_LOGO, PRODUCT_NAME } from '../lib/brand';
 import { api } from '../lib/api';
 import { applyAuthSession, userNeedsOnboarding } from '../lib/session';
@@ -110,7 +111,7 @@ export function AuthPage() {
           transition={t(0.4)}
         >
           <img src={PRODUCT_LOGO} alt="" className="h-9 w-9 object-contain" />
-          <span className="font-display text-xl font-bold tracking-tight text-neutral-900">
+          <span className="font-display text-xl font-bold tracking-tight text-swiss-ink">
             {PRODUCT_NAME}
           </span>
         </motion.div>
@@ -140,7 +141,7 @@ export function AuthPage() {
                   className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
                   aria-hidden
                 />
-                <input
+                <Input
                   id="login-email"
                   type="email"
                   value={email}
@@ -148,7 +149,7 @@ export function AuthPage() {
                   autoComplete="email"
                   required
                   disabled={loading}
-                  className="min-h-11 w-full rounded-xl border border-slate-200 bg-white/90 py-2.5 pl-10 pr-3 text-sm text-slate-900 shadow-sm shadow-slate-900/5 transition-[border-color,box-shadow] duration-200 placeholder:text-slate-400 focus:border-channel-green focus:outline-none focus:ring-2 focus:ring-channel-green/25 disabled:opacity-60"
+                  className="h-11 rounded-xl border-swiss-line bg-white/90 pl-10 pr-3 text-sm text-slate-900 shadow-slate-900/5 transition-[border-color,box-shadow] duration-200 placeholder:text-slate-400 focus-visible:border-channel-green focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-channel-green/25 disabled:opacity-60"
                   placeholder="you@company.com"
                 />
               </div>
@@ -163,7 +164,7 @@ export function AuthPage() {
                   className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
                   aria-hidden
                 />
-                <input
+                <Input
                   id="login-password"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
@@ -172,7 +173,7 @@ export function AuthPage() {
                   required
                   minLength={8}
                   disabled={loading}
-                  className="min-h-11 w-full rounded-xl border border-slate-200 bg-white/90 py-2.5 pl-10 pr-11 text-sm text-slate-900 shadow-sm shadow-slate-900/5 transition-[border-color,box-shadow] duration-200 placeholder:text-slate-400 focus:border-channel-green focus:outline-none focus:ring-2 focus:ring-channel-green/25 disabled:opacity-60"
+                  className="h-11 rounded-xl border-swiss-line bg-white/90 pl-10 pr-11 text-sm text-slate-900 shadow-slate-900/5 transition-[border-color,box-shadow] duration-200 placeholder:text-slate-400 focus-visible:border-channel-green focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-channel-green/25 disabled:opacity-60"
                   placeholder="Your password"
                 />
                 <button
@@ -211,7 +212,7 @@ export function AuthPage() {
               disabled={loading}
               whileHover={loading || reduceMotion ? undefined : { y: -1 }}
               whileTap={loading || reduceMotion ? undefined : { scale: 0.97 }}
-              className="inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-channel-green text-sm font-bold text-white shadow-md shadow-emerald-600/20 transition-colors duration-200 hover:bg-[#20bd5a] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-channel-green disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-channel-green text-sm font-bold text-white shadow-emerald-600/20 transition-colors duration-200 hover:bg-[#20bd5a] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-channel-green disabled:cursor-not-allowed disabled:opacity-60"
             >
               {loading ? (
                 <>

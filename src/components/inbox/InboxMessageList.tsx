@@ -198,7 +198,7 @@ const MessageBubble: React.FC<{
         {message.templateName ? (
           <span
             className={`text-[11px] font-semibold truncate max-w-[220px] ${
-              opts.onDark ? 'text-white/80' : 'text-gray-500'
+              opts.onDark ? 'text-white/80' : 'text-swiss-muted'
             }`}
           >
             {message.templateName}
@@ -208,7 +208,7 @@ const MessageBubble: React.FC<{
       {message.emailSubject ? (
         <p
           className={`text-sm font-bold leading-snug break-words ${
-            opts.onDark ? 'text-white' : 'text-gray-900'
+            opts.onDark ? 'text-white' : 'text-swiss-ink'
           }`}
         >
           {message.emailSubject}
@@ -218,7 +218,7 @@ const MessageBubble: React.FC<{
         // Sanitized via sanitizeEmailHtml above — inbound email ingestion
         // isn't wired yet, but this only stays self-XSS-only by that
         // accident of scope, not by any check in this component.
-        <div className="rounded-lg bg-white text-gray-900 overflow-hidden max-h-[420px] overflow-y-auto">
+        <div className="rounded-lg bg-white text-swiss-ink overflow-hidden max-h-[420px] overflow-y-auto">
           <div
             className="email-inbox-html p-2 text-left text-[13px] leading-relaxed [&_*]:max-w-full [&_a]:text-emerald-700 [&_a]:underline [&_img]:max-w-full [&_img]:h-auto [&_table]:w-full [&_td]:align-top"
             dangerouslySetInnerHTML={{ __html: emailHtml }}
@@ -227,7 +227,7 @@ const MessageBubble: React.FC<{
       ) : emailBodyText ? (
         <p
           className={`text-sm leading-relaxed whitespace-pre-wrap break-words ${
-            opts.onDark ? 'text-white/90' : 'text-gray-700'
+            opts.onDark ? 'text-white/90' : 'text-swiss-ink'
           }`}
         >
           {emailBodyText}
@@ -252,11 +252,11 @@ const MessageBubble: React.FC<{
           : 'bg-[#d9fdd3] rounded-lg rounded-tr-none')
       : channel === 'messenger'
         ? isContact
-          ? 'bg-white rounded-2xl rounded-tl-md border border-black/5 shadow-sm'
-          : 'bg-[#0084ff] rounded-2xl rounded-tr-md shadow-sm'
+          ? 'bg-white rounded-2xl rounded-tl-md border border-swiss-line '
+          : 'bg-[#0084ff] rounded-2xl rounded-tr-md '
         : isContact
-          ? 'bg-white rounded-2xl rounded-tl-md border border-black/5 shadow-sm'
-          : 'bg-gradient-to-br from-[#833AB4]/95 to-[#E1306C] rounded-2xl rounded-tr-md shadow-sm';
+          ? 'bg-white rounded-2xl rounded-tl-md border border-swiss-line '
+          : 'bg-gradient-to-br from-[#833AB4]/95 to-[#E1306C] rounded-2xl rounded-tr-md ';
 
     return (
       <motion.div
@@ -335,7 +335,7 @@ const MessageBubble: React.FC<{
             </dl>
           )}
         </div>
-        <div className="flex items-center gap-1.5 mt-1 text-meta text-gray-400 font-bold font-mono px-1">
+        <div className="flex items-center gap-1.5 mt-1 text-meta text-swiss-faint font-bold font-mono px-1">
           <span>{time}</span>
           {deliveryStatusIcon}
         </div>
@@ -371,7 +371,7 @@ const MessageBubble: React.FC<{
           buttonText={message.waTemplateButtonText || ''}
           hideFooterTime
         />
-        <div className="flex items-center gap-1.5 mt-1 text-meta text-gray-400 font-bold font-mono px-1">
+        <div className="flex items-center gap-1.5 mt-1 text-meta text-swiss-faint font-bold font-mono px-1">
           <span>{time}</span>
           {deliveryStatusIcon}
         </div>
@@ -471,9 +471,9 @@ const MessageBubble: React.FC<{
         }`}
       />
     ) : message.status === 'delivered' ? (
-      <CheckCheck className="w-3.5 h-3.5 text-gray-400" />
+      <CheckCheck className="w-3.5 h-3.5 text-swiss-faint" />
     ) : (
-      <Check className="w-3.5 h-3.5 text-gray-400" />
+      <Check className="w-3.5 h-3.5 text-swiss-faint" />
     ));
 
   const footerClickBadge =
@@ -495,11 +495,11 @@ const MessageBubble: React.FC<{
       } ${message.status === 'sending' ? 'opacity-90' : ''}`}
     >
       <div
-        className={`relative p-3.5 shadow-sm border font-medium text-sm leading-relaxed break-words rounded-2xl ${
+        className={`relative p-3.5 border font-medium text-sm leading-relaxed break-words rounded-2xl ${
           isEmailTemplateBubble ? '' : 'whitespace-pre-wrap'
         } ${
           isContact
-            ? 'bg-white border-black/5 text-gray-900 rounded-tl-md'
+            ? 'bg-white border-swiss-line text-swiss-ink rounded-tl-md'
             : `${outboundClass} rounded-tr-md border-transparent`
         }`}
       >
@@ -517,7 +517,7 @@ const MessageBubble: React.FC<{
               ? 'Media'
               : message.content}
       </div>
-      <div className="flex items-center gap-1.5 mt-1 text-meta text-gray-400 font-bold font-mono px-1">
+      <div className="flex items-center gap-1.5 mt-1 text-meta text-swiss-faint font-bold font-mono px-1">
         <span>{time}</span>
         {footerStatus}
         {footerClickBadge}
@@ -547,7 +547,7 @@ function AutomationWaitingCard({ banner }: { banner: AutomationWaitingBanner }) 
   return (
     <div
       role="status"
-      className="mx-auto my-3 flex max-w-md items-start gap-2.5 rounded-2xl border border-[#f2994a]/30 bg-[#fff5e6]/90 px-3.5 py-2.5 text-left shadow-sm ring-1 ring-[#f2994a]/10"
+      className="mx-auto my-3 flex max-w-md items-start gap-2.5 rounded-2xl border border-[#f2994a]/30 bg-[#fff5e6]/90 px-3.5 py-2.5 text-left ring-1 ring-[#f2994a]/10"
     >
       <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-[#fff5e6] text-[#b45309] ring-1 ring-[#f2994a]/25">
         <PauseCircle className="h-3.5 w-3.5" aria-hidden />
@@ -602,7 +602,7 @@ export const InboxMessageList: React.FC<Props> = ({
         className="flex-1 overflow-y-auto p-4"
         style={isWhatsApp ? { backgroundColor: WA_CHAT_BG } : undefined}
       >
-        <p className="text-center text-xs text-gray-400 font-bold py-8">
+        <p className="text-center text-xs text-swiss-faint font-bold py-8">
           No messages yet. Send the first reply below.
         </p>
         {automationWaiting ? <AutomationWaitingCard banner={automationWaiting} /> : null}
@@ -629,10 +629,10 @@ export const InboxMessageList: React.FC<Props> = ({
               type="button"
               onClick={handleLoadOlderClick}
               disabled={loadingOlder}
-              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-meta font-bold shadow-sm transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
+              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-meta font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
                 isWhatsApp
                   ? 'bg-[#ffffffd9] text-[#54656f] hover:bg-white'
-                  : 'bg-surface/90 text-gray-600 ring-1 ring-black/5 hover:bg-surface'
+                  : 'bg-surface/90 text-swiss-muted ring-1 ring-black/5 hover:bg-surface'
               }`}
             >
               {loadingOlder ? <Loader2 className="h-3 w-3 animate-spin" /> : null}
@@ -646,8 +646,8 @@ export const InboxMessageList: React.FC<Props> = ({
               <span
                 className={
                   isWhatsApp
-                    ? 'px-2.5 py-1 bg-[#ffffffd9] rounded-md text-meta font-medium text-[#54656f] shadow-sm'
-                    : 'px-3 py-1 bg-surface/90 ring-1 ring-black/5 rounded-full text-meta font-bold text-gray-500 tracking-wide'
+                    ? 'px-2.5 py-1 bg-[#ffffffd9] rounded-md text-meta font-medium text-[#54656f] '
+                    : 'px-3 py-1 bg-surface/90 ring-1 ring-black/5 rounded-full text-meta font-bold text-swiss-muted tracking-wide'
                 }
               >
                 {group.label}
@@ -658,7 +658,7 @@ export const InboxMessageList: React.FC<Props> = ({
               if (message.sender === 'system') {
                 return (
                   <div key={message.id} className="flex justify-center py-1">
-                    <div className="bg-[#ffffffd9] text-[#54656f] rounded-lg px-3 py-1.5 text-meta font-medium max-w-[90%] text-center shadow-sm">
+                    <div className="bg-[#ffffffd9] text-[#54656f] rounded-lg px-3 py-1.5 text-meta font-medium max-w-[90%] text-center ">
                       {message.content}
                     </div>
                   </div>

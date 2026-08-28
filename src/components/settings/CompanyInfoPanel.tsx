@@ -18,6 +18,8 @@ import { compressImageFile } from '../../lib/imageUpload';
 import { hasWorkspacePermission } from '../../lib/workspacePermissions';
 import { useKeepAliveActivation } from '../KeepAlive';
 import { LocaleFields } from '../locale/LocaleFields';
+import { Input } from '../ui/input';
+import { Textarea } from '../ui/textarea';
 import {
   mapWorkspaceToForm,
   whatsappLinesFromSettings,
@@ -254,7 +256,7 @@ export function CompanyInfoPanel() {
         type="button"
         onClick={() => void sendOtp(target)}
         disabled={Boolean(otpBusy[target]) || opts.disabledSend}
-        className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-60"
+        className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-swiss-line bg-white px-3 py-2.5 text-xs font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-60"
       >
         {otpBusy[target] === 'send' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
         {otpPending[target] ? 'Resend' : 'Verify'}
@@ -275,13 +277,13 @@ export function CompanyInfoPanel() {
           <p className="text-xs font-medium text-accent-green">{otpSentHint[target]}</p>
         ) : null}
         <div className="flex gap-2">
-          <input
+          <Input
             value={otpCodes[target] || ''}
             onChange={(e) => setOtpCodes((c) => ({ ...c, [target]: e.target.value }))}
             inputMode="numeric"
             autoComplete="one-time-code"
             placeholder="Enter OTP"
-            className="min-w-0 flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+            className="h-auto min-w-0 flex-1 rounded-xl border border-swiss-line px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
           <button
             type="button"
@@ -362,7 +364,7 @@ export function CompanyInfoPanel() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-24 text-gray-400">
+      <div className="flex items-center justify-center py-24 text-swiss-faint">
         <Loader2 className="w-6 h-6 animate-spin text-primary" />
       </div>
     );
@@ -374,12 +376,12 @@ export function CompanyInfoPanel() {
       {message && <p className="text-xs text-accent-green font-medium">{message}</p>}
 
       <form onSubmit={handleSave}>
-      <div className="bg-white rounded-2xl border border-black/5 p-6 shadow-sm">
-        <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2 mb-1">
+        <div className="bg-white rounded-2xl border border-swiss-line p-6 ">
+        <h3 className="text-sm font-bold text-swiss-ink flex items-center gap-2 mb-1">
           <Building2 className="w-4 h-4 text-primary" />
           Company profile
         </h3>
-        <p className="text-xs text-gray-400 mb-6">
+        <p className="text-xs text-swiss-faint mb-6">
           Details for the active company workspace. Switch company from the sidebar if you manage
           multiple.
         </p>
@@ -390,10 +392,10 @@ export function CompanyInfoPanel() {
               <img
                 src={form.logoUrl}
                 alt={form.name || 'Company logo'}
-                className="h-20 w-20 rounded-xl border border-slate-200 bg-white object-contain p-1"
+                className="h-20 w-20 rounded-xl border border-swiss-line bg-white object-contain p-1"
               />
             ) : (
-              <div className="flex h-20 w-20 items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50 text-slate-400">
+              <div className="flex h-20 w-20 items-center justify-center rounded-xl border border-dashed border-swiss-line bg-slate-50 text-slate-400">
                 <Building2 className="h-8 w-8" aria-hidden />
               </div>
             )}
@@ -416,7 +418,7 @@ export function CompanyInfoPanel() {
               type="button"
               onClick={() => logoInputRef.current?.click()}
               disabled={uploadingLogo}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-swiss-line px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50"
             >
               <Camera className="h-4 w-4" aria-hidden />
               {form.logoUrl ? 'Change logo' : 'Upload logo'}
@@ -438,62 +440,62 @@ export function CompanyInfoPanel() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label className="block md:col-span-2">
-            <span className="text-meta font-bold text-gray-500 uppercase">Company name *</span>
-            <input
+            <span className="text-meta font-bold text-swiss-muted uppercase">Company name *</span>
+            <Input
               required
               value={form.name}
               onChange={(e) => update('name', e.target.value)}
-              className="mt-1 w-full text-sm border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="h-auto mt-1 w-full text-sm border border-swiss-line rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
           </label>
           <label className="block md:col-span-2">
-            <span className="text-meta font-bold text-gray-500 uppercase">Legal name</span>
-            <input
+            <span className="text-meta font-bold text-swiss-muted uppercase">Legal name</span>
+            <Input
               value={form.legalName}
               onChange={(e) => update('legalName', e.target.value)}
-              className="mt-1 w-full text-sm border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="h-auto mt-1 w-full text-sm border border-swiss-line rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20"
               placeholder="Registered business name"
             />
           </label>
           <label className="block">
-            <span className="text-meta font-bold text-gray-500 uppercase">Industry</span>
-            <input
+            <span className="text-meta font-bold text-swiss-muted uppercase">Industry</span>
+            <Input
               value={form.industry}
               onChange={(e) => update('industry', e.target.value)}
-              className="mt-1 w-full text-sm border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="h-auto mt-1 w-full text-sm border border-swiss-line rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20"
               placeholder="Education, Retail, …"
             />
           </label>
           <label className="block">
-            <span className="text-meta font-bold text-gray-500 uppercase">Tax ID / GSTIN</span>
-            <input
+            <span className="text-meta font-bold text-swiss-muted uppercase">Tax ID / GSTIN</span>
+            <Input
               value={form.taxId}
               onChange={(e) => update('taxId', e.target.value)}
-              className="mt-1 w-full text-sm border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="h-auto mt-1 w-full text-sm border border-swiss-line rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
           </label>
           <label className="block">
-            <span className="text-meta font-bold text-gray-500 uppercase">Website</span>
+            <span className="text-meta font-bold text-swiss-muted uppercase">Website</span>
             <div className="relative mt-1">
-              <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
+              <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-swiss-faint" />
+              <Input
                 value={form.website}
                 onChange={(e) => update('website', e.target.value)}
-                className="w-full pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
+                className="h-auto w-full pl-9 pr-3 py-2.5 text-sm border border-swiss-line rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
                 placeholder="https://example.com"
               />
             </div>
           </label>
           <div className="block">
-            <span className="text-meta font-bold text-gray-500 uppercase">Company email</span>
+            <span className="text-meta font-bold text-swiss-muted uppercase">Company email</span>
             <div className="mt-1 flex gap-2">
               <div className="relative min-w-0 flex-1">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-swiss-faint" />
+                <Input
                   type="email"
                   value={form.email}
                   onChange={(e) => update('email', e.target.value)}
-                  className="w-full pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="h-auto w-full pl-9 pr-3 py-2.5 text-sm border border-swiss-line rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
               </div>
               {renderVerifyControls('company_email', {
@@ -505,14 +507,14 @@ export function CompanyInfoPanel() {
             {renderOtpRow('company_email')}
           </div>
           <div className="block">
-            <span className="text-meta font-bold text-gray-500 uppercase">Phone</span>
+            <span className="text-meta font-bold text-swiss-muted uppercase">Phone</span>
             <div className="mt-1 flex gap-2">
               <div className="relative min-w-0 flex-1">
-                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-swiss-faint" />
+                <Input
                   value={form.phone}
                   onChange={(e) => update('phone', e.target.value)}
-                  className="w-full pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="h-auto w-full pl-9 pr-3 py-2.5 text-sm border border-swiss-line rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
                   placeholder="+919876543210"
                 />
               </div>
@@ -534,39 +536,39 @@ export function CompanyInfoPanel() {
             />
           </div>
           <label className="block md:col-span-2">
-            <span className="text-meta font-bold text-gray-500 uppercase">Address</span>
+            <span className="text-meta font-bold text-swiss-muted uppercase">Address</span>
             <div className="relative mt-1">
-              <MapPin className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
-              <textarea
+              <MapPin className="absolute left-3 top-3 w-4 h-4 text-swiss-faint" />
+              <Textarea
                 value={form.address}
                 onChange={(e) => update('address', e.target.value)}
                 rows={2}
-                className="w-full pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
+                className="min-h-0 w-full pl-9 pr-3 py-2.5 text-sm border border-swiss-line rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
               />
             </div>
           </label>
           <label className="block">
-            <span className="text-meta font-bold text-gray-500 uppercase">City</span>
-            <input
+            <span className="text-meta font-bold text-swiss-muted uppercase">City</span>
+            <Input
               value={form.city}
               onChange={(e) => update('city', e.target.value)}
-              className="mt-1 w-full text-sm border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="h-auto mt-1 w-full text-sm border border-swiss-line rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
           </label>
           <label className="block">
-            <span className="text-meta font-bold text-gray-500 uppercase">State</span>
-            <input
+            <span className="text-meta font-bold text-swiss-muted uppercase">State</span>
+            <Input
               value={form.state}
               onChange={(e) => update('state', e.target.value)}
-              className="mt-1 w-full text-sm border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="h-auto mt-1 w-full text-sm border border-swiss-line rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
           </label>
           <label className="block">
-            <span className="text-meta font-bold text-gray-500 uppercase">Postal code</span>
-            <input
+            <span className="text-meta font-bold text-swiss-muted uppercase">Postal code</span>
+            <Input
               value={form.postalCode}
               onChange={(e) => update('postalCode', e.target.value)}
-              className="mt-1 w-full text-sm border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="h-auto mt-1 w-full text-sm border border-swiss-line rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
           </label>
         </div>
@@ -585,19 +587,19 @@ export function CompanyInfoPanel() {
       </form>
 
       <div className="bg-sky-50 rounded-2xl border border-sky-100 p-5">
-        <h4 className="text-sm font-bold text-gray-700 mb-3">Workspace reference</h4>
+        <h4 className="text-sm font-bold text-swiss-ink mb-3">Workspace reference</h4>
         <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
           <div>
-            <dt className="text-gray-400 font-medium">Workspace ID</dt>
-            <dd className="font-mono text-gray-800 mt-0.5 break-all">{workspaceId}</dd>
+            <dt className="text-swiss-faint font-medium">Workspace ID</dt>
+            <dd className="font-mono text-swiss-ink mt-0.5 break-all">{workspaceId}</dd>
           </div>
           <div>
-            <dt className="text-gray-400 font-medium">Slug</dt>
-            <dd className="text-gray-800 mt-0.5">{slug}</dd>
+            <dt className="text-swiss-faint font-medium">Slug</dt>
+            <dd className="text-swiss-ink mt-0.5">{slug}</dd>
           </div>
           <div className="sm:col-span-2">
-            <dt className="text-gray-400 font-medium">Connected WhatsApp</dt>
-            <dd className="text-gray-800 mt-0.5">
+            <dt className="text-swiss-faint font-medium">Connected WhatsApp</dt>
+            <dd className="text-swiss-ink mt-0.5">
               {whatsappLines.length > 0 ? whatsappLines.join(', ') : 'Not connected yet'}
             </dd>
           </div>

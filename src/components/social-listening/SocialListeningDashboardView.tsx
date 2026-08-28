@@ -39,7 +39,7 @@ const FacebookInsightsStrip: React.FC<{
     return (
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="h-[88px] animate-pulse rounded-xl bg-white ring-1 ring-slate-200/80" />
+          <div key={i} className="h-[88px] animate-pulse bg-white border border-swiss-line" />
         ))}
       </div>
     );
@@ -47,7 +47,7 @@ const FacebookInsightsStrip: React.FC<{
 
   if (!data.insights) {
     return (
-      <div className="rounded-xl border border-dashed border-black/10 bg-white px-4 py-3 text-sm text-gray-600">
+      <div className="rounded-xl border border-dashed border-black/10 bg-white px-4 py-3 text-sm text-swiss-muted">
         {data.error === 'Missing read_insights permission'
           ? 'Grant read_insights permission on the connected Page to see reach and engagement here.'
           : data.error || 'Page insights unavailable.'}
@@ -66,12 +66,12 @@ const FacebookInsightsStrip: React.FC<{
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
       {stats.map((s) => (
-        <div key={s.label} className="rounded-xl bg-white p-3.5 ring-1 ring-slate-200/80">
+        <div key={s.label} className="bg-white p-3.5 border border-swiss-line">
           <div className="flex items-center gap-1.5 text-[#1877F2]">
             <s.icon className="h-3.5 w-3.5" />
-            <p className="text-[11px] font-extrabold uppercase tracking-widest text-gray-400">{s.label}</p>
+            <p className="text-[11px] font-extrabold uppercase tracking-widest text-swiss-faint">{s.label}</p>
           </div>
-          <p className="mt-1.5 text-xl font-black text-gray-900 font-mono leading-none">{s.value}</p>
+          <p className="mt-1.5 text-xl font-black text-swiss-ink font-mono leading-none">{s.value}</p>
         </div>
       ))}
     </div>
@@ -107,15 +107,15 @@ const RangeDropdown: React.FC<{ range: DashboardRange; onChange: (r: DashboardRa
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-white px-3 py-1.5 text-xs font-bold text-gray-700 shadow-[0_1px_2px_rgba(0,0,0,0.04)] ring-1 ring-slate-200/80 hover:bg-slate-50"
+        className="inline-flex cursor-pointer items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-xs font-bold text-swiss-ink border border-swiss-line hover:bg-slate-50"
       >
         {current.label}
         <ChevronDown
-          className={`h-3.5 w-3.5 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`}
+          className={`h-3.5 w-3.5 text-swiss-faint transition-transform ${open ? 'rotate-180' : ''}`}
         />
       </button>
       {open && (
-        <div className="absolute right-0 top-full z-40 mt-2 w-40 overflow-hidden rounded-xl border border-black/5 bg-white shadow-xl">
+        <div className="absolute right-0 top-full z-40 mt-2 w-40 overflow-hidden rounded-xl border border-swiss-line bg-white shadow-xl">
           {RANGES.map((r) => (
             <button
               key={r.id}
@@ -125,7 +125,7 @@ const RangeDropdown: React.FC<{ range: DashboardRange; onChange: (r: DashboardRa
                 setOpen(false);
               }}
               className={`flex w-full cursor-pointer items-center px-3 py-2.5 text-left text-xs font-bold transition-colors hover:bg-slate-50 ${
-                range === r.id ? 'text-gray-900' : 'text-gray-500'
+                range === r.id ? 'text-swiss-ink' : 'text-swiss-muted'
               }`}
             >
               {r.label}
@@ -197,12 +197,12 @@ export const SocialListeningDashboardView: React.FC = () => {
       />
 
       {hasAccounts === false && platform === 'instagram' && (
-        <div className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-8 text-center shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+        <div className="bg-white border border-swiss-line p-8 text-center shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#fce8f0] text-[#C13584]">
             <Instagram className="h-6 w-6" />
           </div>
-          <h2 className="text-lg font-black text-gray-950">Connect Instagram to start</h2>
-          <p className="mx-auto mt-2 max-w-md text-sm font-medium text-gray-600">
+          <h2 className="text-lg font-semibold text-gray-950">Connect Instagram to start</h2>
+          <p className="mx-auto mt-2 max-w-md text-sm font-medium text-swiss-muted">
             The dashboard summarizes comments, automation, and leads once a Business account is
             connected.
           </p>
@@ -217,12 +217,12 @@ export const SocialListeningDashboardView: React.FC = () => {
       )}
 
       {hasAccounts === false && platform === 'facebook' && (
-        <div className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-8 text-center shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+        <div className="bg-white border border-swiss-line p-8 text-center shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#e8f4ff] text-[#1877F2]">
             <Facebook className="h-6 w-6" />
           </div>
-          <h2 className="text-lg font-black text-gray-950">Connect a Facebook Page to start</h2>
-          <p className="mx-auto mt-2 max-w-md text-sm font-medium text-gray-600">
+          <h2 className="text-lg font-semibold text-gray-950">Connect a Facebook Page to start</h2>
+          <p className="mx-auto mt-2 max-w-md text-sm font-medium text-swiss-muted">
             The dashboard summarizes comments, automation, leads, and Page reach once a Facebook
             Page is connected.
           </p>
@@ -245,7 +245,7 @@ export const SocialListeningDashboardView: React.FC = () => {
       {hasAccounts !== false && (
         <>
           {emptyWorkspace && (
-            <div className="rounded-xl border border-dashed border-black/10 bg-white px-4 py-3 text-sm text-gray-600">
+            <div className="rounded-xl border border-dashed border-black/10 bg-white px-4 py-3 text-sm text-swiss-muted">
               No comment data yet — open{' '}
               <Link to={contentHref} className="font-bold text-primary hover:underline">
                 Content

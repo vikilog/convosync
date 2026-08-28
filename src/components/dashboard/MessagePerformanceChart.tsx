@@ -38,22 +38,22 @@ function ChartTooltip({
   };
 
   const colors: Record<string, string> = {
-    sent: 'bg-sky-500',
-    delivered: 'bg-primary',
-    read: 'bg-neutral-400',
+    sent: 'bg-swiss-ink',
+    delivered: 'bg-swiss-accent',
+    read: 'bg-swiss-faint',
   };
 
   return (
-    <div className="rounded-lg border border-black/5 bg-white px-3 py-2 shadow-lg">
-      <p className="mb-2 text-xs font-semibold text-neutral-900">{label}</p>
+    <div className="border border-swiss-line bg-white px-3 py-2 font-swiss">
+      <p className="mb-2 text-xs font-semibold text-swiss-ink">{label}</p>
       <div className="space-y-1">
         {payload.map((entry) => (
           <div key={entry.dataKey} className="flex items-center justify-between gap-8 text-xs">
-            <span className="flex items-center gap-1.5 text-neutral-500">
-              <span className={`h-2 w-2 rounded-full ${colors[entry.dataKey] ?? 'bg-neutral-400'}`} />
+            <span className="flex items-center gap-1.5 text-swiss-muted">
+              <span className={`h-2 w-2 rounded-full ${colors[entry.dataKey] ?? 'bg-swiss-faint'}`} />
               {labels[entry.dataKey] ?? entry.dataKey}
             </span>
-            <span className="font-semibold tabular-nums text-neutral-900">{entry.value}</span>
+            <span className="font-semibold tabular-nums text-swiss-ink">{entry.value}</span>
           </div>
         ))}
       </div>
@@ -71,22 +71,19 @@ export const MessagePerformanceChart: React.FC<MessagePerformanceChartProps> = (
   const ranges: Array<7 | 14 | 30> = [7, 14, 30];
 
   return (
-    <div className="flex h-full flex-col rounded-xl bg-white p-5 ring-1 ring-slate-200/80">
-      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="font-display text-lg font-medium text-neutral-900">Message performance</h2>
-          <p className="text-sm text-neutral-500">Sent, delivered, and read over time</p>
-        </div>
-        <div className="inline-flex rounded-lg bg-surface-muted p-0.5">
+    <div className="flex h-full flex-col font-swiss">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-baseline sm:justify-between">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-swiss-muted">
+          Message performance
+        </p>
+        <div className="inline-flex items-center gap-4">
           {ranges.map((range) => (
             <button
               key={range}
               type="button"
               onClick={() => onRangeChange(range)}
-              className={`cursor-pointer rounded-md px-3 py-1 text-xs font-medium transition-colors ${
-                activeRange === range
-                  ? 'bg-white text-neutral-900 shadow-sm'
-                  : 'text-neutral-500 hover:text-neutral-800'
+              className={`cursor-pointer text-[11px] font-medium transition-colors ${
+                activeRange === range ? 'text-swiss-accent' : 'text-swiss-faint hover:text-swiss-muted'
               }`}
             >
               {range}d
@@ -95,32 +92,17 @@ export const MessagePerformanceChart: React.FC<MessagePerformanceChartProps> = (
         </div>
       </div>
 
-      <div className="mb-3 flex items-center gap-5 text-xs text-neutral-500">
-        <span className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-sky-500" />
-          Sent
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-primary" />
-          Delivered
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-neutral-300" />
-          Read
-        </span>
-      </div>
-
       <div className="min-h-[240px] flex-1">
         {empty ? (
-          <div className="flex h-full min-h-[240px] flex-col items-center justify-center rounded-lg border border-dashed border-black/10 bg-surface-muted/50 text-center">
-            <p className="text-sm font-medium text-neutral-800">No message data yet</p>
-            <p className="mt-1 max-w-xs text-sm text-neutral-500">
+          <div className="flex h-full min-h-[240px] flex-col items-center justify-center border border-dashed border-swiss-line text-center">
+            <p className="text-sm font-medium text-swiss-ink">No message data yet</p>
+            <p className="mt-1 max-w-xs text-sm text-swiss-muted">
               Run a campaign to populate this chart.
             </p>
             <button
               type="button"
               onClick={onNewCampaign}
-              className="mt-4 inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover"
+              className="mt-4 inline-flex cursor-pointer items-center gap-1.5 border border-swiss-ink px-4 py-2 text-sm font-medium text-swiss-ink hover:bg-swiss-ink hover:text-white"
             >
               <Plus className="h-4 w-4" />
               Create campaign
@@ -131,37 +113,37 @@ export const MessagePerformanceChart: React.FC<MessagePerformanceChartProps> = (
             <ComposedChart data={data} margin={{ top: 4, right: 4, left: -12, bottom: 0 }}>
               <defs>
                 <linearGradient id="sentFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#0284c7" stopOpacity={0.16} />
-                  <stop offset="100%" stopColor="#0284c7" stopOpacity={0} />
+                  <stop offset="0%" stopColor="#111111" stopOpacity={0.08} />
+                  <stop offset="100%" stopColor="#111111" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid stroke="#ebe8e2" strokeDasharray="3 3" vertical={false} />
+              <CartesianGrid stroke="#e4e4e4" strokeDasharray="0" vertical={false} />
               <XAxis
                 dataKey="day"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: '#737373', fontSize: 11 }}
+                tick={{ fill: '#8a8a8a', fontSize: 11 }}
               />
               <YAxis
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: '#a3a3a3', fontSize: 11 }}
+                tick={{ fill: '#c4c4c4', fontSize: 11 }}
                 width={36}
               />
               <Tooltip content={<ChartTooltip />} />
               <Area
                 type="linear"
                 dataKey="sent"
-                stroke="#0284c7"
-                strokeWidth={2}
+                stroke="#111111"
+                strokeWidth={1.5}
                 fill="url(#sentFill)"
                 dot={false}
-                activeDot={{ r: 4 }}
+                activeDot={{ r: 3 }}
               />
               <Line
                 type="linear"
                 dataKey="delivered"
-                stroke="#064e3b"
+                stroke="#0033ff"
                 strokeWidth={2}
                 dot={false}
                 activeDot={{ r: 4 }}
@@ -169,15 +151,30 @@ export const MessagePerformanceChart: React.FC<MessagePerformanceChartProps> = (
               <Line
                 type="linear"
                 dataKey="read"
-                stroke="#a3a3a3"
-                strokeWidth={1.5}
-                strokeDasharray="4 4"
+                stroke="#c4c4c4"
+                strokeWidth={1.2}
+                strokeDasharray="3 3"
                 dot={false}
                 activeDot={{ r: 3 }}
               />
             </ComposedChart>
           </ResponsiveContainer>
         )}
+      </div>
+
+      <div className="mt-4 flex items-center gap-5 text-[11px] text-swiss-muted">
+        <span className="flex items-center gap-1.5">
+          <span className="h-2 w-2 rounded-full bg-swiss-ink" />
+          Sent
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="h-2 w-2 rounded-full bg-swiss-accent" />
+          Delivered
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="h-2 w-2 rounded-full bg-swiss-faint" />
+          Read
+        </span>
       </div>
     </div>
   );

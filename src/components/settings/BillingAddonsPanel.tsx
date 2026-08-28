@@ -8,6 +8,7 @@ import { Loader2, Mail, Minus, Plus } from 'lucide-react';
 import { api, formatCatchError } from '../../lib/api';
 import { formatInrPaise } from '../../lib/billingFormat';
 import { openRazorpayCheckout } from '../../lib/razorpay';
+import { Input } from '../ui/input';
 
 export type AddonCatalogEntry = {
   type: string;
@@ -105,7 +106,7 @@ export function BillingAddonsPanel({
       <div
         key={entry.type}
         className={`rounded-xl border p-4 transition-colors ${
-          highlight ? 'border-sky-200 bg-sky-50/40' : 'border-black/5 bg-white'
+          highlight ? 'border-sky-200 bg-sky-50/40' : 'border-swiss-line bg-white'
         }`}
       >
         <div className="flex items-start justify-between gap-2">
@@ -129,12 +130,12 @@ export function BillingAddonsPanel({
           {highlight && <Mail className="h-4 w-4 shrink-0 text-sky-600" />}
         </div>
 
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-3">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-swiss-line pt-3">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
               Quantity
             </p>
-            <div className="mt-1 inline-flex items-center rounded-lg border border-slate-200 bg-white">
+            <div className="mt-1 inline-flex items-center rounded-lg border border-swiss-line bg-white">
               <button
                 type="button"
                 disabled={checkoutBusy || quantity <= entry.minQuantity}
@@ -149,7 +150,7 @@ export function BillingAddonsPanel({
               >
                 <Minus className="h-3.5 w-3.5" />
               </button>
-              <input
+              <Input
                 type="number"
                 min={entry.minQuantity}
                 max={entry.maxQuantity}
@@ -163,7 +164,7 @@ export function BillingAddonsPanel({
                     ),
                   }))
                 }
-                className="h-9 w-16 border-x border-slate-200 text-center text-sm font-semibold text-slate-800 focus:outline-none"
+                className="h-auto h-9 w-16 border-x border-swiss-line text-center text-sm font-semibold text-slate-800 focus:outline-none"
               />
               <button
                 type="button"
@@ -210,7 +211,7 @@ export function BillingAddonsPanel({
   if (addonCatalog.length === 0) return null;
 
   return (
-    <section className="rounded-xl bg-white ring-1 ring-slate-200/80 p-5">
+    <section className="bg-white border border-swiss-line p-5">
       <div>
         <p className="text-sm font-semibold text-slate-900">Add-ons</p>
         <p className="mt-1 text-xs text-slate-500">

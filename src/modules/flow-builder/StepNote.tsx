@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type PointerEvent } from 'react';
 import { useReactFlow } from '@xyflow/react';
 import { StickyNote, X } from 'lucide-react';
+import { Textarea } from '../../components/ui/textarea';
 
 /** Optional per-step annotation. Purely descriptive — never read by journey/IG execution engines. */
 export type StepNoteData = {
@@ -118,14 +119,14 @@ export function StepNote({ note, onChange, onDelete, onMove }: StepNoteProps) {
         <X className="h-2.5 w-2.5" strokeWidth={3} />
       </button>
       {isEditing ? (
-        <textarea
+        <Textarea
           autoFocus
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           onPointerDown={(e) => e.stopPropagation()}
           onBlur={commit}
           placeholder="Add a note…"
-          className="nodrag h-[92px] w-full resize-none bg-transparent text-[11.5px] leading-snug text-amber-950 outline-none placeholder:text-amber-700/60"
+          className="min-h-0 nodrag h-[92px] w-full resize-none bg-transparent text-[11.5px] leading-snug text-amber-950 outline-none placeholder:text-amber-700/60"
         />
       ) : (
         <p className="max-h-[92px] overflow-y-auto whitespace-pre-wrap break-words text-[11.5px] leading-snug text-amber-950">

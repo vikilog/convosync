@@ -20,7 +20,7 @@ export function DriveFileDetails({ file }: DriveFileDetailsProps) {
   const typeLabel = fileTypeLabel(file);
 
   return (
-    <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 shadow-sm">
+    <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 ">
       <div className="flex items-start gap-3 mb-4">
         <FileTypeIcon file={file} className="w-10 h-10" />
         <div className="min-w-0 flex-1">

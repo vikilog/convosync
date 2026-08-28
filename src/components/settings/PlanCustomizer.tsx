@@ -8,6 +8,7 @@ import { Bot, Calculator, Check, Contact, Loader2, Mail, Users, Zap } from 'luci
 import { api, formatCatchError } from '../../lib/api';
 import { dispatchCompanyUpdated } from '../../lib/companyEvents';
 import { openRazorpayCheckout } from '../../lib/razorpay';
+import { Input } from '../ui/input';
 
 type PricingRules = {
   currency: string;
@@ -75,18 +76,18 @@ function ConfigSlider({
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between gap-3">
-        <label htmlFor={id} className="flex items-center gap-2 text-sm font-medium text-gray-700">
+        <label htmlFor={id} className="flex items-center gap-2 text-sm font-medium text-swiss-ink">
           <Icon className="h-4 w-4 text-sky-600" />
           {label}
         </label>
-        <input
+        <Input
           type="number"
           min={min}
           max={max}
           step={step}
           value={value}
           onChange={(e) => onChange(Number(e.target.value))}
-          className="w-24 rounded-lg border border-slate-200 px-2 py-1 text-right text-sm font-semibold text-gray-900 outline-none focus:ring-2 focus:ring-[#0284c7]"
+          className="h-auto w-24 rounded-lg border border-swiss-line px-2 py-1 text-right text-sm font-semibold text-swiss-ink outline-none focus:ring-2 focus:ring-[#0284c7]"
         />
       </div>
       <input
@@ -99,7 +100,7 @@ function ConfigSlider({
         onChange={(e) => onChange(Number(e.target.value))}
         className="h-2 w-full cursor-pointer accent-sky-600"
       />
-      <div className="flex justify-between text-xs text-gray-400">
+      <div className="flex justify-between text-xs text-swiss-faint">
         <span>{formatNumber(min)}</span>
         <span>{formatNumber(max)}</span>
       </div>
@@ -216,34 +217,34 @@ export function PlanCustomizer({ pricingRules, initialQuote, onSaved }: PlanCust
   }
 
   return (
-    <section className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-6 shadow-sm">
+    <section className="bg-white border border-swiss-line p-6 ">
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-sm font-bold uppercase tracking-widest text-sky-600">
             Build your plan
           </p>
-          <h3 className="mt-1 text-lg font-bold text-gray-900">Customize for your team</h3>
-          <p className="mt-1 max-w-xl text-sm text-gray-500">
+          <h3 className="mt-1 text-lg font-bold text-swiss-ink">Customize for your team</h3>
+          <p className="mt-1 max-w-xl text-sm text-swiss-muted">
             Set contacts, AI agents, team size, channels, and email sends — your monthly price updates automatically.
-            <span className="mt-1 block text-xs text-gray-400">
+            <span className="mt-1 block text-xs text-swiss-faint">
               Email via AWS SES · $1 per 1,000 sends / month (1,000 included in base)
             </span>
           </p>
         </div>
         <div className="rounded-xl bg-sky-50 px-4 py-3 text-right">
-          <p className="text-sm font-bold uppercase tracking-wider text-gray-400">Estimated</p>
-          <p className="mt-1 text-2xl font-bold text-gray-900">
+          <p className="text-sm font-bold uppercase tracking-wider text-swiss-faint">Estimated</p>
+          <p className="mt-1 text-2xl font-bold text-swiss-ink">
             {quoting && !quote ? (
               <Loader2 className="inline h-6 w-6 animate-spin text-sky-600" />
             ) : (
               <>
                 ${quote?.monthlyTotal ?? '—'}
-                <span className="text-sm font-normal text-gray-400">/mo</span>
+                <span className="text-sm font-normal text-swiss-faint">/mo</span>
               </>
             )}
           </p>
           {quote && (
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-swiss-muted">
               ${quote.annualTotal.toLocaleString()}/yr (2 months free)
             </p>
           )}
@@ -304,8 +305,8 @@ export function PlanCustomizer({ pricingRules, initialQuote, onSaved }: PlanCust
           />
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-          <div className="mb-3 flex items-center gap-2 text-sm font-bold text-gray-900">
+        <div className="rounded-xl border border-swiss-line bg-slate-50 p-4">
+          <div className="mb-3 flex items-center gap-2 text-sm font-bold text-swiss-ink">
             <Calculator className="h-4 w-4 text-sky-600" />
             Price breakdown
           </div>
@@ -314,28 +315,28 @@ export function PlanCustomizer({ pricingRules, initialQuote, onSaved }: PlanCust
             <ul className="space-y-2">
               {quote.breakdown.map((line) => (
                 <li key={line.key} className="flex items-start justify-between gap-3 text-sm">
-                  <span className="text-gray-600">
+                  <span className="text-swiss-muted">
                     {line.label}
                     {line.quantity != null && line.unitLabel ? (
-                      <span className="block text-xs text-gray-400">
+                      <span className="block text-xs text-swiss-faint">
                         {formatNumber(line.quantity)} {line.unitLabel}
                       </span>
                     ) : null}
                   </span>
-                  <span className="font-semibold text-gray-900">${line.amount}</span>
+                  <span className="font-semibold text-swiss-ink">${line.amount}</span>
                 </li>
               ))}
-              <li className="flex items-center justify-between border-t border-slate-200 pt-3 text-sm font-bold text-gray-900">
+              <li className="flex items-center justify-between border-t border-swiss-line pt-3 text-sm font-bold text-swiss-ink">
                 <span>Monthly total</span>
                 <span>${quote.monthlyTotal}</span>
               </li>
             </ul>
           ) : (
-            <p className="text-sm text-gray-400">Adjust sliders to see pricing.</p>
+            <p className="text-sm text-swiss-faint">Adjust sliders to see pricing.</p>
           )}
 
           {quote?.matchedPlanName && !quote.requiresSales && (
-            <p className="mt-4 rounded-lg bg-white px-3 py-2 text-xs text-gray-600 border border-slate-200">
+            <p className="mt-4 rounded-lg bg-white px-3 py-2 text-xs text-swiss-muted border border-swiss-line">
               Closest standard plan: <span className="font-semibold">{quote.matchedPlanName}</span>
             </p>
           )}
@@ -393,7 +394,7 @@ export function PlanCustomizer({ pricingRules, initialQuote, onSaved }: PlanCust
               : '';
             window.location.href = `mailto:support@convosync.io?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
           }}
-          className="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+          className="rounded-xl border border-swiss-line px-5 py-2.5 text-sm font-semibold text-swiss-ink hover:bg-gray-50"
         >
           Email quote to sales
         </button>

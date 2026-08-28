@@ -30,7 +30,7 @@ export const AGENT_TYPE_OPTIONS: AgentTypeOption[] = [
   //   id: 'rule_based',
   //   title: 'Rule-based Agent',
   //   description: 'No AI, just simple flow-based behavior, ideal for routine tasks.',
-  //   iconClass: 'text-gray-600 bg-gray-100',
+  //   iconClass: 'text-swiss-muted bg-gray-100',
   // },
 ];
 
@@ -39,7 +39,7 @@ type Props = {
 };
 
 export const AgentTypeSelector: React.FC<Props> = ({ onSelect }) => (
-  <div className="w-[320px] bg-white ring-1 ring-slate-200/80 rounded-xl shadow-xl overflow-hidden">
+  <div className="w-[320px] bg-white border border-swiss-line shadow-xl overflow-hidden">
     {AGENT_TYPE_OPTIONS.map((option) => (
       <button
         key={option.id}

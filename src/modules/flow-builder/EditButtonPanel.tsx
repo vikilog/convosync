@@ -17,6 +17,7 @@ import {
   type PerformActionId,
 } from './buttonActions';
 import type { FlowChannelTheme } from './channelTheme';
+import { Input } from '../../components/ui/input';
 
 export type ButtonDestinationInfo = {
   id: string;
@@ -128,11 +129,11 @@ export function EditButtonPanel({
       </div>
 
       <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
-        <label className="block text-sm font-semibold text-gray-700">
+        <label className="block text-sm font-semibold text-swiss-ink">
           Button title
-          <input
-            className={`mt-1 w-full rounded-lg border px-2 py-1.5 text-sm ${
-              overLimit ? 'border-rose-300' : 'border-slate-200'
+          <Input
+            className={`h-auto mt-1 w-full rounded-lg border px-2 py-1.5 text-sm ${
+              overLimit ? 'border-rose-300' : 'border-swiss-line'
             }`}
             value={button.title}
             onChange={(e) => onTitleChange(e.target.value)}
@@ -144,7 +145,7 @@ export function EditButtonPanel({
         </label>
 
         <div>
-          <p className="text-sm font-semibold text-gray-700">When this button is pressed</p>
+          <p className="text-sm font-semibold text-swiss-ink">When this button is pressed</p>
           {destination ? (
             <button
               type="button"

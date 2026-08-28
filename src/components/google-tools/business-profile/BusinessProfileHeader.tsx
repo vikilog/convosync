@@ -24,14 +24,14 @@ export function BusinessProfileHeader({
   onToggleSidebar,
 }: BusinessProfileHeaderProps) {
   return (
-    <header className="sticky top-0 z-20 shrink-0 border-b border-slate-200 bg-white shadow-[0_1px_0_rgba(232,230,240,0.8)]">
+    <header className="sticky top-0 z-20 shrink-0 border-b border-swiss-line bg-white shadow-[0_1px_0_rgba(232,230,240,0.8)]">
       <div className="flex flex-wrap items-center gap-3 px-4 py-3 min-w-0">
         <div className="flex items-center gap-2 min-w-0 flex-1">
           {onToggleSidebar && (
             <button
               type="button"
               onClick={onToggleSidebar}
-              className="lg:hidden shrink-0 p-2 rounded-lg text-gray-500 hover:bg-slate-50"
+              className="lg:hidden shrink-0 p-2 rounded-lg text-swiss-muted hover:bg-slate-50"
               aria-label="Open sidebar"
             >
               <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
@@ -44,7 +44,7 @@ export function BusinessProfileHeader({
               value={selectedAccountId ?? ''}
               onChange={(e) => onAccountChange(e.target.value)}
               disabled={accounts.length === 0}
-              className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 pr-9 text-sm font-semibold text-gray-900 outline-none focus:border-[#34A853]/40 focus:ring-2 focus:ring-[#34A853]/10 disabled:opacity-50"
+              className="w-full appearance-none rounded-xl border border-swiss-line bg-slate-50 px-3 py-2 pr-9 text-sm font-semibold text-swiss-ink outline-none focus:border-[#34A853]/40 focus:ring-2 focus:ring-[#34A853]/10 disabled:opacity-50"
             >
               {accounts.length === 0 ? (
                 <option value="">No accounts — sync from Integrations</option>
@@ -57,9 +57,9 @@ export function BusinessProfileHeader({
                 ))
               )}
             </select>
-            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-swiss-faint" />
           </div>
-          <p className="hidden lg:block text-meta text-gray-400 whitespace-nowrap">
+          <p className="hidden lg:block text-meta text-swiss-faint whitespace-nowrap">
             Last sync: {formatLastSync(lastSyncAt)}
           </p>
         </div>
@@ -70,7 +70,7 @@ export function BusinessProfileHeader({
             onClick={onSettings}
             title="Settings"
             aria-label="Settings"
-            className="inline-flex items-center justify-center h-9 w-9 rounded-xl text-gray-600 border border-slate-200 bg-white hover:bg-slate-50 transition-all"
+            className="inline-flex items-center justify-center h-9 w-9 rounded-xl text-swiss-muted border border-swiss-line bg-white hover:bg-slate-50 transition-all"
           >
             <Settings className="w-4 h-4" />
           </button>
@@ -94,7 +94,7 @@ export function BusinessProfileHeader({
 export function BusinessProfileBanner({ message }: { message: string }) {
   if (!message) return null;
   return (
-    <div className="shrink-0 px-4 py-2 text-sm font-semibold text-gray-700 bg-[#e8f5e9] border-b border-[#c8e6c9]">
+    <div className="shrink-0 px-4 py-2 text-sm font-semibold text-swiss-ink bg-[#e8f5e9] border-b border-[#c8e6c9]">
       {message}
     </div>
   );
@@ -102,7 +102,7 @@ export function BusinessProfileBanner({ message }: { message: string }) {
 
 export function BusinessProfileLoadingState({ label }: { label: string }) {
   return (
-    <div className="flex flex-1 items-center justify-center py-20 text-sm text-gray-400">
+    <div className="flex flex-1 items-center justify-center py-20 text-sm text-swiss-faint">
       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
       {label}
     </div>

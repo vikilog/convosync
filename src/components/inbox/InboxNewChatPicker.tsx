@@ -11,6 +11,8 @@ import { api } from '../../lib/api';
 import { mapContactFromApi } from '../../lib/mappers';
 import type { WhatsAppInboxAccount } from '../../hooks/inbox/useInboxMeta';
 import { stripHtmlToText } from '../templates/emailTemplateUtils';
+import { Input } from '../ui/input';
+import { Textarea } from '../ui/textarea';
 
 export type NewChatChannel = 'whatsapp' | 'email' | 'instagram';
 
@@ -282,26 +284,26 @@ export function InboxNewChatPicker({
             initial={{ opacity: 0, scale: 0.98, y: 8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.98, y: 8 }}
-            className="fixed left-1/2 top-[10%] z-[100] w-[min(100vw-2rem,440px)] -translate-x-1/2 bg-surface border border-black/5 rounded-2xl shadow-2xl overflow-hidden"
+            className="fixed left-1/2 top-[10%] z-[100] w-[min(100vw-2rem,440px)] -translate-x-1/2 bg-surface border border-swiss-line rounded-2xl shadow-2xl overflow-hidden"
           >
-            <div className="flex items-center justify-between px-4 py-3 border-b border-black/5">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-swiss-line">
               <div className="min-w-0">
-                <h2 id="new-chat-title" className="text-sm font-black text-gray-900">
+                <h2 id="new-chat-title" className="text-sm font-semibold text-swiss-ink">
                   {title}
                 </h2>
-                <p className="text-xs text-gray-400 font-medium mt-0.5 truncate">{subtitle}</p>
+                <p className="text-xs text-swiss-faint font-medium mt-0.5 truncate">{subtitle}</p>
               </div>
               <button
                 type="button"
                 onClick={onClose}
-                className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100"
+                className="p-1.5 rounded-lg text-swiss-faint hover:text-swiss-ink hover:bg-gray-100"
                 aria-label="Close"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="px-4 py-2.5 border-b border-black/5 bg-slate-50">
+            <div className="px-4 py-2.5 border-b border-swiss-line bg-slate-50">
               <div className="flex rounded-lg bg-white p-0.5 ring-1 ring-black/5" role="tablist">
                 {(
                   [
@@ -329,7 +331,7 @@ export function InboxNewChatPicker({
                       className={`flex-1 rounded-md py-1.5 text-xs font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
                         active
                           ? 'bg-gray-950 text-white'
-                          : 'text-gray-500 hover:text-gray-800 hover:bg-slate-50'
+                          : 'text-swiss-muted hover:text-swiss-ink hover:bg-slate-50'
                       }`}
                     >
                       {tab.label}
@@ -348,19 +350,19 @@ export function InboxNewChatPicker({
                     setEmailContact(null);
                     setFieldError(null);
                   }}
-                  className="inline-flex items-center gap-1 text-xs font-bold text-gray-500 hover:text-gray-800"
+                  className="inline-flex items-center gap-1 text-xs font-bold text-swiss-muted hover:text-swiss-ink"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />
                   Change contact
                 </button>
 
-                <div className="rounded-xl border border-black/5 bg-slate-50 px-3 py-2.5 flex items-center gap-3">
+                <div className="rounded-xl border border-swiss-line bg-slate-50 px-3 py-2.5 flex items-center gap-3">
                   <div className="w-9 h-9 rounded-full bg-emerald-50 text-emerald-800 flex items-center justify-center shrink-0">
                     <Mail className="w-4 h-4" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-bold text-gray-900 truncate">{emailContact.name}</p>
-                    <p className="text-xs text-gray-500 font-mono truncate">{emailContact.email}</p>
+                    <p className="text-sm font-bold text-swiss-ink truncate">{emailContact.name}</p>
+                    <p className="text-xs text-swiss-muted font-mono truncate">{emailContact.email}</p>
                   </div>
                 </div>
 
@@ -371,15 +373,15 @@ export function InboxNewChatPicker({
                 )}
 
                 <div>
-                  <label htmlFor="new-email-template" className="block text-xs font-bold text-gray-700 mb-1">
-                    Template <span className="font-medium text-gray-400">(optional)</span>
+                  <label htmlFor="new-email-template" className="block text-xs font-bold text-swiss-ink mb-1">
+                    Template <span className="font-medium text-swiss-faint">(optional)</span>
                   </label>
                   <select
                     id="new-email-template"
                     value={templateId}
                     onChange={(e) => applyTemplate(e.target.value)}
                     disabled={templatesLoading || sending}
-                    className="w-full bg-surface border border-black/5 rounded-lg py-2 px-3 text-sm font-medium text-gray-900 focus:ring-2 focus:ring-sky-200 focus:border-sky-500 outline-none"
+                    className="w-full bg-surface border border-swiss-line rounded-lg py-2 px-3 text-sm font-medium text-swiss-ink focus:ring-2 focus:ring-sky-200 focus:border-sky-500 outline-none"
                   >
                     <option value="">No template — write your own</option>
                     {templates.map((t) => (
@@ -391,10 +393,10 @@ export function InboxNewChatPicker({
                 </div>
 
                 <div>
-                  <label htmlFor="new-email-subject" className="block text-xs font-bold text-gray-700 mb-1">
+                  <label htmlFor="new-email-subject" className="block text-xs font-bold text-swiss-ink mb-1">
                     Subject
                   </label>
-                  <input
+                  <Input
                     id="new-email-subject"
                     type="text"
                     value={subject}
@@ -404,15 +406,15 @@ export function InboxNewChatPicker({
                     }}
                     placeholder="Subject line"
                     disabled={sending}
-                    className="w-full bg-surface border border-black/5 rounded-lg py-2 px-3 text-sm focus:ring-2 focus:ring-sky-200 focus:border-sky-500 outline-none"
+                    className="h-auto w-full bg-surface border border-swiss-line rounded-lg py-2 px-3 text-sm focus:ring-2 focus:ring-sky-200 focus:border-sky-500 outline-none"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="new-email-body" className="block text-xs font-bold text-gray-700 mb-1">
+                  <label htmlFor="new-email-body" className="block text-xs font-bold text-swiss-ink mb-1">
                     Message
                   </label>
-                  <textarea
+                  <Textarea
                     id="new-email-body"
                     value={message}
                     onChange={(e) => {
@@ -425,9 +427,9 @@ export function InboxNewChatPicker({
                     rows={7}
                     placeholder="Write your message… Use {{name}} or {{contact.email}} for personalization"
                     disabled={sending}
-                    className="w-full bg-surface border border-black/5 rounded-lg py-2 px-3 text-sm focus:ring-2 focus:ring-sky-200 focus:border-sky-500 outline-none resize-y min-h-[140px]"
+                    className="min-h-0 w-full bg-surface border border-swiss-line rounded-lg py-2 px-3 text-sm focus:ring-2 focus:ring-sky-200 focus:border-sky-500 outline-none resize-y min-h-[140px]"
                   />
-                  <p className="text-meta text-gray-400 font-medium mt-1">
+                  <p className="text-meta text-swiss-faint font-medium mt-1">
                     Variables like {'{{name}}'} resolve from the contact when sending.
                   </p>
                 </div>
@@ -455,10 +457,10 @@ export function InboxNewChatPicker({
             ) : (
               <>
                 {channel === 'whatsapp' && needsFromPick && (
-                  <div className="px-4 py-3 border-b border-black/5 bg-slate-50">
+                  <div className="px-4 py-3 border-b border-swiss-line bg-slate-50">
                     <label
                       htmlFor="new-wa-chat-from"
-                      className="block text-xs font-bold text-gray-700 mb-1.5"
+                      className="block text-xs font-bold text-swiss-ink mb-1.5"
                     >
                       Send from which number?
                     </label>
@@ -466,7 +468,7 @@ export function InboxNewChatPicker({
                       id="new-wa-chat-from"
                       value={fromPhoneNumberId}
                       onChange={(e) => setFromPhoneNumberId(e.target.value)}
-                      className="w-full bg-surface border border-black/5 rounded-lg py-2 px-3 text-sm font-medium text-gray-900 focus:ring-2 focus:ring-sky-200 focus:border-sky-500 outline-none"
+                      className="w-full bg-surface border border-swiss-line rounded-lg py-2 px-3 text-sm font-medium text-swiss-ink focus:ring-2 focus:ring-sky-200 focus:border-sky-500 outline-none"
                     >
                       <option value="">Select a WhatsApp number…</option>
                       {whatsappAccounts.map((acc) => (
@@ -478,10 +480,10 @@ export function InboxNewChatPicker({
                   </div>
                 )}
 
-                <div className="p-3 border-b border-black/5">
+                <div className="p-3 border-b border-swiss-line">
                   <div className="relative">
-                    <Search className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    <input
+                    <Search className="w-3.5 h-3.5 text-swiss-faint absolute left-3 top-1/2 -translate-y-1/2" />
+                    <Input
                       type="text"
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
@@ -490,7 +492,7 @@ export function InboxNewChatPicker({
                           ? 'Search by name or email…'
                           : 'Search by name or phone…'
                       }
-                      className="w-full bg-slate-50 border border-black/5 rounded-lg py-2 pl-9 pr-3 text-sm focus:ring-2 focus:ring-sky-200 focus:border-sky-500 outline-none"
+                      className="h-auto w-full bg-slate-50 border border-swiss-line rounded-lg py-2 pl-9 pr-3 text-sm focus:ring-2 focus:ring-sky-200 focus:border-sky-500 outline-none"
                       autoFocus={!needsFromPick}
                     />
                   </div>
@@ -504,12 +506,12 @@ export function InboxNewChatPicker({
 
                 <div className="max-h-[320px] overflow-y-auto divide-y divide-gray-50">
                   {loading ? (
-                    <div className="flex items-center justify-center gap-2 py-10 text-sm font-bold text-gray-400">
+                    <div className="flex items-center justify-center gap-2 py-10 text-sm font-bold text-swiss-faint">
                       <Loader2 className="w-4 h-4 animate-spin" />
                       Loading contacts…
                     </div>
                   ) : contacts.length === 0 ? (
-                    <p className="py-10 px-4 text-center text-sm font-bold text-gray-400">
+                    <p className="py-10 px-4 text-center text-sm font-bold text-swiss-faint">
                       {emptyMessage}
                     </p>
                   ) : (
@@ -557,8 +559,8 @@ export function InboxNewChatPicker({
                             )}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <p className="text-sm font-bold text-gray-900 truncate">{contact.name}</p>
-                            <p className="text-xs text-gray-400 font-mono truncate">
+                            <p className="text-sm font-bold text-swiss-ink truncate">{contact.name}</p>
+                            <p className="text-xs text-swiss-faint font-mono truncate">
                               {channel === 'email' ? contact.email : contact.phone}
                             </p>
                             {contact.tags.length > 0 && (
@@ -575,7 +577,7 @@ export function InboxNewChatPicker({
                 </div>
 
                 {channel === 'whatsapp' && (
-                  <div className="p-3 border-t border-black/5 bg-slate-50">
+                  <div className="p-3 border-t border-swiss-line bg-slate-50">
                     <button
                       type="button"
                       disabled={!canProceedWa}

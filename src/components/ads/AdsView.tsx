@@ -34,16 +34,16 @@ function MetaAdsAccountChip({
   manageHref: string;
 }) {
   return (
-    <div className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-black/5 bg-surface text-sm min-w-0">
+    <div className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-swiss-line bg-surface text-sm min-w-0">
       <MousePointerClick className="w-4 h-4 text-[#1877F2] shrink-0" />
-      <span className="font-bold text-gray-900 shrink-0">Meta Ads</span>
+      <span className="font-bold text-swiss-ink shrink-0">Meta Ads</span>
       {adAccounts.length > 0 ? (
         <select
           value={account.id}
           disabled={switchingAccount}
           onChange={(e) => onSwitchAccount(e.target.value)}
           aria-label="Select Meta ad account"
-          className="max-w-[220px] px-2 py-1 bg-surface-muted border border-black/5 text-sm font-medium text-gray-700 rounded-lg cursor-pointer disabled:opacity-50 truncate"
+          className="max-w-[220px] px-2 py-1 bg-surface-muted border border-swiss-line text-sm font-medium text-swiss-ink rounded-lg cursor-pointer disabled:opacity-50 truncate"
         >
           {adAccounts.map((item) => (
             <option key={item.id} value={item.id}>
@@ -52,7 +52,7 @@ function MetaAdsAccountChip({
           ))}
         </select>
       ) : (
-        <span className="text-gray-500 truncate max-w-[180px]">
+        <span className="text-swiss-muted truncate max-w-[180px]">
           {account.name} · {account.id}
         </span>
       )}
@@ -79,10 +79,10 @@ function ConnectedPlatformChip({
   icon: React.ReactNode;
 }) {
   return (
-    <div className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-black/5 bg-surface text-sm">
+    <div className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-swiss-line bg-surface text-sm">
       {icon}
-      <span className="font-bold text-gray-900">{label}</span>
-      <span className="text-gray-500 truncate max-w-[140px]">{accountName}</span>
+      <span className="font-bold text-swiss-ink">{label}</span>
+      <span className="text-swiss-muted truncate max-w-[140px]">{accountName}</span>
       <Link
         to={manageHref}
         className="ml-1 text-sky-600 hover:text-sky-700 cursor-pointer"
@@ -338,7 +338,7 @@ export const AdsView: React.FC = () => {
   if (loading) {
     return (
       <div className="flex-1 max-w-7xl mx-auto pb-12 flex items-center justify-center min-h-[240px]">
-        <div className="flex items-center gap-2 text-sm text-gray-500 font-medium">
+        <div className="flex items-center gap-2 text-sm text-swiss-muted font-medium">
           <Loader2 className="w-4 h-4 animate-spin text-sky-600" />
           Loading Ads Manager…
         </div>
@@ -354,8 +354,8 @@ export const AdsView: React.FC = () => {
     <div className="flex-1 space-y-6 max-w-7xl mx-auto pb-12 text-left">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="font-display font-black text-gray-900 text-xl leading-tight">Ads Manager</h1>
-          <p className="text-sm text-gray-600 mt-1 max-w-2xl">
+          <h1 className="font-display font-semibold text-swiss-ink text-xl leading-tight">Ads Manager</h1>
+          <p className="text-sm text-swiss-muted mt-1 max-w-2xl">
             Campaign performance from your connected Meta and Google Ads integrations.
           </p>
           <div className="flex flex-wrap gap-2 mt-3">
@@ -398,14 +398,14 @@ export const AdsView: React.FC = () => {
 
       <section className="space-y-4" aria-label="Campaign analytics">
         {platformTabs.length > 1 && (
-          <div className="inline-flex items-center gap-1 bg-surface border border-black/5 rounded-xl p-1">
+          <div className="inline-flex items-center gap-1 bg-surface border border-swiss-line rounded-xl p-1">
             {platformTabs.map((tab) => (
               <button
                 key={tab.id}
                 type="button"
                 onClick={() => setPlatformScope(tab.id)}
                 className={`px-3 py-1.5 text-sm font-bold rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 ${
-                  platformScope === tab.id ? 'bg-primary text-white' : 'text-gray-600 hover:bg-surface-muted'
+                  platformScope === tab.id ? 'bg-primary text-white' : 'text-swiss-muted hover:bg-surface-muted'
                 }`}
               >
                 {tab.id === 'google' && <GoogleIcon className="w-3.5 h-3.5" />}
@@ -429,14 +429,14 @@ export const AdsView: React.FC = () => {
 
       <section className="space-y-4" aria-label="Campaign list">
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-1 bg-surface border border-black/5 rounded-xl p-1">
+          <div className="flex items-center gap-1 bg-surface border border-swiss-line rounded-xl p-1">
             {(['ALL', 'ACTIVE', 'PAUSED'] as const).map((s) => (
               <button
                 key={s}
                 type="button"
                 onClick={() => setFilterStatus(s)}
                 className={`px-3 py-1.5 text-sm font-bold rounded-lg transition-colors cursor-pointer ${
-                  filterStatus === s ? 'bg-primary text-white' : 'text-gray-600 hover:bg-surface-muted'
+                  filterStatus === s ? 'bg-primary text-white' : 'text-swiss-muted hover:bg-surface-muted'
                 }`}
               >
                 {s}
@@ -445,7 +445,7 @@ export const AdsView: React.FC = () => {
           </div>
 
           {platformScope === 'meta' && metaIsConnected && (
-            <div className="flex items-center gap-1 bg-surface border border-black/5 rounded-xl p-1">
+            <div className="flex items-center gap-1 bg-surface border border-swiss-line rounded-xl p-1">
               {(
                 [
                   { id: 'ALL', label: 'All types', icon: Layers },
@@ -458,7 +458,7 @@ export const AdsView: React.FC = () => {
                   type="button"
                   onClick={() => setFilterType(t.id)}
                   className={`px-3 py-1.5 text-sm font-bold rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 ${
-                    filterType === t.id ? 'bg-primary text-white' : 'text-gray-600 hover:bg-surface-muted'
+                    filterType === t.id ? 'bg-primary text-white' : 'text-swiss-muted hover:bg-surface-muted'
                   }`}
                 >
                   <t.icon className="w-3.5 h-3.5" />
@@ -468,7 +468,7 @@ export const AdsView: React.FC = () => {
             </div>
           )}
 
-          <span className="text-xs text-gray-500 font-medium ml-auto">{filtered.length} campaigns</span>
+          <span className="text-xs text-swiss-muted font-medium ml-auto">{filtered.length} campaigns</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
@@ -486,8 +486,8 @@ export const AdsView: React.FC = () => {
           {filtered.length === 0 && (
             <div className="col-span-full text-center py-16 rounded-2xl border border-dashed border-black/10 bg-surface">
               <Layers className="w-10 h-10 mx-auto mb-3 text-slate-300" />
-              <p className="font-bold text-sm text-gray-700">No campaigns found</p>
-              <p className="text-xs text-gray-500 mt-1 max-w-md mx-auto">
+              <p className="font-bold text-sm text-swiss-ink">No campaigns found</p>
+              <p className="text-xs text-swiss-muted mt-1 max-w-md mx-auto">
                 Try changing filters or create a new CTWA ad on Meta.
               </p>
             </div>

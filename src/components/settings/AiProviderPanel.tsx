@@ -14,6 +14,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { api, formatCatchError, getUserRole } from '../../lib/api';
+import { Input } from '../ui/input';
 
 type AiProviderMode = 'convosync' | 'byok';
 type AiProviderType = 'openai' | 'anthropic' | 'custom';
@@ -151,7 +152,7 @@ export function AiProviderPanel() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center gap-2 py-12 text-sm text-gray-500">
+      <div className="flex items-center justify-center gap-2 py-12 text-sm text-swiss-muted">
         <Loader2 className="h-4 w-4 animate-spin" />
         Loading AI settings…
       </div>
@@ -160,14 +161,14 @@ export function AiProviderPanel() {
 
   return (
     <div className="mx-auto w-full max-w-2xl space-y-6">
-      <div className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-5 shadow-sm text-center">
+      <div className="bg-white border border-swiss-line p-5 text-center">
         <div className="flex flex-col items-center gap-3">
           <div className="rounded-xl bg-violet-50 p-2 text-violet-600">
             <Sparkles className="h-5 w-5" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-gray-900">AI</h3>
-            <p className="mt-1 text-sm text-gray-500">
+            <h3 className="text-base font-bold text-swiss-ink">AI</h3>
+            <p className="mt-1 text-sm text-swiss-muted">
               Choose managed AI included with your workspace, or connect your own API key for agents,
               copilot, and automations.
             </p>
@@ -183,17 +184,17 @@ export function AiProviderPanel() {
       </div>
 
       {!isAdmin && (
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-swiss-muted">
           Only workspace admins can change AI settings.
         </p>
       )}
 
       <form
-        className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-5 shadow-sm space-y-5"
+        className="bg-white border border-swiss-line p-5 space-y-5"
         onSubmit={(e) => void handleSave(e)}
       >
         <div>
-          <label className="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-2">
+          <label className="block text-xs font-bold uppercase tracking-wide text-swiss-muted mb-2">
             How to run AI
           </label>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -219,11 +220,11 @@ export function AiProviderPanel() {
                 className={`rounded-xl border p-4 text-left transition ${
                   mode === opt.id
                     ? 'border-primary bg-primary/10 ring-1 ring-primary/20'
-                    : 'border-black/5 hover:border-black/10'
+                    : 'border-swiss-line hover:border-black/10'
                 } ${!isAdmin ? 'opacity-60 cursor-not-allowed' : ''}`}
               >
-                <p className="font-semibold text-gray-900">{opt.title}</p>
-                <p className="mt-1 text-xs text-gray-500">{opt.desc}</p>
+                <p className="font-semibold text-swiss-ink">{opt.title}</p>
+                <p className="mt-1 text-xs text-swiss-muted">{opt.desc}</p>
               </button>
             ))}
           </div>
@@ -234,7 +235,7 @@ export function AiProviderPanel() {
             <div>
               <label
                 htmlFor="ai-platform"
-                className="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1"
+                className="block text-xs font-bold uppercase tracking-wide text-swiss-muted mb-1"
               >
                 Platform
               </label>
@@ -247,7 +248,7 @@ export function AiProviderPanel() {
                   setProvider(next);
                   setModel(PLATFORM_MODELS[next][0] ?? 'gpt-4o-mini');
                 }}
-                className="w-full rounded-xl border border-black/5 px-3 py-2.5 text-sm"
+                className="w-full rounded-xl border border-swiss-line px-3 py-2.5 text-sm"
               >
                 {(Object.keys(PLATFORM_LABELS) as AiProviderType[]).map((p) => (
                   <option key={p} value={p}>
@@ -260,7 +261,7 @@ export function AiProviderPanel() {
             <div>
               <label
                 htmlFor="ai-model"
-                className="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1"
+                className="block text-xs font-bold uppercase tracking-wide text-swiss-muted mb-1"
               >
                 Model
               </label>
@@ -269,7 +270,7 @@ export function AiProviderPanel() {
                 disabled={!isAdmin}
                 value={model}
                 onChange={(e) => setModel(e.target.value)}
-                className="w-full rounded-xl border border-black/5 px-3 py-2.5 text-sm"
+                className="w-full rounded-xl border border-swiss-line px-3 py-2.5 text-sm"
               >
                 {modelOptions.map((m) => (
                   <option key={m} value={m}>
@@ -283,36 +284,36 @@ export function AiProviderPanel() {
               <div>
                 <label
                   htmlFor="ai-base-url"
-                  className="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1"
+                  className="block text-xs font-bold uppercase tracking-wide text-swiss-muted mb-1"
                 >
                   API base URL
                 </label>
-                <input
+                <Input
                   id="ai-base-url"
                   type="url"
                   disabled={!isAdmin}
                   placeholder="https://your-api.example.com/v1"
                   value={baseUrl}
                   onChange={(e) => setBaseUrl(e.target.value)}
-                  className="w-full rounded-xl border border-black/5 px-3 py-2.5 text-sm"
+                  className="h-auto w-full rounded-xl border border-swiss-line px-3 py-2.5 text-sm"
                 />
               </div>
             )}
 
             <div>
-              <label htmlFor="ai-api-key" className="block text-xs font-bold uppercase tracking-wide text-gray-500 mb-1">
+              <label htmlFor="ai-api-key" className="block text-xs font-bold uppercase tracking-wide text-swiss-muted mb-1">
                 API key
               </label>
               <div className="relative">
-                <KeyRound className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                <input
+                <KeyRound className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-swiss-faint" />
+                <Input
                   id="ai-api-key"
                   type="password"
                   disabled={!isAdmin}
                   placeholder={config?.hasApiKey ? 'Leave blank to keep current key' : 'Paste your API key'}
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
-                  className="w-full rounded-xl border border-black/5 py-2.5 pl-10 pr-3 text-sm"
+                  className="h-auto w-full rounded-xl border border-swiss-line py-2.5 pl-10 pr-3 text-sm"
                 />
               </div>
             </div>
@@ -352,7 +353,7 @@ export function AiProviderPanel() {
               type="button"
               onClick={(e) => void handleTest(e)}
               disabled={testing || !canTest}
-              className="inline-flex items-center gap-2 rounded-xl bg-white ring-1 ring-slate-200/80 px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-surface-muted disabled:opacity-60"
+              className="inline-flex items-center gap-2 bg-white border border-swiss-line px-4 py-2.5 text-sm font-semibold text-swiss-ink hover:bg-surface-muted disabled:opacity-60"
             >
               {testing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plug className="h-4 w-4" />}
               Test connection
@@ -360,7 +361,7 @@ export function AiProviderPanel() {
             <button
               type="button"
               onClick={() => void load()}
-              className="inline-flex items-center gap-2 rounded-xl bg-white ring-1 ring-slate-200/80 px-4 py-2.5 text-sm text-gray-600 hover:bg-surface-muted"
+              className="inline-flex items-center gap-2 bg-white border border-swiss-line px-4 py-2.5 text-sm text-swiss-muted hover:bg-surface-muted"
             >
               <RefreshCw className="h-4 w-4" />
               Refresh

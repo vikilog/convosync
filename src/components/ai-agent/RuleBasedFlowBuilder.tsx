@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Input } from '../ui/input';
 import {
   BarChart3,
   ChevronDown,
@@ -127,14 +128,14 @@ function FlowNodeCard({
     <Tag
       type={onClick ? 'button' : undefined}
       onClick={onClick}
-      className={`w-[200px] shrink-0 rounded-lg overflow-hidden border border-slate-200 bg-white shadow-sm text-left ${
-        onClick ? 'hover:shadow-md transition-shadow cursor-pointer' : ''
-      }`}
+        className={`w-[200px] shrink-0 rounded-lg overflow-hidden border border-swiss-line bg-white text-left ${
+          onClick ? ' cursor-pointer' : ''
+        }`}
     >
       <div className={`${headerClass} px-3 py-2.5`}>
         <span className="text-sm font-bold text-white">{title}</span>
       </div>
-      <div className="px-3 py-4 min-h-[64px] text-xs text-gray-500">{body}</div>
+      <div className="px-3 py-4 min-h-[64px] text-xs text-swiss-muted">{body}</div>
     </Tag>
   );
 }
@@ -316,13 +317,13 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
   return (
     <div className="flex flex-col h-full min-h-0 bg-[#eef0f3] overflow-hidden">
       {/* Top bar */}
-      <div className="h-14 shrink-0 bg-white border-b border-slate-200 px-5 grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+      <div className="h-14 shrink-0 bg-white border-b border-swiss-line px-5 grid grid-cols-[1fr_auto_1fr] items-center gap-4">
         <div className="flex items-center gap-2 min-w-0">
-          <input
+          <Input
             type="text"
             value={definition.name}
             onChange={(e) => setDefinition((prev) => ({ ...prev, name: e.target.value }))}
-            className="text-sm font-bold text-gray-900 bg-transparent border-none outline-none min-w-0 flex-1"
+            className="h-auto text-sm font-bold text-swiss-ink bg-transparent border-none outline-none min-w-0 flex-1"
           />
           <button
             type="button"
@@ -331,7 +332,7 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
             className={`shrink-0 px-2.5 py-0.5 rounded-full text-sm font-bold uppercase transition-colors ${
               definition.status === 'active'
                 ? 'bg-green-50 text-green-700 border border-green-200 hover:bg-green-100'
-                : 'bg-gray-100 text-gray-500 border border-gray-200 hover:bg-gray-200'
+                : 'bg-gray-100 text-swiss-muted border border-gray-200 hover:bg-gray-200'
             }`}
           >
             {definition.status === 'active' ? 'Active' : 'Inactive'}
@@ -343,7 +344,7 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
             type="button"
             onClick={() => setActiveTab('build')}
             className={`px-5 py-1.5 text-sm font-bold rounded-md transition-colors ${
-              activeTab === 'build' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'
+              activeTab === 'build' ? 'bg-white text-swiss-ink ' : 'text-swiss-muted'
             }`}
           >
             Build
@@ -352,7 +353,7 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
             type="button"
             onClick={() => setActiveTab('analysis')}
             className={`px-5 py-1.5 text-sm font-bold rounded-md transition-colors flex items-center gap-1.5 ${
-              activeTab === 'analysis' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500'
+              activeTab === 'analysis' ? 'bg-white text-swiss-ink ' : 'text-swiss-muted'
             }`}
           >
             <BarChart3 className="w-3.5 h-3.5" />
@@ -373,16 +374,16 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
             <button
               type="button"
               onClick={() => loadSample(SAMPLE_EXACT_MATCH_FLOW)}
-              className="px-3 py-2 text-sm font-bold text-gray-600 bg-white border border-slate-200 rounded-lg hover:bg-gray-50"
+              className="px-3 py-2 text-sm font-bold text-swiss-muted bg-white border border-swiss-line rounded-lg hover:bg-gray-50"
             >
               Sample: Exact
             </button>
           </div>
-          {saving && <span className="text-xs text-gray-400 font-bold mr-1">Saving…</span>}
+          {saving && <span className="text-xs text-swiss-faint font-bold mr-1">Saving…</span>}
           <button
             type="button"
             onClick={handleCheck}
-            className="px-4 py-2 text-sm font-bold text-gray-700 bg-white border border-slate-200 rounded-lg hover:bg-gray-50"
+            className="px-4 py-2 text-sm font-bold text-swiss-ink bg-white border border-swiss-line rounded-lg hover:bg-gray-50"
           >
             Check
           </button>
@@ -405,13 +406,13 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
       <div className="flex flex-1 min-h-0 overflow-hidden">
         {/* Toolbox */}
         <div
-          className="relative shrink-0 flex transition-[width] duration-200 ease-out border-r border-slate-200 bg-white"
+          className="relative shrink-0 flex transition-[width] duration-200 ease-out border-r border-swiss-line bg-white"
           style={{ width: toolboxOpen ? TOOLBOX_WIDTH : 0 }}
         >
           {toolboxOpen && (
             <aside className="flex flex-col h-full w-[240px] overflow-hidden">
               <div className="flex-1 overflow-y-auto p-4 text-left">
-              <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-2">
+              <p className="text-sm font-bold text-swiss-faint uppercase tracking-widest mb-2">
                 Actions
               </p>
               <div className="space-y-0.5 mb-5">
@@ -420,15 +421,15 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
                     key={item.type}
                     type="button"
                     onClick={() => addNode(item.type)}
-                    className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-medium text-gray-700 rounded-lg hover:bg-primary/5 hover:text-primary transition-colors text-left"
+                    className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-medium text-swiss-ink rounded-lg hover:bg-primary/5 hover:text-primary transition-colors text-left"
                   >
-                    <span className="text-gray-400">{item.icon}</span>
+                    <span className="text-swiss-faint">{item.icon}</span>
                     <span className="truncate">{item.label}</span>
                   </button>
                 ))}
               </div>
 
-              <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-2">
+              <p className="text-sm font-bold text-swiss-faint uppercase tracking-widest mb-2">
                 Shopify
               </p>
               <button
@@ -440,15 +441,15 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
                 Send Shopify orders
               </button>
 
-              <p className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-2">
+              <p className="text-sm font-bold text-swiss-faint uppercase tracking-widest mb-2">
                 Rules
               </p>
               <button
                 type="button"
                 onClick={() => addNode('branch')}
-                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-medium text-gray-700 rounded-lg hover:bg-primary/5 hover:text-primary transition-colors text-left"
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-medium text-swiss-ink rounded-lg hover:bg-primary/5 hover:text-primary transition-colors text-left"
               >
-                <GitBranch className="w-4 h-4 shrink-0 text-gray-400" />
+                <GitBranch className="w-4 h-4 shrink-0 text-swiss-faint" />
                 Branch
               </button>
             </div>
@@ -459,7 +460,7 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
             <button
               type="button"
               onClick={() => setToolboxOpen(false)}
-              className="absolute top-4 -right-3 z-10 w-6 h-7 bg-white border border-slate-200 rounded-r-md flex items-center justify-center text-gray-500 hover:text-gray-800 shadow-sm"
+              className="absolute top-4 -right-3 z-10 w-6 h-7 bg-white border border-swiss-line rounded-r-md flex items-center justify-center text-swiss-muted hover:text-swiss-ink shadow-sm"
               aria-label="Collapse toolbox"
             >
               <ChevronLeft className="w-3.5 h-3.5" />
@@ -468,7 +469,7 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
             <button
               type="button"
               onClick={() => setToolboxOpen(true)}
-              className="absolute top-4 left-0 z-10 w-6 h-7 bg-white border border-slate-200 rounded-r-md flex items-center justify-center text-gray-500 hover:text-gray-800 shadow-sm"
+              className="absolute top-4 left-0 z-10 w-6 h-7 bg-white border border-swiss-line rounded-r-md flex items-center justify-center text-swiss-muted hover:text-swiss-ink shadow-sm"
               aria-label="Expand toolbox"
             >
               <ChevronRight className="w-3.5 h-3.5" />
@@ -486,13 +487,13 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
                 onClick={() => setTriggerPanelOpen(false)}
                 aria-label="Close trigger panel"
               />
-              <div className="absolute inset-y-0 left-0 z-20 w-[360px] max-w-[90vw] bg-white border-r border-slate-200 shadow-xl flex flex-col">
-                <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 shrink-0">
-                  <h3 className="text-sm font-bold text-gray-900">Trigger</h3>
+              <div className="absolute inset-y-0 left-0 z-20 w-[360px] max-w-[90vw] bg-white border-r border-swiss-line shadow-xl flex flex-col">
+                <div className="flex items-center justify-between px-5 py-4 border-b border-swiss-line shrink-0">
+                  <h3 className="text-sm font-bold text-swiss-ink">Trigger</h3>
                   <button
                     type="button"
                     onClick={() => setTriggerPanelOpen(false)}
-                    className="p-1 text-gray-400 hover:text-gray-700 rounded-md hover:bg-gray-100"
+                    className="p-1 text-swiss-faint hover:text-swiss-ink rounded-md hover:bg-gray-100"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -508,12 +509,12 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
                           onClick={() =>
                             type === 'keyword' ? startKeywordConfig() : setPanelMode('click_button')
                           }
-                          className="w-full text-left p-4 rounded-xl border-2 border-slate-200 bg-white hover:border-primary/40 transition-all"
+                          className="w-full text-left p-4 rounded-xl border-2 border-swiss-line bg-white hover:border-primary/40 transition-all"
                         >
                           <p className="text-sm font-bold text-primary mb-1">
                             {TRIGGER_LABELS[type]}
                           </p>
-                          <p className="text-xs text-gray-500 leading-relaxed">
+                          <p className="text-xs text-swiss-muted leading-relaxed">
                             {TRIGGER_DESCRIPTIONS[type]}
                           </p>
                         </button>
@@ -527,7 +528,7 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
                         <p className="text-sm font-bold text-primary mb-1">
                           {TRIGGER_LABELS.click_button}
                         </p>
-                        <p className="text-xs text-gray-500 leading-relaxed">
+                        <p className="text-xs text-swiss-muted leading-relaxed">
                           {TRIGGER_DESCRIPTIONS.click_button}
                         </p>
                       </div>
@@ -536,24 +537,24 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
 
                   {panelMode === 'keyword' && (
                     <div className="p-5">
-                      <div className="border border-slate-200 rounded-xl overflow-hidden">
-                        <div className="flex items-center gap-2 px-4 py-3 bg-slate-50 border-b border-slate-200">
+                      <div className="border border-swiss-line rounded-xl overflow-hidden">
+                        <div className="flex items-center gap-2 px-4 py-3 bg-slate-50 border-b border-swiss-line">
                           <button
                             type="button"
                             onClick={() => setKeywordSectionOpen((v) => !v)}
                             className="flex-1 flex items-center justify-between text-left min-w-0"
                           >
-                            <span className="text-sm font-bold text-gray-900">Keyword trigger</span>
+                            <span className="text-sm font-bold text-swiss-ink">Keyword trigger</span>
                             {keywordSectionOpen ? (
-                              <ChevronUp className="w-4 h-4 text-gray-400 shrink-0" />
+                              <ChevronUp className="w-4 h-4 text-swiss-faint shrink-0" />
                             ) : (
-                              <ChevronDown className="w-4 h-4 text-gray-400 shrink-0" />
+                              <ChevronDown className="w-4 h-4 text-swiss-faint shrink-0" />
                             )}
                           </button>
                           <button
                             type="button"
                             onClick={removeKeywordTrigger}
-                            className="p-1.5 text-gray-400 hover:text-red-500 rounded-md hover:bg-red-50 shrink-0"
+                            className="p-1.5 text-swiss-faint hover:text-red-500 rounded-md hover:bg-red-50 shrink-0"
                             title="Remove keyword trigger"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -563,7 +564,7 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
                         {keywordSectionOpen && (
                           <div className="p-4 space-y-4">
                             <div>
-                              <label className="block text-sm font-bold text-gray-700 mb-1.5">
+                              <label className="block text-sm font-bold text-swiss-ink mb-1.5">
                                 Keywords matching rules
                               </label>
                               <select
@@ -571,7 +572,7 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
                                 onChange={(e) =>
                                   setDraftMatchRule(e.target.value as KeywordMatchRule)
                                 }
-                                className="w-full border border-slate-200 rounded-lg py-2.5 px-3 text-sm bg-white focus:ring-2 focus:ring-primary/20 outline-none"
+                                className="w-full border border-swiss-line rounded-lg py-2.5 px-3 text-sm bg-white focus:ring-2 focus:ring-primary/20 outline-none"
                               >
                                 {MATCH_RULE_OPTIONS.map((opt) => (
                                   <option key={opt.value} value={opt.value}>
@@ -587,21 +588,21 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
                                 return (
                                   <div key={`kw-${index}`}>
                                     <div className="flex items-start gap-2">
-                                      <input
+                                      <Input
                                         type="text"
                                         value={keyword}
                                         onChange={(e) => updateDraftKeyword(index, e.target.value)}
                                         placeholder="Please enter"
-                                        className={`flex-1 border rounded-lg py-2.5 px-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 ${
+                                        className={`h-auto flex-1 border rounded-lg py-2.5 px-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 ${
                                           showError
                                             ? 'border-red-400 focus:border-red-400'
-                                            : 'border-slate-200 focus:border-primary'
+                                            : 'border-swiss-line focus:border-primary'
                                         }`}
                                       />
                                       <button
                                         type="button"
                                         onClick={() => removeDraftKeyword(index)}
-                                        className="p-2.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50 shrink-0"
+                                        className="p-2.5 text-swiss-faint hover:text-red-500 rounded-lg hover:bg-red-50 shrink-0"
                                         title="Remove keyword"
                                       >
                                         <Trash2 className="w-4 h-4" />
@@ -630,7 +631,7 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
                   )}
                 </div>
 
-                <div className="p-5 border-t border-slate-200 flex gap-2 shrink-0">
+                <div className="p-5 border-t border-swiss-line flex gap-2 shrink-0">
                   <button
                     type="button"
                     onClick={() => {
@@ -645,7 +646,7 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
                   <button
                     type="button"
                     onClick={() => setTriggerPanelOpen(false)}
-                    className="flex-1 py-2.5 text-sm font-bold text-gray-700 bg-white border border-slate-200 rounded-lg hover:bg-gray-50"
+                    className="flex-1 py-2.5 text-sm font-bold text-swiss-ink bg-white border border-swiss-line rounded-lg hover:bg-gray-50"
                   >
                     Cancel
                   </button>
@@ -655,7 +656,7 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
           )}
 
           {activeTab === 'analysis' ? (
-            <div className="absolute inset-0 flex items-center justify-center text-sm text-gray-500 bg-[#eef0f3]">
+            <div className="absolute inset-0 flex items-center justify-center text-sm text-swiss-muted bg-[#eef0f3]">
               Flow analytics will appear here once the flow is active.
             </div>
           ) : (
@@ -679,15 +680,15 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
                     body={
                       definition.triggerType ? (
                         <>
-                          <p className="font-bold text-gray-800">
+                          <p className="font-bold text-swiss-ink">
                             {TRIGGER_LABELS[definition.triggerType]}
                           </p>
                           {triggerSummary && (
-                            <p className="mt-1.5 text-xs text-gray-500">{triggerSummary}</p>
+                            <p className="mt-1.5 text-xs text-swiss-muted">{triggerSummary}</p>
                           )}
                         </>
                       ) : (
-                        <span className="text-gray-400">Click to configure</span>
+                        <span className="text-swiss-faint">Click to configure</span>
                       )
                     }
                   />
@@ -701,7 +702,7 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
                         <FlowNodeCard
                           headerClass="bg-primary"
                           title={node.title}
-                          body={<span className="text-gray-400">Configure in next step</span>}
+                          body={<span className="text-swiss-faint">Configure in next step</span>}
                         />
                         {i === definition.nodes.length - 1 && (
                           <FlowConnector onAdd={() => addNode('send_messages')} />
@@ -715,19 +716,19 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
           )}
 
           {/* Zoom controls */}
-          <div className="absolute bottom-5 left-5 flex items-center gap-0.5 bg-white border border-slate-200 rounded-lg shadow-md px-1 py-1 z-[5]">
+          <div className="absolute bottom-5 left-5 flex items-center gap-0.5 bg-white border border-swiss-line rounded-lg shadow-md px-1 py-1 z-[5]">
             <button
               type="button"
               onClick={() => setZoom((z) => Math.min(150, z + 10))}
-              className="p-1.5 text-gray-600 hover:bg-gray-100 rounded"
+              className="p-1.5 text-swiss-muted hover:bg-gray-100 rounded"
             >
               <Plus className="w-3.5 h-3.5" />
             </button>
-            <span className="text-sm font-bold text-gray-600 w-11 text-center">{zoom}%</span>
+            <span className="text-sm font-bold text-swiss-muted w-11 text-center">{zoom}%</span>
             <button
               type="button"
               onClick={() => setZoom((z) => Math.max(50, z - 10))}
-              className="p-1.5 text-gray-600 hover:bg-gray-100 rounded"
+              className="p-1.5 text-swiss-muted hover:bg-gray-100 rounded"
             >
               <Minus className="w-3.5 h-3.5" />
             </button>
@@ -735,7 +736,7 @@ export const RuleBasedFlowBuilder: React.FC<Props> = ({ flow, saving, onSave }) 
             <button
               type="button"
               onClick={() => setZoom(100)}
-              className="p-1.5 text-gray-600 hover:bg-gray-100 rounded"
+              className="p-1.5 text-swiss-muted hover:bg-gray-100 rounded"
               title="Reset zoom"
             >
               <Maximize2 className="w-3.5 h-3.5" />

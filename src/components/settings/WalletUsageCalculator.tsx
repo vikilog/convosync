@@ -6,6 +6,7 @@
 import { useMemo, useState } from 'react';
 import { Calculator, RotateCcw } from 'lucide-react';
 import { BRAND_GOLD, formatCc, formatCcInrSubtitle } from '../../lib/convocoins';
+import { Input } from '../ui/input';
 import {
   computeWalletUsageBreakdown,
   computeWalletUsageTotalCc,
@@ -16,7 +17,7 @@ import {
 } from '../../lib/walletUsageRates';
 
 const CARD_CLASS =
-  'rounded-xl bg-white ring-1 ring-slate-200/80 p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)] h-full flex flex-col';
+  'bg-white border border-swiss-line p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)] h-full flex flex-col';
 
 type WalletUsageCalculatorProps = {
   balanceCc?: number;
@@ -88,7 +89,7 @@ export function WalletUsageCalculator({
                   <p className="text-xs font-semibold text-slate-800">{field.label}</p>
                   <p className="text-[10px] text-slate-500">{field.hint}</p>
                 </div>
-                <input
+                <Input
                   type="number"
                   min={0}
                   max={field.sliderMax}
@@ -105,7 +106,7 @@ export function WalletUsageCalculator({
                     setField(field.key, Number(raw));
                   }}
                   placeholder="0"
-                  className="w-[5.5rem] shrink-0 rounded-lg border border-[#E5E7EB] bg-white px-2 py-1.5 text-right text-sm font-semibold tabular-nums text-slate-900 placeholder:font-normal placeholder:text-slate-400 focus:border-channel-green focus:outline-none focus:ring-2 focus:ring-emerald-100"
+                  className="h-auto w-[5.5rem] shrink-0 rounded-lg border border-[#E5E7EB] bg-white px-2 py-1.5 text-right text-sm font-semibold tabular-nums text-slate-900 placeholder:font-normal placeholder:text-slate-400 focus:border-channel-green focus:outline-none focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
               <input

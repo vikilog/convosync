@@ -84,8 +84,8 @@ export function BuilderCanvas({ onGenerateWithAi }: Props) {
             onDragOver={(e) => e.preventDefault()}
             onDrop={(e) => handleCanvasDrop(e, 0)}
           >
-            <p className="text-sm font-semibold text-gray-600">Empty canvas</p>
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-sm font-semibold text-swiss-muted">Empty canvas</p>
+            <p className="text-xs text-swiss-faint mt-1">
               Drag blocks from the left, or generate a full email with AI
             </p>
             <div className="mt-4 flex flex-wrap items-center justify-center gap-2">

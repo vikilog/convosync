@@ -31,6 +31,8 @@ import { api } from '../../lib/api';
 import { leadFunnelIdFromPath, pathForLeadFunnel, pathForTab } from '../../routes';
 import { LeadDetailDrawer } from './LeadDetailDrawer';
 import { FunnelInsightsBar } from './FunnelInsightsBar';
+import { Input } from '../ui/input';
+import { Textarea } from '../ui/textarea';
 import {
   timeAgo,
   type Lead,
@@ -71,7 +73,7 @@ const LeadCard: React.FC<{
 }> = ({ lead, dragging, showConvert, convertBusy, onOpen, onConvert }) => {
   return (
     <div
-      className={`w-full rounded-xl border border-black/5 bg-white p-3 text-left shadow-sm transition-shadow hover:shadow-md ${
+      className={`w-full rounded-xl border border-swiss-line bg-white p-3 text-left transition-shadow ${
         dragging ? 'shadow-lg ring-2 ring-primary/30 opacity-95' : ''
       }`}
     >
@@ -81,18 +83,18 @@ const LeadCard: React.FC<{
         className="w-full cursor-grab text-left active:cursor-grabbing"
       >
         <div className="flex items-start justify-between gap-2">
-          <p className="truncate text-sm font-bold text-gray-900">
+          <p className="truncate text-sm font-bold text-swiss-ink">
             {lead.name?.trim() || 'Unknown'}
           </p>
           {sourceBadge(lead.source)}
         </div>
 
-        <div className="mt-2 flex items-center gap-2 text-gray-400">
-          <Phone className={`h-3.5 w-3.5 ${lead.phone ? 'text-gray-500' : 'opacity-30'}`} />
-          <Mail className={`h-3.5 w-3.5 ${lead.email ? 'text-gray-500' : 'opacity-30'}`} />
+        <div className="mt-2 flex items-center gap-2 text-swiss-faint">
+          <Phone className={`h-3.5 w-3.5 ${lead.phone ? 'text-swiss-muted' : 'opacity-30'}`} />
+          <Mail className={`h-3.5 w-3.5 ${lead.email ? 'text-swiss-muted' : 'opacity-30'}`} />
         </div>
 
-        <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-gray-500">
+        <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-swiss-muted">
           {lead.requirement}
         </p>
       </button>
@@ -111,12 +113,12 @@ const LeadCard: React.FC<{
                 <UserRound className="h-3 w-3 text-slate-500" />
               </span>
             )}
-            <span className="truncate text-[11px] font-semibold text-gray-600">
+            <span className="truncate text-[11px] font-semibold text-swiss-muted">
               {lead.assignedRep.name}
             </span>
           </span>
         ) : (
-          <span className="text-[11px] text-gray-400">Unassigned</span>
+          <span className="text-[11px] text-swiss-faint">Unassigned</span>
         )}
         <div className="flex shrink-0 items-center gap-1.5">
           {showConvert && (
@@ -138,7 +140,7 @@ const LeadCard: React.FC<{
               <Users className="h-3.5 w-3.5" />
             </span>
           )}
-          <span className="text-[11px] text-gray-400">{timeAgo(lead.updatedAt)}</span>
+          <span className="text-[11px] text-swiss-faint">{timeAgo(lead.updatedAt)}</span>
         </div>
       </div>
     </div>
@@ -227,13 +229,13 @@ const StageColumn: React.FC<{
   return (
     <div
       ref={setNodeRef}
-      className={`flex w-72 shrink-0 flex-col rounded-2xl bg-white ring-1 ring-slate-200/80 ${
+      className={`flex w-72 shrink-0 flex-col bg-white border border-swiss-line ${
         isOver ? 'ring-2 ring-primary/20' : ''
       }`}
     >
-      <div className="flex items-center gap-1.5 border-b border-black/5 px-2.5 py-2">
+      <div className="flex items-center gap-1.5 border-b border-swiss-line px-2.5 py-2">
         {editing ? (
-          <input
+          <Input
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             onBlur={() => void commitRename()}
@@ -250,14 +252,14 @@ const StageColumn: React.FC<{
             disabled={saving}
             autoFocus
             aria-label="Board name"
-            className="min-w-0 flex-1 rounded-md border border-primary/30 bg-white px-2 py-1 text-xs font-bold text-gray-800 outline-none focus:ring-2 focus:ring-primary/20"
+            className="h-auto min-w-0 flex-1 rounded-md border border-primary/30 bg-white px-2 py-1 text-xs font-bold text-swiss-ink outline-none focus:ring-2 focus:ring-primary/20"
           />
         ) : (
           <button
             type="button"
             onClick={() => setEditing(true)}
             title="Rename board"
-            className="min-w-0 flex-1 cursor-pointer truncate rounded-md px-1 py-0.5 text-left text-xs font-bold text-gray-800 transition-colors hover:bg-black/[0.03]"
+            className="min-w-0 flex-1 cursor-pointer truncate rounded-md px-1 py-0.5 text-left text-xs font-bold text-swiss-ink transition-colors hover:bg-black/[0.03]"
           >
             {label}
             {isFinal ? (
@@ -328,39 +330,39 @@ function FunnelFormModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 p-4">
-      <div className="w-full max-w-md rounded-2xl border border-black/5 bg-white p-5 shadow-xl">
-        <h3 className="text-base font-bold text-gray-900">{title}</h3>
-        <p className="mt-0.5 text-xs text-gray-400">
+      <div className="w-full max-w-md rounded-2xl border border-swiss-line bg-white p-5 shadow-xl">
+        <h3 className="text-base font-bold text-swiss-ink">{title}</h3>
+        <p className="mt-0.5 text-xs text-swiss-faint">
           Funnels are never auto-created. Automation needs one of these.
         </p>
         <div className="mt-4 space-y-3">
           <label className="block">
-            <span className="text-xs font-semibold text-gray-600">Name</span>
-            <input
+            <span className="text-xs font-semibold text-swiss-muted">Name</span>
+            <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Instagram inbound"
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+              className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
               autoFocus
             />
           </label>
           <label className="block">
-            <span className="text-xs font-semibold text-gray-600">Description</span>
-            <textarea
+            <span className="text-xs font-semibold text-swiss-muted">Description</span>
+            <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={2}
               placeholder="What this funnel is for"
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+              className="min-h-0 mt-1 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
             />
           </label>
           <label className="block">
-            <span className="text-xs font-semibold text-gray-600">Goal</span>
-            <input
+            <span className="text-xs font-semibold text-swiss-muted">Goal</span>
+            <Input
               value={goal}
               onChange={(e) => setGoal(e.target.value)}
               placeholder="e.g. 50 qualified demos / month"
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+              className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
             />
           </label>
         </div>
@@ -368,7 +370,7 @@ function FunnelFormModal({
           <button
             type="button"
             onClick={onClose}
-            className="cursor-pointer rounded-xl border border-black/10 px-3 py-2 text-sm font-bold text-gray-700 hover:bg-surface-muted"
+            className="cursor-pointer rounded-xl border border-black/10 px-3 py-2 text-sm font-bold text-swiss-ink hover:bg-surface-muted"
           >
             Cancel
           </button>
@@ -774,20 +776,20 @@ export const LeadsKanbanView: React.FC = () => {
   if (!activeFunnelId) {
     return (
       <div className="flex h-full min-h-0 flex-1 flex-col gap-4 overflow-y-auto bg-white p-4 md:p-6">
-        <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 rounded-2xl bg-white ring-1 ring-slate-200/80 p-4">
+        <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 bg-white border border-swiss-line p-4">
           <div>
-            <h2 className="flex items-center gap-2 text-base font-black text-gray-900">
+            <h2 className="flex items-center gap-2 text-base font-semibold text-swiss-ink">
               <Filter className="h-5 w-5 text-primary" />
               Lead funnels
             </h2>
-            <p className="mt-0.5 text-xs font-medium text-gray-400">
+            <p className="mt-0.5 text-xs font-medium text-swiss-faint">
               Create a funnel first — then open its Kanban board. No auto-created funnels.
             </p>
           </div>
           <button
             type="button"
             onClick={() => setCreateOpen(true)}
-            className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-sm font-bold text-white shadow-sm shadow-primary/15 hover:bg-primary-hover"
+            className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-sm font-bold text-white shadow-primary/15 hover:bg-primary-hover"
           >
             <Plus className="h-3.5 w-3.5" /> Create funnel
           </button>
@@ -803,7 +805,7 @@ export const LeadsKanbanView: React.FC = () => {
         )}
 
         {funnelsLoading ? (
-          <p className="text-sm font-medium text-gray-400">Loading funnels…</p>
+          <p className="text-sm font-medium text-swiss-faint">Loading funnels…</p>
         ) : funnels.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center rounded-2xl border border-dashed border-black/10 bg-white px-6 py-16 text-center">
             <Users className="mb-3 h-8 w-8 text-slate-300" />
@@ -827,7 +829,7 @@ export const LeadsKanbanView: React.FC = () => {
                 key={f.id}
                 type="button"
                 onClick={() => navigate(pathForLeadFunnel(f.id))}
-                className="cursor-pointer rounded-2xl bg-white ring-1 ring-slate-200/80 p-4 text-left shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-colors hover:border-primary/20 hover:bg-white"
+                className="cursor-pointer bg-white border border-swiss-line p-4 text-left shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-colors hover:border-primary/20 hover:bg-white"
               >
                 <div className="flex items-start justify-between gap-2">
                   <p className="text-sm font-bold text-[#0F172A]">{f.name}</p>
@@ -890,7 +892,7 @@ export const LeadsKanbanView: React.FC = () => {
   // —— Kanban inside selected funnel ——
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col gap-4 overflow-hidden bg-white p-4 md:p-6 selection:bg-primary/15">
-      <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 rounded-2xl bg-white ring-1 ring-slate-200/80 p-4">
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 bg-white border border-swiss-line p-4">
         <div className="min-w-0">
           <button
             type="button"
@@ -903,30 +905,30 @@ export const LeadsKanbanView: React.FC = () => {
           >
             <ArrowLeft className="h-3.5 w-3.5" /> All funnels
           </button>
-          <h2 className="flex items-center gap-2 text-base font-black text-gray-900">
+          <h2 className="flex items-center gap-2 text-base font-semibold text-swiss-ink">
             <Users className="h-5 w-5 text-primary" />
             {activeFunnel?.name ?? 'Funnel'}
           </h2>
-          <p className="mt-0.5 truncate text-xs font-medium text-gray-400">
+          <p className="mt-0.5 truncate text-xs font-medium text-swiss-faint">
             {activeFunnel?.goal || activeFunnel?.description || 'Kanban board'}
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           <div className="relative w-44 sm:w-56">
-            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
-            <input
+            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-swiss-faint" />
+            <Input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search leads…"
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 py-1.5 pl-9 pr-3 text-meta font-semibold outline-none focus:ring-2 focus:ring-primary/15"
+              className="h-auto w-full rounded-xl border border-swiss-line bg-slate-50 py-1.5 pl-9 pr-3 text-meta font-semibold outline-none focus:ring-2 focus:ring-primary/15"
             />
           </div>
           <select
             value={sourceFilter}
             onChange={(e) => setSourceFilter(e.target.value as 'all' | LeadSource)}
-            className="rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-meta font-semibold text-gray-700 outline-none"
+            className="rounded-xl border border-swiss-line bg-white px-2.5 py-1.5 text-meta font-semibold text-swiss-ink outline-none"
           >
             <option value="all">All sources</option>
             <option value="instagram">Instagram</option>
@@ -936,14 +938,14 @@ export const LeadsKanbanView: React.FC = () => {
           <button
             type="button"
             onClick={() => setAddBoardOpen(true)}
-            className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-bold text-gray-700 hover:bg-surface-muted"
+            className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-bold text-swiss-ink hover:bg-surface-muted"
           >
             <Plus className="h-3.5 w-3.5" /> Add board
           </button>
           <button
             type="button"
             onClick={() => setAddOpen(true)}
-            className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-sm font-bold text-white shadow-sm shadow-primary/15 hover:bg-primary-hover"
+            className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-sm font-bold text-white shadow-primary/15 hover:bg-primary-hover"
           >
             <Plus className="h-3.5 w-3.5" /> Add Lead
           </button>
@@ -965,7 +967,7 @@ export const LeadsKanbanView: React.FC = () => {
 
       <div className="min-h-0 flex-1 overflow-x-auto overflow-y-hidden">
         {loading ? (
-          <p className="px-2 py-10 text-sm font-medium text-gray-400">Loading leads…</p>
+          <p className="px-2 py-10 text-sm font-medium text-swiss-faint">Loading leads…</p>
         ) : (
           <DndContext
             sensors={sensors}
@@ -1052,28 +1054,28 @@ export const LeadsKanbanView: React.FC = () => {
 
       {addOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 p-4">
-          <div className="w-full max-w-md rounded-2xl border border-black/5 bg-white p-5 shadow-xl">
-            <h3 className="text-base font-bold text-gray-900">Add lead</h3>
-            <p className="mt-0.5 text-xs text-gray-400">
+          <div className="w-full max-w-md rounded-2xl border border-swiss-line bg-white p-5 shadow-xl">
+            <h3 className="text-base font-bold text-swiss-ink">Add lead</h3>
+            <p className="mt-0.5 text-xs text-swiss-faint">
               Creates a card in New for {activeFunnel?.name}.
             </p>
             <div className="mt-4 space-y-3">
               <label className="block">
-                <span className="text-xs font-semibold text-gray-600">Name</span>
-                <input
+                <span className="text-xs font-semibold text-swiss-muted">Name</span>
+                <Input
                   value={draftName}
                   onChange={(e) => setDraftName(e.target.value)}
                   placeholder="Optional"
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                  className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
                 />
               </label>
               <label className="block">
-                <span className="text-xs font-semibold text-gray-600">Requirement</span>
-                <input
+                <span className="text-xs font-semibold text-swiss-muted">Requirement</span>
+                <Input
                   value={draftRequirement}
                   onChange={(e) => setDraftRequirement(e.target.value)}
                   placeholder="What are they looking for?"
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                  className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
                 />
               </label>
             </div>
@@ -1081,7 +1083,7 @@ export const LeadsKanbanView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setAddOpen(false)}
-                className="cursor-pointer rounded-xl border border-black/10 px-3 py-2 text-sm font-bold text-gray-700 hover:bg-surface-muted"
+                className="cursor-pointer rounded-xl border border-black/10 px-3 py-2 text-sm font-bold text-swiss-ink hover:bg-surface-muted"
               >
                 Cancel
               </button>
@@ -1100,18 +1102,18 @@ export const LeadsKanbanView: React.FC = () => {
 
       {addBoardOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 p-4">
-          <div className="w-full max-w-sm rounded-2xl border border-black/5 bg-white p-5 shadow-xl">
-            <h3 className="text-base font-bold text-gray-900">Add board</h3>
-            <p className="mt-0.5 text-xs text-gray-400">
+          <div className="w-full max-w-sm rounded-2xl border border-swiss-line bg-white p-5 shadow-xl">
+            <h3 className="text-base font-bold text-swiss-ink">Add board</h3>
+            <p className="mt-0.5 text-xs text-swiss-faint">
               New column on this funnel’s Kanban. Default board is New.
             </p>
             <label className="mt-4 block">
-              <span className="text-xs font-semibold text-gray-600">Board name</span>
-              <input
+              <span className="text-xs font-semibold text-swiss-muted">Board name</span>
+              <Input
                 value={boardName}
                 onChange={(e) => setBoardName(e.target.value)}
                 placeholder="e.g. Won / Closed"
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
                 autoFocus
               />
             </label>
@@ -1124,14 +1126,14 @@ export const LeadsKanbanView: React.FC = () => {
                   className="mt-0.5 h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary/30"
                 />
                 <span>
-                  <span className="block text-xs font-bold text-gray-800">Final step</span>
-                  <span className="block text-[11px] text-gray-500">
+                  <span className="block text-xs font-bold text-swiss-ink">Final step</span>
+                  <span className="block text-[11px] text-swiss-muted">
                     Leads on this board can convert to Contacts
                   </span>
                 </span>
               </label>
             ) : (
-              <p className="mt-3 text-[11px] text-gray-500">
+              <p className="mt-3 text-[11px] text-swiss-muted">
                 New board is inserted before the Final board.
               </p>
             )}
@@ -1143,7 +1145,7 @@ export const LeadsKanbanView: React.FC = () => {
                   setBoardName('');
                   setBoardIsFinal(false);
                 }}
-                className="cursor-pointer rounded-xl border border-black/10 px-3 py-2 text-sm font-bold text-gray-700 hover:bg-surface-muted"
+                className="cursor-pointer rounded-xl border border-black/10 px-3 py-2 text-sm font-bold text-swiss-ink hover:bg-surface-muted"
               >
                 Cancel
               </button>

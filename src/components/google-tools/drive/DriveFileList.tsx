@@ -2,6 +2,7 @@ import { ArrowLeft, Grid3x3, List, Loader2, MoreHorizontal, Search } from 'lucid
 import type { DriveFile, LayoutMode } from './types';
 import { FileTypeIcon } from '../shared/FileTypeIcon';
 import { formatBytes, formatDate, fileTypeLabel } from './utils';
+import { Input } from '../../ui/input';
 
 type DriveFileListProps = {
   files: DriveFile[];
@@ -49,12 +50,12 @@ export function DriveFileList({
         )}
         <div className="flex items-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 focus-within:ring-2 focus-within:ring-[#2563EB]/20">
           <Search className="w-4 h-4 text-[#64748B] shrink-0" />
-          <input
+          <Input
             type="search"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search files..."
-            className="flex-1 min-w-0 bg-transparent text-sm text-[#0F172A] placeholder:text-[#94A3B8] outline-none"
+            className="h-auto flex-1 min-w-0 bg-transparent text-sm text-[#0F172A] placeholder:text-[#94A3B8] outline-none"
           />
         </div>
         <div className="inline-flex items-center rounded-lg border border-[#E2E8F0] p-0.5">
@@ -99,9 +100,9 @@ export function DriveFileList({
                   type="button"
                   onClick={() => onSelect(file)}
                   onDoubleClick={() => onOpen(file)}
-                  className={`p-3 rounded-xl border text-left transition-all hover:shadow-md ${
+                  className={`p-3 rounded-xl border text-left transition-all ${
                     selected
-                      ? 'border-[#2563EB] bg-[#EFF6FF] shadow-sm'
+                      ? 'border-[#2563EB] bg-[#EFF6FF] '
                       : 'border-[#E2E8F0] bg-white hover:bg-[#F8FAFC]'
                   }`}
                 >

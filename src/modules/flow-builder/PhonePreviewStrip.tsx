@@ -44,7 +44,7 @@ export function PhonePreviewStrip({
 
   return (
     <div
-      className={`flex max-w-[min(920px,calc(100vw-2rem))] items-end gap-3 rounded-xl border-[0.5px] border-border-subtle bg-white/95 px-4 py-3 shadow-sm backdrop-blur-sm ${className}`}
+      className={`flex max-w-[min(920px,calc(100vw-2rem))] items-end gap-3 rounded-xl border-[0.5px] border-border-subtle bg-white/95 px-4 py-3 backdrop-blur-sm ${className}`}
     >
       <p className="mb-1 shrink-0 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
         Preview
@@ -53,7 +53,7 @@ export function PhonePreviewStrip({
       <div className="flex min-w-0 items-end gap-2 overflow-x-auto pb-0.5">
         {hasTrigger ? (
           <div
-            className="mb-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-[0.5px] border-border-subtle bg-white shadow-sm"
+            className="mb-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-[0.5px] border-border-subtle bg-white "
             title="Trigger"
             aria-label="Flow starts at trigger"
           >
@@ -131,7 +131,7 @@ function PhoneMock({
         {body ? (
           <div className="flex justify-end">
             <div
-              className={`max-w-[95%] rounded-[8px] rounded-br-sm px-1.5 py-1 text-[7px] font-medium leading-[1.25] whitespace-pre-wrap break-words shadow-sm ${bubbleClass}`}
+              className={`max-w-[95%] rounded-[8px] rounded-br-sm px-1.5 py-1 text-[7px] font-medium leading-[1.25] whitespace-pre-wrap break-words ${bubbleClass}`}
             >
               {truncate(body, 90)}
             </div>

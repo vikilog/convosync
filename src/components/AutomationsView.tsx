@@ -94,25 +94,25 @@ function ChannelChooserDialog({
           <motion.div
             role="dialog"
             aria-labelledby="automation-channel-title"
-            className="w-full max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl"
+            className="w-full max-w-md overflow-hidden rounded-2xl border border-swiss-line bg-white shadow-2xl"
             initial={{ scale: 0.96, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.96, opacity: 0 }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-start justify-between border-b border-slate-200 px-5 py-4">
+            <div className="flex items-start justify-between border-b border-swiss-line px-5 py-4">
               <div>
-                <h2 id="automation-channel-title" className="text-sm font-black text-gray-900">
+                <h2 id="automation-channel-title" className="text-sm font-semibold text-swiss-ink">
                   Create automation
                 </h2>
-                <p className="mt-0.5 text-xs text-gray-500">
+                <p className="mt-0.5 text-xs text-swiss-muted">
                   Which channel should this automation run on?
                 </p>
               </div>
               <button
                 type="button"
                 onClick={onClose}
-                className="cursor-pointer rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-50 hover:text-gray-700"
+                className="cursor-pointer rounded-lg p-2 text-swiss-faint transition-colors hover:bg-gray-50 hover:text-swiss-ink"
                 aria-label="Close"
               >
                 <X className="h-4 w-4" />
@@ -122,14 +122,14 @@ function ChannelChooserDialog({
               <button
                 type="button"
                 onClick={() => onPick('whatsapp')}
-                className="flex w-full cursor-pointer items-center gap-3 rounded-xl bg-white ring-1 ring-slate-200/80 px-4 py-3 text-left transition-colors hover:border-channel-green/40 hover:bg-[#25d366]/08"
+                className="flex w-full cursor-pointer items-center gap-3 bg-white border border-swiss-line px-4 py-3 text-left transition-colors hover:border-channel-green/40 hover:bg-[#25d366]/08"
               >
                 <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#25d366]/15 text-[#128C7E]">
                   <MessageCircle className="h-5 w-5" aria-hidden />
                 </span>
                 <span className="min-w-0">
                   <span className="block text-sm font-bold text-gray-950">WhatsApp</span>
-                  <span className="block text-xs text-gray-500">
+                  <span className="block text-xs text-swiss-muted">
                     Triggers, delays, buttons, and journeys
                   </span>
                 </span>
@@ -138,14 +138,14 @@ function ChannelChooserDialog({
                 <button
                   type="button"
                   onClick={() => onPick('instagram')}
-                  className="flex w-full cursor-pointer items-center gap-3 rounded-xl bg-white ring-1 ring-slate-200/80 px-4 py-3 text-left transition-colors hover:border-[#833AB4]/40 hover:bg-[#833AB4]/08"
+                  className="flex w-full cursor-pointer items-center gap-3 bg-white border border-swiss-line px-4 py-3 text-left transition-colors hover:border-[#833AB4]/40 hover:bg-[#833AB4]/08"
                 >
                   <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#F58529]/20 via-[#DD2A7B]/20 to-[#8134AF]/20 text-[#833AB4]">
                     <Instagram className="h-5 w-5" aria-hidden />
                   </span>
                   <span className="min-w-0">
                     <span className="block text-sm font-bold text-gray-950">Instagram</span>
-                    <span className="block text-xs text-gray-500">DM and comment automations</span>
+                    <span className="block text-xs text-swiss-muted">DM and comment automations</span>
                   </span>
                 </button>
               ) : null}
@@ -266,8 +266,8 @@ export function AutomationsView() {
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="font-display text-lg font-black text-gray-950">Automations</h2>
-          <p className="text-xs text-gray-500">
+          <h2 className="font-display text-lg font-semibold text-gray-950">Automations</h2>
+          <p className="text-xs text-swiss-muted">
             {instagramAutomationAllowed
               ? 'WhatsApp and Instagram workflows in one place.'
               : 'WhatsApp workflows in one place.'}
@@ -309,15 +309,15 @@ export function AutomationsView() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center gap-2 py-10 text-sm text-gray-500">
+        <div className="flex items-center justify-center gap-2 py-10 text-sm text-swiss-muted">
           <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
           Loading automations…
         </div>
       ) : visible.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-black/10 bg-white p-8 text-center">
           <Workflow className="mx-auto mb-3 h-7 w-7 text-primary" aria-hidden />
-          <p className="font-bold text-gray-900">No automations yet</p>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="font-bold text-swiss-ink">No automations yet</p>
+          <p className="mt-1 text-sm text-swiss-muted">
             {instagramAutomationAllowed
               ? 'Create a WhatsApp journey or Instagram automation to get started.'
               : 'Create a WhatsApp journey to get started.'}
@@ -339,7 +339,7 @@ export function AutomationsView() {
             return (
               <article
                 key={`${row.channel}-${row.id}`}
-                className="group flex items-stretch overflow-hidden rounded-xl bg-white ring-1 ring-slate-200/80 transition-shadow hover:shadow-sm"
+                className="group flex items-stretch overflow-hidden bg-white border border-swiss-line transition-shadow "
               >
                 <button
                   type="button"
@@ -380,13 +380,13 @@ export function AutomationsView() {
                         className={`shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide ${
                           published
                             ? 'bg-primary/10 text-primary'
-                            : 'bg-gray-100 text-gray-500'
+                            : 'bg-gray-100 text-swiss-muted'
                         }`}
                       >
                         {row.status}
                       </span>
                     </div>
-                    <p className="mt-0.5 text-[11px] font-medium text-gray-400">
+                    <p className="mt-0.5 text-[11px] font-medium text-swiss-faint">
                       {triggerLabel(row.channel, row.triggerEvent)}
                       <span className="mx-1 text-gray-300">·</span>
                       {row.nodes} steps
@@ -398,7 +398,7 @@ export function AutomationsView() {
                 <button
                   type="button"
                   onClick={() => void handleDelete(row)}
-                  className="shrink-0 cursor-pointer border-l border-black/5 px-2.5 text-gray-400 transition-colors hover:bg-rose-50 hover:text-rose-600"
+                  className="shrink-0 cursor-pointer border-l border-swiss-line px-2.5 text-swiss-faint transition-colors hover:bg-rose-50 hover:text-rose-600"
                   aria-label={`Delete ${row.name}`}
                 >
                   <Trash2 className="h-3.5 w-3.5" aria-hidden />

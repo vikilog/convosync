@@ -18,7 +18,7 @@ function FeatureList({ items }: { items: CoexistenceChannelFeature[] }) {
   return (
     <ul className="mt-4 space-y-2.5">
       {items.map((item) => (
-        <li key={item.id} className="flex items-start gap-2.5 text-sm font-semibold text-gray-700">
+        <li key={item.id} className="flex items-start gap-2.5 text-sm font-semibold text-swiss-ink">
           <Check className="w-4 h-4 shrink-0 mt-0.5 text-[#25D366]" strokeWidth={2.5} />
           <span>{item.label}</span>
         </li>
@@ -34,9 +34,9 @@ export const HowItWorksSection: FC<HowItWorksSectionProps> = ({
   platformFeatures,
 }) => {
   return (
-    <section className="bg-white rounded-2xl border border-slate-200 shadow-[0_1px_3px_rgba(25,26,43,0.05),0_8px_24px_rgba(65,44,221,0.05)] p-6 sm:p-8">
-      <h3 className="text-lg font-black text-gray-950 tracking-tight">{title}</h3>
-      <p className="mt-2 text-sm text-gray-600 font-medium leading-relaxed max-w-2xl">
+    <section className="bg-white rounded-2xl border border-swiss-line shadow-[0_1px_3px_rgba(25,26,43,0.05),0_8px_24px_rgba(65,44,221,0.05)] p-6 sm:p-8">
+      <h3 className="text-lg font-semibold text-gray-950 tracking-tight">{title}</h3>
+      <p className="mt-2 text-sm text-swiss-muted font-medium leading-relaxed max-w-2xl">
         {description}
       </p>
 
@@ -51,14 +51,14 @@ export const HowItWorksSection: FC<HowItWorksSectionProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
           <article className="relative rounded-2xl border-2 border-[#25D366]/25 bg-gradient-to-br from-[#e6f7ec]/40 to-white p-6">
             <div className="flex items-center gap-3 mb-1">
-              <span className="flex items-center justify-center w-11 h-11 rounded-xl bg-[#25D366] text-white shadow-md">
+              <span className="flex items-center justify-center w-11 h-11 rounded-xl bg-[#25D366] text-white ">
                 <Smartphone className="w-6 h-6" strokeWidth={1.75} />
               </span>
               <div>
                 <p className="text-sm font-black uppercase tracking-widest text-[#006d2f]">
                   Mobile App
                 </p>
-                <h4 className="text-base font-black text-gray-950">WhatsApp Business App</h4>
+                <h4 className="text-base font-semibold text-gray-950">WhatsApp Business App</h4>
               </div>
             </div>
             <FeatureList items={mobileFeatures} />
@@ -66,14 +66,14 @@ export const HowItWorksSection: FC<HowItWorksSectionProps> = ({
 
           <article className="relative rounded-2xl border-2 border-primary/20 bg-gradient-to-br from-sky-50/50 to-white p-6">
             <div className="flex items-center gap-3 mb-1">
-              <span className="flex items-center justify-center w-11 h-11 rounded-xl bg-primary text-white shadow-md shadow-primary/20">
+              <span className="flex items-center justify-center w-11 h-11 rounded-xl bg-primary text-white shadow-primary/20">
                 <Cloud className="w-6 h-6" strokeWidth={1.75} />
               </span>
               <div>
                 <p className="text-sm font-black uppercase tracking-widest text-primary">
                   Platform
                 </p>
-                <h4 className="text-base font-black text-gray-950">ConvoSync Dashboard</h4>
+                <h4 className="text-base font-semibold text-gray-950">ConvoSync Dashboard</h4>
               </div>
             </div>
             <FeatureList items={platformFeatures} />
@@ -87,19 +87,19 @@ export const HowItWorksSection: FC<HowItWorksSectionProps> = ({
           </span>
         </div>
 
-        <div className="mt-6 p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
+        <div className="mt-6 p-4 rounded-xl bg-slate-50 border border-swiss-line flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
           <div className="flex items-center gap-2 flex-1 min-w-0">
             <div className="p-2 rounded-lg bg-[#25D366] text-white shrink-0">
               <Smartphone className="w-4 h-4" />
             </div>
-            <span className="text-sm font-bold text-gray-600 truncate">Your phone stays primary for quick replies</span>
+            <span className="text-sm font-bold text-swiss-muted truncate">Your phone stays primary for quick replies</span>
           </div>
           <span className="hidden sm:block text-gray-300 font-black">+</span>
           <div className="flex items-center gap-2 flex-1 min-w-0">
             <div className="p-2 rounded-lg bg-primary text-white shrink-0">
               <Cloud className="w-4 h-4" />
             </div>
-            <span className="text-sm font-bold text-gray-600 truncate">
+            <span className="text-sm font-bold text-swiss-muted truncate">
               Your team gains inbox, AI, and reporting on the web
             </span>
           </div>

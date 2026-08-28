@@ -5,6 +5,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { File as FileIcon, Image as ImageIcon, Loader2, Search, Video, X } from 'lucide-react';
 import { api, formatCatchError } from '../../lib/api';
+import { Input } from '../ui/input';
 
 export type MediaGalleryFilterType = 'image' | 'video' | 'pdf' | 'document';
 
@@ -197,14 +198,14 @@ export function MediaGalleryBrowser({
 
   return (
     <div className="flex flex-col min-h-0">
-      <div className={embedded ? 'pb-3' : 'px-5 py-3 border-b border-black/5 shrink-0'}>
+      <div className={embedded ? 'pb-3' : 'px-5 py-3 border-b border-swiss-line shrink-0'}>
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
-          <input
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-swiss-faint" />
+          <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={`Search ${noun}s…`}
-            className="w-full rounded-xl border border-black/10 bg-surface-muted py-2 pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+            className="h-auto w-full rounded-xl border border-black/10 bg-surface-muted py-2 pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-primary/20"
           />
         </div>
       </div>
@@ -217,7 +218,7 @@ export function MediaGalleryBrowser({
         }
       >
         {loading ? (
-          <div className="flex justify-center py-16 text-gray-400">
+          <div className="flex justify-center py-16 text-swiss-faint">
             <Loader2 className="w-8 h-8 animate-spin" />
           </div>
         ) : error && items.length === 0 ? (
@@ -227,10 +228,10 @@ export function MediaGalleryBrowser({
         ) : filtered.length === 0 ? (
           <div className="text-center py-12">
             <TypeIcon className="w-10 h-10 text-gray-300 mx-auto mb-2" />
-            <p className="text-sm font-bold text-gray-600">
+            <p className="text-sm font-bold text-swiss-muted">
               {items.length === 0 ? `No ${noun}s in Media Gallery` : 'No matches'}
             </p>
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-xs text-swiss-faint mt-1">
               {items.length === 0
                 ? `Upload ${noun}s under Media Gallery, then pick them here.`
                 : 'Try a different search.'}
@@ -260,7 +261,7 @@ export function MediaGalleryBrowser({
                     className={`group text-left rounded-xl border overflow-hidden transition-all disabled:opacity-60 ${
                       selected
                         ? 'border-primary ring-2 ring-primary/30'
-                        : 'border-black/5 bg-surface-muted/40 hover:border-primary/40 hover:ring-2 hover:ring-primary/15'
+                        : 'border-swiss-line bg-surface-muted/40 hover:border-primary/40 hover:ring-2 hover:ring-primary/15'
                     }`}
                   >
                     <div className="aspect-[4/3] bg-slate-100 overflow-hidden relative flex items-center justify-center">
@@ -285,9 +286,9 @@ export function MediaGalleryBrowser({
                       ) : null}
                     </div>
                     <div className="px-2.5 py-2">
-                      <p className="text-xs font-bold text-gray-800 truncate">{item.title}</p>
+                      <p className="text-xs font-bold text-swiss-ink truncate">{item.title}</p>
                       {item.filename ? (
-                        <p className="text-[10px] text-gray-400 truncate mt-0.5">{item.filename}</p>
+                        <p className="text-[10px] text-swiss-faint truncate mt-0.5">{item.filename}</p>
                       ) : null}
                     </div>
                   </button>
@@ -303,10 +304,10 @@ export function MediaGalleryBrowser({
           className={
             embedded
               ? 'flex items-center justify-between gap-3 pt-3'
-              : 'flex items-center justify-between gap-3 border-t border-black/5 px-5 py-3 shrink-0'
+              : 'flex items-center justify-between gap-3 border-t border-swiss-line px-5 py-3 shrink-0'
           }
         >
-          <p className="text-xs font-semibold text-gray-500">
+          <p className="text-xs font-semibold text-swiss-muted">
             {selectedIds.length} selected{maxSelect ? ` / ${maxSelect}` : ''}
           </p>
           <button
@@ -356,27 +357,27 @@ export function MediaGalleryPickerModal({
       <div
         role="dialog"
         aria-labelledby="media-gallery-picker-title"
-        className="w-full max-w-2xl max-h-[min(80vh,640px)] flex flex-col rounded-2xl border border-black/5 bg-surface shadow-xl"
+        className="w-full max-w-2xl max-h-[min(80vh,640px)] flex flex-col rounded-2xl border border-swiss-line bg-surface shadow-xl"
       >
-        <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-black/5 shrink-0">
+        <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-swiss-line shrink-0">
           <div className="min-w-0">
             <h2
               id="media-gallery-picker-title"
-              className="text-sm font-bold text-gray-900 flex items-center gap-2"
+              className="text-sm font-bold text-swiss-ink flex items-center gap-2"
             >
               <TypeIcon className="w-4 h-4 text-primary" />
               {multiple
                 ? `Pick ${noun}s from Media Gallery${maxSelect ? ` (up to ${maxSelect})` : ''}`
                 : `Pick a ${noun} from Media Gallery`}
             </h2>
-            <p className="text-xs text-gray-400 mt-0.5">
+            <p className="text-xs text-swiss-faint mt-0.5">
               Uses a secure link (S3 bucket is private)
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-surface-muted text-gray-500 disabled:opacity-50"
+            className="p-2 rounded-lg hover:bg-surface-muted text-swiss-muted disabled:opacity-50"
             aria-label="Close"
           >
             <X className="w-4 h-4" />

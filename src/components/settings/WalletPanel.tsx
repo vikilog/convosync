@@ -32,9 +32,10 @@ import { RechargeConfirmDialog } from './RechargeConfirmDialog';
 import { WalletUsageCalculator } from './WalletUsageCalculator';
 import { dispatchWalletBalance } from '../../lib/walletEvents';
 import { WALLET_PRICING_ROWS, type WalletPricingKey } from '../../lib/walletPricing';
+import { Input } from '../ui/input';
 
 const CARD_CLASS =
-  'rounded-xl bg-white ring-1 ring-slate-200/80 p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]';
+  'bg-white border border-swiss-line p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]';
 
 const PRICING_ICONS: Record<
   WalletPricingKey,
@@ -364,13 +365,13 @@ export function WalletPanel() {
                 </p>
                 {editingAlert ? (
                   <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
-                    <input
+                    <Input
                       type="number"
                       min={10}
                       step={10}
                       value={alertDraft}
                       onChange={(e) => setAlertDraft(e.target.value)}
-                      className="w-16 rounded border border-[#E5E7EB] px-1.5 py-0.5 text-xs"
+                      className="h-auto w-16 rounded border border-[#E5E7EB] px-1.5 py-0.5 text-xs"
                       aria-label="Alert threshold in CC"
                     />
                     <span className="text-xs text-slate-600">CC</span>
@@ -439,7 +440,7 @@ export function WalletPanel() {
                     className={`cursor-pointer rounded-lg border px-2 py-2 text-center transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
                       selected
                         ? 'border-transparent bg-primary text-white hover:bg-primary-hover'
-                        : 'border-black/5 bg-white text-slate-800 hover:border-primary/30'
+                        : 'border-swiss-line bg-white text-slate-800 hover:border-primary/30'
                     }`}
                   >
                     <span className="block text-xs font-bold sm:text-sm">{formatCc(cc)}</span>
@@ -454,7 +455,7 @@ export function WalletPanel() {
             </div>
 
             <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-              <input
+              <Input
                 type="number"
                 min={100}
                 step={100}
@@ -464,7 +465,7 @@ export function WalletPanel() {
                   setSelectedPreset(null);
                 }}
                 placeholder="Enter amount (min 100 CC)"
-                className="min-w-0 flex-1 rounded-lg border border-[#E5E7EB] px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-100"
+                className="h-auto min-w-0 flex-1 rounded-lg border border-[#E5E7EB] px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-100"
               />
               <button
                 type="button"
@@ -667,7 +668,7 @@ export function WalletPanel() {
       {showAllModal ? (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
           <div
-            className="flex max-h-[85vh] w-full max-w-lg flex-col rounded-xl bg-white ring-1 ring-slate-200/80 shadow-xl"
+            className="flex max-h-[85vh] w-full max-w-lg flex-col bg-white border border-swiss-line shadow-xl"
             role="dialog"
             aria-modal="true"
             aria-labelledby="wallet-all-tx-title"

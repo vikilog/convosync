@@ -134,7 +134,7 @@ export function ThemeDateInput({
         className={`inline-flex w-[148px] items-center gap-2 rounded-lg border bg-white px-2.5 py-2 text-left text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20 ${
           open
             ? 'border-primary/40 ring-2 ring-primary/15'
-            : 'border-black/5 hover:border-primary/25'
+            : 'border-swiss-line hover:border-primary/25'
         }`}
       >
         <Calendar className={`h-4 w-4 shrink-0 ${open || value ? 'text-primary' : 'text-slate-400'}`} />
@@ -195,7 +195,7 @@ export function ThemeDateInput({
                   onClick={() => pick(d)}
                   className={`h-8 rounded-lg text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-30 ${
                     selectedDay
-                      ? 'bg-primary text-white shadow-sm'
+                      ? 'bg-primary text-white '
                       : isToday
                         ? 'bg-primary/10 text-primary ring-1 ring-inset ring-primary/30'
                         : 'text-slate-700 hover:bg-primary/10 hover:text-primary'

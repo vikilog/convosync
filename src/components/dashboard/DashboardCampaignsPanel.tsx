@@ -13,18 +13,17 @@ interface DashboardCampaignsPanelProps {
 function statusClass(status: QuickCampaignStatus): string {
   switch (status) {
     case 'Completed':
-      return 'text-primary bg-[#e8f0ec]';
+      return 'text-swiss-ink';
     case 'Running':
     case 'Active':
-      return 'text-sky-700 bg-sky-50';
-    case 'Paused':
-      return 'text-amber-700 bg-amber-50';
-    case 'Failed':
-      return 'text-red-700 bg-red-50';
-    case 'Draft':
-      return 'text-slate-600 bg-slate-100';
     case 'Scheduled':
-      return 'text-violet-700 bg-violet-50';
+      return 'text-swiss-accent';
+    case 'Paused':
+      return 'text-swiss-muted';
+    case 'Failed':
+      return 'text-red-600';
+    case 'Draft':
+      return 'text-swiss-faint';
   }
 }
 
@@ -68,34 +67,35 @@ export const DashboardCampaignsPanel: React.FC<DashboardCampaignsPanelProps> = (
   const isEmpty = upcomingItems.length === 0 && recentItems.length === 0;
 
   return (
-    <div className="flex h-full flex-col rounded-xl bg-white p-5 ring-1 ring-slate-200/80">
-      <div className="mb-1 flex items-center justify-between">
-        <h2 className="font-display text-lg font-medium text-neutral-900">Campaigns</h2>
+    <div className="flex h-full flex-col font-swiss">
+      <div className="mb-4 flex items-baseline justify-between">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-swiss-muted">
+          Campaigns
+        </p>
         <button
           type="button"
           onClick={onViewAll}
-          className="inline-flex cursor-pointer items-center gap-1 text-sm font-medium text-primary hover:text-primary-hover active:scale-[0.97]"
+          className="inline-flex cursor-pointer items-center gap-1 text-[11px] font-medium text-swiss-accent"
         >
           View all
-          <ArrowUpRight className="h-3.5 w-3.5" />
+          <ArrowUpRight className="h-3 w-3" />
         </button>
       </div>
-      <p className="mb-3 text-sm text-neutral-500">Upcoming and recently sent</p>
 
       {isEmpty ? (
         <div className="flex flex-1 flex-col items-center justify-center py-8 text-center">
-          <p className="text-sm font-medium text-neutral-800">No campaigns yet</p>
+          <p className="text-sm font-medium text-swiss-ink">No campaigns yet</p>
           <button
             type="button"
             onClick={onNewCampaign}
-            className="mt-3 inline-flex cursor-pointer items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-hover active:scale-[0.97]"
+            className="mt-3 inline-flex cursor-pointer items-center gap-1.5 text-sm font-medium text-swiss-accent"
           >
             <Plus className="h-4 w-4" />
             Start your first campaign
           </button>
         </div>
       ) : (
-        <div className="divide-y divide-black/5">
+        <div className="divide-y divide-swiss-line">
           {[
             ...upcomingItems.map((c) => ({ campaign: c, meta: upcomingMeta(c) })),
             ...recentItems.map((c) => ({ campaign: c, meta: recentMeta(c) })),
@@ -104,17 +104,15 @@ export const DashboardCampaignsPanel: React.FC<DashboardCampaignsPanelProps> = (
               key={campaign.id}
               type="button"
               onClick={() => onOpenCampaign?.(campaign.id)}
-              className="flex w-full cursor-pointer items-center gap-3 py-3 text-left transition-colors first:pt-0 last:pb-0 hover:bg-black/[0.02]"
+              className="flex w-full cursor-pointer items-center gap-3 py-3 text-left transition-colors first:pt-0 last:pb-0"
             >
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-muted">
-                <ChannelIcon channel={campaign.channel} />
-              </div>
+              <ChannelIcon channel={campaign.channel} />
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-neutral-900">{campaign.name}</p>
-                <p className="text-xs text-neutral-500">{meta}</p>
+                <p className="truncate text-[13px] font-medium text-swiss-ink">{campaign.name}</p>
+                <p className="text-[11px] text-swiss-muted">{meta}</p>
               </div>
               <span
-                className={`shrink-0 rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase ${statusClass(campaign.status)}`}
+                className={`shrink-0 text-[10px] font-semibold uppercase tracking-wide ${statusClass(campaign.status)}`}
               >
                 {campaign.status}
               </span>

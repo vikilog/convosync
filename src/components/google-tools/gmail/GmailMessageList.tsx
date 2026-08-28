@@ -62,7 +62,7 @@ function MessageRow({
           <div className="flex items-center gap-2 min-w-0">
             <span
               className={`text-sm truncate ${
-                msg.isUnread ? 'font-bold text-gray-950' : 'font-semibold text-gray-800'
+                msg.isUnread ? 'font-bold text-gray-950' : 'font-semibold text-swiss-ink'
               }`}
             >
               {folder === 'sent' || folder === 'drafts' ? `To: ${name}` : name}
@@ -70,20 +70,20 @@ function MessageRow({
             {msg.isStarred && (
               <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500 shrink-0" />
             )}
-            <span className="text-meta text-gray-400 ml-auto shrink-0 tabular-nums">
+            <span className="text-meta text-swiss-faint ml-auto shrink-0 tabular-nums">
               {formatListDate(msg.internalDate, msg.date)}
             </span>
           </div>
 
           <p
             className={`text-sm truncate leading-snug ${
-              msg.isUnread ? 'font-semibold text-gray-900' : 'text-gray-700'
+              msg.isUnread ? 'font-semibold text-swiss-ink' : 'text-swiss-ink'
             }`}
           >
             {msg.subject || '(No subject)'}
           </p>
 
-          <p className="text-xs text-gray-400 truncate leading-snug">{msg.snippet}</p>
+          <p className="text-xs text-swiss-faint truncate leading-snug">{msg.snippet}</p>
 
           {(labels.length > 0 || msg.isUnread) && (
             <div className="flex items-center gap-1.5 mt-1 flex-wrap">
@@ -130,22 +130,22 @@ export function GmailMessageList({
   });
 
   return (
-    <section className="w-full lg:w-[420px] shrink-0 flex flex-col min-h-0 min-w-0 border-r border-slate-200 bg-white">
-      <div className="shrink-0 px-4 py-3 border-b border-slate-200 bg-slate-50/80">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-gray-500">{folderLabel}</h2>
-        <p className="text-meta text-gray-400 mt-0.5">{messages.length} shown</p>
+    <section className="w-full lg:w-[420px] shrink-0 flex flex-col min-h-0 min-w-0 border-r border-swiss-line bg-white">
+      <div className="shrink-0 px-4 py-3 border-b border-swiss-line bg-slate-50/80">
+        <h2 className="text-sm font-bold uppercase tracking-wider text-swiss-muted">{folderLabel}</h2>
+        <p className="text-meta text-swiss-faint mt-0.5">{messages.length} shown</p>
       </div>
 
       <div ref={parentRef} className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
         {loading ? (
-          <div className="flex items-center justify-center py-20 text-sm text-gray-400">
+          <div className="flex items-center justify-center py-20 text-sm text-swiss-faint">
             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
             Loading messages…
           </div>
         ) : messages.length === 0 ? (
           <div className="py-20 px-6 text-center">
-            <p className="text-sm font-semibold text-gray-600">No messages</p>
-            <p className="text-xs text-gray-400 mt-1">This folder is empty.</p>
+            <p className="text-sm font-semibold text-swiss-muted">No messages</p>
+            <p className="text-xs text-swiss-faint mt-1">This folder is empty.</p>
           </div>
         ) : (
           <div
@@ -178,12 +178,12 @@ export function GmailMessageList({
       </div>
 
       {hasMore && !loading && (
-        <div className="shrink-0 p-3 border-t border-slate-200 bg-slate-50">
+        <div className="shrink-0 p-3 border-t border-swiss-line bg-slate-50">
           <button
             type="button"
             disabled={loadingMore}
             onClick={onLoadMore}
-            className="w-full py-2.5 rounded-xl text-sm font-bold text-primary bg-white border border-slate-200 hover:bg-sky-50 hover:border-primary/20 disabled:opacity-50 transition-all"
+            className="w-full py-2.5 rounded-xl text-sm font-bold text-primary bg-white border border-swiss-line hover:bg-sky-50 hover:border-primary/20 disabled:opacity-50 transition-all"
           >
             {loadingMore ? 'Loading…' : 'Load more'}
           </button>

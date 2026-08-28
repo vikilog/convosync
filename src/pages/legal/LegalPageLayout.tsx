@@ -21,14 +21,14 @@ type LegalPageLayoutProps = {
 function renderBlock(block: LegalBlock, index: number) {
   if (block.type === 'subheading') {
     return (
-      <h3 key={index} className="text-base font-semibold text-gray-900 mt-6 mb-2">
+      <h3 key={index} className="text-base font-semibold text-swiss-ink mt-6 mb-2">
         {block.text}
       </h3>
     );
   }
   if (block.type === 'list') {
     return (
-      <ul key={index} className="list-disc pl-6 space-y-2 my-4 text-gray-700 leading-relaxed">
+      <ul key={index} className="list-disc pl-6 space-y-2 my-4 text-swiss-ink leading-relaxed">
         {block.items.map((item) => (
           <li key={item.slice(0, 48)}>{item}</li>
         ))}
@@ -36,7 +36,7 @@ function renderBlock(block: LegalBlock, index: number) {
     );
   }
   return (
-    <p key={index} className="text-gray-700 leading-relaxed my-4">
+    <p key={index} className="text-swiss-ink leading-relaxed my-4">
       {block.text}
     </p>
   );
@@ -67,7 +67,7 @@ export function LegalPageLayout({ document }: LegalPageLayoutProps) {
   }, [document.sections]);
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] text-gray-900">
+    <div className="min-h-screen bg-[#FAFAFA] text-swiss-ink">
       <header className="sticky top-0 z-40 border-b border-gray-200/80 bg-white/95 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
           <Link to="/" className="flex items-center gap-3 min-w-0 group">
@@ -80,7 +80,7 @@ export function LegalPageLayout({ document }: LegalPageLayoutProps) {
           </Link>
           <Link
             to="/"
-            className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-brand-indigo transition-colors shrink-0"
+            className="inline-flex items-center gap-2 text-sm font-medium text-swiss-muted hover:text-brand-indigo transition-colors shrink-0"
           >
             <ArrowLeft className="w-4 h-4" />
             <span className="hidden sm:inline">Back to home</span>
@@ -100,10 +100,10 @@ export function LegalPageLayout({ document }: LegalPageLayoutProps) {
               {tocOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
             </button>
             <nav
-              className={`${tocOpen ? 'block' : 'hidden'} lg:block mt-3 lg:mt-0 rounded-xl border border-gray-200 bg-white p-4 shadow-sm`}
+              className={`${tocOpen ? 'block' : 'hidden'} lg:block mt-3 lg:mt-0 rounded-xl border border-gray-200 bg-white p-4 `}
               aria-label="Table of contents"
             >
-              <p className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-3 font-mono">
+              <p className="text-xs font-bold uppercase tracking-widest text-swiss-muted mb-3 font-mono">
                 Contents
               </p>
               <ul className="space-y-1 max-h-[60vh] overflow-y-auto text-sm">
@@ -115,7 +115,7 @@ export function LegalPageLayout({ document }: LegalPageLayoutProps) {
                       className={`block rounded-lg px-2 py-1.5 transition-colors ${
                         activeSection === section.id
                           ? 'bg-brand-indigo/10 text-brand-indigo font-medium'
-                          : 'text-gray-600 hover:text-brand-indigo hover:bg-gray-50'
+                          : 'text-swiss-muted hover:text-brand-indigo hover:bg-gray-50'
                       }`}
                     >
                       {section.title}
@@ -127,7 +127,7 @@ export function LegalPageLayout({ document }: LegalPageLayoutProps) {
           </aside>
 
           <main className="min-w-0">
-            <article className="rounded-2xl border border-gray-200 bg-white shadow-sm px-6 sm:px-10 py-10 sm:py-12">
+            <article className="rounded-2xl border border-gray-200 bg-white px-6 sm:px-10 py-10 sm:py-12">
               <header className="border-b border-gray-100 pb-8 mb-2">
                 <p className="text-xs font-bold uppercase tracking-widest text-brand-indigo font-mono mb-3">
                   Legal
@@ -135,14 +135,14 @@ export function LegalPageLayout({ document }: LegalPageLayoutProps) {
                 <h1 className="text-3xl sm:text-4xl font-bold font-display tracking-tight text-gray-950">
                   {document.title}
                 </h1>
-                <p className="mt-4 text-gray-600 leading-relaxed max-w-3xl">{document.description}</p>
-                <dl className="mt-6 flex flex-wrap gap-x-8 gap-y-2 text-sm text-gray-500">
+                <p className="mt-4 text-swiss-muted leading-relaxed max-w-3xl">{document.description}</p>
+                <dl className="mt-6 flex flex-wrap gap-x-8 gap-y-2 text-sm text-swiss-muted">
                   <div>
-                    <dt className="inline font-medium text-gray-700">Effective date: </dt>
+                    <dt className="inline font-medium text-swiss-ink">Effective date: </dt>
                     <dd className="inline">{document.effectiveDate}</dd>
                   </div>
                   <div>
-                    <dt className="inline font-medium text-gray-700">Last updated: </dt>
+                    <dt className="inline font-medium text-swiss-ink">Last updated: </dt>
                     <dd className="inline">{document.lastUpdated}</dd>
                   </div>
                 </dl>
@@ -156,7 +156,7 @@ export function LegalPageLayout({ document }: LegalPageLayoutProps) {
               ))}
             </article>
 
-            <footer className="mt-10 text-center text-sm text-gray-500 space-y-2 pb-8">
+            <footer className="mt-10 text-center text-sm text-swiss-muted space-y-2 pb-8">
               <p>
                 © {new Date().getFullYear()} {PRODUCT_NAME} · {LEGAL_ENTITY}
               </p>

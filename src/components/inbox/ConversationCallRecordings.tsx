@@ -117,15 +117,15 @@ function CallDetailDialog({
         role="dialog"
         aria-modal="true"
         aria-labelledby="call-detail-title"
-        className="flex max-h-[92vh] w-full max-w-2xl flex-col overflow-hidden rounded-t-2xl border border-black/5 bg-surface shadow-2xl sm:rounded-2xl"
+        className="flex max-h-[92vh] w-full max-w-2xl flex-col overflow-hidden rounded-t-2xl border border-swiss-line bg-surface shadow-2xl sm:rounded-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-black/5 px-5 py-4">
+        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-swiss-line px-5 py-4">
           <div className="min-w-0">
-            <h2 id="call-detail-title" className="text-base font-bold text-gray-900">
+            <h2 id="call-detail-title" className="text-base font-bold text-swiss-ink">
               Call recording
             </h2>
-            <p className="mt-0.5 text-xs font-semibold text-gray-500">
+            <p className="mt-0.5 text-xs font-semibold text-swiss-muted">
               {row.label}
               {row.durationLabel ? ` · ${row.durationLabel}` : ''}
               {langLabel ? ` · ${langLabel}` : ''}
@@ -134,7 +134,7 @@ function CallDetailDialog({
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-400 hover:bg-surface-muted hover:text-gray-700 cursor-pointer"
+            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-swiss-faint hover:bg-surface-muted hover:text-swiss-ink cursor-pointer"
             aria-label="Close"
           >
             <X className="h-4 w-4" />
@@ -143,8 +143,8 @@ function CallDetailDialog({
 
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-5 py-4">
           {row.playUrl ? (
-            <div className="rounded-xl border border-black/5 bg-surface-muted px-3 py-3">
-              <p className="mb-2 text-[11px] font-bold uppercase tracking-wide text-gray-400">
+            <div className="rounded-xl border border-swiss-line bg-surface-muted px-3 py-3">
+              <p className="mb-2 text-[11px] font-bold uppercase tracking-wide text-swiss-faint">
                 Recording
               </p>
               <audio controls preload="metadata" src={row.playUrl} className="w-full" />
@@ -180,7 +180,7 @@ function CallDetailDialog({
 
           <section>
             <div className="mb-2 flex items-center justify-between gap-2">
-              <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-gray-400">
+              <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-swiss-faint">
                 <FileText className="h-3.5 w-3.5" />
                 Full transcript
                 {row.transcriptStatus && row.transcriptStatus !== 'ready'
@@ -210,7 +210,7 @@ function CallDetailDialog({
                 </button>
               )}
             </div>
-            <div className="max-h-[40vh] overflow-y-auto rounded-xl border border-black/5 bg-surface px-4 py-3 text-sm leading-relaxed text-slate-800 whitespace-pre-wrap">
+            <div className="max-h-[40vh] overflow-y-auto rounded-xl border border-swiss-line bg-surface px-4 py-3 text-sm leading-relaxed text-slate-800 whitespace-pre-wrap">
               {row.transcriptStatus === 'failed' ? (
                 <span className="text-red-600">{row.transcriptError || 'Failed'}</span>
               ) : row.transcriptText ? (
@@ -477,9 +477,9 @@ export function ConversationCallRecordings({ conversationId }: { conversationId:
   };
 
   return (
-    <article className="rounded-2xl border border-black/5 bg-surface p-3 shadow-sm">
+    <article className="rounded-2xl border border-swiss-line bg-surface p-3 ">
       <div className="flex items-center justify-between gap-2 px-1">
-        <h4 className="text-xs font-bold text-gray-500 flex items-center gap-1.5">
+        <h4 className="text-xs font-bold text-swiss-muted flex items-center gap-1.5">
           <Phone className="h-3.5 w-3.5 text-emerald-600" />
           Call recordings
         </h4>
@@ -489,7 +489,7 @@ export function ConversationCallRecordings({ conversationId }: { conversationId:
             onChange={(e) => setSttLanguage(e.target.value)}
             title="STT language"
             aria-label="Transcript language"
-            className="h-7 max-w-[7.5rem] rounded-lg border border-black/5 bg-surface px-1.5 text-[10px] font-semibold text-slate-600"
+            className="h-7 max-w-[7.5rem] rounded-lg border border-swiss-line bg-surface px-1.5 text-[10px] font-semibold text-slate-600"
           >
             {STT_LANGUAGES.map((l) => (
               <option key={l.value} value={l.value}>

@@ -40,7 +40,7 @@ export function FunnelInsightsBar({
   const ratePct = Math.round(insights.conversionRate * 100);
 
   return (
-    <div className="shrink-0 rounded-2xl bg-white ring-1 ring-slate-200/80 px-4 py-3 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+    <div className="shrink-0 bg-white border border-swiss-line px-4 py-3 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
       <div className="flex flex-wrap items-end gap-4">
         <Stat label="Entered funnel" value={String(insights.entered)} />
         <Stat label="Converted" value={String(insights.converted)} />
@@ -77,10 +77,10 @@ export function FunnelInsightsBar({
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+      <p className="text-[10px] font-semibold uppercase tracking-wide text-swiss-faint">
         {label}
       </p>
-      <p className="text-lg font-black tabular-nums text-gray-900">{value}</p>
+      <p className="text-lg font-black tabular-nums text-swiss-ink">{value}</p>
     </div>
   );
 }

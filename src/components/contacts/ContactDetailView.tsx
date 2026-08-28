@@ -119,7 +119,7 @@ function campaignStatusTone(status?: string): string {
   }
   if (s === 'failed' || s === 'bounced') return 'bg-red-50 text-red-700 border-red-100';
   if (s === 'queued') return 'bg-amber-50 text-amber-800 border-amber-100';
-  return 'bg-slate-100 text-slate-600 border-slate-200';
+  return 'bg-slate-100 text-slate-600 border-swiss-line';
 }
 
 export function ContactDetailView({ contactId }: { contactId: string }) {
@@ -204,13 +204,13 @@ export function ContactDetailView({ contactId }: { contactId: string }) {
       <div className="h-full min-h-[calc(100vh-64px)] overflow-y-auto bg-white">
         <div className="mx-auto max-w-5xl px-4 py-6 md:px-8 space-y-6 animate-pulse">
           <div className="h-4 w-24 rounded bg-black/5" />
-          <div className="h-36 rounded-2xl bg-white ring-1 ring-slate-200/80" />
+          <div className="h-36 bg-white border border-swiss-line" />
           <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="h-16 rounded-xl bg-white ring-1 ring-slate-200/80" />
+              <div key={i} className="h-16 bg-white border border-swiss-line" />
             ))}
           </div>
-          <div className="h-48 rounded-2xl bg-white ring-1 ring-slate-200/80" />
+          <div className="h-48 bg-white border border-swiss-line" />
         </div>
       </div>
     );
@@ -296,7 +296,7 @@ export function ContactDetailView({ contactId }: { contactId: string }) {
         {/* Identity */}
         <motion.header
           {...fade}
-          className="rounded-2xl bg-white ring-1 ring-slate-200/80 px-5 py-5 md:px-7 md:py-6"
+          className="bg-white border border-swiss-line px-5 py-5 md:px-7 md:py-6"
         >
           <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
             <div className="flex min-w-0 items-start gap-4">
@@ -368,7 +368,7 @@ export function ContactDetailView({ contactId }: { contactId: string }) {
           </div>
 
           {/* Metric strip — one composition, not a dashboard of cards */}
-          <div className="mt-6 flex flex-wrap gap-x-6 gap-y-3 border-t border-black/5 pt-4">
+          <div className="mt-6 flex flex-wrap gap-x-6 gap-y-3 border-t border-swiss-line pt-4">
             {metrics.map((m) => (
               <div key={m.label} className="min-w-[5.5rem]">
                 <div className="flex items-center gap-1.5 text-slate-400">
@@ -401,7 +401,7 @@ export function ContactDetailView({ contactId }: { contactId: string }) {
               return (
                 <li
                   key={row.contactId}
-                  className={`rounded-2xl bg-white ring-1 ring-slate-200/80 border-l-4 ${tone.accent} p-4 transition-colors duration-200`}
+                  className={`bg-white border border-swiss-line border-l-4 ${tone.accent} p-4 transition-colors duration-200`}
                 >
                   <div className="flex items-start gap-3">
                     <div
@@ -485,7 +485,7 @@ export function ContactDetailView({ contactId }: { contactId: string }) {
           <div className="min-w-0 space-y-6">
             <motion.section
               {...fade}
-              className="min-w-0 overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200/80 p-5"
+              className="min-w-0 overflow-hidden bg-white border border-swiss-line p-5"
               aria-labelledby="campaigns-heading"
             >
               <h2 id="campaigns-heading" className="text-sm font-bold text-slate-800">
@@ -494,7 +494,7 @@ export function ContactDetailView({ contactId }: { contactId: string }) {
               {campaigns.length === 0 ? (
                 <p className="mt-3 text-sm text-slate-500">Not included in any campaigns yet.</p>
               ) : (
-                <ul className="mt-3 divide-y divide-black/5">
+                <ul className="mt-3 divide-y divide-swiss-line">
                   {campaigns.map((c) => (
                     <li key={c.id}>
                       <button
@@ -527,7 +527,7 @@ export function ContactDetailView({ contactId }: { contactId: string }) {
 
             <motion.section
               {...fade}
-              className="min-w-0 overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200/80 p-5"
+              className="min-w-0 overflow-hidden bg-white border border-swiss-line p-5"
               aria-labelledby="ig-comments-heading"
             >
               <h2 id="ig-comments-heading" className="text-sm font-bold text-slate-800">
@@ -546,7 +546,7 @@ export function ContactDetailView({ contactId }: { contactId: string }) {
                         onClick={() =>
                           navigate(`/social-listening/media/${encodeURIComponent(c.postId)}`)
                         }
-                        className="flex w-full min-w-0 cursor-pointer flex-col overflow-hidden rounded-xl border border-black/5 bg-white text-left transition-colors duration-200 hover:border-black/10 hover:bg-surface-muted/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                        className="flex w-full min-w-0 cursor-pointer flex-col overflow-hidden rounded-xl border border-swiss-line bg-white text-left transition-colors duration-200 hover:border-black/10 hover:bg-surface-muted/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                       >
                         <div className="flex min-w-0 items-start gap-3 p-3">
                           {c.postThumbnailUrl ? (
@@ -586,7 +586,7 @@ export function ContactDetailView({ contactId }: { contactId: string }) {
                           </div>
                         </div>
                         {c.postCaption ? (
-                          <div className="min-w-0 border-t border-black/5 bg-surface-muted/50 px-3 py-2">
+                          <div className="min-w-0 border-t border-swiss-line bg-surface-muted/50 px-3 py-2">
                             <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
                               Post
                             </p>

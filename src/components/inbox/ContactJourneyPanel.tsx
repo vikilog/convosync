@@ -104,7 +104,7 @@ function statusBadge(status: string) {
     default:
       return {
         label: status,
-        className: 'bg-gray-50 text-gray-600 border-gray-200',
+        className: 'bg-gray-50 text-swiss-muted border-gray-200',
         pulse: false,
       };
   }
@@ -172,7 +172,7 @@ function JourneySteps({ progress }: { progress: ContactJourneyProgress }) {
 
   return (
     <div>
-      <p className="mb-2 text-xs font-semibold text-gray-500">
+      <p className="mb-2 text-xs font-semibold text-swiss-muted">
         {doneCount} of {progress.steps.length} steps completed
       </p>
       <div className="relative max-h-40 space-y-2 overflow-y-auto pl-5 pr-1 before:absolute before:bottom-2 before:left-[6px] before:top-2 before:w-px before:bg-slate-200">
@@ -186,8 +186,8 @@ function JourneySteps({ progress }: { progress: ContactJourneyProgress }) {
                   : step.state === 'failed'
                     ? 'text-[#ba1a1a]'
                     : step.state === 'done'
-                      ? 'text-gray-900'
-                      : 'text-gray-400'
+                      ? 'text-swiss-ink'
+                      : 'text-swiss-faint'
               }`}
             >
               {step.label}
@@ -199,7 +199,7 @@ function JourneySteps({ progress }: { progress: ContactJourneyProgress }) {
                     ? 'text-[#ba1a1a]/80'
                     : step.state === 'current'
                       ? 'text-sky-600/70'
-                      : 'text-gray-400'
+                      : 'text-swiss-faint'
                 }`}
               >
                 {step.detail}
@@ -246,7 +246,7 @@ export const ContactJourneyPanel: React.FC<Props> = ({
 
   if (initialLoading && !progress) {
     return (
-      <div className="animate-pulse rounded-2xl border border-black/5 bg-surface p-4 shadow-sm">
+      <div className="animate-pulse rounded-2xl border border-swiss-line bg-surface p-4 ">
         <div className="mb-2 h-3 w-28 rounded bg-gray-200" />
         <div className="h-4 w-full rounded bg-gray-200" />
       </div>
@@ -257,8 +257,8 @@ export const ContactJourneyPanel: React.FC<Props> = ({
 
   return (
     <article
-      className={`overflow-hidden rounded-2xl border bg-surface shadow-sm transition-colors ${
-        isActive ? 'border-sky-200' : 'border-black/5'
+        className={`overflow-hidden rounded-2xl border bg-surface transition-colors ${
+        isActive ? 'border-sky-200' : 'border-swiss-line'
       }`}
     >
       <div className="flex items-start gap-1 p-3">
@@ -270,7 +270,7 @@ export const ContactJourneyPanel: React.FC<Props> = ({
         >
           <span
             className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${
-              isActive ? 'bg-sky-50 text-sky-600' : 'bg-sky-50 text-gray-400'
+              isActive ? 'bg-sky-50 text-sky-600' : 'bg-sky-50 text-swiss-faint'
             }`}
           >
             <Route className="h-4 w-4" />
@@ -278,7 +278,7 @@ export const ContactJourneyPanel: React.FC<Props> = ({
 
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <p className="text-xs font-bold text-gray-500">{automationLabel}</p>
+              <p className="text-xs font-bold text-swiss-muted">{automationLabel}</p>
               {progress && badge && (
                 <StatusBadgePill status={progress.status} badge={badge} />
               )}
@@ -287,13 +287,13 @@ export const ContactJourneyPanel: React.FC<Props> = ({
             {progress ? (
               <>
                 <p
-                  className="mt-1 break-words text-sm font-bold leading-snug text-gray-900"
+                  className="mt-1 break-words text-sm font-bold leading-snug text-swiss-ink"
                   title={progress.journeyName}
                 >
                   {progress.journeyName}
                 </p>
                 {!expanded && progress.status === 'completed' && (
-                  <p className="mt-1 text-xs font-medium text-gray-500">
+                  <p className="mt-1 text-xs font-medium text-swiss-muted">
                     {progress.steps.filter((s) => s.state === 'done').length} steps completed
                   </p>
                 )}
@@ -315,18 +315,18 @@ export const ContactJourneyPanel: React.FC<Props> = ({
               </>
             ) : assignedJourneyId ? (
               <p
-                className="mt-1 break-words text-sm font-bold leading-snug text-gray-900"
+                className="mt-1 break-words text-sm font-bold leading-snug text-swiss-ink"
                 title={assignedName}
               >
                 {assignedName}
               </p>
             ) : (
-              <p className="mt-1 text-sm font-medium text-gray-500">No active journey</p>
+              <p className="mt-1 text-sm font-medium text-swiss-muted">No active journey</p>
             )}
           </div>
 
           <ChevronDown
-            className={`mt-1 h-4 w-4 shrink-0 text-gray-400 transition-transform duration-200 ${
+            className={`mt-1 h-4 w-4 shrink-0 text-swiss-faint transition-transform duration-200 ${
               expanded ? 'rotate-180' : ''
             }`}
           />
@@ -341,7 +341,7 @@ export const ContactJourneyPanel: React.FC<Props> = ({
               if (!restartJourneyId || !onAssignJourney) return;
               onAssignJourney(restartJourneyId);
             }}
-            className="mt-0.5 flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-xl text-gray-500 transition-colors hover:bg-emerald-50 hover:text-channel-green"
+            className="mt-0.5 flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-xl text-swiss-muted transition-colors hover:bg-emerald-50 hover:text-channel-green"
           >
             <RotateCcw className="h-4 w-4" />
           </button>
@@ -349,11 +349,11 @@ export const ContactJourneyPanel: React.FC<Props> = ({
       </div>
 
       {expanded && (
-        <div className="border-t border-black/5 px-3 pb-3">
+        <div className="border-t border-swiss-line px-3 pb-3">
           {!progress ? (
             <div className="py-4 text-center">
               <Route className="mx-auto mb-2 h-5 w-5 text-gray-300" />
-              <p className="text-xs leading-relaxed text-gray-500">
+              <p className="text-xs leading-relaxed text-swiss-muted">
                 When a journey runs for this contact, live steps will show here.
               </p>
             </div>

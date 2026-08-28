@@ -58,7 +58,7 @@ export const IntegrationConnectError: React.FC<IntegrationConnectErrorProps> = (
         <AlertTriangle className="w-5 h-5" aria-hidden />
       </div>
       <div className="min-w-0">
-        <h3 className="text-base font-black text-red-950">{title}</h3>
+        <h3 className="text-base font-semibold text-red-950">{title}</h3>
         <p className="text-sm text-red-800 mt-1 leading-relaxed">{message}</p>
         {detail ? (
           <p className="text-xs text-red-700/90 mt-2 font-mono bg-white/70 border border-red-100 rounded-lg px-3 py-2 break-words">

@@ -27,7 +27,7 @@ export function FlowCanvasToolbar({ onAutoAlign, position = 'center-right' }: Pr
         <button
           type="button"
           onClick={onAutoAlign}
-          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border-[0.5px] border-border-subtle bg-white text-slate-600 shadow-sm transition-colors duration-150 hover:bg-surface-muted"
+          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border-[0.5px] border-border-subtle bg-white text-slate-600 transition-colors duration-150 hover:bg-surface-muted"
           aria-label="Auto-align steps"
           title="Auto-align steps"
         >
@@ -37,7 +37,7 @@ export function FlowCanvasToolbar({ onAutoAlign, position = 'center-right' }: Pr
       <button
         type="button"
         onClick={() => zoomIn({ duration: 150 })}
-        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border-[0.5px] border-border-subtle bg-white text-slate-600 shadow-sm transition-colors duration-150 hover:bg-surface-muted"
+          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border-[0.5px] border-border-subtle bg-white text-slate-600 transition-colors duration-150 hover:bg-surface-muted"
         aria-label="Zoom in"
       >
         <Plus className="h-3.5 w-3.5" strokeWidth={2.25} />
@@ -45,7 +45,7 @@ export function FlowCanvasToolbar({ onAutoAlign, position = 'center-right' }: Pr
       <button
         type="button"
         onClick={() => zoomOut({ duration: 150 })}
-        className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border-[0.5px] border-border-subtle bg-white text-slate-600 shadow-sm transition-colors duration-150 hover:bg-surface-muted"
+          className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border-[0.5px] border-border-subtle bg-white text-slate-600 transition-colors duration-150 hover:bg-surface-muted"
         aria-label="Zoom out"
       >
         <Minus className="h-3.5 w-3.5" strokeWidth={2.25} />

@@ -57,10 +57,10 @@ export const WhatsappConnectionSelector: FC<WhatsappConnectionSelectorProps> = (
           >
             Connect WhatsApp
           </h1>
-          <p className="mt-3 text-lg sm:text-xl font-semibold text-gray-800">
+          <p className="mt-3 text-lg sm:text-xl font-semibold text-swiss-ink">
             Choose Business API or keep using your WhatsApp Business App.
           </p>
-          <p className="mt-2 text-sm sm:text-base text-gray-500 font-medium leading-relaxed max-w-2xl">
+          <p className="mt-2 text-sm sm:text-base text-swiss-muted font-medium leading-relaxed max-w-2xl">
             Link your Meta Business account for inbox, templates, and automation — or enable
             coexistence so the same number stays active on your phone.
           </p>

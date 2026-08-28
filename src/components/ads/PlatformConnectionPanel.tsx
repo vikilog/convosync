@@ -39,12 +39,12 @@ function ConnectionCard({
 
   if (connected && account) {
     return (
-      <article className="rounded-2xl border border-slate-200 bg-white p-5 flex flex-col gap-4 h-full">
+      <article className="rounded-2xl border border-swiss-line bg-white p-5 flex flex-col gap-4 h-full">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3 min-w-0">
             <div
               className={`p-2.5 rounded-xl shrink-0 ${
-                isMeta ? 'bg-[#1877F2] text-white' : 'bg-white border border-slate-200'
+                isMeta ? 'bg-[#1877F2] text-white' : 'bg-white border border-swiss-line'
               }`}
             >
               {isMeta ? (
@@ -55,13 +55,13 @@ function ConnectionCard({
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h4 className="font-bold text-gray-900 text-sm truncate">{account.name}</h4>
+                <h4 className="font-bold text-swiss-ink text-sm truncate">{account.name}</h4>
                 <span className="inline-flex items-center gap-1 text-xs font-bold text-green-700 bg-green-50 px-2 py-0.5 rounded-full">
                   <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
                   Connected
                 </span>
               </div>
-              <p className="text-xs text-gray-500 mt-1 font-medium">
+              <p className="text-xs text-swiss-muted mt-1 font-medium">
                 {isMeta ? 'Meta Business Ad Account' : 'Google Ads Customer Account'}
               </p>
             </div>
@@ -70,26 +70,26 @@ function ConnectionCard({
 
         <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
           <div>
-            <dt className="text-gray-500 font-medium">Account ID</dt>
-            <dd className="font-mono font-bold text-gray-800 truncate">{account.id}</dd>
+            <dt className="text-swiss-muted font-medium">Account ID</dt>
+            <dd className="font-mono font-bold text-swiss-ink truncate">{account.id}</dd>
           </div>
           <div>
-            <dt className="text-gray-500 font-medium">Currency</dt>
-            <dd className="font-bold text-gray-800">{account.currency}</dd>
+            <dt className="text-swiss-muted font-medium">Currency</dt>
+            <dd className="font-bold text-swiss-ink">{account.currency}</dd>
           </div>
           <div>
-            <dt className="text-gray-500 font-medium">Balance</dt>
+            <dt className="text-swiss-muted font-medium">Balance</dt>
             <dd className="font-bold text-sky-700">{fmtInr(account.balance)}</dd>
           </div>
           <div>
-            <dt className="text-gray-500 font-medium">Timezone</dt>
-            <dd className="font-bold text-gray-800 truncate">{account.timezone}</dd>
+            <dt className="text-swiss-muted font-medium">Timezone</dt>
+            <dd className="font-bold text-swiss-ink truncate">{account.timezone}</dd>
           </div>
         </dl>
 
         {isMeta && metaAdAccounts && metaAdAccounts.length > 1 && onSwitchAccount && (
           <div>
-            <label htmlFor="meta-ad-account" className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1">
+            <label htmlFor="meta-ad-account" className="text-xs font-bold text-swiss-muted uppercase tracking-wide block mb-1">
               Ad Account
             </label>
             <select
@@ -97,7 +97,7 @@ function ConnectionCard({
               value={account.id}
               disabled={switchingAccount}
               onChange={(e) => onSwitchAccount(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-sm font-medium text-gray-700 rounded-xl hover:bg-white focus:border-channel-green focus:ring-2 focus:ring-emerald-100 outline-none cursor-pointer disabled:opacity-50"
+              className="w-full px-3 py-2 bg-slate-50 border border-swiss-line text-sm font-medium text-swiss-ink rounded-xl hover:bg-white focus:border-channel-green focus:ring-2 focus:ring-emerald-100 outline-none cursor-pointer disabled:opacity-50"
             >
               {metaAdAccounts.map((item) => (
                 <option key={item.id} value={item.id}>
@@ -114,7 +114,7 @@ function ConnectionCard({
             type="button"
             onClick={onSync}
             disabled={syncing}
-            className="px-3 py-2 bg-slate-50 border border-slate-200 text-sm font-bold text-gray-700 rounded-xl hover:bg-white transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+            className="px-3 py-2 bg-slate-50 border border-swiss-line text-sm font-bold text-swiss-ink rounded-xl hover:bg-white transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
           >
             <RotateCw className={`w-3.5 h-3.5 ${syncing ? 'animate-spin' : ''}`} />
             Sync
@@ -122,7 +122,7 @@ function ConnectionCard({
           <button
             type="button"
             onClick={onDisconnect}
-            className="px-3 py-2 bg-white border border-slate-200 text-sm font-bold text-red-600 rounded-xl hover:bg-red-50 hover:border-red-100 transition-colors cursor-pointer"
+            className="px-3 py-2 bg-white border border-swiss-line text-sm font-bold text-red-600 rounded-xl hover:bg-red-50 hover:border-red-100 transition-colors cursor-pointer"
           >
             Disconnect
           </button>
@@ -139,8 +139,8 @@ function ConnectionCard({
             <GoogleIcon className="w-5 h-5" />
           </div>
           <div>
-            <h4 className="font-bold text-gray-900 text-sm">Google account linked</h4>
-            <p className="text-xs text-gray-600 mt-1">{linkedEmail}</p>
+            <h4 className="font-bold text-swiss-ink text-sm">Google account linked</h4>
+            <p className="text-xs text-swiss-muted mt-1">{linkedEmail}</p>
             <p className="text-xs text-amber-800 mt-2 font-medium">
               Complete Google Ads API setup to sync Search, Display, and Performance Max campaigns.
             </p>
@@ -162,7 +162,7 @@ function ConnectionCard({
   return (
     <article className="rounded-2xl border border-dashed border-slate-300 bg-slate-50/60 p-5 flex flex-col gap-4 h-full">
       <div className="flex items-start gap-3">
-        <div className={`p-2.5 rounded-xl shrink-0 ${isMeta ? 'bg-[#1877F2]/10' : 'bg-white border border-slate-200'}`}>
+        <div className={`p-2.5 rounded-xl shrink-0 ${isMeta ? 'bg-[#1877F2]/10' : 'bg-white border border-swiss-line'}`}>
           {isMeta ? (
             <Facebook className="w-5 h-5 text-[#1877F2]" />
           ) : (
@@ -170,10 +170,10 @@ function ConnectionCard({
           )}
         </div>
         <div>
-          <h4 className="font-bold text-gray-900 text-sm">
+          <h4 className="font-bold text-swiss-ink text-sm">
             {isMeta ? 'Meta Ads' : 'Google Ads'}
           </h4>
-          <p className="text-xs text-gray-600 mt-1 leading-relaxed">
+          <p className="text-xs text-swiss-muted mt-1 leading-relaxed">
             {isMeta
               ? 'Connect your Meta Business Ad Account for Click-to-WhatsApp campaigns and lead tracking.'
               : 'Connect Google Ads to monitor Search, Display, and lead form campaigns alongside Meta.'}
@@ -223,8 +223,8 @@ export const PlatformConnectionPanel: React.FC<{
     <section aria-label="Ad platform connections" className="space-y-3">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h4 className="text-sm font-black text-gray-900">Connected platforms</h4>
-          <p className="text-xs text-gray-500 mt-0.5">
+          <h4 className="text-sm font-semibold text-swiss-ink">Connected platforms</h4>
+          <p className="text-xs text-swiss-muted mt-0.5">
             Link Meta and Google to manage paid campaigns from one workspace.
           </p>
         </div>

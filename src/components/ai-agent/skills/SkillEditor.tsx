@@ -4,6 +4,8 @@ import { ArrowLeft, Eye, MoreHorizontal, Pencil, Play } from 'lucide-react';
 import type { AgentSkill, KnowledgeItem } from '../types';
 import { api } from '../../../lib/api';
 import { pathForAgent } from '../../../routes';
+import { Input } from '../../ui/input';
+import { Textarea } from '../../ui/textarea';
 
 type SaveState = 'idle' | 'saving' | 'saved' | 'error';
 
@@ -248,7 +250,7 @@ export const SkillEditor: React.FC<Props> = ({ agentId, skillId }) => {
           </button>
           <span className="text-sm text-[#6B7280]">Skill</span>
           <span className="text-sm font-bold text-[#111827] truncate">{skill.title}</span>
-          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 capitalize">
+          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-swiss-muted capitalize">
             {skill.status}
           </span>
           {readOnly && (
@@ -288,7 +290,7 @@ export const SkillEditor: React.FC<Props> = ({ agentId, skillId }) => {
               <MoreHorizontal className="w-5 h-5" />
             </button>
             {menuOpen && (
-              <div className="absolute right-0 mt-1 w-44 bg-white ring-1 ring-slate-200/80 rounded-xl shadow-lg z-20 overflow-hidden">
+              <div className="absolute right-0 mt-1 w-44 bg-white border border-swiss-line shadow-lg z-20 overflow-hidden">
                 {skill.status === 'live' && (
                   <button
                     type="button"
@@ -323,12 +325,12 @@ export const SkillEditor: React.FC<Props> = ({ agentId, skillId }) => {
       {readOnly ? (
         <h1 className="text-2xl font-bold text-[#111827] mb-4">{skill.title}</h1>
       ) : (
-        <input
+        <Input
           type="text"
           value={skill.title}
           onChange={(e) => scheduleSave({ title: e.target.value })}
           placeholder="Enter name here"
-          className="w-full text-2xl font-bold text-[#111827] placeholder:text-gray-300 bg-transparent outline-none mb-4"
+          className="h-auto w-full text-2xl font-bold text-[#111827] placeholder:text-gray-300 bg-transparent outline-none mb-4"
         />
       )}
 
@@ -339,17 +341,17 @@ export const SkillEditor: React.FC<Props> = ({ agentId, skillId }) => {
             {skill.description?.trim() || '—'}
           </p>
         ) : (
-          <textarea
+          <Textarea
             value={skill.description ?? ''}
             onChange={(e) => scheduleSave({ description: e.target.value.slice(0, 500) })}
             placeholder="Optional short blurb"
             rows={2}
-            className="w-full border border-black/5 rounded-xl p-3 text-sm text-[#111827] placeholder:text-[#6B7280] resize-none focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+            className="min-h-0 w-full border border-swiss-line rounded-xl p-3 text-sm text-[#111827] placeholder:text-[#6B7280] resize-none focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
           />
         )}
       </section>
 
-      <section className="mb-8 pb-8 border-b border-black/5">
+      <section className="mb-8 pb-8 border-b border-swiss-line">
         <h3 className="text-sm font-bold text-[#111827] mb-1">Start trigger</h3>
         <p className="text-xs text-[#6B7280] mb-4">
           Set the conditions to trigger this skill. Empty trigger is allowed.
@@ -359,17 +361,17 @@ export const SkillEditor: React.FC<Props> = ({ agentId, skillId }) => {
             {skill.trigger.trim() || '—'}
           </p>
         ) : (
-          <textarea
+          <Textarea
             value={skill.trigger}
             onChange={(e) => scheduleSave({ trigger: e.target.value })}
             placeholder="e.g. Use this skill when users inquire about..."
             rows={4}
-            className="w-full border-0 bg-transparent text-sm text-[#111827] placeholder:text-[#6B7280] resize-none outline-none"
+            className="min-h-0 w-full border-0 bg-transparent text-sm text-[#111827] placeholder:text-[#6B7280] resize-none outline-none"
           />
         )}
       </section>
 
-      <section className="mb-8 pb-8 border-b border-black/5">
+      <section className="mb-8 pb-8 border-b border-swiss-line">
         <h3 className="text-sm font-bold text-[#111827] mb-1">Linked knowledge</h3>
         <p className="text-xs text-[#6B7280] mb-4">
           When this skill matches, retrieval prefers these knowledge items.
@@ -383,7 +385,7 @@ export const SkillEditor: React.FC<Props> = ({ agentId, skillId }) => {
               return (
                 <div
                   key={item.id}
-                  className="flex items-start gap-3 rounded-xl border border-black/5 px-3 py-2"
+                  className="flex items-start gap-3 rounded-xl border border-swiss-line px-3 py-2"
                 >
                   {!readOnly && (
                     <input
@@ -412,7 +414,7 @@ export const SkillEditor: React.FC<Props> = ({ agentId, skillId }) => {
           </div>
         )}
         {activePreview && (
-          <div className="mt-4 rounded-xl bg-surface-muted/60 border border-black/5 p-4">
+          <div className="mt-4 rounded-xl bg-surface-muted/60 border border-swiss-line p-4">
             <p className="text-xs font-bold text-[#6B7280] uppercase tracking-wide mb-2">
               {activePreview.title}
             </p>
@@ -432,21 +434,21 @@ export const SkillEditor: React.FC<Props> = ({ agentId, skillId }) => {
           Provide structured instructions, ensuring each step smoothly guides the user
         </p>
         {readOnly ? (
-          <pre className="w-full border border-black/5 rounded-xl p-4 text-sm text-[#111827] whitespace-pre-wrap font-sans">
+          <pre className="w-full border border-swiss-line rounded-xl p-4 text-sm text-[#111827] whitespace-pre-wrap font-sans">
             {skill.instructions.trim() || '—'}
           </pre>
         ) : (
           <>
-            <textarea
+            <Textarea
               ref={instructionsRef}
               value={skill.instructions}
               onChange={(e) => handleInstructionsChange(e.target.value)}
               placeholder="Type '/' for commands"
               rows={12}
-              className="w-full border border-black/5 rounded-xl p-4 text-sm text-[#111827] placeholder:text-[#6B7280] resize-none focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+              className="min-h-0 w-full border border-swiss-line rounded-xl p-4 text-sm text-[#111827] placeholder:text-[#6B7280] resize-none focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
             />
             {showSlashMenu && filteredCommands.length > 0 && (
-              <div className="absolute left-0 mt-1 w-64 bg-white ring-1 ring-slate-200/80 rounded-xl shadow-lg z-10 overflow-hidden">
+              <div className="absolute left-0 mt-1 w-64 bg-white border border-swiss-line shadow-lg z-10 overflow-hidden">
                 {filteredCommands.map((cmd) => (
                   <button
                     key={cmd.id}

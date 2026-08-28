@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Loader2, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { IG_BTN_PRIMARY } from '../igTheme';
+import { Input } from '../../../components/ui/input';
 
 type Props = {
   open: boolean;
@@ -59,21 +60,21 @@ export function IgNameDialog({
         >
           <motion.div
             role="dialog"
-            className="bg-white rounded-2xl w-full max-w-md border border-slate-200 overflow-hidden"
+            className="bg-white rounded-2xl w-full max-w-md border border-swiss-line overflow-hidden"
             initial={{ scale: 0.96, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.96, opacity: 0 }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-start justify-between px-5 py-4 border-b border-slate-200">
+            <div className="flex items-start justify-between px-5 py-4 border-b border-swiss-line">
               <div>
-                <h2 className="text-sm font-black text-gray-900">{title}</h2>
-                {description && <p className="text-meta text-gray-500 mt-0.5">{description}</p>}
+                <h2 className="text-sm font-semibold text-swiss-ink">{title}</h2>
+                {description && <p className="text-meta text-swiss-muted mt-0.5">{description}</p>}
               </div>
               <button
                 type="button"
                 onClick={onClose}
-                className="p-2 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-50"
+                className="p-2 rounded-lg text-swiss-faint hover:text-swiss-ink hover:bg-gray-50"
                 aria-label="Close"
               >
                 <X className="w-4 h-4" />
@@ -82,8 +83,8 @@ export function IgNameDialog({
 
             <div className="p-5 space-y-3">
               <label className="block">
-                <span className="text-sm font-bold text-gray-700">Automation name</span>
-                <input
+                <span className="text-sm font-bold text-swiss-ink">Automation name</span>
+                <Input
                   type="text"
                   value={name}
                   onChange={(e) => {
@@ -98,18 +99,18 @@ export function IgNameDialog({
                   }}
                   autoFocus
                   placeholder="e.g. DM welcome flow"
-                  className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-gray-900 outline-none focus:ring-2 focus:ring-[#833AB4]/20 focus:border-[#833AB4]"
+                  className="h-auto mt-1.5 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm font-semibold text-swiss-ink outline-none focus:ring-2 focus:ring-[#833AB4]/20 focus:border-[#833AB4]"
                 />
               </label>
               {error && <p className="text-sm font-semibold text-rose-600">{error}</p>}
             </div>
 
-            <div className="px-5 py-4 border-t border-slate-200 flex justify-end gap-2">
+            <div className="px-5 py-4 border-t border-swiss-line flex justify-end gap-2">
               <button
                 type="button"
                 onClick={onClose}
                 disabled={loading}
-                className="px-4 py-2 text-sm font-bold text-gray-600 rounded-lg border border-slate-200 hover:bg-gray-50 disabled:opacity-50"
+                className="px-4 py-2 text-sm font-bold text-swiss-muted rounded-lg border border-swiss-line hover:bg-gray-50 disabled:opacity-50"
               >
                 Cancel
               </button>

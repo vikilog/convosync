@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Loader2, PauseCircle, Plus, Save, Trash2 } from 'lucide-react';
 import { api } from '../../lib/api';
+import { Input } from '../ui/input';
+import { Textarea } from '../ui/textarea';
 
 type MenuItem = {
   id: string;
@@ -169,12 +171,12 @@ export function AutomationControlsPanel() {
             className="h-4 w-4 accent-primary"
           />
         </label>
-        <textarea
+        <Textarea
           value={defaultText}
           onChange={(e) => setDefaultText(e.target.value)}
           rows={3}
           placeholder="Thanks for messaging us — a teammate will get back shortly."
-          className="w-full rounded-lg border-[0.5px] border-border-subtle bg-white px-3 py-2 text-sm text-dark-navy focus:outline-none focus:ring-2 focus:ring-primary/20"
+          className="min-h-0 w-full rounded-lg border-[0.5px] border-border-subtle bg-white px-3 py-2 text-sm text-dark-navy focus:outline-none focus:ring-2 focus:ring-primary/20"
           disabled={!defaultEnabled}
         />
       </section>
@@ -204,7 +206,7 @@ export function AutomationControlsPanel() {
               key={item.id}
               className="grid gap-2 rounded-lg border-[0.5px] border-border-subtle bg-white p-2.5 sm:grid-cols-[1fr_110px_1fr_auto]"
             >
-              <input
+              <Input
                 value={item.title}
                 onChange={(e) => {
                   const title = e.target.value;
@@ -213,7 +215,7 @@ export function AutomationControlsPanel() {
                   );
                 }}
                 placeholder="Title"
-                className="rounded-md border-[0.5px] border-border-subtle bg-white px-2 py-1.5 text-sm"
+                className="h-auto rounded-md border-[0.5px] border-border-subtle bg-white px-2 py-1.5 text-sm"
               />
               <select
                 value={item.type}
@@ -229,7 +231,7 @@ export function AutomationControlsPanel() {
                 <option value="web_url">URL</option>
               </select>
               {item.type === 'web_url' ? (
-                <input
+                <Input
                   value={item.url ?? ''}
                   onChange={(e) => {
                     const url = e.target.value;
@@ -238,10 +240,10 @@ export function AutomationControlsPanel() {
                     );
                   }}
                   placeholder="https://"
-                  className="rounded-md border-[0.5px] border-border-subtle bg-white px-2 py-1.5 text-sm"
+                  className="h-auto rounded-md border-[0.5px] border-border-subtle bg-white px-2 py-1.5 text-sm"
                 />
               ) : (
-                <input
+                <Input
                   value={item.payload ?? ''}
                   onChange={(e) => {
                     const payload = e.target.value;
@@ -250,7 +252,7 @@ export function AutomationControlsPanel() {
                     );
                   }}
                   placeholder="Payload / keyword"
-                  className="rounded-md border-[0.5px] border-border-subtle bg-white px-2 py-1.5 text-sm"
+                  className="h-auto rounded-md border-[0.5px] border-border-subtle bg-white px-2 py-1.5 text-sm"
                 />
               )}
               <button

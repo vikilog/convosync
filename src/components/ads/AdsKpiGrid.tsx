@@ -15,16 +15,16 @@ export const AdsKpiGrid: React.FC<{ stats: KpiStat[] }> = ({ stats }) => (
     {stats.map((stat) => (
       <div
         key={stat.label}
-        className="bg-white p-5 rounded-2xl border border-slate-200 hover:border-sky-100 transition-colors"
+        className="bg-white p-5 rounded-2xl border border-swiss-line hover:border-sky-100 transition-colors"
       >
         <div className={`${stat.color} w-8 h-8 rounded-xl flex items-center justify-center mb-2`}>
           {stat.icon}
         </div>
-        <p className="text-xs font-extrabold text-gray-500 uppercase tracking-widest leading-none mb-1">
+        <p className="text-xs font-extrabold text-swiss-muted uppercase tracking-widest leading-none mb-1">
           {stat.label}
         </p>
-        <p className="text-2xl font-black text-gray-900 font-mono">{stat.value}</p>
-        <p className="text-xs text-gray-500 font-medium mt-0.5">{stat.delta}</p>
+        <p className="text-2xl font-black text-swiss-ink font-mono">{stat.value}</p>
+        <p className="text-xs text-swiss-muted font-medium mt-0.5">{stat.delta}</p>
       </div>
     ))}
   </div>

@@ -73,11 +73,11 @@ export function NeedsAttentionList({
   };
 
   return (
-    <div className="flex min-h-[280px] flex-col rounded-xl bg-white ring-1 ring-slate-200/80 p-5">
+    <div className="flex min-h-[280px] flex-col bg-white border border-swiss-line p-5">
       <div className="mb-3 flex items-start justify-between gap-2">
         <div>
-          <h2 className="text-sm font-bold text-neutral-900">Needs attention</h2>
-          <p className="text-xs text-neutral-500">
+          <h2 className="text-sm font-bold text-swiss-ink">Needs attention</h2>
+          <p className="text-xs text-swiss-muted">
             Pending review, complaints, leads, and failed DMs
           </p>
         </div>
@@ -104,8 +104,8 @@ export function NeedsAttentionList({
       ) : !items?.length ? (
         <div className="flex flex-1 flex-col items-center justify-center py-10 text-center">
           <CheckCircle2 className="mb-2 h-8 w-8 text-emerald-500" />
-          <p className="text-sm font-bold text-gray-800">All clear</p>
-          <p className="mt-1 max-w-xs text-xs text-gray-400">
+          <p className="text-sm font-bold text-swiss-ink">All clear</p>
+          <p className="mt-1 max-w-xs text-xs text-swiss-faint">
             Nothing urgent right now. New comments will show up here when they need a human.
           </p>
         </div>
@@ -117,7 +117,7 @@ export function NeedsAttentionList({
                 ? 'border-red-200 bg-red-50/40'
                 : item.kind === 'failed_dm'
                   ? 'border-amber-200 bg-amber-50/30'
-                  : 'border-black/5 bg-white';
+                  : 'border-swiss-line bg-white';
             const ActionIcon =
               item.suggestedAction === 'retry_dm'
                 ? RefreshCw
@@ -148,7 +148,7 @@ export function NeedsAttentionList({
                     <img
                       src={item.postThumbnailUrl}
                       alt=""
-                      className="h-12 w-12 rounded-lg object-cover border border-black/5"
+                      className="h-12 w-12 rounded-lg object-cover border border-swiss-line"
                     />
                   ) : (
                     <div className="h-12 w-12 rounded-lg bg-slate-100" />
@@ -156,17 +156,17 @@ export function NeedsAttentionList({
                 </Link>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs font-bold text-gray-900">@{item.username}</span>
+                    <span className="text-xs font-bold text-swiss-ink">@{item.username}</span>
                     <IntentBadge
                       intentLabel={item.intent}
                       confidence={item.confidence}
                       classificationStatus="classified"
                     />
-                    <span className="text-[10px] font-medium text-gray-400">
+                    <span className="text-[10px] font-medium text-swiss-faint">
                       {timeAgo(item.waitingSince)}
                     </span>
                   </div>
-                  <p className="mt-0.5 line-clamp-2 text-xs text-gray-600">
+                  <p className="mt-0.5 line-clamp-2 text-xs text-swiss-muted">
                     {item.commentText}
                   </p>
                   {item.dmError && (

@@ -86,7 +86,7 @@ export const ReviewCard: React.FC<{
               <img
                 src={item.profilePicUrl}
                 alt=""
-                className="h-10 w-10 shrink-0 rounded-full object-cover border border-black/5"
+                className="h-10 w-10 shrink-0 rounded-full object-cover border border-swiss-line"
               />
             ) : item.platform === 'facebook' ? (
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#e8f4ff] text-[#1877F2]">
@@ -137,7 +137,7 @@ export const ReviewCard: React.FC<{
               <img
                 src={item.postThumbnailUrl}
                 alt=""
-                className="h-9 w-9 shrink-0 rounded-md object-cover border border-black/5"
+                className="h-9 w-9 shrink-0 rounded-md object-cover border border-swiss-line"
               />
               <p className="min-w-0 truncate text-xs text-slate-500">
                 {item.postCaption || (item.platform === 'facebook' ? 'Facebook post' : 'Instagram post')}
@@ -148,7 +148,7 @@ export const ReviewCard: React.FC<{
           {(showPublicBlock || showDmBlock) && (
             <div className="space-y-2 pl-[52px]">
               {showPublicBlock && (
-                <div className="border-l-2 border-slate-200 pl-3">
+                <div className="border-l-2 border-swiss-line pl-3">
                   <p className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-500">
                     <MessageCircle className="h-3 w-3" aria-hidden />
                     {publicReply ? 'Public reply sent' : 'Suggested public reply'}
@@ -162,7 +162,7 @@ export const ReviewCard: React.FC<{
               {showDmBlock && (
                 <div
                   className={`border-l-2 pl-3 ${
-                    dmFailed ? 'border-amber-400' : 'border-slate-200'
+                    dmFailed ? 'border-amber-400' : 'border-swiss-line'
                   }`}
                 >
                   <p

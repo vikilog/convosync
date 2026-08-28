@@ -45,7 +45,7 @@ export function SendMediaDialog({
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
       <div
-        className="w-full max-w-lg rounded-xl bg-white ring-1 ring-slate-200/80 shadow-xl"
+        className="w-full max-w-lg bg-white border border-swiss-line shadow-xl"
         role="dialog"
         aria-modal="true"
         aria-labelledby="send-media-title"
@@ -73,7 +73,7 @@ export function SendMediaDialog({
                 setError('');
               }}
               className={`flex items-center justify-center gap-1.5 rounded-lg py-2 text-sm font-bold transition-colors ${
-                source === 'device' ? 'bg-white shadow-sm text-primary' : 'text-gray-500'
+                source === 'device' ? 'bg-white text-primary' : 'text-swiss-muted'
               }`}
             >
               <Folder className="h-4 w-4" />
@@ -86,7 +86,7 @@ export function SendMediaDialog({
                 setError('');
               }}
               className={`flex items-center justify-center gap-1.5 rounded-lg py-2 text-sm font-bold transition-colors ${
-                source === 'gallery' ? 'bg-white shadow-sm text-primary' : 'text-gray-500'
+                source === 'gallery' ? 'bg-white text-primary' : 'text-swiss-muted'
               }`}
             >
               <ImageIcon className="h-4 w-4" />
@@ -95,7 +95,7 @@ export function SendMediaDialog({
           </div>
 
           {allowMultiSelect && (
-            <label className="flex items-center gap-2.5 text-sm font-medium text-gray-700 cursor-pointer">
+            <label className="flex items-center gap-2.5 text-sm font-medium text-swiss-ink cursor-pointer">
               <input
                 type="checkbox"
                 checked={multiSelect}
@@ -116,13 +116,13 @@ export function SendMediaDialog({
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-200 bg-surface-muted/40 py-8 text-center hover:border-primary/40 hover:bg-primary/5 transition-colors"
+              className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-swiss-line bg-surface-muted/40 py-8 text-center hover:border-primary/40 hover:bg-primary/5 transition-colors"
             >
               <Upload className="h-6 w-6 text-primary" />
-              <span className="text-sm font-bold text-gray-800">
+              <span className="text-sm font-bold text-swiss-ink">
                 {multiSelect ? 'Choose files' : 'Choose a file'}
               </span>
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-swiss-faint">
                 {multiSelect ? `Pick 2–${cap} photos or videos` : 'Click to browse your device'}
               </span>
               <input

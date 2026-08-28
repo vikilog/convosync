@@ -51,7 +51,7 @@ export const SocialListeningPlatformSwitcher: React.FC = () => {
   if (options.length < 2) {
     return (
       <div
-        className={`inline-flex items-center gap-1.5 rounded-xl bg-white px-3 py-1.5 text-xs font-bold shadow-[0_1px_2px_rgba(0,0,0,0.04)] ring-1 ring-slate-200/80 ${current.activeText}`}
+        className={`inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-xs font-bold border border-swiss-line ${current.activeText}`}
       >
         <current.icon className="h-3.5 w-3.5" />
         {current.label}
@@ -64,23 +64,23 @@ export const SocialListeningPlatformSwitcher: React.FC = () => {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className={`inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-white px-3 py-1.5 text-xs font-bold shadow-[0_1px_2px_rgba(0,0,0,0.04)] ring-1 ring-slate-200/80 hover:bg-slate-50 ${current.activeText}`}
+        className={`inline-flex cursor-pointer items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-xs font-bold border border-swiss-line hover:bg-slate-50 ${current.activeText}`}
       >
         <current.icon className="h-3.5 w-3.5" />
         {current.label}
         <ChevronDown
-          className={`h-3.5 w-3.5 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`}
+          className={`h-3.5 w-3.5 text-swiss-faint transition-transform ${open ? 'rotate-180' : ''}`}
         />
       </button>
       {open && (
-        <div className="absolute left-0 top-full z-40 mt-2 w-44 overflow-hidden rounded-xl border border-black/5 bg-white shadow-xl">
+        <div className="absolute left-0 top-full z-40 mt-2 w-44 overflow-hidden rounded-xl border border-swiss-line bg-white shadow-xl">
           {options.map((o) => (
             <button
               key={o.id}
               type="button"
               onClick={() => setPlatform(o.id)}
               className={`flex w-full cursor-pointer items-center gap-2 px-3 py-2.5 text-left text-xs font-bold transition-colors hover:bg-slate-50 ${
-                platform === o.id ? o.activeText : 'text-gray-700'
+                platform === o.id ? o.activeText : 'text-swiss-ink'
               }`}
             >
               <o.icon className="h-3.5 w-3.5" />

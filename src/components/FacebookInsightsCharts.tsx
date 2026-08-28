@@ -128,11 +128,11 @@ const DailyTrendChart: React.FC<{
     hoverIndex != null ? padding.left + hoverIndex * step : null;
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-5 md:p-6">
+    <div className="bg-white border border-swiss-line rounded-2xl p-5 md:p-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
         <div>
-          <h4 className="font-bold text-gray-900 text-sm">Page performance trend</h4>
-          <p className="text-meta text-gray-400 font-medium mt-0.5">Daily metrics — last 28 days</p>
+          <h4 className="font-bold text-swiss-ink text-sm">Page performance trend</h4>
+          <p className="text-meta text-swiss-faint font-medium mt-0.5">Daily metrics — last 28 days</p>
         </div>
         <div className="flex flex-wrap gap-1.5">
           {(Object.keys(METRIC_CONFIG) as MetricKey[]).map((key) => {
@@ -145,8 +145,8 @@ const DailyTrendChart: React.FC<{
                 onClick={() => onMetricChange(key)}
                 className={`px-2.5 py-1 rounded-lg text-sm font-bold flex items-center gap-1 transition-all ${
                   active
-                    ? 'text-white shadow-sm'
-                    : 'bg-[#fafaf9] text-gray-500 border border-slate-200 hover:border-channel-green/30'
+                    ? 'text-white '
+                    : 'bg-[#fafaf9] text-swiss-muted border border-swiss-line hover:border-channel-green/30'
                 }`}
                 style={active ? { backgroundColor: m.color } : undefined}
               >
@@ -159,7 +159,7 @@ const DailyTrendChart: React.FC<{
       </div>
 
       {daily.length === 0 ? (
-        <div className="h-52 flex items-center justify-center text-sm text-gray-400 font-medium">
+        <div className="h-52 flex items-center justify-center text-sm text-swiss-faint font-medium">
           No daily data yet. Sync insights after granting read_insights permission.
         </div>
       ) : (
@@ -278,10 +278,10 @@ const MultiMetricOverview: React.FC<{ daily: PageInsightsDailyPoint[] }> = ({ da
   if (daily.length === 0) return null;
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-5 md:p-6">
-      <h4 className="font-bold text-gray-900 text-sm mb-1">Combined overview</h4>
-      <p className="text-meta text-gray-400 font-medium mb-5">Normalized daily comparison</p>
-      <div className="h-56 flex items-end justify-between gap-1 sm:gap-2 px-1 border-b border-slate-200 pb-2">
+    <div className="bg-white border border-swiss-line rounded-2xl p-5 md:p-6">
+      <h4 className="font-bold text-swiss-ink text-sm mb-1">Combined overview</h4>
+      <p className="text-meta text-swiss-faint font-medium mb-5">Normalized daily comparison</p>
+      <div className="h-56 flex items-end justify-between gap-1 sm:gap-2 px-1 border-b border-swiss-line pb-2">
         {daily.map((day, idx) => (
           <div key={day.date} className="flex-1 flex flex-col items-center gap-1 group min-w-0">
             <div className="w-full h-44 flex gap-0.5 items-end justify-center">
@@ -300,7 +300,7 @@ const MultiMetricOverview: React.FC<{ daily: PageInsightsDailyPoint[] }> = ({ da
               })}
             </div>
             {idx % Math.ceil(daily.length / 8) === 0 && (
-              <span className="text-badge font-bold text-gray-400 truncate w-full text-center">
+              <span className="text-badge font-bold text-swiss-faint truncate w-full text-center">
                 {day.label}
               </span>
             )}
@@ -309,7 +309,7 @@ const MultiMetricOverview: React.FC<{ daily: PageInsightsDailyPoint[] }> = ({ da
       </div>
       <div className="flex flex-wrap gap-4 mt-4 text-sm font-bold">
         {keys.map((key) => (
-          <div key={key} className="flex items-center gap-1.5 text-gray-500">
+          <div key={key} className="flex items-center gap-1.5 text-swiss-muted">
             <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: METRIC_CONFIG[key].color }} />
             {METRIC_CONFIG[key].label}
           </div>
@@ -338,21 +338,21 @@ const PostEngagementChart: React.FC<{ posts: FacebookPost[] }> = ({ posts }) => 
 
   if (ranked.length === 0) {
     return (
-      <div className="bg-white border border-slate-200 rounded-2xl p-6 text-center text-sm text-gray-400 font-medium">
+      <div className="bg-white border border-swiss-line rounded-2xl p-6 text-center text-sm text-swiss-faint font-medium">
         No posts to compare engagement yet.
       </div>
     );
   }
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-5 md:p-6">
-      <h4 className="font-bold text-gray-900 text-sm mb-1">Post engagement breakdown</h4>
-      <p className="text-meta text-gray-400 font-medium mb-5">Likes, comments & shares per post</p>
+    <div className="bg-white border border-swiss-line rounded-2xl p-5 md:p-6">
+      <h4 className="font-bold text-swiss-ink text-sm mb-1">Post engagement breakdown</h4>
+      <p className="text-meta text-swiss-faint font-medium mb-5">Likes, comments & shares per post</p>
       <div className="space-y-4">
         {ranked.map((post) => (
           <div key={post.id}>
             <div className="flex items-center justify-between gap-2 mb-1.5">
-              <p className="text-meta font-bold text-gray-700 truncate flex-1">{post.label}</p>
+              <p className="text-meta font-bold text-swiss-ink truncate flex-1">{post.label}</p>
               <span className="text-sm font-black text-sky-600 font-mono shrink-0">
                 {formatNum(post.total)}
               </span>
@@ -374,7 +374,7 @@ const PostEngagementChart: React.FC<{ posts: FacebookPost[] }> = ({ posts }) => 
                 title={`Shares: ${post.shares}`}
               />
             </div>
-            <div className="flex gap-3 mt-1 text-meta font-bold text-gray-400">
+            <div className="flex gap-3 mt-1 text-meta font-bold text-swiss-faint">
               <span>♥ {post.likes}</span>
               <span>💬 {post.comments}</span>
               <span>↗ {post.shares}</span>
@@ -382,7 +382,7 @@ const PostEngagementChart: React.FC<{ posts: FacebookPost[] }> = ({ posts }) => 
           </div>
         ))}
       </div>
-      <div className="flex gap-4 mt-5 pt-4 border-t border-slate-200 text-sm font-bold text-gray-500">
+      <div className="flex gap-4 mt-5 pt-4 border-t border-swiss-line text-sm font-bold text-swiss-muted">
         <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-pink-500" /> Likes</span>
         <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-500" /> Comments</span>
         <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-channel-green" /> Shares</span>
@@ -414,15 +414,15 @@ const EngagementRateCard: React.FC<{ insights: PageInsights; daily: PageInsights
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <div className="bg-gradient-to-br from-sky-50 to-white border border-slate-200 rounded-2xl p-5">
-        <p className="text-sm font-extrabold text-gray-400 uppercase tracking-widest">Engagement rate</p>
+      <div className="bg-gradient-to-br from-sky-50 to-white border border-swiss-line rounded-2xl p-5">
+        <p className="text-sm font-extrabold text-swiss-faint uppercase tracking-widest">Engagement rate</p>
         <p className="text-3xl font-black text-sky-600 font-mono mt-2">{rate}%</p>
-        <p className="text-meta text-gray-500 font-medium mt-1">Engaged users ÷ reach (28 days)</p>
+        <p className="text-meta text-swiss-muted font-medium mt-1">Engaged users ÷ reach (28 days)</p>
       </div>
-      <div className="bg-gradient-to-br from-green-50 to-white border border-slate-200 rounded-2xl p-5">
-        <p className="text-sm font-extrabold text-gray-400 uppercase tracking-widest">Avg daily rate</p>
+      <div className="bg-gradient-to-br from-green-50 to-white border border-swiss-line rounded-2xl p-5">
+        <p className="text-sm font-extrabold text-swiss-faint uppercase tracking-widest">Avg daily rate</p>
         <p className="text-3xl font-black text-green-600 font-mono mt-2">{avgDaily}{avgDaily !== '—' ? '%' : ''}</p>
-        <p className="text-meta text-gray-500 font-medium mt-1">Based on {dailyRates.length} days with reach data</p>
+        <p className="text-meta text-swiss-muted font-medium mt-1">Based on {dailyRates.length} days with reach data</p>
       </div>
     </div>
   );

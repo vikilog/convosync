@@ -161,7 +161,7 @@ export function InboxRealtimeBridge() {
         >
           <div
             role="status"
-            className="relative bg-white text-gray-900 rounded-xl shadow-lg shadow-slate-900/10 border border-slate-200/90 overflow-hidden"
+            className="relative bg-white text-swiss-ink rounded-xl shadow-lg shadow-slate-900/10 border border-swiss-line/90 overflow-hidden"
           >
             <button
               type="button"
@@ -174,19 +174,19 @@ export function InboxRealtimeBridge() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-baseline justify-between gap-2">
-                    <p className="text-sm font-bold text-gray-900 truncate">{toast.contactName}</p>
+                    <p className="text-sm font-bold text-swiss-ink truncate">{toast.contactName}</p>
                     <span className="text-[10px] font-bold uppercase tracking-wide text-channel-green shrink-0">
                       New
                     </span>
                   </div>
-                  <p className="text-xs text-gray-500 mt-0.5 truncate leading-snug">{toast.preview}</p>
+                  <p className="text-xs text-swiss-muted mt-0.5 truncate leading-snug">{toast.preview}</p>
                 </div>
               </div>
             </button>
             <button
               type="button"
               onClick={() => setToast(null)}
-              className="absolute top-1.5 right-1.5 p-1 rounded-md text-gray-400 hover:text-gray-700 hover:bg-slate-100 transition-colors"
+              className="absolute top-1.5 right-1.5 p-1 rounded-md text-swiss-faint hover:text-swiss-ink hover:bg-slate-100 transition-colors"
               aria-label="Dismiss notification"
             >
               <X className="w-3.5 h-3.5" />

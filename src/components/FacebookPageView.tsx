@@ -15,6 +15,8 @@ import { api } from '../lib/api';
 import { useKeepAliveActivation } from './KeepAlive';
 import { startFacebookPageConnect } from '../lib/metaOAuth';
 import { FacebookPage } from '../types';
+import { Input } from './ui/input';
+import { Textarea } from './ui/textarea';
 
 function formatNum(n: number): string {
   if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
@@ -32,29 +34,29 @@ const CreatePostModal: React.FC<{
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-surface rounded-2xl w-full max-w-lg shadow-2xl border border-black/5">
-        <div className="flex items-center justify-between p-5 border-b border-black/5">
-          <h3 className="font-black text-gray-900 text-sm flex items-center gap-2">
+      <div className="bg-surface rounded-2xl w-full max-w-lg shadow-2xl border border-swiss-line">
+        <div className="flex items-center justify-between p-5 border-b border-swiss-line">
+          <h3 className="font-semibold text-swiss-ink text-sm flex items-center gap-2">
             <Facebook className="w-4 h-4 text-[#0084FF]" /> Create Facebook Post
           </h3>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="cursor-pointer rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-50 hover:text-gray-700"
+            className="cursor-pointer rounded-lg p-2 text-swiss-faint transition-colors hover:bg-gray-50 hover:text-swiss-ink"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
         <div className="p-5 space-y-4">
-          <div className="flex items-center gap-2.5 p-3 bg-[#fafaf9] rounded-xl border border-slate-200">
+          <div className="flex items-center gap-2.5 p-3 bg-[#fafaf9] rounded-xl border border-swiss-line">
             <div className="w-9 h-9 rounded-xl bg-[#0084FF] flex items-center justify-center">
               <Facebook className="w-5 h-5 text-white fill-white" />
             </div>
             <div>
-              <p className="text-sm font-black text-gray-900">{pageName}</p>
-              <div className="flex items-center gap-1.5 text-xs text-gray-400 font-medium">
+              <p className="text-sm font-black text-swiss-ink">{pageName}</p>
+              <div className="flex items-center gap-1.5 text-xs text-swiss-faint font-medium">
                 {scheduleMode ? (
                   <><Calendar className="w-3 h-3" /> Scheduled</>
                 ) : (
@@ -64,40 +66,40 @@ const CreatePostModal: React.FC<{
             </div>
           </div>
 
-          <textarea
+          <Textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="What's on your mind? Share an update, announcement, or offer..."
             rows={5}
-            className="w-full text-sm border border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-channel-green resize-none leading-relaxed"
+            className="resize-none rounded-xl border-swiss-line px-4 py-3 text-sm leading-relaxed outline-none focus-visible:border-channel-green focus-visible:ring-0"
           />
 
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => setScheduleMode(!scheduleMode)}
-              className={`cursor-pointer flex items-center gap-2 text-sm font-bold px-3 py-2 rounded-xl border transition-all ${scheduleMode ? 'bg-sky-50 border-channel-green/30 text-sky-600' : 'bg-[#fafaf9] border-slate-200 text-gray-500'}`}
+              className={`cursor-pointer flex items-center gap-2 text-sm font-bold px-3 py-2 rounded-xl border transition-all ${scheduleMode ? 'bg-sky-50 border-channel-green/30 text-sky-600' : 'bg-[#fafaf9] border-swiss-line text-swiss-muted'}`}
             >
               <Calendar className="w-3.5 h-3.5" />
               Schedule for later
             </button>
             {scheduleMode && (
-              <input
+              <Input
                 type="datetime-local"
                 value={scheduledTime}
                 onChange={(e) => setScheduledTime(e.target.value)}
-                className="flex-1 text-xs border border-slate-200 rounded-xl px-3 py-2 outline-none focus:border-channel-green"
+                className="h-auto flex-1 rounded-xl border-swiss-line px-3 py-2 text-xs outline-none focus-visible:border-channel-green focus-visible:ring-0"
               />
             )}
           </div>
 
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-swiss-faint">
             {message.length}/2200 characters
           </p>
         </div>
 
-        <div className="flex items-center justify-end gap-3 p-5 border-t border-slate-200">
-          <button type="button" onClick={onClose} className="cursor-pointer px-4 py-2 text-sm font-bold text-gray-600 border border-slate-200 rounded-xl hover:bg-gray-50 transition-all">
+        <div className="flex items-center justify-end gap-3 p-5 border-t border-swiss-line">
+          <button type="button" onClick={onClose} className="cursor-pointer px-4 py-2 text-sm font-bold text-swiss-muted border border-swiss-line rounded-xl hover:bg-gray-50 transition-all">
             Cancel
           </button>
           <button
@@ -107,7 +109,7 @@ const CreatePostModal: React.FC<{
               onClose();
             }}
             disabled={!message.trim() || (scheduleMode && !scheduledTime)}
-            className="cursor-pointer px-5 py-2 bg-primary hover:bg-primary-hover disabled:bg-gray-200 disabled:cursor-not-allowed text-white text-sm font-bold rounded-xl transition-all flex items-center gap-2 shadow-md shadow-primary/20"
+            className="cursor-pointer px-5 py-2 bg-primary hover:bg-primary-hover disabled:bg-gray-200 disabled:cursor-not-allowed text-white text-sm font-bold rounded-xl transition-all flex items-center gap-2 shadow-primary/20"
           >
             {scheduleMode ? <><Calendar className="w-3.5 h-3.5" /> Schedule Post</> : <><Send className="w-3.5 h-3.5" /> Publish Now</>}
           </button>
@@ -212,7 +214,7 @@ export const FacebookPageView: React.FC = () => {
   if (loading) {
     return (
       <div className="flex-1 max-w-7xl mx-auto pb-12 flex items-center justify-center min-h-[240px]">
-        <p className="text-sm text-gray-400 font-medium">Loading Facebook Page…</p>
+        <p className="text-sm text-swiss-faint font-medium">Loading Facebook Page…</p>
       </div>
     );
   }
@@ -221,8 +223,8 @@ export const FacebookPageView: React.FC = () => {
     <div className="flex-1 space-y-6 max-w-7xl mx-auto pb-12 text-left selection:bg-sky-50">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h3 className="font-display font-black text-gray-900 text-lg leading-none">Facebook Page</h3>
-          <p className="text-xs text-gray-400 mt-1.5 font-medium">
+          <h3 className="font-display font-semibold text-swiss-ink text-lg leading-none">Facebook Page</h3>
+          <p className="text-xs text-swiss-faint mt-1.5 font-medium">
             Connect your Page and publish posts — comments, AI replies, and analytics live in Social Listening.
           </p>
         </div>
@@ -230,7 +232,7 @@ export const FacebookPageView: React.FC = () => {
           <button
             type="button"
             onClick={() => setShowCreatePost(true)}
-            className="cursor-pointer bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-xl flex items-center gap-1.5 text-sm font-bold transition-all active:scale-95 shadow-md shadow-primary/20"
+            className="cursor-pointer bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-xl flex items-center gap-1.5 text-sm font-bold transition-all active:scale-95 shadow-primary/20"
           >
             <Plus className="w-3.5 h-3.5" /> Create Post
           </button>
@@ -273,20 +275,20 @@ export const FacebookPageView: React.FC = () => {
                 <img
                   src={page.picture}
                   alt=""
-                  className="w-11 h-11 rounded-xl object-cover border border-black/5"
+                  className="w-11 h-11 rounded-xl object-cover border border-swiss-line"
                 />
               ) : (
                 <div className="w-11 h-11 rounded-xl bg-[#0084FF] flex items-center justify-center">
                   <Facebook className="w-5 h-5 text-white fill-white" />
                 </div>
               )}
-              <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-white border border-black/5 flex items-center justify-center">
+              <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-white border border-swiss-line flex items-center justify-center">
                 <Facebook className="w-2.5 h-2.5 text-[#1877F2] fill-[#1877F2]" />
               </span>
             </div>
             <div className="min-w-0">
               <p className="font-bold text-gray-950 text-sm leading-none truncate">{page.name}</p>
-              <p className="text-xs text-gray-400 font-medium leading-normal mt-1.5 truncate">
+              <p className="text-xs text-swiss-faint font-medium leading-normal mt-1.5 truncate">
                 {page.category} · {formatNum(page.followersCount)} followers · Page ID: {page.id}
               </p>
             </div>
@@ -299,14 +301,14 @@ export const FacebookPageView: React.FC = () => {
               type="button"
               onClick={() => void handleRefresh()}
               disabled={refreshing}
-              className="cursor-pointer px-3 py-1.5 bg-surface border border-black/5 text-sm font-bold text-gray-600 rounded-xl hover:bg-surface-muted flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="cursor-pointer px-3 py-1.5 bg-surface border border-swiss-line text-sm font-bold text-swiss-muted rounded-xl hover:bg-surface-muted flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <RefreshCw className={`w-3 h-3 ${refreshing ? 'animate-spin' : ''}`} /> Refresh
             </button>
             <button
               type="button"
               onClick={() => void handleDisconnect()}
-              className="cursor-pointer px-3 py-1.5 bg-surface border border-black/5 text-sm font-bold text-red-500 rounded-xl hover:bg-red-50 hover:border-red-200"
+              className="cursor-pointer px-3 py-1.5 bg-surface border border-swiss-line text-sm font-bold text-red-500 rounded-xl hover:bg-red-50 hover:border-red-200"
             >
               Disconnect
             </button>
@@ -319,8 +321,8 @@ export const FacebookPageView: React.FC = () => {
               <AlertTriangle className="w-5 h-5 text-orange-400" />
             </div>
             <div>
-              <p className="text-sm font-bold text-gray-900 leading-none">No Facebook Page Connected</p>
-              <p className="text-meta text-gray-400 font-medium leading-normal mt-1">
+              <p className="text-sm font-bold text-swiss-ink leading-none">No Facebook Page Connected</p>
+              <p className="text-meta text-swiss-faint font-medium leading-normal mt-1">
                 Connect your Facebook Page to publish posts and let Social Listening classify and reply to comments.
               </p>
             </div>
@@ -329,7 +331,7 @@ export const FacebookPageView: React.FC = () => {
             type="button"
             onClick={() => void handleConnect()}
             disabled={connecting}
-            className="cursor-pointer px-4 py-2 bg-[#0084FF] hover:bg-[#0071d4] disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-bold rounded-xl shadow-md transition-all whitespace-nowrap flex items-center gap-2"
+            className="cursor-pointer px-4 py-2 bg-[#0084FF] hover:bg-[#0071d4] disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-bold rounded-xl transition-all whitespace-nowrap flex items-center gap-2"
           >
             <Facebook className="w-4 h-4 fill-white" />
             {connecting ? 'Redirecting…' : 'Connect Facebook Page'}
@@ -340,15 +342,15 @@ export const FacebookPageView: React.FC = () => {
       {isConnected && page && (
         <Link
           to="/social-listening/content?platform=facebook"
-          className="flex items-center justify-between gap-3 rounded-2xl border border-black/5 bg-surface p-5 hover:border-primary/20 hover:shadow-md transition-all group"
+          className="flex items-center justify-between gap-3 rounded-2xl border border-swiss-line bg-surface p-5 hover:border-primary/20 transition-all group"
         >
           <div>
-            <p className="text-sm font-bold text-gray-900">View posts &amp; comments in Social Listening</p>
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-sm font-bold text-swiss-ink">View posts &amp; comments in Social Listening</p>
+            <p className="text-xs text-swiss-faint mt-1">
               Browse posts, see AI-classified comments, and reply, hide, or delete — all with the same automation Instagram uses.
             </p>
           </div>
-          <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-primary transition-colors shrink-0" />
+          <ArrowRight className="w-4 h-4 text-swiss-faint group-hover:text-primary transition-colors shrink-0" />
         </Link>
       )}
 

@@ -3,6 +3,7 @@
  */
 import React, { useState } from 'react';
 import { Loader2, Sparkles, X } from 'lucide-react';
+import { Textarea } from '../../ui/textarea';
 
 type Props = {
   open: boolean;
@@ -41,18 +42,18 @@ export function AiGenerateModal({ open, onClose, onGenerate }: Props) {
       <div
         role="dialog"
         aria-labelledby="ai-email-gen-title"
-        className="w-full max-w-lg rounded-2xl bg-white ring-1 ring-slate-200/80 shadow-xl"
+        className="w-full max-w-lg bg-white border border-swiss-line shadow-xl"
       >
-        <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-black/5">
+        <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-swiss-line">
           <div className="flex items-center gap-2 min-w-0">
             <div className="p-1.5 rounded-lg bg-primary/10 text-primary shrink-0">
               <Sparkles className="w-4 h-4" />
             </div>
             <div className="min-w-0">
-              <h2 id="ai-email-gen-title" className="text-sm font-bold text-gray-900">
+              <h2 id="ai-email-gen-title" className="text-sm font-bold text-swiss-ink">
                 Generate with AI
               </h2>
-              <p className="text-xs text-gray-400 mt-0.5">
+              <p className="text-xs text-swiss-faint mt-0.5">
                 Describe the email — we&apos;ll build blocks with {'{{variables}}'}.
               </p>
             </div>
@@ -61,7 +62,7 @@ export function AiGenerateModal({ open, onClose, onGenerate }: Props) {
             type="button"
             onClick={onClose}
             disabled={busy}
-            className="p-2 rounded-lg hover:bg-surface-muted text-gray-500 disabled:opacity-50"
+            className="p-2 rounded-lg hover:bg-surface-muted text-swiss-muted disabled:opacity-50"
             aria-label="Close"
           >
             <X className="w-4 h-4" />
@@ -69,13 +70,13 @@ export function AiGenerateModal({ open, onClose, onGenerate }: Props) {
         </div>
 
         <div className="px-5 py-4 space-y-3">
-          <textarea
+          <Textarea
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             rows={5}
             disabled={busy}
             placeholder="e.g. Welcome email for new customers: thank them, mention a 10% off code, CTA to shop, use {{first_name}} and {{company_name}}"
-            className="w-full rounded-xl bg-surface-muted px-3 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-y min-h-[120px]"
+            className="min-h-0 w-full rounded-xl bg-surface-muted px-3 py-2.5 text-sm text-swiss-ink placeholder:text-swiss-faint focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-y min-h-[120px]"
           />
           {error ? (
             <p className="text-xs font-semibold text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
@@ -84,12 +85,12 @@ export function AiGenerateModal({ open, onClose, onGenerate }: Props) {
           ) : null}
         </div>
 
-        <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-black/5">
+        <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-swiss-line">
           <button
             type="button"
             onClick={onClose}
             disabled={busy}
-            className="px-3 py-2 rounded-lg text-sm font-semibold text-gray-600 hover:bg-surface-muted disabled:opacity-50"
+            className="px-3 py-2 rounded-lg text-sm font-semibold text-swiss-muted hover:bg-surface-muted disabled:opacity-50"
           >
             Cancel
           </button>

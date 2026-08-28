@@ -79,7 +79,7 @@ export function ImpersonatePage() {
   if (error) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-        <div className="max-w-md rounded-2xl border border-red-200 bg-white p-6 text-center shadow-sm">
+        <div className="max-w-md rounded-2xl border border-red-200 bg-white p-6 text-center ">
           <p className="text-sm font-semibold text-red-700">{error}</p>
           <button
             type="button"

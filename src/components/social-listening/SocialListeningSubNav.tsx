@@ -46,8 +46,8 @@ export function SocialListeningSubNav({
                 to={`${link.to}${suffix}`}
                 className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-colors ${
                   active
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-500 hover:text-gray-800'
+                    ? 'bg-white text-swiss-ink '
+                    : 'text-swiss-muted hover:text-swiss-ink'
                 }`}
               >
                 {link.label}

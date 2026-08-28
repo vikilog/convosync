@@ -9,6 +9,8 @@ import { ArrowLeft, Loader2, Save, Rocket, Send, Code2, LayoutGrid } from 'lucid
 import { api, FlowValidationError } from '../../lib/api';
 import { pathForTemplateEditor } from '../../routes';
 import { WhatsAppFlowVisualBuilder } from './WhatsAppFlowVisualBuilder';
+import { Input } from '../ui/input';
+import { Textarea } from '../ui/textarea';
 import {
   builderStateToFlowJson,
   emptyBuilderState,
@@ -317,7 +319,7 @@ export const WhatsAppFlowEditor: React.FC<Props> = ({ flowId, onBack }) => {
 
   if (loading) {
     return (
-      <div className="flex justify-center py-24 text-gray-400">
+      <div className="flex justify-center py-24 text-swiss-faint">
         <Loader2 className="w-8 h-8 animate-spin" />
       </div>
     );
@@ -328,7 +330,7 @@ export const WhatsAppFlowEditor: React.FC<Props> = ({ flowId, onBack }) => {
       <button
         type="button"
         onClick={onBack}
-        className="inline-flex items-center gap-1.5 text-sm font-bold text-gray-500 hover:text-primary transition-colors w-fit"
+        className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-primary transition-colors w-fit"
       >
         <ArrowLeft className="w-3.5 h-3.5" />
         Back to flows
@@ -345,19 +347,19 @@ export const WhatsAppFlowEditor: React.FC<Props> = ({ flowId, onBack }) => {
         </div>
       ) : null}
 
-      <div className="p-4 bg-white ring-1 ring-slate-200/80 rounded-xl space-y-3 shrink-0">
+      <div className="p-4 bg-white border border-swiss-line space-y-3 shrink-0">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <label className="block flex-1 min-w-[200px]">
-            <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">
+            <span className="text-xs font-bold text-swiss-muted uppercase tracking-wide">
               Flow name
             </span>
-            <input
+            <Input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Appointment booking"
               disabled={status === 'published'}
-              className="mt-1 w-full bg-slate-50 border border-slate-200 rounded-xl py-2 px-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-70 disabled:cursor-not-allowed"
+              className="h-auto mt-1 w-full bg-slate-50 border border-swiss-line rounded-xl py-2 px-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-70 disabled:cursor-not-allowed"
             />
           </label>
 
@@ -368,7 +370,7 @@ export const WhatsAppFlowEditor: React.FC<Props> = ({ flowId, onBack }) => {
                 onClick={switchToVisual}
                 disabled={mode === 'visual'}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 ${
-                  mode === 'visual' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500'
+                  mode === 'visual' ? 'bg-white text-swiss-ink' : 'text-swiss-muted'
                 }`}
               >
                 <LayoutGrid className="w-3.5 h-3.5" />
@@ -379,7 +381,7 @@ export const WhatsAppFlowEditor: React.FC<Props> = ({ flowId, onBack }) => {
                 onClick={switchToJson}
                 disabled={mode === 'json'}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 ${
-                  mode === 'json' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500'
+                  mode === 'json' ? 'bg-white text-swiss-ink' : 'text-swiss-muted'
                 }`}
               >
                 <Code2 className="w-3.5 h-3.5" />
@@ -391,7 +393,7 @@ export const WhatsAppFlowEditor: React.FC<Props> = ({ flowId, onBack }) => {
 
         {mode === 'visual' && !isEdit && (
           <div>
-            <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">
+            <span className="text-xs font-bold text-swiss-muted uppercase tracking-wide">
               Start from a template
             </span>
             <div className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -400,10 +402,10 @@ export const WhatsAppFlowEditor: React.FC<Props> = ({ flowId, onBack }) => {
                   key={key}
                   type="button"
                   onClick={() => applyStarter(key)}
-                  className="text-left p-3 rounded-xl border border-slate-200 hover:border-primary/40 hover:bg-primary/5 transition-colors"
+                  className="text-left p-3 rounded-xl border border-swiss-line hover:border-primary/40 hover:bg-primary/5 transition-colors"
                 >
-                  <p className="text-xs font-bold text-gray-900">{tpl.label}</p>
-                  <p className="text-[11px] text-gray-500 mt-0.5">{tpl.description}</p>
+                  <p className="text-xs font-bold text-swiss-ink">{tpl.label}</p>
+                  <p className="text-[11px] text-swiss-muted mt-0.5">{tpl.description}</p>
                 </button>
               ))}
             </div>
@@ -426,17 +428,17 @@ export const WhatsAppFlowEditor: React.FC<Props> = ({ flowId, onBack }) => {
             readOnly={status === 'published'}
           />
         ) : (
-          <div className="min-h-0 flex-1 flex flex-col p-4 bg-white ring-1 ring-slate-200/80 rounded-xl">
-            <span className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
+          <div className="min-h-0 flex-1 flex flex-col p-4 bg-white border border-swiss-line">
+            <span className="text-xs font-bold text-swiss-muted uppercase tracking-wide mb-2">
               Flow JSON
             </span>
-            <textarea
+            <Textarea
               value={jsonText}
               onChange={(e) => setJsonText(e.target.value)}
               spellCheck={false}
               disabled={status === 'published'}
               placeholder='{"version": "7.1", "screens": [...]}'
-              className="flex-1 min-h-[320px] w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-mono outline-none focus:ring-2 focus:ring-primary/20 resize-none disabled:opacity-60 disabled:cursor-not-allowed"
+              className="min-h-0 flex-1 min-h-[320px] w-full bg-slate-50 border border-swiss-line rounded-xl p-3 text-xs font-mono outline-none focus:ring-2 focus:ring-primary/20 resize-none disabled:opacity-60 disabled:cursor-not-allowed"
             />
             {jsonError ? (
               <p className="mt-2 text-xs font-semibold text-red-600">{jsonError}</p>
@@ -446,17 +448,17 @@ export const WhatsAppFlowEditor: React.FC<Props> = ({ flowId, onBack }) => {
       </div>
 
       {status === 'published' ? (
-        <div className="shrink-0 p-4 bg-white ring-1 ring-slate-200/80 rounded-xl space-y-3">
-          <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">
+        <div className="shrink-0 p-4 bg-white border border-swiss-line space-y-3">
+          <span className="text-xs font-bold text-swiss-muted uppercase tracking-wide">
             Send a test message
           </span>
           <div className="flex flex-wrap gap-2">
-            <input
+            <Input
               type="tel"
               value={testPhone}
               onChange={(e) => setTestPhone(e.target.value)}
               placeholder="e.g. 919992492168"
-              className="flex-1 min-w-[200px] bg-slate-50 border border-slate-200 rounded-xl py-2 px-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-primary/20"
+              className="h-auto flex-1 min-w-[200px] bg-slate-50 border border-swiss-line rounded-xl py-2 px-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-primary/20"
             />
             <button
               type="button"
@@ -481,7 +483,7 @@ export const WhatsAppFlowEditor: React.FC<Props> = ({ flowId, onBack }) => {
         <button
           type="button"
           onClick={onBack}
-          className="px-4 py-2 rounded-xl text-sm font-bold border border-black/5 bg-white text-gray-700 hover:bg-gray-50"
+          className="px-4 py-2 rounded-xl text-sm font-bold border border-swiss-line bg-white text-swiss-ink hover:bg-gray-50"
         >
           Cancel
         </button>

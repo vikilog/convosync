@@ -21,7 +21,7 @@ interface StatCardProps {
 
 const ICON: Record<StatCardVariant, string> = {
   contacts: 'bg-sky-50 text-sky-600',
-  messages: 'bg-[#e8f0ec] text-primary',
+  messages: 'bg-[#e6fcef] text-primary',
   response: 'bg-amber-50 text-amber-600',
   journeys: 'bg-violet-50 text-violet-600',
   conversations: 'bg-teal-50 text-teal-600',
@@ -37,7 +37,7 @@ export const StatCard: React.FC<StatCardProps> = ({
   footer,
   trend,
 }) => (
-  <div className="rounded-xl bg-white ring-1 ring-slate-200/80 transition-shadow duration-200 hover:shadow-sm">
+  <div className="bg-white border border-swiss-line transition-shadow duration-200 ">
     <div className="flex items-start gap-4 p-4">
       <div
         className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg ${ICON[variant]}`}
@@ -47,7 +47,7 @@ export const StatCard: React.FC<StatCardProps> = ({
 
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-xs font-medium text-neutral-500">{label}</p>
+          <p className="text-xs font-medium text-swiss-muted">{label}</p>
           {badge ?? (trend ? (
             <span className="inline-flex items-center gap-0.5 text-[11px] font-semibold text-primary">
               <TrendingUp className="h-3 w-3" />
@@ -55,7 +55,7 @@ export const StatCard: React.FC<StatCardProps> = ({
             </span>
           ) : null)}
         </div>
-        <p className="mt-1 text-2xl font-semibold tracking-tight text-neutral-900">{value}</p>
+        <p className="mt-1 text-2xl font-semibold tracking-tight text-swiss-ink">{value}</p>
         {footer ? <div className="mt-2">{footer}</div> : null}
       </div>
     </div>

@@ -5,6 +5,7 @@ import { getSocket } from '../../lib/socket';
 import { formatNotificationRelativeTime } from '../../lib/notificationTime';
 import { useIsLargeUp } from '../../hooks/useBreakpoint';
 import { useKeepAliveActivation, useKeepAliveActive } from '../KeepAlive';
+import { Input } from '../ui/input';
 import {
   setActiveTeamChatPeerId,
   setTeamChatVisible,
@@ -53,7 +54,7 @@ function Avatar({
   return (
     <div className="relative shrink-0">
       <div
-        className={`flex items-center justify-center overflow-hidden rounded-full bg-[#e8f0ec] font-semibold text-primary ${dim}`}
+        className={`flex items-center justify-center overflow-hidden rounded-full bg-[#e6fcef] font-semibold text-primary ${dim}`}
       >
         {avatar ? (
           <img src={avatar} alt="" className="h-full w-full object-cover" />
@@ -287,18 +288,18 @@ export const TeamChatView: React.FC = () => {
   };
 
   return (
-    <div className="flex h-full min-h-0 flex-row overflow-hidden border-t border-black/5 bg-surface-muted selection:bg-primary/15">
+    <div className="flex h-full min-h-0 flex-row overflow-hidden border-t border-swiss-line bg-surface-muted selection:bg-primary/15">
       <section
         className={`${
           isLargeUp ? 'w-[300px] xl:w-[320px]' : 'w-full'
-        } h-full shrink-0 flex-col border-r border-black/5 bg-white text-left ${
+        } h-full shrink-0 flex-col border-r border-swiss-line bg-white text-left ${
           !isLargeUp && mobilePane !== 'list' ? 'hidden' : 'flex'
         }`}
       >
-        <div className="flex flex-col gap-2.5 border-b border-black/5 p-3">
+        <div className="flex flex-col gap-2.5 border-b border-swiss-line p-3">
           <div>
-            <h2 className="text-sm font-semibold text-neutral-900">Team chat</h2>
-            <p className="text-xs text-neutral-500">Direct messages with your team</p>
+            <h2 className="text-sm font-semibold text-swiss-ink">Team chat</h2>
+            <p className="text-xs text-swiss-muted">Direct messages with your team</p>
           </div>
           <label className="relative block">
             <span className="sr-only">Search team members</span>
@@ -306,21 +307,21 @@ export const TeamChatView: React.FC = () => {
               className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400"
               aria-hidden
             />
-            <input
+            <Input
               type="search"
               value={listSearch}
               onChange={(e) => setListSearch(e.target.value)}
               placeholder="Search teammates…"
-              className="min-h-10 w-full cursor-text rounded-xl border border-black/5 bg-surface-muted py-2 pl-8 pr-3 text-sm font-medium text-gray-900 outline-none transition-colors duration-200 placeholder:text-slate-400 focus:border-primary/40 focus:ring-2 focus:ring-primary/15"
+              className="h-auto min-h-10 w-full cursor-text rounded-xl border border-swiss-line bg-surface-muted py-2 pl-8 pr-3 text-sm font-medium text-swiss-ink outline-none transition-colors duration-200 placeholder:text-slate-400 focus:border-primary/40 focus:ring-2 focus:ring-primary/15"
             />
           </label>
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto">
           {loadingPeers ? (
-            <p className="px-4 py-8 text-center text-sm text-neutral-400">Loading team…</p>
+            <p className="px-4 py-8 text-center text-sm text-swiss-faint">Loading team…</p>
           ) : filteredPeers.length === 0 ? (
-            <p className="px-4 py-8 text-center text-sm text-neutral-400">
+            <p className="px-4 py-8 text-center text-sm text-swiss-faint">
               {listSearch.trim() ? 'No matches' : 'No teammates yet'}
             </p>
           ) : (
@@ -346,13 +347,13 @@ export const TeamChatView: React.FC = () => {
                     <div className="flex items-baseline justify-between gap-2">
                       <p
                         className={`truncate text-sm ${
-                          unread > 0 ? 'font-bold text-neutral-900' : 'font-semibold text-neutral-900'
+                          unread > 0 ? 'font-bold text-swiss-ink' : 'font-semibold text-swiss-ink'
                         }`}
                       >
                         {peer.name}
                       </p>
                       {peer.lastMessage && (
-                        <span className="shrink-0 text-[10px] text-neutral-400">
+                        <span className="shrink-0 text-[10px] text-swiss-faint">
                           {formatNotificationRelativeTime(Date.parse(peer.lastMessage.createdAt))}
                         </span>
                       )}
@@ -360,7 +361,7 @@ export const TeamChatView: React.FC = () => {
                     <div className="flex items-center justify-between gap-2">
                       <p
                         className={`truncate text-xs ${
-                          unread > 0 ? 'font-medium text-neutral-700' : 'text-neutral-500'
+                          unread > 0 ? 'font-medium text-swiss-ink' : 'text-swiss-muted'
                         }`}
                       >
                         {preview}
@@ -386,22 +387,22 @@ export const TeamChatView: React.FC = () => {
       >
         {!selectedPeer ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-2 px-6 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-surface-muted text-neutral-400">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-surface-muted text-swiss-faint">
               <MessageSquare className="h-5 w-5" />
             </div>
-            <p className="text-sm font-medium text-neutral-700">Select a teammate</p>
-            <p className="max-w-xs text-xs text-neutral-500">
+            <p className="text-sm font-medium text-swiss-ink">Select a teammate</p>
+            <p className="max-w-xs text-xs text-swiss-muted">
               Pick someone from the list to start a private 1:1 chat.
             </p>
           </div>
         ) : (
           <>
-            <div className="flex items-center gap-3 border-b border-black/5 px-3 py-3">
+            <div className="flex items-center gap-3 border-b border-swiss-line px-3 py-3">
               {!isLargeUp && (
                 <button
                   type="button"
                   onClick={() => setMobilePane('list')}
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-neutral-500 hover:bg-surface-muted"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-swiss-muted hover:bg-surface-muted"
                   aria-label="Back to team list"
                 >
                   <ArrowLeft className="h-4 w-4" />
@@ -414,10 +415,10 @@ export const TeamChatView: React.FC = () => {
                 size="lg"
               />
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-neutral-900">
+                <p className="truncate text-sm font-semibold text-swiss-ink">
                   {selectedPeer.name}
                 </p>
-                <p className="text-xs text-neutral-500">
+                <p className="text-xs text-swiss-muted">
                   {selectedPeer.online ? 'Online' : 'Offline'}
                 </p>
               </div>
@@ -425,9 +426,9 @@ export const TeamChatView: React.FC = () => {
 
             <div className="min-h-0 flex-1 space-y-2 overflow-y-auto bg-surface-muted/40 px-4 py-4">
               {loadingThread ? (
-                <p className="py-10 text-center text-sm text-neutral-400">Loading chat…</p>
+                <p className="py-10 text-center text-sm text-swiss-faint">Loading chat…</p>
               ) : messages.length === 0 ? (
-                <p className="py-10 text-center text-sm text-neutral-400">
+                <p className="py-10 text-center text-sm text-swiss-faint">
                   Say hello to {selectedPeer.name.split(' ')[0] || selectedPeer.name}
                 </p>
               ) : (
@@ -442,13 +443,13 @@ export const TeamChatView: React.FC = () => {
                         className={`max-w-[min(72%,28rem)] rounded-2xl px-3 py-2 text-sm ${
                           mine
                             ? 'rounded-br-md bg-primary text-white'
-                            : 'rounded-bl-md bg-white text-neutral-800 shadow-sm ring-1 ring-black/5'
+                            : 'rounded-bl-md bg-white text-swiss-ink ring-1 ring-black/5'
                         }`}
                       >
                         <p className="whitespace-pre-wrap break-words">{m.body}</p>
                         <p
                           className={`mt-1 text-[10px] ${
-                            mine ? 'text-white/70' : 'text-neutral-400'
+                            mine ? 'text-white/70' : 'text-swiss-faint'
                           }`}
                         >
                           {formatNotificationRelativeTime(Date.parse(m.createdAt))}
@@ -462,18 +463,18 @@ export const TeamChatView: React.FC = () => {
             </div>
 
             <form
-              className="flex items-center gap-2 border-t border-black/5 bg-white px-3 py-2.5"
+              className="flex items-center gap-2 border-t border-swiss-line bg-white px-3 py-2.5"
               onSubmit={(e) => {
                 e.preventDefault();
                 void send();
               }}
             >
-              <input
+              <Input
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
                 placeholder={`Message ${selectedPeer.name.split(' ')[0] || selectedPeer.name}…`}
                 maxLength={4000}
-                className="min-w-0 flex-1 rounded-lg border border-black/10 bg-white px-3 py-2.5 text-sm text-neutral-800 placeholder:text-neutral-400 focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/15"
+                className="h-auto min-w-0 flex-1 rounded-lg border border-black/10 bg-white px-3 py-2.5 text-sm text-swiss-ink placeholder:text-swiss-faint focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/15"
               />
               <button
                 type="submit"

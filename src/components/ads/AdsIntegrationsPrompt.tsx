@@ -6,12 +6,12 @@ import { GoogleIcon } from './GoogleIcon';
 
 export const AdsIntegrationsPrompt: React.FC = () => (
   <div className="flex-1 max-w-2xl mx-auto pb-12">
-    <div className="bg-surface border border-black/5 rounded-2xl p-8 text-center">
+    <div className="bg-surface border border-swiss-line rounded-2xl p-8 text-center">
       <div className="mx-auto w-14 h-14 rounded-2xl bg-sky-50 border border-sky-100 flex items-center justify-center mb-4">
         <Plug className="w-7 h-7 text-sky-600" />
       </div>
-      <h2 className="text-lg font-black text-gray-900">Connect an ads platform first</h2>
-      <p className="text-sm text-gray-600 mt-2 leading-relaxed max-w-md mx-auto">
+      <h2 className="text-lg font-semibold text-swiss-ink">Connect an ads platform first</h2>
+      <p className="text-sm text-swiss-muted mt-2 leading-relaxed max-w-md mx-auto">
         Ads Manager data appears after you connect Meta Ads or Google Ads from Integrations. Link at least one platform to view campaigns and KPIs here.
       </p>
 

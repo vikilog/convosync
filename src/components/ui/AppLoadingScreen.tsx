@@ -75,14 +75,14 @@ export function AppLoadingScreen({
   if (variant === 'card') {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
-        <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+        <div className="w-full max-w-md rounded-2xl border border-swiss-line bg-white p-8 text-center shadow-sm">
           <div className="mx-auto mb-5 flex justify-center">
             <AnimatedLoader compact />
           </div>
           {title ? (
-            <h1 className="text-lg font-black text-gray-950">{title}</h1>
+            <h1 className="text-lg font-semibold text-gray-950">{title}</h1>
           ) : null}
-          <p className={`text-sm font-medium text-gray-600 ${title ? 'mt-2' : ''}`}>
+          <p className={`text-sm font-medium text-swiss-muted ${title ? 'mt-2' : ''}`}>
             {message}
             {isLoadingMessage(message) ? <LoadingDots /> : null}
           </p>
@@ -114,7 +114,7 @@ export function AppLoadingScreen({
         </div>
 
         <p className="font-display text-sm font-semibold tracking-wide text-slate-900">{brand}</p>
-        <p className="mt-2 flex items-center gap-0.5 text-xs font-medium text-gray-500">
+        <p className="mt-2 flex items-center gap-0.5 text-xs font-medium text-swiss-muted">
           {message}
           <LoadingDots />
         </p>

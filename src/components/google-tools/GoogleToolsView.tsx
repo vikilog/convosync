@@ -26,8 +26,8 @@ function GoogleToolsEmptyState() {
           <Blocks className="w-7 h-7 text-[#4285F4]" />
         </div>
         <div>
-          <h2 className="text-lg font-black text-gray-950">No Google tools connected</h2>
-          <p className="text-sm text-gray-500 mt-1">
+          <h2 className="text-lg font-semibold text-gray-950">No Google tools connected</h2>
+          <p className="text-sm text-swiss-muted mt-1">
             Connect Calendar, Gmail, Drive, and other Google products from Integrations.
           </p>
         </div>
@@ -95,7 +95,7 @@ export function GoogleToolsView() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-16 text-sm text-gray-400">
+      <div className="flex items-center justify-center py-16 text-sm text-swiss-faint">
         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
         Loading Google tools…
       </div>
@@ -104,7 +104,7 @@ export function GoogleToolsView() {
 
   if (connectedTools.length === 0) {
     return (
-      <div className="flex h-[calc(100vh-4.5rem)] -m-2 md:-m-3 bg-white border border-slate-200 rounded-2xl overflow-hidden">
+      <div className="flex h-[calc(100vh-4.5rem)] -m-2 md:-m-3 bg-white border border-swiss-line rounded-2xl overflow-hidden">
         <GoogleToolsEmptyState />
       </div>
     );
@@ -112,7 +112,7 @@ export function GoogleToolsView() {
 
   if (!activeTool) {
     return (
-      <div className="flex items-center justify-center py-16 text-sm text-gray-400">
+      <div className="flex items-center justify-center py-16 text-sm text-swiss-faint">
         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
         Opening Google tool…
       </div>
@@ -121,7 +121,7 @@ export function GoogleToolsView() {
 
   return (
     <GoogleToolsActiveProvider activeTool={activeTool}>
-      <div className="flex h-[calc(100vh-4.5rem)] -m-2 md:-m-3 w-full min-w-0 max-w-full bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+      <div className="flex h-[calc(100vh-4.5rem)] -m-2 md:-m-3 w-full min-w-0 max-w-full bg-white border border-swiss-line rounded-2xl overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
         <GoogleToolsLayout>
           <GoogleToolsPage key={activeTool} tool={activeTool} />
         </GoogleToolsLayout>

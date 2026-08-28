@@ -6,6 +6,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Check, Lock, Mail, User } from 'lucide-react';
+import { Input } from './ui/input';
 import { PRODUCT_LOGO, PRODUCT_NAME } from '../lib/brand';
 import { api } from '../lib/api';
 import { landingPath } from '../lib/publicUrls';
@@ -86,7 +87,7 @@ export function SignupPage() {
           <p className="text-sm font-bold uppercase tracking-widest text-white/70">
             14-day free trial
           </p>
-          <h1 className="text-3xl font-black tracking-tight leading-tight mt-2">
+          <h1 className="text-3xl font-semibold tracking-tight leading-tight mt-2">
             Start your ConvoSync workspace in minutes
           </h1>
           <p className="mt-4 text-white/80 text-sm leading-relaxed">
@@ -112,7 +113,7 @@ export function SignupPage() {
         <div className="px-6 pt-6 md:px-10">
           <Link
             to="/"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-gray-500 hover:text-primary transition-colors cursor-pointer"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-swiss-muted hover:text-primary transition-colors cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to home
@@ -125,63 +126,63 @@ export function SignupPage() {
               <img src={PRODUCT_LOGO} alt={PRODUCT_NAME} className="h-12 w-12 object-contain" />
             </div>
 
-            <h2 className="text-2xl font-bold text-gray-900">Create your free account</h2>
-            <p className="text-sm text-gray-500 mt-1 mb-6">
+            <h2 className="text-2xl font-bold text-swiss-ink">Create your free account</h2>
+            <p className="text-sm text-swiss-muted mt-1 mb-6">
               Sign up to start your trial. You will finish company and workspace details in the next
               steps.
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <label className="block">
-                <span className="text-meta font-bold text-gray-500 uppercase tracking-wide">
+                <span className="text-meta font-bold text-swiss-muted uppercase tracking-wide">
                   Your name
                 </span>
                 <div className="relative mt-1">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-swiss-faint" />
+                  <Input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     autoComplete="name"
                     required
-                    className="w-full pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    className="h-auto pl-9 pr-3 py-2.5 text-sm rounded-xl border-swiss-line focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary"
                     placeholder="Vikas Sharma"
                   />
                 </div>
               </label>
 
               <label className="block">
-                <span className="text-meta font-bold text-gray-500 uppercase tracking-wide">
+                <span className="text-meta font-bold text-swiss-muted uppercase tracking-wide">
                   Work email
                 </span>
                 <div className="relative mt-1">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-swiss-faint" />
+                  <Input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value.toLowerCase())}
                     autoComplete="email"
                     required
-                    className="w-full pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    className="h-auto pl-9 pr-3 py-2.5 text-sm rounded-xl border-swiss-line focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary"
                     placeholder="you@company.com"
                   />
                 </div>
               </label>
 
               <label className="block">
-                <span className="text-meta font-bold text-gray-500 uppercase tracking-wide">
+                <span className="text-meta font-bold text-swiss-muted uppercase tracking-wide">
                   Password
                 </span>
                 <div className="relative mt-1">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-swiss-faint" />
+                  <Input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     autoComplete="new-password"
                     required
                     minLength={8}
-                    className="w-full pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    className="h-auto pl-9 pr-3 py-2.5 text-sm rounded-xl border-swiss-line focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary"
                     placeholder="Min. 8 characters"
                   />
                 </div>
@@ -196,7 +197,7 @@ export function SignupPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 rounded-full bg-channel-green hover:bg-[#20bd5a] text-white text-sm font-bold transition-all disabled:opacity-60 shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-3 rounded-full bg-channel-green hover:bg-[#20bd5a] text-white text-sm font-bold transition-all disabled:opacity-60 flex items-center justify-center gap-2 cursor-pointer"
               >
                 {loading ? (
                   'Creating account…'
@@ -209,7 +210,7 @@ export function SignupPage() {
               </button>
             </form>
 
-            <p className="text-meta text-gray-400 text-center mt-4 leading-relaxed">
+            <p className="text-meta text-swiss-faint text-center mt-4 leading-relaxed">
               No credit card required. By signing up you agree to our{' '}
               <a
                 href={landingPath('/terms', '/terms')}
@@ -231,7 +232,7 @@ export function SignupPage() {
               .
             </p>
 
-            <p className="text-sm text-center text-gray-500 mt-6">
+            <p className="text-sm text-center text-swiss-muted mt-6">
               Already have an account?{' '}
               <Link to="/login" className="font-semibold text-primary hover:underline cursor-pointer">
                 Log in

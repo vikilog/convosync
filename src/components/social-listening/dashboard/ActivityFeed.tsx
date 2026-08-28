@@ -33,10 +33,10 @@ export function ActivityFeed({
   loading: boolean;
 }) {
   return (
-    <div className="flex min-h-[280px] flex-col rounded-xl bg-white ring-1 ring-slate-200/80 p-5">
+    <div className="flex min-h-[280px] flex-col bg-white border border-swiss-line p-5">
       <div className="mb-3">
-        <h2 className="text-sm font-bold text-neutral-900">Recent activity</h2>
-        <p className="text-xs text-neutral-500">Automation and approval events</p>
+        <h2 className="text-sm font-bold text-swiss-ink">Recent activity</h2>
+        <p className="text-xs text-swiss-muted">Automation and approval events</p>
       </div>
 
       {loading ? (
@@ -48,8 +48,8 @@ export function ActivityFeed({
       ) : !events?.length ? (
         <div className="flex flex-1 flex-col items-center justify-center py-10 text-center">
           <Activity className="mb-2 h-7 w-7 text-gray-300" />
-          <p className="text-sm font-semibold text-gray-600">No activity yet</p>
-          <p className="mt-1 text-xs text-gray-400">
+          <p className="text-sm font-semibold text-swiss-muted">No activity yet</p>
+          <p className="mt-1 text-xs text-swiss-faint">
             Auto-replies, DMs, and leads will show up here as they happen.
           </p>
         </div>
@@ -58,14 +58,14 @@ export function ActivityFeed({
           {events.map((ev) => (
             <li
               key={ev.id}
-              className="flex gap-3 border-b border-black/5 py-2.5 last:border-b-0"
+              className="flex gap-3 border-b border-swiss-line py-2.5 last:border-b-0"
             >
               <span
                 className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${DOT[ev.eventType] || 'bg-slate-300'}`}
               />
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-medium leading-relaxed text-gray-800">{ev.message}</p>
-                <p className="mt-0.5 text-[10px] text-gray-400">{timeAgo(ev.createdAt)}</p>
+                <p className="text-xs font-medium leading-relaxed text-swiss-ink">{ev.message}</p>
+                <p className="mt-0.5 text-[10px] text-swiss-faint">{timeAgo(ev.createdAt)}</p>
               </div>
             </li>
           ))}

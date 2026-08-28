@@ -135,7 +135,7 @@ export function CalendarLeftPanel({
             selectedDayEvents.map((event, index) => (
               <div
                 key={event.id}
-                className="flex gap-3 rounded-xl border border-[#E2E8F0] bg-white p-3 shadow-sm hover:shadow-md transition-shadow"
+                className="flex gap-3 rounded-xl border border-[#E2E8F0] bg-white p-3 transition-shadow"
               >
                 <p className="text-meta font-medium text-[#64748B] w-14 shrink-0 pt-0.5 tabular-nums">
                   {formatEventTime(event).split(' – ')[0] || 'All day'}

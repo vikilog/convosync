@@ -28,6 +28,7 @@ import { PreviewVariablesPanel } from './PreviewVariablesPanel';
 import { designFromApi, designToJson } from './parseDesign';
 import { renderDesignToFullHtml } from './renderHtml';
 import { useEmailBuilderStore } from './store';
+import { Input } from '../../ui/input';
 
 type Props = {
   template: EmailTemplateRecord | null;
@@ -170,25 +171,25 @@ export function EmailBuilderShell({ template, onBack, onSaved }: Props) {
       className="fixed inset-0 z-50 flex flex-col bg-white min-h-0 transition-[left] duration-200 ease-out"
       style={{ left: sidebarOffset }}
     >
-      <header className="shrink-0 flex items-center gap-3 px-4 py-2.5 border-b border-black/5 bg-white">
+      <header className="shrink-0 flex items-center gap-3 px-4 py-2.5 border-b border-swiss-line bg-white">
         <button
           type="button"
           onClick={handleBack}
-          className="p-2 rounded-lg hover:bg-surface-muted text-gray-600"
+          className="p-2 rounded-lg hover:bg-surface-muted text-swiss-muted"
           aria-label="Back"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
 
         <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-2 gap-2">
-          <input
-            className="rounded-lg bg-surface-muted px-3 py-2 text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+          <Input
+            className="h-auto rounded-lg bg-surface-muted px-3 py-2 text-sm font-semibold text-swiss-ink focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
             placeholder="Template name"
             value={name}
             onChange={(e) => setMeta({ name: e.target.value })}
           />
-          <input
-            className="rounded-lg bg-surface-muted px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+          <Input
+            className="h-auto rounded-lg bg-surface-muted px-3 py-2 text-sm text-swiss-ink focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
             placeholder="Subject line — use {{variables}}"
             value={subject}
             onChange={(e) => setMeta({ subject: e.target.value })}
@@ -197,12 +198,12 @@ export function EmailBuilderShell({ template, onBack, onSaved }: Props) {
 
         <div className="flex items-center gap-2 shrink-0">
           {/* ponytail: Generate with AI UI hidden for now — rewire AiGenerateModal when ready */}
-          <div className="hidden sm:flex rounded-lg border border-black/5 p-0.5 bg-white">
+          <div className="hidden sm:flex rounded-lg border border-swiss-line p-0.5 bg-white">
             <button
               type="button"
               onClick={() => setViewMode('edit')}
               className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md text-sm font-semibold ${
-                viewMode === 'edit' ? 'bg-white shadow-sm text-primary' : 'text-gray-500'
+                viewMode === 'edit' ? 'bg-white text-primary' : 'text-swiss-muted'
               }`}
             >
               <Pencil className="w-3.5 h-3.5" /> Edit
@@ -211,7 +212,7 @@ export function EmailBuilderShell({ template, onBack, onSaved }: Props) {
               type="button"
               onClick={() => setViewMode('html')}
               className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md text-sm font-semibold ${
-                viewMode === 'html' ? 'bg-white shadow-sm text-primary' : 'text-gray-500'
+                viewMode === 'html' ? 'bg-white text-primary' : 'text-swiss-muted'
               }`}
             >
               <Code2 className="w-3.5 h-3.5" /> HTML
@@ -220,7 +221,7 @@ export function EmailBuilderShell({ template, onBack, onSaved }: Props) {
               type="button"
               onClick={() => setViewMode('preview')}
               className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md text-sm font-semibold ${
-                viewMode === 'preview' ? 'bg-white shadow-sm text-primary' : 'text-gray-500'
+                viewMode === 'preview' ? 'bg-white text-primary' : 'text-swiss-muted'
               }`}
             >
               <Eye className="w-3.5 h-3.5" /> Preview
@@ -231,7 +232,7 @@ export function EmailBuilderShell({ template, onBack, onSaved }: Props) {
             type="button"
             disabled={saving}
             onClick={() => handleSave(false)}
-            className="hidden md:inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-black/5 text-sm font-semibold text-gray-700 hover:bg-surface-muted disabled:opacity-50"
+            className="hidden md:inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-swiss-line text-sm font-semibold text-swiss-ink hover:bg-surface-muted disabled:opacity-50"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             Save draft

@@ -4,6 +4,7 @@ import { motion } from 'motion/react';
 import type { AgentType } from '../../components/ai-agent/types';
 import { CATEGORY_LABELS } from '../../components/ai-agent/types';
 import { AGENT_TYPE_OPTIONS } from '../../components/ai-agent/AgentTypeSelector';
+import { Input } from '../../components/ui/input';
 
 type Props = {
   category: AgentType;
@@ -27,7 +28,7 @@ export const CreateAgentModal: React.FC<Props> = ({
       initial={{ scale: 0.96, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       exit={{ scale: 0.96, opacity: 0 }}
-      className="bg-white rounded-2xl w-full max-w-md border border-black/5 p-6 shadow-2xl"
+      className="bg-white rounded-2xl w-full max-w-md border border-swiss-line p-6 shadow-2xl"
     >
       <div className="flex justify-between items-start pb-4 border-b border-gray-100">
         <div>
@@ -49,14 +50,14 @@ export const CreateAgentModal: React.FC<Props> = ({
           <label className="block text-sm font-bold text-[#6B7280] uppercase tracking-wider mb-1.5">
             Agent name
           </label>
-          <input
+          <Input
             type="text"
             required
             autoFocus
             value={name}
             onChange={(e) => onNameChange(e.target.value)}
             placeholder="e.g. Support Bot"
-            className="w-full bg-white border border-black/5 rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+            className="h-auto w-full bg-white border border-swiss-line rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
           />
         </div>
 

@@ -100,6 +100,26 @@ const TAB_SEO: Record<AppTab, Omit<PageSeo, 'path'>> = {
     title: 'Data Tables',
     description: 'Design your own tables, connect them to a WhatsApp Flow, or enter data by hand.',
   },
+  'app-store': {
+    title: 'App Store',
+    description: 'Install first-party apps that add capabilities to your ConvoSync workspace.',
+  },
+  crm: {
+    title: 'CRM',
+    description: 'Accounts, contacts, tasks and a meeting/notes timeline.',
+  },
+  attendance: {
+    title: 'Attendance',
+    description: 'Staff check-in and check-out, shift tracking, and daily attendance reports.',
+  },
+  'dasalon-console': {
+    title: 'Dasalon Console',
+    description: 'Salon appointments, stylist schedules, and service menu in one dashboard.',
+  },
+  'dasalon-partner': {
+    title: 'Dasalon Partner',
+    description: "Stylist and chair-partner view of today's bookings, availability, and earnings.",
+  },
   ctwa: {
     title: 'Ads Manager',
     description: 'Connect Meta and Google Ads, run Click-to-WhatsApp campaigns, and track performance.',

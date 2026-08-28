@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Code2, Info } from 'lucide-react';
 import { useEmailBuilderStore } from './store';
 import { blocksToEditableHtml } from './editableHtml';
+import { Textarea } from '../../ui/textarea';
 export function HtmlCodePanel() {
   const blocks = useEmailBuilderStore((s) => s.blocks);
   const setHtmlSource = useEmailBuilderStore((s) => s.setHtmlSource);
@@ -22,7 +23,7 @@ export function HtmlCodePanel() {
           <Code2 className="w-4 h-4 text-primary" />
           <span className="text-sm font-semibold">HTML source</span>
         </div>
-        <span className="text-meta text-gray-400">Supports {'{{variables}}'} · inline styles recommended</span>
+        <span className="text-meta text-swiss-faint">Supports {'{{variables}}'} · inline styles recommended</span>
       </div>
 
       {wasMultiBlock ? (
@@ -36,8 +37,8 @@ export function HtmlCodePanel() {
         </div>
       ) : null}
 
-      <textarea
-        className="flex-1 min-h-0 w-full resize-none bg-[#1e1e2e] text-[#cdd6f4] font-mono text-sm leading-relaxed p-4 focus:outline-none"
+      <Textarea
+        className="min-h-0 flex-1 min-h-0 w-full resize-none bg-[#1e1e2e] text-[#cdd6f4] font-mono text-sm leading-relaxed p-4 focus:outline-none"
         spellCheck={false}
         value={source}
         onChange={(e) => {

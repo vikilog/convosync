@@ -15,6 +15,7 @@ import {
   Webhook,
 } from 'lucide-react';
 import { api, parseApiError } from '../../lib/api';
+import { Input } from '../ui/input';
 
 const WEBHOOK_EVENTS = [
   'contact.created',
@@ -192,7 +193,7 @@ export function WebhooksPanel() {
 
   if (loading && !incoming) {
     return (
-      <div className="flex items-center gap-2 text-sm text-gray-500 py-8">
+      <div className="flex items-center gap-2 text-sm text-swiss-muted py-8">
         <Loader2 className="w-4 h-4 animate-spin" />
         Loading webhooks…
       </div>
@@ -201,7 +202,7 @@ export function WebhooksPanel() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-2">
+      <div className="flex flex-wrap gap-2 border-b border-swiss-line pb-2">
         {tabs.map((t) => (
           <button
             key={t.id}
@@ -210,7 +211,7 @@ export function WebhooksPanel() {
             className={`px-3 py-1.5 rounded-lg text-sm font-bold transition-colors ${
               tab === t.id
                 ? 'bg-primary text-white'
-                : 'text-gray-500 hover:bg-slate-50 hover:text-primary'
+                : 'text-swiss-muted hover:bg-slate-50 hover:text-primary'
             }`}
           >
             {t.label}
@@ -219,7 +220,7 @@ export function WebhooksPanel() {
         <button
           type="button"
           onClick={() => void load()}
-          className="ml-auto inline-flex items-center gap-1 text-sm font-semibold text-gray-500 hover:text-primary"
+          className="ml-auto inline-flex items-center gap-1 text-sm font-semibold text-swiss-muted hover:text-primary"
         >
           <RefreshCw className="w-3.5 h-3.5" />
           Refresh
@@ -234,19 +235,19 @@ export function WebhooksPanel() {
       )}
 
       {tab === 'incoming' && incoming && (
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm space-y-4">
+        <div className="rounded-2xl border border-swiss-line bg-white p-4 space-y-4">
           <div className="flex items-start gap-3">
             <div className="p-2 rounded-xl bg-sky-50 text-primary">
               <Webhook className="w-5 h-5" />
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="text-sm font-bold text-gray-900">Incoming webhook</h4>
-              <p className="text-xs text-gray-500 mt-1">
+              <h4 className="text-sm font-bold text-swiss-ink">Incoming webhook</h4>
+              <p className="text-xs text-swiss-muted mt-1">
                 Unique URL and secret per organization. Send events with header{' '}
                 <code className="text-xs bg-gray-100 px-1 rounded">X-ConvoSync-Secret</code>.
               </p>
             </div>
-            <label className="flex items-center gap-2 text-sm font-semibold text-gray-600">
+            <label className="flex items-center gap-2 text-sm font-semibold text-swiss-muted">
               <input
                 type="checkbox"
                 checked={incoming.enabled}
@@ -259,17 +260,17 @@ export function WebhooksPanel() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-bold uppercase tracking-wide text-gray-500">
+            <label className="text-sm font-bold uppercase tracking-wide text-swiss-muted">
               Webhook URL
             </label>
             <div className="flex gap-2">
-              <code className="flex-1 text-xs bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 truncate">
+              <code className="flex-1 text-xs bg-slate-50 border border-swiss-line rounded-lg px-3 py-2 truncate">
                 {incoming.webhookUrl}
               </code>
               <button
                 type="button"
                 onClick={() => void copyText(incoming.webhookUrl)}
-                className="p-2 rounded-lg border border-slate-200 hover:border-primary/40 text-gray-500"
+                className="p-2 rounded-lg border border-swiss-line hover:border-primary/40 text-swiss-muted"
                 aria-label="Copy URL"
               >
                 <Copy className="w-4 h-4" />
@@ -278,17 +279,17 @@ export function WebhooksPanel() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-bold uppercase tracking-wide text-gray-500">
+            <label className="text-sm font-bold uppercase tracking-wide text-swiss-muted">
               Secret
             </label>
             <div className="flex gap-2">
-              <code className="flex-1 text-xs bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 truncate font-mono">
+              <code className="flex-1 text-xs bg-slate-50 border border-swiss-line rounded-lg px-3 py-2 truncate font-mono">
                 {incoming.secret}
               </code>
               <button
                 type="button"
                 onClick={() => void copyText(incoming.secret)}
-                className="p-2 rounded-lg border border-slate-200 hover:border-primary/40 text-gray-500"
+                className="p-2 rounded-lg border border-swiss-line hover:border-primary/40 text-swiss-muted"
                 aria-label="Copy secret"
               >
                 <Copy className="w-4 h-4" />
@@ -297,19 +298,19 @@ export function WebhooksPanel() {
                 type="button"
                 disabled={saving}
                 onClick={() => void saveIncoming({ regenerateSecret: true })}
-                className="text-sm font-bold px-3 rounded-lg border border-slate-200 hover:border-primary/40 text-primary"
+                className="text-sm font-bold px-3 rounded-lg border border-swiss-line hover:border-primary/40 text-primary"
               >
                 Regenerate
               </button>
             </div>
           </div>
 
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-swiss-muted">
             Last event: {formatDate(incoming.lastEventAt)}
           </p>
 
           <div>
-            <p className="text-sm font-bold uppercase tracking-wide text-gray-500 mb-2">
+            <p className="text-sm font-bold uppercase tracking-wide text-swiss-muted mb-2">
               Accepted event types
             </p>
             <div className="flex flex-wrap gap-2">
@@ -319,7 +320,7 @@ export function WebhooksPanel() {
                   className={`inline-flex items-center gap-1.5 text-sm font-semibold px-2.5 py-1 rounded-full border cursor-pointer ${
                     incoming.subscribedEvents.includes(ev)
                       ? 'bg-sky-50 border-primary/30 text-primary'
-                      : 'bg-gray-50 border-gray-200 text-gray-500'
+                      : 'bg-gray-50 border-gray-200 text-swiss-muted'
                   }`}
                 >
                   <input
@@ -339,7 +340,7 @@ export function WebhooksPanel() {
       {tab === 'outgoing' && (
         <div className="space-y-3">
           <div className="flex justify-between items-center">
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-swiss-muted">
               Subscribe to platform events. Retries and delivery logs are recorded automatically.
             </p>
             <button
@@ -354,23 +355,23 @@ export function WebhooksPanel() {
 
           {showAddOutgoing && (
             <div className="rounded-2xl border border-primary/20 bg-slate-50 p-4 space-y-3">
-              <input
+              <Input
                 placeholder="Name"
                 value={newOutgoing.name}
                 onChange={(e) => setNewOutgoing((p) => ({ ...p, name: e.target.value }))}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                className="h-auto w-full rounded-lg border border-swiss-line px-3 py-2 text-sm"
               />
-              <input
+              <Input
                 placeholder="https://your-server.com/webhook"
                 value={newOutgoing.url}
                 onChange={(e) => setNewOutgoing((p) => ({ ...p, url: e.target.value }))}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                className="h-auto w-full rounded-lg border border-swiss-line px-3 py-2 text-sm"
               />
-              <input
+              <Input
                 placeholder="Signing secret (optional)"
                 value={newOutgoing.secret}
                 onChange={(e) => setNewOutgoing((p) => ({ ...p, secret: e.target.value }))}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                className="h-auto w-full rounded-lg border border-swiss-line px-3 py-2 text-sm"
               />
               <div className="flex flex-wrap gap-1.5">
                 {WEBHOOK_EVENTS.map((ev) => (
@@ -388,7 +389,7 @@ export function WebhooksPanel() {
                     className={`text-sm font-semibold px-2 py-0.5 rounded-full border ${
                       newOutgoing.subscribedEvents.includes(ev)
                         ? 'bg-primary text-white border-primary'
-                        : 'bg-white border-gray-200 text-gray-500'
+                        : 'bg-white border-gray-200 text-swiss-muted'
                     }`}
                   >
                     {ev}
@@ -407,7 +408,7 @@ export function WebhooksPanel() {
                 <button
                   type="button"
                   onClick={() => setShowAddOutgoing(false)}
-                  className="text-sm font-semibold text-gray-500"
+                  className="text-sm font-semibold text-swiss-muted"
                 >
                   Cancel
                 </button>
@@ -416,29 +417,29 @@ export function WebhooksPanel() {
           )}
 
           {outgoing.length === 0 && (
-            <p className="text-sm text-gray-400 py-8 text-center">No outgoing webhooks yet.</p>
+            <p className="text-sm text-swiss-faint py-8 text-center">No outgoing webhooks yet.</p>
           )}
 
           {outgoing.map((hook) => (
             <div
               key={hook.id}
-              className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm flex flex-wrap gap-3 justify-between"
+              className="rounded-2xl border border-swiss-line bg-white p-4 flex flex-wrap gap-3 justify-between"
             >
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-bold text-gray-900">{hook.name}</span>
+                  <span className="text-sm font-bold text-swiss-ink">{hook.name}</span>
                   {hook.enabled ? (
                     <span className="text-sm font-bold text-accent-green bg-[#e6f7ec] px-2 py-0.5 rounded-full">
                       Active
                     </span>
                   ) : (
-                    <span className="text-sm font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+                    <span className="text-sm font-bold text-swiss-faint bg-gray-100 px-2 py-0.5 rounded-full">
                       Disabled
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-gray-500 mt-1 truncate">{hook.url}</p>
-                <p className="text-xs text-gray-400 mt-2">
+                <p className="text-xs text-swiss-muted mt-1 truncate">{hook.url}</p>
+                <p className="text-xs text-swiss-faint mt-2">
                   Retries: {hook.maxRetries} · Timeout: {hook.timeoutMs}ms · Events:{' '}
                   {hook.subscribedEvents.length || 'none'}
                 </p>
@@ -447,7 +448,7 @@ export function WebhooksPanel() {
                 type="button"
                 disabled={saving}
                 onClick={() => void deleteOutgoing(hook.id)}
-                className="p-2 text-gray-400 hover:text-danger-red"
+                className="p-2 text-swiss-faint hover:text-danger-red"
                 aria-label="Delete webhook"
               >
                 <Trash2 className="w-4 h-4" />
@@ -458,9 +459,9 @@ export function WebhooksPanel() {
       )}
 
       {tab === 'logs' && (
-        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+        <div className="rounded-2xl border border-swiss-line bg-white overflow-hidden">
           <table className="w-full text-xs">
-            <thead className="bg-slate-50 text-left text-sm font-bold uppercase text-gray-500">
+            <thead className="bg-slate-50 text-left text-sm font-bold uppercase text-swiss-muted">
               <tr>
                 <th className="px-3 py-2">Time</th>
                 <th className="px-3 py-2">Direction</th>
@@ -472,14 +473,14 @@ export function WebhooksPanel() {
             <tbody>
               {logs.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-3 py-8 text-center text-gray-400">
+                  <td colSpan={5} className="px-3 py-8 text-center text-swiss-faint">
                     No delivery logs yet.
                   </td>
                 </tr>
               )}
               {logs.map((log) => (
-                <tr key={log.id} className="border-t border-slate-200">
-                  <td className="px-3 py-2 text-gray-600 whitespace-nowrap">
+                <tr key={log.id} className="border-t border-swiss-line">
+                  <td className="px-3 py-2 text-swiss-muted whitespace-nowrap">
                     {formatDate(log.createdAt)}
                   </td>
                   <td className="px-3 py-2 capitalize">{log.direction}</td>
@@ -499,7 +500,7 @@ export function WebhooksPanel() {
                       {log.statusCode != null && ` (${log.statusCode})`}
                     </span>
                     {log.errorMessage && (
-                      <p className="text-xs text-gray-400 mt-0.5 truncate max-w-[200px]">
+                      <p className="text-xs text-swiss-faint mt-0.5 truncate max-w-[200px]">
                         {log.errorMessage}
                       </p>
                     )}

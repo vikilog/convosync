@@ -61,7 +61,7 @@ export function WhatsAppTemplateMessageBubble({
   const mediaPad = compact ? 'py-5 px-3' : 'py-8 px-4';
 
   return (
-    <div className="max-w-[95%] bg-white rounded-lg rounded-tl-sm shadow-md overflow-hidden text-[#111b21]">
+    <div className="max-w-[95%] bg-white rounded-lg rounded-tl-sm overflow-hidden text-[#111b21]">
       {showMediaHeader && (
         <div className="bg-[#f0f2f5] border-b border-[#e9edef]">
           {headerFormat === 'image' && headerMediaPreviewUrl ? (
@@ -188,7 +188,7 @@ export const WhatsAppTemplatePreview: React.FC<Props> = ({
       <div className="rounded-lg overflow-hidden" style={CHAT_BG_STYLE}>
         <div className="px-2 py-2 space-y-1.5">
           <div className="flex justify-center">
-            <span className="text-[10px] text-[#54656f] bg-white/90 px-2 py-0.5 rounded-md shadow-sm">
+            <span className="text-[10px] text-[#54656f] bg-white/90 px-2 py-0.5 rounded-md ">
               Today
             </span>
           </div>
@@ -227,7 +227,7 @@ export const WhatsAppTemplatePreview: React.FC<Props> = ({
 
           <div className="min-h-[480px] px-4 py-5 space-y-3" style={CHAT_BG_STYLE}>
             <div className="flex justify-center">
-              <span className="text-xs text-[#54656f] bg-white/90 px-2.5 py-1 rounded-md shadow-sm">
+              <span className="text-xs text-[#54656f] bg-white/90 px-2.5 py-1 rounded-md ">
                 Today
               </span>
             </div>

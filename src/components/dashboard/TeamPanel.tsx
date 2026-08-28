@@ -19,52 +19,54 @@ export const TeamPanel: React.FC<TeamPanelProps> = ({ members, onViewAll }) => {
   const items = members.slice(0, 5);
 
   return (
-    <div className="flex h-full flex-col rounded-xl bg-white p-5 ring-1 ring-slate-200/80">
-      <div className="mb-1 flex items-center justify-between">
-        <h2 className="font-display text-lg font-medium text-neutral-900">Team</h2>
+    <div className="flex h-full flex-col font-swiss">
+      <div className="mb-1 flex items-baseline justify-between">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-swiss-muted">
+          Team
+        </p>
         <button
           type="button"
           onClick={onViewAll}
-          className="inline-flex cursor-pointer items-center gap-1 text-sm font-medium text-primary hover:text-primary-hover active:scale-[0.97]"
+          className="inline-flex cursor-pointer items-center gap-1 text-[11px] font-medium text-swiss-accent"
         >
           Manage
-          <ArrowUpRight className="h-3.5 w-3.5" />
+          <ArrowUpRight className="h-3 w-3" />
         </button>
       </div>
-      <p className="mb-3 text-sm text-neutral-500">
+      <p className="mb-3 text-[11px] text-swiss-faint">
         {members.length} member{members.length === 1 ? '' : 's'} in this workspace
       </p>
 
       {items.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center py-6 text-center">
-          <p className="text-sm text-neutral-500">No team members yet.</p>
+          <p className="text-sm text-swiss-muted">No team members yet.</p>
         </div>
       ) : (
-        <ul className="divide-y divide-black/5">
+        <ul className="divide-y divide-swiss-line">
           {items.map((member) => (
             <li key={member.id} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
               {member.avatar ? (
                 <img
                   src={member.avatar}
                   alt=""
-                  className="h-8 w-8 shrink-0 rounded-full object-cover ring-1 ring-slate-200"
+                  className="h-7 w-7 shrink-0 rounded-full object-cover"
                 />
               ) : (
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-swiss-line text-[11px] font-semibold text-swiss-ink">
                   {member.name.charAt(0).toUpperCase()}
                 </div>
               )}
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1">
-                  <p className="truncate text-sm font-medium text-neutral-900">{member.name}</p>
+                  <p className="truncate text-[13px] font-medium text-swiss-ink">{member.name}</p>
                   {member.isOwner ? (
-                    <Crown className="h-3 w-3 shrink-0 text-amber-500" aria-hidden />
+                    <Crown className="h-3 w-3 shrink-0 text-swiss-accent" aria-hidden />
                   ) : null}
                 </div>
-                <p className="truncate text-xs capitalize text-neutral-500">{member.role}</p>
+                <p className="truncate text-[11px] capitalize text-swiss-muted">{member.role}</p>
               </div>
               {typeof member.conversationsCount === 'number' ? (
-                <span className="shrink-0 text-xs tabular-nums text-neutral-400">
+                <span className="shrink-0 text-[11px] tabular-nums text-swiss-faint">
                   {member.conversationsCount} convos
                 </span>
               ) : null}

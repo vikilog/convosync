@@ -61,23 +61,25 @@ export const ChannelsPanel: React.FC<ChannelsPanelProps> = ({
   onUpgrade,
 }) => {
   return (
-    <div className="flex h-full flex-col rounded-xl bg-white p-5 ring-1 ring-slate-200/80">
-      <h2 className="font-display text-lg font-medium text-neutral-900">Channels</h2>
-      <p className="mb-3 text-sm text-neutral-500">What's connected, and what your plan allows</p>
+    <div className="flex h-full flex-col font-swiss">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-swiss-muted">
+        Channels
+      </p>
+      <p className="mb-3 text-[11px] text-swiss-faint">What's connected, and what your plan allows</p>
 
-      <ul className="divide-y divide-black/5">
+      <ul className="divide-y divide-swiss-line">
         {channels.map((channel) => {
           const Icon = ICON[channel.kind];
           return (
             <li key={channel.kind} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
               <div
-                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${ICON_CLASS[channel.kind]}`}
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${ICON_CLASS[channel.kind]}`}
               >
                 <Icon className="h-4 w-4" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-neutral-900">{channel.label}</p>
-                <p className="truncate text-xs text-neutral-500">
+                <p className="truncate text-[13px] font-medium text-swiss-ink">{channel.label}</p>
+                <p className="truncate text-[11px] text-swiss-muted">
                   {!channel.allowedByPlan
                     ? 'Not on your plan'
                     : channel.connected
@@ -90,13 +92,13 @@ export const ChannelsPanel: React.FC<ChannelsPanelProps> = ({
                 <button
                   type="button"
                   onClick={onUpgrade}
-                  className="inline-flex shrink-0 cursor-pointer items-center gap-1 rounded-md bg-amber-50 px-2 py-1 text-[11px] font-semibold text-amber-700 transition-colors hover:bg-amber-100 active:scale-[0.97]"
+                  className="inline-flex shrink-0 cursor-pointer items-center gap-1 text-[11px] font-semibold text-swiss-muted hover:text-swiss-ink"
                 >
                   <Lock className="h-3 w-3" aria-hidden />
                   Upgrade
                 </button>
               ) : channel.connected ? (
-                <span className="inline-flex shrink-0 items-center gap-1 rounded-md bg-[#e8f0ec] px-2 py-1 text-[11px] font-semibold text-primary">
+                <span className="inline-flex shrink-0 items-center gap-1 text-[11px] font-semibold text-swiss-accent">
                   <CheckCircle2 className="h-3 w-3" aria-hidden />
                   Connected
                 </span>
@@ -104,7 +106,7 @@ export const ChannelsPanel: React.FC<ChannelsPanelProps> = ({
                 <button
                   type="button"
                   onClick={() => onConnect(channel.kind)}
-                  className="inline-flex shrink-0 cursor-pointer items-center gap-1 rounded-md border border-slate-200 px-2 py-1 text-[11px] font-semibold text-slate-600 transition-colors hover:bg-slate-50 active:scale-[0.97]"
+                  className="inline-flex shrink-0 cursor-pointer items-center gap-1 text-[11px] font-semibold text-swiss-muted hover:text-swiss-ink"
                 >
                   <Plug className="h-3 w-3" aria-hidden />
                   Connect

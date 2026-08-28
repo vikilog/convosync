@@ -5,6 +5,7 @@
 
 import { useState } from 'react';
 import { ExternalLink, Send } from 'lucide-react';
+import { Input } from '../ui/input';
 
 export function TelegramBrandIcon({ className }: { className?: string }) {
   return (
@@ -65,8 +66,8 @@ export function TelegramConnectPanel({
         <TelegramBrandIcon className="w-3 h-3" />
         Telegram Bot
       </span>
-      <h4 className="text-xl font-black text-gray-950">Connect a Telegram bot</h4>
-      <p className="mt-2 text-sm text-gray-600 font-medium max-w-xl">
+      <h4 className="text-xl font-semibold text-gray-950">Connect a Telegram bot</h4>
+      <p className="mt-2 text-sm text-swiss-muted font-medium max-w-xl">
         ConvoSync talks to Telegram through a bot you create with BotFather. Follow the steps
         below to get a bot token, then paste it in to link the bot to this workspace.
       </p>
@@ -78,8 +79,8 @@ export function TelegramConnectPanel({
               {index + 1}
             </span>
             <div className="min-w-0">
-              <p className="text-sm font-bold text-gray-900">{step.title}</p>
-              <p className="text-xs text-gray-500 font-medium mt-0.5">{step.description}</p>
+              <p className="text-sm font-bold text-swiss-ink">{step.title}</p>
+              <p className="text-xs text-swiss-muted font-medium mt-0.5">{step.description}</p>
             </div>
           </li>
         ))}
@@ -96,10 +97,10 @@ export function TelegramConnectPanel({
       </a>
 
       <div className="mt-6 pt-6 border-t border-slate-100">
-        <label htmlFor="telegram-bot-token" className="block text-xs font-black uppercase tracking-wide text-gray-500 mb-1.5">
+        <label htmlFor="telegram-bot-token" className="block text-xs font-black uppercase tracking-wide text-swiss-muted mb-1.5">
           Bot token
         </label>
-        <input
+        <Input
           id="telegram-bot-token"
           type="text"
           value={botToken}
@@ -108,7 +109,7 @@ export function TelegramConnectPanel({
           placeholder="123456789:AAHdd2ZjhP9k...  "
           spellCheck={false}
           autoComplete="off"
-          className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-mono text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+          className="h-auto w-full px-3.5 py-2.5 rounded-xl border border-swiss-line bg-white text-sm font-mono text-swiss-ink placeholder:text-swiss-faint focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
         />
         {touched && trimmedToken && !looksValid ? (
           <p className="mt-1.5 text-xs font-bold text-amber-700">
@@ -131,7 +132,7 @@ export function TelegramConnectPanel({
           type="button"
           onClick={onConnect}
           disabled={connecting || !trimmedToken}
-          className="mt-4 inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary-hover disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-xl text-sm font-black shadow-md transition-all"
+          className="mt-4 inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary-hover disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-xl text-sm font-black transition-all"
         >
           <Send className="w-4 h-4" />
           {connecting ? 'Connecting…' : 'Connect Telegram bot'}

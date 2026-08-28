@@ -39,8 +39,8 @@ export function IgJourneyList({ journeys, loading, onCreateBlank, onOpen, onDele
     <div className="space-y-5 ig-automation-module">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h2 className="font-display text-lg font-black text-gray-950">Instagram Automation</h2>
-          <p className="text-xs text-gray-500">
+          <h2 className="font-display text-lg font-semibold text-gray-950">Instagram Automation</h2>
+          <p className="text-xs text-swiss-muted">
             Automate Instagram DMs and comment replies with triggers and quick replies.
           </p>
         </div>
@@ -55,7 +55,7 @@ export function IgJourneyList({ journeys, loading, onCreateBlank, onOpen, onDele
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center gap-2 py-10 text-sm text-gray-500">
+        <div className="flex items-center justify-center gap-2 py-10 text-sm text-swiss-muted">
           <Loader2 className="h-4 w-4 animate-spin text-[#833AB4]" />
           Loading automations…
         </div>
@@ -66,8 +66,8 @@ export function IgJourneyList({ journeys, loading, onCreateBlank, onOpen, onDele
           >
             <Workflow className="h-5 w-5 text-[#833AB4]" />
           </div>
-          <p className="font-bold text-gray-900">No automations yet</p>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="font-bold text-swiss-ink">No automations yet</p>
+          <p className="mt-1 text-sm text-swiss-muted">
             Create your first Instagram DM or comment automation.
           </p>
           <button
@@ -86,7 +86,7 @@ export function IgJourneyList({ journeys, loading, onCreateBlank, onOpen, onDele
             return (
               <article
                 key={j.id}
-                className="group flex items-stretch overflow-hidden rounded-xl bg-white ring-1 ring-slate-200/80 transition-shadow hover:shadow-sm"
+                className="group flex items-stretch overflow-hidden bg-white border border-swiss-line transition-shadow "
               >
                 <button
                   type="button"
@@ -108,13 +108,13 @@ export function IgJourneyList({ journeys, loading, onCreateBlank, onOpen, onDele
                         className={`shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide ${
                           published
                             ? `${IG_GRADIENT_SOFT} text-[#833AB4]`
-                            : 'bg-gray-100 text-gray-500'
+                            : 'bg-gray-100 text-swiss-muted'
                         }`}
                       >
                         {j.status}
                       </span>
                     </div>
-                    <p className="mt-0.5 text-[11px] font-medium text-gray-400">
+                    <p className="mt-0.5 text-[11px] font-medium text-swiss-faint">
                       {triggerLabel(j.triggerEvent)}
                       <span className="mx-1 text-gray-300">·</span>
                       {j._count?.nodes ?? 0} steps
@@ -126,7 +126,7 @@ export function IgJourneyList({ journeys, loading, onCreateBlank, onOpen, onDele
                 <button
                   type="button"
                   onClick={() => onDelete(j.id)}
-                  className="shrink-0 cursor-pointer border-l border-black/5 px-2.5 text-gray-400 transition-colors hover:bg-rose-50 hover:text-rose-600"
+                  className="shrink-0 cursor-pointer border-l border-swiss-line px-2.5 text-swiss-faint transition-colors hover:bg-rose-50 hover:text-rose-600"
                   aria-label={`Delete ${j.name}`}
                 >
                   <Trash2 className="h-3.5 w-3.5" />

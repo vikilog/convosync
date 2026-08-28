@@ -42,7 +42,7 @@ export function CookieConsentBanner() {
       className="fixed bottom-0 inset-x-0 z-[100] p-4 sm:p-6 pointer-events-none"
     >
       <div className="max-w-3xl mx-auto pointer-events-auto rounded-2xl border border-gray-200 bg-white/95 backdrop-blur-md shadow-xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4">
-        <p className="text-sm text-gray-600 leading-relaxed flex-1">
+        <p className="text-sm text-swiss-muted leading-relaxed flex-1">
           We use cookies and analytics (Google Analytics, Meta, Microsoft Clarity) to measure traffic and
           improve ConvoSync. See our{' '}
           <a
@@ -59,7 +59,7 @@ export function CookieConsentBanner() {
           <button
             type="button"
             onClick={decline}
-            className="px-4 py-2 text-sm font-semibold text-gray-600 rounded-xl border border-gray-200 hover:bg-gray-50"
+            className="px-4 py-2 text-sm font-semibold text-swiss-muted rounded-xl border border-gray-200 hover:bg-gray-50"
           >
             Decline
           </button>

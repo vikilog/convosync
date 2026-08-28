@@ -128,7 +128,7 @@ export function CallLiveTranscript({
   if (turns.length === 0) {
     return (
       <div
-        className={`rounded-xl border border-slate-200 bg-slate-50 px-3 py-4 text-center text-xs text-slate-500 ${className}`}
+        className={`rounded-xl border border-swiss-line bg-slate-50 px-3 py-4 text-center text-xs text-slate-500 ${className}`}
       >
         Live transcript will appear here as the customer and AI speak…
       </div>
@@ -137,7 +137,7 @@ export function CallLiveTranscript({
 
   return (
     <div
-      className={`rounded-xl border border-slate-200 bg-slate-50 max-h-48 overflow-y-auto px-3 py-2 space-y-2 ${className}`}
+      className={`rounded-xl border border-swiss-line bg-slate-50 max-h-48 overflow-y-auto px-3 py-2 space-y-2 ${className}`}
     >
       {turns.map((t, i) => (
         <div

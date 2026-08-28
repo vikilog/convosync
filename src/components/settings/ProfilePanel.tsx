@@ -28,6 +28,7 @@ import { logoutThisDevice } from '../../lib/session';
 import { disconnectSocket } from '../../lib/socket';
 import { hasWorkspacePermission } from '../../lib/workspacePermissions';
 import { LocaleFields } from '../locale/LocaleFields';
+import { Input } from '../ui/input';
 
 type ProfileUser = {
   id: string;
@@ -39,9 +40,9 @@ type ProfileUser = {
 };
 
 const inputClass =
-  'mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20';
+  'mt-1 w-full rounded-xl border border-swiss-line px-3 py-2.5 text-sm text-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20';
 
-const cardClass = 'rounded-2xl bg-white ring-1 ring-slate-200/80 p-5 shadow-sm md:p-6';
+const cardClass = 'bg-white border border-swiss-line p-5 md:p-6';
 
 const SHEET_SPRING = { type: 'spring' as const, damping: 28, stiffness: 320 };
 
@@ -273,10 +274,10 @@ export function ProfilePanel() {
 
             <div className="max-w-md space-y-4">
               <label className="block">
-                <span className="text-meta font-bold uppercase tracking-wide text-gray-500">
+                <span className="text-meta font-bold uppercase tracking-wide text-swiss-muted">
                   Full name
                 </span>
-                <input
+                <Input
                   required
                   type="text"
                   value={name}
@@ -286,15 +287,15 @@ export function ProfilePanel() {
               </label>
 
               <div className="block">
-                <span className="text-meta font-bold uppercase tracking-wide text-gray-500">
+                <span className="text-meta font-bold uppercase tracking-wide text-swiss-muted">
                   Email
                 </span>
                 <div className="mt-1 flex gap-2">
-                  <input
+                  <Input
                     type="email"
                     value={profile.email}
                     disabled
-                    className={`${inputClass} mt-0 min-w-0 flex-1 cursor-not-allowed bg-slate-50 text-slate-500`}
+                    className={`h-auto ${inputClass} mt-0 min-w-0 flex-1 cursor-not-allowed bg-slate-50 text-slate-500`}
                   />
                   {emailVerified ? (
                     <span className="inline-flex shrink-0 items-center gap-1 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-xs font-semibold text-emerald-700">
@@ -338,7 +339,7 @@ export function ProfilePanel() {
                         })();
                       }}
                       disabled={otpBusy !== null}
-                      className="inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-semibold text-slate-800 transition-colors hover:bg-slate-50 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-xl border border-swiss-line bg-white px-3 py-2.5 text-xs font-semibold text-slate-800 transition-colors hover:bg-slate-50 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {otpBusy === 'send' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
                       {otpPending ? 'Resend' : 'Verify'}
@@ -351,13 +352,13 @@ export function ProfilePanel() {
                       <p className="text-xs font-medium text-accent-green">{otpSentHint}</p>
                     ) : null}
                     <div className="flex gap-2">
-                      <input
+                      <Input
                         value={otpCode}
                         onChange={(e) => setOtpCode(e.target.value)}
                         inputMode="numeric"
                         autoComplete="one-time-code"
                         placeholder="Enter OTP"
-                        className="min-w-0 flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        className="h-auto min-w-0 flex-1 rounded-xl border border-swiss-line px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                       />
                       <button
                         type="button"
@@ -476,10 +477,10 @@ export function ProfilePanel() {
                     className="max-w-md space-y-4 pt-4"
                   >
                     <label className="block">
-                      <span className="text-meta font-bold uppercase tracking-wide text-gray-500">
+                      <span className="text-meta font-bold uppercase tracking-wide text-swiss-muted">
                         Current password
                       </span>
-                      <input
+                      <Input
                         required
                         type="password"
                         value={currentPassword}
@@ -490,10 +491,10 @@ export function ProfilePanel() {
                     </label>
 
                     <label className="block">
-                      <span className="text-meta font-bold uppercase tracking-wide text-gray-500">
+                      <span className="text-meta font-bold uppercase tracking-wide text-swiss-muted">
                         New password
                       </span>
-                      <input
+                      <Input
                         required
                         type="password"
                         value={newPassword}
@@ -505,10 +506,10 @@ export function ProfilePanel() {
                     </label>
 
                     <label className="block">
-                      <span className="text-meta font-bold uppercase tracking-wide text-gray-500">
+                      <span className="text-meta font-bold uppercase tracking-wide text-swiss-muted">
                         Confirm new password
                       </span>
-                      <input
+                      <Input
                         required
                         type="password"
                         value={confirmPassword}
@@ -556,10 +557,10 @@ export function ProfilePanel() {
                   <img
                     src={avatarUrl}
                     alt={profile.name}
-                    className="h-24 w-24 rounded-full border border-slate-200 object-cover"
+                    className="h-24 w-24 rounded-full border border-swiss-line object-cover"
                   />
                 ) : (
-                  <div className="flex h-24 w-24 items-center justify-center rounded-full border border-slate-200 bg-primary/10 text-3xl font-semibold text-primary">
+                  <div className="flex h-24 w-24 items-center justify-center rounded-full border border-swiss-line bg-primary/10 text-3xl font-semibold text-primary">
                     {initials}
                   </div>
                 )}
@@ -608,7 +609,7 @@ export function ProfilePanel() {
                     type="button"
                     disabled={uploadingAvatar}
                     onClick={() => void handleRemoveAvatar()}
-                    className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-500 transition-colors hover:border-red-100 hover:bg-red-50 hover:text-red-600 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50"
+                    className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-swiss-line px-3 py-2 text-xs font-semibold text-slate-500 transition-colors hover:border-red-100 hover:bg-red-50 hover:text-red-600 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <Trash2 className="h-3.5 w-3.5" aria-hidden />
                     Remove photo
@@ -638,7 +639,7 @@ export function ProfilePanel() {
                   navigate('/login', { replace: true });
                 })();
               }}
-              className="mt-4 inline-flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 active:scale-[0.97]"
+              className="mt-4 inline-flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-swiss-line bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 active:scale-[0.97]"
             >
               <LogOut className="h-4 w-4" aria-hidden />
               Log out

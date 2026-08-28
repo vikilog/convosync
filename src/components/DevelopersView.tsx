@@ -69,8 +69,8 @@ export const DevelopersView: FC = () => {
             <Code2 className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="font-display text-sm font-bold text-gray-900">Developers</h2>
-            <p className="text-xs text-gray-500">Integrations & automation</p>
+            <h2 className="font-display text-sm font-bold text-swiss-ink">Developers</h2>
+            <p className="text-xs text-swiss-muted">Integrations & automation</p>
           </div>
         </div>
         <nav className="space-y-1">
@@ -84,8 +84,8 @@ export const DevelopersView: FC = () => {
                 onClick={() => setSection(item.id)}
                 className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left text-sm font-semibold transition-colors ${
                   isActive
-                    ? 'bg-primary text-white shadow-sm'
-                    : 'text-gray-600 hover:bg-surface-muted hover:text-primary'
+                    ? 'bg-primary text-white '
+                    : 'text-swiss-muted hover:bg-surface-muted hover:text-primary'
                 }`}
               >
                 <Icon className="w-4 h-4 shrink-0" />
@@ -101,8 +101,8 @@ export const DevelopersView: FC = () => {
           <PlanUpgradeBanner message="Developers (webhooks, actions, AI sync) is available on Business plan and above." />
         ) : null}
         <header className="mb-4 mt-4">
-          <h3 className="text-base font-bold text-gray-900">{active.label}</h3>
-          <p className="text-xs text-gray-500 mt-1">{active.description}</p>
+          <h3 className="text-base font-bold text-swiss-ink">{active.label}</h3>
+          <p className="text-xs text-swiss-muted mt-1">{active.description}</p>
         </header>
 
         {developersAllowed && section === 'webhooks' && <WebhooksPanel />}

@@ -20,6 +20,8 @@ import { EditButtonPanel, type ButtonDestinationInfo } from '../../flow-builder/
 import { summarizeDestinationNode } from '../../flow-builder/buttonActions';
 import { FLOW_CHANNEL_THEMES } from '../../flow-builder/channelTheme';
 import type { ButtonActionId, PerformActionId } from '../../flow-builder/buttonActions';
+import { Input } from '../../../components/ui/input';
+import { Textarea } from '../../../components/ui/textarea';
 
 const theme = FLOW_CHANNEL_THEMES.whatsapp;
 
@@ -281,10 +283,10 @@ export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButt
 
       <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
       {type === 'TRIGGER' && (
-        <label className="block text-sm font-semibold text-gray-700">
+        <label className="block text-sm font-semibold text-swiss-ink">
           Event
           <select
-            className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+            className="mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
             value={String(local.event ?? 'contact.created')}
             onChange={(e) => patch('event', e.target.value)}
           >
@@ -303,7 +305,7 @@ export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButt
 
       {type === 'ASK_QUESTION' && (
         <>
-          <label className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-gray-700">
+          <label className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-swiss-ink">
             <input
               type="checkbox"
               className="h-4 w-4 rounded border-slate-300"
@@ -314,20 +316,20 @@ export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButt
           </label>
           {Boolean(local.quickCollect) ? (
             <>
-              <label className="block text-sm font-semibold text-gray-700">
+              <label className="block text-sm font-semibold text-swiss-ink">
                 Question text
-                <textarea
+                <Textarea
                   rows={3}
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                  className="min-h-0 mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
                   value={String(local.text ?? '')}
                   onChange={(e) => patch('text', e.target.value)}
                   placeholder="What would you like to know?"
                 />
               </label>
-              <label className="block text-sm font-semibold text-gray-700">
+              <label className="block text-sm font-semibold text-swiss-ink">
                 Save reply to
                 <select
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                  className="mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
                   value={String(local.saveReplyTo ?? 'last_reply')}
                   onChange={(e) => patch('saveReplyTo', e.target.value)}
                 >
@@ -343,11 +345,11 @@ export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButt
               </p>
             </>
           ) : (
-            <label className="block text-sm font-semibold text-gray-700">
+            <label className="block text-sm font-semibold text-swiss-ink">
               Question text
-              <textarea
+              <Textarea
                 rows={3}
-                className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                className="min-h-0 mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
                 value={String(local.text ?? '')}
                 onChange={(e) => patch('text', e.target.value)}
                 placeholder="What would you like to know?"
@@ -359,11 +361,11 @@ export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButt
 
       {type === 'BUTTONS' && (
         <>
-          <label className="block text-sm font-semibold text-gray-700">
+          <label className="block text-sm font-semibold text-swiss-ink">
             Message text
-            <textarea
+            <Textarea
               rows={3}
-              className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+              className="min-h-0 mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
               value={String(local.text ?? '')}
               onChange={(e) => patch('text', e.target.value)}
               placeholder="Choose an option…"
@@ -371,7 +373,7 @@ export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButt
           </label>
           <div>
             <div className="flex items-center justify-between">
-              <p className="text-sm font-semibold text-gray-700">Buttons</p>
+              <p className="text-sm font-semibold text-swiss-ink">Buttons</p>
               <span className="text-xs text-slate-500">
                 {buttons.length}/{WA_BUTTONS_MAX}
               </span>
@@ -383,8 +385,8 @@ export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButt
             <div className="mt-2 space-y-2">
               {buttons.map((btn, idx) => (
                 <div key={btn.id || idx} className="flex gap-2">
-                  <input
-                    className="min-w-0 flex-1 rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                  <Input
+                    className="h-auto min-w-0 flex-1 rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
                     value={btn.title}
                     maxLength={WA_BUTTON_TITLE_MAX}
                     onChange={(e) => {
@@ -423,7 +425,7 @@ export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButt
                     { id: `btn_${crypto.randomUUID().slice(0, 4)}`, title: '' },
                   ])
                 }
-                className="mt-2 inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                className="mt-2 inline-flex items-center gap-1 rounded-lg border border-swiss-line px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
               >
                 <Plus className="h-3.5 w-3.5" />
                 Add button
@@ -436,7 +438,7 @@ export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButt
       {type === 'RANDOMIZER' && (
         <div>
           <div className="flex items-center justify-between">
-            <p className="text-sm font-semibold text-gray-700">Paths</p>
+            <p className="text-sm font-semibold text-swiss-ink">Paths</p>
             <span className="text-xs text-slate-500">
               {paths.length}/{RANDOMIZER_PATHS_MAX} · total {pathWeightTotal}%
             </span>
@@ -447,8 +449,8 @@ export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButt
           <div className="mt-2 space-y-2">
             {paths.map((path, idx) => (
               <div key={path.id || idx} className="flex gap-2">
-                <input
-                  className="min-w-0 flex-1 rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                <Input
+                  className="h-auto min-w-0 flex-1 rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
                   value={path.label}
                   onChange={(e) => {
                     const next = [...paths];
@@ -457,10 +459,10 @@ export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButt
                   }}
                   placeholder="Label"
                 />
-                <input
+                <Input
                   type="number"
                   min={0}
-                  className="w-20 rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                  className="h-auto w-20 rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
                   value={path.weight}
                   onChange={(e) => {
                     const next = [...paths];
@@ -493,7 +495,7 @@ export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButt
                   },
                 ])
               }
-              className="mt-2 inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+              className="mt-2 inline-flex items-center gap-1 rounded-lg border border-swiss-line px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
             >
               <Plus className="h-3.5 w-3.5" />
               Add path
@@ -503,7 +505,7 @@ export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButt
       )}
 
       {(type === 'SEND_MESSAGE' || type === 'ASK_QUESTION' || type === 'BUTTONS') && (
-        <label className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-gray-700">
+        <label className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-swiss-ink">
           <input
             type="checkbox"
             className="h-4 w-4 rounded border-slate-300"
@@ -516,10 +518,10 @@ export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButt
 
       {type === 'ASSIGN_TO' && (
         <>
-          <label className="block text-sm font-semibold text-gray-700">
+          <label className="block text-sm font-semibold text-swiss-ink">
             Assign to
             <select
-              className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+              className="mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
               value={String(local.assigneeType ?? 'user')}
               onChange={(e) => patch('assigneeType', e.target.value)}
             >
@@ -531,10 +533,10 @@ export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButt
             </select>
           </label>
           {['user', 'rule_based', 'journey'].includes(String(local.assigneeType ?? 'user')) && (
-            <label className="block text-sm font-semibold text-gray-700">
+            <label className="block text-sm font-semibold text-swiss-ink">
               Assignee ID
-              <input
-                className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm font-mono text-xs"
+              <Input
+                className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm font-mono text-xs"
                 value={String(local.assigneeId ?? '')}
                 onChange={(e) => patch('assigneeId', e.target.value)}
                 placeholder="User, bot, or journey ID"
@@ -547,20 +549,20 @@ export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButt
       {type === 'WAIT' && (
         <>
           <div className="grid grid-cols-2 gap-2">
-            <label className="block text-sm font-semibold text-gray-700">
+            <label className="block text-sm font-semibold text-swiss-ink">
               Amount
-              <input
+              <Input
                 type="number"
                 min={0}
-                className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
                 value={Number(local.amount ?? 1)}
                 onChange={(e) => patch('amount', Number(e.target.value))}
               />
             </label>
-            <label className="block text-sm font-semibold text-gray-700">
+            <label className="block text-sm font-semibold text-swiss-ink">
               Unit
               <select
-                className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                className="mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
                 value={String(local.unit ?? 'hours')}
                 onChange={(e) => patch('unit', e.target.value)}
               >
@@ -570,7 +572,7 @@ export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButt
               </select>
             </label>
           </div>
-          <label className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-gray-700">
+          <label className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-swiss-ink">
             <input
               type="checkbox"
               className="h-4 w-4 rounded border-slate-300"
@@ -582,27 +584,27 @@ export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButt
           {businessHours.enabled && (
             <>
               <div className="grid grid-cols-2 gap-2">
-                <label className="block text-sm font-semibold text-gray-700">
+                <label className="block text-sm font-semibold text-swiss-ink">
                   Start
-                  <input
+                  <Input
                     type="time"
-                    className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                    className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
                     value={businessHours.startTime}
                     onChange={(e) => patchBusinessHours({ startTime: e.target.value || '08:00' })}
                   />
                 </label>
-                <label className="block text-sm font-semibold text-gray-700">
+                <label className="block text-sm font-semibold text-swiss-ink">
                   End
-                  <input
+                  <Input
                     type="time"
-                    className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                    className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
                     value={businessHours.endTime}
                     onChange={(e) => patchBusinessHours({ endTime: e.target.value || '22:00' })}
                   />
                 </label>
               </div>
               <div>
-                <p className="text-sm font-semibold text-gray-700">Days</p>
+                <p className="text-sm font-semibold text-swiss-ink">Days</p>
                 <p className="mt-0.5 text-xs text-slate-500">
                   {businessHours.daysOfWeek.length === 0
                     ? 'Any day'
@@ -624,7 +626,7 @@ export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButt
                         className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
                           selected
                             ? 'bg-primary text-white'
-                            : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                            : 'border border-swiss-line bg-white text-slate-600 hover:bg-slate-50'
                         }`}
                       >
                         {day.label}
@@ -639,10 +641,10 @@ export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButt
       )}
 
       {type === 'GOTO_STEP' && (
-        <label className="block text-sm font-semibold text-gray-700">
+        <label className="block text-sm font-semibold text-swiss-ink">
           Jump to step
           <select
-            className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+            className="mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
             value={String(local.targetNodeId ?? '')}
             onChange={(e) => patch('targetNodeId', e.target.value)}
           >
@@ -664,10 +666,10 @@ export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButt
 
       {type === 'UPDATE_TAG' && (
         <>
-          <label className="block text-sm font-semibold text-gray-700">
+          <label className="block text-sm font-semibold text-swiss-ink">
             Action
             <select
-              className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+              className="mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
               value={String(local.action ?? 'add')}
               onChange={(e) => patch('action', e.target.value)}
             >
@@ -676,7 +678,7 @@ export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButt
               <option value="set">Set tags</option>
             </select>
           </label>
-          <label className="block text-sm font-semibold text-gray-700">
+          <label className="block text-sm font-semibold text-swiss-ink">
             Tags
             <div className="mt-1">
               <TagChipInput
@@ -691,10 +693,10 @@ export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButt
 
       {type === 'UPDATE_FIELD' && (
         <>
-          <label className="block text-sm font-semibold text-gray-700">
+          <label className="block text-sm font-semibold text-swiss-ink">
             Field
             <select
-              className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+              className="mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
               value={String(local.field ?? 'name')}
               onChange={(e) => patch('field', e.target.value)}
             >
@@ -706,19 +708,19 @@ export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButt
             </select>
           </label>
           {local.field === 'custom' && (
-            <label className="block text-sm font-semibold text-gray-700">
+            <label className="block text-sm font-semibold text-swiss-ink">
               Custom field key
-              <input
-                className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+              <Input
+                className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
                 value={String(local.customFieldKey ?? '')}
                 onChange={(e) => patch('customFieldKey', e.target.value)}
               />
             </label>
           )}
-          <label className="block text-sm font-semibold text-gray-700">
+          <label className="block text-sm font-semibold text-swiss-ink">
             Value
-            <input
-              className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+            <Input
+              className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
               value={String(local.value ?? '')}
               onChange={(e) => patch('value', e.target.value)}
             />
@@ -728,10 +730,10 @@ export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButt
 
       {type === 'SEND_FLOW' && (
         <>
-          <label className="block text-sm font-semibold text-gray-700">
+          <label className="block text-sm font-semibold text-swiss-ink">
             WhatsApp Flow
             <select
-              className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+              className="mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
               value={String(local.flowId ?? '')}
               onChange={(e) => patch('flowId', e.target.value)}
             >
@@ -748,40 +750,40 @@ export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButt
               </p>
             )}
           </label>
-          <label className="block text-sm font-semibold text-gray-700">
+          <label className="block text-sm font-semibold text-swiss-ink">
             Message text
-            <textarea
+            <Textarea
               rows={2}
-              className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+              className="min-h-0 mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
               placeholder="Please fill out this quick form"
               value={String(local.text ?? '')}
               onChange={(e) => patch('text', e.target.value)}
             />
           </label>
-          <label className="block text-sm font-semibold text-gray-700">
+          <label className="block text-sm font-semibold text-swiss-ink">
             Header text (optional)
-            <input
+            <Input
               type="text"
-              className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+              className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
               value={String(local.headerText ?? '')}
               onChange={(e) => patch('headerText', e.target.value)}
             />
           </label>
-          <label className="block text-sm font-semibold text-gray-700">
+          <label className="block text-sm font-semibold text-swiss-ink">
             Button label
-            <input
+            <Input
               type="text"
               maxLength={30}
-              className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+              className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
               value={String(local.ctaLabel ?? '')}
               onChange={(e) => patch('ctaLabel', e.target.value)}
             />
           </label>
-          <label className="block text-sm font-semibold text-gray-700">
+          <label className="block text-sm font-semibold text-swiss-ink">
             Save submitted fields with prefix
-            <input
+            <Input
               type="text"
-              className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm font-mono"
+              className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm font-mono"
               placeholder="flow_"
               value={String(local.saveFieldsPrefix ?? '')}
               onChange={(e) => patch('saveFieldsPrefix', e.target.value)}
@@ -793,7 +795,7 @@ export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButt
             journey pauses here until the flow is submitted, then continues to the next step.
           </p>
 
-          <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 space-y-3">
+          <div className="rounded-lg border border-swiss-line bg-slate-50 p-3 space-y-3">
             <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
               Map answers to contact (optional)
             </p>
@@ -802,31 +804,31 @@ export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButt
               in the flow builder) to update the contact's real name/phone/email instead of just a
               custom field.
             </p>
-            <label className="block text-sm font-semibold text-gray-700">
+            <label className="block text-sm font-semibold text-swiss-ink">
               Name field
-              <input
+              <Input
                 type="text"
-                className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm font-mono"
+                className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm font-mono"
                 placeholder="full_name"
                 value={String(local.mapNameField ?? '')}
                 onChange={(e) => patch('mapNameField', e.target.value)}
               />
             </label>
-            <label className="block text-sm font-semibold text-gray-700">
+            <label className="block text-sm font-semibold text-swiss-ink">
               Phone field
-              <input
+              <Input
                 type="text"
-                className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm font-mono"
+                className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm font-mono"
                 placeholder="phone"
                 value={String(local.mapPhoneField ?? '')}
                 onChange={(e) => patch('mapPhoneField', e.target.value)}
               />
             </label>
-            <label className="block text-sm font-semibold text-gray-700">
+            <label className="block text-sm font-semibold text-swiss-ink">
               Email field
-              <input
+              <Input
                 type="text"
-                className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm font-mono"
+                className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm font-mono"
                 placeholder="email"
                 value={String(local.mapEmailField ?? '')}
                 onChange={(e) => patch('mapEmailField', e.target.value)}
@@ -834,14 +836,14 @@ export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButt
             </label>
           </div>
 
-          <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 space-y-3">
+          <div className="rounded-lg border border-swiss-line bg-slate-50 p-3 space-y-3">
             <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
               Add to funnel (optional)
             </p>
-            <label className="block text-sm font-semibold text-gray-700">
+            <label className="block text-sm font-semibold text-swiss-ink">
               Lead funnel
               <select
-                className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                className="mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
                 value={String(local.funnelId ?? '')}
                 onChange={(e) => patchMany({ funnelId: e.target.value, stageId: '' })}
               >
@@ -854,10 +856,10 @@ export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButt
               </select>
             </label>
             {Boolean(local.funnelId) && (
-              <label className="block text-sm font-semibold text-gray-700">
+              <label className="block text-sm font-semibold text-swiss-ink">
                 Board (optional)
                 <select
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                  className="mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
                   value={String(local.stageId ?? '')}
                   onChange={(e) => patch('stageId', e.target.value)}
                 >
@@ -879,10 +881,10 @@ export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButt
 
       {type === 'ADD_TO_FUNNEL' && (
         <>
-          <label className="block text-sm font-semibold text-gray-700">
+          <label className="block text-sm font-semibold text-swiss-ink">
             Lead funnel
             <select
-              className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+              className="mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
               value={String(local.funnelId ?? '')}
               onChange={(e) => patchMany({ funnelId: e.target.value, stageId: '' })}
             >
@@ -894,10 +896,10 @@ export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButt
               ))}
             </select>
           </label>
-          <label className="block text-sm font-semibold text-gray-700">
+          <label className="block text-sm font-semibold text-swiss-ink">
             Board (optional)
             <select
-              className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+              className="mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
               value={String(local.stageId ?? '')}
               onChange={(e) => patch('stageId', e.target.value)}
               disabled={!local.funnelId}
@@ -918,17 +920,17 @@ export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButt
       )}
 
       {type === 'OPEN_CONVERSATION' && (
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-swiss-muted">
           Reopens the contact&apos;s latest conversation in the inbox.
         </p>
       )}
 
       {type === 'CLOSE_CONVERSATION' && (
-        <label className="block text-sm font-semibold text-gray-700">
+        <label className="block text-sm font-semibold text-swiss-ink">
           Closing note (optional)
-          <textarea
+          <Textarea
             rows={2}
-            className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+            className="min-h-0 mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
             value={String(local.closingNote ?? '')}
             onChange={(e) => patch('closingNote', e.target.value)}
           />
@@ -936,10 +938,10 @@ export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButt
       )}
 
       {type === 'TRIGGER_JOURNEY' && (
-        <label className="block text-sm font-semibold text-gray-700">
+        <label className="block text-sm font-semibold text-swiss-ink">
           Published journey
           <select
-            className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+            className="mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
             value={String(local.journeyId ?? '')}
             onChange={(e) => patch('journeyId', e.target.value)}
           >
@@ -954,10 +956,10 @@ export function NodeConfigPanel({ node, graph = null, onUpdate, onDelete, onButt
       )}
 
       {type === 'UPDATE_LIFECYCLE' && (
-        <label className="block text-sm font-semibold text-gray-700">
+        <label className="block text-sm font-semibold text-swiss-ink">
           Lifecycle stage
-          <input
-            className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+          <Input
+            className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
             value={String(local.stage ?? '')}
             onChange={(e) => patch('stage', e.target.value)}
             placeholder="e.g. lead, customer, churned"

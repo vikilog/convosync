@@ -27,7 +27,7 @@ export function FacebookPagePicker({
   const canConfirm = Boolean(selectedPageId) && !confirming;
 
   return (
-    <div className="mx-auto w-full max-w-xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="mx-auto w-full max-w-xl rounded-2xl border border-swiss-line bg-white p-6 ">
       <div className="flex items-start gap-3">
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#e8f4ff] text-[#1877F2]">
           <Facebook className="h-5 w-5" aria-hidden />
@@ -55,7 +55,7 @@ export function FacebookPagePicker({
               className={`w-full cursor-pointer rounded-xl border p-3 text-left transition-colors ${
                 selected
                   ? 'border-[#1877F2]/40 bg-[#e8f4ff]'
-                  : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
+                  : 'border-swiss-line bg-white hover:border-slate-300 hover:bg-slate-50'
               }`}
             >
               <div className="flex items-center gap-3">
@@ -63,7 +63,7 @@ export function FacebookPagePicker({
                   <img
                     src={page.picture}
                     alt=""
-                    className="h-10 w-10 rounded-lg border border-slate-200 object-cover"
+                    className="h-10 w-10 rounded-lg border border-swiss-line object-cover"
                   />
                 ) : (
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#e8f4ff] text-[#1877F2]">

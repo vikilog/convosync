@@ -64,7 +64,7 @@ export function TrialBanner() {
         className={`shrink-0 border-b px-6 py-2.5 flex items-center justify-between gap-4 ${
           urgent
             ? 'bg-amber-50 border-amber-200 text-amber-900'
-            : 'bg-primary/10 border-black/5 text-primary'
+            : 'bg-primary/10 border-swiss-line text-primary'
         }`}
       >
         <div className="flex items-center gap-2.5 min-w-0">

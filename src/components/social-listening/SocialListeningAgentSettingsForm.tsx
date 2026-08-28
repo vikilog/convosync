@@ -1,5 +1,7 @@
 import React, { useMemo } from 'react';
 import { AlertTriangle } from 'lucide-react';
+import { Input } from '../ui/input';
+import { Textarea } from '../ui/textarea';
 
 export type SocialListeningSettingsState = {
   autoResponseEnabled: boolean;
@@ -77,7 +79,7 @@ function Toggle({
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
   return (
-    <span className="text-[11px] font-semibold uppercase tracking-wide text-neutral-400">
+    <span className="text-[11px] font-semibold uppercase tracking-wide text-swiss-faint">
       {children}
     </span>
   );
@@ -113,8 +115,8 @@ export function SocialListeningAgentSettingsForm({
       <section className="rounded-2xl bg-surface-muted/60 p-4">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h3 className="text-sm font-bold text-gray-900">Agent</h3>
-            <p className="mt-1 text-xs leading-relaxed text-gray-500">
+            <h3 className="text-sm font-bold text-swiss-ink">Agent</h3>
+            <p className="mt-1 text-xs leading-relaxed text-swiss-muted">
               {draft.autoResponseEnabled
                 ? 'On: matching comments on this post can be handled automatically.'
                 : 'Off (safe): every comment on this post stays in the review queue.'}
@@ -139,7 +141,7 @@ export function SocialListeningAgentSettingsForm({
 
       <section>
         <FieldLabel>Lead funnel (required for agent)</FieldLabel>
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="mt-1 text-xs text-swiss-muted">
           Leads from this post go into the selected funnel.
         </p>
         {funnels.length === 0 ? (
@@ -158,7 +160,7 @@ export function SocialListeningAgentSettingsForm({
                 autoResponseEnabled: id ? d.autoResponseEnabled : false,
               }));
             }}
-            className="mt-2 w-full cursor-pointer rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-semibold text-gray-800 outline-none focus:ring-2 focus:ring-primary/20"
+            className="mt-2 w-full cursor-pointer rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-semibold text-swiss-ink outline-none focus:ring-2 focus:ring-primary/20"
           >
             <option value="">Select funnel…</option>
             {funnels.map((f) => (
@@ -181,7 +183,7 @@ export function SocialListeningAgentSettingsForm({
 
       <section>
         <FieldLabel>Automation by intent</FieldLabel>
-        <div className="mt-2 overflow-hidden rounded-xl border border-black/5">
+        <div className="mt-2 overflow-hidden rounded-xl border border-swiss-line">
           {(
             [
               {
@@ -222,15 +224,15 @@ export function SocialListeningAgentSettingsForm({
           ).map((row) => (
             <div
               key={row.key}
-              className="flex items-center justify-between gap-3 border-b border-black/5 bg-white px-3 py-2.5 last:border-b-0"
+              className="flex items-center justify-between gap-3 border-b border-swiss-line bg-white px-3 py-2.5 last:border-b-0"
             >
-              <span className="text-sm font-semibold text-gray-800">{row.label}</span>
+              <span className="text-sm font-semibold text-swiss-ink">{row.label}</span>
               <select
                 value={draft[row.key]}
                 onChange={(e) =>
                   patch(row.key, e.target.value as SocialListeningSettingsState[typeof row.key])
                 }
-                className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs font-semibold text-gray-700 outline-none"
+                className="rounded-lg border border-swiss-line bg-slate-50 px-2 py-1.5 text-xs font-semibold text-swiss-ink outline-none"
               >
                 {row.options.map((o) => (
                   <option key={o.value} value={o.value}>
@@ -241,7 +243,7 @@ export function SocialListeningAgentSettingsForm({
             </div>
           ))}
         </div>
-        <p className="mt-1.5 text-[11px] text-gray-400">
+        <p className="mt-1.5 text-[11px] text-swiss-faint">
           Complaints never auto-DM — only Review or Escalate.
         </p>
       </section>
@@ -249,7 +251,7 @@ export function SocialListeningAgentSettingsForm({
       <section>
         <div className="flex items-center justify-between gap-2">
           <FieldLabel>Confidence threshold</FieldLabel>
-          <span className="text-xs font-bold text-gray-700">{draft.confidenceThreshold}%</span>
+          <span className="text-xs font-bold text-swiss-ink">{draft.confidenceThreshold}%</span>
         </div>
         <input
           type="range"
@@ -259,7 +261,7 @@ export function SocialListeningAgentSettingsForm({
           onChange={(e) => patch('confidenceThreshold', Number(e.target.value))}
           className="mt-2 w-full accent-[var(--color-primary,#4f46e5)]"
         />
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="mt-1 text-xs text-swiss-muted">
           Auto-respond only above {draft.confidenceThreshold}% confidence.
         </p>
       </section>
@@ -267,7 +269,7 @@ export function SocialListeningAgentSettingsForm({
       <section className="space-y-3">
         <FieldLabel>Message settings</FieldLabel>
         <label className="block">
-          <span className="text-xs font-semibold text-gray-600">Public reply tone</span>
+          <span className="text-xs font-semibold text-swiss-muted">Public reply tone</span>
           <select
             value={draft.publicReplyTone}
             onChange={(e) =>
@@ -276,7 +278,7 @@ export function SocialListeningAgentSettingsForm({
                 e.target.value as SocialListeningSettingsState['publicReplyTone']
               )
             }
-            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+            className="mt-1 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
           >
             <option value="friendly">Friendly</option>
             <option value="professional">Professional</option>
@@ -284,11 +286,11 @@ export function SocialListeningAgentSettingsForm({
           </select>
         </label>
         <label className="block">
-          <span className="text-xs font-semibold text-gray-600">DM Agent Skill</span>
+          <span className="text-xs font-semibold text-swiss-muted">DM Agent Skill</span>
           <select
             value={draft.dmAgentSkillId || ''}
             onChange={(e) => patch('dmAgentSkillId', e.target.value || null)}
-            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+            className="mt-1 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
           >
             <option value="">None (default prompts)</option>
             {skills.map((s) => (
@@ -299,13 +301,13 @@ export function SocialListeningAgentSettingsForm({
           </select>
         </label>
         <label className="block">
-          <span className="text-xs font-semibold text-gray-600">Fallback message</span>
-          <textarea
+          <span className="text-xs font-semibold text-swiss-muted">Fallback message</span>
+          <Textarea
             value={draft.fallbackMessage || ''}
             onChange={(e) => patch('fallbackMessage', e.target.value || null)}
             rows={3}
             placeholder="Used for DM if AI generation fails"
-            className="mt-1 w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+            className="min-h-0 mt-1 w-full resize-none rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
           />
         </label>
       </section>
@@ -320,7 +322,7 @@ export function SocialListeningAgentSettingsForm({
               e.target.value as SocialListeningSettingsState['leadCreationRule']
             )
           }
-          className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+          className="mt-2 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
         >
           <option value="interested_only">Interested comments only</option>
           <option value="interested_and_questions">Interested + Questions</option>
@@ -331,23 +333,23 @@ export function SocialListeningAgentSettingsForm({
       <section className="space-y-3">
         <FieldLabel>Safety limits</FieldLabel>
         <label className="block">
-          <span className="text-xs font-semibold text-gray-600">Max auto-DMs per day (this post)</span>
-          <input
+          <span className="text-xs font-semibold text-swiss-muted">Max auto-DMs per day (this post)</span>
+          <Input
             type="number"
             min={0}
             max={10000}
             value={draft.maxAutoDmsPerDay}
             onChange={(e) => patch('maxAutoDmsPerDay', Math.max(0, Number(e.target.value) || 0))}
-            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+            className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
           />
-          <p className="mt-1 text-[11px] text-gray-400">
+          <p className="mt-1 text-[11px] text-swiss-faint">
             Sent today: {draft.autoDmsSentToday} / {draft.maxAutoDmsPerDay}
           </p>
         </label>
         <div className="flex items-center justify-between gap-3 rounded-xl bg-surface-muted/50 px-3 py-2.5">
           <div>
-            <p className="text-sm font-semibold text-gray-800">Working hours only</p>
-            <p className="text-[11px] text-gray-400">
+            <p className="text-sm font-semibold text-swiss-ink">Working hours only</p>
+            <p className="text-[11px] text-swiss-faint">
               Outside the window, auto-eligible comments go to review.
             </p>
           </div>
@@ -360,21 +362,21 @@ export function SocialListeningAgentSettingsForm({
         {draft.workingHoursOnly && (
           <div className="grid grid-cols-2 gap-2">
             <label className="block">
-              <span className="text-xs font-semibold text-gray-600">Start</span>
-              <input
+              <span className="text-xs font-semibold text-swiss-muted">Start</span>
+              <Input
                 type="time"
                 value={draft.workingHoursStart || '09:00'}
                 onChange={(e) => patch('workingHoursStart', e.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none"
+                className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none"
               />
             </label>
             <label className="block">
-              <span className="text-xs font-semibold text-gray-600">End</span>
-              <input
+              <span className="text-xs font-semibold text-swiss-muted">End</span>
+              <Input
                 type="time"
                 value={draft.workingHoursEnd || '18:00'}
                 onChange={(e) => patch('workingHoursEnd', e.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none"
+                className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none"
               />
             </label>
           </div>

@@ -26,9 +26,9 @@ export function MemberPermissionsEditor({
   }
 
   return (
-    <div className="space-y-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
+    <div className="space-y-2 rounded-xl border border-swiss-line bg-slate-50 p-3">
       <div className="flex items-center justify-between gap-2">
-        <p className="text-sm font-bold uppercase tracking-wide text-gray-500">
+        <p className="text-sm font-bold uppercase tracking-wide text-swiss-muted">
           Permissions
         </p>
         <button
@@ -43,7 +43,7 @@ export function MemberPermissionsEditor({
       <ul className="grid gap-2 sm:grid-cols-2">
         {WORKSPACE_PERMISSION_DEFS.map((perm) => (
           <li key={perm.key}>
-            <label className="flex cursor-pointer items-start gap-2 rounded-lg border border-transparent px-1 py-1 hover:border-slate-200 hover:bg-white">
+            <label className="flex cursor-pointer items-start gap-2 rounded-lg border border-transparent px-1 py-1 hover:border-swiss-line hover:bg-white">
               <input
                 type="checkbox"
                 className="mt-0.5 accent-sky-600"
@@ -51,7 +51,7 @@ export function MemberPermissionsEditor({
                 disabled={disabled}
                 onChange={() => toggle(perm.key)}
               />
-              <span className="text-xs font-medium text-gray-800">{perm.label}</span>
+              <span className="text-xs font-medium text-swiss-ink">{perm.label}</span>
             </label>
           </li>
         ))}

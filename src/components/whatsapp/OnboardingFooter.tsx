@@ -22,13 +22,13 @@ export const OnboardingFooter: FC<OnboardingFooterProps> = ({
   isStarting = false,
 }) => {
   return (
-    <footer className="sticky bottom-0 z-20 -mx-4 px-4 py-4 sm:py-5 bg-slate-50/95 backdrop-blur-md border-t border-slate-200 mt-8">
+    <footer className="sticky bottom-0 z-20 -mx-4 px-4 py-4 sm:py-5 bg-slate-50/95 backdrop-blur-md border-t border-swiss-line mt-8">
       <div className="max-w-4xl mx-auto flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3">
         <button
           type="button"
           onClick={onBack}
           disabled={isStarting}
-          className="w-full sm:w-auto px-6 py-3 rounded-xl text-sm font-bold text-gray-700 bg-white border border-slate-200 hover:bg-gray-50 transition-colors disabled:opacity-50"
+          className="w-full sm:w-auto px-6 py-3 rounded-xl text-sm font-bold text-swiss-ink bg-white border border-swiss-line hover:bg-gray-50 transition-colors disabled:opacity-50"
         >
           {backLabel}
         </button>

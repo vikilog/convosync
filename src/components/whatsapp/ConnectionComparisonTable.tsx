@@ -9,12 +9,12 @@ import { CONNECTION_COMPARISON_ROWS } from './connectionComparisonData';
 export const ConnectionComparisonTable: FC = () => {
   return (
     <section
-      className="w-full rounded-2xl border border-slate-200 bg-white shadow-[0_1px_3px_rgba(25,26,43,0.05),0_8px_24px_rgba(65,44,221,0.05)] overflow-hidden"
+      className="w-full rounded-2xl border border-swiss-line bg-white shadow-[0_1px_3px_rgba(25,26,43,0.05),0_8px_24px_rgba(65,44,221,0.05)] overflow-hidden"
       aria-label="Connection options comparison"
     >
-      <div className="px-6 py-5 border-b border-slate-200 bg-slate-50/80">
-        <h3 className="text-base font-black text-gray-950">Compare Connection Options</h3>
-        <p className="mt-1 text-xs text-gray-500 font-medium">
+      <div className="px-6 py-5 border-b border-swiss-line bg-slate-50/80">
+        <h3 className="text-base font-semibold text-gray-950">Compare Connection Options</h3>
+        <p className="mt-1 text-xs text-swiss-muted font-medium">
           A quick side-by-side view to help you pick the right path.
         </p>
       </div>
@@ -22,10 +22,10 @@ export const ConnectionComparisonTable: FC = () => {
       <div className="overflow-x-auto">
         <table className="w-full min-w-[640px] text-left border-collapse">
           <thead>
-            <tr className="border-b border-slate-200 bg-gray-50/80">
+            <tr className="border-b border-swiss-line bg-gray-50/80">
               <th
                 scope="col"
-                className="px-6 py-4 text-sm font-black uppercase tracking-widest text-gray-400 w-[28%]"
+                className="px-6 py-4 text-sm font-black uppercase tracking-widest text-swiss-faint w-[28%]"
               >
                 &nbsp;
               </th>
@@ -47,18 +47,18 @@ export const ConnectionComparisonTable: FC = () => {
             {CONNECTION_COMPARISON_ROWS.map((row, index) => (
               <tr
                 key={row.id}
-                className={index < CONNECTION_COMPARISON_ROWS.length - 1 ? 'border-b border-slate-200' : ''}
+                className={index < CONNECTION_COMPARISON_ROWS.length - 1 ? 'border-b border-swiss-line' : ''}
               >
                 <th
                   scope="row"
-                  className="px-6 py-4 text-sm font-black text-gray-900 align-top bg-slate-50/40"
+                  className="px-6 py-4 text-sm font-black text-swiss-ink align-top bg-slate-50/40"
                 >
                   {row.label}
                 </th>
-                <td className="px-6 py-4 text-sm font-semibold text-gray-700 align-top">
+                <td className="px-6 py-4 text-sm font-semibold text-swiss-ink align-top">
                   {row.businessApi}
                 </td>
-                <td className="px-6 py-4 text-sm font-semibold text-gray-700 align-top">
+                <td className="px-6 py-4 text-sm font-semibold text-swiss-ink align-top">
                   {row.coexistence}
                 </td>
               </tr>

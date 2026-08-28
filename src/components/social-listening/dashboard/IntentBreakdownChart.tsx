@@ -33,10 +33,10 @@ export function IntentBreakdownChart({
   const total = data.reduce((s, d) => s + d.value, 0);
 
   return (
-    <div className="flex h-full min-h-[260px] flex-col rounded-xl bg-white ring-1 ring-slate-200/80 p-5">
+    <div className="flex h-full min-h-[260px] flex-col bg-white border border-swiss-line p-5">
       <div className="mb-3">
-        <h2 className="text-sm font-bold text-neutral-900">Intent breakdown</h2>
-        <p className="text-xs text-neutral-500">Comment distribution by AI intent</p>
+        <h2 className="text-sm font-bold text-swiss-ink">Intent breakdown</h2>
+        <p className="text-xs text-swiss-muted">Comment distribution by AI intent</p>
       </div>
 
       {loading ? (
@@ -45,8 +45,8 @@ export function IntentBreakdownChart({
         </div>
       ) : total === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center text-center">
-          <p className="text-sm font-semibold text-gray-600">No comments in this range</p>
-          <p className="mt-1 text-xs text-gray-400">Sync posts from Content to start classifying.</p>
+          <p className="text-sm font-semibold text-swiss-muted">No comments in this range</p>
+          <p className="mt-1 text-xs text-swiss-faint">Sync posts from Content to start classifying.</p>
         </div>
       ) : (
         <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
@@ -86,14 +86,14 @@ export function IntentBreakdownChart({
                 key={row.intent}
                 className="flex items-center justify-between gap-2 text-xs"
               >
-                <span className="inline-flex items-center gap-2 font-semibold text-gray-700">
+                <span className="inline-flex items-center gap-2 font-semibold text-swiss-ink">
                   <span
                     className="h-2 w-2 rounded-full"
                     style={{ background: COLORS[row.intent] || '#94a3b8' }}
                   />
                   {row.label}
                 </span>
-                <span className="tabular-nums font-bold text-gray-900">{row.count}</span>
+                <span className="tabular-nums font-bold text-swiss-ink">{row.count}</span>
               </li>
             ))}
           </ul>

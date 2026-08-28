@@ -55,10 +55,10 @@ export function WhatsAppAccountManager({
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
-      <header className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-5 sm:p-6">
+      <header className="bg-white border border-swiss-line p-5 sm:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#25D366] text-white shadow-sm">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#25D366] text-white ">
               <MessageCircle className="h-6 w-6" aria-hidden />
             </div>
             <div>
@@ -100,7 +100,7 @@ export function WhatsAppAccountManager({
             return (
               <article
                 key={account.id}
-                className="group rounded-2xl bg-white ring-1 ring-slate-200/80 p-4 sm:p-5 transition-colors duration-200 hover:border-black/10 hover:bg-surface-muted/40"
+                className="group bg-white border border-swiss-line p-4 sm:p-5 transition-colors duration-200 hover:border-black/10 hover:bg-surface-muted/40"
               >
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div className="flex gap-4 min-w-0">

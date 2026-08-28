@@ -8,6 +8,7 @@ import { Building2, Check, Plus, X } from 'lucide-react';
 import { api } from '../lib/api';
 import { applyAuthSession } from '../lib/session';
 import { connectSocket } from '../lib/socket';
+import { Input } from './ui/input';
 
 export type WorkspaceSummary = {
   id: string;
@@ -103,20 +104,20 @@ export const WorkspaceSwitcherDialog: React.FC<WorkspaceSwitcherDialogProps> = (
         aria-label="Close"
         onClick={onClose}
       />
-      <div className="relative w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
+      <div className="relative w-full max-w-md bg-white rounded-2xl shadow-xl border border-swiss-line overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-swiss-line">
           <div>
-            <h2 id="workspace-switcher-title" className="text-sm font-bold text-gray-900">
+            <h2 id="workspace-switcher-title" className="text-sm font-bold text-swiss-ink">
               Select company
             </h2>
-            <p className="text-meta text-gray-400 mt-0.5">
+            <p className="text-meta text-swiss-faint mt-0.5">
               Each company has its own workspace, contacts, and WhatsApp accounts.
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-50 hover:text-gray-700"
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-swiss-faint hover:bg-gray-50 hover:text-swiss-ink"
           >
             <X className="w-4 h-4" />
           </button>
@@ -124,10 +125,10 @@ export const WorkspaceSwitcherDialog: React.FC<WorkspaceSwitcherDialogProps> = (
 
         <div className="max-h-[320px] overflow-y-auto p-2">
           {loading && (
-            <p className="text-xs text-gray-400 text-center py-8">Loading companies…</p>
+            <p className="text-xs text-swiss-faint text-center py-8">Loading companies…</p>
           )}
           {!loading && workspaces.length === 0 && (
-            <p className="text-xs text-gray-400 text-center py-8">No companies found.</p>
+            <p className="text-xs text-swiss-faint text-center py-8">No companies found.</p>
           )}
           {!loading &&
             workspaces.map((ws) => {
@@ -149,8 +150,8 @@ export const WorkspaceSwitcherDialog: React.FC<WorkspaceSwitcherDialogProps> = (
                     {initial}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-gray-900 truncate">{ws.name}</p>
-                    <p className="text-xs text-gray-400 capitalize">{ws.role}</p>
+                    <p className="text-sm font-bold text-swiss-ink truncate">{ws.name}</p>
+                    <p className="text-xs text-swiss-faint capitalize">{ws.role}</p>
                     {ws.waPhoneNumber && (
                       <p className="text-xs text-primary font-medium mt-0.5 truncate">
                         {ws.waPhoneNumber}
@@ -160,7 +161,7 @@ export const WorkspaceSwitcherDialog: React.FC<WorkspaceSwitcherDialogProps> = (
                   {isActive ? (
                     <Check className="w-4 h-4 text-primary shrink-0" />
                   ) : switchingId === ws.id ? (
-                    <span className="text-xs text-gray-400">Switching…</span>
+                    <span className="text-xs text-swiss-faint">Switching…</span>
                   ) : (
                     <Building2 className="w-4 h-4 text-gray-300 shrink-0" />
                   )}
@@ -173,7 +174,7 @@ export const WorkspaceSwitcherDialog: React.FC<WorkspaceSwitcherDialogProps> = (
           <p className="px-5 pb-2 text-meta text-danger-red font-medium">{error}</p>
         )}
 
-        <div className="border-t border-slate-200 p-3 bg-slate-50">
+        <div className="border-t border-swiss-line p-3 bg-slate-50">
           {!showCreate ? (
             <button
               type="button"
@@ -185,12 +186,12 @@ export const WorkspaceSwitcherDialog: React.FC<WorkspaceSwitcherDialogProps> = (
             </button>
           ) : (
             <form onSubmit={handleCreate} className="space-y-2">
-              <input
+              <Input
                 type="text"
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 placeholder="Company name"
-                className="w-full text-xs border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                className="h-auto rounded-xl border-swiss-line px-3 py-2 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
                 autoFocus
               />
               <div className="flex gap-2">
@@ -200,7 +201,7 @@ export const WorkspaceSwitcherDialog: React.FC<WorkspaceSwitcherDialogProps> = (
                     setShowCreate(false);
                     setNewName('');
                   }}
-                  className="flex-1 py-2 text-sm font-bold text-gray-500 rounded-xl hover:bg-gray-100"
+                  className="flex-1 py-2 text-sm font-bold text-swiss-muted rounded-xl hover:bg-gray-100"
                 >
                   Cancel
                 </button>

@@ -148,14 +148,14 @@ export function SocialListeningPostAgentPanel({
   };
 
   return (
-    <section className="relative flex h-full min-h-0 flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-      <div className="flex shrink-0 items-center justify-between gap-2 border-b border-black/5 px-3.5 py-3">
+    <section className="relative flex h-full min-h-0 flex-col overflow-hidden bg-white border border-swiss-line shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+      <div className="flex shrink-0 items-center justify-between gap-2 border-b border-swiss-line px-3.5 py-3">
         <div className="min-w-0">
-          <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-neutral-400">
+          <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-swiss-faint">
             <Bot className="h-3.5 w-3.5" />
             This post
           </p>
-          <h2 className="text-sm font-black text-gray-950">Comment handling</h2>
+          <h2 className="text-sm font-semibold text-gray-950">Comment handling</h2>
         </div>
         <button
           type="button"
@@ -175,7 +175,7 @@ export function SocialListeningPostAgentPanel({
 
       <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-3.5">
         {loading ? (
-          <div className="flex items-center gap-2 py-8 text-sm text-gray-400">
+          <div className="flex items-center gap-2 py-8 text-sm text-swiss-faint">
             <Loader2 className="h-4 w-4 animate-spin" /> Loading…
           </div>
         ) : (
@@ -185,15 +185,15 @@ export function SocialListeningPostAgentPanel({
                 <div className="flex items-start gap-2">
                   <Route className="mt-0.5 h-4 w-4 shrink-0 text-sky-600" />
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-bold text-gray-900">Instagram Automation</p>
-                    <p className="mt-0.5 text-xs text-gray-500">
+                    <p className="text-sm font-bold text-swiss-ink">Instagram Automation</p>
+                    <p className="mt-0.5 text-xs text-swiss-muted">
                       Start a published automation when someone comments on this post. Leave off to
                       use global Comment-on-post triggers (keyword match) instead.
                     </p>
-                    <label className="mt-2 block text-[11px] font-semibold uppercase tracking-wide text-neutral-400">
+                    <label className="mt-2 block text-[11px] font-semibold uppercase tracking-wide text-swiss-faint">
                       Automation
                       <select
-                        className="mt-1 w-full cursor-pointer rounded-lg bg-white ring-1 ring-slate-200/80 px-2.5 py-2 text-sm font-semibold text-gray-800 outline-none focus:border-sky-200 focus:ring-2 focus:ring-sky-100"
+                        className="mt-1 w-full cursor-pointer rounded-lg bg-white ring-1 ring-swiss-line px-2.5 py-2 text-sm font-semibold text-swiss-ink outline-none focus:border-sky-200 focus:ring-2 focus:ring-sky-100"
                         value={commentJourneyId}
                         onChange={(e) => setCommentJourneyId(e.target.value)}
                       >
@@ -216,7 +216,7 @@ export function SocialListeningPostAgentPanel({
             )}
 
             <div>
-              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-neutral-400">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-swiss-faint">
                 AI Agent (Social Listening)
               </p>
               <SocialListeningAgentSettingsForm

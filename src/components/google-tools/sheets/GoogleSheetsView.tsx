@@ -19,7 +19,7 @@ export function GoogleSheetsView() {
   if (!sheets.loading && !sheets.integration) {
     return (
       <div className="flex flex-1 items-center justify-center p-8 bg-[#F8FAFC]">
-        <div className="max-w-md text-center rounded-xl border border-[#E2E8F0] bg-white px-8 py-10 shadow-sm">
+        <div className="max-w-md text-center rounded-xl border border-[#E2E8F0] bg-white px-8 py-10 ">
           <FileSpreadsheet className="w-10 h-10 mx-auto text-[#16A34A] mb-4" />
           <h2 className="text-lg font-bold text-[#0F172A]">Google Sheets not connected</h2>
           <p className="text-sm text-[#64748B] mt-2">Connect Sheets from Integrations → Google.</p>

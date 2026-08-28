@@ -34,7 +34,7 @@ export const InstructionToolbar: React.FC<Props> = ({
             <button
               type="button"
               onClick={() => insert(`\n${HANDOFF_SNIPPET}\n`)}
-              className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold border border-black/5 rounded-lg text-[#111827] hover:bg-surface-muted"
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold border border-swiss-line rounded-lg text-[#111827] hover:bg-surface-muted"
             >
               <Plus className="w-3.5 h-3.5" />
               Hand off
@@ -44,7 +44,7 @@ export const InstructionToolbar: React.FC<Props> = ({
             <button
               type="button"
               onClick={() => insert(`\n${ADD_TAGS_SNIPPET}\n`)}
-              className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold border border-black/5 rounded-lg text-[#111827] hover:bg-surface-muted"
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold border border-swiss-line rounded-lg text-[#111827] hover:bg-surface-muted"
             >
               <Plus className="w-3.5 h-3.5" />
               Add contact tags
@@ -54,7 +54,7 @@ export const InstructionToolbar: React.FC<Props> = ({
         <button
           type="button"
           onClick={onOpenTemplates}
-          className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold border border-black/5 rounded-lg text-[#111827] hover:bg-surface-muted"
+          className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold border border-swiss-line rounded-lg text-[#111827] hover:bg-surface-muted"
         >
           <Plus className="w-3.5 h-3.5" />
           Add prompt templates

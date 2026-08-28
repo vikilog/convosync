@@ -241,7 +241,7 @@ export const SocialListeningFeedView: React.FC = () => {
         )}
 
         {facebookConnected && (
-          <section className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+          <section className="bg-white border border-swiss-line p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
             {loadingFacebookProfile && !facebookProfile ? (
               <div className="flex gap-4 animate-pulse">
                 <div className="h-20 w-20 shrink-0 rounded-2xl bg-slate-100" />
@@ -256,7 +256,7 @@ export const SocialListeningFeedView: React.FC = () => {
                   <img
                     src={facebookProfile.picture}
                     alt=""
-                    className="h-20 w-20 shrink-0 rounded-2xl border border-black/5 object-cover"
+                    className="h-20 w-20 shrink-0 rounded-2xl border border-swiss-line object-cover"
                   />
                 ) : (
                   <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-[#e8f4ff] text-[#1877F2]">
@@ -264,8 +264,8 @@ export const SocialListeningFeedView: React.FC = () => {
                   </div>
                 )}
                 <div className="min-w-0 flex-1">
-                  <h1 className="text-lg font-black text-gray-950">{facebookProfile.name}</h1>
-                  <p className="text-sm font-bold text-gray-500">
+                  <h1 className="text-lg font-semibold text-gray-950">{facebookProfile.name}</h1>
+                  <p className="text-sm font-bold text-swiss-muted">
                     {[facebookProfile.category, `${formatCount(facebookProfile.followersCount)} followers`]
                       .filter(Boolean)
                       .join(' · ')}
@@ -275,7 +275,7 @@ export const SocialListeningFeedView: React.FC = () => {
                   type="button"
                   onClick={() => void handleDisconnectFacebook()}
                   disabled={disconnectingFacebook}
-                  className="inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-xl bg-white px-3 py-1.5 text-xs font-bold text-red-500 ring-1 ring-slate-200/80 hover:border-red-200 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-xs font-bold text-red-500 border border-swiss-line hover:border-red-200 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Unlink className="h-3.5 w-3.5" />
                   {disconnectingFacebook ? 'Disconnecting…' : 'Disconnect'}
@@ -288,8 +288,8 @@ export const SocialListeningFeedView: React.FC = () => {
         {!facebookConnected ? (
           <div className="flex flex-1 flex-col items-center justify-center rounded-2xl border border-dashed border-black/10 bg-white px-6 py-16 text-center">
             <Facebook className="mb-3 h-10 w-10 text-[#1877F2]" />
-            <h2 className="text-lg font-black text-gray-950">Connect a Facebook Page</h2>
-            <p className="mt-2 max-w-sm text-sm text-gray-500">
+            <h2 className="text-lg font-semibold text-gray-950">Connect a Facebook Page</h2>
+            <p className="mt-2 max-w-sm text-sm text-swiss-muted">
               Link a Facebook Page to browse posts and let AI classify and triage its comments.
             </p>
             <button
@@ -310,8 +310,8 @@ export const SocialListeningFeedView: React.FC = () => {
         ) : facebookPosts.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center rounded-2xl border border-dashed border-black/10 bg-white px-6 py-16 text-center">
             <ImageIcon className="mb-3 h-10 w-10 text-gray-300" />
-            <h2 className="text-lg font-black text-gray-950">No posts yet</h2>
-            <p className="mt-2 max-w-sm text-sm text-gray-500">
+            <h2 className="text-lg font-semibold text-gray-950">No posts yet</h2>
+            <p className="mt-2 max-w-sm text-sm text-swiss-muted">
               Posts from your connected Facebook Page will appear here.
             </p>
           </div>
@@ -329,7 +329,7 @@ export const SocialListeningFeedView: React.FC = () => {
                     openPostComments(post.id);
                   }
                 }}
-                className="group relative aspect-square cursor-pointer overflow-hidden rounded-xl bg-white ring-1 ring-slate-200/80 text-left shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
+                className="group relative aspect-square cursor-pointer overflow-hidden bg-white border border-swiss-line text-left shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
               >
                 {post.fullPicture ? (
                   <img
@@ -372,7 +372,7 @@ export const SocialListeningFeedView: React.FC = () => {
     return (
       <div className="flex h-full min-h-0 flex-1 flex-col gap-4 overflow-y-auto bg-white p-4 md:p-6">
         <SocialListeningPlatformSwitcher />
-        <div className="h-40 animate-pulse rounded-2xl bg-white ring-1 ring-slate-200/80" />
+        <div className="h-40 animate-pulse bg-white border border-swiss-line" />
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="aspect-square animate-pulse rounded-xl bg-slate-100" />
@@ -388,8 +388,8 @@ export const SocialListeningFeedView: React.FC = () => {
         <SocialListeningSubNav trailing={<SocialListeningPlatformSwitcher />} />
         <div className="flex flex-1 flex-col items-center justify-center rounded-2xl border border-dashed border-black/10 bg-white px-6 py-16 text-center">
           <Instagram className="mb-3 h-10 w-10 text-[#C13584]" />
-          <h2 className="text-lg font-black text-gray-950">Connect Instagram</h2>
-          <p className="mt-2 max-w-sm text-sm text-gray-500">
+          <h2 className="text-lg font-semibold text-gray-950">Connect Instagram</h2>
+          <p className="mt-2 max-w-sm text-sm text-swiss-muted">
             Link an Instagram Business account to browse posts and configure the agent per post.
           </p>
           <button
@@ -413,7 +413,7 @@ export const SocialListeningFeedView: React.FC = () => {
               type="button"
               disabled={!selectedIgId || loadingProfile || loadingMedia}
               onClick={() => loadFeed()}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-white ring-1 ring-slate-200/80 px-3 py-1.5 text-xs font-bold text-gray-700 hover:bg-surface-muted disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 bg-white border border-swiss-line px-3 py-1.5 text-xs font-bold text-swiss-ink hover:bg-surface-muted disabled:opacity-50"
             >
               <RefreshCw className={`h-3.5 w-3.5 ${loadingProfile || loadingMedia ? 'animate-spin' : ''}`} />
               Refresh
@@ -438,7 +438,7 @@ export const SocialListeningFeedView: React.FC = () => {
                 className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-colors ${
                   active
                     ? 'bg-[#0F172A] text-white'
-                    : 'bg-white ring-1 ring-slate-200/80 text-gray-600 hover:bg-surface-muted'
+                    : 'bg-white ring-1 ring-swiss-line text-swiss-muted hover:bg-surface-muted'
                 }`}
               >
                 {label}
@@ -454,7 +454,7 @@ export const SocialListeningFeedView: React.FC = () => {
         </p>
       )}
 
-      <section className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+      <section className="bg-white border border-swiss-line p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
         {loadingProfile && !profile ? (
           <div className="flex gap-4 animate-pulse">
             <div className="h-20 w-20 shrink-0 rounded-2xl bg-slate-100" />
@@ -470,7 +470,7 @@ export const SocialListeningFeedView: React.FC = () => {
               <img
                 src={profile.profilePictureUrl}
                 alt=""
-                className="h-20 w-20 shrink-0 rounded-2xl border border-black/5 object-cover"
+                className="h-20 w-20 shrink-0 rounded-2xl border border-swiss-line object-cover"
               />
             ) : (
               <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-[#fce8f0] text-[#C13584]">
@@ -478,14 +478,14 @@ export const SocialListeningFeedView: React.FC = () => {
               </div>
             )}
             <div className="min-w-0 flex-1">
-              <h1 className="text-lg font-black text-gray-950">
+              <h1 className="text-lg font-semibold text-gray-950">
                 {profile.name || profile.username || 'Instagram'}
               </h1>
               {profile.username && (
-                <p className="text-sm font-bold text-gray-500">@{profile.username}</p>
+                <p className="text-sm font-bold text-swiss-muted">@{profile.username}</p>
               )}
               {profile.biography && (
-                <p className="mt-2 text-sm text-gray-600 whitespace-pre-wrap">{profile.biography}</p>
+                <p className="mt-2 text-sm text-swiss-muted whitespace-pre-wrap">{profile.biography}</p>
               )}
             </div>
           </div>
@@ -508,14 +508,14 @@ export const SocialListeningFeedView: React.FC = () => {
               className={`rounded-lg px-3 py-1.5 text-xs font-bold ${
                 filter === f.id
                   ? 'bg-[#0F172A] text-white'
-                  : 'text-gray-500 hover:text-gray-800'
+                  : 'text-swiss-muted hover:text-swiss-ink'
               }`}
             >
               {f.label}
             </button>
           ))}
         </div>
-        <p className="text-[11px] font-bold text-gray-400">
+        <p className="text-[11px] font-bold text-swiss-faint">
           Hover a post → Insights · click post to open comments
         </p>
       </div>
@@ -555,7 +555,7 @@ export const SocialListeningFeedView: React.FC = () => {
                       openPostComments(item.id);
                     }
                   }}
-                  className="group relative aspect-square cursor-pointer overflow-hidden rounded-xl bg-white ring-1 ring-slate-200/80 text-left shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
+                  className="group relative aspect-square cursor-pointer overflow-hidden bg-white border border-swiss-line text-left shadow-[0_1px_2px_rgba(0,0,0,0.04)]"
                 >
                   {thumb ? (
                     <img
@@ -632,7 +632,7 @@ export const SocialListeningFeedView: React.FC = () => {
                 type="button"
                 disabled={loadingMore}
                 onClick={() => void loadMore()}
-                className="rounded-xl bg-white ring-1 ring-slate-200/80 px-5 py-2 text-sm font-bold text-gray-700 hover:bg-surface-muted disabled:opacity-50"
+                className="bg-white border border-swiss-line px-5 py-2 text-sm font-bold text-swiss-ink hover:bg-surface-muted disabled:opacity-50"
               >
                 {loadingMore ? 'Loading…' : 'Load more'}
               </button>

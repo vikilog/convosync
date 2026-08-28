@@ -53,7 +53,7 @@ export function InvoiceLogsPanel() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20 text-neutral-400">
+      <div className="flex items-center justify-center py-20 text-swiss-faint">
         <Loader2 className="h-6 w-6 animate-spin" />
       </div>
     );
@@ -61,7 +61,7 @@ export function InvoiceLogsPanel() {
 
   return (
     <div className="w-full space-y-4">
-      <div className="flex items-start gap-3 rounded-xl border border-primary/15 bg-primary/[0.06] px-4 py-3 text-sm text-neutral-700">
+      <div className="flex items-start gap-3 rounded-xl border border-primary/15 bg-primary/[0.06] px-4 py-3 text-sm text-swiss-ink">
         <Receipt className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
         <p>
           Every charge, renewal, and add-on purchase with Razorpay payment and order IDs.
@@ -75,15 +75,15 @@ export function InvoiceLogsPanel() {
       )}
 
       {transactions.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-black/10 bg-white py-16 text-center text-sm text-neutral-400">
+        <div className="rounded-2xl border border-dashed border-black/10 bg-white py-16 text-center text-sm text-swiss-faint">
           No invoices or transactions yet.
         </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200/80">
+        <div className="overflow-hidden bg-white border border-swiss-line">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[720px] text-left text-xs">
               <thead>
-                <tr className="border-b border-black/5 bg-white text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
+                <tr className="border-b border-swiss-line bg-white text-[11px] font-semibold uppercase tracking-wider text-swiss-faint">
                   <th className="px-4 py-3">Date</th>
                   <th className="px-4 py-3">Description</th>
                   <th className="px-4 py-3">Type</th>
@@ -93,17 +93,17 @@ export function InvoiceLogsPanel() {
                   <th className="px-4 py-3">Order ID</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-black/5">
+              <tbody className="divide-y divide-swiss-line">
                 {transactions.map((row) => (
                   <tr key={`${row.source}-${row.id}`} className="hover:bg-surface-muted/70">
-                    <td className="whitespace-nowrap px-4 py-3 text-neutral-600">
+                    <td className="whitespace-nowrap px-4 py-3 text-swiss-muted">
                       {formatBillingDate(row.paidAt ?? row.createdAt)}
                     </td>
-                    <td className="max-w-[200px] px-4 py-3 font-medium text-neutral-900">
+                    <td className="max-w-[200px] px-4 py-3 font-medium text-swiss-ink">
                       {row.description ?? '—'}
                     </td>
-                    <td className="px-4 py-3 text-neutral-600">{formatTransactionType(row.type)}</td>
-                    <td className="whitespace-nowrap px-4 py-3 font-semibold text-neutral-900">
+                    <td className="px-4 py-3 text-swiss-muted">{formatTransactionType(row.type)}</td>
+                    <td className="whitespace-nowrap px-4 py-3 font-semibold text-swiss-ink">
                       {formatInrPaise(row.amountPaise, row.currency)}
                     </td>
                     <td className="px-4 py-3">
@@ -115,10 +115,10 @@ export function InvoiceLogsPanel() {
                         {row.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-neutral-500">
+                    <td className="px-4 py-3 font-mono text-xs text-swiss-muted">
                       {row.razorpayPaymentId ?? '—'}
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-neutral-500">
+                    <td className="px-4 py-3 font-mono text-xs text-swiss-muted">
                       {row.razorpayOrderId ?? '—'}
                     </td>
                   </tr>

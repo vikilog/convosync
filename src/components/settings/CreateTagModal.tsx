@@ -6,6 +6,7 @@
 import { useEffect, useId, useState, type FormEvent } from 'react';
 import { Loader2 } from 'lucide-react';
 import { api, type WorkspaceTagRecord } from '../../lib/api';
+import { Input } from '../ui/input';
 
 type Props = {
   open: boolean;
@@ -63,10 +64,10 @@ export function CreateTagModal({ open, onClose, onSaved, folders, editingTag }: 
       <div className="absolute inset-0" onClick={() => !saving && onClose()} aria-hidden />
       <form
         onSubmit={(e) => void handleSubmit(e)}
-        className="relative w-full max-w-md space-y-4 rounded-2xl bg-white ring-1 ring-slate-200/80 p-6 shadow-xl"
+        className="relative w-full max-w-md space-y-4 bg-white border border-swiss-line p-6 shadow-xl"
       >
         <div>
-          <h3 className="text-base font-black text-gray-950">{isEdit ? 'Edit tag' : 'New tag'}</h3>
+          <h3 className="text-base font-semibold text-gray-950">{isEdit ? 'Edit tag' : 'New tag'}</h3>
           <p className="mt-1 text-xs text-slate-500">
             Tags help you segment contacts and trigger automations. Group related tags into a
             folder to keep pickers tidy.
@@ -74,26 +75,26 @@ export function CreateTagModal({ open, onClose, onSaved, folders, editingTag }: 
         </div>
 
         <label className="block space-y-1">
-          <span className="text-sm font-bold text-gray-500 uppercase tracking-wide">
+          <span className="text-sm font-bold text-swiss-muted uppercase tracking-wide">
             Name <span className="text-red-500">*</span>
           </span>
-          <input
+          <Input
             autoFocus
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. VIP"
-            className="w-full rounded-xl border border-black/5 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+            className="h-auto w-full rounded-xl border border-swiss-line px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
         </label>
 
         <label className="block space-y-1">
-          <span className="text-sm font-bold text-gray-500 uppercase tracking-wide">Folder</span>
-          <input
+          <span className="text-sm font-bold text-swiss-muted uppercase tracking-wide">Folder</span>
+          <Input
             value={folder}
             onChange={(e) => setFolder(e.target.value)}
             list={folderListId}
             placeholder="Tags"
-            className="w-full rounded-xl border border-black/5 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+            className="h-auto w-full rounded-xl border border-swiss-line px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
           <datalist id={folderListId}>
             {folders.map((f) => (
@@ -110,7 +111,7 @@ export function CreateTagModal({ open, onClose, onSaved, folders, editingTag }: 
             type="button"
             onClick={onClose}
             disabled={saving}
-            className="cursor-pointer rounded-lg border border-black/5 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-surface-muted disabled:opacity-50"
+            className="cursor-pointer rounded-lg border border-swiss-line px-4 py-2 text-sm font-semibold text-swiss-ink hover:bg-surface-muted disabled:opacity-50"
           >
             Cancel
           </button>

@@ -16,10 +16,10 @@ interface NeedsReplyPanelProps {
   onOpenInbox: () => void;
 }
 
-function urgency(waitMinutes: number): { stripe: string; text: string } {
-  if (waitMinutes >= 120) return { stripe: 'bg-red-500', text: 'text-red-600' };
-  if (waitMinutes >= 30) return { stripe: 'bg-amber-500', text: 'text-amber-700' };
-  return { stripe: 'bg-slate-200', text: 'text-neutral-400' };
+function urgency(waitMinutes: number): { text: string } {
+  if (waitMinutes >= 120) return { text: 'text-red-600' };
+  if (waitMinutes >= 30) return { text: 'text-swiss-accent' };
+  return { text: 'text-swiss-muted' };
 }
 
 function ChannelIcon({ channel }: { channel: string }) {
@@ -35,28 +35,30 @@ export const NeedsReplyPanel: React.FC<NeedsReplyPanelProps> = ({
   const now = Date.now();
 
   return (
-    <div className="flex h-full flex-col rounded-xl bg-white p-5 ring-1 ring-slate-200/80">
-      <div className="mb-1 flex items-center justify-between">
-        <h2 className="font-display text-lg font-medium text-neutral-900">Needs a reply</h2>
+    <div className="flex h-full flex-col font-swiss">
+      <div className="mb-1 flex items-baseline justify-between">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-swiss-muted">
+          Needs a reply
+        </p>
         <button
           type="button"
           onClick={onOpenInbox}
-          className="inline-flex cursor-pointer items-center gap-1 text-sm font-medium text-primary hover:text-primary-hover active:scale-[0.97]"
+          className="inline-flex cursor-pointer items-center gap-1 text-[11px] font-medium text-swiss-accent"
         >
           Open inbox
-          <ArrowUpRight className="h-3.5 w-3.5" />
+          <ArrowUpRight className="h-3 w-3" />
         </button>
       </div>
-      <p className="mb-3 text-sm text-neutral-500">Oldest unread first</p>
+      <p className="mb-3 text-[11px] text-swiss-faint">Oldest unread first</p>
 
       {items.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center py-8 text-center">
-          <CheckCircle2 className="h-7 w-7 text-emerald-500" aria-hidden />
-          <p className="mt-2 text-sm font-medium text-neutral-800">You're all caught up</p>
-          <p className="mt-0.5 text-xs text-neutral-500">No unread conversations waiting.</p>
+          <CheckCircle2 className="h-7 w-7 text-swiss-accent" aria-hidden />
+          <p className="mt-2 text-sm font-medium text-swiss-ink">You're all caught up</p>
+          <p className="mt-0.5 text-xs text-swiss-muted">No unread conversations waiting.</p>
         </div>
       ) : (
-        <ul className="divide-y divide-black/5">
+        <ul className="divide-y divide-swiss-line">
           {items.map((c) => {
             const waitMs = Math.max(0, now - new Date(c.lastMessageAt).getTime());
             const waitMinutes = waitMs / 60_000;
@@ -65,30 +67,29 @@ export const NeedsReplyPanel: React.FC<NeedsReplyPanelProps> = ({
 
             return (
               <li key={c.id} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
-                <span className={`h-8 w-1 shrink-0 rounded-full ${u.stripe}`} aria-hidden />
                 {c.contactAvatar ? (
                   <img
                     src={c.contactAvatar}
                     alt=""
-                    className="h-8 w-8 shrink-0 rounded-full object-cover"
+                    className="h-7 w-7 shrink-0 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-swiss-line text-[11px] font-semibold text-swiss-ink">
                     {initials}
                   </div>
                 )}
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">
-                    <p className="truncate text-sm font-medium text-neutral-900">
+                    <p className="truncate text-[13px] font-medium text-swiss-ink">
                       {c.contactName}
                     </p>
-                    <span className="flex shrink-0 items-center gap-1 text-[10px] uppercase text-neutral-400">
+                    <span className="flex shrink-0 items-center gap-1 text-swiss-faint">
                       <ChannelIcon channel={c.channel} />
                     </span>
                   </div>
-                  <p className="truncate text-xs text-neutral-500">{c.lastMessage || '—'}</p>
+                  <p className="truncate text-[11px] text-swiss-muted">{c.lastMessage || '—'}</p>
                 </div>
-                <span className={`shrink-0 text-xs font-semibold tabular-nums ${u.text}`}>
+                <span className={`shrink-0 text-[11px] font-semibold tabular-nums ${u.text}`}>
                   {formatNotificationRelativeTime(new Date(c.lastMessageAt).getTime(), now)}
                 </span>
               </li>

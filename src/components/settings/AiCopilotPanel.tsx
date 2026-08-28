@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { api, getUserId, parseApiError } from '../../lib/api';
 import { pathForSettingsSection } from '../../routes';
+import { Input } from '../ui/input';
 
 type ChatMessage = {
   id: string;
@@ -177,7 +178,7 @@ export function AiCopilotPanel() {
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 text-sm text-gray-500">
+      <div className="flex items-center gap-2 text-sm text-swiss-muted">
         <Loader2 className="w-4 h-4 animate-spin" />
         Loading AI Copilot…
       </div>
@@ -188,15 +189,15 @@ export function AiCopilotPanel() {
 
   return (
     <div className="max-w-4xl space-y-4">
-      <div className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-4 shadow-sm">
+      <div className="bg-white border border-swiss-line p-4 ">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex items-start gap-3">
             <div className="p-2.5 rounded-xl bg-sky-50 text-primary">
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-gray-900">Test salon AI replies</h3>
-              <p className="text-xs text-gray-500 mt-1">
+              <h3 className="text-sm font-bold text-swiss-ink">Test salon AI replies</h3>
+              <p className="text-xs text-swiss-muted mt-1">
                 Uses synced knowledge + OpenAI. Same flow as WhatsApp inbox will use.
               </p>
             </div>
@@ -210,9 +211,9 @@ export function AiCopilotPanel() {
         </div>
 
         <div className="mt-4 flex flex-wrap items-center gap-3 text-xs">
-          <span className="text-gray-500">
+          <span className="text-swiss-muted">
             Venue:{' '}
-            <span className="font-mono font-semibold text-gray-800">
+            <span className="font-mono font-semibold text-swiss-ink">
               {venueId || 'Not configured'}
             </span>
           </span>
@@ -230,12 +231,12 @@ export function AiCopilotPanel() {
             )}
             {knowledgeReady ? 'Knowledge synced' : 'Sync knowledge first'}
           </span>
-          <label className="flex items-center gap-2 text-gray-600">
+          <label className="flex items-center gap-2 text-swiss-muted">
             Channel
             <select
               value={channel}
               onChange={(e) => setChannel(e.target.value as typeof channel)}
-              className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-meta font-semibold"
+              className="rounded-lg border border-swiss-line bg-slate-50 px-2 py-1 text-meta font-semibold"
             >
               {CHANNELS.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -244,7 +245,7 @@ export function AiCopilotPanel() {
               ))}
             </select>
           </label>
-          <label className="flex items-center gap-1.5 text-gray-500 cursor-pointer">
+          <label className="flex items-center gap-1.5 text-swiss-muted cursor-pointer">
             <input
               type="checkbox"
               checked={showDebug}
@@ -263,15 +264,15 @@ export function AiCopilotPanel() {
         </div>
       )}
 
-      <div className="rounded-2xl bg-white ring-1 ring-slate-200/80 shadow-sm overflow-hidden flex flex-col min-h-[420px] max-h-[560px]">
+      <div className="bg-white border border-swiss-line overflow-hidden flex flex-col min-h-[420px] max-h-[560px]">
         <div
           ref={scrollRef}
           className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50"
         >
           {messages.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-12 text-center text-gray-400">
+            <div className="flex flex-col items-center justify-center py-12 text-center text-swiss-faint">
               <MessageSquare className="w-10 h-10 mb-3 opacity-40" />
-              <p className="text-sm font-semibold text-gray-500">Start a test conversation</p>
+              <p className="text-sm font-semibold text-swiss-muted">Start a test conversation</p>
               <p className="text-xs mt-1 max-w-xs">
                 Try a quick prompt below or type your own message as a customer would.
               </p>
@@ -287,7 +288,7 @@ export function AiCopilotPanel() {
                 className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
                   msg.role === 'user'
                     ? 'bg-primary text-white rounded-br-md'
-                    : 'bg-white border border-slate-200 text-gray-800 rounded-bl-md shadow-sm'
+                    : 'bg-white border border-swiss-line text-swiss-ink rounded-bl-md '
                 }`}
               >
                 {msg.role === 'assistant' && (
@@ -298,21 +299,21 @@ export function AiCopilotPanel() {
                 )}
                 <p className="whitespace-pre-wrap">{msg.content}</p>
                 {msg.role === 'assistant' && msg.intent && (
-                  <div className="mt-2 pt-2 border-t border-slate-200 flex flex-wrap gap-2 text-xs">
-                    <span className="font-bold text-gray-500">
+                  <div className="mt-2 pt-2 border-t border-swiss-line flex flex-wrap gap-2 text-xs">
+                    <span className="font-bold text-swiss-muted">
                       Intent:{' '}
                       <span className="text-primary">{formatIntent(msg.intent)}</span>
                     </span>
                     {msg.confidence != null && (
-                      <span className="font-bold text-gray-500">
+                      <span className="font-bold text-swiss-muted">
                         Confidence:{' '}
-                        <span className="text-gray-800">{Math.round(msg.confidence * 100)}%</span>
+                        <span className="text-swiss-ink">{Math.round(msg.confidence * 100)}%</span>
                       </span>
                     )}
                     {showDebug && msg.matchedSections && msg.matchedSections.length > 0 && (
-                      <span className="font-bold text-gray-500">
+                      <span className="font-bold text-swiss-muted">
                         Context:{' '}
-                        <span className="text-gray-800">{msg.matchedSections.join(', ')}</span>
+                        <span className="text-swiss-ink">{msg.matchedSections.join(', ')}</span>
                       </span>
                     )}
                   </div>
@@ -323,14 +324,14 @@ export function AiCopilotPanel() {
 
           {sending && (
             <div className="flex justify-start">
-              <div className="bg-white border border-slate-200 rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
+              <div className="bg-white border border-swiss-line rounded-2xl rounded-bl-md px-4 py-3 ">
                 <Loader2 className="w-4 h-4 animate-spin text-primary" />
               </div>
             </div>
           )}
         </div>
 
-        <div className="border-t border-slate-200 p-3 bg-white space-y-2">
+        <div className="border-t border-swiss-line p-3 bg-white space-y-2">
           <div className="flex flex-wrap gap-1.5">
             {QUICK_PROMPTS.map((prompt) => (
               <button
@@ -338,7 +339,7 @@ export function AiCopilotPanel() {
                 type="button"
                 disabled={sending || !knowledgeReady}
                 onClick={() => void sendMessage(prompt)}
-                className="text-sm font-semibold px-2.5 py-1 rounded-full border border-slate-200 bg-slate-50 hover:border-primary/40 hover:text-primary disabled:opacity-50 transition-colors"
+                className="text-sm font-semibold px-2.5 py-1 rounded-full border border-swiss-line bg-slate-50 hover:border-primary/40 hover:text-primary disabled:opacity-50 transition-colors"
               >
                 {prompt}
               </button>
@@ -346,7 +347,7 @@ export function AiCopilotPanel() {
           </div>
 
           <form onSubmit={handleSubmit} className="flex gap-2">
-            <input
+            <Input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -356,7 +357,7 @@ export function AiCopilotPanel() {
                   : 'Sync AI Knowledge first to test chat'
               }
               disabled={sending || !knowledgeReady}
-              className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none disabled:opacity-60"
+              className="h-auto flex-1 rounded-xl border border-swiss-line bg-slate-50 px-3 py-2.5 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none disabled:opacity-60"
             />
             <button
               type="submit"

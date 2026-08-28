@@ -25,7 +25,7 @@ function formatDate(iso: string | null): string {
 /** Stage accents — green only on delivered; others stay neutral/ink. */
 const STAGE_ACCENT: Record<string, string> = {
   sent: '#64748b',
-  delivered: 'var(--color-primary, #064e3b)',
+  delivered: 'var(--color-primary, #078038)',
   read: '#334155',
   opened: '#334155',
   failed: '#b91c1c',
@@ -53,8 +53,8 @@ const QuietEmpty: React.FC<{ title: string; description: string; className?: str
     className={`flex h-full min-h-[140px] flex-col items-center justify-center px-4 py-8 text-center ${className}`}
     role="status"
   >
-    <p className="text-sm font-semibold text-gray-600">{title}</p>
-    <p className="mt-1 max-w-sm text-xs font-medium leading-relaxed text-gray-400">
+    <p className="text-sm font-semibold text-swiss-muted">{title}</p>
+    <p className="mt-1 max-w-sm text-xs font-medium leading-relaxed text-swiss-faint">
       {description}
     </p>
   </div>
@@ -71,18 +71,18 @@ const KpiCell: React.FC<{
       ? 'text-primary'
       : accent === 'danger'
         ? 'text-red-700'
-        : 'text-gray-900';
+        : 'text-swiss-ink';
 
   return (
     <div className="min-w-0 px-5 py-5 sm:px-6">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-gray-400">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-swiss-faint">
         {label}
       </p>
       <p className={`mt-1.5 text-[1.75rem] font-semibold tracking-tight tabular-nums leading-none ${valueTone}`}>
         {value}
       </p>
       {hint && (
-        <p className="mt-1.5 text-[11px] font-medium leading-snug text-gray-400">{hint}</p>
+        <p className="mt-1.5 text-[11px] font-medium leading-snug text-swiss-faint">{hint}</p>
       )}
     </div>
   );
@@ -114,12 +114,12 @@ const StatusFunnel: React.FC<{
         return (
           <div key={step.key} role="listitem" className="min-w-0">
             <div className="mb-1 flex items-baseline justify-between gap-3">
-              <span className="text-sm font-semibold text-gray-800">{step.label}</span>
-              <span className="shrink-0 text-xs font-semibold tabular-nums text-gray-500">
-                <span className="text-sm font-semibold text-gray-900">
+              <span className="text-sm font-semibold text-swiss-ink">{step.label}</span>
+              <span className="shrink-0 text-xs font-semibold tabular-nums text-swiss-muted">
+                <span className="text-sm font-semibold text-swiss-ink">
                   {step.count.toLocaleString()}
                 </span>
-                <span className="ml-1.5 text-gray-400">{step.pct}%</span>
+                <span className="ml-1.5 text-swiss-faint">{step.pct}%</span>
               </span>
             </div>
             <div className="h-2 w-full overflow-hidden rounded-sm bg-black/[0.04]">
@@ -143,7 +143,7 @@ const StatusFunnel: React.FC<{
           </div>
         );
       })}
-      <p className="pt-0.5 text-[11px] font-medium text-gray-400">
+      <p className="pt-0.5 text-[11px] font-medium text-swiss-faint">
         Empty stages hidden · bar length relative to largest stage
       </p>
     </div>
@@ -184,12 +184,12 @@ const FailureReasons: React.FC<{
               aria-hidden
             />
             <div className="relative flex items-baseline justify-between gap-3 px-2.5 py-2">
-              <span className="min-w-0 break-words text-sm font-medium text-gray-800">
+              <span className="min-w-0 break-words text-sm font-medium text-swiss-ink">
                 {row.reason}
               </span>
-              <span className="shrink-0 text-xs font-semibold tabular-nums text-gray-500">
+              <span className="shrink-0 text-xs font-semibold tabular-nums text-swiss-muted">
                 {row.count}
-                <span className="ml-1 text-gray-400">{row.pct}%</span>
+                <span className="ml-1 text-swiss-faint">{row.pct}%</span>
               </span>
             </div>
           </li>
@@ -217,16 +217,16 @@ const LagHistogram: React.FC<{
     <div className="min-w-0">
       <div className="mb-3 flex items-end justify-between gap-2">
         <div>
-          <h4 className="text-sm font-semibold text-gray-900">{title}</h4>
-          <p className="mt-0.5 text-[11px] font-medium text-gray-400">
+          <h4 className="text-sm font-semibold text-swiss-ink">{title}</h4>
+          <p className="mt-0.5 text-[11px] font-medium text-swiss-faint">
             {hasData ? `${samples} sample${samples === 1 ? '' : 's'}` : 'Timeline pending'}
           </p>
         </div>
         <div className="text-right">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-gray-400">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-swiss-faint">
             Median
           </p>
-          <p className="text-sm font-semibold tabular-nums text-gray-900">
+          <p className="text-sm font-semibold tabular-nums text-swiss-ink">
             {formatMedian(medianMs)}
           </p>
         </div>
@@ -296,28 +296,28 @@ export const CampaignDetailAnalytics: React.FC<Props> = ({ channel, analytics })
 
   return (
     <motion.section
-      className="rounded-2xl bg-white ring-1 ring-slate-200/80"
+      className="bg-white border border-swiss-line"
       initial={reduceMotion ? false : { opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: reduceMotion ? 0 : 0.35, ease: 'easeOut' }}
       aria-labelledby="campaign-analytics-heading"
     >
-      <header className="flex flex-wrap items-baseline justify-between gap-2 border-b border-black/5 px-5 py-4 sm:px-6">
+      <header className="flex flex-wrap items-baseline justify-between gap-2 border-b border-swiss-line px-5 py-4 sm:px-6">
         <div>
           <h3
             id="campaign-analytics-heading"
-            className="text-sm font-semibold tracking-tight text-gray-900"
+            className="text-sm font-semibold tracking-tight text-swiss-ink"
           >
             Analytics
           </h3>
-          <p className="mt-0.5 text-xs font-medium text-gray-400">
+          <p className="mt-0.5 text-xs font-medium text-swiss-faint">
             Delivery funnel, rates, and timing
           </p>
         </div>
       </header>
 
       {/* KPI strip — typography grid, not gradient cards */}
-      <div className="grid grid-cols-2 divide-y divide-black/5 border-b border-black/5 sm:grid-cols-4 sm:divide-x sm:divide-y-0">
+      <div className="grid grid-cols-2 divide-y divide-swiss-line border-b border-swiss-line sm:grid-cols-4 sm:divide-x sm:divide-y-0">
         <KpiCell
           label="Success rate"
           value={`${analytics.successRate}%`}
@@ -347,18 +347,18 @@ export const CampaignDetailAnalytics: React.FC<Props> = ({ channel, analytics })
       </div>
 
       <div className="grid grid-cols-1 gap-0 xl:grid-cols-2">
-        <div className="min-w-0 border-b border-black/5 px-5 py-5 sm:px-6 xl:border-b-0 xl:border-r">
-          <h4 className="text-sm font-semibold text-gray-900">Status funnel</h4>
-          <p className="mb-4 text-[11px] font-medium text-gray-400">
+        <div className="min-w-0 border-b border-swiss-line px-5 py-5 sm:px-6 xl:border-b-0 xl:border-r">
+          <h4 className="text-sm font-semibold text-swiss-ink">Status funnel</h4>
+          <p className="mb-4 text-[11px] font-medium text-swiss-faint">
             Sent → Delivered → {readLabel}
             {analytics.funnel.some((s) => s.key === 'failed' && s.count > 0) ? ' · Failed' : ''}
           </p>
           <StatusFunnel steps={analytics.funnel} readLabel={readLabel} />
         </div>
 
-        <div className="min-w-0 border-b border-black/5 px-5 py-5 sm:px-6 xl:border-b-0">
-          <h4 className="text-sm font-semibold text-gray-900">Failure reasons</h4>
-          <p className="mb-4 text-[11px] font-medium text-gray-400">
+        <div className="min-w-0 border-b border-swiss-line px-5 py-5 sm:px-6 xl:border-b-0">
+          <h4 className="text-sm font-semibold text-swiss-ink">Failure reasons</h4>
+          <p className="mb-4 text-[11px] font-medium text-swiss-faint">
             Per-recipient error breakdown
           </p>
           <FailureReasons rows={analytics.failureReasons} />
@@ -381,7 +381,7 @@ export const CampaignDetailAnalytics: React.FC<Props> = ({ channel, analytics })
         </div>
       )}
 
-      <div className="grid grid-cols-1 divide-y divide-black/5 border-t border-black/5 xl:grid-cols-2 xl:divide-x xl:divide-y-0">
+      <div className="grid grid-cols-1 divide-y divide-swiss-line border-t border-swiss-line xl:grid-cols-2 xl:divide-x xl:divide-y-0">
         <div className="px-5 py-5 sm:px-6">
           <LagHistogram
             title="Send → delivered lag"

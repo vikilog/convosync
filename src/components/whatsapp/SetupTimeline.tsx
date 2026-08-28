@@ -13,8 +13,8 @@ type SetupTimelineProps = {
 
 export const SetupTimeline: FC<SetupTimelineProps> = ({ title, steps }) => {
   return (
-    <section className="bg-white rounded-2xl border border-slate-200 shadow-[0_1px_3px_rgba(25,26,43,0.05),0_8px_24px_rgba(65,44,221,0.05)] p-6 sm:p-8">
-      <h3 className="text-lg font-black text-gray-950 tracking-tight">{title}</h3>
+    <section className="bg-white rounded-2xl border border-swiss-line shadow-[0_1px_3px_rgba(25,26,43,0.05),0_8px_24px_rgba(65,44,221,0.05)] p-6 sm:p-8">
+      <h3 className="text-lg font-semibold text-gray-950 tracking-tight">{title}</h3>
 
       <ol className="mt-8 relative space-y-0">
         {steps.map((item, index) => {
@@ -31,8 +31,8 @@ export const SetupTimeline: FC<SetupTimelineProps> = ({ title, steps }) => {
                 {item.step}
               </span>
               <div className="pt-1 min-w-0">
-                <p className="text-sm font-black text-gray-900 leading-snug">{item.title}</p>
-                <p className="mt-1 text-xs text-gray-500 font-medium leading-relaxed">
+                <p className="text-sm font-black text-swiss-ink leading-snug">{item.title}</p>
+                <p className="mt-1 text-xs text-swiss-muted font-medium leading-relaxed">
                   {item.description}
                 </p>
               </div>

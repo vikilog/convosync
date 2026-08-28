@@ -57,7 +57,7 @@ export function IgDmPreview({
           <div className="flex justify-end">
             {/* Instagram outbound bubble — Meta blue, tail on bottom-right */}
             <div
-              className={`max-w-[88%] rounded-[18px] rounded-br-md bg-[#3797F0] text-white shadow-sm ${
+              className={`max-w-[88%] rounded-[18px] rounded-br-md bg-[#3797F0] text-white ${
                 compact
                   ? 'px-2.5 py-1.5 text-[10px] leading-snug'
                   : 'px-3 py-2 text-[12px] leading-relaxed'

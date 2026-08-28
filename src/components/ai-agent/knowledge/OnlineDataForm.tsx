@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { CheckCircle2, Link2, Loader2 } from 'lucide-react';
 import { api } from '../../../lib/api';
 import type { KnowledgeItem } from '../types';
+import { Input } from '../../ui/input';
 
 type FetchResult = {
   title: string;
@@ -117,7 +118,7 @@ export const OnlineDataForm: React.FC<Props> = ({ agentId, onSaved }) => {
         <div className="flex gap-2">
           <div className="relative flex-1">
             <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280]" />
-            <input
+            <Input
               type="text"
               value={url}
               onChange={(e) => {
@@ -126,14 +127,14 @@ export const OnlineDataForm: React.FC<Props> = ({ agentId, onSaved }) => {
               }}
               disabled={fetching}
               placeholder="https://example.com/pricing"
-              className="w-full pl-10 pr-3 py-2.5 border border-black/5 rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none disabled:opacity-60"
+              className="h-auto w-full pl-10 pr-3 py-2.5 border border-swiss-line rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none disabled:opacity-60"
             />
           </div>
           <button
             type="button"
             onClick={() => void handleFetch()}
             disabled={fetching || !url.trim()}
-            className="inline-flex items-center gap-2 px-4 py-2.5 border border-black/5 rounded-xl text-sm font-bold text-[#111827] hover:bg-surface-muted disabled:opacity-60"
+            className="inline-flex items-center gap-2 px-4 py-2.5 border border-swiss-line rounded-xl text-sm font-bold text-[#111827] hover:bg-surface-muted disabled:opacity-60"
           >
             {fetching ? (
               <>
@@ -153,7 +154,7 @@ export const OnlineDataForm: React.FC<Props> = ({ agentId, onSaved }) => {
           value={refreshInterval}
           onChange={(e) => setRefreshInterval(e.target.value)}
           disabled={fetching}
-          className="w-full border border-black/5 rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none disabled:opacity-60"
+          className="w-full border border-swiss-line rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none disabled:opacity-60"
         >
           <option value="daily">Daily</option>
           <option value="weekly">Weekly</option>

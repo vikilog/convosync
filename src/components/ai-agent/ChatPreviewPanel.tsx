@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Bot, RefreshCw, Send, X } from 'lucide-react';
 import { api } from '../../lib/api';
 import { mapAgentFromApi } from '../../lib/mappers';
+import { Input } from '../ui/input';
 
 type ChatMessage = {
   role: 'user' | 'assistant';
@@ -51,7 +52,7 @@ const BotAvatar: React.FC<BotAvatarProps> = ({ avatarUrl, size = 'sm', alt = 'Ag
       <img
         src={avatarUrl}
         alt={alt}
-        className={`${dim} rounded-full object-cover border border-black/5 shrink-0 bg-white`}
+        className={`${dim} rounded-full object-cover border border-swiss-line shrink-0 bg-white`}
       />
     );
   }
@@ -68,7 +69,7 @@ const BotAvatar: React.FC<BotAvatarProps> = ({ avatarUrl, size = 'sm', alt = 'Ag
 
   return (
     <div
-      className={`${dim} rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-black/5`}
+      className={`${dim} rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-swiss-line`}
     >
       <Bot className={iconDim} />
     </div>
@@ -220,7 +221,7 @@ export const ChatPreviewPanel: React.FC<Props> = ({
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-white">
-      <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-black/5 shrink-0">
+      <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-swiss-line shrink-0">
         <div className="min-w-0">
           <h4 className="text-sm font-bold text-[#111827]">Test conversation</h4>
           <p className="mt-0.5 text-[11px] text-slate-500">Agent ko yahan chat karke test karo</p>
@@ -274,7 +275,7 @@ export const ChatPreviewPanel: React.FC<Props> = ({
             <div key={idx} className="flex items-end gap-2">
               <BotAvatar avatarUrl={avatarUrl} size="sm" />
               <div className="max-w-[85%]">
-                <div className="rounded-2xl rounded-bl-md bg-white ring-1 ring-slate-200/80 text-[#111827] px-3 py-2 text-sm">
+                <div className="rounded-2xl rounded-bl-md bg-white border border-swiss-line text-[#111827] px-3 py-2 text-sm">
                   {msg.content}
                 </div>
                 {msg.billingMode !== 'byok' &&
@@ -293,7 +294,7 @@ export const ChatPreviewPanel: React.FC<Props> = ({
         {loading && (
           <div className="flex items-end gap-2">
             <BotAvatar avatarUrl={avatarUrl} size="sm" />
-            <div className="rounded-2xl rounded-bl-md bg-white ring-1 ring-slate-200/80 px-4 py-3 flex items-center gap-1">
+            <div className="rounded-2xl rounded-bl-md bg-white border border-swiss-line px-4 py-3 flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-[#6B7280] animate-bounce [animation-delay:0ms]" />
               <span className="w-1.5 h-1.5 rounded-full bg-[#6B7280] animate-bounce [animation-delay:150ms]" />
               <span className="w-1.5 h-1.5 rounded-full bg-[#6B7280] animate-bounce [animation-delay:300ms]" />
@@ -307,7 +308,7 @@ export const ChatPreviewPanel: React.FC<Props> = ({
       </div>
 
       {lastMeta ? (
-        <div className="px-3 py-1.5 border-t border-black/5 bg-white shrink-0">
+        <div className="px-3 py-1.5 border-t border-swiss-line bg-white shrink-0">
           {lastMeta.billingMode === 'byok' ? (
             <p className="text-[10px] text-slate-500 leading-snug">
               You&apos;re using your own AI provider. Check usage and billing in your provider&apos;s
@@ -322,9 +323,9 @@ export const ChatPreviewPanel: React.FC<Props> = ({
         </div>
       ) : null}
 
-      <div className="p-3 border-t border-black/5 shrink-0">
-        <div className="flex items-center gap-2 bg-white border border-black/5 rounded-xl px-3 py-2">
-          <input
+      <div className="p-3 border-t border-swiss-line shrink-0">
+        <div className="flex items-center gap-2 bg-white border border-swiss-line rounded-xl px-3 py-2">
+          <Input
             ref={inputRef}
             type="text"
             value={input}
@@ -332,7 +333,7 @@ export const ChatPreviewPanel: React.FC<Props> = ({
             onKeyDown={handleKeyDown}
             disabled={loading}
             placeholder="Customer ki tarah message likho…"
-            className="flex-1 bg-transparent text-sm text-[#111827] placeholder:text-[#6B7280] outline-none disabled:opacity-60"
+            className="h-auto flex-1 bg-transparent text-sm text-[#111827] placeholder:text-[#6B7280] outline-none disabled:opacity-60"
           />
           <button
             type="button"

@@ -8,8 +8,8 @@ type GoogleToolsNavProps = {
 
 export function GoogleToolsNav({ connectedTools }: GoogleToolsNavProps) {
   return (
-    <aside className="w-[188px] shrink-0 border-r border-slate-200 bg-slate-50 py-3 flex flex-col min-h-0 overflow-y-auto overflow-x-hidden">
-      <p className="text-sm font-bold uppercase tracking-wider text-gray-400 mb-2 px-4">
+    <aside className="w-[188px] shrink-0 border-r border-swiss-line bg-slate-50 py-3 flex flex-col min-h-0 overflow-y-auto overflow-x-hidden">
+      <p className="text-sm font-bold uppercase tracking-wider text-swiss-faint mb-2 px-4">
         Connected tools
       </p>
       <nav className="space-y-0.5 px-2">
@@ -25,14 +25,14 @@ export function GoogleToolsNav({ connectedTools }: GoogleToolsNavProps) {
                 `w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm transition-all ${
                   isActive
                     ? 'bg-[#e8f4ff] text-[#4285F4] font-bold'
-                    : 'text-gray-600 hover:bg-white hover:text-[#4285F4]'
+                    : 'text-swiss-muted hover:bg-white hover:text-[#4285F4]'
                 }`
               }
             >
               {({ isActive }) => (
                 <>
                   <Icon
-                    className={`w-4 h-4 shrink-0 ${isActive ? 'text-[#4285F4]' : 'text-gray-400'}`}
+                    className={`w-4 h-4 shrink-0 ${isActive ? 'text-[#4285F4]' : 'text-swiss-faint'}`}
                   />
                   <span className="truncate">{meta.shortLabel}</span>
                 </>

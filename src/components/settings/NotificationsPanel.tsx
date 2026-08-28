@@ -12,6 +12,8 @@ import {
   Users,
 } from 'lucide-react';
 import { api } from '../../lib/api';
+import { Input } from '../ui/input';
+import { Textarea } from '../ui/textarea';
 
 type EmailRecipients = {
   workspaceEmail: boolean;
@@ -126,7 +128,7 @@ function Switch({
       }`}
     >
       <span
-        className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform duration-200 ${
+        className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform duration-200 ${
           checked ? 'translate-x-6' : 'translate-x-1'
         }`}
       />
@@ -478,7 +480,7 @@ export function NotificationsPanel() {
 
             <div>
               <FieldLabel htmlFor="email-subject">Subject</FieldLabel>
-              <input
+              <Input
                 ref={subjectRef}
                 id="email-subject"
                 type="text"
@@ -496,7 +498,7 @@ export function NotificationsPanel() {
 
             <div>
               <FieldLabel htmlFor="email-body">Body</FieldLabel>
-              <textarea
+              <Textarea
                 ref={bodyRef}
                 id="email-body"
                 rows={6}
@@ -508,7 +510,7 @@ export function NotificationsPanel() {
                     email: { ...c.email, bodyTemplate: e.target.value },
                   }))
                 }
-                className={`${inputClass} resize-y font-mono text-[13px] leading-relaxed`}
+                className={`min-h-0 ${inputClass} resize-y font-mono text-[13px] leading-relaxed`}
               />
             </div>
 
@@ -578,7 +580,7 @@ export function NotificationsPanel() {
                           type="button"
                           onClick={() => toggleEmailUser(m.userId)}
                           className={`flex w-full cursor-pointer items-center gap-3 rounded-lg px-2.5 py-2 text-left transition-colors duration-200 ${
-                            on ? 'bg-white shadow-sm ring-1 ring-primary/20' : 'hover:bg-white/70'
+                            on ? 'bg-white ring-1 ring-primary/20' : 'hover:bg-white/70'
                           }`}
                         >
                           <span
@@ -600,7 +602,7 @@ export function NotificationsPanel() {
               ) : null}
 
               <FieldLabel htmlFor="extra-emails">Extra emails</FieldLabel>
-              <input
+              <Input
                 id="extra-emails"
                 type="text"
                 value={extraEmailsText}
@@ -662,7 +664,7 @@ export function NotificationsPanel() {
 
             <div>
               <FieldLabel htmlFor="wa-phones">On-call phone numbers</FieldLabel>
-              <input
+              <Input
                 id="wa-phones"
                 type="text"
                 value={waPhonesText}
@@ -689,7 +691,7 @@ export function NotificationsPanel() {
                             type="button"
                             onClick={() => toggleWaUser(m.userId)}
                             className={`flex w-full cursor-pointer items-center gap-3 rounded-lg px-2.5 py-2 text-left transition-colors duration-200 ${
-                              on ? 'bg-white shadow-sm ring-1 ring-channel-green/25' : 'hover:bg-white/70'
+                              on ? 'bg-white ring-1 ring-channel-green/25' : 'hover:bg-white/70'
                             }`}
                           >
                             <span

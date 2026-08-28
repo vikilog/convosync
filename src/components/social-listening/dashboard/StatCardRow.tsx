@@ -37,7 +37,7 @@ export function StatCardRow({
         {Array.from({ length: 5 }).map((_, i) => (
           <div
             key={i}
-            className="h-[88px] animate-pulse rounded-xl bg-white ring-1 ring-slate-200/80"
+            className="h-[88px] animate-pulse bg-white border border-swiss-line"
           />
         ))}
       </div>
@@ -77,7 +77,7 @@ export function StatCardRow({
         label="Auto-handled"
         value={stats.autoHandled.toLocaleString()}
         footer={
-          <span className="text-[11px] text-neutral-400">
+          <span className="text-[11px] text-swiss-faint">
             {stats.autoResponseEnabled ? 'In selected range' : 'Automation off'}
           </span>
         }

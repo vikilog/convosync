@@ -2,6 +2,7 @@ import { FileSpreadsheet, Grid3x3, List, Loader2, MoreHorizontal, Search } from 
 import type { SortDir, SortKey, SpreadsheetSummary } from './types';
 import { formatDate, formatNumber } from './utils';
 import { SheetsToolbarSelect } from './SheetsHeader';
+import { Input } from '../../ui/input';
 
 type SheetsListProps = {
   spreadsheets: SpreadsheetSummary[];
@@ -45,12 +46,12 @@ export function SheetsList({
       <div className="shrink-0 p-3 space-y-2 border-b border-[#E2E8F0] bg-white">
         <div className="flex items-center gap-2 rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 focus-within:ring-2 focus-within:ring-[#16A34A]/20">
           <Search className="w-4 h-4 text-[#64748B] shrink-0" />
-          <input
+          <Input
             type="search"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search sheets..."
-            className="flex-1 min-w-0 bg-transparent text-sm text-[#0F172A] placeholder:text-[#94A3B8] outline-none"
+            className="h-auto flex-1 min-w-0 bg-transparent text-sm text-[#0F172A] placeholder:text-[#94A3B8] outline-none"
           />
         </div>
 
@@ -130,9 +131,9 @@ export function SheetsList({
                   key={sheet.id}
                   type="button"
                   onClick={() => onSelect(sheet.id)}
-                  className={`p-3 rounded-xl border text-left transition-all hover:shadow-md ${
+                  className={`p-3 rounded-xl border text-left transition-all ${
                     selected
-                      ? 'border-[#16A34A] bg-emerald-50 shadow-sm'
+                      ? 'border-[#16A34A] bg-emerald-50 '
                       : 'border-[#E2E8F0] bg-white hover:bg-[#F8FAFC]'
                   }`}
                 >

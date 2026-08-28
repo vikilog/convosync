@@ -19,6 +19,7 @@ import {
 } from '../../lib/convocoins';
 import { openRazorpayCheckout } from '../../lib/razorpay';
 import { computeWalletRechargeQuote } from '../../lib/walletRechargeQuote';
+import { Input } from '../ui/input';
 
 type WalletSummary = {
   balancePaise: number;
@@ -53,7 +54,7 @@ const PRICING_ROWS = WALLET_PRICING_ROWS.map((row) => ({
 
 function SectionCard({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="rounded-xl bg-white ring-1 ring-slate-200/80 p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] md:p-6">
+    <section className="bg-white border border-swiss-line p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] md:p-6">
       <h3 className="text-base font-semibold text-slate-900">{title}</h3>
       <div className="mt-4">{children}</div>
     </section>
@@ -315,7 +316,7 @@ export function RechargeWalletPanel({
       ) : null}
 
       {/* Section 1 — Balance */}
-      <section className="rounded-xl bg-white ring-1 ring-slate-200/80 p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] md:p-6">
+      <section className="bg-white border border-swiss-line p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] md:p-6">
         <div className="flex items-center gap-2.5">
           <ConvoCoinMark size={32} />
           <h3 className="text-lg font-bold text-slate-900">ConvoCoins</h3>
@@ -330,20 +331,20 @@ export function RechargeWalletPanel({
         <p className="mt-1 text-sm text-slate-500">{formatCcInrSubtitle(balanceCc)}</p>
 
         <div className="mt-5 flex flex-wrap gap-2">
-          <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-700">
+          <span className="inline-flex items-center rounded-full border border-swiss-line bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-700">
             This month: <span className="ml-1 font-bold">{formatCc(monthSpentCc)}</span> spent
           </span>
-          <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-700">
+          <span className="inline-flex items-center rounded-full border border-swiss-line bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-700">
             Alert threshold:{' '}
             {editingAlert ? (
               <span className="ml-1 inline-flex items-center gap-1">
-                <input
+                <Input
                   type="number"
                   min={10}
                   step={10}
                   value={alertDraft}
                   onChange={(e) => setAlertDraft(e.target.value)}
-                  className="w-16 rounded border border-slate-200 px-1.5 py-0.5 text-xs"
+                  className="h-auto w-16 rounded border border-swiss-line px-1.5 py-0.5 text-xs"
                 />
                 CC
                 <button
@@ -401,8 +402,8 @@ export function RechargeWalletPanel({
                 }}
                 className={`flex flex-col items-center rounded-xl border px-3 py-3 text-center transition-all disabled:opacity-50 ${
                   selected
-                    ? 'border-violet-400 bg-violet-50 shadow-sm'
-                    : 'border-slate-200 bg-white hover:border-violet-200 hover:bg-violet-50/40'
+                    ? 'border-violet-400 bg-violet-50 '
+                    : 'border-swiss-line bg-white hover:border-violet-200 hover:bg-violet-50/40'
                 }`}
               >
                 <span className="text-sm font-bold text-slate-900">{formatCc(cc)}</span>
@@ -419,7 +420,7 @@ export function RechargeWalletPanel({
             <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
               Custom amount
             </label>
-            <input
+            <Input
               type="number"
               min={100}
               step={100}
@@ -429,14 +430,14 @@ export function RechargeWalletPanel({
                 setSelectedPreset(null);
               }}
               placeholder="Enter amount (min 100 CC)"
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-100"
+              className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-3 py-2.5 text-sm focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-100"
             />
           </div>
           <button
             type="button"
             disabled={checkoutBusy}
             onClick={handleCustomRecharge}
-            className="inline-flex items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:opacity-95 disabled:opacity-50 sm:shrink-0"
+            className="inline-flex items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:opacity-95 disabled:opacity-50 sm:shrink-0"
             style={{ backgroundColor: BRAND_PURPLE }}
           >
             {checkoutBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
@@ -447,7 +448,7 @@ export function RechargeWalletPanel({
         <p className="mt-3 text-xs text-slate-500">1 CC = ₹1 • 18% GST applicable</p>
 
         {/* AUTO_RECHARGE_DISABLED — re-enable later
-        <label className="mt-4 flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50/70 px-3 py-3">
+        <label className="mt-4 flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-swiss-line bg-slate-50/70 px-3 py-3">
           <span className="text-sm text-slate-700">
             Auto-recharge {formatCc(AUTO_RECHARGE_CC)} when balance drops below{' '}
             {formatCc(alertCc)}
@@ -476,7 +477,7 @@ export function RechargeWalletPanel({
 
       {/* Section 3 — Pricing */}
       <SectionCard title="How ConvoCoins are used">
-        <div className="overflow-x-auto rounded-lg border border-slate-200">
+        <div className="overflow-x-auto rounded-lg border border-swiss-line">
           <table className="min-w-full text-left text-sm">
             <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
               <tr>
@@ -522,7 +523,7 @@ export function RechargeWalletPanel({
       {showAllModal ? (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
           <div
-            className="flex max-h-[85vh] w-full max-w-lg flex-col rounded-2xl bg-white ring-1 ring-slate-200/80 shadow-xl"
+            className="flex max-h-[85vh] w-full max-w-lg flex-col bg-white border border-swiss-line shadow-xl"
             role="dialog"
             aria-modal="true"
             aria-labelledby="convocoin-tx-title"

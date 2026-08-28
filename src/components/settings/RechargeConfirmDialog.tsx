@@ -39,7 +39,7 @@ export function RechargeConfirmDialog({
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
       <div
-        className="w-full max-w-md rounded-xl bg-white ring-1 ring-slate-200/80 shadow-xl"
+        className="w-full max-w-md bg-white border border-swiss-line shadow-xl"
         role="dialog"
         aria-modal="true"
         aria-labelledby="recharge-confirm-title"

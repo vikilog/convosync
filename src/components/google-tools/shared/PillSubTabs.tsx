@@ -24,7 +24,7 @@ export function PillSubTabs({
             onClick={tab.onClick}
             className={`px-3 py-1.5 rounded-md text-sm font-semibold whitespace-nowrap transition-all ${
               tab.active
-                ? `bg-white shadow-sm ${activeClassName}`
+                ? `bg-white ${activeClassName}`
                 : 'text-[#64748B] hover:text-[#0F172A] bg-transparent'
             }`}
           >

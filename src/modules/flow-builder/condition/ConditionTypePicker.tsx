@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { ChevronDown, ChevronRight, Search, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { Input } from '../../../components/ui/input';
 import {
   CONDITION_CATEGORIES,
   CONDITION_CATEGORY_LABELS,
@@ -75,31 +76,31 @@ export function ConditionTypePicker({ open, channel, onClose, onSelect }: Props)
             initial={{ scale: 0.96, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.96, opacity: 0 }}
-            className="relative flex max-h-[80vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200/80 shadow-2xl"
+            className="relative flex max-h-[80vh] w-full max-w-lg flex-col overflow-hidden bg-white border border-swiss-line shadow-2xl"
           >
-            <div className="flex items-center justify-between border-b border-black/5 px-4 py-3">
-              <h3 className="text-sm font-bold text-gray-900">Add a condition</h3>
-              <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-700">
+            <div className="flex items-center justify-between border-b border-swiss-line px-4 py-3">
+              <h3 className="text-sm font-bold text-swiss-ink">Add a condition</h3>
+              <button type="button" onClick={onClose} className="text-swiss-faint hover:text-swiss-ink">
                 <X className="h-4 w-4" />
               </button>
             </div>
 
-            <div className="border-b border-black/5 p-3">
+            <div className="border-b border-swiss-line p-3">
               <div className="relative">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
-                <input
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-swiss-faint" />
+                <Input
                   autoFocus
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Search conditions…"
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50/80 py-2 pl-9 pr-3 text-sm outline-none focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/15"
+                  className="h-auto w-full rounded-xl border border-swiss-line bg-slate-50/80 py-2 pl-9 pr-3 text-sm outline-none focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/15"
                 />
               </div>
             </div>
 
             <div className="flex min-h-0 flex-1">
               {!searching && (
-                <div className="w-2/5 shrink-0 space-y-0.5 overflow-y-auto border-r border-black/5 p-2">
+                <div className="w-2/5 shrink-0 space-y-0.5 overflow-y-auto border-r border-swiss-line p-2">
                   {tabs.map((t) => (
                     <button
                       key={t}
@@ -148,7 +149,7 @@ export function ConditionTypePicker({ open, channel, onClose, onSelect }: Props)
                           </span>
                         </button>
                         {igOpen && (
-                          <div className="ml-1 space-y-0.5 border-l border-black/5 pl-2">
+                          <div className="ml-1 space-y-0.5 border-l border-swiss-line pl-2">
                             {igItems.map((def) => (
                               <ConditionTypeRow key={def.key} def={def} onSelect={handleSelect} />
                             ))}

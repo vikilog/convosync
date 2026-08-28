@@ -21,7 +21,7 @@ export function AutomationSettingsPanel() {
 
   return (
     <div className="space-y-4">
-      <div className="inline-flex rounded-lg bg-white ring-1 ring-slate-200/80 p-1">
+      <div className="inline-flex rounded-lg bg-white ring-1 ring-swiss-line p-1">
         {TABS.map((tab) => (
           <button
             key={tab.key}

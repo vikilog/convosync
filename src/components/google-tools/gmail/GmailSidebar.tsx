@@ -17,14 +17,14 @@ export function GmailSidebar({
   onClose,
 }: GmailSidebarProps) {
   return (
-    <aside className="shrink-0 w-[200px] flex flex-col min-h-0 bg-slate-50 border-r border-slate-200 overflow-y-auto overflow-x-hidden">
-      <div className="p-3 border-b border-slate-200 bg-white/70 flex items-center justify-between gap-2">
-        <p className="text-sm font-bold uppercase tracking-wider text-gray-400">Mailboxes</p>
+    <aside className="shrink-0 w-[200px] flex flex-col min-h-0 bg-slate-50 border-r border-swiss-line overflow-y-auto overflow-x-hidden">
+      <div className="p-3 border-b border-swiss-line bg-white/70 flex items-center justify-between gap-2">
+        <p className="text-sm font-bold uppercase tracking-wider text-swiss-faint">Mailboxes</p>
         {onClose && (
           <button
             type="button"
             onClick={onClose}
-            className="lg:hidden p-1.5 rounded-lg text-gray-400 hover:bg-slate-50"
+            className="lg:hidden p-1.5 rounded-lg text-swiss-faint hover:bg-slate-50"
             aria-label="Close sidebar"
           >
             <ChevronLeft className="w-4 h-4" />
@@ -45,7 +45,7 @@ export function GmailSidebar({
               className={`group relative w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 ${
                 active
                   ? 'bg-white text-primary font-bold shadow-[0_1px_4px_rgba(91,76,245,0.08)] ring-1 ring-primary/15'
-                  : 'text-gray-600 hover:bg-white/80 hover:text-gray-900'
+                  : 'text-swiss-muted hover:bg-white/80 hover:text-swiss-ink'
               }`}
             >
               {active && (
@@ -53,14 +53,14 @@ export function GmailSidebar({
               )}
               <Icon
                 className={`w-4 h-4 shrink-0 transition-colors ${
-                  active ? 'text-primary' : 'text-gray-400 group-hover:text-gray-600'
+                  active ? 'text-primary' : 'text-swiss-faint group-hover:text-swiss-muted'
                 }`}
               />
               <span className="flex-1 text-left truncate">{item.label}</span>
               {count && (
                 <span
                   className={`text-meta font-mono tabular-nums shrink-0 min-w-[2ch] text-right ${
-                    active ? 'text-primary/70' : 'text-gray-400'
+                    active ? 'text-primary/70' : 'text-swiss-faint'
                   }`}
                 >
                   {count}

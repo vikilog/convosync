@@ -9,6 +9,7 @@ import { api } from '../../lib/api';
 import { CreateDataTableModal } from './CreateDataTableModal';
 import { DataTableDetailView } from './DataTableDetailView';
 import type { DataTableRecord } from './types';
+import { Input } from '../ui/input';
 
 function formatUpdated(iso?: string): string {
   if (!iso) return '—';
@@ -74,15 +75,15 @@ export function DataTablesView() {
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-4">
-      <div className="p-4 bg-white ring-1 ring-slate-200/80 rounded-xl flex flex-wrap items-center justify-between gap-4">
+      <div className="p-4 bg-white border border-swiss-line flex flex-wrap items-center justify-between gap-4">
         <div className="relative w-48 sm:w-64">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
-          <input
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-swiss-faint" />
+          <Input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search tables..."
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl py-1.5 pl-9 pr-3 text-meta font-semibold outline-none focus:ring-2 focus:ring-primary/20"
+            className="h-auto w-full bg-slate-50 border border-swiss-line rounded-xl py-1.5 pl-9 pr-3 text-meta font-semibold outline-none focus:ring-2 focus:ring-primary/20"
           />
         </div>
         <button
@@ -103,11 +104,11 @@ export function DataTablesView() {
 
       <div className="min-h-0 flex-1 overflow-y-auto">
         {loading ? (
-          <div className="flex justify-center py-24 text-gray-400">
+          <div className="flex justify-center py-24 text-swiss-faint">
             <Loader2 className="w-8 h-8 animate-spin" />
           </div>
         ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-3 py-24 text-center text-gray-400">
+          <div className="flex flex-col items-center justify-center gap-3 py-24 text-center text-swiss-faint">
             <Table2 className="w-10 h-10" />
             <p className="text-sm font-semibold">
               {tables.length === 0 ? 'No tables yet' : 'No tables match your search'}
@@ -123,20 +124,20 @@ export function DataTablesView() {
               <article
                 key={table.id}
                 onClick={() => setOpenId(table.id)}
-                className="cursor-pointer bg-white rounded-2xl border border-black/5 p-4 flex flex-col gap-3 shadow-[0_1px_3px_rgba(0,0,0,0.02)] hover:border-primary/30"
+                className="cursor-pointer bg-white rounded-2xl border border-swiss-line p-4 flex flex-col gap-3 shadow-[0_1px_3px_rgba(0,0,0,0.02)] hover:border-primary/30"
               >
                 <div className="flex items-start justify-between gap-2">
-                  <h3 className="text-sm font-black text-gray-950 leading-tight break-words">
+                  <h3 className="text-sm font-semibold text-gray-950 leading-tight break-words">
                     {table.name}
                   </h3>
-                  <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-gray-500">
+                  <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-swiss-muted">
                     {table.rowCount} row{table.rowCount === 1 ? '' : 's'}
                   </span>
                 </div>
                 {table.description ? (
-                  <p className="text-xs text-gray-500 line-clamp-2">{table.description}</p>
+                  <p className="text-xs text-swiss-muted line-clamp-2">{table.description}</p>
                 ) : null}
-                <p className="text-xs text-gray-400 font-medium">
+                <p className="text-xs text-swiss-faint font-medium">
                   {table.columns.length} column{table.columns.length === 1 ? '' : 's'} · Updated{' '}
                   {formatUpdated(table.updatedAt)}
                 </p>

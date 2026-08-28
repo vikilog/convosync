@@ -1,0 +1,14 @@
+{
+  "id": "session-1787478114030",
+  "startedAt": "2026-08-23T09:41:54.030Z",
+  "cwd": "/Users/vikas/Downloads/wabiz/frontend",
+  "context": {},
+  "metrics": {
+    "edits": 201,
+    "commands": 0,
+    "tasks": 0,
+    "errors": 0
+  },
+  "endedAt": "2026-08-28T18:36:54.842Z",
+  "duration": 464100813
+}

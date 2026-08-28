@@ -480,7 +480,7 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
       <div className="flex-1 w-full pb-12 text-left selection:bg-primary/15">
         <div className="flex flex-col items-center justify-center py-24 text-center">
           <div className="w-10 h-10 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
-          <p className="mt-4 text-sm font-bold text-gray-500">Checking WhatsApp numbers…</p>
+          <p className="mt-4 text-sm font-bold text-swiss-muted">Checking WhatsApp numbers…</p>
         </div>
       </div>
     );
@@ -492,7 +492,7 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
         <button
           type="button"
           onClick={onBackToHub}
-          className="inline-flex items-center gap-1.5 text-sm font-bold text-gray-500 hover:text-primary transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-primary transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Back to integrations
@@ -550,15 +550,15 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
             <Blocks className="w-7 h-7" />
           </div>
           <div className="space-y-2">
-            <h4 className="text-lg font-black text-gray-950">Connect from Integrations</h4>
-            <p className="text-sm text-gray-500 font-medium">
+            <h4 className="text-lg font-semibold text-gray-950">Connect from Integrations</h4>
+            <p className="text-sm text-swiss-muted font-medium">
               WhatsApp and Instagram setup now lives in the Integrations tab.
             </p>
           </div>
           <button
             type="button"
             onClick={() => navigate(pathForTab('integrations'))}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary-hover text-white rounded-xl text-sm font-black shadow-sm transition-all"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary-hover text-white rounded-xl text-sm font-black transition-all"
           >
             Open Integrations
           </button>
@@ -593,18 +593,18 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
             <button
               type="button"
               onClick={() => setNumbersFlow('business_api_guide')}
-              className="inline-flex items-center gap-1.5 text-sm font-bold text-gray-500 hover:text-primary transition-colors"
+              className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-primary transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               Back to requirements
             </button>
 
-            <div className="bg-white ring-1 ring-slate-200/80 rounded-2xl p-6 sm:p-8 shadow-sm">
+            <div className="bg-white border border-swiss-line p-6 sm:p-8 ">
               <span className="inline-block px-3 py-1 rounded-full text-sm font-black uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 mb-4">
                 Step 2 — Connect Meta Account
               </span>
-              <h4 className="text-xl font-black text-gray-950">Connect with Meta Business</h4>
-              <p className="mt-2 text-sm text-gray-600 font-medium max-w-xl">
+              <h4 className="text-xl font-semibold text-gray-950">Connect with Meta Business</h4>
+              <p className="mt-2 text-sm text-swiss-muted font-medium max-w-xl">
                 Sign in with Facebook to link your Business Manager and continue WhatsApp Business
                 API registration.
               </p>
@@ -628,18 +628,18 @@ export const ManagerView: React.FC<ManagerViewProps> = ({
             <button
               type="button"
               onClick={() => setNumbersFlow('coexistence_guide')}
-              className="inline-flex items-center gap-1.5 text-sm font-bold text-gray-500 hover:text-primary transition-colors"
+              className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-primary transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               Back to requirements
             </button>
 
-            <div className="bg-white ring-1 ring-slate-200/80 rounded-2xl p-6 sm:p-8 shadow-sm">
+            <div className="bg-white border border-swiss-line p-6 sm:p-8 ">
               <span className="inline-block px-3 py-1 rounded-full text-sm font-black uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 mb-4">
                 Step 2 — Connect WhatsApp
               </span>
-              <h4 className="text-xl font-black text-gray-950">Connect with Meta</h4>
-              <p className="mt-2 text-sm text-gray-600 font-medium max-w-xl">
+              <h4 className="text-xl font-semibold text-gray-950">Connect with Meta</h4>
+              <p className="mt-2 text-sm text-swiss-muted font-medium max-w-xl">
                 Sign in with Facebook to link your existing WhatsApp Business App. Your mobile app
                 will keep working while permissions and data sync complete.
               </p>

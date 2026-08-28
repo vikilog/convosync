@@ -1,6 +1,7 @@
 import { Loader2, MapPin, Search } from 'lucide-react';
 import type { GbpLocation } from './types';
 import { formatAddressLine, locationInitials } from './utils';
+import { Input } from '../../ui/input';
 
 type BusinessProfileLocationListProps = {
   locations: GbpLocation[];
@@ -22,35 +23,35 @@ export function BusinessProfileLocationList({
   totalCount,
 }: BusinessProfileLocationListProps) {
   return (
-    <section className="w-full lg:w-[360px] shrink-0 flex flex-col min-h-0 min-w-0 border-r border-slate-200 bg-white">
-      <div className="shrink-0 px-4 py-3 border-b border-slate-200 bg-slate-50/80 space-y-2.5">
+    <section className="w-full lg:w-[360px] shrink-0 flex flex-col min-h-0 min-w-0 border-r border-swiss-line bg-white">
+      <div className="shrink-0 px-4 py-3 border-b border-swiss-line bg-slate-50/80 space-y-2.5">
         <div className="flex items-center justify-between gap-2">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-gray-500">Locations</h2>
-          <span className="text-meta text-gray-400 tabular-nums">{totalCount} total</span>
+          <h2 className="text-sm font-bold uppercase tracking-wider text-swiss-muted">Locations</h2>
+          <span className="text-meta text-swiss-faint tabular-nums">{totalCount} total</span>
         </div>
-        <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2">
-          <Search className="w-4 h-4 text-gray-400 shrink-0" />
-          <input
+        <div className="flex items-center gap-2 rounded-xl border border-swiss-line bg-white px-3 py-2">
+          <Search className="w-4 h-4 text-swiss-faint shrink-0" />
+          <Input
             type="search"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search locations…"
-            className="flex-1 min-w-0 bg-transparent text-sm text-gray-900 placeholder:text-gray-400 outline-none"
+            className="h-auto flex-1 min-w-0 bg-transparent text-sm text-swiss-ink placeholder:text-swiss-faint outline-none"
           />
         </div>
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
         {loading ? (
-          <div className="flex items-center justify-center py-20 text-sm text-gray-400">
+          <div className="flex items-center justify-center py-20 text-sm text-swiss-faint">
             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
             Loading locations…
           </div>
         ) : locations.length === 0 ? (
           <div className="py-20 px-6 text-center">
             <MapPin className="w-8 h-8 mx-auto text-gray-300 mb-3" />
-            <p className="text-sm font-semibold text-gray-600">No locations found</p>
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-sm font-semibold text-swiss-muted">No locations found</p>
+            <p className="text-xs text-swiss-faint mt-1">
               Sync your account or try another business account.
             </p>
           </div>
@@ -78,7 +79,7 @@ export function BusinessProfileLocationList({
                       <p className="text-sm font-bold text-gray-950 truncate">
                         {loc.title || 'Untitled location'}
                       </p>
-                      <p className="text-xs text-gray-500 truncate mt-0.5">
+                      <p className="text-xs text-swiss-muted truncate mt-0.5">
                         {formatAddressLine(loc.storefrontAddress)}
                       </p>
                       {loc.regularHours?.periods && loc.regularHours.periods.length > 0 && (

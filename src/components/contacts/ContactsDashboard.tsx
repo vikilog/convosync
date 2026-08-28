@@ -54,14 +54,14 @@ const GROWTH_RANGES: { id: GrowthRange; label: string }[] = [
 ];
 
 const CHANNEL_COLORS = {
-  whatsapp: '#064e3b',
-  instagram: '#0a5c46',
+  whatsapp: '#078038',
+  instagram: '#0aa347',
   messenger: '#0d6b52',
 };
 
 const SOURCE_COLORS = [
-  '#064e3b',
-  '#0a5c46',
+  '#078038',
+  '#0aa347',
   '#0d6b52',
   '#14805f',
   '#2a9a74',
@@ -280,7 +280,7 @@ export const ContactsDashboard: React.FC<{
                     onClick={() => setGrowthRange(r.id)}
                     className={`rounded-md px-2.5 py-1 text-[11px] font-semibold transition-colors ${
                       growthRange === r.id
-                        ? 'bg-primary text-white shadow-sm'
+                        ? 'bg-primary text-white '
                         : 'text-slate-600 hover:text-primary'
                     }`}
                   >
@@ -330,8 +330,8 @@ export const ContactsDashboard: React.FC<{
                 <AreaChart data={growthPoints} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="contactGrowthFill" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#064e3b" stopOpacity={0.35} />
-                      <stop offset="100%" stopColor="#064e3b" stopOpacity={0.02} />
+                      <stop offset="0%" stopColor="#078038" stopOpacity={0.35} />
+                      <stop offset="100%" stopColor="#078038" stopOpacity={0.02} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e2dc" vertical={false} />
@@ -361,7 +361,7 @@ export const ContactsDashboard: React.FC<{
                     type="monotone"
                     dataKey="count"
                     name="New"
-                    stroke="#064e3b"
+                    stroke="#078038"
                     strokeWidth={2}
                     fill="url(#contactGrowthFill)"
                   />

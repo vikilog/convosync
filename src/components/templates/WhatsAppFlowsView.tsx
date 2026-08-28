@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { Plus, Search, Pencil, Trash2, Loader2, LayoutGrid } from 'lucide-react';
 import { api } from '../../lib/api';
 import { pathForTemplateEditor } from '../../routes';
+import { Input } from '../ui/input';
 
 export type WhatsAppFlowRecord = {
   id: string;
@@ -31,7 +32,7 @@ function StatusBadge({ status }: { status: string }) {
   return (
     <span
       className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide ${
-        isPublished ? 'bg-[#e6f7ec] text-channel-green' : 'bg-slate-100 text-gray-500'
+        isPublished ? 'bg-[#e6f7ec] text-channel-green' : 'bg-slate-100 text-swiss-muted'
       }`}
     >
       {isPublished ? 'Published' : 'Draft'}
@@ -81,15 +82,15 @@ export const WhatsAppFlowsView: React.FC = () => {
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-4">
-      <div className="p-4 bg-white ring-1 ring-slate-200/80 rounded-xl flex flex-wrap items-center justify-between gap-4">
+      <div className="p-4 bg-white border border-swiss-line flex flex-wrap items-center justify-between gap-4">
         <div className="relative w-48 sm:w-64">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
-          <input
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-swiss-faint" />
+          <Input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search flows..."
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl py-1.5 pl-9 pr-3 text-meta font-semibold outline-none focus:ring-2 focus:ring-primary/20"
+            className="h-auto w-full bg-slate-50 border border-swiss-line rounded-xl py-1.5 pl-9 pr-3 text-meta font-semibold outline-none focus:ring-2 focus:ring-primary/20"
           />
         </div>
         <button
@@ -110,11 +111,11 @@ export const WhatsAppFlowsView: React.FC = () => {
 
       <div className="min-h-0 flex-1 overflow-y-auto">
         {loading ? (
-          <div className="flex justify-center py-24 text-gray-400">
+          <div className="flex justify-center py-24 text-swiss-faint">
             <Loader2 className="w-8 h-8 animate-spin" />
           </div>
         ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-3 py-24 text-center text-gray-400">
+          <div className="flex flex-col items-center justify-center gap-3 py-24 text-center text-swiss-faint">
             <LayoutGrid className="w-10 h-10" />
             <p className="text-sm font-semibold">
               {flows.length === 0 ? 'No flows yet' : 'No flows match your search'}
@@ -129,22 +130,22 @@ export const WhatsAppFlowsView: React.FC = () => {
             {filtered.map((flow) => (
               <article
                 key={flow.id}
-                className="bg-white rounded-2xl border border-black/5 p-4 flex flex-col gap-3 shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                className="bg-white rounded-2xl border border-swiss-line p-4 flex flex-col gap-3 shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
               >
                 <div className="flex items-start justify-between gap-2">
-                  <h3 className="text-sm font-black text-gray-950 leading-tight break-words">
+                  <h3 className="text-sm font-semibold text-gray-950 leading-tight break-words">
                     {flow.name}
                   </h3>
                   <StatusBadge status={flow.status} />
                 </div>
-                <p className="text-xs text-gray-400 font-medium">
+                <p className="text-xs text-swiss-faint font-medium">
                   Updated {formatUpdated(flow.updatedAt)}
                 </p>
                 <div className="mt-auto flex gap-2 pt-2">
                   <button
                     type="button"
                     onClick={() => navigate(pathForTemplateEditor('flow', flow.id))}
-                    className="flex-1 px-3 py-1.5 rounded-lg text-xs font-bold border border-black/5 bg-white text-gray-700 hover:bg-gray-50 inline-flex items-center justify-center gap-1.5"
+                    className="flex-1 px-3 py-1.5 rounded-lg text-xs font-bold border border-swiss-line bg-white text-swiss-ink hover:bg-gray-50 inline-flex items-center justify-center gap-1.5"
                   >
                     <Pencil className="w-3 h-3" />
                     Edit

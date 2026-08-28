@@ -486,13 +486,13 @@ export function CallRealtimeBridge() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-bold text-gray-950 truncate">{contactLabel}</p>
-                  <p className="text-xs text-gray-500 font-medium mt-0.5">Incoming call · WhatsApp voice</p>
+                  <p className="text-xs text-swiss-muted font-medium mt-0.5">Incoming call · WhatsApp voice</p>
                   {error && <p className="text-xs text-red-600 mt-1">{error}</p>}
                 </div>
                 <button
                   type="button"
                   onClick={() => clearIncoming()}
-                  className="p-1.5 rounded-lg text-gray-400 hover:bg-slate-50 cursor-pointer"
+                  className="p-1.5 rounded-lg text-swiss-faint hover:bg-slate-50 cursor-pointer"
                   aria-label="Dismiss"
                 >
                   <X className="h-4 w-4" />

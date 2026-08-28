@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Check, Image as ImageIcon, Zap } from 'lucide-react';
 import { fmt, fmtInr } from './utils';
+import { Input } from '../ui/input';
+import { Textarea } from '../ui/textarea';
 
 export type CTWAFormData = {
   campaignName: string;
@@ -35,20 +37,20 @@ export const CreateCTWAModal: React.FC<{
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-surface rounded-2xl w-full max-w-xl shadow-2xl border border-black/5">
-        <div className="flex items-center justify-between p-5 border-b border-slate-200">
+      <div className="bg-surface rounded-2xl w-full max-w-xl shadow-2xl border border-swiss-line">
+        <div className="flex items-center justify-between p-5 border-b border-swiss-line">
           <div>
-            <h3 className="font-black text-gray-900 text-sm flex items-center gap-2">
+            <h3 className="font-semibold text-swiss-ink text-sm flex items-center gap-2">
               <Zap className="w-4 h-4 text-sky-600" />
               Create Click-to-WhatsApp Ad
             </h3>
-            <p className="text-xs text-gray-500 mt-0.5 font-medium">Step {step} of 3 · Meta Ads</p>
+            <p className="text-xs text-swiss-muted mt-0.5 font-medium">Step {step} of 3 · Meta Ads</p>
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="text-gray-400 hover:text-gray-700 font-bold text-lg cursor-pointer"
+            className="text-swiss-faint hover:text-swiss-ink font-bold text-lg cursor-pointer"
           >
             ×
           </button>
@@ -82,19 +84,19 @@ export const CreateCTWAModal: React.FC<{
           {step === 1 && (
             <>
               <div>
-                <label htmlFor="ctwa-campaign-name" className="text-sm font-black text-gray-500 uppercase tracking-wider block mb-1.5">
+                <label htmlFor="ctwa-campaign-name" className="text-sm font-black text-swiss-muted uppercase tracking-wider block mb-1.5">
                   Campaign Name
                 </label>
-                <input
+                <Input
                   id="ctwa-campaign-name"
                   value={form.campaignName}
                   onChange={(e) => update('campaignName', e.target.value)}
                   placeholder="e.g. Diwali Sale — WhatsApp Leads"
-                  className="w-full text-sm border border-slate-200 rounded-xl px-4 py-2.5 outline-none focus:border-channel-green focus:ring-2 focus:ring-emerald-100"
+                  className="h-auto w-full text-sm border border-swiss-line rounded-xl px-4 py-2.5 outline-none focus:border-channel-green focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
               <div>
-                <label htmlFor="ctwa-daily-budget" className="text-sm font-black text-gray-500 uppercase tracking-wider block mb-1.5">
+                <label htmlFor="ctwa-daily-budget" className="text-sm font-black text-swiss-muted uppercase tracking-wider block mb-1.5">
                   Daily Budget (₹)
                 </label>
                 <div className="flex items-center gap-3">
@@ -112,20 +114,20 @@ export const CreateCTWAModal: React.FC<{
                     {fmtInr(form.dailyBudget)}
                   </span>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-swiss-muted mt-1">
                   Est. reach: {fmt(form.dailyBudget * 40)}–{fmt(form.dailyBudget * 80)} people/day
                 </p>
               </div>
               <div>
-                <label htmlFor="ctwa-start-date" className="text-sm font-black text-gray-500 uppercase tracking-wider block mb-1.5">
+                <label htmlFor="ctwa-start-date" className="text-sm font-black text-swiss-muted uppercase tracking-wider block mb-1.5">
                   Start Date
                 </label>
-                <input
+                <Input
                   id="ctwa-start-date"
                   type="date"
                   value={form.startDate}
                   onChange={(e) => update('startDate', e.target.value)}
-                  className="w-full text-sm border border-slate-200 rounded-xl px-4 py-2.5 outline-none focus:border-channel-green focus:ring-2 focus:ring-emerald-100"
+                  className="h-auto w-full text-sm border border-swiss-line rounded-xl px-4 py-2.5 outline-none focus:border-channel-green focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
             </>
@@ -134,48 +136,48 @@ export const CreateCTWAModal: React.FC<{
           {step === 2 && (
             <>
               <div>
-                <label htmlFor="ctwa-headline" className="text-sm font-black text-gray-500 uppercase tracking-wider block mb-1.5">
+                <label htmlFor="ctwa-headline" className="text-sm font-black text-swiss-muted uppercase tracking-wider block mb-1.5">
                   Ad Headline
                 </label>
-                <input
+                <Input
                   id="ctwa-headline"
                   value={form.headline}
                   onChange={(e) => update('headline', e.target.value)}
                   placeholder="e.g. Chat with us on WhatsApp!"
                   maxLength={40}
-                  className="w-full text-sm border border-slate-200 rounded-xl px-4 py-2.5 outline-none focus:border-channel-green focus:ring-2 focus:ring-emerald-100"
+                  className="h-auto w-full text-sm border border-swiss-line rounded-xl px-4 py-2.5 outline-none focus:border-channel-green focus:ring-2 focus:ring-emerald-100"
                 />
-                <p className="text-xs text-gray-500 mt-1">{form.headline.length}/40 characters</p>
+                <p className="text-xs text-swiss-muted mt-1">{form.headline.length}/40 characters</p>
               </div>
               <div>
-                <label htmlFor="ctwa-description" className="text-sm font-black text-gray-500 uppercase tracking-wider block mb-1.5">
+                <label htmlFor="ctwa-description" className="text-sm font-black text-swiss-muted uppercase tracking-wider block mb-1.5">
                   Description
                 </label>
-                <textarea
+                <Textarea
                   id="ctwa-description"
                   value={form.description}
                   onChange={(e) => update('description', e.target.value)}
                   placeholder="e.g. Get instant answers. Click to start a WhatsApp conversation with our team."
                   rows={3}
                   maxLength={125}
-                  className="w-full text-sm border border-slate-200 rounded-xl px-4 py-2.5 outline-none focus:border-channel-green focus:ring-2 focus:ring-emerald-100 resize-none"
+                  className="min-h-0 w-full text-sm border border-swiss-line rounded-xl px-4 py-2.5 outline-none focus:border-channel-green focus:ring-2 focus:ring-emerald-100 resize-none"
                 />
-                <p className="text-xs text-gray-500 mt-1">{form.description.length}/125 characters</p>
+                <p className="text-xs text-swiss-muted mt-1">{form.description.length}/125 characters</p>
               </div>
-              <div className="border-2 border-dashed border-slate-200 rounded-xl p-6 text-center hover:border-sky-300 hover:bg-sky-50/40 transition-colors cursor-pointer">
+              <div className="border-2 border-dashed border-swiss-line rounded-xl p-6 text-center hover:border-sky-300 hover:bg-sky-50/40 transition-colors cursor-pointer">
                 <ImageIcon className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                <p className="text-sm font-bold text-gray-600">Upload Ad Image</p>
-                <p className="text-xs text-gray-500 mt-0.5">Recommended: 1200×628px, JPG or PNG, max 30MB</p>
+                <p className="text-sm font-bold text-swiss-muted">Upload Ad Image</p>
+                <p className="text-xs text-swiss-muted mt-0.5">Recommended: 1200×628px, JPG or PNG, max 30MB</p>
               </div>
-              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
-                <p className="text-sm font-black text-gray-500 uppercase tracking-wider mb-3">Ad Preview</p>
+              <div className="bg-slate-50 border border-swiss-line rounded-xl p-4">
+                <p className="text-sm font-black text-swiss-muted uppercase tracking-wider mb-3">Ad Preview</p>
                 <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
                   <div className="h-28 bg-sky-50 flex items-center justify-center">
                     <ImageIcon className="w-6 h-6 text-sky-300" />
                   </div>
                   <div className="p-3">
-                    <p className="text-sm font-black text-gray-900">{form.headline || 'Your headline here'}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">{form.description || 'Your description here'}</p>
+                    <p className="text-sm font-black text-swiss-ink">{form.headline || 'Your headline here'}</p>
+                    <p className="text-xs text-swiss-muted mt-0.5">{form.description || 'Your description here'}</p>
                     <div className="mt-2 bg-[#25D366] text-white text-sm font-black py-1.5 px-3 rounded-lg text-center">
                       Send WhatsApp Message
                     </div>
@@ -188,24 +190,24 @@ export const CreateCTWAModal: React.FC<{
           {step === 3 && (
             <>
               <div>
-                <label htmlFor="ctwa-locations" className="text-sm font-black text-gray-500 uppercase tracking-wider block mb-1.5">
+                <label htmlFor="ctwa-locations" className="text-sm font-black text-swiss-muted uppercase tracking-wider block mb-1.5">
                   Target Locations
                 </label>
-                <input
+                <Input
                   id="ctwa-locations"
                   value={form.locations}
                   onChange={(e) => update('locations', e.target.value)}
                   placeholder="India, Mumbai, Delhi..."
-                  className="w-full text-sm border border-slate-200 rounded-xl px-4 py-2.5 outline-none focus:border-channel-green focus:ring-2 focus:ring-emerald-100"
+                  className="h-auto w-full text-sm border border-swiss-line rounded-xl px-4 py-2.5 outline-none focus:border-channel-green focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
               <div>
-                <p className="text-sm font-black text-gray-500 uppercase tracking-wider mb-3">
+                <p className="text-sm font-black text-swiss-muted uppercase tracking-wider mb-3">
                   Age Range: {form.ageMin}–{form.ageMax} years
                 </p>
                 <div className="space-y-2">
                   <div className="flex items-center gap-3">
-                    <span className="text-xs text-gray-500 w-8">Min</span>
+                    <span className="text-xs text-swiss-muted w-8">Min</span>
                     <input
                       type="range"
                       min="18"
@@ -218,7 +220,7 @@ export const CreateCTWAModal: React.FC<{
                     <span className="text-sm font-bold text-sky-600 w-8">{form.ageMin}</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-xs text-gray-500 w-8">Max</span>
+                    <span className="text-xs text-swiss-muted w-8">Max</span>
                     <input
                       type="range"
                       min="18"
@@ -242,8 +244,8 @@ export const CreateCTWAModal: React.FC<{
                   ['Objective', 'Click-to-WhatsApp (MESSAGES)'],
                 ].map(([k, v]) => (
                   <div key={k} className="flex justify-between text-xs">
-                    <span className="text-gray-500 font-medium">{k}</span>
-                    <span className="font-bold text-gray-900 text-right max-w-[200px] truncate">{v}</span>
+                    <span className="text-swiss-muted font-medium">{k}</span>
+                    <span className="font-bold text-swiss-ink text-right max-w-[200px] truncate">{v}</span>
                   </div>
                 ))}
               </div>
@@ -251,11 +253,11 @@ export const CreateCTWAModal: React.FC<{
           )}
         </div>
 
-        <div className="flex items-center justify-between p-5 border-t border-slate-200">
+        <div className="flex items-center justify-between p-5 border-t border-swiss-line">
           <button
             type="button"
             onClick={step === 1 ? onClose : () => setStep((s) => s - 1)}
-            className="px-4 py-2 text-sm font-bold text-gray-600 border border-slate-200 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors"
+            className="px-4 py-2 text-sm font-bold text-swiss-muted border border-swiss-line rounded-xl hover:bg-gray-50 cursor-pointer transition-colors"
           >
             {step === 1 ? 'Cancel' : '← Back'}
           </button>

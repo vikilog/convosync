@@ -35,7 +35,7 @@ export function InstagramAccountPicker({
   const canConfirm = Boolean(selectedPageId) && !confirming;
 
   return (
-    <div className="mx-auto w-full max-w-xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="mx-auto w-full max-w-xl rounded-2xl border border-swiss-line bg-white p-6 ">
       <div className="flex items-start gap-3">
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#fce8f0] text-[#C13584]">
           <Instagram className="h-5 w-5" aria-hidden />
@@ -69,7 +69,7 @@ export function InstagramAccountPicker({
               className={`w-full rounded-xl border p-3 text-left transition-colors ${
                 selected
                   ? 'border-sky-300 bg-sky-50'
-                  : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
+                  : 'border-swiss-line bg-white hover:border-slate-300 hover:bg-slate-50'
               }`}
             >
               <div className="flex items-center gap-3">
@@ -77,7 +77,7 @@ export function InstagramAccountPicker({
                   <img
                     src={candidate.profilePicture}
                     alt=""
-                    className="h-10 w-10 rounded-lg object-cover border border-slate-200"
+                    className="h-10 w-10 rounded-lg object-cover border border-swiss-line"
                   />
                 ) : (
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#fce8f0] text-[#C13584]">

@@ -7,6 +7,8 @@ import { statusUiToSlug } from '../../../lib/templateLabels';
 import { TemplateStatusBadge } from '../../../components/templates/TemplateStatusBadge';
 import { countBodyVariables, renderBodyWithSamples } from '../../../components/templates/templateBuilderUtils';
 import { ChannelMessagePreviews } from './ChannelMessagePreviews';
+import { Input } from '../../../components/ui/input';
+import { Textarea } from '../../../components/ui/textarea';
 
 export type MessageMode = 'text' | 'template' | 'cta_url';
 
@@ -44,7 +46,7 @@ function CompactTemplatePreview({
   const showHeader = template.header?.trim();
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-2.5">
+    <div className="rounded-lg border border-swiss-line bg-white p-2.5">
       <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
         Template content
       </p>
@@ -167,8 +169,8 @@ export function SendMessageConfig({ local, patch, patchMany }: Props) {
   return (
     <div className="space-y-3">
       <div>
-        <p className="mb-1.5 text-sm font-semibold text-gray-700">Message type</p>
-        <div className="grid grid-cols-3 gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1">
+        <p className="mb-1.5 text-sm font-semibold text-swiss-ink">Message type</p>
+        <div className="grid grid-cols-3 gap-1 rounded-lg border border-swiss-line bg-slate-50 p-1">
           {(['text', 'template', 'cta_url'] as const).map((opt) => (
             <button
               key={opt}
@@ -176,8 +178,8 @@ export function SendMessageConfig({ local, patch, patchMany }: Props) {
               onClick={() => setMode(opt)}
               className={`rounded-md py-1.5 text-xs font-bold transition-colors ${
                 mode === opt
-                  ? 'border border-primary/20 bg-white text-primary shadow-sm'
-                  : 'text-gray-500 hover:text-gray-800'
+                  ? 'border border-primary/20 bg-white text-primary '
+                  : 'text-swiss-muted hover:text-swiss-ink'
               }`}
             >
               {opt === 'text' ? 'Text' : opt === 'template' ? 'Template' : 'Link button'}
@@ -188,16 +190,16 @@ export function SendMessageConfig({ local, patch, patchMany }: Props) {
 
       {mode === 'text' && (
         <>
-          <label className="block text-sm font-semibold text-gray-700">
+          <label className="block text-sm font-semibold text-swiss-ink">
             Message text
-            <textarea
-              className="mt-1 min-h-[96px] w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+            <Textarea
+              className="min-h-0 mt-1 min-h-[96px] w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
               value={String(local.text ?? '')}
               onChange={(e) => patch('text', e.target.value)}
               placeholder="Hi {{contact.name}}, thanks for reaching out!"
             />
           </label>
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-swiss-faint">
             Variables: {'{{contact.name}}'}, {'{{contact.phone}}'}, {'{{contact.email}}'}
           </p>
           <ChannelMessagePreviews body={previewBody} />
@@ -210,20 +212,20 @@ export function SendMessageConfig({ local, patch, patchMany }: Props) {
             WhatsApp&apos;s CTA URL message — the only Meta-accepted way to attach a link button.
             Reply buttons can&apos;t open a URL, so this sends as its own message type.
           </p>
-          <label className="block text-sm font-semibold text-gray-700">
+          <label className="block text-sm font-semibold text-swiss-ink">
             Message text
-            <textarea
-              className="mt-1 min-h-[80px] w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+            <Textarea
+              className="min-h-0 mt-1 min-h-[80px] w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
               value={String(local.text ?? '')}
               onChange={(e) => patch('text', e.target.value)}
               placeholder="Hi {{contact.name}}, here's your link:"
             />
           </label>
           <div className="grid grid-cols-2 gap-2">
-            <label className="block text-sm font-semibold text-gray-700">
+            <label className="block text-sm font-semibold text-swiss-ink">
               Button label
-              <input
-                className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+              <Input
+                className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
                 value={String(local.ctaLabel ?? '')}
                 maxLength={CTA_URL_LABEL_MAX}
                 onChange={(e) => patch('ctaLabel', e.target.value)}
@@ -233,10 +235,10 @@ export function SendMessageConfig({ local, patch, patchMany }: Props) {
                 {String(local.ctaLabel ?? '').length}/{CTA_URL_LABEL_MAX}
               </span>
             </label>
-            <label className="block text-sm font-semibold text-gray-700">
+            <label className="block text-sm font-semibold text-swiss-ink">
               URL
-              <input
-                className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm font-mono text-xs"
+              <Input
+                className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm font-mono text-xs"
                 value={String(local.ctaUrl ?? '')}
                 onChange={(e) => patch('ctaUrl', e.target.value)}
                 placeholder="https://…"
@@ -256,19 +258,19 @@ export function SendMessageConfig({ local, patch, patchMany }: Props) {
           )}
 
           {loading ? (
-            <div className="flex items-center justify-center gap-2 py-4 text-xs text-gray-500">
+            <div className="flex items-center justify-center gap-2 py-4 text-xs text-swiss-muted">
               <Loader2 className="h-4 w-4 animate-spin" />
               Loading templates…
             </div>
           ) : templates.length === 0 ? (
-            <p className="rounded-lg border border-slate-200 bg-gray-50 px-3 py-3 text-center text-xs text-gray-500">
+            <p className="rounded-lg border border-swiss-line bg-gray-50 px-3 py-3 text-center text-xs text-swiss-muted">
               No templates found. Create or sync templates from the Templates page.
             </p>
           ) : (
             <>
               <div>
-                <p className="mb-1.5 text-sm font-semibold text-gray-700">Choose template</p>
-                <ul className="max-h-44 space-y-1 overflow-y-auto rounded-lg border border-slate-200 bg-slate-50 p-1.5">
+                <p className="mb-1.5 text-sm font-semibold text-swiss-ink">Choose template</p>
+                <ul className="max-h-44 space-y-1 overflow-y-auto rounded-lg border border-swiss-line bg-slate-50 p-1.5">
                   {templates.map((t) => {
                     const active =
                       (local.templateId && t.id === String(local.templateId)) ||
@@ -284,12 +286,12 @@ export function SendMessageConfig({ local, patch, patchMany }: Props) {
                               : 'border border-transparent hover:bg-white'
                           }`}
                         >
-                          <p className="truncate font-mono text-sm font-bold text-gray-900">
+                          <p className="truncate font-mono text-sm font-bold text-swiss-ink">
                             {t.name}
                           </p>
                           <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
                             <TemplateStatusBadge status={statusUiToSlug(t.status)} />
-                            <span className="text-xs text-gray-400">{t.category}</span>
+                            <span className="text-xs text-swiss-faint">{t.category}</span>
                           </div>
                         </button>
                       </li>
@@ -314,19 +316,19 @@ export function SendMessageConfig({ local, patch, patchMany }: Props) {
 
                   {varCount > 0 && (
                     <div className="space-y-2">
-                      <p className="text-sm font-bold uppercase tracking-wide text-gray-400">
+                      <p className="text-sm font-bold uppercase tracking-wide text-swiss-faint">
                         Variable mapping
                       </p>
                       {Array.from({ length: varCount }, (_, i) => {
                         const label = selectedTemplate.variables[i] || `Variable {{${i + 1}}}`;
                         return (
                           <label key={i} className="block">
-                            <span className="text-sm font-bold text-gray-500">{label}</span>
-                            <input
+                            <span className="text-sm font-bold text-swiss-muted">{label}</span>
+                            <Input
                               type="text"
                               value={variableValues[i] ?? ''}
                               onChange={(e) => setVariable(i, e.target.value)}
-                              className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-xs"
+                              className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-xs"
                               placeholder={`{{contact.name}} or static value`}
                             />
                           </label>

@@ -131,7 +131,7 @@ export const AIAgentList: React.FC = () => {
 
         <div className="flex items-center gap-2">
           {agents.length > 0 && (
-            <div className="inline-flex items-center rounded-lg bg-white ring-1 ring-slate-200/80 p-0.5">
+            <div className="inline-flex items-center rounded-lg bg-white ring-1 ring-swiss-line p-0.5">
               <button
                 type="button"
                 onClick={() => setView('list')}
@@ -180,12 +180,12 @@ export const AIAgentList: React.FC = () => {
 
       {/* Content */}
       {loading ? (
-        <div className="rounded-xl bg-white ring-1 ring-slate-200/80 px-4 py-10 text-center text-sm text-slate-500">
+        <div className="bg-white border border-swiss-line px-4 py-10 text-center text-sm text-slate-500">
           Loading agents…
         </div>
       ) : agents.length === 0 ? (
         <div className="rounded-xl border border-dashed border-black/10 bg-surface-muted/50 px-6 py-10 text-center">
-          <div className="w-12 h-12 rounded-2xl bg-white ring-1 ring-slate-200/80 flex items-center justify-center mx-auto mb-3">
+          <div className="w-12 h-12 bg-white border border-swiss-line flex items-center justify-center mx-auto mb-3">
             <Sparkles className="w-6 h-6 text-primary" />
           </div>
           <p className="text-sm font-semibold text-slate-900">No agents yet</p>
@@ -202,7 +202,7 @@ export const AIAgentList: React.FC = () => {
           </button>
         </div>
       ) : viewMode === 'list' ? (
-        <div className="rounded-xl bg-white ring-1 ring-slate-200/80 overflow-hidden">
+        <div className="bg-white border border-swiss-line overflow-hidden">
           {agents.map((agent) => (
             <AgentListRow
               key={agent.id}

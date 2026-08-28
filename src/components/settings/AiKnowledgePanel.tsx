@@ -14,6 +14,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { api, parseApiError } from '../../lib/api';
+import { Input } from '../ui/input';
 
 type SyncStatus = 'pending' | 'syncing' | 'success' | 'failed';
 
@@ -47,7 +48,7 @@ const STATUS_LABELS: Record<SyncStatus, string> = {
 };
 
 const STATUS_STYLES: Record<SyncStatus, string> = {
-  pending: 'bg-gray-100 text-gray-600 border-gray-200',
+  pending: 'bg-gray-100 text-swiss-muted border-gray-200',
   syncing: 'bg-sky-50 text-primary border-primary/20',
   success: 'bg-[#e6f7ec] text-accent-green border-[#5dfd8a]/40',
   failed: 'bg-red-50 text-danger-red border-red-200',
@@ -309,7 +310,7 @@ export function AiKnowledgePanel() {
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 text-sm text-gray-500">
+      <div className="flex items-center gap-2 text-sm text-swiss-muted">
         <Loader2 className="w-4 h-4 animate-spin" />
         Loading AI Knowledge settings…
       </div>
@@ -318,14 +319,14 @@ export function AiKnowledgePanel() {
 
   return (
     <div className="max-w-3xl space-y-6">
-      <div className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-5 shadow-sm">
+      <div className="bg-white border border-swiss-line p-5 ">
         <div className="flex items-start gap-3 mb-5">
           <div className="p-2.5 rounded-xl bg-sky-50 text-primary">
             <Database className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-gray-900">External salon database</h3>
-            <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+            <h3 className="text-sm font-bold text-swiss-ink">External salon database</h3>
+            <p className="text-xs text-swiss-muted mt-1 leading-relaxed">
               Sync one MongoDB collection at a time — no timeout, full control. Start with{' '}
               <span className="font-mono font-semibold">Venue</span>, then Service, Client, etc.
             </p>
@@ -334,44 +335,44 @@ export function AiKnowledgePanel() {
 
         <div className="space-y-4">
           <div>
-            <label className="block text-meta font-bold text-gray-500 uppercase tracking-wide mb-1.5">
+            <label className="block text-meta font-bold text-swiss-muted uppercase tracking-wide mb-1.5">
               MongoDB connection string
             </label>
             <div className="relative">
-              <input
+              <Input
                 type={showConnection ? 'text' : 'password'}
                 value={connectionString}
                 onChange={(e) => setConnectionString(e.target.value)}
                 placeholder="mongodb+srv://user:pass@cluster/db"
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 pr-10 text-xs font-mono focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                className="h-auto w-full rounded-xl border border-swiss-line bg-slate-50 px-3 py-2.5 pr-10 text-xs font-mono focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
                 autoComplete="off"
               />
               <button
                 type="button"
                 onClick={() => setShowConnection((v) => !v)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-primary"
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-swiss-faint hover:text-primary"
                 aria-label={showConnection ? 'Hide connection string' : 'Show connection string'}
               >
                 {showConnection ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
             {config?.hasConnectionString && config.connectionStringMasked && (
-              <p className="text-xs text-gray-400 mt-1 font-mono">
+              <p className="text-xs text-swiss-faint mt-1 font-mono">
                 Saved: {config.connectionStringMasked}
               </p>
             )}
           </div>
 
           <div>
-            <label className="block text-meta font-bold text-gray-500 uppercase tracking-wide mb-1.5">
+            <label className="block text-meta font-bold text-swiss-muted uppercase tracking-wide mb-1.5">
               Venue ID
             </label>
-            <input
+            <Input
               type="text"
               value={venueId}
               onChange={(e) => setVenueId(e.target.value)}
               placeholder="Salon / venue / branch ObjectId"
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-mono focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+              className="h-auto w-full rounded-xl border border-swiss-line bg-slate-50 px-3 py-2.5 text-xs font-mono focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
             />
           </div>
 
@@ -387,7 +388,7 @@ export function AiKnowledgePanel() {
               type="button"
               onClick={() => void handleLoadCollections()}
               disabled={loadingCollections || syncing}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-60 text-gray-800 text-sm font-bold px-4 py-2.5 transition-colors"
+              className="inline-flex items-center gap-2 rounded-xl border border-swiss-line bg-white hover:bg-slate-50 disabled:opacity-60 text-swiss-ink text-sm font-bold px-4 py-2.5 transition-colors"
             >
               {loadingCollections ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -415,9 +416,9 @@ export function AiKnowledgePanel() {
       </div>
 
       {collections.length > 0 && (
-        <div className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-5 shadow-sm">
+      <div className="bg-white border border-swiss-line p-5 ">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-meta font-bold text-gray-400 uppercase tracking-wide">
+            <p className="text-meta font-bold text-swiss-faint uppercase tracking-wide">
               Collections ({collections.filter((c) => c.synced).length}/{collections.length} synced)
             </p>
             {syncAllProgress && (
@@ -426,7 +427,7 @@ export function AiKnowledgePanel() {
               </p>
             )}
           </div>
-          <div className="max-h-80 overflow-y-auto rounded-xl border border-slate-200 divide-y divide-slate-200">
+          <div className="max-h-80 overflow-y-auto rounded-xl border border-swiss-line divide-y divide-slate-200">
             {collections.map((col) => {
               const isActive = syncingCollection === col.name;
               return (
@@ -435,8 +436,8 @@ export function AiKnowledgePanel() {
                   className="flex items-center justify-between gap-3 px-3 py-2.5 bg-white hover:bg-slate-50"
                 >
                   <div className="min-w-0">
-                    <p className="text-xs font-mono font-semibold text-gray-900 truncate">{col.name}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">
+                    <p className="text-xs font-mono font-semibold text-swiss-ink truncate">{col.name}</p>
+                    <p className="text-xs text-swiss-muted mt-0.5">
                       {col.synced
                         ? col.documentsFound != null
                           ? `${col.documentsFound} document(s) synced`
@@ -469,10 +470,10 @@ export function AiKnowledgePanel() {
         </div>
       )}
 
-      <div className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-5 shadow-sm space-y-4">
+      <div className="bg-white border border-swiss-line p-5 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-meta font-bold text-gray-400 uppercase tracking-wide">Status</p>
+            <p className="text-meta font-bold text-swiss-faint uppercase tracking-wide">Status</p>
             <span
               className={`inline-flex items-center gap-1.5 mt-1 px-2.5 py-1 rounded-lg border text-meta font-bold ${STATUS_STYLES[status]}`}
             >
@@ -483,8 +484,8 @@ export function AiKnowledgePanel() {
             </span>
           </div>
           <div className="text-right">
-            <p className="text-meta font-bold text-gray-400 uppercase tracking-wide">Last sync</p>
-            <p className="text-sm font-semibold text-gray-800 mt-1">
+            <p className="text-meta font-bold text-swiss-faint uppercase tracking-wide">Last sync</p>
+            <p className="text-sm font-semibold text-swiss-ink mt-1">
               {formatDate(record?.syncedAt ?? config?.updatedAt ?? null)}
             </p>
           </div>
@@ -492,7 +493,7 @@ export function AiKnowledgePanel() {
 
         {(syncing || syncAllProgress) && (
           <div>
-            <div className="flex justify-between text-sm font-semibold text-gray-500 mb-1">
+            <div className="flex justify-between text-sm font-semibold text-swiss-muted mb-1">
               <span>
                 {syncAllProgress
                   ? `Syncing ${syncAllProgress.name}…`
@@ -525,13 +526,13 @@ export function AiKnowledgePanel() {
       </div>
 
       {record?.data && Object.keys(record.data).length > 0 && (
-        <div className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-5 shadow-sm">
+      <div className="bg-white border border-swiss-line p-5 ">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <p className="text-meta font-bold text-gray-400 uppercase tracking-wide">
+              <p className="text-meta font-bold text-swiss-faint uppercase tracking-wide">
                 Preview data
               </p>
-              <p className="text-xs text-gray-500 mt-1">{countPreviewItems(record.data)}</p>
+              <p className="text-xs text-swiss-muted mt-1">{countPreviewItems(record.data)}</p>
             </div>
           </div>
           <pre className="max-h-96 overflow-auto rounded-xl bg-[#0f0f1a] text-slate-300 p-4 text-meta font-mono leading-relaxed">

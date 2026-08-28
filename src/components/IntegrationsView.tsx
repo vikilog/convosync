@@ -140,18 +140,18 @@ function IntegrationCard({
   onConnect,
 }: IntegrationCardProps) {
   return (
-    <article className="bg-white rounded-2xl border border-black/5 p-5 flex flex-col h-full shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+    <article className="bg-white rounded-2xl border border-swiss-line p-5 flex flex-col h-full shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
       <div className="flex items-center gap-3 min-w-0">
         <div
           className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${iconBgClass}`}
         >
           <Icon className={`w-5 h-5 ${iconClass}`} />
         </div>
-        <h3 className="text-sm font-black text-gray-950 leading-tight truncate flex-1 min-w-0">
+        <h3 className="text-sm font-semibold text-gray-950 leading-tight truncate flex-1 min-w-0">
           {title}
         </h3>
       </div>
-      <p className="mt-2 text-xs text-gray-500 font-medium leading-relaxed flex-1">{description}</p>
+      <p className="mt-2 text-xs text-swiss-muted font-medium leading-relaxed flex-1">{description}</p>
 
       <div className="mt-5">
         <button
@@ -160,7 +160,7 @@ function IntegrationCard({
           onClick={onConnect}
           className={`w-full px-3 py-2 rounded-lg text-sm font-bold transition-all border border-transparent ${
             connectDisabled
-              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              ? 'bg-gray-100 text-swiss-faint cursor-not-allowed'
               : /\btext-/.test(connectBtnClass)
                 ? connectBtnClass
                 : `${connectBtnClass} text-white`
@@ -350,18 +350,18 @@ function ConnectedChannelCard({
 
   return (
     <article
-      className={`bg-white rounded-xl border ${borderAccent} p-3.5 flex flex-col gap-2.5 h-full shadow-[0_1px_2px_rgba(0,0,0,0.04)]`}
+      className={`bg-white rounded-md border ${borderAccent} p-3.5 flex flex-col gap-2.5 h-full`}
     >
       <div className="flex items-start gap-2.5 min-w-0">
         {avatarUrl ? (
           <img
             src={avatarUrl}
             alt=""
-            className="w-9 h-9 rounded-lg object-cover border border-black/5 shrink-0"
+            className="w-9 h-9 rounded-md object-cover border border-swiss-line shrink-0"
           />
         ) : (
           <div
-            className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${iconBg}`}
+            className={`w-9 h-9 rounded-md flex items-center justify-center shrink-0 ${iconBg}`}
           >
             {channel === 'whatsapp' ? (
               <WhatsAppBrandIcon className={`w-4 h-4 ${iconColor}`} />
@@ -379,7 +379,7 @@ function ConnectedChannelCard({
 
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5 min-w-0">
-            <span className="text-[11px] font-black uppercase tracking-wide text-gray-500 truncate">
+            <span className="text-[11px] font-black uppercase tracking-wide text-swiss-muted truncate">
               {channelLabel}
             </span>
             <span
@@ -388,9 +388,9 @@ function ConnectedChannelCard({
               {liveBadgeText}
             </span>
           </div>
-          <p className="mt-0.5 text-sm font-bold text-gray-900 leading-snug truncate">{title}</p>
+          <p className="mt-0.5 text-sm font-bold text-swiss-ink leading-snug truncate">{title}</p>
           {metaLine ? (
-            <p className="mt-0.5 text-[11px] text-gray-500 leading-snug truncate" title={metaLine}>
+            <p className="mt-0.5 text-[11px] text-swiss-muted leading-snug truncate" title={metaLine}>
               {metaLine}
             </p>
           ) : null}
@@ -402,7 +402,7 @@ function ConnectedChannelCard({
               type="button"
               onClick={onManage}
               aria-label={`Manage ${title}`}
-              className="p-1 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition-colors cursor-pointer"
+              className="p-1 rounded-md text-swiss-faint hover:text-primary hover:bg-primary/10 transition-colors cursor-pointer"
             >
               <Settings className="w-3.5 h-3.5" />
             </button>
@@ -413,7 +413,7 @@ function ConnectedChannelCard({
               onClick={onDisconnect}
               disabled={disconnecting}
               aria-label={`Disconnect ${title}`}
-              className="p-1 rounded-md text-gray-400 hover:text-danger-red hover:bg-red-50 transition-colors disabled:opacity-50 cursor-pointer"
+              className="p-1 rounded-md text-swiss-faint hover:text-danger-red hover:bg-red-50 transition-colors disabled:opacity-50 cursor-pointer"
             >
               {disconnecting ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -426,7 +426,7 @@ function ConnectedChannelCard({
       </div>
 
       <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
-        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide truncate">
+        <p className="text-[10px] font-bold text-swiss-faint uppercase tracking-wide truncate">
           {statusText}
         </p>
         {(channel === 'email' || channel === 'whatsapp') && onManage ? (
@@ -472,14 +472,14 @@ function WhatsAppGroupedCard({ accounts, onManage, onEditProfile }: WhatsAppGrou
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-1.5 min-w-0">
-              <span className="text-[11px] font-black uppercase tracking-wide text-gray-500 truncate">
+              <span className="text-[11px] font-black uppercase tracking-wide text-swiss-muted truncate">
                 WhatsApp
               </span>
               <span className="shrink-0 inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-accent-green-bg text-accent-green border border-accent-green/10">
                 Live
               </span>
             </div>
-            <p className="mt-0.5 text-sm font-bold text-gray-900 leading-snug">
+            <p className="mt-0.5 text-sm font-bold text-swiss-ink leading-snug">
               {accounts.length} connected number{accounts.length === 1 ? '' : 's'}
             </p>
           </div>
@@ -509,9 +509,9 @@ function WhatsAppGroupedCard({ accounts, onManage, onEditProfile }: WhatsAppGrou
               className="inline-flex max-w-full items-center gap-1 rounded-md bg-slate-50 border border-slate-100 px-2 py-1 text-[10px] leading-none hover:border-channel-green/40 hover:bg-[#e6f7ec] transition-colors cursor-pointer"
               title={`Edit business profile · ${title} · ${phone}`}
             >
-              <span className="font-semibold text-gray-800 truncate">{title}</span>
-              <span className="text-gray-400">•</span>
-              <span className="text-gray-600 truncate">{phone}</span>
+              <span className="font-semibold text-swiss-ink truncate">{title}</span>
+              <span className="text-swiss-faint">•</span>
+              <span className="text-swiss-muted truncate">{phone}</span>
             </button>
           ) : (
             <div
@@ -519,9 +519,9 @@ function WhatsAppGroupedCard({ accounts, onManage, onEditProfile }: WhatsAppGrou
               className="inline-flex max-w-full items-center gap-1 rounded-md bg-slate-50 border border-slate-100 px-2 py-1 text-[10px] leading-none"
               title={`${title} · ${phone}`}
             >
-              <span className="font-semibold text-gray-800 truncate">{title}</span>
-              <span className="text-gray-400">•</span>
-              <span className="text-gray-600 truncate">{phone}</span>
+              <span className="font-semibold text-swiss-ink truncate">{title}</span>
+              <span className="text-swiss-faint">•</span>
+              <span className="text-swiss-muted truncate">{phone}</span>
             </div>
           );
         })}
@@ -1198,7 +1198,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
             setMessengerAutoLaunch(false);
             setMessengerConnectError('');
           }}
-          className="inline-flex items-center gap-1.5 text-sm font-bold text-gray-500 hover:text-primary transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-primary transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Back to integrations
@@ -1247,7 +1247,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
             setInstagramAutoLaunch(false);
             setInstagramConnectError('');
           }}
-          className="inline-flex items-center gap-1.5 text-sm font-bold text-gray-500 hover:text-primary transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-primary transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Back to integrations
@@ -1275,7 +1275,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
         <button
           type="button"
           onClick={goToHub}
-          className="inline-flex items-center gap-1.5 text-sm font-bold text-gray-500 hover:text-primary transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-primary transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Back to integrations
@@ -1303,7 +1303,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
             <button
               type="button"
               onClick={goToHub}
-              className="inline-flex items-center gap-1.5 text-sm font-bold text-gray-500 hover:text-primary transition-colors"
+              className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-primary transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               Back to integrations
@@ -1318,28 +1318,28 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
           <button
             type="button"
             onClick={goToHub}
-            className="inline-flex items-center gap-1.5 text-sm font-bold text-gray-500 hover:text-primary transition-colors"
+            className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-primary transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             Back to integrations
           </button>
 
-          <div className="bg-white ring-1 ring-slate-200/80 rounded-2xl p-6 space-y-4">
+          <div className="bg-white border border-swiss-line p-6 space-y-4">
             <div className="flex items-center gap-3">
               <div className="w-11 h-11 rounded-xl bg-[#e8f4ff] text-channel-blue flex items-center justify-center">
                 <Mail className="w-5 h-5" />
               </div>
               <div>
-                <h2 className="text-lg font-black text-gray-950">Enable Email</h2>
-                <p className="text-xs text-gray-500 font-medium mt-0.5">
+                <h2 className="text-lg font-semibold text-gray-950">Enable Email</h2>
+                <p className="text-xs text-swiss-muted font-medium mt-0.5">
                   Turn on outbound email for this workspace.
                 </p>
               </div>
             </div>
 
-            <p className="text-sm text-gray-600 leading-relaxed">
+            <p className="text-sm text-swiss-muted leading-relaxed">
               Default sender will be{' '}
-              <span className="font-mono font-bold text-gray-900">{defaultEmail}</span>. After
+              <span className="font-mono font-bold text-swiss-ink">{defaultEmail}</span>. After
               enabling, you can connect AWS SES and choose your own From address.
             </p>
 
@@ -1367,7 +1367,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
         <button
           type="button"
           onClick={goToHub}
-          className="inline-flex items-center gap-1.5 text-sm font-bold text-gray-500 hover:text-primary transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-primary transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Back to integrations
@@ -1375,7 +1375,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
 
         <header className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
-            <h2 className="text-xl font-black text-gray-950">Email</h2>
+            <h2 className="text-xl font-semibold text-gray-950">Email</h2>
           </div>
           <button
             type="button"
@@ -1409,15 +1409,15 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
         <button
           type="button"
           onClick={goToHub}
-          className="inline-flex items-center gap-1.5 text-sm font-bold text-gray-500 hover:text-primary transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-primary transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Back to integrations
         </button>
 
         <header>
-          <h2 className="text-xl font-black text-gray-950">Google</h2>
-          <p className="text-xs text-gray-500 font-medium mt-1">
+          <h2 className="text-xl font-semibold text-gray-950">Google</h2>
+          <p className="text-xs text-swiss-muted font-medium mt-1">
             Connect Calendar, Business Profile, Sheets, Drive, Gmail, and Meet with shared OAuth — ready for journeys and AI agents.
           </p>
         </header>
@@ -1440,14 +1440,14 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
         <button
           type="button"
           onClick={goToHub}
-          className="inline-flex items-center gap-1.5 text-sm font-bold text-gray-500 hover:text-primary transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-primary transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Back to integrations
         </button>
-        <div className="bg-white ring-1 ring-slate-200/80 rounded-2xl p-6 text-center space-y-3">
-          <h3 className="text-lg font-black text-gray-950">{channel.title}</h3>
-          <p className="text-sm text-gray-500 font-medium">{channel.description}</p>
+        <div className="bg-white border border-swiss-line p-6 text-center space-y-3">
+          <h3 className="text-lg font-semibold text-gray-950">{channel.title}</h3>
+          <p className="text-sm text-swiss-muted font-medium">{channel.description}</p>
           <span className="inline-block text-sm font-black uppercase tracking-wider px-3 py-1 rounded-full bg-[#f3eeff] text-primary">
             Coming soon
           </span>
@@ -1462,15 +1462,15 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
         <button
           type="button"
           onClick={goToHub}
-          className="inline-flex items-center gap-1.5 text-sm font-bold text-gray-500 hover:text-primary transition-colors cursor-pointer"
+          className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-primary transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Back to integrations
         </button>
 
         <header>
-          <h2 className="text-xl font-black text-gray-950">Meta Ads</h2>
-          <p className="text-xs text-gray-500 font-medium mt-1">
+          <h2 className="text-xl font-semibold text-gray-950">Meta Ads</h2>
+          <p className="text-xs text-swiss-muted font-medium mt-1">
             Connect your Meta Business Ad Account for Click-to-WhatsApp campaigns and Ads Manager sync.
           </p>
         </header>
@@ -1494,15 +1494,15 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
         <button
           type="button"
           onClick={goToHub}
-          className="inline-flex items-center gap-1.5 text-sm font-bold text-gray-500 hover:text-primary transition-colors cursor-pointer"
+          className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-primary transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Back to integrations
         </button>
 
         <header>
-          <h2 className="text-xl font-black text-gray-950">Google Ads</h2>
-          <p className="text-xs text-gray-500 font-medium mt-1">
+          <h2 className="text-xl font-semibold text-gray-950">Google Ads</h2>
+          <p className="text-xs text-swiss-muted font-medium mt-1">
             Link Google Ads to sync Search, Display, and lead campaigns into Ads Manager.
           </p>
         </header>
@@ -1555,7 +1555,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
           <button
             type="button"
             onClick={goToHub}
-            className="inline-flex items-center gap-1.5 text-sm font-bold text-gray-500 hover:text-primary transition-colors"
+            className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-primary transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             Back to integrations
@@ -1571,15 +1571,15 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
           <button
             type="button"
             onClick={goToHub}
-            className="inline-flex items-center gap-1.5 text-sm font-bold text-gray-500 hover:text-primary transition-colors"
+            className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-primary transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             Back to integrations
           </button>
 
           <header className="text-center">
-            <h2 className="text-xl font-black text-gray-950">AI Provider</h2>
-            <p className="text-xs text-gray-500 font-medium mt-1">
+            <h2 className="text-xl font-semibold text-gray-950">AI Provider</h2>
+            <p className="text-xs text-swiss-muted font-medium mt-1">
               Use managed AI or connect your own API key for agents, copilot, and automations.
             </p>
           </header>
@@ -1653,7 +1653,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
             {Array.from({ length: 3 }).map((_, i) => (
               <div
                 key={`connected-skel-${i}`}
-                className="rounded-xl bg-white ring-1 ring-slate-200/80 p-3.5 space-y-3 animate-pulse"
+                className="bg-white border border-swiss-line p-3.5 space-y-3 animate-pulse"
               >
                 <div className="flex items-start gap-2.5">
                   <div className="h-9 w-9 rounded-lg skel shrink-0" />
@@ -1678,7 +1678,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
             {Array.from({ length: 3 }).map((_, i) => (
               <div
                 key={`add-skel-${i}`}
-                className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-5 space-y-4 animate-pulse"
+                className="bg-white border border-swiss-line p-5 space-y-4 animate-pulse"
               >
                 <div className="h-11 w-11 rounded-xl skel" />
                 <div className="space-y-2">
@@ -1695,7 +1695,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
         <section className="space-y-3">
           <div className="h-4 w-36 rounded-md skel animate-pulse" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-5 space-y-4 animate-pulse">
+            <div className="bg-white border border-swiss-line p-5 space-y-4 animate-pulse">
               <div className="h-11 w-11 rounded-xl skel" />
               <div className="space-y-2">
                 <div className="h-4 w-24 rounded skel" />
@@ -1745,7 +1745,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
 
       {hasConnectedChannels && (
         <section>
-          <h3 className="text-sm font-black text-gray-950 mb-3">Connected channels</h3>
+          <h3 className="text-sm font-semibold text-gray-950 mb-3">Connected channels</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
             {whatsappConnected && (
               <WhatsAppGroupedCard
@@ -1876,17 +1876,17 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
             )}
           </div>
           {instagramSyncMessage ? (
-            <p className="mt-2 text-xs font-medium text-gray-500">{instagramSyncMessage}</p>
+            <p className="mt-2 text-xs font-medium text-swiss-muted">{instagramSyncMessage}</p>
           ) : null}
           {messengerSyncMessage ? (
-            <p className="mt-2 text-xs font-medium text-gray-500">{messengerSyncMessage}</p>
+            <p className="mt-2 text-xs font-medium text-swiss-muted">{messengerSyncMessage}</p>
           ) : null}
         </section>
       )}
 
       {hasAddableChannels && (
       <section>
-        <h3 className="text-sm font-black text-gray-950 mb-3">Add a channel</h3>
+        <h3 className="text-sm font-semibold text-gray-950 mb-3">Add a channel</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {!whatsappConnected && (
               <IntegrationCard
@@ -1983,7 +1983,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
       )}
 
       <section>
-        <h3 className="text-sm font-black text-gray-950 mb-3">AI & automation</h3>
+        <h3 className="text-sm font-semibold text-gray-950 mb-3">AI & automation</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <IntegrationCard
             title="AI Provider"
@@ -1994,7 +1994,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
             connectLabel={aiProviderLocked ? 'Upgrade plan' : 'Manage'}
             connectBtnClass={
               aiProviderLocked
-                ? 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                ? 'bg-gray-100 text-swiss-muted hover:bg-gray-200'
                 : 'bg-primary hover:bg-primary-hover'
             }
             onConnect={() => {

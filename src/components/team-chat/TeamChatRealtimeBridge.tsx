@@ -116,7 +116,7 @@ export function TeamChatRealtimeBridge() {
         >
           <div
             role="status"
-            className="relative overflow-hidden rounded-xl border border-slate-200/90 bg-white text-gray-900 shadow-lg shadow-slate-900/10"
+            className="relative overflow-hidden rounded-xl border border-swiss-line/90 bg-white text-swiss-ink shadow-lg shadow-slate-900/10"
           >
             <button
               type="button"
@@ -129,19 +129,19 @@ export function TeamChatRealtimeBridge() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-baseline justify-between gap-2">
-                    <p className="truncate text-sm font-bold text-gray-900">{toast.senderName}</p>
+                    <p className="truncate text-sm font-bold text-swiss-ink">{toast.senderName}</p>
                     <span className="shrink-0 text-[10px] font-bold uppercase tracking-wide text-channel-green">
                       Team
                     </span>
                   </div>
-                  <p className="mt-0.5 truncate text-xs leading-snug text-gray-500">{toast.preview}</p>
+                  <p className="mt-0.5 truncate text-xs leading-snug text-swiss-muted">{toast.preview}</p>
                 </div>
               </div>
             </button>
             <button
               type="button"
               onClick={() => setToast(null)}
-              className="absolute right-1.5 top-1.5 rounded-md p-1 text-gray-400 transition-colors hover:bg-slate-100 hover:text-gray-700"
+              className="absolute right-1.5 top-1.5 rounded-md p-1 text-swiss-faint transition-colors hover:bg-slate-100 hover:text-swiss-ink"
               aria-label="Dismiss notification"
             >
               <X className="h-3.5 w-3.5" />

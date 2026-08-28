@@ -46,7 +46,7 @@ const STATUS_STYLES: Record<string, string> = {
   paid: 'bg-primary/10 text-primary',
   expired: 'bg-amber-50 text-amber-800',
   failed: 'bg-red-50 text-red-700',
-  cancelled: 'bg-gray-100 text-gray-600',
+  cancelled: 'bg-gray-100 text-swiss-muted',
 };
 
 function fmtInr(paise: number) {
@@ -192,7 +192,7 @@ export const PayView: React.FC = () => {
   if (loading) {
     return (
       <div className="flex-1 max-w-7xl mx-auto pb-12 flex items-center justify-center min-h-[240px]">
-        <div className="flex items-center gap-2 text-sm text-gray-500 font-medium">
+        <div className="flex items-center gap-2 text-sm text-swiss-muted font-medium">
           <Loader2 className="w-4 h-4 animate-spin text-sky-600" />
           Loading WhatsApp Pay…
         </div>
@@ -206,8 +206,8 @@ export const PayView: React.FC = () => {
         <div className="inline-flex p-3 rounded-2xl bg-emerald-50 text-emerald-600 mb-4">
           <CreditCard className="w-8 h-8" />
         </div>
-        <h1 className="font-display text-xl font-black text-gray-900">WhatsApp Pay</h1>
-        <p className="text-sm text-gray-600 mt-2 leading-relaxed">
+        <h1 className="font-display text-xl font-semibold text-swiss-ink">WhatsApp Pay</h1>
+        <p className="text-sm text-swiss-muted mt-2 leading-relaxed">
           Connect WhatsApp first, then send secure Razorpay payment links directly in customer chats.
         </p>
         <Link
@@ -226,8 +226,8 @@ export const PayView: React.FC = () => {
     <div className="flex-1 space-y-6 max-w-7xl mx-auto pb-12 text-left">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="font-display font-black text-gray-900 text-xl leading-tight">WhatsApp Pay</h1>
-          <p className="text-sm text-gray-600 mt-1 max-w-2xl">
+          <h1 className="font-display font-semibold text-swiss-ink text-xl leading-tight">WhatsApp Pay</h1>
+          <p className="text-sm text-swiss-muted mt-1 max-w-2xl">
             Create payment requests and send secure UPI / card links inside WhatsApp conversations.
           </p>
         </div>
@@ -272,30 +272,30 @@ export const PayView: React.FC = () => {
         {kpiStats.map((stat) => (
           <div
             key={stat.label}
-            className="bg-white p-5 rounded-2xl border border-black/5 hover:border-primary/10 transition-colors"
+            className="bg-white p-5 rounded-2xl border border-swiss-line hover:border-primary/10 transition-colors"
           >
             <div className={`${stat.color} w-8 h-8 rounded-xl flex items-center justify-center mb-2`}>
               <stat.icon className="w-4 h-4" />
             </div>
-            <p className="text-xs font-extrabold text-gray-500 uppercase tracking-widest leading-none mb-1">
+            <p className="text-xs font-extrabold text-swiss-muted uppercase tracking-widest leading-none mb-1">
               {stat.label}
             </p>
-            <p className="text-2xl font-black text-gray-900 font-mono">{stat.value}</p>
-            <p className="text-xs text-gray-500 font-medium mt-0.5">{stat.sub}</p>
+            <p className="text-2xl font-black text-swiss-ink font-mono">{stat.value}</p>
+            <p className="text-xs text-swiss-muted font-medium mt-0.5">{stat.sub}</p>
           </div>
         ))}
       </section>
 
       <section className="space-y-4">
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-1 bg-white ring-1 ring-slate-200/80 rounded-xl p-1">
+          <div className="flex items-center gap-1 bg-white border border-swiss-line p-1">
             {(['ALL', 'draft', 'sent', 'paid'] as const).map((s) => (
               <button
                 key={s}
                 type="button"
                 onClick={() => setFilterStatus(s)}
                 className={`px-3 py-1.5 text-sm font-bold rounded-lg transition-colors cursor-pointer capitalize ${
-                  filterStatus === s ? 'bg-primary text-white' : 'text-gray-600 hover:bg-surface-muted'
+                  filterStatus === s ? 'bg-primary text-white' : 'text-swiss-muted hover:bg-surface-muted'
                 }`}
               >
                 {s === 'ALL' ? 'All' : s}
@@ -305,18 +305,18 @@ export const PayView: React.FC = () => {
           <button
             type="button"
             onClick={() => void loadData({ silent: true })}
-            className="ml-auto inline-flex items-center gap-1.5 text-sm font-bold text-gray-500 hover:text-gray-800 cursor-pointer"
+            className="ml-auto inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-swiss-ink cursor-pointer"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             Refresh
           </button>
         </div>
 
-        <div className="bg-white ring-1 ring-slate-200/80 rounded-2xl overflow-hidden">
+        <div className="bg-white border border-swiss-line overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-white text-left text-xs font-bold uppercase tracking-wide text-gray-500">
+                <tr className="bg-white text-left text-xs font-bold uppercase tracking-wide text-swiss-muted">
                   <th className="px-4 py-3">Contact</th>
                   <th className="px-4 py-3">Amount</th>
                   <th className="px-4 py-3">Description</th>
@@ -329,13 +329,13 @@ export const PayView: React.FC = () => {
                 {requests.map((row) => (
                   <tr key={row.id} className="hover:bg-surface-muted/60">
                     <td className="px-4 py-3">
-                      <p className="font-bold text-gray-900">{row.contactName}</p>
-                      <p className="text-xs text-gray-500">{row.contactPhone}</p>
+                      <p className="font-bold text-swiss-ink">{row.contactName}</p>
+                      <p className="text-xs text-swiss-muted">{row.contactPhone}</p>
                     </td>
-                    <td className="px-4 py-3 font-mono font-bold text-gray-900">
+                    <td className="px-4 py-3 font-mono font-bold text-swiss-ink">
                       {fmtInr(row.amountPaise)}
                     </td>
-                    <td className="px-4 py-3 text-gray-700 max-w-[200px] truncate">{row.description}</td>
+                    <td className="px-4 py-3 text-swiss-ink max-w-[200px] truncate">{row.description}</td>
                     <td className="px-4 py-3">
                       <span
                         className={`inline-flex px-2 py-0.5 rounded-full text-xs font-bold capitalize ${
@@ -345,7 +345,7 @@ export const PayView: React.FC = () => {
                         {row.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-xs text-gray-500">
+                    <td className="px-4 py-3 text-xs text-swiss-muted">
                       {fmtDate(row.paidAt ?? row.sentAt ?? row.createdAt)}
                     </td>
                     <td className="px-4 py-3">
@@ -370,7 +370,7 @@ export const PayView: React.FC = () => {
                             type="button"
                             disabled={busyId === row.id}
                             onClick={() => void handleRefresh(row.id)}
-                            className="px-2.5 py-1.5 rounded-lg border border-black/5 text-xs font-bold text-gray-600 hover:bg-surface-muted disabled:opacity-50 cursor-pointer"
+                            className="px-2.5 py-1.5 rounded-lg border border-swiss-line text-xs font-bold text-swiss-muted hover:bg-surface-muted disabled:opacity-50 cursor-pointer"
                           >
                             Check
                           </button>
@@ -407,8 +407,8 @@ export const PayView: React.FC = () => {
           {requests.length === 0 && (
             <div className="text-center py-16 px-4">
               <CreditCard className="w-10 h-10 mx-auto mb-3 text-slate-300" />
-              <p className="font-bold text-sm text-gray-700">No payment requests yet</p>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="font-bold text-sm text-swiss-ink">No payment requests yet</p>
+              <p className="text-xs text-swiss-muted mt-1">
                 Create a request and send a secure payment link in WhatsApp chat.
               </p>
               <button
@@ -424,7 +424,7 @@ export const PayView: React.FC = () => {
         </div>
       </section>
 
-      <p className="text-xs text-gray-500">
+      <p className="text-xs text-swiss-muted">
         Payments are processed via Razorpay. Enable the{' '}
         <code className="bg-slate-100 px-1 rounded">payment_link.paid</code> webhook event in your
         Razorpay dashboard for automatic status updates. Open{' '}

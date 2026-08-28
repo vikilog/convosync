@@ -14,6 +14,8 @@ import {
 import { api, formatCatchError } from '../../lib/api';
 import { pathForTab } from '../../routes';
 import { CalendarLeftPanel } from './calendar/CalendarLeftPanel';
+import { Input } from '../ui/input';
+import { Textarea } from '../ui/textarea';
 import {
   type CalendarDay,
   type CalendarEvent,
@@ -683,7 +685,7 @@ export function GoogleCalendarView() {
                 }}
                 className={`px-3 py-1.5 rounded-md text-sm font-semibold transition-colors ${
                   viewMode === mode.id
-                    ? 'bg-white text-[#2563EB] shadow-sm'
+                    ? 'bg-white text-[#2563EB] '
                     : 'text-[#64748B] hover:text-[#0F172A]'
                 }`}
               >
@@ -717,7 +719,7 @@ export function GoogleCalendarView() {
         </div>
 
         <div className="flex-1 min-h-0 overflow-y-auto">
-          <div className="m-4 rounded-xl border border-[#E2E8F0] bg-white overflow-hidden shadow-sm">
+          <div className="m-4 rounded-xl border border-[#E2E8F0] bg-white overflow-hidden ">
             {mainView}
           </div>
         </div>
@@ -742,40 +744,40 @@ export function GoogleCalendarView() {
             <div className="space-y-3">
               <label className="block">
                 <span className="text-meta font-semibold text-[#64748B] uppercase">Title</span>
-                <input
+                <Input
                   value={form.summary}
                   onChange={(e) => setForm((f) => ({ ...f, summary: e.target.value }))}
-                  className="mt-1 w-full text-sm border border-[#E2E8F0] rounded-lg px-3 py-2"
+                  className="h-auto mt-1 w-full text-sm border border-[#E2E8F0] rounded-lg px-3 py-2"
                   required
                   autoFocus
                 />
               </label>
               <label className="block">
                 <span className="text-meta font-semibold text-[#64748B] uppercase">Description</span>
-                <textarea
+                <Textarea
                   value={form.description}
                   onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
                   rows={2}
-                  className="mt-1 w-full text-sm border border-[#E2E8F0] rounded-lg px-3 py-2"
+                  className="min-h-0 mt-1 w-full text-sm border border-[#E2E8F0] rounded-lg px-3 py-2"
                 />
               </label>
               <label className="block">
                 <span className="text-meta font-semibold text-[#64748B] uppercase">Start</span>
-                <input
+                <Input
                   type="datetime-local"
                   value={form.start}
                   onChange={(e) => setForm((f) => ({ ...f, start: e.target.value }))}
-                  className="mt-1 w-full text-sm border border-[#E2E8F0] rounded-lg px-3 py-2"
+                  className="h-auto mt-1 w-full text-sm border border-[#E2E8F0] rounded-lg px-3 py-2"
                   required
                 />
               </label>
               <label className="block">
                 <span className="text-meta font-semibold text-[#64748B] uppercase">End</span>
-                <input
+                <Input
                   type="datetime-local"
                   value={form.end}
                   onChange={(e) => setForm((f) => ({ ...f, end: e.target.value }))}
-                  className="mt-1 w-full text-sm border border-[#E2E8F0] rounded-lg px-3 py-2"
+                  className="h-auto mt-1 w-full text-sm border border-[#E2E8F0] rounded-lg px-3 py-2"
                   required
                 />
               </label>

@@ -2,13 +2,14 @@ import React, { useMemo } from 'react';
 import { Copy, RotateCcw } from 'lucide-react';
 import { useEmailBuilderStore } from './store';
 import { renderDesignToFullHtml } from './renderHtml';
+import { Input } from '../../ui/input';
 import {
   buildSampleVariables,
   extractEmailTemplateVariables,
 } from '../emailTemplateUtils';
 
 const inputCls =
-  'w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary';
+  'w-full rounded-lg border border-swiss-line bg-white px-3 py-2 text-sm text-swiss-ink focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary';
 
 type Props = {
   showCopyTokens?: boolean;
@@ -40,7 +41,7 @@ export function VariablePreviewForm({ showCopyTokens = true, compact = false }: 
 
   if (variableKeys.length === 0) {
     return (
-      <p className="text-xs text-gray-500">
+      <p className="text-xs text-swiss-muted">
         No {'{{variables}}'} in this template yet. Add them in the subject or block content.
       </p>
     );
@@ -50,15 +51,15 @@ export function VariablePreviewForm({ showCopyTokens = true, compact = false }: 
     <div className={compact ? 'space-y-3' : 'space-y-4'}>
       <div className="flex items-center justify-between gap-2">
         <div>
-          <p className="text-sm font-bold text-gray-900">Preview values</p>
-          <p className="text-meta text-gray-500 mt-0.5">
+          <p className="text-sm font-bold text-swiss-ink">Preview values</p>
+          <p className="text-meta text-swiss-muted mt-0.5">
             Fill values to see the real email in Preview
           </p>
         </div>
         <button
           type="button"
           onClick={resetPreviewVariables}
-          className="shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-lg text-meta font-semibold text-gray-600 border border-slate-200 hover:bg-[#f4f5f7]"
+          className="shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-lg text-meta font-semibold text-swiss-muted border border-swiss-line hover:bg-[#f4f5f7]"
           title="Reset to sample defaults"
         >
           <RotateCcw className="w-3 h-3" />
@@ -80,7 +81,7 @@ export function VariablePreviewForm({ showCopyTokens = true, compact = false }: 
                   <button
                     type="button"
                     onClick={() => copyVar(key)}
-                    className="text-xs text-gray-400 hover:text-primary inline-flex items-center gap-0.5"
+                    className="text-xs text-swiss-faint hover:text-primary inline-flex items-center gap-0.5"
                   >
                     {copiedVar === key ? (
                       'Copied'
@@ -92,7 +93,7 @@ export function VariablePreviewForm({ showCopyTokens = true, compact = false }: 
                   </button>
                 ) : null}
               </div>
-              <input
+              <Input
                 id={`pv-${key}`}
                 className={inputCls}
                 value={value}

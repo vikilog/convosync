@@ -7,6 +7,8 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Plus, Search, Loader2, Smile, Paperclip, Trash2, X, FileText } from 'lucide-react';
 import { api } from '../../lib/api';
 import type { CannedResponseRecord } from './CannedResponseModal';
+import { Input } from '../ui/input';
+import { Textarea } from '../ui/textarea';
 
 const SHORTCUT_MAX = 150;
 const CONTENT_MAX = 1024;
@@ -223,15 +225,15 @@ export const CannedResponsesPanel: React.FC<Props> = ({
   const previewName = mediaFile?.name || selectedItem?.mediaFileName || 'attachment';
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-xl bg-white ring-1 ring-slate-200/80">
-      <div className="shrink-0 border-b border-black/5 px-5 py-4 sm:px-6">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden bg-white border border-swiss-line">
+      <div className="shrink-0 border-b border-swiss-line px-5 py-4 sm:px-6">
         <h2 className="text-lg font-semibold text-dark-navy">Canned Response</h2>
-        <p className="mt-1 text-sm text-neutral-500">
+        <p className="mt-1 text-sm text-swiss-muted">
           Configure preset quick replies that are standardized across the team for the inbox.
         </p>
       </div>
 
-      <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-black/5 px-5 py-3 sm:px-6">
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-swiss-line px-5 py-3 sm:px-6">
         <button
           type="button"
           onClick={handleAdd}
@@ -241,13 +243,13 @@ export const CannedResponsesPanel: React.FC<Props> = ({
           Add Canned Response
         </button>
         <div className="relative w-full sm:w-72">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
-          <input
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-swiss-faint" />
+          <Input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by short code or content"
-            className="w-full rounded-xl bg-surface-muted py-2 pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-primary/15"
+            className="h-auto w-full rounded-xl bg-surface-muted py-2 pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-primary/15"
           />
         </div>
       </div>
@@ -259,16 +261,16 @@ export const CannedResponsesPanel: React.FC<Props> = ({
       )}
 
       {loading ? (
-        <div className="flex flex-1 items-center justify-center text-neutral-400">
+        <div className="flex flex-1 items-center justify-center text-swiss-faint">
           <Loader2 className="h-8 w-8 animate-spin" />
         </div>
       ) : (
         <div className="flex min-h-0 flex-1">
-          <div className="w-[min(280px,40%)] shrink-0 overflow-y-auto border-r border-black/5">
+          <div className="w-[min(280px,40%)] shrink-0 overflow-y-auto border-r border-swiss-line">
             {selectedId === 'new' && (
               <button
                 type="button"
-                className="relative w-full border-b border-black/5 bg-primary/[0.04] px-4 py-3.5 text-left"
+                className="relative w-full border-b border-swiss-line bg-primary/[0.04] px-4 py-3.5 text-left"
               >
                 <span className="absolute bottom-0 left-0 top-0 w-1 rounded-r bg-primary" />
                 <p className="pl-2 text-sm font-semibold text-dark-navy">New Canned Response</p>
@@ -281,7 +283,7 @@ export const CannedResponsesPanel: React.FC<Props> = ({
                   key={item.id}
                   type="button"
                   onClick={() => setSelectedId(item.id)}
-                  className={`relative w-full border-b border-black/5 px-4 py-3.5 text-left transition-colors ${
+                  className={`relative w-full border-b border-swiss-line px-4 py-3.5 text-left transition-colors ${
                     active ? 'bg-primary/[0.04]' : 'hover:bg-surface-muted/70'
                   }`}
                 >
@@ -290,21 +292,21 @@ export const CannedResponsesPanel: React.FC<Props> = ({
                   )}
                   <p className="flex items-center gap-1.5 truncate pl-2 text-sm font-semibold text-dark-navy">
                     <span className="truncate">{listLabel(item)}</span>
-                    {item.hasMedia && <Paperclip className="h-3 w-3 shrink-0 text-neutral-400" />}
+                    {item.hasMedia && <Paperclip className="h-3 w-3 shrink-0 text-swiss-faint" />}
                   </p>
                 </button>
               );
             })}
             {filtered.length === 0 && selectedId !== 'new' && (
-              <p className="p-6 text-center text-sm text-neutral-400">No canned responses found</p>
+              <p className="p-6 text-center text-sm text-swiss-faint">No canned responses found</p>
             )}
           </div>
 
           <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto p-5 sm:p-6">
             {selectedId == null && filtered.length === 0 ? (
               <div className="flex flex-1 flex-col items-center justify-center py-12 text-center">
-                <p className="text-sm font-semibold text-neutral-700">No canned responses yet</p>
-                <p className="mt-1 max-w-sm text-xs text-neutral-400">
+                <p className="text-sm font-semibold text-swiss-ink">No canned responses yet</p>
+                <p className="mt-1 max-w-sm text-xs text-swiss-faint">
                   Add quick replies your team can insert while chatting in Inbox.
                 </p>
                 <button
@@ -317,7 +319,7 @@ export const CannedResponsesPanel: React.FC<Props> = ({
                 </button>
               </div>
             ) : selectedId == null ? (
-              <div className="flex flex-1 items-center justify-center text-sm text-neutral-400">
+              <div className="flex flex-1 items-center justify-center text-sm text-swiss-faint">
                 Select a canned response from the list
               </div>
             ) : (
@@ -326,36 +328,36 @@ export const CannedResponsesPanel: React.FC<Props> = ({
                   <div>
                     <div className="mb-1.5 flex items-center justify-between">
                       <label className="text-sm font-semibold text-dark-navy">Short code</label>
-                      <span className="text-xs text-neutral-400">
+                      <span className="text-xs text-swiss-faint">
                         {shortcut.length}/{SHORTCUT_MAX}
                       </span>
                     </div>
-                    <input
+                    <Input
                       type="text"
                       value={shortcut}
                       onChange={(e) =>
                         setShortcut(e.target.value.replace(/\s/g, '').slice(0, SHORTCUT_MAX))
                       }
                       placeholder="Text that trigger canned responses"
-                      className="w-full rounded-xl bg-surface-muted px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/15"
+                      className="h-auto w-full rounded-xl bg-surface-muted px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/15"
                     />
                   </div>
 
                   <div className="flex min-h-0 flex-1 flex-col">
                     <label className="mb-1.5 text-sm font-semibold text-dark-navy">Content</label>
-                    <div className="flex min-h-[280px] flex-1 flex-col overflow-hidden rounded-xl border border-black/5">
-                      <div className="relative flex items-center gap-1 border-b border-black/5 bg-white px-2 py-1.5">
+                    <div className="flex min-h-[280px] flex-1 flex-col overflow-hidden rounded-xl border border-swiss-line">
+                      <div className="relative flex items-center gap-1 border-b border-swiss-line bg-white px-2 py-1.5">
                         <div ref={emojiRef} className="relative">
                           <button
                             type="button"
                             onClick={() => setShowEmoji((v) => !v)}
-                            className="rounded-md p-1.5 text-neutral-500 hover:bg-surface hover:text-dark-navy"
+                            className="rounded-md p-1.5 text-swiss-muted hover:bg-surface hover:text-dark-navy"
                             title="Insert emoji"
                           >
                             <Smile className="h-4 w-4" />
                           </button>
                           {showEmoji && (
-                            <div className="absolute left-0 top-full z-10 mt-1 flex w-[200px] flex-wrap gap-1 rounded-xl bg-white ring-1 ring-slate-200/80 p-2">
+                            <div className="absolute left-0 top-full z-10 mt-1 flex w-[200px] flex-wrap gap-1 bg-white border border-swiss-line p-2">
                               {QUICK_EMOJIS.map((emoji) => (
                                 <button
                                   key={emoji}
@@ -371,7 +373,7 @@ export const CannedResponsesPanel: React.FC<Props> = ({
                         </div>
                         <label
                           htmlFor={mediaInputId}
-                          className="cursor-pointer rounded-md p-1.5 text-neutral-700 transition-colors hover:bg-surface hover:text-primary"
+                          className="cursor-pointer rounded-md p-1.5 text-swiss-ink transition-colors hover:bg-surface hover:text-primary"
                           title="Attach image, video, audio, or document"
                         >
                           <Paperclip className="pointer-events-none h-4 w-4" />
@@ -389,23 +391,23 @@ export const CannedResponsesPanel: React.FC<Props> = ({
                         />
                       </div>
                       {hasMediaAttached && (
-                        <div className="flex items-center gap-3 border-b border-black/5 bg-white px-3 py-2">
+                        <div className="flex items-center gap-3 border-b border-swiss-line bg-white px-3 py-2">
                           {previewMime.startsWith('image/') && existingMediaUrl ? (
                             <img
                               src={existingMediaUrl}
                               alt={previewName}
-                              className="h-14 w-14 rounded-lg border border-black/5 object-cover"
+                              className="h-14 w-14 rounded-lg border border-swiss-line object-cover"
                             />
                           ) : (
-                            <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-white ring-1 ring-slate-200/80">
-                              <FileText className="h-6 w-6 text-neutral-400" />
+                            <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-white ring-1 ring-swiss-line">
+                              <FileText className="h-6 w-6 text-swiss-faint" />
                             </div>
                           )}
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-sm font-semibold text-dark-navy">
                               {previewName}
                             </p>
-                            <p className="text-xs text-neutral-400">
+                            <p className="text-xs text-swiss-faint">
                               {mediaFile
                                 ? 'New attachment — save to apply'
                                 : 'Attached media will be sent with this reply'}
@@ -414,32 +416,32 @@ export const CannedResponsesPanel: React.FC<Props> = ({
                           <button
                             type="button"
                             onClick={handleClearMedia}
-                            className="rounded-md p-1.5 text-neutral-400 hover:bg-red-50 hover:text-red-500"
+                            className="rounded-md p-1.5 text-swiss-faint hover:bg-red-50 hover:text-red-500"
                             title="Remove attachment"
                           >
                             <X className="h-4 w-4" />
                           </button>
                         </div>
                       )}
-                      <textarea
+                      <Textarea
                         ref={contentRef}
                         value={content}
                         onChange={(e) => setContent(e.target.value.slice(0, CONTENT_MAX))}
                         placeholder="Please enter a content"
-                        className="min-h-[180px] w-full flex-1 resize-none bg-white p-3 text-sm outline-none"
+                        className="min-h-0 min-h-[180px] w-full flex-1 resize-none bg-white p-3 text-sm outline-none"
                       />
-                      <div className="border-t border-black/5 px-3 py-1.5 text-right text-xs text-neutral-400">
+                      <div className="border-t border-swiss-line px-3 py-1.5 text-right text-xs text-swiss-faint">
                         {content.length}/{CONTENT_MAX}
                       </div>
                     </div>
-                    <p className="mt-2 text-xs text-neutral-400">
+                    <p className="mt-2 text-xs text-swiss-faint">
                       Content is used as caption when media is attached. Use {'{{contact.name}}'},{' '}
                       {'{{contact.phone}}'} in Inbox.
                     </p>
                   </div>
                 </div>
 
-                <div className="mt-4 flex shrink-0 items-center justify-between border-t border-black/5 pt-4">
+                <div className="mt-4 flex shrink-0 items-center justify-between border-t border-swiss-line pt-4">
                   {selectedItem ? (
                     <button
                       type="button"

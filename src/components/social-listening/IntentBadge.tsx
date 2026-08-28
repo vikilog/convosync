@@ -118,7 +118,7 @@ export function primaryActionForComment(input: {
       kind: 'ignore_only',
       label: 'Ignore',
       className:
-        'text-neutral-700 bg-white ring-1 ring-slate-200/80 hover:bg-surface-muted',
+        'text-swiss-ink bg-white ring-1 ring-swiss-line hover:bg-surface-muted',
     };
   }
 

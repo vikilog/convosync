@@ -103,7 +103,7 @@ export function InboxAssigneePicker({
   };
 
   const itemClass =
-    'w-full text-left px-3 py-2.5 text-sm font-bold text-gray-800 hover:bg-sky-50 transition-colors flex items-center gap-2.5';
+    'w-full text-left px-3 py-2.5 text-sm font-bold text-swiss-ink hover:bg-sky-50 transition-colors flex items-center gap-2.5';
 
   return (
     <div className="relative" ref={rootRef}>
@@ -113,11 +113,11 @@ export function InboxAssigneePicker({
           setOpen((prev) => !prev);
           if (open) setSubmenu('main');
         }}
-        className="flex items-center gap-1 bg-transparent border-none text-sm font-bold text-gray-800 focus:ring-0 outline-none p-0 cursor-pointer max-w-[180px]"
+        className="flex items-center gap-1 bg-transparent border-none text-sm font-bold text-swiss-ink focus:ring-0 outline-none p-0 cursor-pointer max-w-[180px]"
       >
         <span className="truncate">{displayLabel}</span>
         <ChevronDown
-          className={`w-3.5 h-3.5 text-gray-400 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}
+          className={`w-3.5 h-3.5 text-swiss-faint shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}
         />
       </button>
 
@@ -128,18 +128,18 @@ export function InboxAssigneePicker({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.15 }}
-            className="absolute right-0 top-full mt-2 z-40 w-64 bg-surface border border-black/5 rounded-xl shadow-xl overflow-hidden"
+            className="absolute right-0 top-full mt-2 z-40 w-64 bg-surface border border-swiss-line rounded-xl shadow-xl overflow-hidden"
           >
             {submenu === 'main' && (
               <div className="py-1">
                 <button type="button" onClick={() => pick('')} className={itemClass}>
-                  <UserX className="w-4 h-4 text-gray-400 shrink-0" />
+                  <UserX className="w-4 h-4 text-swiss-faint shrink-0" />
                   Unassigned
                 </button>
 
                 {teamAgents.length > 0 && (
                   <>
-                    <div className="px-3 pt-2 pb-1 text-meta font-black uppercase tracking-wider text-gray-400">
+                    <div className="px-3 pt-2 pb-1 text-meta font-black uppercase tracking-wider text-swiss-faint">
                       Team
                     </div>
                     {teamAgents.map((agent) => (
@@ -156,7 +156,7 @@ export function InboxAssigneePicker({
                   </>
                 )}
 
-                <div className="px-3 pt-2 pb-1 text-meta font-black uppercase tracking-wider text-gray-400">
+                <div className="px-3 pt-2 pb-1 text-meta font-black uppercase tracking-wider text-swiss-faint">
                   Automation
                 </div>
 
@@ -169,7 +169,7 @@ export function InboxAssigneePicker({
                     <Sparkles className="w-4 h-4 text-sky-600 shrink-0" />
                     AI Agent
                   </span>
-                  <span className="text-xs text-gray-400 font-bold shrink-0">
+                  <span className="text-xs text-swiss-faint font-bold shrink-0">
                     {aiAgents.length}
                   </span>
                 </button>
@@ -183,7 +183,7 @@ export function InboxAssigneePicker({
                     <Route className="w-4 h-4 text-sky-600 shrink-0" />
                     {journeysMenuLabel}
                   </span>
-                  <span className="text-xs text-gray-400 font-bold shrink-0">
+                  <span className="text-xs text-swiss-faint font-bold shrink-0">
                     {publishedJourneys.length}
                   </span>
                 </button>
@@ -195,16 +195,16 @@ export function InboxAssigneePicker({
                 <button
                   type="button"
                   onClick={() => setSubmenu('main')}
-                  className={`${itemClass} text-gray-500 border-b border-black/5`}
+                  className={`${itemClass} text-swiss-muted border-b border-swiss-line`}
                 >
                   <ChevronLeft className="w-4 h-4 shrink-0" />
                   Back
                 </button>
-                <div className="px-3 py-2 text-meta font-black uppercase tracking-wider text-gray-400">
+                <div className="px-3 py-2 text-meta font-black uppercase tracking-wider text-swiss-faint">
                   Select AI agent
                 </div>
                 {aiAgents.length === 0 ? (
-                  <p className="px-3 py-3 text-meta text-gray-400 font-medium">
+                  <p className="px-3 py-3 text-meta text-swiss-faint font-medium">
                     No published AI agents yet. Publish one from AI Agent.
                   </p>
                 ) : (
@@ -228,16 +228,16 @@ export function InboxAssigneePicker({
                 <button
                   type="button"
                   onClick={() => setSubmenu('main')}
-                  className={`${itemClass} text-gray-500 border-b border-black/5`}
+                  className={`${itemClass} text-swiss-muted border-b border-swiss-line`}
                 >
                   <ChevronLeft className="w-4 h-4 shrink-0" />
                   Back
                 </button>
-                <div className="px-3 py-2 text-meta font-black uppercase tracking-wider text-gray-400">
+                <div className="px-3 py-2 text-meta font-black uppercase tracking-wider text-swiss-faint">
                   Select automation
                 </div>
                 {publishedJourneys.length === 0 ? (
-                  <p className="px-3 py-3 text-meta text-gray-400 font-medium">
+                  <p className="px-3 py-3 text-meta text-swiss-faint font-medium">
                     No published {journeysMenuLabel.toLowerCase()} yet.
                   </p>
                 ) : (

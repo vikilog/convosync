@@ -11,7 +11,7 @@ export function SheetsBanner({ message }: { message: string }) {
 
 export function SheetsLoadingState({ label }: { label: string }) {
   return (
-    <div className="flex flex-1 items-center justify-center py-20 text-sm text-gray-400">
+    <div className="flex flex-1 items-center justify-center py-20 text-sm text-swiss-faint">
       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
       {label}
     </div>
@@ -43,7 +43,7 @@ export function SheetsToolbarSelect({
           </option>
         ))}
       </select>
-      <ChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+      <ChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-swiss-faint" />
     </div>
   );
 }

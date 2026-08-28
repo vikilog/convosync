@@ -90,7 +90,7 @@ export function ContactInsightPanel({ contactId }: { contactId: string }) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-2">
-        <h4 className="text-xs font-bold text-gray-500 flex items-center gap-1.5">
+        <h4 className="text-xs font-bold text-swiss-muted flex items-center gap-1.5">
           <Sparkles className="h-3.5 w-3.5 text-sky-600" />
           Customer insight
         </h4>
@@ -140,11 +140,11 @@ export function ContactInsightPanel({ contactId }: { contactId: string }) {
       )}
 
       {!loading && !insight && !error && !excludeFromInsights && (
-        <article className="rounded-2xl border border-black/5 bg-surface p-5 shadow-sm text-center">
+        <article className="rounded-2xl border border-swiss-line bg-surface p-5 text-center">
           <span className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-sky-50 text-sky-600">
             <Sparkles className="h-5 w-5" />
           </span>
-          <h4 className="mt-3 text-sm font-bold text-gray-900">No insight yet</h4>
+          <h4 className="mt-3 text-sm font-bold text-swiss-ink">No insight yet</h4>
           <p className="mt-1.5 text-xs leading-relaxed text-slate-500">
             Past calls and chats are ready to analyze. Tap Prepare insight to run now
             (doesn’t wait for the nightly job).
@@ -153,7 +153,7 @@ export function ContactInsightPanel({ contactId }: { contactId: string }) {
       )}
 
       {!loading && insight && (
-        <article className="rounded-2xl border border-black/5 bg-surface p-3 shadow-sm space-y-3">
+        <article className="rounded-2xl border border-swiss-line bg-surface p-3 space-y-3">
           <p className="text-[10px] font-semibold text-slate-400">
             {new Date(insight.computedAt).toLocaleString()} · {insight.modelVersion}
             {insight.basedOnCallSessionIds.length
@@ -193,7 +193,7 @@ export function ContactInsightPanel({ contactId }: { contactId: string }) {
           )}
 
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-wide text-gray-400">Summary</p>
+            <p className="text-[11px] font-bold uppercase tracking-wide text-swiss-faint">Summary</p>
             <p className="mt-1 text-sm leading-relaxed text-slate-800">{insight.summary}</p>
           </div>
 
@@ -208,7 +208,7 @@ export function ContactInsightPanel({ contactId }: { contactId: string }) {
 
           {genuine && insight.painPoints.length > 0 && (
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-wide text-gray-400">
+              <p className="text-[11px] font-bold uppercase tracking-wide text-swiss-faint">
                 Pain points
               </p>
               <ul className="mt-1 list-disc space-y-0.5 pl-4 text-xs text-slate-700">
@@ -221,7 +221,7 @@ export function ContactInsightPanel({ contactId }: { contactId: string }) {
 
           {genuine && insight.interests.length > 0 && (
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-wide text-gray-400">
+              <p className="text-[11px] font-bold uppercase tracking-wide text-swiss-faint">
                 Interests
               </p>
               <ul className="mt-1 list-disc space-y-0.5 pl-4 text-xs text-slate-700">

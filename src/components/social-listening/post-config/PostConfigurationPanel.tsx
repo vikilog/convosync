@@ -106,16 +106,16 @@ export function PostConfigurationPanel({
     scanState === 'failed' || showForm || (editing && isConfigured);
 
   return (
-    <div className="relative flex h-full min-h-0 flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-      <div className="flex shrink-0 items-start justify-between gap-2 border-b border-black/5 px-3.5 py-3">
+    <div className="relative flex h-full min-h-0 flex-col overflow-hidden bg-white border border-swiss-line shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+      <div className="flex shrink-0 items-start justify-between gap-2 border-b border-swiss-line px-3.5 py-3">
         <div className="min-w-0">
-          <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-neutral-400">
+          <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-swiss-faint">
             <Bot className="h-3.5 w-3.5" />
             This post
           </p>
-          <h2 className="text-sm font-black text-gray-950">Agent &amp; funnel</h2>
+          <h2 className="text-sm font-semibold text-gray-950">Agent &amp; funnel</h2>
           {postCaption && (
-            <p className="mt-0.5 line-clamp-2 text-[11px] font-medium text-gray-400">
+            <p className="mt-0.5 line-clamp-2 text-[11px] font-medium text-swiss-faint">
               {postCaption}
             </p>
           )}
@@ -125,19 +125,19 @@ export function PostConfigurationPanel({
             <button
               type="button"
               onClick={onOpenPost}
-              className="inline-flex cursor-pointer items-center gap-1 rounded-lg border border-black/5 px-2 py-1 text-[10px] font-bold text-gray-500 hover:bg-surface-muted hover:text-gray-800"
+              className="inline-flex cursor-pointer items-center gap-1 rounded-lg border border-swiss-line px-2 py-1 text-[10px] font-bold text-swiss-muted hover:bg-surface-muted hover:text-swiss-ink"
             >
               Comments
               <ExternalLink className="h-3 w-3" />
             </button>
           )}
           {/* Mock state toggle — remove when real scan is wired */}
-          <label className="flex items-center gap-1 text-[10px] font-bold text-gray-400">
+          <label className="flex items-center gap-1 text-[10px] font-bold text-swiss-faint">
             <Sparkles className="h-3 w-3" />
             <select
               value={demoState}
               onChange={(e) => setDemoState(e.target.value as ScanUiState | 'auto')}
-              className="cursor-pointer rounded-md border border-black/10 bg-white px-1.5 py-0.5 text-[10px] font-bold text-gray-600 outline-none"
+              className="cursor-pointer rounded-md border border-black/10 bg-white px-1.5 py-0.5 text-[10px] font-bold text-swiss-muted outline-none"
               title="Mock AI scan state"
             >
               <option value="auto">Auto scan</option>
@@ -246,8 +246,8 @@ export function PostConfigEmptyState() {
       <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-50 text-cyan-700">
         <Sparkles className="h-6 w-6" />
       </div>
-      <h3 className="mt-4 text-sm font-black text-gray-950">Configure agent &amp; funnel</h3>
-      <p className="mt-1.5 max-w-[220px] text-xs leading-relaxed text-gray-500">
+      <h3 className="mt-4 text-sm font-semibold text-gray-950">Configure agent &amp; funnel</h3>
+      <p className="mt-1.5 max-w-[220px] text-xs leading-relaxed text-swiss-muted">
         Open a post to review AI suggestions and set funnel, skill, and reply tone.
       </p>
     </div>

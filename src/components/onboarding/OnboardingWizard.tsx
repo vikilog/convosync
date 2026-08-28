@@ -32,13 +32,14 @@ import {
 import { setOnboardingCache } from '../../lib/session';
 import { LocaleFields } from '../locale/LocaleFields';
 import { OnboardingStepIndicator } from './OnboardingStepIndicator';
+import { Input } from '../ui/input';
 
 const DIAL_OPTIONS = listDialCodeOptions();
 const easeOut = [0.22, 1, 0.36, 1] as const;
 
 // Shared chrome; width is composed per control so dial select isn't stuck with w-full.
 const fieldShell =
-  'min-h-11 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm shadow-slate-900/5 placeholder:text-slate-400 transition-[border-color,box-shadow] duration-200 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20';
+  'min-h-11 rounded-xl border border-swiss-line bg-white px-3 py-2.5 text-sm text-slate-900 shadow-slate-900/5 placeholder:text-slate-400 transition-[border-color,box-shadow] duration-200 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20';
 
 const fieldClass = `w-full ${fieldShell}`;
 const selectClass = fieldClass;
@@ -334,7 +335,7 @@ export function OnboardingWizard() {
             <img
               src={PRODUCT_LOGO}
               alt={PRODUCT_NAME}
-              className="h-12 w-12 object-contain drop-shadow-sm sm:h-14 sm:w-14"
+              className="h-12 w-12 object-contain drop- sm:h-14 sm:w-14"
             />
             <div className="min-w-0">
               <h1 className="font-display text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
@@ -356,7 +357,7 @@ export function OnboardingWizard() {
         </motion.div>
 
         <motion.div
-          className="mt-8 flex-1 rounded-2xl border border-black/5 bg-white p-6 shadow-sm shadow-slate-900/5 md:p-8"
+          className="mt-8 flex-1 rounded-2xl border border-swiss-line bg-white p-6 shadow-slate-900/5 md:p-8"
           initial={reduceMotion ? false : { opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ ...t(0.45), delay: reduceMotion ? 0 : 0.1 }}
@@ -391,7 +392,7 @@ export function OnboardingWizard() {
                             'cursor-pointer rounded-xl border p-4 text-left transition-colors duration-200',
                             selected
                               ? 'border-primary bg-accent-green-bg ring-2 ring-primary/15'
-                              : 'border-slate-200 bg-white hover:border-primary/40 hover:bg-accent-green-bg/40',
+                              : 'border-swiss-line bg-white hover:border-primary/40 hover:bg-accent-green-bg/40',
                           ].join(' ')}
                         >
                           <p className="text-sm font-bold text-slate-900">{type.label}</p>
@@ -424,11 +425,11 @@ export function OnboardingWizard() {
                         className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
                         aria-hidden
                       />
-                      <input
+                      <Input
                         value={form.name}
                         onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                         autoComplete="name"
-                        className={`${fieldClass} pl-10`}
+                        className={`h-auto ${fieldClass} pl-10`}
                       />
                     </div>
                   </label>
@@ -452,13 +453,13 @@ export function OnboardingWizard() {
                           </option>
                         ))}
                       </select>
-                      <input
+                      <Input
                         type="tel"
                         value={form.phone}
                         onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
                         placeholder="98765 43210"
                         autoComplete="tel-national"
-                        className={`${fieldShell} min-w-0 flex-1`}
+                        className={`h-auto ${fieldShell} min-w-0 flex-1`}
                       />
                     </div>
                   </label>
@@ -466,11 +467,11 @@ export function OnboardingWizard() {
                     <span className="text-meta font-bold uppercase tracking-wide text-slate-600">
                       Role / job title
                     </span>
-                    <input
+                    <Input
                       value={form.jobTitle}
                       onChange={(e) => setForm((f) => ({ ...f, jobTitle: e.target.value }))}
                       placeholder="Founder, Support Lead, Marketing Manager…"
-                      className={`mt-1.5 ${fieldClass}`}
+                      className={`h-auto mt-1.5 ${fieldClass}`}
                     />
                   </label>
                 </div>
@@ -499,10 +500,10 @@ export function OnboardingWizard() {
                             className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
                             aria-hidden
                           />
-                          <input
+                          <Input
                             value={form.companyName}
                             onChange={(e) => setForm((f) => ({ ...f, companyName: e.target.value }))}
-                            className={`${fieldClass} pl-10`}
+                            className={`h-auto ${fieldClass} pl-10`}
                           />
                         </div>
                       </label>
@@ -546,15 +547,15 @@ export function OnboardingWizard() {
                       <span className="text-meta font-bold uppercase tracking-wide text-slate-600">
                         Display / business name
                       </span>
-                      <input
+                      <Input
                         value={form.displayName}
                         onChange={(e) => setForm((f) => ({ ...f, displayName: e.target.value }))}
                         placeholder="Your brand or professional name"
-                        className={`mt-1.5 ${fieldClass}`}
+                        className={`h-auto mt-1.5 ${fieldClass}`}
                       />
                     </label>
                   )}
-                  <div className="rounded-xl border border-slate-200 bg-accent-green-bg/50 p-4">
+                  <div className="rounded-xl border border-swiss-line bg-accent-green-bg/50 p-4">
                     <p className="mb-1 text-sm font-semibold text-slate-800">Confirm your location</p>
                     <p className="mb-4 text-xs leading-relaxed text-slate-600">
                       We detected these from your device and network. Change either before continuing —
@@ -601,7 +602,7 @@ export function OnboardingWizard() {
                             'cursor-pointer rounded-xl border px-4 py-3 text-left text-sm font-semibold transition-colors duration-200',
                             selected
                               ? 'border-primary bg-accent-green-bg text-primary'
-                              : 'border-slate-200 text-slate-700 hover:border-primary/40 hover:bg-accent-green-bg/40',
+                              : 'border-swiss-line text-slate-700 hover:border-primary/40 hover:bg-accent-green-bg/40',
                           ].join(' ')}
                         >
                           {option.label}
@@ -643,11 +644,11 @@ export function OnboardingWizard() {
                     <span className="text-meta font-bold uppercase tracking-wide text-slate-600">
                       Referral code (optional)
                     </span>
-                    <input
+                    <Input
                       value={form.referralCode}
                       onChange={(e) => setForm((f) => ({ ...f, referralCode: e.target.value }))}
                       placeholder="If someone referred you"
-                      className={`mt-1.5 ${fieldClass}`}
+                      className={`h-auto mt-1.5 ${fieldClass}`}
                     />
                   </label>
                 </div>
@@ -668,10 +669,10 @@ export function OnboardingWizard() {
                     <span className="text-meta font-bold uppercase tracking-wide text-slate-600">
                       Workspace name
                     </span>
-                    <input
+                    <Input
                       value={form.workspaceName}
                       onChange={(e) => setForm((f) => ({ ...f, workspaceName: e.target.value }))}
-                      className={`mt-1.5 ${fieldClass}`}
+                      className={`h-auto mt-1.5 ${fieldClass}`}
                     />
                   </label>
                 </div>
@@ -693,7 +694,7 @@ export function OnboardingWizard() {
                       </p>
                     </div>
                   </div>
-                  <dl className="divide-y divide-slate-100 rounded-xl border border-slate-200 text-sm">
+                  <dl className="divide-y divide-slate-100 rounded-xl border border-swiss-line text-sm">
                     <div className="grid grid-cols-3 gap-2 px-4 py-3">
                       <dt className="text-slate-500">Account type</dt>
                       <dd className="col-span-2 font-medium capitalize text-slate-900">
@@ -748,7 +749,7 @@ export function OnboardingWizard() {
                   type="button"
                   onClick={handleBack}
                   disabled={saving}
-                  className="inline-flex min-h-11 cursor-pointer items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition-colors duration-200 hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex min-h-11 cursor-pointer items-center gap-1.5 rounded-xl border border-swiss-line bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition-colors duration-200 hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <ArrowLeft className="h-4 w-4" aria-hidden />
                   Back

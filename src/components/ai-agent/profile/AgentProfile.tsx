@@ -19,6 +19,7 @@ import { PromptTemplatesModal } from './PromptTemplatesModal';
 import { WritingGuideDrawer } from './WritingGuideDrawer';
 import { INSTRUCTIONS_PLACEHOLDER, TONE_OPTIONS } from './constants';
 import { defaultAgentActions } from './constants';
+import { Textarea } from '../../ui/textarea';
 
 /** Matches backend SIMILARITY_LOW_THRESHOLD default when agent has no override. */
 const DEFAULT_SIMILARITY_LOW_THRESHOLD = 0.7;
@@ -224,7 +225,7 @@ export const AgentProfile: React.FC<Props> = ({
               <button
                 type="button"
                 onClick={onTestAgent}
-                className="inline-flex items-center gap-1.5 rounded-xl border border-black/5 bg-white px-3 py-2 text-sm font-bold text-[#111827] hover:border-primary hover:text-primary transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-swiss-line bg-white px-3 py-2 text-sm font-bold text-[#111827] hover:border-primary hover:text-primary transition-colors cursor-pointer"
               >
                 <MessageSquare className="w-4 h-4" />
                 Test Agent
@@ -250,7 +251,7 @@ export const AgentProfile: React.FC<Props> = ({
           </div>
         </div>
 
-        <section className="bg-white ring-1 ring-slate-200/80 rounded-xl p-5 relative">
+        <section className="bg-white border border-swiss-line p-5 relative">
             <button
               type="button"
               onClick={() => setShowEdit(true)}
@@ -270,10 +271,10 @@ export const AgentProfile: React.FC<Props> = ({
                   <img
                     src={local.avatarUrl}
                     alt=""
-                    className="w-16 h-16 rounded-full object-cover border border-black/5"
+                    className="w-16 h-16 rounded-full object-cover border border-swiss-line"
                   />
                 ) : (
-                  <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center border border-black/5">
+                  <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center border border-swiss-line">
                     <Bot className="w-8 h-8" />
                   </div>
                 )}
@@ -288,7 +289,7 @@ export const AgentProfile: React.FC<Props> = ({
             </div>
           </section>
 
-          <section className="bg-white ring-1 ring-slate-200/80 rounded-xl p-5">
+          <section className="bg-white border border-swiss-line p-5">
             <p className="text-sm font-medium text-[#111827] mb-3">Tone of voice</p>
             <div className="flex flex-wrap gap-2">
               {TONE_OPTIONS.map((opt) => {
@@ -301,7 +302,7 @@ export const AgentProfile: React.FC<Props> = ({
                     className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold border transition-colors ${
                       selected
                         ? 'border-primary/30 bg-primary/10 text-primary'
-                        : 'border-black/5 bg-white text-[#6B7280] hover:border-black/10'
+                        : 'border-swiss-line bg-white text-[#6B7280] hover:border-black/10'
                     }`}
                   >
                     {TONE_ICONS[opt.id]}
@@ -312,7 +313,7 @@ export const AgentProfile: React.FC<Props> = ({
             </div>
           </section>
 
-          <section className="bg-white ring-1 ring-slate-200/80 rounded-xl p-5">
+          <section className="bg-white border border-swiss-line p-5">
             <div className="flex items-center gap-2 mb-2">
               <label className="text-sm font-medium text-[#111827]">Fallback language</label>
               <InfoTooltip text="Language used when AI cannot detect user's language" />
@@ -325,7 +326,7 @@ export const AgentProfile: React.FC<Props> = ({
                     fallbackLanguage: e.target.value as AgentProfileData['fallbackLanguage'],
                   })
                 }
-                className="w-full appearance-none border border-black/5 rounded-lg py-2.5 pl-3 pr-9 text-sm text-[#111827] focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none bg-white"
+                className="w-full appearance-none border border-swiss-line rounded-lg py-2.5 pl-3 pr-9 text-sm text-[#111827] focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none bg-white"
               >
                 {(Object.keys(LANGUAGE_LABELS) as Array<keyof typeof LANGUAGE_LABELS>).map(
                   (key) => (
@@ -339,7 +340,7 @@ export const AgentProfile: React.FC<Props> = ({
             </div>
           </section>
 
-          <section className="bg-white ring-1 ring-slate-200/80 rounded-xl p-5">
+          <section className="bg-white border border-swiss-line p-5">
             <div className="flex items-center justify-between gap-2 mb-1">
               <div className="flex items-center gap-2">
                 <label
@@ -376,19 +377,19 @@ export const AgentProfile: React.FC<Props> = ({
             </p>
           </section>
 
-          <section className="bg-white ring-1 ring-slate-200/80 rounded-xl p-5 space-y-3">
+          <section className="bg-white border border-swiss-line p-5 space-y-3">
             <div className="flex items-center gap-2">
               <label className="text-sm font-medium text-[#111827]">Instructions</label>
               <InfoTooltip text="Main instructions that define how your AI Agent behaves in all conversations" />
             </div>
             <div className="relative">
-              <textarea
+              <Textarea
                 ref={instructionsRef}
                 value={local.instructions}
                 onChange={(e) => patchLocal({ instructions: e.target.value.slice(0, 5000) })}
                 placeholder={INSTRUCTIONS_PLACEHOLDER}
                 rows={10}
-                className="w-full border border-black/5 rounded-lg py-3 px-3 text-sm resize-y min-h-[200px] max-h-[400px] focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                className="min-h-0 w-full border border-swiss-line rounded-lg py-3 px-3 text-sm resize-y min-h-[200px] max-h-[400px] focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
               />
               <span className="absolute bottom-3 right-3 text-xs text-[#6B7280]">
                 {local.instructions.length}/5000
@@ -432,7 +433,7 @@ export const AgentProfile: React.FC<Props> = ({
               <div className="space-y-4">
                 {/* ponytail: voice/call agent UI parked — set true to show again */}
                 {false && (
-                <div className="bg-white ring-1 ring-slate-200/80 rounded-xl p-5">
+                <div className="bg-white border border-swiss-line p-5">
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <h4 className="text-sm font-bold text-[#111827]">Answer calls with AI Agent</h4>
@@ -461,7 +462,7 @@ export const AgentProfile: React.FC<Props> = ({
                     </button>
                   </div>
                   {local.voiceAgentEnabled && (
-                    <div className="mt-4 pt-4 border-t border-black/5 space-y-4">
+                    <div className="mt-4 pt-4 border-t border-swiss-line space-y-4">
                       <div>
                         <label
                           htmlFor="voice-stt-provider"
@@ -473,7 +474,7 @@ export const AgentProfile: React.FC<Props> = ({
                           id="voice-stt-provider"
                           value={local.voiceSttProvider || VOICE_STT_PROVIDERS[0]?.value}
                           onChange={(e) => patchLocal({ voiceSttProvider: e.target.value })}
-                          className="w-full max-w-xs rounded-lg bg-white ring-1 ring-slate-200/80 px-3 py-2 text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/30"
+                          className="w-full max-w-xs rounded-lg bg-white ring-1 ring-swiss-line px-3 py-2 text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/30"
                         >
                           {VOICE_STT_PROVIDERS.map((opt) => (
                             <option key={opt.value} value={opt.value}>
@@ -499,7 +500,7 @@ export const AgentProfile: React.FC<Props> = ({
                               voiceTtsVoiceId: defaultVoiceForTtsProvider(provider),
                             });
                           }}
-                          className="w-full max-w-xs rounded-lg bg-white ring-1 ring-slate-200/80 px-3 py-2 text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/30"
+                          className="w-full max-w-xs rounded-lg bg-white ring-1 ring-swiss-line px-3 py-2 text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/30"
                         >
                           {VOICE_TTS_PROVIDERS.map((opt) => (
                             <option key={opt.value} value={opt.value}>
@@ -524,7 +525,7 @@ export const AgentProfile: React.FC<Props> = ({
                             onChange={(e) =>
                               patchLocal({ voiceTtsVoiceId: e.target.value || null })
                             }
-                            className="w-full max-w-xs rounded-lg bg-white ring-1 ring-slate-200/80 px-3 py-2 text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/30"
+                            className="w-full max-w-xs rounded-lg bg-white ring-1 ring-swiss-line px-3 py-2 text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/30"
                           >
                             {CARTESIA_TTS_VOICES.map((opt) => (
                               <option key={opt.value} value={opt.value}>
@@ -550,7 +551,7 @@ export const AgentProfile: React.FC<Props> = ({
                             onChange={(e) =>
                               patchLocal({ voiceTtsVoiceId: e.target.value || null })
                             }
-                            className="w-full max-w-xs rounded-lg bg-white ring-1 ring-slate-200/80 px-3 py-2 text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/30"
+                            className="w-full max-w-xs rounded-lg bg-white ring-1 ring-swiss-line px-3 py-2 text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/30"
                           >
                             {OPENAI_TTS_VOICES.map((opt) => (
                               <option key={opt.value} value={opt.value}>
@@ -576,7 +577,7 @@ export const AgentProfile: React.FC<Props> = ({
                             onChange={(e) =>
                               patchLocal({ voiceTtsVoiceId: e.target.value || null })
                             }
-                            className="w-full max-w-xs rounded-lg bg-white ring-1 ring-slate-200/80 px-3 py-2 text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/30"
+                            className="w-full max-w-xs rounded-lg bg-white ring-1 ring-swiss-line px-3 py-2 text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/30"
                           >
                             {DEEPGRAM_TTS_VOICES.map((opt) => (
                               <option key={opt.value} value={opt.value}>
@@ -605,17 +606,17 @@ export const AgentProfile: React.FC<Props> = ({
               </div>
             )}          </section>
 
-          <section className="bg-white ring-1 ring-slate-200/80 rounded-xl p-5">
+          <section className="bg-white border border-swiss-line p-5">
             <label className="block text-sm font-medium text-[#111827] mb-2">
               Brand&apos;s background <span className="text-[#6B7280] font-normal">(Optional)</span>
             </label>
             <div className="relative">
-              <textarea
+              <Textarea
                 value={local.brandBackground}
                 onChange={(e) => patchLocal({ brandBackground: e.target.value.slice(0, 1200) })}
                 placeholder="Enter brand information"
                 rows={5}
-                className="w-full border border-black/5 rounded-xl py-3 px-3 text-sm resize-none focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                className="min-h-0 w-full border border-swiss-line rounded-xl py-3 px-3 text-sm resize-none focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
               />
               <span className="absolute bottom-3 right-3 text-xs text-[#6B7280]">
                 {local.brandBackground.length}/1200
@@ -635,7 +636,7 @@ export const AgentProfile: React.FC<Props> = ({
 
       {showPublishConfirm && (
         <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-md border border-black/5 shadow-2xl p-6">
+          <div className="bg-white rounded-2xl w-full max-w-md border border-swiss-line shadow-2xl p-6">
             <h3 className="text-base font-bold text-[#111827]">Publish agent?</h3>
             <p className="text-sm text-[#6B7280] mt-2">
               Are you sure you want to publish this agent? It will start responding to real

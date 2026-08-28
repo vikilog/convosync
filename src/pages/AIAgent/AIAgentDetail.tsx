@@ -220,7 +220,7 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
             id="agent-section-mobile"
             value={mobileNavValue}
             onChange={(e) => navigate(e.target.value)}
-            className="w-full rounded-xl bg-white ring-1 ring-slate-200/80 px-3 py-2.5 text-sm font-semibold text-[#111827]"
+            className="w-full bg-white border border-swiss-line px-3 py-2.5 text-sm font-semibold text-[#111827]"
           >
             {mobileNavOptions.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -230,7 +230,7 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
           </select>
         </div>
 
-        <aside className="hidden lg:block w-[280px] shrink-0 border border-black/5 rounded-xl bg-white p-4 h-fit sticky top-6">
+        <aside className="hidden lg:block w-[280px] shrink-0 border border-swiss-line rounded-xl bg-white p-4 h-fit sticky top-6">
           <div className="flex items-start justify-between gap-2 mb-1">
             <button
               type="button"
@@ -300,7 +300,7 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
           ) : section === 'knowledge' ? (
             <KnowledgeBase agentId={agentId} />
           ) : section === 'flows' && agent.category === 'rule_based' ? (
-            <div className="h-full min-h-[520px] w-full rounded-xl border border-black/5 overflow-hidden bg-[#eef0f3]">
+            <div className="h-full min-h-[520px] w-full rounded-xl border border-swiss-line overflow-hidden bg-[#eef0f3]">
               <RuleBasedFlowBuilder
                 flow={agent.flowDefinition}
                 saving={saving}

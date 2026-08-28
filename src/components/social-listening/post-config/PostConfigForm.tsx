@@ -10,7 +10,7 @@ import {
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
   return (
-    <span className="text-[11px] font-semibold uppercase tracking-wide text-neutral-400">
+    <span className="text-[11px] font-semibold uppercase tracking-wide text-swiss-faint">
       {children}
     </span>
   );
@@ -31,9 +31,9 @@ export function PostConfigForm({
     onChange({ ...values, [key]: value });
 
   return (
-    <section className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-      <h3 className="text-sm font-black text-gray-950">Manual configuration</h3>
-      <p className="mt-0.5 text-xs text-gray-500">
+    <section className="bg-white border border-swiss-line p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+      <h3 className="text-sm font-semibold text-gray-950">Manual configuration</h3>
+      <p className="mt-0.5 text-xs text-swiss-muted">
         Funnel, agent skill, and reply tone for this post.
       </p>
 
@@ -43,7 +43,7 @@ export function PostConfigForm({
           <select
             value={values.funnelId || ''}
             onChange={(e) => patch('funnelId', e.target.value || null)}
-            className="mt-1.5 w-full cursor-pointer rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-semibold text-gray-800 outline-none focus:ring-2 focus:ring-primary/20"
+            className="mt-1.5 w-full cursor-pointer rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-semibold text-swiss-ink outline-none focus:ring-2 focus:ring-primary/20"
           >
             <option value="">Select funnel…</option>
             {MOCK_FUNNELS.map((f) => (
@@ -59,7 +59,7 @@ export function PostConfigForm({
           <select
             value={values.skillId || ''}
             onChange={(e) => patch('skillId', e.target.value || null)}
-            className="mt-1.5 w-full cursor-pointer rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-semibold text-gray-800 outline-none focus:ring-2 focus:ring-primary/20"
+            className="mt-1.5 w-full cursor-pointer rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-semibold text-swiss-ink outline-none focus:ring-2 focus:ring-primary/20"
           >
             <option value="">None (default prompts)</option>
             {MOCK_SKILLS.map((s) => (
@@ -82,8 +82,8 @@ export function PostConfigForm({
                   onClick={() => patch('tone', t.value as ReplyToneOption)}
                   className={`flex-1 cursor-pointer rounded-lg px-2 py-1.5 text-xs font-bold transition-colors ${
                     active
-                      ? 'bg-white text-gray-900 shadow-sm'
-                      : 'text-gray-500 hover:text-gray-800'
+                      ? 'bg-white text-swiss-ink '
+                      : 'text-swiss-muted hover:text-swiss-ink'
                   }`}
                 >
                   {t.label}
@@ -109,7 +109,7 @@ export function PostConfigForm({
         )}
       </button>
       {!values.funnelId && (
-        <p className="mt-2 text-center text-[11px] font-medium text-gray-400">
+        <p className="mt-2 text-center text-[11px] font-medium text-swiss-faint">
           Select a funnel to save.
         </p>
       )}

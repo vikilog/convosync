@@ -46,7 +46,7 @@ export function OnboardingStepIndicator({ currentStep }: Props) {
                     ? 'bg-primary text-white'
                     : isActive
                       ? 'bg-primary text-white ring-4 ring-primary/15'
-                      : 'border border-slate-200 bg-white text-slate-400',
+                      : 'border border-swiss-line bg-white text-slate-400',
                 ].join(' ')}
               >
                 {isComplete ? (

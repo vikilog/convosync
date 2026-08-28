@@ -4,6 +4,7 @@ import { api } from '../../lib/api';
 import { useBrowserVoiceTalk } from '../../hooks/useBrowserVoiceTalk';
 import { CallAvatar } from './CallAvatar';
 import type { LiveTranscriptTurn, TranscriptTurnLatency } from './CallLiveTranscript';
+import { Input } from '../ui/input';
 
 type ChatApiResponse = {
   reply: string;
@@ -244,7 +245,7 @@ export function CallAgentPreviewChat({
 
   return (
     <div className={`flex min-h-0 flex-1 flex-col ${className}`}>
-      <div className="flex-1 min-h-0 overflow-y-auto rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 space-y-2">
+      <div className="flex-1 min-h-0 overflow-y-auto rounded-xl border border-swiss-line bg-slate-50 px-3 py-2 space-y-2">
         {turns.length === 0 && !loading && !voice.inCall && (
           <div className="flex h-full min-h-[120px] flex-col items-center justify-center px-4 text-center">
             <p className="text-sm font-semibold text-slate-700">Voice preview call</p>
@@ -339,8 +340,8 @@ export function CallAgentPreviewChat({
           </button>
         )}
 
-        <div className="flex min-w-0 flex-[1.4] items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2">
-          <input
+        <div className="flex min-w-0 flex-[1.4] items-center gap-2 rounded-xl border border-swiss-line bg-white px-3 py-2">
+          <Input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -352,7 +353,7 @@ export function CallAgentPreviewChat({
             }}
             disabled={loading}
             placeholder="Type fallback…"
-            className="flex-1 bg-transparent text-sm text-slate-900 placeholder:text-slate-400 outline-none disabled:opacity-60"
+            className="h-auto flex-1 bg-transparent text-sm text-slate-900 placeholder:text-slate-400 outline-none disabled:opacity-60"
           />
           <button
             type="button"

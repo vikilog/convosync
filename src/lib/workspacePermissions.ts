@@ -64,6 +64,11 @@ export function tabPermission(tab: string): WorkspacePermission | null {
       return 'campaigns';
     case 'social-listening':
     case 'leads':
+    case 'app-store':
+    case 'crm':
+    case 'attendance':
+    case 'dasalon-console':
+    case 'dasalon-partner':
       // ponytail: UI mock pages — no backend permission yet; gate later when APIs land
       return null;
     case 'data':

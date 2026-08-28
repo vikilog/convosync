@@ -50,7 +50,7 @@ export function ConditionGroupEditor({ local, patchMany, channel }: Props) {
         <p className="text-sm font-semibold leading-relaxed text-slate-700">
           Does the contact match{' '}
           <select
-            className="mx-1 rounded-md border border-slate-200 bg-white px-1.5 py-0.5 text-sm font-bold text-primary"
+            className="mx-1 rounded-md border border-swiss-line bg-white px-1.5 py-0.5 text-sm font-bold text-primary"
             value={combinator}
             onChange={(e) => setGroup(conditions, e.target.value === 'any' ? 'any' : 'all')}
           >
@@ -88,7 +88,7 @@ export function ConditionGroupEditor({ local, patchMany, channel }: Props) {
         onSelect={addType}
       />
 
-      <div className="space-y-1 rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2.5 text-xs leading-relaxed text-slate-500">
+      <div className="space-y-1 rounded-xl border border-swiss-line bg-slate-50/60 px-3 py-2.5 text-xs leading-relaxed text-slate-500">
         <p>
           <span className="font-semibold text-emerald-600">Yes, the contact matches</span> — connect the{' '}
           <strong>Yes</strong> handle on the canvas to the next step.

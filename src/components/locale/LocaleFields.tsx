@@ -14,7 +14,7 @@ export type LocaleFieldsProps = {
 };
 
 const selectClass =
-  'mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:bg-slate-50';
+  'mt-1 w-full rounded-xl border border-swiss-line bg-white px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:bg-slate-50';
 
 export function LocaleFields({
   country,
@@ -46,7 +46,7 @@ export function LocaleFields({
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       <label className="block" htmlFor={`${idPrefix}-country`}>
-        <span className="text-meta font-bold uppercase tracking-wide text-gray-500">Country</span>
+        <span className="text-meta font-bold uppercase tracking-wide text-swiss-muted">Country</span>
         <select
           id={`${idPrefix}-country`}
           value={country}
@@ -64,7 +64,7 @@ export function LocaleFields({
       </label>
 
       <label className="block" htmlFor={`${idPrefix}-timezone`}>
-        <span className="text-meta font-bold uppercase tracking-wide text-gray-500">Timezone</span>
+        <span className="text-meta font-bold uppercase tracking-wide text-swiss-muted">Timezone</span>
         <select
           id={`${idPrefix}-timezone`}
           value={timezone}

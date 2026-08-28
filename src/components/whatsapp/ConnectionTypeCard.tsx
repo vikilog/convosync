@@ -25,15 +25,15 @@ type ConnectionTypeCardProps = {
 function BusinessApiIllustration() {
   return (
     <div className="relative h-[140px] w-full flex items-center justify-center" aria-hidden>
-      <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-sky-50 via-white to-[#e6f7ec]/30 border border-slate-200/60" />
+      <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-sky-50 via-white to-[#e6f7ec]/30 border border-swiss-line/60" />
       <div className="relative flex items-center gap-2">
-        <div className="p-3 rounded-2xl bg-white shadow-md border border-slate-200 text-primary">
+        <div className="p-3 rounded-2xl bg-white border border-swiss-line text-primary">
           <Cloud className="w-7 h-7" strokeWidth={1.75} />
         </div>
         <div className="p-2.5 rounded-xl bg-primary text-white shadow-lg shadow-primary/25">
           <Zap className="w-5 h-5" strokeWidth={2} />
         </div>
-        <div className="p-3 rounded-2xl bg-white shadow-md border border-slate-200 text-primary">
+        <div className="p-3 rounded-2xl bg-white border border-swiss-line text-primary">
           <Bot className="w-7 h-7" strokeWidth={1.75} />
         </div>
       </div>
@@ -44,7 +44,7 @@ function BusinessApiIllustration() {
 function CoexistenceIllustration() {
   return (
     <div className="relative h-[140px] w-full flex items-center justify-center" aria-hidden>
-      <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#e6f7ec]/40 via-white to-sky-50/30 border border-slate-200/60" />
+      <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#e6f7ec]/40 via-white to-sky-50/30 border border-swiss-line/60" />
       <div className="relative flex items-center gap-3">
         <div className="p-3.5 rounded-2xl bg-[#25D366] text-white shadow-lg">
           <Smartphone className="w-8 h-8" strokeWidth={1.5} />
@@ -87,12 +87,12 @@ export const ConnectionTypeCard: FC<ConnectionTypeCardProps> = ({
         'group relative flex flex-col min-h-[550px] h-full rounded-2xl bg-white text-left',
         'border-2 transition-all duration-200 overflow-hidden',
         isComingSoon
-          ? 'border-slate-200 opacity-80 cursor-default'
+          ? 'border-swiss-line opacity-80 cursor-default'
           : 'cursor-pointer shadow-[0_2px_8px_rgba(25,26,43,0.04),0_12px_32px_rgba(65,44,221,0.06)] hover:-translate-y-1',
         !isComingSoon &&
           (selected
             ? 'border-primary ring-4 ring-primary/15 shadow-[0_8px_40px_rgba(65,44,221,0.18)]'
-            : 'border-slate-200 hover:border-primary/40 hover:shadow-[0_8px_28px_rgba(65,44,221,0.1)]'),
+            : 'border-swiss-line hover:border-primary/40 hover:shadow-[0_8px_28px_rgba(65,44,221,0.1)]'),
       ]
         .filter(Boolean)
         .join(' ')}
@@ -101,7 +101,7 @@ export const ConnectionTypeCard: FC<ConnectionTypeCardProps> = ({
         className={[
           'absolute top-5 right-5 z-10 px-3 py-1 rounded-full text-sm font-black uppercase tracking-wider',
           isComingSoon
-            ? 'bg-slate-100 text-slate-500 border border-slate-200'
+            ? 'bg-slate-100 text-slate-500 border border-swiss-line'
             : isApi
               ? 'bg-sky-50 text-primary border border-primary/20'
               : 'bg-[#e6f7ec] text-[#006d2f] border border-[#5dfd8a]/30',
@@ -119,23 +119,23 @@ export const ConnectionTypeCard: FC<ConnectionTypeCardProps> = ({
       <div className="p-6 pt-14 flex flex-col flex-1">
         <div className="mb-5">{isApi ? <BusinessApiIllustration /> : <CoexistenceIllustration />}</div>
 
-        <h3 className="text-xl font-black text-gray-950 tracking-tight leading-tight pr-16">
+        <h3 className="text-xl font-semibold text-gray-950 tracking-tight leading-tight pr-16">
           {data.title}
         </h3>
-        <p className="mt-2 text-sm text-gray-600 font-medium leading-relaxed line-clamp-3">
+        <p className="mt-2 text-sm text-swiss-muted font-medium leading-relaxed line-clamp-3">
           {data.subtitle}
         </p>
-        <p className="mt-2 text-xs text-gray-500 leading-relaxed">{data.description}</p>
+        <p className="mt-2 text-xs text-swiss-muted leading-relaxed">{data.description}</p>
 
         <div className="mt-5 flex-1">
-          <p className="text-sm font-black text-gray-400 uppercase tracking-widest mb-2.5">
+          <p className="text-sm font-black text-swiss-faint uppercase tracking-widest mb-2.5">
             Features
           </p>
           <ul className="space-y-2">
             {data.features.slice(0, 6).map((feature) => (
               <li
                 key={feature}
-                className="flex items-start gap-2 text-sm font-semibold text-gray-700"
+                className="flex items-start gap-2 text-sm font-semibold text-swiss-ink"
               >
                 <Check className="w-3.5 h-3.5 shrink-0 mt-0.5 text-primary" strokeWidth={2.5} />
                 <span>{feature}</span>
@@ -143,21 +143,21 @@ export const ConnectionTypeCard: FC<ConnectionTypeCardProps> = ({
             ))}
           </ul>
           {data.features.length > 6 && (
-            <p className="mt-2 text-sm font-bold text-gray-400">
+            <p className="mt-2 text-sm font-bold text-swiss-faint">
               +{data.features.length - 6} more capabilities
             </p>
           )}
         </div>
 
-        <div className="mt-4 rounded-xl bg-slate-50 border border-slate-200 px-3.5 py-3">
-          <p className="text-sm font-black text-gray-400 uppercase tracking-widest mb-2">
+        <div className="mt-4 rounded-xl bg-slate-50 border border-swiss-line px-3.5 py-3">
+          <p className="text-sm font-black text-swiss-faint uppercase tracking-widest mb-2">
             Best For
           </p>
           <ul className="flex flex-wrap gap-1.5">
             {data.bestFor.map((item) => (
               <li
                 key={item}
-                className="text-sm font-bold text-gray-700 bg-white px-2 py-0.5 rounded-md border border-slate-200"
+                className="text-sm font-bold text-swiss-ink bg-white px-2 py-0.5 rounded-md border border-swiss-line"
               >
                 {item}
               </li>
@@ -178,10 +178,10 @@ export const ConnectionTypeCard: FC<ConnectionTypeCardProps> = ({
             'mt-6 w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl',
             'text-sm font-black transition-all',
             isComingSoon
-              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              ? 'bg-gray-100 text-swiss-faint cursor-not-allowed'
               : selected
                 ? 'bg-channel-green hover:bg-[#20bd5a] text-white shadow-lg shadow-primary/25'
-                : 'bg-gray-900 hover:bg-gray-950 text-white shadow-md',
+                : 'bg-gray-900 hover:bg-gray-950 text-white ',
           ].join(' ')}
         >
           {isComingSoon ? 'Coming soon' : data.ctaLabel}

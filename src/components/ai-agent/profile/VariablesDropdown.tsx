@@ -33,13 +33,13 @@ export const VariablesDropdown: React.FC<Props> = ({ onSelect }) => {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold border border-black/5 rounded-lg text-[#111827] hover:bg-surface-muted"
+        className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold border border-swiss-line rounded-lg text-[#111827] hover:bg-surface-muted"
       >
         <Plus className="w-3.5 h-3.5" />
         Variables
       </button>
       {open && (
-        <div className="absolute left-0 bottom-full mb-1 w-52 bg-white ring-1 ring-slate-200/80 rounded-xl shadow-lg z-20 py-1 max-h-56 overflow-y-auto">
+        <div className="absolute left-0 bottom-full mb-1 w-52 bg-white border border-swiss-line shadow-lg z-20 py-1 max-h-56 overflow-y-auto">
           {VARIABLES.map((v) => (
             <button
               key={v.value}

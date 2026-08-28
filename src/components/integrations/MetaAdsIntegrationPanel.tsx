@@ -143,7 +143,7 @@ export const MetaAdsIntegrationPanel: React.FC<MetaAdsIntegrationPanelProps> = (
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 text-sm text-gray-500 py-8">
+      <div className="flex items-center gap-2 text-sm text-swiss-muted py-8">
         <Loader2 className="w-4 h-4 animate-spin text-sky-600" />
         Loading Meta Ads…
       </div>
@@ -163,14 +163,14 @@ export const MetaAdsIntegrationPanel: React.FC<MetaAdsIntegrationPanelProps> = (
           />
         ) : null}
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4">
+        <div className="bg-white border border-swiss-line rounded-2xl p-6 space-y-4">
         <div className="flex items-start gap-3">
           <div className="p-2.5 bg-[#1877F2]/10 rounded-xl shrink-0">
             <Facebook className="w-5 h-5 text-[#1877F2]" />
           </div>
           <div>
-            <h3 className="text-lg font-black text-gray-950">Connect Meta Ads</h3>
-            <p className="text-sm text-gray-600 mt-1 leading-relaxed">
+            <h3 className="text-lg font-semibold text-gray-950">Connect Meta Ads</h3>
+            <p className="text-sm text-swiss-muted mt-1 leading-relaxed">
               Link your Meta Business Ad Account to run Click-to-WhatsApp campaigns and sync performance to the Ads Manager.
             </p>
           </div>
@@ -220,7 +220,7 @@ export const MetaAdsIntegrationPanel: React.FC<MetaAdsIntegrationPanelProps> = (
         </p>
       )}
 
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4">
+      <div className="bg-white border border-swiss-line rounded-2xl p-5 space-y-4">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-start gap-3 min-w-0">
             <div className="p-2.5 bg-[#1877F2] text-white rounded-xl shrink-0">
@@ -228,12 +228,12 @@ export const MetaAdsIntegrationPanel: React.FC<MetaAdsIntegrationPanelProps> = (
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="font-bold text-gray-900">{account.name}</h3>
+                <h3 className="font-bold text-swiss-ink">{account.name}</h3>
                 <span className="text-xs font-bold text-green-700 bg-green-50 px-2 py-0.5 rounded-full">
                   Connected
                 </span>
               </div>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-swiss-muted mt-1">
                 ID {account.id} · {account.currency} · Balance {fmtInr(account.balance)}
               </p>
             </div>
@@ -243,7 +243,7 @@ export const MetaAdsIntegrationPanel: React.FC<MetaAdsIntegrationPanelProps> = (
               type="button"
               onClick={() => void load()}
               disabled={syncing}
-              className="px-3 py-2 border border-slate-200 rounded-xl text-sm font-bold text-gray-700 hover:bg-slate-50 cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+              className="px-3 py-2 border border-swiss-line rounded-xl text-sm font-bold text-swiss-ink hover:bg-slate-50 cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
             >
               <RotateCw className={`w-3.5 h-3.5 ${syncing ? 'animate-spin' : ''}`} />
               Sync
@@ -267,7 +267,7 @@ export const MetaAdsIntegrationPanel: React.FC<MetaAdsIntegrationPanelProps> = (
 
         {adAccounts.length > 1 && (
           <div>
-            <label htmlFor="meta-integration-ad-account" className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1">
+            <label htmlFor="meta-integration-ad-account" className="text-xs font-bold text-swiss-muted uppercase tracking-wide block mb-1">
               Ad account
             </label>
             <select
@@ -275,7 +275,7 @@ export const MetaAdsIntegrationPanel: React.FC<MetaAdsIntegrationPanelProps> = (
               value={account.id}
               disabled={switchingAccount}
               onChange={(e) => void handleSwitchAccount(e.target.value)}
-              className="w-full max-w-md px-3 py-2 bg-slate-50 border border-slate-200 text-sm font-medium rounded-xl cursor-pointer disabled:opacity-50"
+              className="w-full max-w-md px-3 py-2 bg-slate-50 border border-swiss-line text-sm font-medium rounded-xl cursor-pointer disabled:opacity-50"
             >
               {adAccounts.map((item) => (
                 <option key={item.id} value={item.id}>

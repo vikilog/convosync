@@ -34,6 +34,9 @@ import { ContactDetailView } from './contacts/ContactDetailView';
 import { contactIdFromPath, pathForContact, pathForContactsDashboard, pathForContactsList, pathForIntegrationsChannel } from '../routes';
 import { useInboxAssigneeMeta } from '../hooks/inbox/useInboxMeta';
 import { ConnectChannelEmpty } from './ConnectChannelEmpty';
+import { Input } from './ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Checkbox } from './ui/checkbox';
 
 type ContactListKey = 'all' | 'unsubscribe' | 'blocklist';
 type ContactChannelKey = 'all' | 'whatsapp' | 'instagram' | 'messenger';
@@ -89,7 +92,7 @@ const CHANNEL_NAV: {
 
 /** Compact toolbar selects — never stretch. */
 const FILTER_SELECT_CLASS =
-  'shrink-0 rounded-lg border border-black/5 bg-white px-2.5 py-2 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary';
+  'h-auto shrink-0 rounded-lg border-swiss-line bg-white px-2.5 py-2 text-sm font-semibold text-slate-800 shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary';
 
 export const ContactsView: React.FC = () => {
   const location = useLocation();
@@ -393,7 +396,7 @@ const ContactsWorkspace: React.FC = () => {
 
   if (showConnectChannelEmpty) {
     return (
-      <div className="h-full min-h-0 border border-black/5 bg-white overflow-hidden flex">
+      <div className="h-full min-h-0 border border-swiss-line bg-white overflow-hidden flex">
         <ConnectChannelEmpty
           onConnect={() => navigate(pathForIntegrationsChannel('whatsapp'))}
         />
@@ -402,17 +405,17 @@ const ContactsWorkspace: React.FC = () => {
   }
 
   return (
-    <div className="h-full min-h-0 border border-black/5 bg-white overflow-hidden">
+    <div className="h-full min-h-0 border border-swiss-line bg-white overflow-hidden">
       <div className="h-full min-h-0">
         <section className="min-h-0 h-full flex flex-col">
-          <div className="border-b border-black/5 bg-white px-3 md:px-4 py-3 space-y-3">
+          <div className="border-b border-swiss-line bg-white px-3 md:px-4 py-3 space-y-3">
             <div className="inline-flex rounded-lg bg-surface-muted p-0.5">
               <button
                 type="button"
                 onClick={() => navigate(pathForContactsDashboard())}
                 className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer ${
                   pageTab === 'dashboard'
-                    ? 'bg-white text-primary shadow-sm ring-1 ring-slate-200/80'
+                    ? 'bg-white text-primary ring-1 ring-swiss-line'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
@@ -423,7 +426,7 @@ const ContactsWorkspace: React.FC = () => {
                 onClick={() => navigate(pathForContactsList())}
                 className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer ${
                   pageTab === 'contacts'
-                    ? 'bg-white text-primary shadow-sm ring-1 ring-slate-200/80'
+                    ? 'bg-white text-primary ring-1 ring-swiss-line'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
@@ -436,26 +439,30 @@ const ContactsWorkspace: React.FC = () => {
             <div className="flex items-center gap-2 w-full">
               <div className="relative min-w-[180px] flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                <input
+                <Input
                   type="search"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search name, phone, email..."
-                  className="w-full rounded-lg border border-black/5 bg-white py-2 pl-9 pr-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  className="h-auto rounded-lg border-swiss-line bg-white py-2 pl-9 pr-3 text-sm text-slate-800 focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
                 />
               </div>
 
-              <select
+              <Select
                 value={activeList}
-                onChange={(e) => setActiveList(e.target.value as ContactListKey)}
-                className={`${FILTER_SELECT_CLASS} w-[112px]`}
+                onValueChange={(value) => setActiveList(value as ContactListKey)}
               >
-                {LIST_NAV.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.label}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className={`${FILTER_SELECT_CLASS} w-[112px]`}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {LIST_NAV.map((item) => (
+                    <SelectItem key={item.id} value={item.id}>
+                      {item.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
               <ThemeDateInput
                 value={dateFrom}
@@ -472,34 +479,37 @@ const ContactsWorkspace: React.FC = () => {
                 min={dateFrom || undefined}
               />
 
-              <select
-                value={tagFilter}
-                onChange={(e) => setTagFilter(e.target.value)}
-                className={`${FILTER_SELECT_CLASS} w-[128px]`}
-                aria-label="Filter by tag"
-              >
-                <option value="">All tags</option>
-                {availableTags.map((t) => (
-                  <option key={t} value={t}>
-                    {t}
-                  </option>
-                ))}
-              </select>
+              <Select value={tagFilter || 'all'} onValueChange={(v) => setTagFilter(v === 'all' ? '' : v)}>
+                <SelectTrigger className={`${FILTER_SELECT_CLASS} w-[128px]`} aria-label="Filter by tag">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All tags</SelectItem>
+                  {availableTags.map((t) => (
+                    <SelectItem key={t} value={t}>
+                      {t}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-              <select
-                value={pageLimit}
-                onChange={(e) =>
-                  setPageLimit(Number(e.target.value) as (typeof PAGE_SIZE_OPTIONS)[number])
+              <Select
+                value={String(pageLimit)}
+                onValueChange={(v) =>
+                  setPageLimit(Number(v) as (typeof PAGE_SIZE_OPTIONS)[number])
                 }
-                className={`${FILTER_SELECT_CLASS} w-[108px]`}
-                aria-label="Per page"
               >
-                {PAGE_SIZE_OPTIONS.map((n) => (
-                  <option key={n} value={n}>
-                    {n} / page
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className={`${FILTER_SELECT_CLASS} w-[108px]`} aria-label="Per page">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PAGE_SIZE_OPTIONS.map((n) => (
+                    <SelectItem key={n} value={String(n)}>
+                      {n} / page
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="flex items-center gap-2">
@@ -514,7 +524,7 @@ const ContactsWorkspace: React.FC = () => {
                       className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 py-1.5 text-xs font-semibold border transition-colors cursor-pointer ${
                         active
                           ? 'bg-primary/15 text-primary border-primary/20'
-                          : 'bg-white text-slate-600 border-black/5 hover:bg-surface-muted'
+                          : 'bg-white text-slate-600 border-swiss-line hover:bg-surface-muted'
                       }`}
                     >
                       <span className={active ? 'text-primary' : 'text-slate-400'}>{item.icon}</span>
@@ -529,7 +539,7 @@ const ContactsWorkspace: React.FC = () => {
                   type="button"
                   onClick={() => setExportOpen(true)}
                   disabled={contacts.length === 0 || loading}
-                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-black/5 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-surface-muted disabled:opacity-50"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-swiss-line px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-surface-muted disabled:opacity-50"
                 >
                   <Download className="w-4 h-4" />
                   Export
@@ -538,7 +548,7 @@ const ContactsWorkspace: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setImportOpen(true)}
-                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-black/5 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-surface-muted"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-swiss-line px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-surface-muted"
                 >
                   <Upload className="w-4 h-4" />
                   Import
@@ -606,16 +616,12 @@ const ContactsWorkspace: React.FC = () => {
               </div>
             ) : (
               <>
-                <div className="md:hidden flex items-center gap-2 px-3 py-2 border-b border-black/5 bg-white">
-                  <input
-                    type="checkbox"
-                    checked={allVisibleSelected}
-                    ref={(el) => {
-                      if (el) el.indeterminate = someVisibleSelected && !allVisibleSelected;
-                    }}
-                    onChange={toggleSelectAll}
+                <div className="md:hidden flex items-center gap-2 px-3 py-2 border-b border-swiss-line bg-white">
+                  <Checkbox
+                    checked={someVisibleSelected && !allVisibleSelected ? 'indeterminate' : allVisibleSelected}
+                    onCheckedChange={toggleSelectAll}
                     disabled={bulkDeleting}
-                    className="w-4 h-4 accent-sky-600 cursor-pointer"
+                    className="cursor-pointer"
                     aria-label="Select all contacts"
                   />
                   <span className="text-xs font-semibold text-slate-600">
@@ -626,12 +632,11 @@ const ContactsWorkspace: React.FC = () => {
                   {contacts.map((contact) => (
                     <li key={contact.id} className="px-3 py-2.5">
                       <div className="flex items-center gap-2.5">
-                        <input
-                          type="checkbox"
+                        <Checkbox
                           checked={selectedIds.has(contact.id)}
-                          onChange={() => toggleSelect(contact.id)}
+                          onCheckedChange={() => toggleSelect(contact.id)}
                           disabled={bulkDeleting}
-                          className="w-4 h-4 accent-sky-600 cursor-pointer shrink-0"
+                          className="shrink-0 cursor-pointer"
                           aria-label={`Select ${contact.name}`}
                         />
                         <div className="w-8 h-8 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center shrink-0">
@@ -661,18 +666,14 @@ const ContactsWorkspace: React.FC = () => {
 
                 <div className="hidden md:block">
                   <table className="w-full min-w-[760px] text-left">
-                    <thead className="sticky top-0 z-10 bg-surface-muted border-b border-black/5">
+                    <thead className="sticky top-0 z-10 bg-surface-muted border-b border-swiss-line">
                       <tr className="text-[11px] uppercase tracking-wider text-slate-500">
                         <th className="px-4 py-2 font-bold w-10">
-                          <input
-                            type="checkbox"
-                            checked={allVisibleSelected}
-                            ref={(el) => {
-                              if (el) el.indeterminate = someVisibleSelected && !allVisibleSelected;
-                            }}
-                            onChange={toggleSelectAll}
+                          <Checkbox
+                            checked={someVisibleSelected && !allVisibleSelected ? 'indeterminate' : allVisibleSelected}
+                            onCheckedChange={toggleSelectAll}
                             disabled={bulkDeleting}
-                            className="w-4 h-4 accent-sky-600 cursor-pointer"
+                            className="cursor-pointer"
                             aria-label="Select all contacts"
                           />
                         </th>
@@ -693,12 +694,11 @@ const ContactsWorkspace: React.FC = () => {
                           className={`hover:bg-surface-muted/70 ${selectedIds.has(contact.id) ? 'bg-primary/15' : ''}`}
                         >
                           <td className="px-4 py-2">
-                            <input
-                              type="checkbox"
+                            <Checkbox
                               checked={selectedIds.has(contact.id)}
-                              onChange={() => toggleSelect(contact.id)}
+                              onCheckedChange={() => toggleSelect(contact.id)}
                               disabled={bulkDeleting}
-                              className="w-4 h-4 accent-sky-600 cursor-pointer"
+                              className="cursor-pointer"
                               aria-label={`Select ${contact.name}`}
                             />
                           </td>
@@ -768,14 +768,14 @@ const ContactsWorkspace: React.FC = () => {
             )}
           </div>
 
-          <div className="shrink-0 flex items-center justify-between gap-3 border-t border-black/5 bg-white px-3 md:px-4 py-2.5">
+          <div className="shrink-0 flex items-center justify-between gap-3 border-t border-swiss-line bg-white px-3 md:px-4 py-2.5">
             <p className="text-xs font-semibold text-slate-500">{pageLabel}</p>
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={goPrev}
                 disabled={!canPrev || loading}
-                className="inline-flex items-center gap-1 rounded-lg border border-black/5 px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-surface-muted disabled:opacity-40"
+                className="inline-flex items-center gap-1 rounded-lg border border-swiss-line px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-surface-muted disabled:opacity-40"
               >
                 <ChevronLeft className="w-4 h-4" />
                 Prev
@@ -784,7 +784,7 @@ const ContactsWorkspace: React.FC = () => {
                 type="button"
                 onClick={goNext}
                 disabled={!hasMore || loading}
-                className="inline-flex items-center gap-1 rounded-lg border border-black/5 px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-surface-muted disabled:opacity-40"
+                className="inline-flex items-center gap-1 rounded-lg border border-swiss-line px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-surface-muted disabled:opacity-40"
               >
                 Next
                 <ChevronRight className="w-4 h-4" />

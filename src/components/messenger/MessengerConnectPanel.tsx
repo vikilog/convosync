@@ -129,12 +129,12 @@ export function MessengerConnectPanel({
         <Facebook className="w-3 h-3" />
         Facebook Messenger
       </span>
-      <h4 className="text-xl font-black text-gray-950">Enable Messenger</h4>
-      <p className="mt-2 text-sm text-gray-600 font-medium max-w-xl">
+      <h4 className="text-xl font-semibold text-gray-950">Enable Messenger</h4>
+      <p className="mt-2 text-sm text-swiss-muted font-medium max-w-xl">
         Uses the same Meta Page token from your Instagram connection — no extra login required.
       </p>
 
-      <ul className="mt-4 space-y-2 text-xs text-gray-500 font-medium">
+      <ul className="mt-4 space-y-2 text-xs text-swiss-muted font-medium">
         <li>• Requires Instagram on the same Facebook Page</li>
         <li>• Shows as a separate channel in your workspace</li>
         <li>• Syncs Messenger inbox alongside Instagram DMs</li>
@@ -168,7 +168,7 @@ export function MessengerConnectPanel({
                 className={`w-full rounded-xl border p-3 text-left transition-colors ${
                   selected
                     ? 'border-[#1877F2]/40 bg-[#e8f4ff]'
-                    : 'border-slate-200 bg-white hover:border-slate-300'
+                    : 'border-swiss-line bg-white hover:border-slate-300'
                 }`}
               >
                 <div className="flex items-center gap-3">
@@ -176,7 +176,7 @@ export function MessengerConnectPanel({
                     <img
                       src={page.profilePicture}
                       alt=""
-                      className="h-9 w-9 rounded-lg border border-slate-200 object-cover"
+                      className="h-9 w-9 rounded-lg border border-swiss-line object-cover"
                     />
                   ) : (
                     <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#fce8f0] text-[#C13584]">
@@ -210,7 +210,7 @@ export function MessengerConnectPanel({
         type="button"
         onClick={() => void handleConnect()}
         disabled={!canConnect}
-        className="mt-6 inline-flex items-center justify-center gap-2 px-6 py-3 bg-channel-green hover:bg-[#20bd5a] disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-xl text-sm font-black shadow-md transition-all"
+        className="mt-6 inline-flex items-center justify-center gap-2 px-6 py-3 bg-channel-green hover:bg-[#20bd5a] disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-xl text-sm font-black transition-all"
       >
         {loading ? 'Enabling Messenger…' : requiresSelection ? 'Enable Messenger for page' : 'Enable Messenger'}
       </button>

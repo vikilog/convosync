@@ -34,6 +34,7 @@ import { CallLiveTranscript } from './CallLiveTranscript';
 import { CallAvatar } from './CallAvatar';
 import { formatCallTimer, useCallDuration } from '../../lib/callDuration';
 import { getAiAgentName, getHumanHandlerName } from './callLabels';
+import { Input } from '../ui/input';
 type Role = 'agent' | 'customer';
 type Phase =
   | 'loading'
@@ -746,7 +747,7 @@ export function CallPage() {
           <span className="font-display text-lg font-bold text-slate-900">{workspaceName}</span>
         </div>
 
-        <div className="rounded-3xl border border-slate-200/80 bg-white shadow-xl shadow-emerald-900/5 p-6 sm:p-8">
+        <div className="rounded-3xl border border-swiss-line bg-white shadow-xl shadow-emerald-900/5 p-6 sm:p-8">
           {phase === 'loading' && (
             <div className="flex flex-col items-center gap-3 py-10 text-slate-500">
               <Loader2 className="h-8 w-8 animate-spin text-channel-green" />
@@ -815,7 +816,7 @@ export function CallPage() {
                 )}
                 {(call?.currentHandler === 'human' || agentMode === 'speaking') &&
                   call?.currentHandler !== 'ai' && (
-                    <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-slate-100 border border-slate-200 px-3 py-1 text-xs font-bold text-slate-700">
+                    <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-slate-100 border border-swiss-line px-3 py-1 text-xs font-bold text-slate-700">
                       <User className="h-3.5 w-3.5" />
                       {humanHandlerName ? `${humanHandlerName} on call` : 'You are on this call'}
                     </p>
@@ -869,7 +870,7 @@ export function CallPage() {
                         type="button"
                         disabled={busy}
                         onClick={() => void handleListenIn()}
-                        className="w-full min-h-11 rounded-xl border border-slate-200 text-sm font-bold text-slate-800 hover:bg-slate-50 cursor-pointer inline-flex items-center justify-center gap-2 disabled:opacity-60"
+                        className="w-full min-h-11 rounded-xl border border-swiss-line text-sm font-bold text-slate-800 hover:bg-slate-50 cursor-pointer inline-flex items-center justify-center gap-2 disabled:opacity-60"
                       >
                         {busy ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
@@ -909,15 +910,15 @@ export function CallPage() {
                     Customer link
                   </p>
                   <div className="flex gap-2">
-                    <input
+                    <Input
                       readOnly
                       value={guestUrl}
-                      className="flex-1 min-w-0 text-xs rounded-xl border border-slate-200 px-3 py-2.5 bg-slate-50 text-slate-700"
+                      className="h-auto flex-1 min-w-0 text-xs rounded-xl border border-swiss-line px-3 py-2.5 bg-slate-50 text-slate-700"
                     />
                     <button
                       type="button"
                       onClick={() => void handleCopy()}
-                      className="inline-flex items-center gap-1.5 px-3 rounded-xl border border-slate-200 text-sm font-bold text-slate-700 hover:bg-slate-50 cursor-pointer shrink-0"
+                      className="inline-flex items-center gap-1.5 px-3 rounded-xl border border-swiss-line text-sm font-bold text-slate-700 hover:bg-slate-50 cursor-pointer shrink-0"
                     >
                       {copied ? <Check className="h-4 w-4 text-channel-green" /> : <Copy className="h-4 w-4" />}
                       {copied ? 'Copied' : 'Copy'}
@@ -927,7 +928,7 @@ export function CallPage() {
                     type="button"
                     disabled={busy}
                     onClick={() => void handleResend()}
-                    className="w-full min-h-10 rounded-xl border border-slate-200 text-sm font-bold text-slate-700 hover:bg-slate-50 cursor-pointer inline-flex items-center justify-center gap-2 disabled:opacity-60"
+                    className="w-full min-h-10 rounded-xl border border-swiss-line text-sm font-bold text-slate-700 hover:bg-slate-50 cursor-pointer inline-flex items-center justify-center gap-2 disabled:opacity-60"
                   >
                     {resendOk ? <Check className="h-4 w-4 text-channel-green" /> : <Send className="h-4 w-4" />}
                     {resendOk ? 'Sent on channel' : 'Resend link'}
@@ -945,7 +946,7 @@ export function CallPage() {
                       <select
                         value={micId}
                         onChange={(e) => void onMicChange(e.target.value)}
-                        className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800 bg-white"
+                        className="mt-1 w-full rounded-xl border border-swiss-line px-3 py-2 text-sm text-slate-800 bg-white"
                       >
                         {mics.map((d) => (
                           <option key={d.deviceId} value={d.deviceId}>
@@ -961,7 +962,7 @@ export function CallPage() {
                       <select
                         value={speakerId}
                         onChange={(e) => void onSpeakerChange(e.target.value)}
-                        className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800 bg-white"
+                        className="mt-1 w-full rounded-xl border border-swiss-line px-3 py-2 text-sm text-slate-800 bg-white"
                       >
                         {speakers.map((d) => (
                           <option key={d.deviceId} value={d.deviceId}>
@@ -980,7 +981,7 @@ export function CallPage() {
                   <button
                     type="button"
                     onClick={() => void toggleMute()}
-                    className="w-full min-h-11 rounded-full border border-slate-200 text-sm font-bold text-slate-800 hover:bg-slate-50 cursor-pointer inline-flex items-center justify-center gap-2"
+                    className="w-full min-h-11 rounded-full border border-swiss-line text-sm font-bold text-slate-800 hover:bg-slate-50 cursor-pointer inline-flex items-center justify-center gap-2"
                   >
                     {muted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
                     {muted ? 'Unmute' : 'Mute'}

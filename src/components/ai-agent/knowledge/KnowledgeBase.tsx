@@ -4,6 +4,7 @@ import type { KnowledgeItem, KnowledgeStatus, KnowledgeType } from '../types';
 import { api } from '../../../lib/api';
 import { AddKnowledgeModal } from './AddKnowledgeModal';
 import { EditKnowledgeModal, type KnowledgeEditPayload } from './EditKnowledgeModal';
+import { Input } from '../../ui/input';
 
 type Props = {
   agentId: string;
@@ -179,12 +180,12 @@ export const KnowledgeBase: React.FC<Props> = ({ agentId }) => {
 
       <div className="relative max-w-md mb-4">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280]" />
-        <input
+        <Input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search knowledge"
-          className="w-full pl-10 pr-3 py-2 border border-black/5 rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+          className="h-auto w-full pl-10 pr-3 py-2 border border-swiss-line rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
         />
       </div>
 
@@ -206,7 +207,7 @@ export const KnowledgeBase: React.FC<Props> = ({ agentId }) => {
           {filtered.map((item) => (
             <div
               key={item.id}
-              className="flex items-center justify-between gap-4 bg-white ring-1 ring-slate-200/80 rounded-xl p-4"
+              className="flex items-center justify-between gap-4 bg-white border border-swiss-line p-4"
             >
               <button
                 type="button"
@@ -280,7 +281,7 @@ export const KnowledgeBase: React.FC<Props> = ({ agentId }) => {
 
       {deleteTarget && (
         <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-sm border border-black/5 p-6 shadow-2xl">
+          <div className="bg-white rounded-2xl w-full max-w-sm border border-swiss-line p-6 shadow-2xl">
             <h3 className="text-base font-bold text-[#111827] mb-2">Delete knowledge item?</h3>
             <p className="text-sm text-[#6B7280] mb-6">
               &ldquo;{deleteTarget.title}&rdquo; will be permanently removed from this agent.

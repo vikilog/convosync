@@ -44,7 +44,7 @@ export function CallAvatar({
       ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
       : kind === 'customer'
         ? 'bg-slate-200 text-slate-600 border-slate-300'
-        : 'bg-slate-100 text-slate-600 border-slate-200';
+        : 'bg-slate-100 text-slate-600 border-swiss-line';
 
   if (showImage) {
     return (

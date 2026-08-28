@@ -26,7 +26,7 @@ const categoryStyles: Record<AgentBot['category'], { badge: string; avatar: stri
     avatar: 'bg-gradient-to-br from-violet-50 to-fuchsia-50 text-violet-600',
   },
   rule_based: {
-    badge: 'bg-slate-100 text-slate-600 ring-slate-200',
+    badge: 'bg-slate-100 text-slate-600 ring-swiss-line',
     avatar: 'bg-slate-100 text-slate-600',
   },
 };
@@ -41,7 +41,7 @@ function AgentAvatar({ agent, size = 'md' }: { agent: AgentBot; size?: 'md' | 'l
       <img
         src={agent.avatarUrl}
         alt=""
-        className={`${dim} rounded-xl object-cover border border-black/5 shrink-0`}
+        className={`${dim} rounded-xl object-cover border border-swiss-line shrink-0`}
       />
     );
   }
@@ -134,7 +134,7 @@ function AgentMeta({ agent }: { agent: AgentBot }) {
 
 export const AgentListRow: React.FC<SharedProps> = ({ agent, onEdit, onDelete, deleting }) => {
   return (
-    <div className="group flex items-center gap-3 px-4 py-3 border-b border-black/5 last:border-b-0 hover:bg-surface-muted/80 transition-colors">
+    <div className="group flex items-center gap-3 px-4 py-3 border-b border-swiss-line last:border-b-0 hover:bg-surface-muted/80 transition-colors">
       <button
         type="button"
         onClick={onEdit}
@@ -158,7 +158,7 @@ export const AgentListRow: React.FC<SharedProps> = ({ agent, onEdit, onDelete, d
 
 export const AgentGridCard: React.FC<SharedProps> = ({ agent, onEdit, onDelete, deleting }) => {
   return (
-    <div className="group relative flex flex-col rounded-xl bg-white ring-1 ring-slate-200/80 p-4 hover:border-primary/20 hover:shadow-sm transition-all duration-200">
+    <div className="group relative flex flex-col bg-white border border-swiss-line p-4 hover:border-primary/20 transition-all duration-200">
       <div className="flex items-start justify-between gap-2">
         <button type="button" onClick={onEdit} className="flex items-start gap-3 min-w-0 flex-1 text-left cursor-pointer">
           <AgentAvatar agent={agent} size="lg" />

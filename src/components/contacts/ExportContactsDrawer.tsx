@@ -83,16 +83,16 @@ export const ExportContactsDrawer: React.FC<Props> = ({
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-            className="fixed top-0 right-0 h-full w-full max-w-[420px] bg-white border-l border-slate-200 z-50 flex flex-col shadow-2xl"
+            className="fixed top-0 right-0 h-full w-full max-w-[420px] bg-white border-l border-swiss-line z-50 flex flex-col shadow-2xl"
           >
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 shrink-0">
-              <h2 id="export-contacts-title" className="text-base font-bold text-gray-900">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-swiss-line shrink-0">
+              <h2 id="export-contacts-title" className="text-base font-bold text-swiss-ink">
                 Export contacts
               </h2>
               <button
                 type="button"
                 onClick={onClose}
-                className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100"
+                className="p-1.5 rounded-lg text-swiss-faint hover:text-swiss-ink hover:bg-gray-100"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -146,7 +146,7 @@ export const ExportContactsDrawer: React.FC<Props> = ({
               </ul>
             </div>
 
-            <div className="shrink-0 flex justify-end gap-2 border-t border-slate-200 px-5 py-3 bg-white">
+            <div className="shrink-0 flex justify-end gap-2 border-t border-swiss-line px-5 py-3 bg-white">
               <button
                 type="button"
                 onClick={onClose}

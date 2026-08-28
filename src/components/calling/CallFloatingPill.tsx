@@ -28,7 +28,7 @@ export function CallFloatingPill({ call, elapsed, onClick }: Props) {
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 12, scale: 0.95 }}
       onClick={onClick}
-      className="fixed bottom-6 right-6 z-[80] flex items-center gap-2.5 rounded-full border border-slate-200 bg-white pl-2 pr-4 py-2 shadow-lg shadow-slate-900/10 hover:shadow-xl transition-shadow cursor-pointer"
+      className="fixed bottom-6 right-6 z-[80] flex items-center gap-2.5 rounded-full border border-swiss-line bg-white pl-2 pr-4 py-2 shadow-lg shadow-slate-900/10 hover:shadow-xl transition-shadow cursor-pointer"
       aria-label="Open call panel"
     >
       <span className="relative shrink-0">

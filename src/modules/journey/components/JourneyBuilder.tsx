@@ -17,6 +17,7 @@ import {
   useUpdateJourney,
 } from '../hooks/useJourneys';
 import { FLOW_CHANNEL_THEMES } from '../../flow-builder/channelTheme';
+import { Input } from '../../../components/ui/input';
 import {
   buildButtonDestination,
   type ButtonActionId,
@@ -241,7 +242,7 @@ export function JourneyBuilder({ journey, onBack }: Props) {
             WhatsApp Automation
           </button>
           <span className="text-slate-300">/</span>
-          <input
+          <Input
             type="text"
             value={draftName}
             onChange={(e) => {
@@ -249,7 +250,7 @@ export function JourneyBuilder({ journey, onBack }: Props) {
               if (e.target.value.trim()) setError(null);
             }}
             placeholder="Journey name"
-            className="max-w-[200px] truncate bg-transparent font-semibold text-dark-navy placeholder:text-slate-400 focus:outline-none"
+            className="h-auto max-w-[200px] truncate bg-transparent font-semibold text-dark-navy placeholder:text-slate-400 focus:outline-none"
           />
           <span className="text-slate-300">/</span>
           <span className="font-medium text-slate-500">Edit</span>

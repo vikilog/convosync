@@ -29,6 +29,7 @@ import {
 import { dispatchCompanyUpdated } from '../../lib/companyEvents';
 import { BRAND_PURPLE } from '../../lib/convocoins';
 import { openRazorpayCheckout } from '../../lib/razorpay';
+import { Input } from '../ui/input';
 
 type BillingCycle = 'monthly' | 'annual';
 
@@ -1363,7 +1364,7 @@ export function PlansPanel() {
                 </div>
 
                 <div className="mt-3 flex gap-2">
-                  <input
+                  <Input
                     type="text"
                     value={couponInput}
                     onChange={(e) => {
@@ -1375,7 +1376,7 @@ export function PlansPanel() {
                     placeholder="Enter code"
                     autoComplete="off"
                     spellCheck={false}
-                    className="min-h-10 flex-1 rounded-xl border border-border-subtle bg-white px-3 text-sm font-medium uppercase tracking-wide text-slate-900 placeholder:normal-case placeholder:font-normal placeholder:tracking-normal placeholder:text-slate-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-60"
+                    className="h-auto min-h-10 flex-1 rounded-xl border border-border-subtle bg-white px-3 text-sm font-medium uppercase tracking-wide text-slate-900 placeholder:normal-case placeholder:font-normal placeholder:tracking-normal placeholder:text-slate-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-60"
                   />
                   {appliedCoupon ? (
                     <button

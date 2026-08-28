@@ -5,6 +5,7 @@ import type { AgentSkill } from '../types';
 import { api } from '../../../lib/api';
 import { pathForAgentSkill } from '../../../routes';
 import { NewSkillModal, type SkillDraft } from './NewSkillModal';
+import { Input } from '../../ui/input';
 
 type Props = {
   agentId: string;
@@ -132,7 +133,7 @@ export const SkillsList: React.FC<Props> = ({ agentId }) => {
               setBulkErrors([]);
               setShowNew(true);
             }}
-            className="px-4 py-2 border border-black/5 text-[#111827] rounded-xl text-sm font-bold hover:bg-surface-muted"
+            className="px-4 py-2 border border-swiss-line text-[#111827] rounded-xl text-sm font-bold hover:bg-surface-muted"
           >
             Bulk add
           </button>
@@ -164,17 +165,17 @@ export const SkillsList: React.FC<Props> = ({ agentId }) => {
       <div className="flex items-center gap-3 mb-6">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280]" />
-          <input
+          <Input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name"
-            className="w-full pl-10 pr-3 py-2 border border-black/5 rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+            className="h-auto w-full pl-10 pr-3 py-2 border border-swiss-line rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
           />
         </div>
         <button
           type="button"
-          className="inline-flex items-center gap-1.5 px-3 py-2 border border-black/5 rounded-xl text-sm font-medium text-[#6B7280] hover:bg-surface-muted"
+          className="inline-flex items-center gap-1.5 px-3 py-2 border border-swiss-line rounded-xl text-sm font-medium text-[#6B7280] hover:bg-surface-muted"
         >
           Status
           <Info className="w-4 h-4" />
@@ -197,7 +198,7 @@ export const SkillsList: React.FC<Props> = ({ agentId }) => {
               key={skill.id}
               type="button"
               onClick={() => navigate(pathForAgentSkill(agentId, skill.id))}
-              className="w-full text-left bg-white ring-1 ring-slate-200/80 rounded-xl p-4 hover:border-primary hover:bg-primary/5 transition-colors"
+              className="w-full text-left bg-white border border-swiss-line p-4 hover:border-primary hover:bg-primary/5 transition-colors"
             >
               <div className="flex items-center justify-between gap-3">
                 <p className="text-sm font-bold text-[#111827]">{skill.title}</p>
@@ -205,7 +206,7 @@ export const SkillsList: React.FC<Props> = ({ agentId }) => {
                   className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
                     skill.status === 'live'
                       ? 'bg-green-100 text-green-700'
-                      : 'bg-gray-100 text-gray-600'
+                      : 'bg-gray-100 text-swiss-muted'
                   }`}
                 >
                   {skill.status === 'live' ? 'Live' : 'Draft'}

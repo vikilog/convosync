@@ -115,9 +115,9 @@ function formatPendingValue(value: number) {
 function TransactionId({ label, value }: { label: string; value: string | null }) {
   if (!value) return null;
   return (
-    <p className="text-xs text-gray-500">
-      <span className="font-semibold text-gray-400">{label}:</span>{' '}
-      <span className="font-mono text-gray-600">{value}</span>
+    <p className="text-xs text-swiss-muted">
+      <span className="font-semibold text-swiss-faint">{label}:</span>{' '}
+      <span className="font-mono text-swiss-muted">{value}</span>
     </p>
   );
 }
@@ -164,7 +164,7 @@ export function BillingOverviewPanel() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20 text-gray-400">
+      <div className="flex items-center justify-center py-20 text-swiss-faint">
         <Loader2 className="h-6 w-6 animate-spin" />
       </div>
     );
@@ -250,9 +250,9 @@ export function BillingOverviewPanel() {
         </div>
       )}
 
-      <section className="rounded-xl bg-white ring-1 ring-slate-200/80 p-4 md:p-5">
+      <section className="bg-white border border-swiss-line p-4 md:p-5">
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
+          <div className="rounded-lg border border-swiss-line bg-slate-50 px-3 py-2.5">
             <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
               ConvoCoins balance
             </p>
@@ -274,7 +274,7 @@ export function BillingOverviewPanel() {
               <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
-          <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
+          <div className="rounded-lg border border-swiss-line bg-slate-50 px-3 py-2.5">
             <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
               Current plan
             </p>
@@ -283,7 +283,7 @@ export function BillingOverviewPanel() {
             </p>
             <p className="mt-0.5 text-xs capitalize text-slate-600">{statusLabel}</p>
           </div>
-          <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
+          <div className="rounded-lg border border-swiss-line bg-slate-50 px-3 py-2.5">
             <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
               Billing cycle
             </p>
@@ -296,7 +296,7 @@ export function BillingOverviewPanel() {
                 : 'No active renewal window'}
             </p>
           </div>
-          <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5">
+          <div className="rounded-lg border border-swiss-line bg-slate-50 px-3 py-2.5">
             <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
               Usage snapshot
             </p>
@@ -336,7 +336,7 @@ export function BillingOverviewPanel() {
       </section>
 
       <div className="grid items-start gap-4 xl:grid-cols-[1.2fr_0.8fr]">
-        <section className="rounded-xl bg-white ring-1 ring-slate-200/80 p-5">
+        <section className="bg-white border border-swiss-line p-5">
           <div className="flex items-start gap-3">
             <Gauge className="mt-0.5 h-5 w-5 text-sky-600" />
             <div>
@@ -349,7 +349,7 @@ export function BillingOverviewPanel() {
             </div>
           </div>
           {limits ? (
-            <div className="mt-4 overflow-hidden rounded-lg border border-slate-200">
+            <div className="mt-4 overflow-hidden rounded-lg border border-swiss-line">
               <div className="grid grid-cols-[1.4fr_0.9fr_0.9fr_0.9fr_1fr] bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-500">
                 <span>Metric</span>
                 <span className="text-right">Limit</span>
@@ -426,7 +426,7 @@ export function BillingOverviewPanel() {
           )}
         </section>
 
-        <section className="rounded-xl bg-white ring-1 ring-slate-200/80 p-5">
+        <section className="bg-white border border-swiss-line p-5">
           <div className="flex items-start gap-3">
             <CreditCard className="mt-0.5 h-5 w-5 text-sky-600" />
             <div className="min-w-0 flex-1">
@@ -467,7 +467,7 @@ export function BillingOverviewPanel() {
       )}
 
       {sub && ['active', 'authenticated', 'paused'].includes(sub.status) && (
-        <section className="rounded-xl bg-white ring-1 ring-slate-200/80 p-5">
+        <section className="bg-white border border-swiss-line p-5">
           <p className="text-sm font-semibold text-slate-900">Manage subscription</p>
           <p className="mt-1 text-xs text-slate-600">
             Pause billing or cancel at the end of the current period.
@@ -491,7 +491,7 @@ export function BillingOverviewPanel() {
               <button
                 type="button"
                 disabled={actionLoading !== null}
-                className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+                className="inline-flex items-center gap-2 rounded-lg border border-swiss-line px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60"
                 onClick={() => void runAction('pause', () => api.pauseBillingSubscription())}
               >
                 {actionLoading === 'pause' ? (
@@ -525,7 +525,7 @@ export function BillingOverviewPanel() {
         </section>
       )}
 
-      <section className="rounded-xl bg-white ring-1 ring-slate-200/80 p-5">
+      <section className="bg-white border border-swiss-line p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-start gap-3">
             <Receipt className="mt-0.5 h-5 w-5 text-sky-600" />
@@ -543,7 +543,7 @@ export function BillingOverviewPanel() {
         </div>
 
         {recentRows.length === 0 ? (
-          <p className="mt-6 text-center text-sm text-gray-400 py-8">
+          <p className="mt-6 text-center text-sm text-swiss-faint py-8">
             No transactions yet. Subscribe to a plan to see payments here.
           </p>
         ) : (

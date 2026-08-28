@@ -2,6 +2,7 @@ import { Search } from 'lucide-react';
 import { STEP_CATEGORY_LABELS } from '../stepCatalog';
 import { getStepVisual } from './stepIcons';
 import { groupPaletteItems, type StepCatalogItem, type StepCatalogSelectHandler } from './stepCatalogUtils';
+import { Input } from '../../../components/ui/input';
 
 type Props = {
   items: StepCatalogItem[];
@@ -55,7 +56,7 @@ function StepRow({
           e.dataTransfer.setData('application/journey-node', item.type);
           e.dataTransfer.effectAllowed = 'move';
         }}
-        className="cursor-grab rounded-xl border border-slate-200 bg-white px-3 py-2.5 transition-colors active:cursor-grabbing hover:border-primary/30 hover:bg-slate-50/80"
+        className="cursor-grab rounded-xl border border-swiss-line bg-white px-3 py-2.5 transition-colors active:cursor-grabbing hover:border-primary/30 hover:bg-slate-50/80"
       >
         {inner}
       </div>
@@ -89,12 +90,12 @@ export function StepsCatalogList({
     <div className={className}>
       <div className="relative">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
-        <input
+        <Input
           autoFocus={autoFocusSearch}
           value={query}
           onChange={(e) => onQueryChange(e.target.value)}
           placeholder="Search steps…"
-          className="w-full rounded-xl border border-slate-200 bg-slate-50/80 py-2 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 transition-colors focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/15"
+          className="h-auto w-full rounded-xl border border-swiss-line bg-slate-50/80 py-2 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 transition-colors focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/15"
         />
       </div>
 

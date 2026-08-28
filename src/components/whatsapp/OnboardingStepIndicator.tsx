@@ -37,7 +37,7 @@ export const OnboardingStepIndicator: FC<OnboardingStepIndicatorProps> = ({
                       ? 'bg-primary text-white'
                       : isActive
                         ? 'bg-primary text-white ring-4 ring-primary/20'
-                        : 'bg-sky-50 text-gray-400 border border-slate-200',
+                        : 'bg-sky-50 text-swiss-faint border border-swiss-line',
                   ].join(' ')}
                   aria-current={isActive ? 'step' : undefined}
                 >
@@ -46,7 +46,7 @@ export const OnboardingStepIndicator: FC<OnboardingStepIndicatorProps> = ({
                 <span
                   className={[
                     'text-sm font-bold leading-tight sm:text-center sm:px-1',
-                    isActive ? 'text-primary' : isComplete ? 'text-gray-700' : 'text-gray-400',
+                    isActive ? 'text-primary' : isComplete ? 'text-swiss-ink' : 'text-swiss-faint',
                   ].join(' ')}
                 >
                   {step.label}

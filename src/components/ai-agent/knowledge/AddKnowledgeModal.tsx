@@ -122,8 +122,8 @@ export const AddKnowledgeModal: React.FC<Props> = ({
 
   return (
     <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-2xl border border-black/5 shadow-2xl max-h-[90vh] flex flex-col">
-        <div className="flex justify-between items-center px-6 py-4 border-b border-black/5 shrink-0">
+      <div className="bg-white rounded-2xl w-full max-w-2xl border border-swiss-line shadow-2xl max-h-[90vh] flex flex-col">
+        <div className="flex justify-between items-center px-6 py-4 border-b border-swiss-line shrink-0">
           <h3 className="text-base font-bold text-[#111827]">Add knowledge</h3>
           <button type="button" onClick={onClose} className="text-[#6B7280] hover:text-[#111827]">
             <X className="w-5 h-5" />
@@ -141,7 +141,7 @@ export const AddKnowledgeModal: React.FC<Props> = ({
                   className={`text-left p-5 rounded-xl border-2 transition-colors ${
                     selected === opt.id
                       ? 'border-primary bg-primary/10'
-                      : 'border-black/5 hover:border-primary hover:bg-primary/5'
+                      : 'border-swiss-line hover:border-primary hover:bg-primary/5'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2 mb-3">
@@ -173,7 +173,7 @@ export const AddKnowledgeModal: React.FC<Props> = ({
         </div>
 
         {showFooter && (
-          <div className="flex justify-between items-center px-6 py-4 border-t border-black/5 shrink-0">
+          <div className="flex justify-between items-center px-6 py-4 border-t border-swiss-line shrink-0">
             {step === 'form' ? (
               <button
                 type="button"

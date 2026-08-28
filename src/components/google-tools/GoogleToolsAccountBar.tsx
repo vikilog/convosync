@@ -34,11 +34,11 @@ export function GoogleToolsAccountBar() {
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-3 px-4 md:px-5 py-3 bg-slate-50/80 border-b border-slate-200">
+    <div className="flex flex-wrap items-center gap-3 px-4 md:px-5 py-3 bg-slate-50/80 border-b border-swiss-line">
       <div className="flex items-center gap-3 min-w-0 flex-1">
         <div
-          className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black shrink-0 shadow-sm ${
-            connected ? 'bg-[#e8f4ff] text-[#4285F4]' : 'bg-gray-100 text-gray-400'
+            className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black shrink-0 ${
+            connected ? 'bg-[#e8f4ff] text-[#4285F4]' : 'bg-gray-100 text-swiss-faint'
           }`}
         >
           {(email?.[0] ?? meta?.shortLabel[0] ?? 'G').toUpperCase()}
@@ -47,7 +47,7 @@ export function GoogleToolsAccountBar() {
           <p className="text-sm font-bold text-gray-950 truncate">
             {connected ? (meta?.label ?? 'Google account') : `${meta?.shortLabel ?? 'Tool'} not connected`}
           </p>
-          <p className="text-meta text-gray-500 truncate">
+          <p className="text-meta text-swiss-muted truncate">
             {connected ? (email ?? 'Connected account') : 'Connect from Integrations → Google'}
           </p>
         </div>
@@ -56,7 +56,7 @@ export function GoogleToolsAccountBar() {
       <div className="flex items-center gap-2 shrink-0">
         <span
           className={`hidden sm:inline text-meta font-medium tabular-nums ${
-            connected ? 'text-gray-500' : 'text-amber-600'
+            connected ? 'text-swiss-muted' : 'text-amber-600'
           }`}
         >
           {connected ? formatSyncLabel(lastSyncAt) : 'Not connected'}
@@ -67,7 +67,7 @@ export function GoogleToolsAccountBar() {
           onClick={handleRefresh}
           disabled={!connected || !toolbar?.onRefresh}
           title="Refresh"
-          className="inline-flex items-center justify-center h-9 w-9 rounded-xl text-gray-600 border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 transition-colors"
+          className="inline-flex items-center justify-center h-9 w-9 rounded-xl text-swiss-muted border border-swiss-line bg-white hover:bg-slate-50 disabled:opacity-40 transition-colors"
         >
           <RefreshCw className="w-4 h-4" />
         </button>
@@ -87,7 +87,7 @@ export function GoogleToolsAccountBar() {
           type="button"
           onClick={() => navigate(`${pathForTab('integrations')}?channel=google`)}
           title="Settings"
-          className="inline-flex items-center justify-center h-9 w-9 rounded-xl text-gray-600 border border-slate-200 bg-white hover:bg-slate-50 transition-colors"
+          className="inline-flex items-center justify-center h-9 w-9 rounded-xl text-swiss-muted border border-swiss-line bg-white hover:bg-slate-50 transition-colors"
         >
           <Settings className="w-4 h-4" />
         </button>

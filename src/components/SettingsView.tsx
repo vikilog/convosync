@@ -38,6 +38,7 @@ import { NotificationsPanel } from './settings/NotificationsPanel';
 import { fetchWalletBalanceCc, WALLET_BALANCE_EVENT } from '../lib/walletEvents';
 import { formatCc } from '../lib/convocoins';
 import { ConvoCoinIcon } from './ConvoCoinIcon';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 function SettingsPanel({ section }: { section: SettingsSection }) {
   if (section === 'profile') return <ProfilePanel />;
@@ -153,26 +154,32 @@ export function SettingsView() {
 
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden bg-white selection:bg-primary/15">
-      <div className="border-b border-black/5 bg-white px-3 py-2.5 md:hidden">
+      <div className="border-b border-swiss-line bg-white px-3 py-2.5 md:hidden">
         <label htmlFor="settings-section-mobile" className="sr-only">
           Settings section
         </label>
-        <select
-          id="settings-section-mobile"
+        <Select
           value={section}
-          onChange={(e) => navigate(pathForSettingsSection(e.target.value as SettingsSection))}
-          className="w-full rounded-lg bg-white ring-1 ring-slate-200/80 px-3 py-2 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20"
+          onValueChange={(value) => navigate(pathForSettingsSection(value as SettingsSection))}
         >
-          {flatNavItems.map((item) => (
-            <option key={item.id} value={item.id}>
-              {item.label}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger
+            id="settings-section-mobile"
+            className="h-auto w-full rounded-lg bg-white px-3 py-2 text-sm font-medium text-slate-800 ring-1 ring-swiss-line focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {flatNavItems.map((item) => (
+              <SelectItem key={item.id} value={item.id}>
+                {item.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="flex min-h-0 flex-1">
-        <aside className="hidden w-[230px] shrink-0 overflow-y-auto border-r border-black/5 bg-white md:block">
+        <aside className="hidden w-[230px] shrink-0 overflow-y-auto border-r border-swiss-line bg-white md:block">
           <div className="px-3 py-3">
             <p className="px-2 pb-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
               Workspace settings
@@ -214,7 +221,7 @@ export function SettingsView() {
           }`}
         >
           {section !== 'alerts' && section !== 'subscription' && section !== 'profile' ? (
-            <div className="mb-3 rounded-2xl bg-white ring-1 ring-slate-200/80 px-4 py-3 shadow-sm md:mb-4 md:px-5">
+            <div className="mb-3 bg-white border border-swiss-line px-4 py-3 md:mb-4 md:px-5">
               <h1 className="text-xl font-bold tracking-tight text-slate-900 md:text-2xl">{title}</h1>
               <p className="mt-0.5 text-xs text-slate-500 md:text-sm">{subtitle}</p>
             </div>
@@ -223,7 +230,7 @@ export function SettingsView() {
           {currentSectionAllowed ? (
             <SettingsPanel section={section} />
           ) : (
-            <div className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-4 shadow-sm">
+            <div className="bg-white border border-swiss-line p-4 ">
               <p className="text-sm text-slate-600">
                 You do not have permission to view this settings section. Ask an admin to update
                 your access under Users and teams.

@@ -33,8 +33,8 @@ export function JourneyAutomationGallery({
       {!hideHeader ? (
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h3 className="text-sm font-black text-gray-900">Automation gallery</h3>
-            <p className="text-xs text-gray-500 mt-0.5">
+            <h3 className="text-sm font-semibold text-swiss-ink">Automation gallery</h3>
+            <p className="text-xs text-swiss-muted mt-0.5">
               ConvoSync customer care + universal starters — edit copy after create, then publish &
               assign chats.
             </p>
@@ -69,7 +69,7 @@ export function JourneyAutomationGallery({
                 </span>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="text-sm font-bold text-gray-900 group-hover:text-primary">
+                    <p className="text-sm font-bold text-swiss-ink group-hover:text-primary">
                       {template.name}
                     </p>
                     {isConvoSync ? (
@@ -81,7 +81,7 @@ export function JourneyAutomationGallery({
                       {template.triggerLabel}
                     </span>
                   </div>
-                  <p className="mt-1 text-xs leading-relaxed text-gray-500 line-clamp-2">
+                  <p className="mt-1 text-xs leading-relaxed text-swiss-muted line-clamp-2">
                     {template.description}
                   </p>
                 </div>

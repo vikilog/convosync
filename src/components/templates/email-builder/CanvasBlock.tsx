@@ -45,7 +45,7 @@ export function CanvasBlock({
         const Tag = (p.level as string) === 'h2' ? 'h2' : 'h1';
         return (
           <Tag
-            className="font-bold text-gray-900"
+            className="font-bold text-swiss-ink"
             style={{
               fontSize: (p.level as string) === 'h2' ? 20 : 26,
               textAlign: (p.align as React.CSSProperties['textAlign']) ?? 'left',
@@ -59,7 +59,7 @@ export function CanvasBlock({
       case 'text':
         return (
           <p
-            className="text-gray-700 whitespace-pre-wrap leading-relaxed"
+            className="text-swiss-ink whitespace-pre-wrap leading-relaxed"
             style={{
               textAlign: (p.align as React.CSSProperties['textAlign']) ?? 'left',
               fontSize: Number(p.fontSize) || 16,
@@ -74,7 +74,7 @@ export function CanvasBlock({
             <img
               src={String(p.src ?? '')}
               alt={String(p.alt ?? '')}
-              className="max-w-full h-auto rounded-lg border border-black/5"
+              className="max-w-full h-auto rounded-lg border border-swiss-line"
             />
           </div>
         );
@@ -95,7 +95,7 @@ export function CanvasBlock({
         );
       case 'columns':
         return (
-          <div className="grid grid-cols-2 gap-4 text-sm text-gray-700">
+          <div className="grid grid-cols-2 gap-4 text-sm text-swiss-ink">
             <div className="whitespace-pre-wrap">{String(p.left ?? '')}</div>
             <div className="whitespace-pre-wrap">{String(p.right ?? '')}</div>
           </div>
@@ -107,7 +107,7 @@ export function CanvasBlock({
       case 'footer':
         return (
           <p
-            className="text-xs text-gray-400"
+            className="text-xs text-swiss-faint"
             style={{ textAlign: (p.align as React.CSSProperties['textAlign']) ?? 'center' }}
           >
             {String(p.text ?? '')}
@@ -126,7 +126,7 @@ export function CanvasBlock({
         }
         return (
           <div
-            className="prose prose-sm max-w-none text-gray-700"
+            className="prose prose-sm max-w-none text-swiss-ink"
             dangerouslySetInnerHTML={{ __html: htmlSanitized }}
           />
         );
@@ -153,15 +153,15 @@ export function CanvasBlock({
         fullHtmlDoc ? 'mx-0 overflow-hidden' : 'mx-1'
       } ${
         selected
-          ? 'ring-2 ring-primary shadow-md shadow-primary/10'
-          : 'ring-1 ring-transparent hover:ring-black/10 hover:shadow-sm'
+          ? 'ring-2 ring-primary shadow-primary/10'
+          : 'ring-1 ring-transparent hover:ring-black/10 '
       }`}
     >
       <div className="absolute left-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 flex flex-col gap-0.5 z-10">
         <button
           type="button"
           {...dragHandlers}
-          className="p-1 rounded-md bg-white ring-1 ring-slate-200/80 text-gray-400 cursor-grab active:cursor-grabbing"
+          className="p-1 rounded-md bg-white ring-1 ring-swiss-line text-swiss-faint cursor-grab active:cursor-grabbing"
           aria-label="Drag block"
         >
           <GripVertical className="w-3.5 h-3.5" />
@@ -174,7 +174,7 @@ export function CanvasBlock({
             e.stopPropagation();
             onDuplicate();
           }}
-          className="p-1 rounded-full bg-white ring-1 ring-slate-200/80 text-gray-500 hover:text-primary"
+          className="p-1 rounded-full bg-white ring-1 ring-swiss-line text-swiss-muted hover:text-primary"
           aria-label="Duplicate"
         >
           <Copy className="w-3 h-3" />

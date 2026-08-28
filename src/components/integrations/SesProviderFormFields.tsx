@@ -5,6 +5,7 @@
 
 import React, { useMemo } from 'react';
 import { AlertCircle, Globe, Loader2, RefreshCw, Send } from 'lucide-react';
+import { Input } from '../ui/input';
 
 export type VerifiedIdentity = {
   identity: string;
@@ -137,7 +138,7 @@ export function SesProviderFormFields({
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        <input
+        <Input
           value={accessKeyId}
           disabled={disabled}
           onChange={(e) => onAccessKeyIdChange(e.target.value)}
@@ -147,9 +148,9 @@ export function SesProviderFormFields({
               : 'Access key ID'
           }
           autoComplete="off"
-          className="text-sm border border-slate-200 rounded-lg px-3 py-2"
+          className="h-auto text-sm border border-swiss-line rounded-lg px-3 py-2"
         />
-        <input
+        <Input
           type="password"
           value={secretAccessKey}
           disabled={disabled}
@@ -160,13 +161,13 @@ export function SesProviderFormFields({
               : 'Secret access key'
           }
           autoComplete="new-password"
-          className="text-sm border border-slate-200 rounded-lg px-3 py-2"
+          className="h-auto text-sm border border-swiss-line rounded-lg px-3 py-2"
         />
         <select
           value={region}
           disabled={disabled}
           onChange={(e) => onRegionChange(e.target.value)}
-          className="text-sm border border-slate-200 rounded-lg px-3 py-2 sm:col-span-2"
+          className="text-sm border border-swiss-line rounded-lg px-3 py-2 sm:col-span-2"
         >
           {!AWS_REGIONS.includes(region) && region ? (
             <option value={region}>{region}</option>
@@ -182,17 +183,17 @@ export function SesProviderFormFields({
       <div className="space-y-3 rounded-xl border border-sky-200 bg-sky-50/40 p-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <h5 className="flex items-center gap-2 text-sm font-bold text-gray-900">
+            <h5 className="flex items-center gap-2 text-sm font-bold text-swiss-ink">
               <Globe className="h-4 w-4 text-sky-700" />
               Choose From address
             </h5>
-            <p className="mt-0.5 text-xs text-gray-600">
+            <p className="mt-0.5 text-xs text-swiss-muted">
               Pick a verified <span className="font-semibold">email</span> to send as that address, or
               pick a <span className="font-semibold">domain</span> and type the mailbox name (e.g.{' '}
               <span className="font-mono">hello</span>) to send as{' '}
               <span className="font-mono">hello@domain</span>.
             </p>
-            <p className="mt-1 text-[11px] text-gray-500">
+            <p className="mt-1 text-[11px] text-swiss-muted">
               These are AWS SES verified senders for the From field only — not the ConvoSync Domains
               tab.
             </p>
@@ -217,10 +218,10 @@ export function SesProviderFormFields({
           </button>
         </div>
 
-        <p className="text-xs text-gray-500">
-          Click <span className="font-semibold text-gray-700">Refresh identities</span> after entering
+        <p className="text-xs text-swiss-muted">
+          Click <span className="font-semibold text-swiss-ink">Refresh identities</span> after entering
           keys (no Save needed). Only VerificationStatus = Success identities in{' '}
-          <span className="font-medium text-gray-700">{region || 'this region'}</span> appear.
+          <span className="font-medium text-swiss-ink">{region || 'this region'}</span> appear.
         </p>
 
         {!canRefresh && !disabled && (
@@ -274,7 +275,7 @@ export function SesProviderFormFields({
                     className={`rounded-xl border transition-colors ${
                       selected
                         ? 'border-sky-400 bg-sky-50 ring-2 ring-sky-200'
-                        : 'border-black/5 bg-white hover:border-sky-200'
+                        : 'border-swiss-line bg-white hover:border-sky-200'
                     }`}
                   >
                     <button
@@ -297,7 +298,7 @@ export function SesProviderFormFields({
                       </span>
                       <span className="min-w-0 flex-1">
                         <span className="flex flex-wrap items-center gap-2">
-                          <span className="break-all font-mono text-[13px] font-semibold text-gray-900">
+                          <span className="break-all font-mono text-[13px] font-semibold text-swiss-ink">
                             {id.identity}
                           </span>
                           <span
@@ -310,7 +311,7 @@ export function SesProviderFormFields({
                             {isDomain ? 'Domain' : 'Email'}
                           </span>
                         </span>
-                        <span className="mt-0.5 block text-xs text-gray-500">
+                        <span className="mt-0.5 block text-xs text-swiss-muted">
                           {isDomain
                             ? selected
                               ? 'Type the mailbox name below — From becomes that@domain'
@@ -326,12 +327,12 @@ export function SesProviderFormFields({
                       <div className="border-t border-sky-200/80 px-3 py-3">
                         <label
                           htmlFor="ses-local-part"
-                          className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-gray-600"
+                          className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-swiss-muted"
                         >
                           From local part
                         </label>
                         <div className="flex flex-wrap items-center gap-2">
-                          <input
+                          <Input
                             id="ses-local-part"
                             type="text"
                             disabled={disabled}
@@ -341,13 +342,13 @@ export function SesProviderFormFields({
                             }
                             placeholder="hello"
                             autoComplete="off"
-                            className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 font-mono text-sm"
+                            className="h-auto min-w-0 flex-1 rounded-lg border border-swiss-line bg-white px-3 py-2 font-mono text-sm"
                           />
-                          <span className="shrink-0 font-mono text-sm text-gray-700">
+                          <span className="shrink-0 font-mono text-sm text-swiss-ink">
                             @{id.identity}
                           </span>
                         </div>
-                        <p className="mt-2 rounded-lg bg-white/80 px-2.5 py-1.5 font-mono text-sm text-gray-800">
+                        <p className="mt-2 rounded-lg bg-white/80 px-2.5 py-1.5 font-mono text-sm text-swiss-ink">
                           Full From:{' '}
                           <span className="font-semibold">
                             {domainLocalPart.trim()
@@ -383,7 +384,7 @@ export function SesProviderFormFields({
               className={`rounded-xl border px-3 py-2.5 text-sm ${
                 senderEmail
                   ? 'border-emerald-300 bg-emerald-50 text-emerald-950'
-                  : 'border-slate-200 bg-white text-slate-600'
+                  : 'border-swiss-line bg-white text-slate-600'
               }`}
               aria-live="polite"
             >
@@ -415,12 +416,12 @@ export function SesProviderFormFields({
             type="button"
             disabled={disabled || testing || saving || !canTest}
             onClick={onTestSend}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-bold text-gray-700 hover:border-primary/30 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-swiss-line bg-white px-3 py-1.5 text-sm font-bold text-swiss-ink hover:border-primary/30 disabled:opacity-50"
           >
             {testing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
             Send Test Email
           </button>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-swiss-muted">
             Sends to your account email via SES and refreshes verified identities.
           </p>
         </div>

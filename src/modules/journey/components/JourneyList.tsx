@@ -51,8 +51,8 @@ export function JourneyList({
     <div className="space-y-5">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h2 className="font-display text-lg font-black text-gray-950">WhatsApp Automation</h2>
-          <p className="text-xs text-gray-500">
+          <h2 className="font-display text-lg font-semibold text-gray-950">WhatsApp Automation</h2>
+          <p className="text-xs text-swiss-muted">
             Automate WhatsApp workflows with triggers, delays, and branches.
           </p>
         </div>
@@ -77,15 +77,15 @@ export function JourneyList({
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center gap-2 py-10 text-sm text-gray-500">
+        <div className="flex items-center justify-center gap-2 py-10 text-sm text-swiss-muted">
           <Loader2 className="h-4 w-4 animate-spin" />
           Loading journeys…
         </div>
       ) : journeys.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-black/10 bg-white p-8 text-center">
           <Workflow className="mx-auto mb-3 h-7 w-7 text-primary" />
-          <p className="font-bold text-gray-900">No journeys yet</p>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="font-bold text-swiss-ink">No journeys yet</p>
+          <p className="mt-1 text-sm text-swiss-muted">
             Browse the gallery for starters, or create a blank journey.
           </p>
           <button
@@ -104,7 +104,7 @@ export function JourneyList({
             return (
               <article
                 key={j.id}
-                className="group flex items-stretch overflow-hidden rounded-xl bg-white ring-1 ring-slate-200/80 transition-shadow hover:shadow-sm"
+                className="group flex items-stretch overflow-hidden bg-white border border-swiss-line transition-shadow "
               >
                 <button
                   type="button"
@@ -126,13 +126,13 @@ export function JourneyList({
                         className={`shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide ${
                           published
                             ? 'bg-primary/10 text-primary'
-                            : 'bg-gray-100 text-gray-500'
+                            : 'bg-gray-100 text-swiss-muted'
                         }`}
                       >
                         {j.status}
                       </span>
                     </div>
-                    <p className="mt-0.5 text-[11px] font-medium text-gray-400">
+                    <p className="mt-0.5 text-[11px] font-medium text-swiss-faint">
                       {triggerLabel(j.triggerEvent)}
                       <span className="mx-1 text-gray-300">·</span>
                       {j._count?.nodes ?? 0} steps
@@ -144,7 +144,7 @@ export function JourneyList({
                 <button
                   type="button"
                   onClick={() => onDelete(j.id)}
-                  className="shrink-0 cursor-pointer border-l border-black/5 px-2.5 text-gray-400 transition-colors hover:bg-rose-50 hover:text-rose-600"
+                  className="shrink-0 cursor-pointer border-l border-swiss-line px-2.5 text-swiss-faint transition-colors hover:bg-rose-50 hover:text-rose-600"
                   aria-label={`Delete ${j.name}`}
                 >
                   <Trash2 className="h-3.5 w-3.5" />

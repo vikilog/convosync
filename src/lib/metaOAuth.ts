@@ -22,6 +22,9 @@ export function buildMetaOAuthDialogUrl(params: {
 }
 
 export const INSTAGRAM_OAUTH_REDIRECT_STORAGE_KEY = 'convosync_instagram_oauth_redirect';
+/** "Instagram API with Instagram Login" track — separate connect flow from the one above. */
+export const INSTAGRAM_BUSINESS_LOGIN_REDIRECT_STORAGE_KEY =
+  'convosync_instagram_business_login_oauth_redirect';
 export const MESSENGER_OAUTH_REDIRECT_STORAGE_KEY = 'convosync_messenger_oauth_redirect';
 export const FACEBOOK_OAUTH_REDIRECT_STORAGE_KEY = 'convosync_facebook_oauth_redirect';
 

@@ -31,6 +31,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { SocialListeningPostAgentPanel } from './SocialListeningPostAgentPanel';
 import { useSocialListeningPlatform } from './SocialListeningPlatformSwitcher';
 import { clubCommentsByUser, commenterKey } from './commentClub';
+import { Input } from '../ui/input';
 
 function mediaIdFromPath(pathname: string): string | null {
   const parts = pathname.replace(/\/$/, '').split('/').filter(Boolean);
@@ -138,7 +139,7 @@ function CommentsSkeleton({ rows = 4 }: { rows?: number }) {
       {Array.from({ length: rows }, (_, i) => (
         <div
           key={i}
-          className="animate-pulse rounded-xl bg-white ring-1 ring-slate-200/80 p-3"
+          className="animate-pulse bg-white border border-swiss-line p-3"
         >
           <div className="flex items-start gap-2.5">
             <div className="h-8 w-8 shrink-0 rounded-full bg-slate-100" />
@@ -234,8 +235,8 @@ function CommentRow({
       <div
         className={
           hideIdentity
-            ? 'border-t border-black/5 pt-3 first:border-t-0 first:pt-0'
-            : 'rounded-xl bg-white ring-1 ring-slate-200/80 p-3'
+            ? 'border-t border-swiss-line pt-3 first:border-t-0 first:pt-0'
+            : 'bg-white border border-swiss-line p-3'
         }
       >
         <div className="flex items-start gap-2.5">
@@ -250,7 +251,7 @@ function CommentRow({
                   {comment.username ? `@${comment.username}` : platform === 'facebook' ? 'Facebook user' : 'Instagram user'}
                 </p>
                 {comment.timestamp && (
-                  <span className="shrink-0 text-[11px] font-medium text-gray-400">
+                  <span className="shrink-0 text-[11px] font-medium text-swiss-faint">
                     {timeAgo(comment.timestamp)}
                   </span>
                 )}
@@ -299,12 +300,12 @@ function CommentRow({
                 ))}
             </div>
             <div className="mt-1.5 rounded-lg border border-[#E1306C]/15 bg-[#fce8f0]/30 px-2.5 py-2">
-              <p className="text-sm font-medium text-gray-800 whitespace-pre-wrap">
+              <p className="text-sm font-medium text-swiss-ink whitespace-pre-wrap">
                 {comment.text || '—'}
               </p>
             </div>
             <div className="mt-2 flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-gray-400">
+              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-swiss-faint">
                 <Heart className="h-3 w-3" />
                 {formatCount(comment.likeCount)}
               </span>
@@ -344,7 +345,7 @@ function CommentRow({
               <button
                 type="button"
                 onClick={() => onStartReply(comment.id, comment.suggestedReply)}
-                className="inline-flex cursor-pointer items-center gap-1 text-[11px] font-bold text-gray-500 hover:text-[#C13584]"
+                className="inline-flex cursor-pointer items-center gap-1 text-[11px] font-bold text-swiss-muted hover:text-[#C13584]"
               >
                 <Reply className="h-3 w-3" />
                 Reply
@@ -356,7 +357,7 @@ function CommentRow({
                     type="button"
                     disabled={busy}
                     onClick={() => onHide(comment)}
-                    className="inline-flex cursor-pointer items-center gap-1 text-[11px] font-bold text-gray-500 hover:text-amber-700 disabled:opacity-50"
+                    className="inline-flex cursor-pointer items-center gap-1 text-[11px] font-bold text-swiss-muted hover:text-amber-700 disabled:opacity-50"
                   >
                     <EyeOff className="h-3 w-3" />
                     Hide
@@ -365,7 +366,7 @@ function CommentRow({
                     type="button"
                     disabled={busy}
                     onClick={() => onDelete(comment)}
-                    className="inline-flex cursor-pointer items-center gap-1 text-[11px] font-bold text-gray-500 hover:text-red-600 disabled:opacity-50"
+                    className="inline-flex cursor-pointer items-center gap-1 text-[11px] font-bold text-swiss-muted hover:text-red-600 disabled:opacity-50"
                   >
                     <Trash2 className="h-3 w-3" />
                     Delete
@@ -376,7 +377,7 @@ function CommentRow({
 
             {isReplying && (
               <div className="mt-3 flex gap-2">
-                <input
+                <Input
                   value={replyText}
                   onChange={(e) => onChangeReply(e.target.value)}
                   onKeyDown={(e) => {
@@ -386,7 +387,7 @@ function CommentRow({
                     }
                   }}
                   placeholder="Write a reply…"
-                  className="min-w-0 flex-1 rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-medium text-gray-900 outline-none focus:border-[#C13584]/40"
+                  className="h-auto min-w-0 flex-1 rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-medium text-swiss-ink outline-none focus:border-[#C13584]/40"
                   autoFocus
                 />
                 <button
@@ -401,7 +402,7 @@ function CommentRow({
                 <button
                   type="button"
                   onClick={onCancelReply}
-                  className="rounded-xl px-2 text-xs font-bold text-gray-500 hover:text-gray-800"
+                  className="rounded-xl px-2 text-xs font-bold text-swiss-muted hover:text-swiss-ink"
                 >
                   Cancel
                 </button>
@@ -412,21 +413,21 @@ function CommentRow({
               <div className="mt-3 space-y-2 rounded-lg bg-surface-muted/80 p-2.5">
                 {comment.publicReplyText && (
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400">
+                    <p className="text-[10px] font-bold uppercase tracking-wide text-swiss-faint">
                       Public reply sent
                     </p>
-                    <p className="mt-0.5 text-xs font-medium text-gray-700 whitespace-pre-wrap">
+                    <p className="mt-0.5 text-xs font-medium text-swiss-ink whitespace-pre-wrap">
                       {comment.publicReplyText}
                     </p>
                   </div>
                 )}
                 {comment.dmReplyText && comment.dmStatus !== 'failed' && (
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400">
+                    <p className="text-[10px] font-bold uppercase tracking-wide text-swiss-faint">
                       DM sent
                       {comment.dmSentAt ? ` · ${timeAgo(comment.dmSentAt)} ago` : ''}
                     </p>
-                    <p className="mt-0.5 text-xs font-medium text-gray-700 whitespace-pre-wrap">
+                    <p className="mt-0.5 text-xs font-medium text-swiss-ink whitespace-pre-wrap">
                       {comment.dmReplyText}
                     </p>
                   </div>
@@ -450,7 +451,7 @@ function CommentRow({
                       </span>
                     )}
                     {comment.dmReplyText && (
-                      <p className="w-full text-xs font-medium text-gray-500 whitespace-pre-wrap">
+                      <p className="w-full text-xs font-medium text-swiss-muted whitespace-pre-wrap">
                         Draft DM: {comment.dmReplyText}
                       </p>
                     )}
@@ -540,7 +541,7 @@ function CommentClub({
   onDelete: (comment: ListeningComment) => void;
 }) {
   return (
-    <div className="rounded-xl bg-white ring-1 ring-slate-200/80 p-3">
+    <div className="bg-white border border-swiss-line p-3">
       <div className="space-y-3">
         {club.comments.map((comment, index) => (
           <CommentRow
@@ -940,7 +941,7 @@ export const SocialListeningMediaDetailView: React.FC = () => {
   if (!mediaId) {
     return (
       <div className="flex h-full items-center justify-center p-6">
-        <p className="text-sm font-bold text-gray-500">Missing media id</p>
+        <p className="text-sm font-bold text-swiss-muted">Missing media id</p>
       </div>
     );
   }
@@ -962,7 +963,7 @@ export const SocialListeningMediaDetailView: React.FC = () => {
                   : '/social-listening/content'
             )
           }
-          className="inline-flex items-center gap-1.5 text-sm font-bold text-gray-500 hover:text-primary"
+          className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-primary"
         >
           ← Back to content
         </button>
@@ -972,7 +973,7 @@ export const SocialListeningMediaDetailView: React.FC = () => {
               href={media.permalink}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1 rounded-xl bg-white ring-1 ring-slate-200/80 px-3 py-1.5 text-xs font-bold text-gray-700 hover:bg-surface-muted"
+              className="inline-flex items-center gap-1 bg-white border border-swiss-line px-3 py-1.5 text-xs font-bold text-swiss-ink hover:bg-surface-muted"
             >
               {platform === 'facebook' ? 'Open on Facebook' : 'Open on Instagram'}
               <ExternalLink className="h-3 w-3" />
@@ -982,7 +983,7 @@ export const SocialListeningMediaDetailView: React.FC = () => {
             type="button"
             disabled={loading}
             onClick={() => void load()}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-white ring-1 ring-slate-200/80 px-3 py-1.5 text-xs font-bold text-gray-700 hover:bg-surface-muted disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 bg-white border border-swiss-line px-3 py-1.5 text-xs font-bold text-swiss-ink hover:bg-surface-muted disabled:opacity-50"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
             Refresh
@@ -998,8 +999,8 @@ export const SocialListeningMediaDetailView: React.FC = () => {
 
       {loading && !media ? (
         <div className="grid min-h-0 flex-1 gap-3 lg:grid-cols-2">
-          <div className="animate-pulse rounded-2xl bg-white ring-1 ring-slate-200/80" />
-          <section className="flex min-h-0 flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200/80 p-3.5">
+          <div className="animate-pulse bg-white border border-swiss-line" />
+          <section className="flex min-h-0 flex-col overflow-hidden bg-white border border-swiss-line p-3.5">
             <div className="mb-2 h-4 w-24 animate-pulse rounded bg-slate-100" />
             <CommentsSkeleton />
           </section>
@@ -1008,7 +1009,7 @@ export const SocialListeningMediaDetailView: React.FC = () => {
         <div className="grid min-h-0 flex-1 gap-3 lg:grid-cols-2">
           {/* Post + agent settings */}
           <div className="flex min-h-0 flex-col gap-3 overflow-hidden">
-          <section className="flex shrink-0 flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+          <section className="flex shrink-0 flex-col overflow-hidden bg-white border border-swiss-line shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
             <div className="relative flex h-44 shrink-0 items-center justify-center bg-[#0b1220] sm:h-52">
               {preview ? (
                 media.mediaType === 'VIDEO' || media.isReel ? (
@@ -1048,11 +1049,11 @@ export const SocialListeningMediaDetailView: React.FC = () => {
 
             <div className="max-h-28 space-y-2 overflow-y-auto p-3.5">
               {media.caption && (
-                <p className="text-sm font-medium text-gray-700 whitespace-pre-wrap">
+                <p className="text-sm font-medium text-swiss-ink whitespace-pre-wrap">
                   {media.caption}
                 </p>
               )}
-              <div className="flex flex-wrap items-center gap-4 text-xs font-bold text-gray-500">
+              <div className="flex flex-wrap items-center gap-4 text-xs font-bold text-swiss-muted">
                 <span className="inline-flex items-center gap-1">
                   <Heart className="h-3.5 w-3.5" />
                   {formatCount(media.likeCount)} likes
@@ -1062,7 +1063,7 @@ export const SocialListeningMediaDetailView: React.FC = () => {
                   {formatCount(media.commentsCount)} comments
                 </span>
                 {media.timestamp && (
-                  <span className="text-gray-400">{timeAgo(media.timestamp)} ago</span>
+                  <span className="text-swiss-faint">{timeAgo(media.timestamp)} ago</span>
                 )}
               </div>
             </div>
@@ -1078,10 +1079,10 @@ export const SocialListeningMediaDetailView: React.FC = () => {
           </div>
 
           {/* Comments card — scrolls inside */}
-          <section className="flex min-h-0 flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200/80 p-3.5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+          <section className="flex min-h-0 flex-col overflow-hidden bg-white border border-swiss-line p-3.5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
             <div className="mb-2 flex shrink-0 items-center justify-between gap-2">
-              <h2 className="text-sm font-black text-gray-950">Comments</h2>
-              <span className="text-[11px] font-bold text-gray-400">
+              <h2 className="text-sm font-semibold text-gray-950">Comments</h2>
+              <span className="text-[11px] font-bold text-swiss-faint">
                 {commentsLoading ? 'Loading…' : `${comments.length} loaded`}
               </span>
             </div>
@@ -1097,7 +1098,7 @@ export const SocialListeningMediaDetailView: React.FC = () => {
                 <CommentsSkeleton />
               ) : comments.length === 0 ? (
                 <div className="flex h-full min-h-[100px] items-center justify-center px-4 py-6">
-                  <p className="text-center text-sm font-medium text-gray-500">
+                  <p className="text-center text-sm font-medium text-swiss-muted">
                     No comments on this post yet.
                   </p>
                 </div>
@@ -1187,7 +1188,7 @@ export const SocialListeningMediaDetailView: React.FC = () => {
                   type="button"
                   disabled={loadingMore}
                   onClick={() => void loadMoreComments()}
-                  className="rounded-xl bg-white px-4 py-2 text-xs font-bold text-gray-700 hover:bg-slate-100 disabled:opacity-50"
+                  className="rounded-xl bg-white px-4 py-2 text-xs font-bold text-swiss-ink hover:bg-slate-100 disabled:opacity-50"
                 >
                   {loadingMore ? 'Loading…' : 'Load more comments'}
                 </button>
@@ -1199,13 +1200,13 @@ export const SocialListeningMediaDetailView: React.FC = () => {
 
       {addLeadCommentId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 p-4">
-          <div className="w-full max-w-sm rounded-2xl border border-black/5 bg-white p-5 shadow-xl">
-            <h3 className="text-base font-bold text-gray-900">Add to lead</h3>
-            <p className="mt-0.5 text-xs text-gray-400">
+          <div className="w-full max-w-sm rounded-2xl border border-swiss-line bg-white p-5 shadow-xl">
+            <h3 className="text-base font-bold text-swiss-ink">Add to lead</h3>
+            <p className="mt-0.5 text-xs text-swiss-faint">
               Choose which funnel receives this lead.
             </p>
             {funnelsLoading ? (
-              <p className="mt-4 text-sm text-gray-400">Loading funnels…</p>
+              <p className="mt-4 text-sm text-swiss-faint">Loading funnels…</p>
             ) : funnels.length === 0 ? (
               <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-900">
                 No funnels yet. Create one under Leads first.
@@ -1234,7 +1235,7 @@ export const SocialListeningMediaDetailView: React.FC = () => {
                   setAddLeadCommentId(null);
                   setAddLeadError('');
                 }}
-                className="cursor-pointer rounded-xl border border-black/10 px-3 py-2 text-sm font-bold text-gray-700 hover:bg-surface-muted"
+                className="cursor-pointer rounded-xl border border-black/10 px-3 py-2 text-sm font-bold text-swiss-ink hover:bg-surface-muted"
               >
                 Cancel
               </button>

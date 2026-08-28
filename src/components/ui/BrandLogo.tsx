@@ -15,7 +15,7 @@ export function BrandLogo({
   showName = false,
   nameClassName = 'text-xl font-bold font-display tracking-tight text-gray-950',
   tagline,
-  taglineClassName = 'text-[10px] text-gray-500 font-mono tracking-wider',
+  taglineClassName = 'text-[10px] text-swiss-muted font-mono tracking-wider',
 }: BrandLogoProps) {
   return (
     <div className={`flex items-center gap-2.5 min-w-0 ${className}`}>

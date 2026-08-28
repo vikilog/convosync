@@ -6,6 +6,7 @@
 import React from 'react';
 import { Menu, Search, Bell } from 'lucide-react';
 import { useSidebar, useSidebarOffset } from '../contexts/SidebarContext';
+import { Input } from './ui/input';
 
 interface TopNavBarProps {
   title: string;
@@ -40,7 +41,7 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
         <button
           type="button"
           onClick={toggleMobile}
-          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gray-50 text-gray-600 hover:bg-emerald-50 hover:text-emerald-700 transition-colors"
+          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gray-50 text-swiss-muted hover:bg-emerald-50 hover:text-emerald-700 transition-colors"
           aria-label="Open navigation menu"
         >
           <Menu className="h-5 w-5" />
@@ -49,7 +50,7 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
 
       <div className="min-w-0 flex-1 text-left">
         {!hideTitle && (
-          <h2 className="font-sans font-bold text-gray-900 leading-tight truncate text-sm md:text-base min-w-0">
+          <h2 className="font-sans font-bold text-swiss-ink leading-tight truncate text-sm md:text-base min-w-0">
             {title}
           </h2>
         )}
@@ -58,15 +59,15 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
       {!hideSearch && (
         <div className="hidden md:flex flex-1 max-w-md min-w-0">
           <div className="relative w-full">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-swiss-faint">
               <Search className="w-4 h-4" />
             </span>
-            <input
+            <Input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={searchPlaceholder}
-              className="w-full bg-white border border-gray-200 rounded-lg py-1.5 pl-9 pr-4 text-xs font-medium text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 focus:border-channel-green transition-all"
+              className="h-auto rounded-lg border-gray-200 bg-white py-1.5 pl-9 pr-4 text-xs font-medium text-swiss-ink placeholder:text-swiss-faint transition-all focus-visible:border-channel-green focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-100"
             />
           </div>
         </div>
@@ -75,7 +76,7 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({
       <div className="flex items-center justify-end gap-2 shrink-0">
         <button
           type="button"
-          className="w-10 h-10 flex items-center justify-center rounded-lg bg-gray-50 text-gray-600 hover:bg-emerald-50 hover:text-emerald-700 transition-colors relative"
+          className="w-10 h-10 flex items-center justify-center rounded-lg bg-gray-50 text-swiss-muted hover:bg-emerald-50 hover:text-emerald-700 transition-colors relative"
           aria-label="Notifications"
         >
           <Bell className="w-4 h-4" />

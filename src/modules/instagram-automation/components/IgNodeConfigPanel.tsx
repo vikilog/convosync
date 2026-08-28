@@ -34,6 +34,8 @@ import {
   type PerformActionId,
 } from '../../flow-builder/buttonActions';
 import { FLOW_CHANNEL_THEMES } from '../../flow-builder/channelTheme';
+import { Input } from '../../../components/ui/input';
+import { Textarea } from '../../../components/ui/textarea';
 
 const theme = FLOW_CHANNEL_THEMES.instagram;
 
@@ -325,7 +327,7 @@ export function IgNodeConfigPanel({ node, graph = null, onUpdate, onDelete, onBu
         {type === 'TRIGGER' && (
           <>
             <fieldset>
-              <legend className="text-sm font-semibold text-gray-700">Events</legend>
+              <legend className="text-sm font-semibold text-swiss-ink">Events</legend>
               <p className="mt-1 text-xs text-slate-500">
                 Automation starts when any selected event matches (OR).
               </p>
@@ -336,7 +338,7 @@ export function IgNodeConfigPanel({ node, graph = null, onUpdate, onDelete, onBu
                   return (
                     <label
                       key={ev.value}
-                      className="flex cursor-pointer items-center gap-2 text-sm text-gray-700"
+                      className="flex cursor-pointer items-center gap-2 text-sm text-swiss-ink"
                     >
                       <input
                         type="checkbox"
@@ -359,10 +361,10 @@ export function IgNodeConfigPanel({ node, graph = null, onUpdate, onDelete, onBu
                 })}
               </div>
             </fieldset>
-            <label className="block text-sm font-semibold text-gray-700">
+            <label className="block text-sm font-semibold text-swiss-ink">
               Keyword filter
-              <input
-                className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+              <Input
+                className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
                 value={String(local.keyword ?? '')}
                 onChange={(e) => patch('keyword', e.target.value)}
                 placeholder="Leave empty to match any text"
@@ -382,10 +384,10 @@ export function IgNodeConfigPanel({ node, graph = null, onUpdate, onDelete, onBu
 
         {type === 'SEND_MESSAGE' && (
           <>
-            <label className="block text-sm font-semibold text-gray-700">
+            <label className="block text-sm font-semibold text-swiss-ink">
               Send as
               <select
-                className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                className="mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
                 value={resolveIgSendAs(local)}
                 onChange={(e) => patch('sendAs', e.target.value)}
               >
@@ -418,7 +420,7 @@ export function IgNodeConfigPanel({ node, graph = null, onUpdate, onDelete, onBu
 
         {type === 'ASK_QUESTION' && (
           <>
-            <label className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-gray-700">
+            <label className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-swiss-ink">
               <input
                 type="checkbox"
                 className="h-4 w-4 rounded border-slate-300"
@@ -428,11 +430,11 @@ export function IgNodeConfigPanel({ node, graph = null, onUpdate, onDelete, onBu
               Quick data capture
             </label>
 
-            <label className="block text-sm font-semibold text-gray-700">
+            <label className="block text-sm font-semibold text-swiss-ink">
               Question text
-              <textarea
+              <Textarea
                 rows={3}
-                className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                className="min-h-0 mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
                 value={String(local.text ?? '')}
                 onChange={(e) => patch('text', e.target.value)}
                 placeholder="What would you like to know?"
@@ -441,10 +443,10 @@ export function IgNodeConfigPanel({ node, graph = null, onUpdate, onDelete, onBu
 
             {Boolean(local.quickCollect) ? (
               <>
-                <label className="block text-sm font-semibold text-gray-700">
+                <label className="block text-sm font-semibold text-swiss-ink">
                   Save reply to
                   <select
-                    className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                    className="mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
                     value={String(local.saveReplyTo ?? 'last_reply')}
                     onChange={(e) => patch('saveReplyTo', e.target.value)}
                   >
@@ -462,7 +464,7 @@ export function IgNodeConfigPanel({ node, graph = null, onUpdate, onDelete, onBu
               <>
                 <div>
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-semibold text-gray-700">Quick replies</p>
+                    <p className="text-sm font-semibold text-swiss-ink">Quick replies</p>
                     <span className="text-xs text-slate-500">
                       {quickReplies.length}/{IG_QUICK_REPLY_MAX}
                     </span>
@@ -475,8 +477,8 @@ export function IgNodeConfigPanel({ node, graph = null, onUpdate, onDelete, onBu
                   <div className="mt-2 space-y-2">
                     {quickReplies.map((reply, idx) => (
                       <div key={idx} className="flex gap-2">
-                        <input
-                          className="min-w-0 flex-1 rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                        <Input
+                          className="h-auto min-w-0 flex-1 rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
                           value={reply.title}
                           maxLength={IG_QUICK_REPLY_TITLE_MAX}
                           onChange={(e) => {
@@ -486,8 +488,8 @@ export function IgNodeConfigPanel({ node, graph = null, onUpdate, onDelete, onBu
                           }}
                           placeholder="Button label"
                         />
-                        <input
-                          className="w-24 rounded-lg border border-slate-200 px-2 py-1.5 text-sm font-mono text-xs"
+                        <Input
+                          className="h-auto w-24 rounded-lg border border-swiss-line px-2 py-1.5 text-sm font-mono text-xs"
                           value={reply.payload ?? ''}
                           onChange={(e) => {
                             const next = [...quickReplies];
@@ -528,10 +530,10 @@ export function IgNodeConfigPanel({ node, graph = null, onUpdate, onDelete, onBu
                   emptyHint="Add question text and quick replies to preview the Instagram DM."
                 />
 
-                <label className="block text-sm font-semibold text-gray-700">
+                <label className="block text-sm font-semibold text-swiss-ink">
                   Save reply to
-                  <input
-                    className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm font-mono text-xs"
+                  <Input
+                    className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm font-mono text-xs"
                     value={String(local.saveReplyTo ?? 'last_reply')}
                     onChange={(e) => patch('saveReplyTo', e.target.value)}
                     placeholder="last_reply"
@@ -552,11 +554,11 @@ export function IgNodeConfigPanel({ node, graph = null, onUpdate, onDelete, onBu
 
         {type === 'BUTTONS' && (
           <>
-            <label className="block text-sm font-semibold text-gray-700">
+            <label className="block text-sm font-semibold text-swiss-ink">
               Message text
-              <textarea
+              <Textarea
                 rows={3}
-                className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                className="min-h-0 mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
                 value={String(local.text ?? '')}
                 onChange={(e) => patch('text', e.target.value)}
                 placeholder="Choose an option…"
@@ -564,7 +566,7 @@ export function IgNodeConfigPanel({ node, graph = null, onUpdate, onDelete, onBu
             </label>
             <div>
               <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold text-gray-700">Buttons</p>
+                <p className="text-sm font-semibold text-swiss-ink">Buttons</p>
                 <span className="text-xs text-slate-500">
                   {buttons.length}/{IG_BUTTONS_MAX}
                 </span>
@@ -576,8 +578,8 @@ export function IgNodeConfigPanel({ node, graph = null, onUpdate, onDelete, onBu
               <div className="mt-2 space-y-2">
                 {buttons.map((btn, idx) => (
                   <div key={btn.id || idx} className="flex gap-2">
-                    <input
-                      className="min-w-0 flex-1 rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                    <Input
+                      className="h-auto min-w-0 flex-1 rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
                       value={btn.title}
                       maxLength={IG_QUICK_REPLY_TITLE_MAX}
                       onChange={(e) => {
@@ -634,7 +636,7 @@ export function IgNodeConfigPanel({ node, graph = null, onUpdate, onDelete, onBu
         {type === 'RANDOMIZER' && (
           <div>
             <div className="flex items-center justify-between">
-              <p className="text-sm font-semibold text-gray-700">Paths</p>
+              <p className="text-sm font-semibold text-swiss-ink">Paths</p>
               <span className="text-xs text-slate-500">
                 {paths.length}/{RANDOMIZER_PATHS_MAX} · total {pathWeightTotal}%
               </span>
@@ -645,8 +647,8 @@ export function IgNodeConfigPanel({ node, graph = null, onUpdate, onDelete, onBu
             <div className="mt-2 space-y-2">
               {paths.map((path, idx) => (
                 <div key={path.id || idx} className="flex gap-2">
-                  <input
-                    className="min-w-0 flex-1 rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                  <Input
+                    className="h-auto min-w-0 flex-1 rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
                     value={path.label}
                     onChange={(e) => {
                       const next = [...paths];
@@ -655,10 +657,10 @@ export function IgNodeConfigPanel({ node, graph = null, onUpdate, onDelete, onBu
                     }}
                     placeholder="Label"
                   />
-                  <input
+                  <Input
                     type="number"
                     min={0}
-                    className="w-20 rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                    className="h-auto w-20 rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
                     value={path.weight}
                     onChange={(e) => {
                       const next = [...paths];
@@ -701,7 +703,7 @@ export function IgNodeConfigPanel({ node, graph = null, onUpdate, onDelete, onBu
         )}
 
         {(type === 'SEND_MESSAGE' || type === 'ASK_QUESTION' || type === 'BUTTONS') && (
-          <label className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-gray-700">
+          <label className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-swiss-ink">
             <input
               type="checkbox"
               className="h-4 w-4 rounded border-slate-300"
@@ -715,20 +717,20 @@ export function IgNodeConfigPanel({ node, graph = null, onUpdate, onDelete, onBu
         {type === 'WAIT' && (
           <>
             <div className="grid grid-cols-2 gap-2">
-              <label className="block text-sm font-semibold text-gray-700">
+              <label className="block text-sm font-semibold text-swiss-ink">
                 Amount
-                <input
+                <Input
                   type="number"
                   min={0}
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                  className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
                   value={Number(local.amount ?? 1)}
                   onChange={(e) => patch('amount', Number(e.target.value))}
                 />
               </label>
-              <label className="block text-sm font-semibold text-gray-700">
+              <label className="block text-sm font-semibold text-swiss-ink">
                 Unit
                 <select
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                  className="mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
                   value={String(local.unit ?? 'hours')}
                   onChange={(e) => patch('unit', e.target.value)}
                 >
@@ -738,7 +740,7 @@ export function IgNodeConfigPanel({ node, graph = null, onUpdate, onDelete, onBu
                 </select>
               </label>
             </div>
-            <label className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-gray-700">
+            <label className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-swiss-ink">
               <input
                 type="checkbox"
                 className="h-4 w-4 rounded border-slate-300"
@@ -750,27 +752,27 @@ export function IgNodeConfigPanel({ node, graph = null, onUpdate, onDelete, onBu
             {businessHours.enabled && (
               <>
                 <div className="grid grid-cols-2 gap-2">
-                  <label className="block text-sm font-semibold text-gray-700">
+                  <label className="block text-sm font-semibold text-swiss-ink">
                     Start
-                    <input
+                    <Input
                       type="time"
-                      className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                      className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
                       value={businessHours.startTime}
                       onChange={(e) => patchBusinessHours({ startTime: e.target.value || '08:00' })}
                     />
                   </label>
-                  <label className="block text-sm font-semibold text-gray-700">
+                  <label className="block text-sm font-semibold text-swiss-ink">
                     End
-                    <input
+                    <Input
                       type="time"
-                      className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                      className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
                       value={businessHours.endTime}
                       onChange={(e) => patchBusinessHours({ endTime: e.target.value || '22:00' })}
                     />
                   </label>
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-gray-700">Days</p>
+                  <p className="text-sm font-semibold text-swiss-ink">Days</p>
                   <p className="mt-0.5 text-xs text-slate-500">
                     {businessHours.daysOfWeek.length === 0
                       ? 'Any day'
@@ -792,7 +794,7 @@ export function IgNodeConfigPanel({ node, graph = null, onUpdate, onDelete, onBu
                           className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
                             selected
                               ? 'bg-[#833AB4] text-white'
-                              : `border border-slate-200 bg-white text-slate-600 hover:bg-slate-50`
+                              : `border border-swiss-line bg-white text-slate-600 hover:bg-slate-50`
                           }`}
                         >
                           {day.label}
@@ -807,10 +809,10 @@ export function IgNodeConfigPanel({ node, graph = null, onUpdate, onDelete, onBu
         )}
 
         {type === 'GOTO_STEP' && (
-          <label className="block text-sm font-semibold text-gray-700">
+          <label className="block text-sm font-semibold text-swiss-ink">
             Jump to step
             <select
-              className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+              className="mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
               value={String(local.targetNodeId ?? '')}
               onChange={(e) => patch('targetNodeId', e.target.value)}
             >
@@ -830,10 +832,10 @@ export function IgNodeConfigPanel({ node, graph = null, onUpdate, onDelete, onBu
 
         {type === 'UPDATE_TAG' && (
           <>
-            <label className="block text-sm font-semibold text-gray-700">
+            <label className="block text-sm font-semibold text-swiss-ink">
               Action
               <select
-                className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                className="mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
                 value={String(local.action ?? 'add')}
                 onChange={(e) => patch('action', e.target.value)}
               >
@@ -842,7 +844,7 @@ export function IgNodeConfigPanel({ node, graph = null, onUpdate, onDelete, onBu
                 <option value="set">Replace tags</option>
               </select>
             </label>
-            <label className="block text-sm font-semibold text-gray-700">
+            <label className="block text-sm font-semibold text-swiss-ink">
               Tags
               <div className="mt-1">
                 <TagChipInput
@@ -858,10 +860,10 @@ export function IgNodeConfigPanel({ node, graph = null, onUpdate, onDelete, onBu
 
         {type === 'ADD_TO_FUNNEL' && (
           <>
-            <label className="block text-sm font-semibold text-gray-700">
+            <label className="block text-sm font-semibold text-swiss-ink">
               Lead funnel
               <select
-                className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                className="mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
                 value={String(local.funnelId ?? '')}
                 onChange={(e) => patchMany({ funnelId: e.target.value, stageId: '' })}
               >
@@ -873,10 +875,10 @@ export function IgNodeConfigPanel({ node, graph = null, onUpdate, onDelete, onBu
                 ))}
               </select>
             </label>
-            <label className="block text-sm font-semibold text-gray-700">
+            <label className="block text-sm font-semibold text-swiss-ink">
               Board (optional)
               <select
-                className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                className="mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
                 value={String(local.stageId ?? '')}
                 onChange={(e) => patch('stageId', e.target.value)}
                 disabled={!local.funnelId}
@@ -898,10 +900,10 @@ export function IgNodeConfigPanel({ node, graph = null, onUpdate, onDelete, onBu
 
         {type === 'UPDATE_FIELD' && (
           <>
-            <label className="block text-sm font-semibold text-gray-700">
+            <label className="block text-sm font-semibold text-swiss-ink">
               Field
               <select
-                className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                className="mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
                 value={String(local.field ?? 'name')}
                 onChange={(e) => patch('field', e.target.value)}
               >
@@ -913,19 +915,19 @@ export function IgNodeConfigPanel({ node, graph = null, onUpdate, onDelete, onBu
               </select>
             </label>
             {local.field === 'custom' && (
-              <label className="block text-sm font-semibold text-gray-700">
+              <label className="block text-sm font-semibold text-swiss-ink">
                 Custom field key
-                <input
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                <Input
+                  className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
                   value={String(local.customFieldKey ?? '')}
                   onChange={(e) => patch('customFieldKey', e.target.value)}
                 />
               </label>
             )}
-            <label className="block text-sm font-semibold text-gray-700">
+            <label className="block text-sm font-semibold text-swiss-ink">
               Value
-              <input
-                className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+              <Input
+                className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
                 value={String(local.value ?? '')}
                 onChange={(e) => patch('value', e.target.value)}
               />
@@ -935,10 +937,10 @@ export function IgNodeConfigPanel({ node, graph = null, onUpdate, onDelete, onBu
 
         {type === 'ASSIGN_TO' && (
           <>
-            <label className="block text-sm font-semibold text-gray-700">
+            <label className="block text-sm font-semibold text-swiss-ink">
               Assign to
               <select
-                className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                className="mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
                 value={String(local.assigneeType ?? 'unassigned')}
                 onChange={(e) => patch('assigneeType', e.target.value)}
               >
@@ -950,10 +952,10 @@ export function IgNodeConfigPanel({ node, graph = null, onUpdate, onDelete, onBu
               </select>
             </label>
             {local.assigneeType === 'user' && (
-              <label className="block text-sm font-semibold text-gray-700">
+              <label className="block text-sm font-semibold text-swiss-ink">
                 Assignee ID
-                <input
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm font-mono text-xs"
+                <Input
+                  className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm font-mono text-xs"
                   value={String(local.assigneeId ?? '')}
                   onChange={(e) => patch('assigneeId', e.target.value)}
                   placeholder="User ID"
@@ -970,11 +972,11 @@ export function IgNodeConfigPanel({ node, graph = null, onUpdate, onDelete, onBu
         )}
 
         {type === 'CLOSE_CONVERSATION' && (
-          <label className="block text-sm font-semibold text-gray-700">
+          <label className="block text-sm font-semibold text-swiss-ink">
             Closing note (optional)
-            <textarea
+            <Textarea
               rows={2}
-              className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+              className="min-h-0 mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
               value={String(local.closingNote ?? '')}
               onChange={(e) => patch('closingNote', e.target.value)}
             />
@@ -983,19 +985,19 @@ export function IgNodeConfigPanel({ node, graph = null, onUpdate, onDelete, onBu
 
         {type === 'WEBHOOK' && (
           <div className="space-y-3">
-            <label className="block text-sm font-semibold text-gray-700">
+            <label className="block text-sm font-semibold text-swiss-ink">
               Request name
-              <input
-                className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+              <Input
+                className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
                 value={String(local.name ?? '')}
                 onChange={(e) => patch('name', e.target.value)}
                 placeholder="Optional label"
               />
             </label>
-            <label className="block text-sm font-semibold text-gray-700">
+            <label className="block text-sm font-semibold text-swiss-ink">
               Method
               <select
-                className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                className="mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
                 value={String(local.method ?? 'POST')}
                 onChange={(e) => patch('method', e.target.value)}
               >
@@ -1003,22 +1005,22 @@ export function IgNodeConfigPanel({ node, graph = null, onUpdate, onDelete, onBu
                 <option value="POST">POST</option>
               </select>
             </label>
-            <label className="block text-sm font-semibold text-gray-700">
+            <label className="block text-sm font-semibold text-swiss-ink">
               URL
-              <input
-                className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm font-mono text-xs"
+              <Input
+                className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm font-mono text-xs"
                 value={String(local.url ?? '')}
                 onChange={(e) => patch('url', e.target.value)}
                 placeholder="https://api.example.com/hook"
               />
             </label>
             <div>
-              <p className="text-sm font-semibold text-gray-700">Headers</p>
+              <p className="text-sm font-semibold text-swiss-ink">Headers</p>
               <div className="mt-1 space-y-2">
                 {headerRows.map((row, idx) => (
                   <div key={idx} className="flex gap-2">
-                    <input
-                      className="min-w-0 flex-1 rounded-lg border border-slate-200 px-2 py-1.5 text-sm font-mono text-xs"
+                    <Input
+                      className="h-auto min-w-0 flex-1 rounded-lg border border-swiss-line px-2 py-1.5 text-sm font-mono text-xs"
                       value={row.key}
                       onChange={(e) => {
                         const next = [...headerRows];
@@ -1027,8 +1029,8 @@ export function IgNodeConfigPanel({ node, graph = null, onUpdate, onDelete, onBu
                       }}
                       placeholder="Header"
                     />
-                    <input
-                      className="min-w-0 flex-1 rounded-lg border border-slate-200 px-2 py-1.5 text-sm font-mono text-xs"
+                    <Input
+                      className="h-auto min-w-0 flex-1 rounded-lg border border-swiss-line px-2 py-1.5 text-sm font-mono text-xs"
                       value={row.value}
                       onChange={(e) => {
                         const next = [...headerRows];
@@ -1058,11 +1060,11 @@ export function IgNodeConfigPanel({ node, graph = null, onUpdate, onDelete, onBu
               </button>
             </div>
             {String(local.method ?? 'POST') === 'POST' && (
-              <label className="block text-sm font-semibold text-gray-700">
+              <label className="block text-sm font-semibold text-swiss-ink">
                 Body (JSON)
-                <textarea
+                <Textarea
                   rows={4}
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm font-mono text-xs"
+                  className="min-h-0 mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm font-mono text-xs"
                   value={bodyText}
                   onChange={(e) => patch('body', e.target.value)}
                   placeholder='{"key": "value"}'
@@ -1070,22 +1072,22 @@ export function IgNodeConfigPanel({ node, graph = null, onUpdate, onDelete, onBu
               </label>
             )}
             <div className="grid grid-cols-2 gap-2">
-              <label className="block text-sm font-semibold text-gray-700">
+              <label className="block text-sm font-semibold text-swiss-ink">
                 Timeout (ms)
-                <input
+                <Input
                   type="number"
                   min={1000}
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                  className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
                   value={Number(local.timeoutMs ?? 15000)}
                   onChange={(e) => patch('timeoutMs', Number(e.target.value))}
                 />
               </label>
-              <label className="block text-sm font-semibold text-gray-700">
+              <label className="block text-sm font-semibold text-swiss-ink">
                 Retries
-                <input
+                <Input
                   type="number"
                   min={0}
-                  className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                  className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
                   value={Number(local.retries ?? 2)}
                   onChange={(e) => patch('retries', Number(e.target.value))}
                 />
@@ -1095,10 +1097,10 @@ export function IgNodeConfigPanel({ node, graph = null, onUpdate, onDelete, onBu
         )}
 
         {type === 'TRIGGER_JOURNEY' && (
-          <label className="block text-sm font-semibold text-gray-700">
+          <label className="block text-sm font-semibold text-swiss-ink">
             Published automation
             <select
-              className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+              className="mt-1 w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm"
               value={String(local.journeyId ?? '')}
               onChange={(e) => patch('journeyId', e.target.value)}
             >

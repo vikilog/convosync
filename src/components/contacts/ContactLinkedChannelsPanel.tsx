@@ -3,6 +3,7 @@ import { Link2, Loader2, Search, Unlink, X } from 'lucide-react';
 import { api } from '../../lib/api';
 import { mapContactFromApi } from '../../lib/mappers';
 import type { Contact } from '../../types';
+import { Input } from '../ui/input';
 
 type Channel = 'whatsapp' | 'instagram' | 'messenger';
 
@@ -155,7 +156,7 @@ export function ContactLinkedChannelsPanel({
   const linkOnly = variant === 'linkOnly';
 
   return (
-    <div className={linkOnly ? 'space-y-2' : 'rounded-xl border border-slate-200 bg-slate-50/60 p-3 space-y-2'}>
+    <div className={linkOnly ? 'space-y-2' : 'rounded-xl border border-swiss-line bg-slate-50/60 p-3 space-y-2'}>
       <div className="flex items-center justify-between gap-2">
         {!linkOnly ? (
           <p className="text-xs font-bold uppercase tracking-wide text-slate-500">
@@ -194,7 +195,7 @@ export function ContactLinkedChannelsPanel({
           {others.map((ch) => (
             <li
               key={ch.contactId}
-              className="flex items-center gap-2 rounded-lg bg-white border border-slate-200 px-2.5 py-2"
+              className="flex items-center gap-2 rounded-lg bg-white border border-swiss-line px-2.5 py-2"
             >
               <span
                 className={`shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-bold ${CHANNEL_BADGE[ch.channel]}`}
@@ -235,16 +236,16 @@ export function ContactLinkedChannelsPanel({
       ) : null}
 
       {pickerOpen && editable ? (
-        <div className="rounded-xl border border-black/10 bg-white p-3 space-y-2 shadow-sm">
+        <div className="rounded-xl border border-black/10 bg-white p-3 space-y-2 ">
           <div className="flex items-center gap-2">
             <div className="relative flex-1">
               <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" aria-hidden />
-              <input
+              <Input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search contacts to link…"
                 aria-label="Search contacts to link"
-                className="w-full rounded-lg border border-black/10 py-2 pl-8 pr-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                className="h-auto w-full rounded-lg border border-black/10 py-2 pl-8 pr-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 autoFocus
               />
             </div>

@@ -36,6 +36,8 @@ import {
 import { CannedResponsesPanel } from './templates/CannedResponsesPanel';
 import { WhatsAppFlowsView } from './templates/WhatsAppFlowsView';
 import { WhatsAppFlowEditor } from './templates/WhatsAppFlowEditor';
+import { Input } from './ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 function waButtonKind(raw?: string): '' | ButtonKind {
   if (raw === 'URL' || raw === 'QUICK_REPLY' || raw === 'PHONE_NUMBER') return raw;
@@ -288,7 +290,7 @@ export const TemplatesView: React.FC = () => {
   if (isBuilder && editorRoute.channel === 'email') {
     if (editorLoading && editorRoute.mode === 'edit') {
       return (
-        <div className="flex justify-center py-24 text-gray-400">
+        <div className="flex justify-center py-24 text-swiss-faint">
           <Loader2 className="w-8 h-8 animate-spin" />
         </div>
       );
@@ -305,7 +307,7 @@ export const TemplatesView: React.FC = () => {
   if (isBuilder && editorRoute.channel === 'whatsapp') {
     if (editorLoading && editorRoute.mode === 'edit') {
       return (
-        <div className="flex justify-center py-24 text-gray-400">
+        <div className="flex justify-center py-24 text-swiss-faint">
           <Loader2 className="w-8 h-8 animate-spin" />
         </div>
       );
@@ -469,7 +471,7 @@ export const TemplatesView: React.FC = () => {
             className={`px-3 py-2 rounded-xl text-sm font-bold border inline-flex items-center gap-1.5 ${
               channel === 'whatsapp'
                 ? 'bg-[#008069] text-white border-[#008069]'
-                : 'bg-white text-gray-700 border-black/5'
+                : 'bg-white text-swiss-ink border-swiss-line'
             }`}
           >
             <MessageCircle className="w-3.5 h-3.5" />
@@ -483,7 +485,7 @@ export const TemplatesView: React.FC = () => {
             className={`px-3 py-2 rounded-xl text-sm font-bold border inline-flex items-center gap-1.5 ${
               channel === 'email'
                 ? 'bg-primary text-white border-primary'
-                : 'bg-white text-gray-700 border-black/5'
+                : 'bg-white text-swiss-ink border-swiss-line'
             }`}
           >
             <Mail className="w-3.5 h-3.5" />
@@ -496,7 +498,7 @@ export const TemplatesView: React.FC = () => {
           className={`px-3 py-2 rounded-xl text-sm font-bold border inline-flex items-center gap-1.5 ${
             channel === 'canned'
               ? 'bg-primary text-white border-primary'
-              : 'bg-white text-gray-700 border-black/5'
+              : 'bg-white text-swiss-ink border-swiss-line'
           }`}
         >
           <MessageSquareText className="w-3.5 h-3.5" />
@@ -509,7 +511,7 @@ export const TemplatesView: React.FC = () => {
             className={`px-3 py-2 rounded-xl text-sm font-bold border inline-flex items-center gap-1.5 ${
               channel === 'flow'
                 ? 'bg-primary text-white border-primary'
-                : 'bg-white text-gray-700 border-black/5'
+                : 'bg-white text-swiss-ink border-swiss-line'
             }`}
           >
             <LayoutGrid className="w-3.5 h-3.5" />
@@ -518,7 +520,7 @@ export const TemplatesView: React.FC = () => {
         )}
       </div>
 
-      <p className="shrink-0 text-xs text-gray-500">
+      <p className="shrink-0 text-xs text-swiss-muted">
         Looking for Instagram DM or comment automations?{' '}
         <button
           type="button"
@@ -546,33 +548,34 @@ export const TemplatesView: React.FC = () => {
         </div>
       ) : (
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto">
-      <div className="p-4 bg-white ring-1 ring-slate-200/80 rounded-xl flex flex-wrap items-center justify-between gap-4">
+      <div className="p-4 bg-white border border-swiss-line flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-2.5">
           {channel === 'whatsapp' && (
-            <div className="flex items-center gap-1 bg-slate-50 px-2.5 py-1.5 rounded-xl border border-slate-200">
-              <span className="text-meta font-bold text-gray-400 mr-1">Category:</span>
-              <select
-                value={categoryFilter}
-                onChange={(e) => setCategoryFilter(e.target.value)}
-                className="bg-transparent border-none text-meta font-bold text-gray-800 outline-none p-0 cursor-pointer"
-              >
-                <option value="All">All</option>
-                {TEMPLATE_CATEGORIES.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
+            <div className="flex items-center gap-1 bg-slate-50 px-2.5 py-1.5 rounded-xl border border-swiss-line">
+              <span className="text-meta font-bold text-swiss-faint mr-1">Category:</span>
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <SelectTrigger className="h-auto border-none bg-transparent p-0 text-meta font-bold text-swiss-ink shadow-none focus-visible:ring-0">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="All">All</SelectItem>
+                  {TEMPLATE_CATEGORIES.map((c) => (
+                    <SelectItem key={c} value={c}>
+                      {c}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           )}
           <div className="relative w-48 sm:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
-            <input
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-swiss-faint" />
+            <Input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search templates..."
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl py-1.5 pl-9 pr-3 text-meta font-semibold outline-none focus:ring-2 focus:ring-primary/20"
+              className="h-auto rounded-xl border-swiss-line bg-slate-50 py-1.5 pl-9 pr-3 text-meta font-semibold outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
             />
           </div>
         </div>
@@ -582,7 +585,7 @@ export const TemplatesView: React.FC = () => {
               type="button"
               onClick={() => void handleSync()}
               disabled={syncing}
-              className="px-3 py-2 bg-white ring-1 ring-slate-200/80 hover:bg-gray-50 text-gray-800 rounded-xl text-meta font-bold flex items-center gap-1.5 disabled:opacity-60"
+              className="px-3 py-2 bg-white ring-1 ring-swiss-line hover:bg-gray-50 text-swiss-ink rounded-xl text-meta font-bold flex items-center gap-1.5 disabled:opacity-60"
             >
               {syncing ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -595,7 +598,7 @@ export const TemplatesView: React.FC = () => {
           <button
             type="button"
             onClick={openCreate}
-            className={`px-3 py-2 text-white rounded-xl text-meta font-bold flex items-center gap-1.5 shadow-sm ${
+            className={`px-3 py-2 text-white rounded-xl text-meta font-bold flex items-center gap-1.5 ${
               channel === 'email'
                 ? 'bg-primary hover:bg-primary-hover'
                 : 'bg-[#008069] hover:bg-[#006e5b]'
@@ -613,7 +616,7 @@ export const TemplatesView: React.FC = () => {
       )}
 
       {loading ? (
-        <div className="flex justify-center py-16 text-gray-400">
+        <div className="flex justify-center py-16 text-swiss-faint">
           <Loader2 className="w-8 h-8 animate-spin" />
         </div>
       ) : channel === 'whatsapp' ? (
@@ -663,8 +666,8 @@ function EmptyState({ channel, onCreate }: { channel: Channel; onCreate: () => v
     channel === 'whatsapp' ? 'WhatsApp' : channel === 'email' ? 'email' : 'canned response';
   return (
     <div className="bg-white border border-dashed border-black/10 rounded-2xl p-12 text-center">
-      <p className="text-sm font-bold text-gray-600">No {label} templates</p>
-      <p className="text-xs text-gray-400 mt-1 max-w-md mx-auto">
+      <p className="text-sm font-bold text-swiss-muted">No {label} templates</p>
+      <p className="text-xs text-swiss-faint mt-1 max-w-md mx-auto">
         {channel === 'whatsapp'
           ? 'Create WhatsApp message templates with live preview — same flow as Meta Business Suite.'
           : channel === 'email'
@@ -722,7 +725,7 @@ function WhatsAppCard({
 
   return (
     <div
-      className="bg-white ring-1 ring-slate-200/80 rounded-xl p-3 flex flex-col text-left hover:border-[#008069]/30 transition-all cursor-pointer"
+      className="bg-white border border-swiss-line p-3 flex flex-col text-left hover:border-[#008069]/30 transition-all cursor-pointer"
       onClick={onOpen}
       onKeyDown={(e) => e.key === 'Enter' && onOpen()}
       role="button"
@@ -731,7 +734,7 @@ function WhatsAppCard({
       <div className="flex items-start justify-between gap-1.5 mb-2">
         <div className="flex items-center gap-1.5 min-w-0">
           <span className={`${CATEGORY_BADGE_CLASS} !text-[10px] !px-1.5 !py-0.5`}>{template.category}</span>
-          <h5 className="font-bold text-gray-900 text-xs truncate font-mono">{template.name}</h5>
+          <h5 className="font-bold text-swiss-ink text-xs truncate font-mono">{template.name}</h5>
         </div>
         <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
           {template.id ? (
@@ -776,8 +779,8 @@ function WhatsAppCard({
         className="pt-2 border-t border-gray-50 mt-2.5 flex flex-wrap justify-between items-center gap-1.5"
         onClick={(e) => e.stopPropagation()}
       >
-        <span className="text-xs font-bold text-gray-400">
-          <span className="font-mono text-gray-500">{template.language}</span>
+        <span className="text-xs font-bold text-swiss-faint">
+          <span className="font-mono text-swiss-muted">{template.language}</span>
           {template.lastUpdated ? ` · ${template.lastUpdated}` : ''}
         </span>
         <div className="flex gap-1">
@@ -791,7 +794,7 @@ function WhatsAppCard({
               }
               onClick={onEdit}
               disabled={busy}
-              className="p-1 rounded-md hover:bg-gray-100 text-gray-600 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="p-1 rounded-md hover:bg-gray-100 text-swiss-muted disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <Pencil className="w-3 h-3" />
             </button>
@@ -856,33 +859,33 @@ function EmailCard({
 
   return (
     <div
-      className="bg-white ring-1 ring-slate-200/80 rounded-xl p-3 flex flex-col text-left hover:border-primary/30 transition-all cursor-pointer"
+      className="bg-white border border-swiss-line p-3 flex flex-col text-left hover:border-primary/30 transition-all cursor-pointer"
       onClick={onOpen}
       onKeyDown={(e) => e.key === 'Enter' && onOpen()}
       role="button"
       tabIndex={0}
     >
       <div className="flex items-start justify-between gap-1.5 mb-2">
-        <h5 className="font-bold text-gray-900 text-xs truncate font-mono min-w-0">{template.name}</h5>
+        <h5 className="font-bold text-swiss-ink text-xs truncate font-mono min-w-0">{template.name}</h5>
         <span
           className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded border shrink-0 ${
             template.status === 'active'
               ? 'bg-primary/10 text-primary border-primary/20'
-              : 'bg-gray-50 text-gray-500 border-gray-200'
+              : 'bg-gray-50 text-swiss-muted border-gray-200'
           }`}
         >
           {template.status}
         </span>
       </div>
-      <div className="flex-1 min-h-0 rounded-lg overflow-hidden border border-slate-200 bg-white pointer-events-none">
+      <div className="flex-1 min-h-0 rounded-lg overflow-hidden border border-swiss-line bg-white pointer-events-none">
         <div className="bg-[#f5f5f5] px-2 py-1.5 border-b border-gray-200">
           <div className="flex items-center gap-1 mb-1">
             <div className="w-1.5 h-1.5 rounded-full bg-red-400" />
             <div className="w-1.5 h-1.5 rounded-full bg-yellow-400" />
             <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
           </div>
-          <p className="text-[9px] font-bold uppercase text-gray-400 leading-none">Subject</p>
-          <p className="text-[11px] font-semibold text-gray-900 truncate mt-0.5">
+          <p className="text-[9px] font-bold uppercase text-swiss-faint leading-none">Subject</p>
+          <p className="text-[11px] font-semibold text-swiss-ink truncate mt-0.5">
             {previewSubject || 'Your subject line…'}
           </p>
         </div>
@@ -897,7 +900,7 @@ function EmailCard({
         className="pt-2 border-t border-gray-50 mt-2.5 flex flex-wrap justify-between items-center gap-1.5"
         onClick={(e) => e.stopPropagation()}
       >
-        <span className="text-xs font-bold text-gray-400">
+        <span className="text-xs font-bold text-swiss-faint">
           Updated {formatUpdated(template.updatedAt)}
         </span>
         <div className="flex gap-1">
@@ -906,7 +909,7 @@ function EmailCard({
             title="Edit"
             onClick={onEdit}
             disabled={busy}
-            className="p-1 rounded-md hover:bg-gray-100 text-gray-600 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="p-1 rounded-md hover:bg-gray-100 text-swiss-muted disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <Pencil className="w-3 h-3" />
           </button>

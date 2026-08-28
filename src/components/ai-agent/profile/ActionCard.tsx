@@ -3,6 +3,7 @@ import { Bot } from 'lucide-react';
 import type { AgentActionConfig, AgentActionType } from '../types';
 import { ACTION_META, ACTION_PLACEHOLDERS } from './constants';
 import { InstructionToolbar } from './InstructionToolbar';
+import { Textarea } from '../../ui/textarea';
 
 type Props = {
   action: AgentActionConfig;
@@ -22,7 +23,7 @@ export const ActionCard: React.FC<Props> = ({
   const placeholder = ACTION_PLACEHOLDERS[action.type];
 
   return (
-    <div className="bg-white ring-1 ring-slate-200/80 rounded-xl p-5">
+    <div className="bg-white border border-swiss-line p-5">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h4 className="text-sm font-bold text-[#111827]">{meta.title}</h4>
@@ -51,13 +52,13 @@ export const ActionCard: React.FC<Props> = ({
             When and how should this action be performed?
           </label>
           <div className="relative">
-            <textarea
+            <Textarea
               ref={textareaRef}
               value={action.instruction}
               onChange={(e) => onChange({ instruction: e.target.value.slice(0, 1000) })}
               placeholder={placeholder}
               rows={6}
-              className="w-full bg-white rounded-lg py-3 px-3 pr-10 text-sm resize-y min-h-[120px] focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+              className="min-h-0 w-full bg-white rounded-lg py-3 px-3 pr-10 text-sm resize-y min-h-[120px] focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
             />
             <span className="absolute bottom-3 right-3 text-xs text-[#6B7280]">
               {action.instruction.length}/1000

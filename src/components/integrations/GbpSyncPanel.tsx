@@ -69,21 +69,21 @@ export function GbpSyncPanel({ connectionId, connectionEmail }: GbpSyncPanelProp
 
   if (loading && !status) {
     return (
-      <div className="flex items-center justify-center py-8 text-gray-400">
+      <div className="flex items-center justify-center py-8 text-swiss-faint">
         <Loader2 className="w-5 h-5 animate-spin" />
       </div>
     );
   }
 
   return (
-    <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-5">
+    <section className="bg-white border border-swiss-line rounded-2xl p-5 space-y-5">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
             <MapPin className="w-4 h-4 text-[#34A853]" />
-            <h3 className="text-sm font-black text-gray-950">Google Business Profile — Sync</h3>
+            <h3 className="text-sm font-semibold text-gray-950">Google Business Profile — Sync</h3>
           </div>
-          <p className="text-xs text-gray-500 font-medium mt-1">
+          <p className="text-xs text-swiss-muted font-medium mt-1">
             {connectionEmail ? `Account: ${connectionEmail}` : 'Cache-first sync via background workers'}
           </p>
         </div>
@@ -101,33 +101,33 @@ export function GbpSyncPanel({ connectionId, connectionEmail }: GbpSyncPanelProp
       )}
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-          <p className="text-sm font-bold uppercase text-gray-400">Accounts</p>
-          <p className="font-semibold text-gray-800 mt-1">
+        <div className="rounded-xl border border-swiss-line bg-slate-50 p-3">
+          <p className="text-sm font-bold uppercase text-swiss-faint">Accounts</p>
+          <p className="font-semibold text-swiss-ink mt-1">
             {formatLastSync(status?.lastSync.accounts ?? null)}
           </p>
-          <p className="text-xs text-gray-400 mt-0.5">{status?.counts.accounts ?? 0} cached</p>
+          <p className="text-xs text-swiss-faint mt-0.5">{status?.counts.accounts ?? 0} cached</p>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-          <p className="text-sm font-bold uppercase text-gray-400">Locations</p>
-          <p className="font-semibold text-gray-800 mt-1">
+        <div className="rounded-xl border border-swiss-line bg-slate-50 p-3">
+          <p className="text-sm font-bold uppercase text-swiss-faint">Locations</p>
+          <p className="font-semibold text-swiss-ink mt-1">
             {formatLastSync(status?.lastSync.locations ?? null)}
           </p>
-          <p className="text-xs text-gray-400 mt-0.5">{status?.counts.locations ?? 0} cached</p>
+          <p className="text-xs text-swiss-faint mt-0.5">{status?.counts.locations ?? 0} cached</p>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-          <p className="text-sm font-bold uppercase text-gray-400">Reviews</p>
-          <p className="font-semibold text-gray-800 mt-1">
+        <div className="rounded-xl border border-swiss-line bg-slate-50 p-3">
+          <p className="text-sm font-bold uppercase text-swiss-faint">Reviews</p>
+          <p className="font-semibold text-swiss-ink mt-1">
             {formatLastSync(status?.lastSync.reviews ?? null)}
           </p>
-          <p className="text-xs text-gray-400 mt-0.5">{status?.counts.reviews ?? 0} cached</p>
+          <p className="text-xs text-swiss-faint mt-0.5">{status?.counts.reviews ?? 0} cached</p>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-          <p className="text-sm font-bold uppercase text-gray-400">Metrics</p>
-          <p className="font-semibold text-gray-800 mt-1">
+        <div className="rounded-xl border border-swiss-line bg-slate-50 p-3">
+          <p className="text-sm font-bold uppercase text-swiss-faint">Metrics</p>
+          <p className="font-semibold text-swiss-ink mt-1">
             {formatLastSync(status?.lastSync.metrics ?? null)}
           </p>
-          <p className="text-xs text-gray-400 mt-0.5">{status?.counts.metrics ?? 0} cached</p>
+          <p className="text-xs text-swiss-faint mt-0.5">{status?.counts.metrics ?? 0} cached</p>
         </div>
       </div>
 
@@ -159,13 +159,13 @@ export function GbpSyncPanel({ connectionId, connectionEmail }: GbpSyncPanelProp
         <button
           type="button"
           onClick={() => void refresh()}
-          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-meta font-bold border border-slate-200 text-gray-600 hover:bg-slate-50"
+          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-meta font-bold border border-swiss-line text-swiss-muted hover:bg-slate-50"
         >
           Refresh status
         </button>
       </div>
 
-      <div className="flex flex-wrap gap-4 text-meta text-gray-500 font-medium">
+      <div className="flex flex-wrap gap-4 text-meta text-swiss-muted font-medium">
         <span>Pending jobs: {status?.jobs.waiting ?? 0}</span>
         <span>Active: {status?.jobs.active ?? 0}</span>
         <span className={status?.jobs.failed ? 'text-red-600 font-bold' : ''}>
@@ -174,14 +174,14 @@ export function GbpSyncPanel({ connectionId, connectionEmail }: GbpSyncPanelProp
       </div>
 
       <div>
-        <h4 className="text-sm font-black text-gray-800 mb-2">Sync logs</h4>
+        <h4 className="text-sm font-semibold text-swiss-ink mb-2">Sync logs</h4>
         {logs.length === 0 ? (
-          <p className="text-xs text-gray-400">No sync activity yet.</p>
+          <p className="text-xs text-swiss-faint">No sync activity yet.</p>
         ) : (
-          <div className="max-h-56 overflow-auto rounded-xl border border-slate-200">
+          <div className="max-h-56 overflow-auto rounded-xl border border-swiss-line">
             <table className="w-full text-meta">
               <thead className="bg-slate-50 sticky top-0">
-                <tr className="text-left text-gray-500">
+                <tr className="text-left text-swiss-muted">
                   <th className="px-3 py-2 font-bold">Type</th>
                   <th className="px-3 py-2 font-bold">Status</th>
                   <th className="px-3 py-2 font-bold">Duration</th>
@@ -192,19 +192,19 @@ export function GbpSyncPanel({ connectionId, connectionEmail }: GbpSyncPanelProp
               <tbody className="divide-y divide-[#f0eef5]">
                 {logs.map((log) => (
                   <tr key={log.id}>
-                    <td className="px-3 py-2 font-semibold text-gray-800">{log.syncType}</td>
+                    <td className="px-3 py-2 font-semibold text-swiss-ink">{log.syncType}</td>
                     <td
                       className={`px-3 py-2 font-bold ${log.status === 'error' ? 'text-red-600' : 'text-[#34A853]'}`}
                     >
                       {log.status}
                     </td>
-                    <td className="px-3 py-2 text-gray-600">
+                    <td className="px-3 py-2 text-swiss-muted">
                       {log.durationMs != null ? `${log.durationMs}ms` : '—'}
                     </td>
-                    <td className="px-3 py-2 text-gray-600 tabular-nums">
+                    <td className="px-3 py-2 text-swiss-muted tabular-nums">
                       {log.requestCount}/{log.responseCount}
                     </td>
-                    <td className="px-3 py-2 text-gray-500 whitespace-nowrap">
+                    <td className="px-3 py-2 text-swiss-muted whitespace-nowrap">
                       {new Date(log.createdAt).toLocaleString()}
                     </td>
                   </tr>

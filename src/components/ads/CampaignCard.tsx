@@ -31,7 +31,7 @@ const InsightsRow: React.FC<{
     { label: 'Clicks', value: fmt(insights.clicks), icon: <MousePointerClick className="w-3.5 h-3.5" />, color: 'text-indigo-600 bg-indigo-50' },
     { label: 'CTR', value: fmtPct(insights.ctr), icon: <Percent className="w-3.5 h-3.5" />, color: 'text-pink-600 bg-pink-50' },
     { label: 'CPC', value: fmtInr(insights.cpc), icon: <Target className="w-3.5 h-3.5" />, color: 'text-orange-600 bg-orange-50' },
-    { label: 'CPM', value: fmtInr(insights.cpm), icon: <BarChart2 className="w-3.5 h-3.5" />, color: 'text-gray-600 bg-gray-100' },
+    { label: 'CPM', value: fmtInr(insights.cpm), icon: <BarChart2 className="w-3.5 h-3.5" />, color: 'text-swiss-muted bg-gray-100' },
     ...(isCTWA
       ? [{ label: 'WA Convos', value: fmt(waConversations || 0), icon: <MessageSquare className="w-3.5 h-3.5" />, color: 'text-green-700 bg-green-50' }]
       : []),
@@ -41,14 +41,14 @@ const InsightsRow: React.FC<{
   ];
 
   return (
-    <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 mt-3 pt-3 border-t border-slate-200">
+    <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 mt-3 pt-3 border-t border-swiss-line">
       {metrics.map((m) => (
         <div key={m.label} className="text-center">
           <div className={`${m.color} w-6 h-6 rounded-lg flex items-center justify-center mx-auto mb-1`}>
             {m.icon}
           </div>
-          <p className="text-sm font-black text-gray-900 font-mono">{m.value}</p>
-          <p className="text-meta text-gray-500 font-medium">{m.label}</p>
+          <p className="text-sm font-black text-swiss-ink font-mono">{m.value}</p>
+          <p className="text-meta text-swiss-muted font-medium">{m.label}</p>
         </div>
       ))}
     </div>
@@ -75,7 +75,7 @@ export const CampaignCard: React.FC<{
       className={`bg-surface rounded-2xl border overflow-hidden flex flex-col transition-all duration-200 ${
         campaign.status === 'PAUSED'
           ? 'border-yellow-200 opacity-90'
-          : 'border-black/5 hover:border-sky-200 hover:shadow-md'
+          : 'border-swiss-line hover:border-sky-200 '
       }`}
     >
       <div className="h-44 bg-slate-100 flex items-center justify-center relative overflow-hidden">
@@ -104,15 +104,15 @@ export const CampaignCard: React.FC<{
 
       <div className="p-4 flex-1 flex flex-col">
         <div className="flex-1">
-          <h5 className="font-bold text-gray-900 text-sm leading-tight">{campaign.name}</h5>
-          <p className="text-xs text-gray-500 font-medium mb-3 mt-1">
+          <h5 className="font-bold text-swiss-ink text-sm leading-tight">{campaign.name}</h5>
+          <p className="text-xs text-swiss-muted font-medium mb-3 mt-1">
             {campaign.objective} • {fmtInr(campaign.dailyBudget)}/day • Started {campaign.startTime}
           </p>
 
           <div className="grid grid-cols-3 gap-2 mb-3">
             <div className="bg-slate-50 p-2 rounded-xl border border-slate-100 text-center">
-              <p className="text-meta text-gray-500 font-black uppercase">Clicks</p>
-              <p className="text-sm font-black text-gray-900 font-mono mt-0.5">{fmt(campaign.clicks)}</p>
+              <p className="text-meta text-swiss-muted font-black uppercase">Clicks</p>
+              <p className="text-sm font-black text-swiss-ink font-mono mt-0.5">{fmt(campaign.clicks)}</p>
             </div>
             <div className="bg-slate-50 p-2 rounded-xl border border-slate-100 text-center">
               <p className="text-meta text-sky-600 font-black uppercase">Conv%</p>
@@ -123,10 +123,10 @@ export const CampaignCard: React.FC<{
                 campaign.isCTWA ? 'bg-green-50 border-green-100' : 'bg-slate-50 border-slate-100'
               }`}
             >
-              <p className={`text-meta font-black uppercase ${campaign.isCTWA ? 'text-green-600' : 'text-gray-500'}`}>
+              <p className={`text-meta font-black uppercase ${campaign.isCTWA ? 'text-green-600' : 'text-swiss-muted'}`}>
                 {campaign.isCTWA ? 'WA Convos' : 'Reach'}
               </p>
-              <p className={`text-sm font-black font-mono mt-0.5 ${campaign.isCTWA ? 'text-green-700' : 'text-gray-900'}`}>
+              <p className={`text-sm font-black font-mono mt-0.5 ${campaign.isCTWA ? 'text-green-700' : 'text-swiss-ink'}`}>
                 {campaign.isCTWA
                   ? fmt(campaign.waConversationsStarted || 0)
                   : fmt(campaign.insights.reach)}
@@ -138,7 +138,7 @@ export const CampaignCard: React.FC<{
         <button
           type="button"
           onClick={() => setShowInsights(!showInsights)}
-          className="w-full flex items-center justify-between px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-sky-50 hover:text-sky-700 hover:border-sky-200 transition-colors cursor-pointer mb-3"
+          className="w-full flex items-center justify-between px-3 py-2 bg-slate-50 border border-swiss-line rounded-xl text-sm font-bold text-swiss-muted hover:bg-sky-50 hover:text-sky-700 hover:border-sky-200 transition-colors cursor-pointer mb-3"
         >
           <span className="flex items-center gap-1.5">
             <BarChart2 className="w-3.5 h-3.5" /> View Analytics
@@ -154,7 +154,7 @@ export const CampaignCard: React.FC<{
           />
         )}
 
-        <div className="pt-3 border-t border-slate-200 flex items-center justify-between mt-3 gap-2">
+        <div className="pt-3 border-t border-swiss-line flex items-center justify-between mt-3 gap-2">
           {!readOnly && onToggle && onDelete ? (
             <div className="flex items-center gap-2">
               <button
@@ -187,7 +187,7 @@ export const CampaignCard: React.FC<{
               </button>
             </div>
           ) : (
-            <span className="text-xs text-gray-500 font-medium">Manage in Google Ads</span>
+            <span className="text-xs text-swiss-muted font-medium">Manage in Google Ads</span>
           )}
           <a
             href={managerHref}

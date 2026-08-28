@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { X, Search, Plus, Trash2 } from 'lucide-react';
 import type { KnowledgeItem } from '../types';
 import { api } from '../../../lib/api';
+import { Input } from '../../ui/input';
+import { Textarea } from '../../ui/textarea';
 
 export type SkillDraft = {
   title: string;
@@ -88,7 +90,7 @@ function KnowledgeMultiSelect({
     return <p className="text-xs text-[#6B7280]">No knowledge items yet.</p>;
   }
   return (
-    <div className="max-h-36 overflow-y-auto border border-black/5 rounded-xl divide-y divide-black/5">
+    <div className="max-h-36 overflow-y-auto border border-swiss-line rounded-xl divide-y divide-swiss-line">
       {items.map((item) => {
         const checked = selected.includes(item.id);
         return (
@@ -232,8 +234,8 @@ export const NewSkillModal: React.FC<Props> = ({
 
   return (
     <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-lg border border-black/5 shadow-2xl max-h-[90vh] flex flex-col">
-        <div className="flex justify-between items-center px-6 py-4 border-b border-black/5 shrink-0">
+      <div className="bg-white rounded-2xl w-full max-w-lg border border-swiss-line shadow-2xl max-h-[90vh] flex flex-col">
+        <div className="flex justify-between items-center px-6 py-4 border-b border-swiss-line shrink-0">
           <h3 className="text-base font-bold text-[#111827]">
             {mode === 'bulk' ? 'Bulk add skills' : 'New Skill'}
           </h3>
@@ -268,18 +270,18 @@ export const NewSkillModal: React.FC<Props> = ({
             <>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280]" />
-                <input
+                <Input
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search skills or enter a name"
-                  className="w-full pl-10 pr-3 py-2.5 border border-black/5 rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                  className="h-auto w-full pl-10 pr-3 py-2.5 border border-swiss-line rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-[#111827] mb-1.5">Name</label>
-                <input
+                <Input
                   type="text"
                   value={title}
                   onChange={(e) => {
@@ -287,7 +289,7 @@ export const NewSkillModal: React.FC<Props> = ({
                     setSelected(null);
                   }}
                   placeholder="Enter name here"
-                  className="w-full border border-black/5 rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                  className="h-auto w-full border border-swiss-line rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
                 />
               </div>
 
@@ -295,12 +297,12 @@ export const NewSkillModal: React.FC<Props> = ({
                 <label className="block text-sm font-medium text-[#111827] mb-1.5">
                   Description <span className="text-[#6B7280] font-normal">(optional)</span>
                 </label>
-                <textarea
+                <Textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value.slice(0, 500))}
                   rows={2}
                   placeholder="Short blurb for the skills list"
-                  className="w-full border border-black/5 rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none resize-none"
+                  className="min-h-0 w-full border border-swiss-line rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none resize-none"
                 />
               </div>
 
@@ -356,12 +358,12 @@ export const NewSkillModal: React.FC<Props> = ({
                 <label className="block text-sm font-medium text-[#111827] mb-1.5">
                   Paste JSON <span className="text-[#6B7280] font-normal">(optional)</span>
                 </label>
-                <textarea
+                <Textarea
                   value={jsonPaste}
                   onChange={(e) => setJsonPaste(e.target.value)}
                   rows={3}
                   placeholder='[{"title":"…","trigger":"","instructions":"","description":"","knowledgeItemIds":[]}]'
-                  className="w-full border border-black/5 rounded-xl py-2.5 px-3 text-xs font-mono focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none resize-none"
+                  className="min-h-0 w-full border border-swiss-line rounded-xl py-2.5 px-3 text-xs font-mono focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none resize-none"
                 />
                 {jsonError && <p className="text-xs text-red-600 mt-1">{jsonError}</p>}
                 <button
@@ -376,7 +378,7 @@ export const NewSkillModal: React.FC<Props> = ({
 
               <div className="space-y-3">
                 {rows.map((row, idx) => (
-                  <div key={idx} className="border border-black/5 rounded-xl p-3 space-y-2">
+                  <div key={idx} className="border border-swiss-line rounded-xl p-3 space-y-2">
                     <div className="flex items-center justify-between gap-2">
                       <span className="text-xs font-bold text-[#6B7280]">Row {idx + 1}</span>
                       {rows.length > 1 && (
@@ -390,7 +392,7 @@ export const NewSkillModal: React.FC<Props> = ({
                         </button>
                       )}
                     </div>
-                    <input
+                    <Input
                       type="text"
                       value={row.title}
                       onChange={(e) =>
@@ -399,9 +401,9 @@ export const NewSkillModal: React.FC<Props> = ({
                         )
                       }
                       placeholder="Name"
-                      className="w-full border border-black/5 rounded-lg py-2 px-3 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                      className="h-auto w-full border border-swiss-line rounded-lg py-2 px-3 text-sm outline-none focus:ring-2 focus:ring-primary/20"
                     />
-                    <input
+                    <Input
                       type="text"
                       value={row.description ?? ''}
                       onChange={(e) =>
@@ -412,9 +414,9 @@ export const NewSkillModal: React.FC<Props> = ({
                         )
                       }
                       placeholder="Description (optional)"
-                      className="w-full border border-black/5 rounded-lg py-2 px-3 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                      className="h-auto w-full border border-swiss-line rounded-lg py-2 px-3 text-sm outline-none focus:ring-2 focus:ring-primary/20"
                     />
-                    <textarea
+                    <Textarea
                       value={row.trigger}
                       onChange={(e) =>
                         setRows((r) =>
@@ -423,7 +425,7 @@ export const NewSkillModal: React.FC<Props> = ({
                       }
                       placeholder="Trigger (optional — empty OK)"
                       rows={2}
-                      className="w-full border border-black/5 rounded-lg py-2 px-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 resize-none"
+                      className="min-h-0 w-full border border-swiss-line rounded-lg py-2 px-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 resize-none"
                     />
                     <KnowledgeMultiSelect
                       items={kbItems}

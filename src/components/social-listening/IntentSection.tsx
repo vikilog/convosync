@@ -19,7 +19,7 @@ export const IntentSection: React.FC<{
 
   return (
     <section
-      className={`rounded-2xl bg-white ring-1 ring-slate-200/80 overflow-hidden ${
+      className={`bg-white border border-swiss-line overflow-hidden ${
         theme.muted ? 'opacity-90' : ''
       }`}
     >

@@ -26,10 +26,10 @@ export function GoogleBusinessProfileView({ connectedTools }: GoogleBusinessProf
   if (!bp.loading && !bp.integration) {
     return (
       <div className="flex flex-1 items-center justify-center p-8 bg-slate-50">
-        <div className="max-w-md text-center rounded-2xl border border-slate-200 bg-white px-8 py-10 shadow-[0_4px_24px_rgba(52,168,83,0.06)]">
+        <div className="max-w-md text-center rounded-2xl border border-swiss-line bg-white px-8 py-10 shadow-[0_4px_24px_rgba(52,168,83,0.06)]">
           <MapPin className="w-10 h-10 mx-auto text-[#34A853] mb-4" />
-          <h2 className="text-lg font-black text-gray-950">Business Profile not connected</h2>
-          <p className="text-sm text-gray-500 mt-2 leading-relaxed">
+          <h2 className="text-lg font-semibold text-gray-950">Business Profile not connected</h2>
+          <p className="text-sm text-swiss-muted mt-2 leading-relaxed">
             Connect Google Business Profile from Integrations → Google to manage locations here.
           </p>
           <button

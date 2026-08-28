@@ -133,8 +133,8 @@ export function WhatsAppPaymentModePanel({
 
   if (loading) {
     return (
-      <div className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-6">
-        <p className="text-sm font-bold text-gray-500">Checking payment setup…</p>
+      <div className="bg-white border border-swiss-line p-6">
+        <p className="text-sm font-bold text-swiss-muted">Checking payment setup…</p>
       </div>
     );
   }
@@ -146,14 +146,14 @@ export function WhatsAppPaymentModePanel({
   const readyToContinue = hasPm || acknowledged || modeChosen;
 
   return (
-    <div className="rounded-2xl bg-white ring-1 ring-slate-200/80 p-6 sm:p-8 shadow-sm space-y-5">
+    <div className="bg-white border border-swiss-line p-6 sm:p-8 space-y-5">
       {variant === 'post_connect' ? (
         <div>
           <span className="inline-block px-3 py-1 rounded-full text-sm font-black uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 mb-4">
             Step 3 — Payment mode
           </span>
-          <h4 className="text-xl font-black text-gray-950">How will Meta bill WhatsApp usage?</h4>
-          <p className="mt-2 text-sm text-gray-600 font-medium max-w-xl">
+          <h4 className="text-xl font-semibold text-gray-950">How will Meta bill WhatsApp usage?</h4>
+          <p className="mt-2 text-sm text-swiss-muted font-medium max-w-xl">
             Tech Provider clients pay Meta directly for conversation charges. You can finish this
             later from WhatsApp settings.
           </p>
@@ -197,7 +197,7 @@ export function WhatsAppPaymentModePanel({
 
         <div
           aria-disabled
-          className="rounded-xl border border-black/5 bg-slate-50 p-4 opacity-60 cursor-not-allowed"
+          className="rounded-xl border border-swiss-line bg-slate-50 p-4 opacity-60 cursor-not-allowed"
         >
           <div className="flex items-start gap-3">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-200 text-slate-500">
@@ -258,7 +258,7 @@ export function WhatsAppPaymentModePanel({
                   type="button"
                   disabled={busy}
                   onClick={refresh}
-                  className="inline-flex items-center gap-2 rounded-xl bg-white ring-1 ring-slate-200/80 px-4 py-2 text-sm font-bold text-slate-800 hover:bg-surface-muted disabled:opacity-50"
+                  className="inline-flex items-center gap-2 bg-white border border-swiss-line px-4 py-2 text-sm font-bold text-slate-800 hover:bg-surface-muted disabled:opacity-50"
                 >
                   <RefreshCw className={`h-3.5 w-3.5 ${busy ? 'animate-spin' : ''}`} aria-hidden />
                   Refresh status
@@ -294,7 +294,7 @@ export function WhatsAppPaymentModePanel({
                   type="button"
                   disabled={busy}
                   onClick={refresh}
-                  className="inline-flex items-center gap-2 rounded-xl bg-white ring-1 ring-slate-200/80 px-4 py-2 text-sm font-bold text-slate-800 hover:bg-surface-muted disabled:opacity-50"
+                  className="inline-flex items-center gap-2 bg-white border border-swiss-line px-4 py-2 text-sm font-bold text-slate-800 hover:bg-surface-muted disabled:opacity-50"
                 >
                   <RefreshCw className={`h-3.5 w-3.5 ${busy ? 'animate-spin' : ''}`} aria-hidden />
                   Refresh status
@@ -326,7 +326,7 @@ export function WhatsAppPaymentModePanel({
           <button
             type="button"
             onClick={onDone}
-            className="inline-flex items-center justify-center rounded-xl bg-channel-green hover:bg-[#20bd5a] px-5 py-2.5 text-sm font-black text-white shadow-sm"
+            className="inline-flex items-center justify-center rounded-xl bg-channel-green hover:bg-[#20bd5a] px-5 py-2.5 text-sm font-black text-white "
           >
             {readyToContinue ? 'Continue to WhatsApp' : 'Skip for now'}
           </button>

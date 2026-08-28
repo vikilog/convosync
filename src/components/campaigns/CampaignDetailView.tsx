@@ -44,12 +44,12 @@ import { ResendButton } from '../shared/ResendButton';
 const FAILED_STATUSES = new Set(['failed', 'bounced', 'rejected']);
 
 const STATUS_STYLE: Record<CampaignRecordStatus, string> = {
-  Draft: 'bg-gray-100 text-gray-600 border-gray-200',
+  Draft: 'bg-gray-100 text-swiss-muted border-gray-200',
   Scheduled: 'bg-amber-50 text-amber-800 border-amber-100',
   Running: 'bg-blue-50 text-blue-700 border-blue-100',
   Completed: 'bg-green-50 text-green-700 border-green-100',
   Failed: 'bg-red-50 text-red-700 border-red-100',
-  Cancelled: 'bg-gray-100 text-gray-600 border-gray-200',
+  Cancelled: 'bg-gray-100 text-swiss-muted border-gray-200',
 };
 
 const MESSAGE_STATUS_STYLE: Record<string, string> = {
@@ -57,7 +57,7 @@ const MESSAGE_STATUS_STYLE: Record<string, string> = {
   opened: 'text-emerald-800 bg-emerald-50/90 ring-emerald-200/70',
   clicked: 'text-emerald-800 bg-emerald-50/90 ring-emerald-200/70',
   delivered: 'text-sky-800 bg-sky-50/90 ring-sky-200/70',
-  sent: 'text-slate-700 bg-slate-100/90 ring-slate-200/80',
+  sent: 'text-slate-700 bg-slate-100/90 ring-swiss-line',
   resent: 'text-primary bg-primary/8 ring-primary/20',
   queued: 'text-amber-800 bg-amber-50/90 ring-amber-200/70',
   resend_pending: 'text-amber-800 bg-amber-50/90 ring-amber-200/70',
@@ -67,10 +67,10 @@ const MESSAGE_STATUS_STYLE: Record<string, string> = {
 };
 
 const WhatsAppMessagePreview: React.FC<{ body: string }> = ({ body }) => (
-  <div className="w-full bg-[#efeae2] rounded-2xl p-4 border border-slate-200">
-    <div className="bg-white p-3 rounded-r-xl rounded-bl-xl shadow-sm border border-gray-100 space-y-1">
+  <div className="w-full bg-[#efeae2] rounded-2xl p-4 border border-swiss-line">
+ <div className="bg-white p-3 rounded-r-xl rounded-bl-xl border border-gray-100 space-y-1">
       <p className="text-xs text-stone-800 leading-relaxed whitespace-pre-wrap">{body}</p>
-      <div className="text-meta text-gray-400 text-right flex justify-end gap-0.5">
+      <div className="text-meta text-swiss-faint text-right flex justify-end gap-0.5">
         <span>{formatDate(new Date().toISOString()).split(',')[1]?.trim() ?? ''}</span>
         <CheckCheck className="w-3 h-3 text-cyan-600" aria-hidden />
       </div>
@@ -92,19 +92,19 @@ const DeliveryTrendChart: React.FC<{ series: CampaignDeliveryTrendPoint[] }> = (
     series.length > 0 ? series[series.length - 1]!.cumulative.toLocaleString() : null;
 
   return (
-    <div className="border-b border-black/5 px-5 py-5">
+    <div className="border-b border-swiss-line px-5 py-5">
       <div className="mb-3 flex items-end justify-between gap-3">
         <div>
-          <h4 className="text-sm font-semibold text-gray-900">Delivery pace</h4>
-          <p className="mt-0.5 text-[11px] font-medium text-gray-400">
+          <h4 className="text-sm font-semibold text-swiss-ink">Delivery pace</h4>
+          <p className="mt-0.5 text-[11px] font-medium text-swiss-faint">
             Cumulative delivered vs time
           </p>
         </div>
-        <p className="shrink-0 text-xs font-semibold tabular-nums text-gray-500">
+        <p className="shrink-0 text-xs font-semibold tabular-nums text-swiss-muted">
           {deliveredTotal != null ? (
             <>
               <span className="text-primary">{deliveredTotal}</span>
-              <span className="ml-1 text-gray-400">delivered</span>
+              <span className="ml-1 text-swiss-faint">delivered</span>
             </>
           ) : (
             'No deliveries'
@@ -117,8 +117,8 @@ const DeliveryTrendChart: React.FC<{ series: CampaignDeliveryTrendPoint[] }> = (
             className="flex h-full min-h-[180px] flex-col items-center justify-center px-4 text-center"
             role="status"
           >
-            <p className="text-sm font-semibold text-gray-600">Pace chart pending</p>
-            <p className="mt-1 max-w-sm text-xs font-medium leading-relaxed text-gray-400">
+            <p className="text-sm font-semibold text-swiss-muted">Pace chart pending</p>
+            <p className="mt-1 max-w-sm text-xs font-medium leading-relaxed text-swiss-faint">
               Cumulative delivery appears once delivered timestamps land — common until webhook
               timeline backfill finishes.
             </p>
@@ -156,9 +156,9 @@ const DeliveryTrendChart: React.FC<{ series: CampaignDeliveryTrendPoint[] }> = (
                 type="monotone"
                 dataKey="cumulative"
                 name="Delivered"
-                stroke="var(--color-primary, #064e3b)"
+                stroke="var(--color-primary, #078038)"
                 strokeWidth={2}
-                dot={series.length <= 24 ? { r: 2.5, fill: 'var(--color-primary, #064e3b)' } : false}
+                dot={series.length <= 24 ? { r: 2.5, fill: 'var(--color-primary, #078038)' } : false}
                 activeDot={{ r: 4, strokeWidth: 2, stroke: '#fafaf8' }}
                 animationDuration={shouldReduceMotion ? 0 : 500}
                 isAnimationActive={!shouldReduceMotion}
@@ -196,8 +196,8 @@ const RecipientsTable: React.FC<{
     return (
       <div className="flex min-h-[220px] flex-1 items-center justify-center p-10 text-center">
         <div className="max-w-md">
-          <p className="text-sm font-semibold text-gray-600">No delivery logs yet</p>
-          <p className="mt-1 text-xs font-medium leading-relaxed text-gray-400">
+          <p className="text-sm font-semibold text-swiss-muted">No delivery logs yet</p>
+          <p className="mt-1 text-xs font-medium leading-relaxed text-swiss-faint">
             {status === 'Draft' || status === 'Scheduled'
               ? status === 'Scheduled'
                 ? 'This campaign is scheduled. Delivery logs appear after it runs.'
@@ -223,32 +223,32 @@ const RecipientsTable: React.FC<{
           {showActions && <col className="w-[10%]" />}
         </colgroup>
         <thead className="sticky top-0 z-10">
-          <tr className="border-b border-black/5 bg-white/95 backdrop-blur-sm">
-            <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-gray-400">
+          <tr className="border-b border-swiss-line bg-white/95 backdrop-blur-sm">
+            <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-swiss-faint">
               Contact
             </th>
-            <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-gray-400">
+            <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-swiss-faint">
               {destLabel}
             </th>
             {isEmail && (
-              <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-gray-400">
+              <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-swiss-faint">
                 Subject
               </th>
             )}
-            <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-gray-400">
+            <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-swiss-faint">
               Status
             </th>
-            <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-gray-400">
+            <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-swiss-faint">
               Sent at
             </th>
-            <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-gray-400">
+            <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-swiss-faint">
               Delivered at
             </th>
-            <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-gray-400">
+            <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-swiss-faint">
               Read at
             </th>
             {showActions && (
-              <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-gray-400">
+              <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-swiss-faint">
                 Action
               </th>
             )}
@@ -263,14 +263,14 @@ const RecipientsTable: React.FC<{
                 key={row.messageId}
                 className="border-b border-black/[0.04] transition-colors duration-150 hover:bg-black/[0.015]"
               >
-                <td className="px-5 py-3.5 text-sm font-semibold text-gray-900 truncate">
+                <td className="px-5 py-3.5 text-sm font-semibold text-swiss-ink truncate">
                   {row.contactName}
                 </td>
-                <td className="px-5 py-3.5 font-mono text-xs text-gray-500 truncate">
+                <td className="px-5 py-3.5 font-mono text-xs text-swiss-muted truncate">
                   {resolveDest(row)}
                 </td>
                 {isEmail && (
-                  <td className="px-5 py-3.5 text-xs text-gray-500 truncate">
+                  <td className="px-5 py-3.5 text-xs text-swiss-muted truncate">
                     {row.content || '—'}
                   </td>
                 )}
@@ -278,7 +278,7 @@ const RecipientsTable: React.FC<{
                   <span
                     className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-semibold capitalize tracking-wide ring-1 ring-inset ${
                       MESSAGE_STATUS_STYLE[statusKey] ??
-                      'bg-gray-100 text-gray-600 ring-gray-200'
+                      'bg-gray-100 text-swiss-muted ring-gray-200'
                     }`}
                   >
                     {row.status.replace('_', ' ')}
@@ -292,13 +292,13 @@ const RecipientsTable: React.FC<{
                     </p>
                   )}
                 </td>
-                <td className="whitespace-nowrap px-5 py-3.5 text-xs font-medium tabular-nums text-gray-500">
+                <td className="whitespace-nowrap px-5 py-3.5 text-xs font-medium tabular-nums text-swiss-muted">
                   {formatDate(row.sentAt)}
                 </td>
-                <td className="whitespace-nowrap px-5 py-3.5 text-xs font-medium tabular-nums text-gray-500">
+                <td className="whitespace-nowrap px-5 py-3.5 text-xs font-medium tabular-nums text-swiss-muted">
                   {formatDate(row.deliveredAt)}
                 </td>
-                <td className="whitespace-nowrap px-5 py-3.5 text-xs font-medium tabular-nums text-gray-500">
+                <td className="whitespace-nowrap px-5 py-3.5 text-xs font-medium tabular-nums text-swiss-muted">
                   {formatDate(row.readAt)}
                 </td>
                 {showActions && (
@@ -320,7 +320,7 @@ const RecipientsTable: React.FC<{
         </tbody>
       </table>
       {recipients.length < sentCount && sentCount > 0 && (
-        <p className="border-t border-black/5 px-5 py-2.5 text-xs font-medium text-gray-400">
+        <p className="border-t border-swiss-line px-5 py-2.5 text-xs font-medium text-swiss-faint">
           Showing {recipients.length} of {sentCount} sent
         </p>
       )}
@@ -443,7 +443,7 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
           type="button"
           onClick={() => navigate(pathForTab('campaigns'))}
           aria-label="Back to campaigns"
-          className="flex items-center gap-1.5 text-sm font-bold text-gray-600 hover:text-primary mb-4"
+          className="flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-primary mb-4"
         >
           <ArrowLeft className="w-4 h-4" aria-hidden />
         </button>
@@ -461,18 +461,18 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
 
   const mainContent = (
     <div className="p-6 w-full max-w-none space-y-5">
-      <div className="bg-white ring-1 ring-slate-200/80 rounded-2xl p-5 space-y-3">
+      <div className="bg-white border border-swiss-line p-5 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0 flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={() => navigate(pathForTab('campaigns'))}
               aria-label="Back to campaigns"
-              className="shrink-0 flex items-center text-gray-500 hover:text-primary cursor-pointer transition-colors duration-200"
+              className="shrink-0 flex items-center text-swiss-muted hover:text-primary cursor-pointer transition-colors duration-200"
             >
               <ArrowLeft className="w-4 h-4" aria-hidden />
             </button>
-            <h2 className="text-base font-black text-gray-900 break-words">{detail.name}</h2>
+            <h2 className="text-base font-semibold text-swiss-ink break-words">{detail.name}</h2>
             <span
               className={`inline-flex text-sm font-black px-2 py-0.5 rounded-lg border ${STATUS_STYLE[detail.status]}`}
             >
@@ -498,7 +498,7 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
                 onClick={() => canEditSchedule && openFullEdit()}
                 disabled={!canEditSchedule}
                 title={canEditSchedule ? 'Edit campaign' : SCHEDULED_CAMPAIGN_EDIT_BLOCKED_HINT}
-                className="cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-white border border-black/5 hover:bg-surface-muted text-gray-700 rounded-xl text-xs font-bold disabled:cursor-not-allowed disabled:opacity-45 transition-colors duration-200"
+                className="cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-white border border-swiss-line hover:bg-surface-muted text-swiss-ink rounded-xl text-xs font-bold disabled:cursor-not-allowed disabled:opacity-45 transition-colors duration-200"
               >
                 <Pencil className="w-3.5 h-3.5" aria-hidden />
                 Edit
@@ -508,40 +508,40 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
               type="button"
               onClick={loadDetail}
               aria-label="Refresh"
-              className="cursor-pointer p-1.5 bg-white border border-black/5 hover:bg-surface-muted text-gray-600 rounded-xl flex items-center transition-colors duration-200"
+              className="cursor-pointer p-1.5 bg-white border border-swiss-line hover:bg-surface-muted text-swiss-muted rounded-xl flex items-center transition-colors duration-200"
             >
               <RefreshCw className="w-3.5 h-3.5" aria-hidden />
             </button>
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-x-5 gap-y-1 text-meta font-bold text-gray-500 pt-1 border-t border-black/5">
+        <div className="flex flex-wrap gap-x-5 gap-y-1 text-meta font-bold text-swiss-muted pt-1 border-t border-swiss-line">
           <span>
-            <span className="text-gray-400">Recipients </span>
+            <span className="text-swiss-faint">Recipients </span>
             {insights.totalRecipients.toLocaleString()}
           </span>
           <span>
-            <span className="text-gray-400">Sent </span>
+            <span className="text-swiss-faint">Sent </span>
             {insights.sent.toLocaleString()}
           </span>
           <span>
-            <span className="text-gray-400">Delivered </span>
+            <span className="text-swiss-faint">Delivered </span>
             {insights.delivered.toLocaleString()}
             {insights.deliveryRate > 0 && (
-              <span className="text-gray-400 font-normal"> ({insights.deliveryRate}%)</span>
+              <span className="text-swiss-faint font-normal"> ({insights.deliveryRate}%)</span>
             )}
           </span>
           {isEmail ? (
             <span>
-              <span className="text-gray-400">Opened </span>
+              <span className="text-swiss-faint">Opened </span>
               {insights.read.toLocaleString()}
               {insights.readRate > 0 && (
-                <span className="text-gray-400 font-normal"> ({insights.readRate}%)</span>
+                <span className="text-swiss-faint font-normal"> ({insights.readRate}%)</span>
               )}
             </span>
           ) : (
             <span>
-              <span className="text-gray-400">Read </span>
+              <span className="text-swiss-faint">Read </span>
               {insights.read.toLocaleString()}
             </span>
           )}
@@ -556,12 +556,12 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
             </button>
           ) : (
             <span>
-              <span className="text-gray-400">Failed </span>0
+              <span className="text-swiss-faint">Failed </span>0
             </span>
           )}
           {(insights.successRate != null || detail.analytics) && (
             <span>
-              <span className="text-gray-400">Success </span>
+              <span className="text-swiss-faint">Success </span>
               {(detail.analytics?.successRate ?? insights.successRate ?? 0).toLocaleString()}%
             </span>
           )}
@@ -575,35 +575,35 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
         <CampaignDetailAnalytics channel={detail.channel} analytics={detail.analytics} />
       )}
 
-      <div className="bg-white ring-1 ring-slate-200/80 rounded-2xl p-5">
-        <h3 className="text-sm font-black text-gray-900 uppercase tracking-wider mb-3">Details</h3>
+      <div className="bg-white border border-swiss-line p-5">
+        <h3 className="text-sm font-semibold text-swiss-ink uppercase tracking-wider mb-3">Details</h3>
         <dl className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-3">
           {detailRows.map(([label, value]) => (
             <div key={label} className="min-w-0">
-              <dt className="text-xs text-gray-400 font-bold">{label}</dt>
-              <dd className="mt-0.5 text-sm text-gray-900 font-bold break-words">{value}</dd>
+              <dt className="text-xs text-swiss-faint font-bold">{label}</dt>
+              <dd className="mt-0.5 text-sm text-swiss-ink font-bold break-words">{value}</dd>
             </div>
           ))}
         </dl>
       </div>
 
       <section
-        className="flex min-h-[320px] flex-col overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200/80"
+        className="flex min-h-[320px] flex-col overflow-hidden bg-white border border-swiss-line"
         aria-labelledby="campaign-recipients-heading"
       >
-        <div className="flex shrink-0 items-baseline justify-between gap-3 border-b border-black/5 px-5 py-4">
+        <div className="flex shrink-0 items-baseline justify-between gap-3 border-b border-swiss-line px-5 py-4">
           <div className="min-w-0">
             <h3
               id="campaign-recipients-heading"
-              className="text-sm font-semibold tracking-tight text-gray-900"
+              className="text-sm font-semibold tracking-tight text-swiss-ink"
             >
               Recipients
             </h3>
-            <p className="mt-0.5 text-xs font-medium text-gray-400">
+            <p className="mt-0.5 text-xs font-medium text-swiss-faint">
               Per-message delivery status and timestamps
             </p>
           </div>
-          <span className="shrink-0 text-xs font-semibold tabular-nums text-gray-500">
+          <span className="shrink-0 text-xs font-semibold tabular-nums text-swiss-muted">
             {detail.recipients.length > 0
               ? `${detail.recipients.length} logged`
               : detail.sentCount > 0
@@ -625,12 +625,12 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
       {showFailedOnly && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div className="bg-white rounded-2xl border border-black/10 shadow-xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden">
-            <div className="px-5 py-3 border-b border-black/5 flex items-center justify-between gap-3 shrink-0">
+            <div className="px-5 py-3 border-b border-swiss-line flex items-center justify-between gap-3 shrink-0">
               <div>
-                <h3 className="text-sm font-black text-gray-900">
+                <h3 className="text-sm font-semibold text-swiss-ink">
                   Failed recipients ({failedRecipients.length})
                 </h3>
-                <p className="text-xs text-gray-400 font-bold mt-0.5">
+                <p className="text-xs text-swiss-faint font-bold mt-0.5">
                   Resend uses the original payload through the same send pipeline
                 </p>
               </div>
@@ -651,7 +651,7 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
                 <button
                   type="button"
                   onClick={() => setShowFailedOnly(false)}
-                  className="cursor-pointer p-1.5 rounded-lg hover:bg-surface-muted text-gray-500"
+                  className="cursor-pointer p-1.5 rounded-lg hover:bg-surface-muted text-swiss-muted"
                   aria-label="Close"
                 >
                   <X className="w-4 h-4" />
@@ -661,8 +661,8 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
             <div className="min-h-0 flex-1 overflow-auto">
               {failedRecipients.length === 0 ? (
                 <div className="p-10 text-center">
-                  <p className="text-sm font-bold text-gray-600">No failed recipients</p>
-                  <p className="text-xs text-gray-400 mt-1">All failures have been resent or cleared.</p>
+                  <p className="text-sm font-bold text-swiss-muted">No failed recipients</p>
+                  <p className="text-xs text-swiss-faint mt-1">All failures have been resent or cleared.</p>
                 </div>
               ) : (
                 <RecipientsTable
@@ -692,17 +692,17 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
 
   return (
     <div className="flex-1 flex flex-col xl:flex-row h-[calc(100vh-64px)] overflow-hidden bg-white selection:bg-primary/15">
-      <section className="flex-1 flex flex-col min-w-0 min-h-0 overflow-y-auto border-r border-black/5">
+      <section className="flex-1 flex flex-col min-w-0 min-h-0 overflow-y-auto border-r border-swiss-line">
         {mainContent}
       </section>
-      <aside className="w-full xl:w-[320px] shrink-0 p-5 flex flex-col bg-white border-t xl:border-t-0 xl:border-l border-black/5 overflow-y-auto">
-        <p className="text-sm font-black text-gray-400 uppercase tracking-widest mb-4">
+      <aside className="w-full xl:w-[320px] shrink-0 p-5 flex flex-col bg-white border-t xl:border-t-0 xl:border-l border-swiss-line overflow-y-auto">
+        <p className="text-sm font-black text-swiss-faint uppercase tracking-widest mb-4">
           Message sent
         </p>
         <WhatsAppMessagePreview body={messageBody} />
         {detail.template?.name && (
-          <p className="text-xs text-gray-400 font-bold mt-4">
-            Template: <span className="text-gray-600">{detail.template.name}</span>
+          <p className="text-xs text-swiss-faint font-bold mt-4">
+            Template: <span className="text-swiss-muted">{detail.template.name}</span>
           </p>
         )}
       </aside>

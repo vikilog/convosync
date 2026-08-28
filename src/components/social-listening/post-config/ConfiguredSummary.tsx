@@ -21,18 +21,18 @@ export function ConfiguredSummary({
           <p className="text-[11px] font-semibold uppercase tracking-wide text-emerald-700/80">
             Configured
           </p>
-          <p className="mt-1 text-sm font-bold text-gray-900">
+          <p className="mt-1 text-sm font-bold text-swiss-ink">
             <span className="text-emerald-800">{funnelName(values.funnelId)}</span>
-            <span className="font-medium text-gray-400"> · </span>
+            <span className="font-medium text-swiss-faint"> · </span>
             <span>{skillTitle(values.skillId)}</span>
-            <span className="font-medium text-gray-400"> · </span>
+            <span className="font-medium text-swiss-faint"> · </span>
             <span>{toneLabel(values.tone)}</span>
           </p>
         </div>
         <button
           type="button"
           onClick={onEdit}
-          className="inline-flex shrink-0 cursor-pointer items-center gap-1 rounded-xl border border-black/10 bg-white px-3 py-1.5 text-xs font-bold text-gray-700 hover:bg-surface-muted"
+          className="inline-flex shrink-0 cursor-pointer items-center gap-1 rounded-xl border border-black/10 bg-white px-3 py-1.5 text-xs font-bold text-swiss-ink hover:bg-surface-muted"
         >
           <Pencil className="h-3 w-3" />
           Edit

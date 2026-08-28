@@ -8,6 +8,7 @@ import {
   type Condition,
 } from './conditionTypes';
 import { useWorkspaceTags } from '../../../lib/useWorkspaceTags';
+import { Input } from '../../../components/ui/input';
 
 const DAYS_OF_WEEK = [
   { value: 0, label: 'Sun' },
@@ -19,7 +20,7 @@ const DAYS_OF_WEEK = [
   { value: 6, label: 'Sat' },
 ];
 
-const INPUT = 'w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm';
+const INPUT = 'w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm';
 const LABEL = 'block text-xs font-semibold text-slate-500';
 
 type Props = {
@@ -46,7 +47,7 @@ export function ConditionRow({ condition, onChange, onRemove }: Props) {
   const patch = (updates: Partial<Condition>) => onChange({ ...condition, ...updates });
 
   return (
-    <div className="space-y-2 rounded-xl border border-slate-200 bg-white p-2.5">
+    <div className="space-y-2 rounded-xl border border-swiss-line bg-white p-2.5">
       <div className="flex items-center justify-between">
         <p className="text-xs font-bold text-slate-700">{def?.label ?? 'Condition'}</p>
         <button
@@ -74,7 +75,7 @@ export function ConditionRow({ condition, onChange, onRemove }: Props) {
           </label>
           <label className={LABEL}>
             Tag
-            <input
+            <Input
               className={INPUT}
               list="condition-row-tag-options"
               value={String(condition.value ?? '')}
@@ -101,7 +102,7 @@ export function ConditionRow({ condition, onChange, onRemove }: Props) {
         <div className="grid grid-cols-3 gap-2">
           <label className={`${LABEL} col-span-1`}>
             Field key
-            <input
+            <Input
               className={INPUT}
               value={condition.field}
               onChange={(e) => patch({ field: e.target.value })}
@@ -120,7 +121,7 @@ export function ConditionRow({ condition, onChange, onRemove }: Props) {
           </label>
           <label className={LABEL}>
             Value
-            <input className={INPUT} value={String(condition.value ?? '')} onChange={(e) => patch({ value: e.target.value })} />
+            <Input className={INPUT} value={String(condition.value ?? '')} onChange={(e) => patch({ value: e.target.value })} />
           </label>
         </div>
       )}
@@ -150,7 +151,7 @@ export function ConditionRow({ condition, onChange, onRemove }: Props) {
           </label>
           <label className={LABEL}>
             Status
-            <input className={INPUT} value={String(condition.value ?? '')} onChange={(e) => patch({ value: e.target.value })} placeholder="active" />
+            <Input className={INPUT} value={String(condition.value ?? '')} onChange={(e) => patch({ value: e.target.value })} placeholder="active" />
           </label>
         </div>
       )}
@@ -159,8 +160,8 @@ export function ConditionRow({ condition, onChange, onRemove }: Props) {
         <div className="grid grid-cols-3 gap-2">
           <label className={`${LABEL} col-span-1`}>
             Field
-            <input
-              className={`${INPUT} font-mono text-xs`}
+            <Input
+              className={`h-auto ${INPUT} font-mono text-xs`}
               value={condition.field}
               onChange={(e) => patch({ field: e.target.value })}
               placeholder="contact.name"
@@ -178,7 +179,7 @@ export function ConditionRow({ condition, onChange, onRemove }: Props) {
           </label>
           <label className={LABEL}>
             Value
-            <input className={INPUT} value={String(condition.value ?? '')} onChange={(e) => patch({ value: e.target.value })} />
+            <Input className={INPUT} value={String(condition.value ?? '')} onChange={(e) => patch({ value: e.target.value })} />
           </label>
         </div>
       )}
@@ -221,7 +222,7 @@ export function ConditionRow({ condition, onChange, onRemove }: Props) {
           </label>
           <label className={LABEL}>
             Days
-            <input
+            <Input
               type="number"
               className={INPUT}
               value={String(condition.value ?? '')}
@@ -245,7 +246,7 @@ export function ConditionRow({ condition, onChange, onRemove }: Props) {
           </label>
           <label className={LABEL}>
             Value
-            <input className={INPUT} value={String(condition.value ?? '')} onChange={(e) => patch({ value: e.target.value })} />
+            <Input className={INPUT} value={String(condition.value ?? '')} onChange={(e) => patch({ value: e.target.value })} />
           </label>
         </div>
       )}
@@ -287,7 +288,7 @@ function CurrentTimeFields({
       <div className="grid grid-cols-2 gap-2">
         <label className={LABEL}>
           Start
-          <input
+          <Input
             type="time"
             className={INPUT}
             value={timeWindow.startTime}
@@ -296,7 +297,7 @@ function CurrentTimeFields({
         </label>
         <label className={LABEL}>
           End
-          <input
+          <Input
             type="time"
             className={INPUT}
             value={timeWindow.endTime}

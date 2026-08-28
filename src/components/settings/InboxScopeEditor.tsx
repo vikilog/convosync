@@ -135,7 +135,7 @@ export function InboxScopeEditor({ value, onChange, disabled }: InboxScopeEditor
   function renderAccountList(channel: InboxChannel, list: { id: string; label: string }[]) {
     if (!list.length) {
       return (
-        <p className="text-xs text-gray-400 font-medium pl-6">
+        <p className="text-xs text-swiss-faint font-medium pl-6">
           No connected {CHANNEL_LABELS[channel]} accounts
         </p>
       );
@@ -146,7 +146,7 @@ export function InboxScopeEditor({ value, onChange, disabled }: InboxScopeEditor
       <ul className="pl-6 space-y-1">
         {list.map((item) => (
           <li key={item.id}>
-            <label className="flex items-center gap-2 text-xs text-gray-700 cursor-pointer">
+            <label className="flex items-center gap-2 text-xs text-swiss-ink cursor-pointer">
               <input
                 type="checkbox"
                 className="accent-sky-600"
@@ -158,7 +158,7 @@ export function InboxScopeEditor({ value, onChange, disabled }: InboxScopeEditor
             </label>
           </li>
         ))}
-        <p className="text-xs text-gray-400 pt-1">
+        <p className="text-xs text-swiss-faint pt-1">
           Leave all unchecked with channel enabled for full channel access, or pick specific numbers/pages.
         </p>
       </ul>
@@ -166,16 +166,16 @@ export function InboxScopeEditor({ value, onChange, disabled }: InboxScopeEditor
   }
 
   return (
-    <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
+    <div className="space-y-3 rounded-xl border border-swiss-line bg-slate-50 p-3">
       <div>
-        <p className="text-sm font-bold uppercase tracking-wide text-gray-500">Inbox access</p>
-        <p className="text-xs text-gray-400 mt-0.5">
+        <p className="text-sm font-bold uppercase tracking-wide text-swiss-muted">Inbox access</p>
+        <p className="text-xs text-swiss-faint mt-0.5">
           Choose which channels and connected numbers/pages this user can manage.
         </p>
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <label className="inline-flex items-center gap-2 text-xs font-medium text-gray-800">
+        <label className="inline-flex items-center gap-2 text-xs font-medium text-swiss-ink">
           <input
             type="radio"
             name="inbox-scope-mode"
@@ -185,7 +185,7 @@ export function InboxScopeEditor({ value, onChange, disabled }: InboxScopeEditor
           />
           All connected inboxes
         </label>
-        <label className="inline-flex items-center gap-2 text-xs font-medium text-gray-800">
+        <label className="inline-flex items-center gap-2 text-xs font-medium text-swiss-ink">
           <input
             type="radio"
             name="inbox-scope-mode"
@@ -200,7 +200,7 @@ export function InboxScopeEditor({ value, onChange, disabled }: InboxScopeEditor
       {restricted && (
         <div className="space-y-3">
           {loading ? (
-            <div className="flex items-center gap-2 text-xs text-gray-500 py-2">
+            <div className="flex items-center gap-2 text-xs text-swiss-muted py-2">
               <Loader2 className="w-3.5 h-3.5 animate-spin" />
               Loading connected accounts…
             </div>
@@ -209,7 +209,7 @@ export function InboxScopeEditor({ value, onChange, disabled }: InboxScopeEditor
               if (channel === 'email') {
                 return (
                   <div key={channel} className="space-y-1.5">
-                    <label className="flex items-center gap-2 text-sm font-bold text-gray-800">
+                    <label className="flex items-center gap-2 text-sm font-bold text-swiss-ink">
                       <input
                         type="checkbox"
                         className="accent-sky-600"
@@ -245,7 +245,7 @@ export function InboxScopeEditor({ value, onChange, disabled }: InboxScopeEditor
 
               return (
                 <div key={channel} className="space-y-1.5">
-                  <label className="flex items-center gap-2 text-sm font-bold text-gray-800">
+                  <label className="flex items-center gap-2 text-sm font-bold text-swiss-ink">
                     <input
                       type="checkbox"
                       className="accent-sky-600"

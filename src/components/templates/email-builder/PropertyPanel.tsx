@@ -4,6 +4,8 @@ import { useEmailBuilderStore } from './store';
 import { getBlockDefinition } from './blockRegistry';
 import type { BlockType, TextAlign } from './types';
 import { MediaGalleryPickerModal } from '../../media/MediaGalleryPickerModal';
+import { Input } from '../../ui/input';
+import { Textarea } from '../../ui/textarea';
 
 const ALIGNS: TextAlign[] = ['left', 'center', 'right'];
 
@@ -16,14 +18,14 @@ function Field({
 }) {
   return (
     <label className="block space-y-1.5">
-      <span className="text-meta font-semibold uppercase tracking-wide text-gray-500">{label}</span>
+      <span className="text-meta font-semibold uppercase tracking-wide text-swiss-muted">{label}</span>
       {children}
     </label>
   );
 }
 
 const inputCls =
-  'w-full rounded-lg bg-surface-muted px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary';
+  'w-full rounded-lg bg-surface-muted px-3 py-2 text-sm text-swiss-ink focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary';
 
 export function PropertyPanel() {
   const blocks = useEmailBuilderStore((s) => s.blocks);
@@ -36,13 +38,13 @@ export function PropertyPanel() {
 
   if (!block) {
     return (
-      <aside className="w-[300px] shrink-0 border-l border-black/5 bg-white flex flex-col">
-        <div className="px-4 py-3 border-b border-black/5">
-          <h3 className="text-sm font-bold text-gray-900">Properties</h3>
+      <aside className="w-[300px] shrink-0 border-l border-swiss-line bg-white flex flex-col">
+        <div className="px-4 py-3 border-b border-swiss-line">
+          <h3 className="text-sm font-bold text-swiss-ink">Properties</h3>
         </div>
         <div className="flex-1 flex flex-col items-center justify-center p-6 text-center bg-surface-muted/30">
           <Settings2 className="w-8 h-8 text-gray-300 mb-2" />
-          <p className="text-sm text-gray-500">Select a block on the canvas to edit its properties.</p>
+          <p className="text-sm text-swiss-muted">Select a block on the canvas to edit its properties.</p>
         </div>
       </aside>
     );
@@ -64,7 +66,7 @@ export function PropertyPanel() {
             className={`flex-1 py-1.5 text-sm font-semibold rounded-md capitalize ${
               (p.align ?? 'left') === a
                 ? 'bg-primary text-white'
-                : 'bg-[#f4f5f7] text-gray-600 hover:bg-primary/10'
+                : 'bg-[#f4f5f7] text-swiss-muted hover:bg-primary/10'
             }`}
           >
             {a}
@@ -80,7 +82,7 @@ export function PropertyPanel() {
         return (
           <>
             <Field label="Heading text">
-              <input
+              <Input
                 className={inputCls}
                 value={String(p.text ?? '')}
                 onChange={(e) => set({ text: e.target.value })}
@@ -98,9 +100,9 @@ export function PropertyPanel() {
             </Field>
             {alignField}
             <Field label="Color (optional)">
-              <input
+              <Input
                 type="color"
-                className="h-9 w-full rounded border border-slate-200"
+                className="h-auto h-9 w-full rounded border border-swiss-line"
                 value={String(p.color || brand.textColor)}
                 onChange={(e) => set({ color: e.target.value })}
               />
@@ -111,15 +113,15 @@ export function PropertyPanel() {
         return (
           <>
             <Field label="Content">
-              <textarea
-                className={`${inputCls} min-h-[120px] resize-y`}
+              <Textarea
+                className={`min-h-0 ${inputCls} min-h-[120px] resize-y`}
                 value={String(p.content ?? '')}
                 onChange={(e) => set({ content: e.target.value })}
               />
             </Field>
             {alignField}
             <Field label="Font size">
-              <input
+              <Input
                 type="number"
                 min={12}
                 max={24}
@@ -134,7 +136,7 @@ export function PropertyPanel() {
         return (
           <>
             <Field label="Image URL">
-              <input
+              <Input
                 className={inputCls}
                 value={String(p.src ?? '')}
                 onChange={(e) => set({ src: e.target.value })}
@@ -150,7 +152,7 @@ export function PropertyPanel() {
               Pick from Media Gallery
             </button>
             {p.src ? (
-              <div className="rounded-lg border border-black/5 overflow-hidden bg-slate-50">
+              <div className="rounded-lg border border-swiss-line overflow-hidden bg-slate-50">
                 <img
                   src={String(p.src)}
                   alt={String(p.alt || 'Preview')}
@@ -159,14 +161,14 @@ export function PropertyPanel() {
               </div>
             ) : null}
             <Field label="Alt text">
-              <input
+              <Input
                 className={inputCls}
                 value={String(p.alt ?? '')}
                 onChange={(e) => set({ alt: e.target.value })}
               />
             </Field>
             <Field label="Link URL (optional)">
-              <input
+              <Input
                 className={inputCls}
                 value={String(p.link ?? '')}
                 onChange={(e) => set({ link: e.target.value })}
@@ -180,14 +182,14 @@ export function PropertyPanel() {
         return (
           <>
             <Field label="Button label">
-              <input
+              <Input
                 className={inputCls}
                 value={String(p.label ?? '')}
                 onChange={(e) => set({ label: e.target.value })}
               />
             </Field>
             <Field label="Link URL">
-              <input
+              <Input
                 className={inputCls}
                 value={String(p.url ?? '')}
                 onChange={(e) => set({ url: e.target.value })}
@@ -201,7 +203,7 @@ export function PropertyPanel() {
                   { id: 'primary', bg: brand.primaryColor, fg: '#ffffff' },
                   { id: 'outline', bg: '#ffffff', fg: brand.primaryColor },
                   { id: 'dark', bg: '#1c1e21', fg: '#ffffff' },
-                  { id: 'soft', bg: '#e8f0ec', fg: brand.primaryColor },
+                  { id: 'soft', bg: '#e6fcef', fg: brand.primaryColor },
                 ].map((v) => (
                   <button
                     key={v.id}
@@ -214,7 +216,7 @@ export function PropertyPanel() {
                         borderRadius: v.id === 'outline' ? 8 : 8,
                       })
                     }
-                    className="py-2 rounded-lg text-sm font-bold border border-slate-200"
+                    className="py-2 rounded-lg text-sm font-bold border border-swiss-line"
                     style={{ background: v.bg, color: v.fg }}
                   >
                     {v.id}
@@ -223,9 +225,9 @@ export function PropertyPanel() {
               </div>
             </Field>
             <Field label="Background">
-              <input
+              <Input
                 type="color"
-                className="h-9 w-full rounded border border-slate-200"
+                className="h-auto h-9 w-full rounded border border-swiss-line"
                 value={String(p.bgColor || brand.primaryColor)}
                 onChange={(e) => set({ bgColor: e.target.value })}
               />
@@ -246,15 +248,15 @@ export function PropertyPanel() {
         return (
           <>
             <Field label="Left column">
-              <textarea
-                className={`${inputCls} min-h-[80px]`}
+              <Textarea
+                className={`min-h-0 ${inputCls} min-h-[80px]`}
                 value={String(p.left ?? '')}
                 onChange={(e) => set({ left: e.target.value })}
               />
             </Field>
             <Field label="Right column">
-              <textarea
-                className={`${inputCls} min-h-[80px]`}
+              <Textarea
+                className={`min-h-0 ${inputCls} min-h-[80px]`}
                 value={String(p.right ?? '')}
                 onChange={(e) => set({ right: e.target.value })}
               />
@@ -264,9 +266,9 @@ export function PropertyPanel() {
       case 'divider':
         return (
           <Field label="Line color">
-            <input
+            <Input
               type="color"
-              className="h-9 w-full rounded border border-slate-200"
+              className="h-auto h-9 w-full rounded border border-swiss-line"
               value={String(p.color ?? '#e2e8f0')}
               onChange={(e) => set({ color: e.target.value })}
             />
@@ -275,7 +277,7 @@ export function PropertyPanel() {
       case 'spacer':
         return (
           <Field label="Height (px)">
-            <input
+            <Input
               type="number"
               min={8}
               max={120}
@@ -289,8 +291,8 @@ export function PropertyPanel() {
         return (
           <>
             <Field label="Footer text">
-              <textarea
-                className={`${inputCls} min-h-[80px]`}
+              <Textarea
+                className={`min-h-0 ${inputCls} min-h-[80px]`}
                 value={String(p.text ?? '')}
                 onChange={(e) => set({ text: e.target.value })}
               />
@@ -301,8 +303,8 @@ export function PropertyPanel() {
       case 'html':
         return (
           <Field label="Raw HTML">
-            <textarea
-              className={`${inputCls} min-h-[min(60vh,520px)] font-mono text-xs leading-relaxed resize-y`}
+            <Textarea
+              className={`min-h-0 ${inputCls} min-h-[min(60vh,520px)] font-mono text-xs leading-relaxed resize-y`}
               value={String(p.rawHtml ?? '')}
               onChange={(e) => set({ rawHtml: e.target.value })}
             />
@@ -314,10 +316,10 @@ export function PropertyPanel() {
   };
 
   return (
-    <aside className="w-[320px] shrink-0 border-l border-black/5 bg-white flex flex-col min-h-0">
-      <div className="px-4 py-3 border-b border-black/5">
+    <aside className="w-[320px] shrink-0 border-l border-swiss-line bg-white flex flex-col min-h-0">
+      <div className="px-4 py-3 border-b border-swiss-line">
         <p className="text-meta font-semibold uppercase tracking-wide text-primary">{def.label}</p>
-        <h3 className="text-sm font-bold text-gray-900">Block properties</h3>
+        <h3 className="text-sm font-bold text-swiss-ink">Block properties</h3>
       </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-surface-muted/30">{renderFields()}</div>
 

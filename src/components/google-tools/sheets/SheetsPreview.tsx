@@ -58,7 +58,7 @@ export function SheetsPreview({
                     onClick={() => ws.title && onTabChange(ws.title)}
                     className={`shrink-0 px-3 py-1.5 rounded-md text-sm font-semibold transition-all ${
                       activeSheetTitle === ws.title
-                        ? 'bg-white text-[#16A34A] shadow-sm'
+                        ? 'bg-white text-[#16A34A] '
                         : 'text-[#64748B] hover:text-[#0F172A]'
                     }`}
                   >
@@ -103,7 +103,7 @@ export function SheetsPreview({
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto p-4">
-        <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 shadow-sm">
+        <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 ">
           <div className="flex items-start gap-3 mb-4">
             <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
               <FileSpreadsheet className="w-5 h-5" />

@@ -211,7 +211,7 @@ export function SubscriptionPanel({
         </div>
       ) : null}
 
-      <section className="rounded-xl bg-white ring-1 ring-slate-200/80 p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+      <section className="bg-white border border-swiss-line p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
         <p className="text-xl font-bold text-slate-900">{PLAN_NAME}</p>
         <p className="mt-1 text-2xl font-bold text-slate-900">
           ₹{PLAN_PRICE_INR.toLocaleString('en-IN')}
@@ -258,7 +258,7 @@ export function SubscriptionPanel({
             type="button"
             disabled={checkoutBusy}
             onClick={() => void handleSubscribe()}
-            className="mt-5 inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-hover disabled:opacity-60"
+            className="mt-5 inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-hover disabled:opacity-60"
           >
             {checkoutBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
             Subscribe to {PLAN_NAME}
@@ -266,7 +266,7 @@ export function SubscriptionPanel({
         )}
       </section>
 
-      <section className="rounded-xl bg-white ring-1 ring-slate-200/80 p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+      <section className="bg-white border border-swiss-line p-6 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
         <h3 className="text-sm font-bold uppercase tracking-wide text-slate-500">
           What&apos;s included
         </h3>

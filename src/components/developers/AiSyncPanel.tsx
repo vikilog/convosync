@@ -44,7 +44,7 @@ const STATUS_STYLES: Record<string, string> = {
   syncing: 'bg-sky-50 text-primary border-primary/20',
   failed: 'bg-red-50 text-danger-red border-red-200',
   disconnected: 'bg-amber-50 text-amber-700 border-amber-200',
-  not_configured: 'bg-gray-100 text-gray-600 border-gray-200',
+  not_configured: 'bg-gray-100 text-swiss-muted border-gray-200',
 };
 
 function formatDate(iso: string | null): string {
@@ -103,7 +103,7 @@ export function AiSyncPanel() {
 
   if (loading && !dashboard) {
     return (
-      <div className="flex items-center gap-2 text-sm text-gray-500 py-8">
+      <div className="flex items-center gap-2 text-sm text-swiss-muted py-8">
         <Loader2 className="w-4 h-4 animate-spin" />
         Loading AI Sync…
       </div>
@@ -116,7 +116,7 @@ export function AiSyncPanel() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <p className="text-xs text-gray-500 max-w-lg">
+        <p className="text-xs text-swiss-muted max-w-lg">
           Uses existing AI Knowledge Sync. Rebuild enqueues an event-driven full sync — ready for
           Vector DB, AI Agent, and Journey Engine pipelines.
         </p>
@@ -142,10 +142,10 @@ export function AiSyncPanel() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="rounded-2xl border border-swiss-line bg-white p-4 ">
           <div className="flex items-center gap-2 mb-3">
             <Database className="w-4 h-4 text-primary" />
-            <h4 className="text-sm font-bold text-gray-900">Connection</h4>
+            <h4 className="text-sm font-bold text-swiss-ink">Connection</h4>
           </div>
           <span
             className={`inline-flex text-sm font-bold px-2 py-0.5 rounded-lg border capitalize ${STATUS_STYLES[status] ?? STATUS_STYLES.not_configured}`}
@@ -154,26 +154,26 @@ export function AiSyncPanel() {
           </span>
           <dl className="mt-3 space-y-2 text-xs">
             <div className="flex justify-between gap-2">
-              <dt className="text-gray-500">Venue ID</dt>
-              <dd className="font-mono font-semibold text-gray-800 truncate max-w-[180px]">
+              <dt className="text-swiss-muted">Venue ID</dt>
+              <dd className="font-mono font-semibold text-swiss-ink truncate max-w-[180px]">
                 {dashboard?.venueId ?? '—'}
               </dd>
             </div>
             <div className="flex justify-between gap-2">
-              <dt className="text-gray-500">Last sync</dt>
-              <dd className="text-gray-800">{formatDate(dashboard?.lastSyncTime ?? null)}</dd>
+              <dt className="text-swiss-muted">Last sync</dt>
+              <dd className="text-swiss-ink">{formatDate(dashboard?.lastSyncTime ?? null)}</dd>
             </div>
             <div className="flex justify-between gap-2">
-              <dt className="text-gray-500">Last event</dt>
-              <dd className="text-gray-800">{formatDate(dashboard?.lastEventTime ?? null)}</dd>
+              <dt className="text-swiss-muted">Last event</dt>
+              <dd className="text-swiss-ink">{formatDate(dashboard?.lastEventTime ?? null)}</dd>
             </div>
           </dl>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="rounded-2xl border border-swiss-line bg-white p-4 ">
           <div className="flex items-center gap-2 mb-3">
             <Sparkles className="w-4 h-4 text-primary" />
-            <h4 className="text-sm font-bold text-gray-900">Knowledge health</h4>
+            <h4 className="text-sm font-bold text-swiss-ink">Knowledge health</h4>
           </div>
           <div className="grid grid-cols-2 gap-2">
             {[
@@ -184,24 +184,24 @@ export function AiSyncPanel() {
             ].map((item) => (
               <div
                 key={item.label}
-                className="rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-center"
+                className="rounded-xl bg-slate-50 border border-swiss-line px-3 py-2 text-center"
               >
-                <p className="text-lg font-bold text-gray-900">{item.value}</p>
-                <p className="text-sm font-semibold text-gray-500">{item.label}</p>
+                <p className="text-lg font-bold text-swiss-ink">{item.value}</p>
+                <p className="text-sm font-semibold text-swiss-muted">{item.label}</p>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm flex flex-wrap items-center justify-between gap-3">
+      <div className="rounded-2xl border border-swiss-line bg-white p-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex gap-4 text-xs">
           <span>
-            <span className="text-gray-500">Pending jobs: </span>
+            <span className="text-swiss-muted">Pending jobs: </span>
             <span className="font-bold text-amber-600">{dashboard?.pendingQueueJobs ?? 0}</span>
           </span>
           <span>
-            <span className="text-gray-500">Failed events: </span>
+            <span className="text-swiss-muted">Failed events: </span>
             <span className="font-bold text-danger-red">{dashboard?.failedEvents ?? 0}</span>
           </span>
         </div>
@@ -209,7 +209,7 @@ export function AiSyncPanel() {
           <button
             type="button"
             onClick={() => void load()}
-            className="inline-flex items-center gap-1 text-sm font-semibold text-gray-500 hover:text-primary px-3 py-2 rounded-lg border border-slate-200"
+            className="inline-flex items-center gap-1 text-sm font-semibold text-swiss-muted hover:text-primary px-3 py-2 rounded-lg border border-swiss-line"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             Refresh
@@ -231,12 +231,12 @@ export function AiSyncPanel() {
       </div>
 
       {events.length > 0 && (
-        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-          <div className="px-4 py-2 bg-slate-50 text-sm font-bold uppercase text-gray-500">
+          <div className="rounded-2xl border border-swiss-line bg-white overflow-hidden">
+          <div className="px-4 py-2 bg-slate-50 text-sm font-bold uppercase text-swiss-muted">
             Recent sync events
           </div>
           <table className="w-full text-xs">
-            <thead className="text-left text-sm font-bold uppercase text-gray-500">
+            <thead className="text-left text-sm font-bold uppercase text-swiss-muted">
               <tr>
                 <th className="px-3 py-2">Time</th>
                 <th className="px-3 py-2">Type</th>
@@ -245,8 +245,8 @@ export function AiSyncPanel() {
             </thead>
             <tbody>
               {events.map((ev) => (
-                <tr key={ev.id} className="border-t border-slate-200">
-                  <td className="px-3 py-2 text-gray-600">{formatDate(ev.createdAt)}</td>
+                <tr key={ev.id} className="border-t border-swiss-line">
+                  <td className="px-3 py-2 text-swiss-muted">{formatDate(ev.createdAt)}</td>
                   <td className="px-3 py-2 font-mono text-xs">{ev.eventType}</td>
                   <td className="px-3 py-2 capitalize">
                     <span
@@ -261,7 +261,7 @@ export function AiSyncPanel() {
                       {ev.status}
                     </span>
                     {ev.errorMessage && (
-                      <p className="text-xs text-gray-400 truncate max-w-[240px]">
+                      <p className="text-xs text-swiss-faint truncate max-w-[240px]">
                         {ev.errorMessage}
                       </p>
                     )}

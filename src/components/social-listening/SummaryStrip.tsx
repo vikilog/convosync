@@ -29,7 +29,7 @@ export const SummaryStrip: React.FC<{
       {pills.map((p) => (
         <span
           key={p.id}
-          className={`inline-flex items-center gap-1.5 rounded-full border border-black/5 px-2.5 py-1 text-[11px] font-bold ${p.theme.accentBg} ${p.theme.accentText}`}
+          className={`inline-flex items-center gap-1.5 rounded-full border border-swiss-line px-2.5 py-1 text-[11px] font-bold ${p.theme.accentBg} ${p.theme.accentText}`}
         >
           <span className={`h-1.5 w-1.5 rounded-full ${p.theme.accentDot}`} />
           {p.count} {p.short}

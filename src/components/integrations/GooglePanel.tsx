@@ -85,7 +85,7 @@ function statusClass(status: string): string {
   if (status === 'connected') return 'bg-[#e6f7ec] text-[#006d2f] border-[#5dfd8a]/40';
   if (status === 'error') return 'bg-red-50 text-red-700 border-red-200';
   if (status === 'syncing') return 'bg-[#e8f4ff] text-[#4285F4] border-[#4285F4]/20';
-  return 'bg-gray-50 text-gray-500 border-gray-200';
+  return 'bg-gray-50 text-swiss-muted border-gray-200';
 }
 
 type GoogleProductCardProps = {
@@ -120,7 +120,7 @@ function GoogleProductCard({
   }, [product.connectionId, connections]);
 
   return (
-    <article className="bg-white rounded-2xl border border-black/5 p-5 flex flex-col h-full shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+    <article className="bg-white rounded-2xl border border-swiss-line p-5 flex flex-col h-full shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
       <div className="flex items-start gap-3 min-w-0">
         <div
           className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${meta.bg}`}
@@ -128,7 +128,7 @@ function GoogleProductCard({
           <Icon className={`w-5 h-5 ${meta.color}`} />
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-black text-gray-950 leading-tight">{product.label}</h3>
+          <h3 className="text-sm font-semibold text-gray-950 leading-tight">{product.label}</h3>
           <span
             className={`mt-1 inline-flex text-sm font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${statusClass(product.status)}`}
           >
@@ -137,11 +137,11 @@ function GoogleProductCard({
         </div>
       </div>
 
-      <p className="mt-2 text-xs text-gray-500 font-medium leading-relaxed flex-1">
+      <p className="mt-2 text-xs text-swiss-muted font-medium leading-relaxed flex-1">
         {product.description}
       </p>
 
-      <div className="mt-3 space-y-1 text-xs text-gray-400 font-medium">
+      <div className="mt-3 space-y-1 text-xs text-swiss-faint font-medium">
         <p>Last sync: {formatDate(product.lastSyncAt)}</p>
         {product.connectionEmail && <p>Account: {product.connectionEmail}</p>}
         {product.lastError && (
@@ -153,13 +153,13 @@ function GoogleProductCard({
 
       {!isConnected && connections.length > 0 && (
         <div className="mt-3">
-          <label className="text-sm font-bold text-gray-400 uppercase tracking-wide">
+          <label className="text-sm font-bold text-swiss-faint uppercase tracking-wide">
             Google account
           </label>
           <select
             value={selectedConnection}
             onChange={(e) => setSelectedConnection(e.target.value)}
-            className="mt-1 w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 font-medium"
+            className="mt-1 w-full text-xs border border-swiss-line rounded-lg px-2 py-1.5 font-medium"
           >
             {connections.map((c) => (
               <option key={c.id} value={c.id}>
@@ -195,7 +195,7 @@ function GoogleProductCard({
               type="button"
               disabled={busy}
               onClick={onManage}
-              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-sm font-black border border-gray-200 text-gray-600 bg-gray-50 hover:bg-gray-100 disabled:opacity-50"
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-sm font-black border border-gray-200 text-swiss-muted bg-gray-50 hover:bg-gray-100 disabled:opacity-50"
             >
               <Settings className="w-3 h-3" />
               Manage
@@ -332,7 +332,7 @@ export function GooglePanel() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-16 text-gray-400">
+      <div className="flex items-center justify-center py-16 text-swiss-faint">
         <Loader2 className="w-6 h-6 animate-spin" />
       </div>
     );
@@ -346,11 +346,11 @@ export function GooglePanel() {
         </p>
       )}
 
-      <section className="bg-white ring-1 ring-slate-200/80 rounded-2xl p-5">
+      <section className="bg-white border border-swiss-line p-5">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h3 className="text-sm font-black text-gray-950">Google accounts</h3>
-            <p className="text-xs text-gray-500 font-medium mt-1">
+            <h3 className="text-sm font-semibold text-gray-950">Google accounts</h3>
+            <p className="text-xs text-swiss-muted font-medium mt-1">
               Connect one or more Google accounts at the workspace level. Products reuse the same OAuth tokens.
             </p>
           </div>
@@ -370,7 +370,7 @@ export function GooglePanel() {
             {connections.map((c) => (
               <li
                 key={c.id}
-                className="flex items-center justify-between gap-3 px-3 py-2 rounded-xl border border-slate-200 bg-slate-50"
+                className="flex items-center justify-between gap-3 px-3 py-2 rounded-xl border border-swiss-line bg-slate-50"
               >
                 <div className="flex items-center gap-2 min-w-0">
                   {c.pictureUrl ? (
@@ -381,9 +381,9 @@ export function GooglePanel() {
                     </div>
                   )}
                   <div className="min-w-0">
-                    <p className="text-sm font-bold text-gray-900 truncate">{c.email}</p>
+                    <p className="text-sm font-bold text-swiss-ink truncate">{c.email}</p>
                     {c.displayName && (
-                      <p className="text-xs text-gray-400 truncate">{c.displayName}</p>
+                      <p className="text-xs text-swiss-faint truncate">{c.displayName}</p>
                     )}
                   </div>
                 </div>
@@ -398,7 +398,7 @@ export function GooglePanel() {
             ))}
           </ul>
         ) : (
-          <p className="mt-4 text-xs text-gray-400 font-medium">
+          <p className="mt-4 text-xs text-swiss-faint font-medium">
             No Google accounts connected yet.
           </p>
         )}
@@ -418,13 +418,13 @@ export function GooglePanel() {
       })()}
 
       {showGbpSync && (
-        <p className="text-meta text-gray-400 -mt-4">
+        <p className="text-meta text-swiss-faint -mt-4">
           Google Business Profile sync controls are shown above when connected.
         </p>
       )}
 
       <section>
-        <h3 className="text-sm font-black text-gray-950 mb-4">Google products</h3>
+        <h3 className="text-sm font-semibold text-gray-950 mb-4">Google products</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {products.map((product) => (
             <GoogleProductCard
@@ -443,9 +443,9 @@ export function GooglePanel() {
 
       {manageProduct && manageSummary && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30">
-          <div className="bg-white rounded-2xl border border-black/5 max-w-lg w-full p-6 shadow-xl max-h-[80vh] overflow-auto">
-            <h3 className="text-lg font-black text-gray-950">{manageSummary.label}</h3>
-            <p className="text-xs text-gray-500 mt-1 font-medium">
+          <div className="bg-white rounded-2xl border border-swiss-line max-w-lg w-full p-6 shadow-xl max-h-[80vh] overflow-auto">
+            <h3 className="text-lg font-semibold text-gray-950">{manageSummary.label}</h3>
+            <p className="text-xs text-swiss-muted mt-1 font-medium">
               Integration config and sync metadata (for Journey Engine, AI Agent, and webhooks).
             </p>
             <pre className="mt-4 text-xs font-mono bg-gray-50 border border-gray-100 rounded-xl p-3 overflow-auto max-h-48">

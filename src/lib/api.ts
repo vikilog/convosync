@@ -1514,6 +1514,36 @@ export const api = {
       scopes: string[];
     }>,
   getInstagramAccounts: () => get('/instagram/accounts'),
+  /** "Instagram API with Instagram Login" track — separate from the Facebook-Login connect above. */
+  getInstagramBusinessLoginConnectUrl: () =>
+    get('/instagram-business-login/connect') as Promise<{
+      oauthDialogUrl: string;
+      redirectUri: string;
+      state: string;
+    }>,
+  connectInstagramBusinessLogin: (data: { code: string; redirectUri?: string }) =>
+    post('/instagram-business-login/connect', data) as Promise<{
+      success: boolean;
+      instagramUserId: string;
+      username: string | null;
+      status: string;
+    }>,
+  getInstagramBusinessLoginAccounts: () =>
+    get('/instagram-business-login/accounts') as Promise<{
+      accounts: Array<{
+        id: string;
+        instagramUserId: string;
+        username: string | null;
+        status: string;
+        tokenExpiresAt: string | null;
+        createdAt: string;
+      }>;
+    }>,
+  replyInstagramBusinessComment: (commentId: string, message: string, instagramUserId?: string) =>
+    post(`/instagram-business-login/comments/${encodeURIComponent(commentId)}/reply`, {
+      message,
+      instagramUserId,
+    }) as Promise<{ success: boolean; id: string }>,
   getInstagramListeningProfile: (instagramUserId?: string) =>
     get(
       '/instagram/listening/profile',
@@ -2124,6 +2154,11 @@ export const api = {
     }>,
   deleteLeadFunnel: (id: string) =>
     del(`/lead-funnels/${encodeURIComponent(id)}`) as Promise<{ success: boolean }>,
+  getInstalledApps: () => get('/installed-apps') as Promise<{ appIds: string[] }>,
+  installApp: (appId: string) =>
+    post(`/installed-apps/${encodeURIComponent(appId)}`) as Promise<{ success: boolean }>,
+  uninstallApp: (appId: string) =>
+    del(`/installed-apps/${encodeURIComponent(appId)}`) as Promise<{ success: boolean }>,
   createLeadFunnelStage: (
     funnelId: string,
     data: { name: string; isFinal?: boolean }

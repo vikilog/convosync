@@ -77,7 +77,7 @@ export function CallSideSheet({
           animate={{ x: open ? 0 : '100%' }}
           exit={{ x: '100%' }}
           transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-          className={`fixed top-0 right-0 z-[79] flex h-full w-1/2 min-w-[360px] max-w-full flex-col border-l border-slate-200 bg-white shadow-2xl ${
+          className={`fixed top-0 right-0 z-[79] flex h-full w-1/2 min-w-[360px] max-w-full flex-col border-l border-swiss-line bg-white shadow-2xl ${
             open ? '' : 'pointer-events-none'
           }`}
           aria-label="Call details"
@@ -125,7 +125,7 @@ export function CallSideSheet({
                 type="button"
                 disabled={busy}
                 onClick={onListenIn}
-                className="flex-1 min-h-10 rounded-xl border border-slate-200 text-sm font-bold text-slate-800 hover:bg-slate-50 disabled:opacity-60 cursor-pointer inline-flex items-center justify-center gap-1.5"
+                className="flex-1 min-h-10 rounded-xl border border-swiss-line text-sm font-bold text-slate-800 hover:bg-slate-50 disabled:opacity-60 cursor-pointer inline-flex items-center justify-center gap-1.5"
               >
                 {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Headphones className="h-4 w-4" />}
                 Listen in
@@ -146,7 +146,7 @@ export function CallSideSheet({
               <button
                 type="button"
                 onClick={onToggleMute}
-                className="flex-1 min-h-10 rounded-xl border border-slate-200 text-sm font-bold text-slate-800 hover:bg-slate-50 cursor-pointer"
+                className="flex-1 min-h-10 rounded-xl border border-swiss-line text-sm font-bold text-slate-800 hover:bg-slate-50 cursor-pointer"
               >
                 {muted ? 'Unmute' : 'Mute'}
               </button>

@@ -2,6 +2,8 @@ import React, { useRef, useState } from 'react';
 import { Camera, Loader2, X } from 'lucide-react';
 import type { AgentProfileData } from '../types';
 import { compressImageFile } from '../../../lib/imageUpload';
+import { Input } from '../../ui/input';
+import { Textarea } from '../../ui/textarea';
 
 type Props = {
   profile: AgentProfileData;
@@ -45,8 +47,8 @@ export const EditProfileModal: React.FC<Props> = ({ profile, onClose, onSave, sa
 
   return (
     <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-lg border border-black/5 shadow-2xl">
-        <div className="flex justify-between items-center px-6 py-4 border-b border-black/5">
+      <div className="bg-white rounded-2xl w-full max-w-lg border border-swiss-line shadow-2xl">
+        <div className="flex justify-between items-center px-6 py-4 border-b border-swiss-line">
           <h3 className="text-base font-bold text-[#111827]">Edit profile</h3>
           <button type="button" onClick={onClose} className="text-[#6B7280] hover:text-[#111827]">
             <X className="w-5 h-5" />
@@ -61,7 +63,7 @@ export const EditProfileModal: React.FC<Props> = ({ profile, onClose, onSave, sa
                 type="button"
                 onClick={() => fileRef.current?.click()}
                 disabled={uploading || saving}
-                className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border border-black/5 bg-primary/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border border-swiss-line bg-primary/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                 aria-label="Upload bot image"
               >
                 {avatarUrl ? (
@@ -82,7 +84,7 @@ export const EditProfileModal: React.FC<Props> = ({ profile, onClose, onSave, sa
                   type="button"
                   onClick={() => fileRef.current?.click()}
                   disabled={uploading || saving}
-                  className="rounded-xl bg-white ring-1 ring-slate-200/80 px-3 py-2 text-sm font-bold text-[#111827] hover:bg-surface-muted disabled:opacity-60"
+                  className="bg-white border border-swiss-line px-3 py-2 text-sm font-bold text-[#111827] hover:bg-surface-muted disabled:opacity-60"
                 >
                   {avatarUrl ? 'Change image' : 'Upload image'}
                 </button>
@@ -116,21 +118,21 @@ export const EditProfileModal: React.FC<Props> = ({ profile, onClose, onSave, sa
 
           <div>
             <label className="block text-sm font-medium text-[#111827] mb-1.5">Agent Name</label>
-            <input
+            <Input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full border border-black/5 rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+              className="h-auto w-full border border-swiss-line rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-[#111827] mb-1.5">Description</label>
-            <textarea
+            <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-              className="w-full border border-black/5 rounded-xl py-2.5 px-3 text-sm resize-none focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+              className="min-h-0 w-full border border-swiss-line rounded-xl py-2.5 px-3 text-sm resize-none focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
             />
           </div>
 

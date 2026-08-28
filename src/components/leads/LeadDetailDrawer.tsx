@@ -13,6 +13,8 @@ import { Link } from 'react-router-dom';
 import { api } from '../../lib/api';
 import { pathForContact } from '../../routes';
 import { timeAgo, type Lead } from './types';
+import { Input } from '../ui/input';
+import { Textarea } from '../ui/textarea';
 
 type DrawerTab = 'origin' | 'activity' | 'notes';
 
@@ -29,14 +31,14 @@ function InlineField({
 }) {
   return (
     <label className="block">
-      <span className="text-[11px] font-semibold uppercase tracking-wide text-neutral-400">
+      <span className="text-[11px] font-semibold uppercase tracking-wide text-swiss-faint">
         {label}
       </span>
-      <input
+      <Input
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-gray-900 outline-none focus:ring-2 focus:ring-primary/20"
+        className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm font-medium text-swiss-ink outline-none focus:ring-2 focus:ring-primary/20"
       />
     </label>
   );
@@ -133,21 +135,21 @@ export function LeadDetailDrawer({
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-            className="fixed top-0 right-0 z-50 flex h-full w-full max-w-[440px] flex-col border-l border-slate-200 bg-white shadow-2xl"
+            className="fixed top-0 right-0 z-50 flex h-full w-full max-w-[440px] flex-col border-l border-swiss-line bg-white shadow-2xl"
           >
-            <div className="flex items-start justify-between gap-3 border-b border-slate-200 px-5 py-4">
+            <div className="flex items-start justify-between gap-3 border-b border-swiss-line px-5 py-4">
               <div className="min-w-0">
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-neutral-400">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-swiss-faint">
                   Lead
                 </p>
-                <h2 className="truncate text-base font-bold text-gray-900">
+                <h2 className="truncate text-base font-bold text-swiss-ink">
                   {lead.name?.trim() || 'Unknown'}
                 </h2>
               </div>
               <button
                 type="button"
                 onClick={onClose}
-                className="cursor-pointer rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+                className="cursor-pointer rounded-lg p-1.5 text-swiss-faint hover:bg-gray-100 hover:text-swiss-ink"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -206,7 +208,7 @@ export function LeadDetailDrawer({
               </div>
 
               <div>
-                <span className="text-[11px] font-semibold uppercase tracking-wide text-neutral-400">
+                <span className="text-[11px] font-semibold uppercase tracking-wide text-swiss-faint">
                   Board
                 </span>
                 <div className="mt-1.5 flex flex-wrap gap-1">
@@ -235,7 +237,7 @@ export function LeadDetailDrawer({
                         className={`cursor-pointer rounded-lg px-2.5 py-1 text-xs font-bold transition-colors ${
                           active
                             ? 'bg-primary text-white'
-                            : 'border border-black/10 bg-white text-gray-600 hover:bg-surface-muted'
+                            : 'border border-black/10 bg-white text-swiss-muted hover:bg-surface-muted'
                         }`}
                       >
                         {s.name}
@@ -257,8 +259,8 @@ export function LeadDetailDrawer({
                       onClick={() => setTab(t.id)}
                       className={`flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-bold ${
                         active
-                          ? 'bg-white text-gray-900 shadow-sm'
-                          : 'text-gray-500 hover:text-gray-800'
+                          ? 'bg-white text-swiss-ink '
+                          : 'text-swiss-muted hover:text-swiss-ink'
                       }`}
                     >
                       <Icon className="h-3.5 w-3.5" />
@@ -280,30 +282,30 @@ export function LeadDetailDrawer({
                         <img
                           src={lead.origin.postThumbnailUrl}
                           alt=""
-                          className="h-16 w-16 shrink-0 rounded-xl object-cover border border-black/5"
+                          className="h-16 w-16 shrink-0 rounded-xl object-cover border border-swiss-line"
                         />
                         <div className="min-w-0">
-                          <p className="text-sm font-bold text-gray-900">
+                          <p className="text-sm font-bold text-swiss-ink">
                             @{lead.origin.username}
                           </p>
-                          <p className="mt-1 text-sm text-gray-700 whitespace-pre-wrap">
+                          <p className="mt-1 text-sm text-swiss-ink whitespace-pre-wrap">
                             {lead.origin.commentText}
                           </p>
-                          <p className="mt-2 text-[11px] text-gray-400">
+                          <p className="mt-2 text-[11px] text-swiss-faint">
                             {timeAgo(lead.origin.commentedAt)}
                           </p>
                         </div>
                       </div>
                     </blockquote>
                   ) : (
-                    <p className="text-sm text-gray-400">No Instagram origin on this lead.</p>
+                    <p className="text-sm text-swiss-faint">No Instagram origin on this lead.</p>
                   )}
                   {lead.requirement && (
                     <div>
-                      <span className="text-[11px] font-semibold uppercase tracking-wide text-neutral-400">
+                      <span className="text-[11px] font-semibold uppercase tracking-wide text-swiss-faint">
                         Requirement
                       </span>
-                      <p className="mt-1 text-sm text-gray-700 whitespace-pre-wrap">
+                      <p className="mt-1 text-sm text-swiss-ink whitespace-pre-wrap">
                         {lead.requirement}
                       </p>
                     </div>
@@ -314,18 +316,18 @@ export function LeadDetailDrawer({
               {tab === 'activity' && (
                 <ul className="space-y-2">
                   {lead.activity.length === 0 ? (
-                    <p className="text-sm text-gray-400">No activity yet.</p>
+                    <p className="text-sm text-swiss-faint">No activity yet.</p>
                   ) : (
                     lead.activity.map((a) => (
                       <li
                         key={a.id}
-                        className="rounded-xl bg-white ring-1 ring-slate-200/80 px-3 py-2"
+                        className="bg-white border border-swiss-line px-3 py-2"
                       >
-                        <div className="flex items-center gap-2 text-[11px] text-gray-400">
+                        <div className="flex items-center gap-2 text-[11px] text-swiss-faint">
                           <MessageSquare className="h-3 w-3" />
                           {timeAgo(a.at)}
                         </div>
-                        <p className="mt-0.5 text-sm text-gray-800">{a.text}</p>
+                        <p className="mt-0.5 text-sm text-swiss-ink">{a.text}</p>
                       </li>
                     ))
                   )}
@@ -334,15 +336,15 @@ export function LeadDetailDrawer({
 
               {tab === 'notes' && (
                 <label className="block">
-                  <span className="text-[11px] font-semibold uppercase tracking-wide text-neutral-400">
+                  <span className="text-[11px] font-semibold uppercase tracking-wide text-swiss-faint">
                     Notes
                   </span>
-                  <textarea
+                  <Textarea
                     value={lead.notes}
                     onChange={(e) => patch({ notes: e.target.value })}
                     rows={8}
                     placeholder="Internal notes…"
-                    className="mt-1 w-full resize-none rounded-xl border border-slate-200 px-3 py-2 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-primary/20"
+                    className="min-h-0 mt-1 w-full resize-none rounded-xl border border-swiss-line px-3 py-2 text-sm text-swiss-ink outline-none focus:ring-2 focus:ring-primary/20"
                   />
                 </label>
               )}

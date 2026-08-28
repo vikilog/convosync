@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ArrowDown, ArrowUp, Check, Loader2, Plus, Save, Trash2, Users2 } from 'lucide-react';
 import { api } from '../../lib/api';
+import { Input } from '../ui/input';
 
 type Mode = 'off' | 'basic' | 'advanced';
 
@@ -384,11 +385,11 @@ export function InboxBehaviorPanel() {
             </div>
 
             <div className="flex gap-2">
-              <input
+              <Input
                 value={newGroupName}
                 onChange={(e) => setNewGroupName(e.target.value)}
                 placeholder="New group name"
-                className="flex-1 rounded-lg border-[0.5px] border-border-subtle bg-white px-3 py-2 text-sm"
+                className="h-auto flex-1 rounded-lg border-[0.5px] border-border-subtle bg-white px-3 py-2 text-sm"
               />
               <button
                 type="button"
@@ -570,22 +571,22 @@ export function InboxBehaviorPanel() {
             onClick={() => !savingRule && setShowRuleForm(false)}
             aria-hidden
           />
-          <div className="relative w-full max-w-lg space-y-4 rounded-2xl bg-white ring-1 ring-slate-200/80 p-6 shadow-xl max-h-[90vh] overflow-y-auto">
-            <h3 className="text-base font-black text-gray-950">
+          <div className="relative w-full max-w-lg space-y-4 bg-white border border-swiss-line p-6 shadow-xl max-h-[90vh] overflow-y-auto">
+            <h3 className="text-base font-semibold text-gray-950">
               {editingRuleId ? 'Edit rule' : 'New rule'}
             </h3>
 
             <label className="block space-y-1">
-              <span className="text-sm font-bold text-gray-500 uppercase tracking-wide">Name</span>
-              <input
+              <span className="text-sm font-bold text-swiss-muted uppercase tracking-wide">Name</span>
+              <Input
                 value={ruleForm.name}
                 onChange={(e) => setRuleForm((prev) => ({ ...prev, name: e.target.value }))}
-                className="w-full rounded-xl border border-black/5 px-3 py-2 text-sm"
+                className="h-auto w-full rounded-xl border border-swiss-line px-3 py-2 text-sm"
               />
             </label>
 
             <div className="space-y-1.5">
-              <span className="text-sm font-bold text-gray-500 uppercase tracking-wide">Channels</span>
+              <span className="text-sm font-bold text-swiss-muted uppercase tracking-wide">Channels</span>
               <div className="flex gap-3">
                 {CHANNELS.map((ch) => (
                   <label key={ch} className="flex items-center gap-1.5 text-sm capitalize">
@@ -610,21 +611,21 @@ export function InboxBehaviorPanel() {
             </div>
 
             <label className="block space-y-1">
-              <span className="text-sm font-bold text-gray-500 uppercase tracking-wide">
+              <span className="text-sm font-bold text-swiss-muted uppercase tracking-wide">
                 Contact tags (any match)
               </span>
-              <input
+              <Input
                 value={ruleForm.contactTags}
                 onChange={(e) => setRuleForm((prev) => ({ ...prev, contactTags: e.target.value }))}
                 placeholder="vip, priority"
-                className="w-full rounded-xl border border-black/5 px-3 py-2 text-sm"
+                className="h-auto w-full rounded-xl border border-swiss-line px-3 py-2 text-sm"
               />
               <span className="text-xs text-slate-400">Comma-separated. Leave empty to match any contact.</span>
             </label>
 
             <div className="space-y-2 rounded-xl border-[0.5px] border-border-subtle p-3">
               <label className="flex cursor-pointer items-center justify-between gap-2">
-                <span className="text-sm font-bold text-gray-500 uppercase tracking-wide">
+                <span className="text-sm font-bold text-swiss-muted uppercase tracking-wide">
                   Business hours
                 </span>
                 <input
@@ -659,18 +660,18 @@ export function InboxBehaviorPanel() {
                     ))}
                   </div>
                   <div className="flex items-center gap-2">
-                    <input
+                    <Input
                       type="time"
                       value={ruleForm.start}
                       onChange={(e) => setRuleForm((prev) => ({ ...prev, start: e.target.value }))}
-                      className="rounded-lg border-[0.5px] border-border-subtle px-2 py-1.5 text-sm"
+                      className="h-auto rounded-lg border-[0.5px] border-border-subtle px-2 py-1.5 text-sm"
                     />
                     <span className="text-xs text-slate-400">to</span>
-                    <input
+                    <Input
                       type="time"
                       value={ruleForm.end}
                       onChange={(e) => setRuleForm((prev) => ({ ...prev, end: e.target.value }))}
-                      className="rounded-lg border-[0.5px] border-border-subtle px-2 py-1.5 text-sm"
+                      className="h-auto rounded-lg border-[0.5px] border-border-subtle px-2 py-1.5 text-sm"
                     />
                   </div>
                   <p className="text-xs text-slate-400">Uses the workspace's Inbox Behavior timezone.</p>
@@ -679,7 +680,7 @@ export function InboxBehaviorPanel() {
             </div>
 
             <div className="space-y-2">
-              <span className="text-sm font-bold text-gray-500 uppercase tracking-wide">Assign to</span>
+              <span className="text-sm font-bold text-swiss-muted uppercase tracking-wide">Assign to</span>
               <div className="flex gap-3">
                 <label className="flex items-center gap-1.5 text-sm">
                   <input
@@ -704,7 +705,7 @@ export function InboxBehaviorPanel() {
                 <select
                   value={ruleForm.actionGroupId}
                   onChange={(e) => setRuleForm((prev) => ({ ...prev, actionGroupId: e.target.value }))}
-                  className="w-full rounded-xl bg-white ring-1 ring-slate-200/80 px-3 py-2 text-sm"
+                  className="w-full bg-white border border-swiss-line px-3 py-2 text-sm"
                 >
                   <option value="">Select a group…</option>
                   {groups.map((g) => (
@@ -717,7 +718,7 @@ export function InboxBehaviorPanel() {
                 <select
                   value={ruleForm.actionUserId}
                   onChange={(e) => setRuleForm((prev) => ({ ...prev, actionUserId: e.target.value }))}
-                  className="w-full rounded-xl bg-white ring-1 ring-slate-200/80 px-3 py-2 text-sm"
+                  className="w-full bg-white border border-swiss-line px-3 py-2 text-sm"
                 >
                   <option value="">Select a member…</option>
                   {members.map((m) => (
@@ -741,7 +742,7 @@ export function InboxBehaviorPanel() {
                 type="button"
                 onClick={() => setShowRuleForm(false)}
                 disabled={savingRule}
-                className="rounded-xl px-4 py-2 text-sm font-bold text-gray-500 hover:bg-gray-50"
+                className="rounded-xl px-4 py-2 text-sm font-bold text-swiss-muted hover:bg-gray-50"
               >
                 Cancel
               </button>

@@ -49,7 +49,7 @@ export const ReviewCardTile: React.FC<{
         <img
           src={item.postThumbnailUrl}
           alt=""
-          className="h-14 w-14 rounded-lg object-cover border border-black/5"
+          className="h-14 w-14 rounded-lg object-cover border border-swiss-line"
         />
       </button>
 
@@ -70,10 +70,10 @@ export const ReviewCardTile: React.FC<{
               <Instagram className="h-2.5 w-2.5" />
             </div>
           )}
-          <span className="truncate text-sm font-bold text-neutral-900">
+          <span className="truncate text-sm font-bold text-swiss-ink">
             @{item.username}
           </span>
-          <span className="shrink-0 text-[11px] text-neutral-400">
+          <span className="shrink-0 text-[11px] text-swiss-faint">
             {timeAgo(item.createdAt)}
           </span>
         </div>

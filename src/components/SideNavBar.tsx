@@ -30,11 +30,18 @@ import {
   MessageSquare,
   Bell,
   Table2,
+  Blocks,
 } from 'lucide-react';
 import { useSidebar } from '../contexts/SidebarContext';
 import { api, getWorkspaceId } from '../lib/api';
 import { getSocket } from '../lib/socket';
 import { useWorkspaceAccess } from '../hooks/useWorkspaceAccess';
+import {
+  APP_REGISTRY,
+  APPS_CHANGED_EVENT,
+  getInstalledAppIds,
+  refreshInstalledApps,
+} from '../lib/installedApps';
 import {
   GOOGLE_TOOL_META,
   GOOGLE_TOOLS_CHANGED_EVENT,
@@ -81,7 +88,7 @@ type NavSection = {
 function SectionLabel({ label, collapsed }: { label: string; collapsed: boolean }) {
   if (collapsed) return null;
   return (
-    <p className="px-3 pb-1 pt-3 text-[11px] font-medium uppercase tracking-wide text-neutral-400">
+    <p className="px-3 pb-2 pt-5 font-swiss text-[11px] font-semibold uppercase tracking-[0.08em] text-swiss-muted first:pt-0">
       {label}
     </p>
   );
@@ -101,6 +108,7 @@ export const SideNavBar: React.FC = () => {
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifUnread, setNotifUnread] = useState(0);
   const [bellAttention, setBellAttention] = useState(false);
+  const [installedAppIds, setInstalledAppIds] = useState<string[]>(() => getInstalledAppIds());
   const { collapsed, toggleCollapsed, setCollapsed, mobileOpen, setMobileOpen, toggleMobile, isLargeScreen } =
     useSidebar();
   const sidebarCollapsed = collapsed && isLargeScreen;
@@ -201,6 +209,13 @@ export const SideNavBar: React.FC = () => {
   }, [location.pathname]);
 
   useEffect(() => {
+    const syncFromCache = () => setInstalledAppIds(getInstalledAppIds());
+    void refreshInstalledApps().then(syncFromCache).catch(() => {});
+    window.addEventListener(APPS_CHANGED_EVENT, syncFromCache);
+    return () => window.removeEventListener(APPS_CHANGED_EVENT, syncFromCache);
+  }, [activeWorkspace?.id]);
+
+  useEffect(() => {
     setMobileOpen(false);
   }, [location.pathname, setMobileOpen]);
 
@@ -265,9 +280,22 @@ export const SideNavBar: React.FC = () => {
         { id: 'media-gallery', label: 'Media Gallery', icon: Images },
       ],
     },
+    ...(installedAppIds.length > 0
+      ? [
+          {
+            label: 'Apps',
+            items: APP_REGISTRY.filter((app) => installedAppIds.includes(app.id)).map((app) => ({
+              id: app.tab,
+              label: app.navLabel ?? app.name,
+              icon: app.icon,
+            })),
+          },
+        ]
+      : []),
     {
       label: 'Systems',
       items: [
+        { id: 'app-store', label: 'App Store', icon: Blocks },
         { id: 'integrations', label: 'Integrations', icon: Plug },
         { id: 'settings', label: 'Settings', icon: Settings },
       ],
@@ -304,12 +332,10 @@ export const SideNavBar: React.FC = () => {
     canTab('google-tools');
 
   const navLinkClass = (active: boolean, collapsed: boolean) =>
-    `relative w-full flex items-center ${
+    `relative w-full flex items-center font-swiss ${
       collapsed ? 'justify-center px-2 py-2.5' : 'gap-2.5 px-3 py-2'
-    } rounded-lg text-sm transition-colors duration-200 ${
-      active
-        ? 'bg-[#e8ece8] font-semibold text-primary'
-        : 'text-neutral-600 hover:bg-black/[0.04] hover:text-neutral-900'
+    } text-[14.5px] transition-colors duration-150 ${
+      active ? 'font-semibold text-swiss-ink' : 'font-normal text-swiss-muted hover:text-swiss-ink'
     }`;
 
   return (
@@ -318,7 +344,7 @@ export const SideNavBar: React.FC = () => {
         <button
           type="button"
           onClick={toggleMobile}
-          className="fixed left-3 top-3 z-40 inline-flex h-10 w-10 items-center justify-center rounded-lg border border-black/10 bg-surface text-neutral-600 shadow-sm transition-colors hover:bg-surface-muted hover:text-primary lg:hidden"
+          className="fixed left-3 top-3 z-40 inline-flex h-10 w-10 items-center justify-center rounded-lg border border-black/10 bg-surface text-swiss-muted shadow-sm transition-colors hover:bg-surface-muted hover:text-primary lg:hidden"
           aria-label="Open navigation menu"
         >
           <Menu className="h-5 w-5" />
@@ -337,7 +363,7 @@ export const SideNavBar: React.FC = () => {
       <aside
         className={`${
           sidebarCollapsed && isLargeScreen ? 'w-[72px]' : 'w-[min(260px,85vw)] lg:w-[220px]'
-        } fixed left-0 top-0 z-50 flex h-screen shrink-0 flex-col overflow-x-hidden overflow-y-auto border-r border-black/5 bg-white transition-transform duration-200 ease-out selection:bg-primary/15 lg:static lg:z-0 lg:translate-x-0 lg:transition-[width] ${
+        } fixed left-0 top-0 z-50 flex h-screen shrink-0 flex-col overflow-x-hidden overflow-y-auto border-r border-swiss-line bg-white transition-transform duration-200 ease-out selection:bg-swiss-accent/15 lg:static lg:z-0 lg:translate-x-0 lg:transition-[width] ${
           isLargeScreen || mobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -350,17 +376,20 @@ export const SideNavBar: React.FC = () => {
               title={sidebarCollapsed ? displayCompanyName : undefined}
               className={`flex min-w-0 items-center gap-2 ${sidebarCollapsed ? 'justify-center' : ''}`}
             >
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#e8f0ec] text-primary">
-                {companyLogoUrl ? (
+              {companyLogoUrl ? (
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-md">
                   <img src={companyLogoUrl} alt="" className="h-full w-full object-cover" />
-                ) : (
-                  <span className="text-sm font-semibold">{displayCompanyInitial}</span>
-                )}
-              </div>
+                </div>
+              ) : null}
               {!sidebarCollapsed && (
-                <h1 className="truncate font-sans text-base font-semibold tracking-tight text-neutral-900">
+                <h1 className="truncate font-swiss text-[15px] font-semibold tracking-tight text-swiss-ink">
                   {displayCompanyName}
                 </h1>
+              )}
+              {sidebarCollapsed && !companyLogoUrl && (
+                <span className="font-swiss text-[13px] font-semibold text-swiss-ink">
+                  {displayCompanyInitial}
+                </span>
               )}
             </NavLink>
             <button
@@ -368,7 +397,7 @@ export const SideNavBar: React.FC = () => {
               onClick={toggleCollapsed}
               title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
               aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-              className="hidden rounded-lg p-1.5 text-neutral-400 transition-colors hover:bg-black/5 hover:text-neutral-700 lg:inline-flex"
+              className="hidden rounded-md p-1.5 text-swiss-faint transition-colors hover:text-swiss-ink lg:inline-flex"
             >
               {sidebarCollapsed ? (
                 <PanelLeft className="h-4 w-4" />
@@ -380,7 +409,7 @@ export const SideNavBar: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setMobileOpen(false)}
-                className="inline-flex rounded-lg p-1.5 text-neutral-400 transition-colors hover:bg-black/5 hover:text-neutral-700 lg:hidden"
+                className="inline-flex rounded-md p-1.5 text-swiss-faint transition-colors hover:text-swiss-ink lg:hidden"
                 aria-label="Close navigation menu"
               >
                 <X className="h-4 w-4" />
@@ -434,12 +463,6 @@ export const SideNavBar: React.FC = () => {
                         const active = isItemActive(isActive);
                         return (
                           <>
-                            {active ? (
-                              <span
-                                className="pointer-events-none absolute inset-y-1.5 right-0 w-0.5 rounded-full bg-primary"
-                                aria-hidden
-                              />
-                            ) : null}
                             <div
                               className={`relative flex min-w-0 flex-1 items-center ${
                                 sidebarCollapsed ? '' : 'gap-2'
@@ -447,21 +470,22 @@ export const SideNavBar: React.FC = () => {
                             >
                               <Icon
                                 className={`h-4 w-4 shrink-0 ${
-                                  active ? 'text-primary' : 'text-neutral-400'
+                                  active ? 'text-swiss-ink' : 'text-swiss-faint'
                                 }`}
+                                strokeWidth={1.75}
                               />
                               {!sidebarCollapsed && <span className="truncate">{item.label}</span>}
                               {item.pulse ? (
                                 <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full border-2 border-white bg-red-500 animate-pulse" />
                               ) : null}
                               {sidebarCollapsed && item.badge ? (
-                                <span className="absolute -right-1 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-channel-green px-1 text-[10px] font-bold text-white">
+                                <span className="absolute -right-2 -top-1.5 font-swiss text-[10px] font-semibold text-swiss-accent">
                                   {item.badge > 99 ? '99+' : item.badge}
                                 </span>
                               ) : null}
                             </div>
                             {!sidebarCollapsed && item.badge ? (
-                              <span className="flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-channel-green px-1.5 text-xs font-bold text-white">
+                              <span className="font-swiss text-[12px] font-semibold text-swiss-accent">
                                 {item.badge > 99 ? '99+' : item.badge}
                               </span>
                             ) : null}
@@ -490,23 +514,18 @@ export const SideNavBar: React.FC = () => {
                 }}
                 className={navLinkClass(isGoogleToolsRoute, sidebarCollapsed)}
               >
-                {isGoogleToolsRoute ? (
-                  <span
-                    className="pointer-events-none absolute inset-y-1.5 right-0 w-0.5 rounded-full bg-primary"
-                    aria-hidden
-                  />
-                ) : null}
                 <div className={`flex items-center ${sidebarCollapsed ? '' : 'gap-2'}`}>
                   <CalendarDays
                     className={`h-4 w-4 shrink-0 ${
-                      isGoogleToolsRoute ? 'text-primary' : 'text-neutral-400'
+                      isGoogleToolsRoute ? 'text-swiss-ink' : 'text-swiss-faint'
                     }`}
+                    strokeWidth={1.75}
                   />
                   {!sidebarCollapsed && <span>Google Tools</span>}
                 </div>
                 {!sidebarCollapsed && (
                   <ChevronDown
-                    className={`h-3.5 w-3.5 shrink-0 text-neutral-400 transition-transform ${
+                    className={`h-3.5 w-3.5 shrink-0 text-swiss-faint transition-transform ${
                       googleToolsOpen ? 'rotate-180' : ''
                     }`}
                   />
@@ -514,7 +533,7 @@ export const SideNavBar: React.FC = () => {
               </button>
 
               {googleToolsOpen && !sidebarCollapsed && (
-                <div className="ml-2 mt-0.5 space-y-0.5 border-l border-black/10 pl-2">
+                <div className="ml-2 mt-0.5 space-y-0.5 border-l border-swiss-line pl-2">
                   {connectedMainGoogleTools.map((tool) => {
                     const meta = GOOGLE_TOOL_META[tool];
                     const ToolIcon = meta.icon;
@@ -524,20 +543,13 @@ export const SideNavBar: React.FC = () => {
                       <NavLink
                         key={tool}
                         to={toolPath}
-                        className={`relative flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm transition-colors ${
-                          isActive
-                            ? 'bg-[#e8ece8] font-semibold text-primary'
-                            : 'text-neutral-600 hover:bg-black/[0.04] hover:text-neutral-900'
+                        className={`font-swiss flex w-full items-center gap-2 px-2.5 py-1.5 text-[14.5px] transition-colors ${
+                          isActive ? 'font-semibold text-swiss-ink' : 'text-swiss-muted hover:text-swiss-ink'
                         }`}
                       >
-                        {isActive ? (
-                          <span
-                            className="pointer-events-none absolute inset-y-1 right-0 w-0.5 rounded-full bg-primary"
-                            aria-hidden
-                          />
-                        ) : null}
                         <ToolIcon
-                          className={`h-4 w-4 shrink-0 ${isActive ? 'text-primary' : 'text-neutral-400'}`}
+                          className={`h-4 w-4 shrink-0 ${isActive ? 'text-swiss-ink' : 'text-swiss-faint'}`}
+                          strokeWidth={1.75}
                         />
                         <span>{meta.shortLabel}</span>
                       </NavLink>
@@ -561,16 +573,11 @@ export const SideNavBar: React.FC = () => {
                   >
                     {({ isActive }) => (
                       <>
-                        {isActive ? (
-                          <span
-                            className="pointer-events-none absolute inset-y-1.5 right-0 w-0.5 rounded-full bg-primary"
-                            aria-hidden
-                          />
-                        ) : null}
                         <Icon
                           className={`h-4 w-4 shrink-0 ${
-                            isActive ? 'text-primary' : 'text-neutral-400'
+                            isActive ? 'text-swiss-ink' : 'text-swiss-faint'
                           }`}
+                          strokeWidth={1.75}
                         />
                         {!sidebarCollapsed && <span>{item.label}</span>}
                       </>
@@ -583,7 +590,7 @@ export const SideNavBar: React.FC = () => {
         </nav>
 
         <div
-          className={`mt-auto space-y-0.5 border-t border-black/5 ${
+          className={`mt-auto space-y-0.5 border-t border-swiss-line ${
             sidebarCollapsed ? 'p-2' : 'px-2 py-2'
           }`}
         >
@@ -597,9 +604,10 @@ export const SideNavBar: React.FC = () => {
           >
             <div className="relative shrink-0">
               <Bell
-                className={`h-4 w-4 ${notifOpen ? 'text-primary' : 'text-neutral-400'}${
+                className={`h-4 w-4 ${notifOpen ? 'text-swiss-ink' : 'text-swiss-faint'}${
                   bellAttention && !notifOpen ? ' notif-bell-attention' : ''
                 }`}
+                strokeWidth={1.75}
               />
               {notifUnread > 0 && (
                 <span

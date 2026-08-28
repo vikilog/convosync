@@ -22,6 +22,9 @@ import {
   planFeaturesFromSubscription,
 } from '../lib/planEntitlements';
 import { PlanUpgradeBanner } from './PlanUpgradeBanner';
+import { Input } from './ui/input';
+import { Textarea } from './ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 type MediaScope = 'customer' | 'partner' | 'both';
 type MediaType = 'image' | 'pdf' | 'video' | 'audio' | 'document';
@@ -566,7 +569,7 @@ export const MediaGalleryView: React.FC = () => {
         )}
 
         {/* Command bar — search, storage, add */}
-        <div className="relative mb-5 overflow-hidden rounded-xl bg-white ring-1 ring-slate-200/80">
+        <div className="relative mb-5 overflow-hidden bg-white border border-swiss-line">
           <div className="absolute inset-x-0 top-0 h-0.5 bg-primary" />
           <div className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:gap-4 sm:p-4">
             <div className="relative min-w-0 flex-1">
@@ -577,13 +580,13 @@ export const MediaGalleryView: React.FC = () => {
                 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
                 aria-hidden
               />
-              <input
+              <Input
                 id="media-search"
                 type="search"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search by title, tag, or filename"
-                className="w-full min-h-11 rounded-lg border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-3 text-base text-slate-900 outline-none ring-primary/20 placeholder:text-slate-400 transition-colors duration-200 focus:border-primary/40 focus:bg-white focus:ring-2 sm:text-sm"
+                className="h-auto min-h-11 rounded-lg border-swiss-line bg-slate-50 py-2.5 pl-10 pr-3 text-base text-slate-900 outline-none ring-primary/20 transition-colors duration-200 placeholder:text-slate-400 focus-visible:border-primary/40 focus-visible:bg-white focus-visible:ring-2 sm:text-sm"
               />
             </div>
 
@@ -652,7 +655,7 @@ export const MediaGalleryView: React.FC = () => {
             {[0, 1, 2, 3, 4, 5].map((i) => (
               <li
                 key={i}
-                className="h-52 animate-pulse rounded-xl border border-black/5 bg-white"
+                className="h-52 animate-pulse rounded-xl border border-swiss-line bg-white"
               />
             ))}
           </ul>
@@ -661,7 +664,7 @@ export const MediaGalleryView: React.FC = () => {
             initial={reduceMotion ? false : { opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: reduceMotion ? 0 : 0.25, ease: EASE }}
-            className="relative overflow-hidden rounded-xl bg-white ring-1 ring-slate-200/80"
+            className="relative overflow-hidden bg-white border border-swiss-line"
             role="status"
           >
             <div className="absolute inset-x-0 top-0 h-0.5 bg-primary" />
@@ -687,7 +690,7 @@ export const MediaGalleryView: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setSearch('')}
-                    className="mt-6 min-h-11 cursor-pointer rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-bold text-slate-700 transition-colors duration-200 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    className="mt-6 min-h-11 cursor-pointer rounded-xl border border-swiss-line px-5 py-2.5 text-sm font-bold text-slate-700 transition-colors duration-200 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   >
                     Clear search
                   </button>
@@ -749,7 +752,7 @@ export const MediaGalleryView: React.FC = () => {
                             transition: { duration: 0.18, ease: EASE },
                           }
                     }
-                    className="group relative flex min-w-0 flex-col overflow-hidden rounded-xl bg-white ring-1 ring-slate-200 transition-[box-shadow] duration-200 hover:ring-slate-300"
+                    className="group relative flex min-w-0 flex-col overflow-hidden bg-white border border-swiss-line transition-[box-shadow] duration-200 hover:ring-slate-300"
                   >
                     <div className="relative aspect-[4/3] overflow-hidden bg-slate-50 text-primary">
                       {thumb ? (
@@ -771,7 +774,7 @@ export const MediaGalleryView: React.FC = () => {
                         className={`absolute left-2 top-2 inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-semibold backdrop-blur-sm ${
                           item.isActive
                             ? 'bg-white/90 text-primary ring-1 ring-primary/15'
-                            : 'bg-white/90 text-slate-500 ring-1 ring-slate-200'
+                            : 'bg-white/90 text-slate-500 ring-1 ring-swiss-line'
                         }`}
                       >
                         <span
@@ -795,7 +798,7 @@ export const MediaGalleryView: React.FC = () => {
                           onClick={() =>
                             setOpenMenuId((id) => (id === item.id ? null : item.id))
                           }
-                          className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg bg-white/90 text-slate-600 opacity-100 shadow-sm ring-1 ring-slate-200/80 transition-opacity duration-150 hover:bg-white hover:text-slate-900 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100 data-[open=true]:opacity-100"
+                          className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg bg-white/90 text-slate-600 opacity-100 ring-1 ring-swiss-line transition-opacity duration-150 hover:bg-white hover:text-slate-900 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100 data-[open=true]:opacity-100"
                           data-open={menuOpen}
                         >
                           {busyIds.has(item.id) ? (
@@ -815,7 +818,7 @@ export const MediaGalleryView: React.FC = () => {
                                 duration: reduceMotion ? 0 : 0.15,
                                 ease: EASE,
                               }}
-                              className="absolute right-0 top-full z-20 mt-1 w-40 overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/10"
+                              className="absolute right-0 top-full z-20 mt-1 w-40 overflow-hidden rounded-lg border border-swiss-line bg-white py-1 shadow-lg shadow-slate-900/10"
                             >
                               <button
                                 type="button"
@@ -866,7 +869,7 @@ export const MediaGalleryView: React.FC = () => {
                         >
                           {item.filename || item.type}
                         </p>
-                        <span className="shrink-0 truncate rounded-md bg-slate-50 px-1.5 py-0.5 text-[10px] font-medium capitalize text-slate-500 ring-1 ring-slate-200/80">
+                        <span className="shrink-0 truncate rounded-md bg-slate-50 px-1.5 py-0.5 text-[10px] font-medium capitalize text-slate-500 ring-1 ring-swiss-line">
                           {metaTag}
                         </span>
                       </div>
@@ -885,8 +888,8 @@ export const MediaGalleryView: React.FC = () => {
             aria-modal="true"
             aria-labelledby="media-upload-title"
           >
-            <div className="flex max-h-[92vh] w-full flex-col rounded-t-2xl bg-white ring-1 ring-slate-200/80 shadow-2xl sm:max-w-lg sm:rounded-2xl">
-              <div className="flex shrink-0 items-center justify-between gap-3 border-b border-black/5 px-5 py-4 sm:px-6">
+            <div className="flex max-h-[92vh] w-full flex-col rounded-t-2xl bg-white ring-1 ring-swiss-line shadow-2xl sm:max-w-lg sm:rounded-2xl">
+              <div className="flex shrink-0 items-center justify-between gap-3 border-b border-swiss-line px-5 py-4 sm:px-6">
                 <div>
                   <h2 id="media-upload-title" className="text-base font-bold text-slate-900">
                     {editing ? 'Edit media' : 'Upload to S3'}
@@ -1006,11 +1009,11 @@ export const MediaGalleryView: React.FC = () => {
                   <label htmlFor={titleId} className="block text-sm font-bold text-slate-900">
                     Title
                   </label>
-                  <input
+                  <Input
                     id={titleId}
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    className="mt-1.5 w-full min-h-11 rounded-xl border border-black/10 px-3 py-2 text-base outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 sm:text-sm"
+                    className="mt-1.5 h-auto min-h-11 rounded-xl border-black/10 px-3 py-2 text-base outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 sm:text-sm"
                     placeholder="Price list PDF"
                     autoComplete="off"
                   />
@@ -1020,13 +1023,13 @@ export const MediaGalleryView: React.FC = () => {
                   <label htmlFor={descId} className="block text-sm font-bold text-slate-900">
                     Description
                   </label>
-                  <textarea
+                  <Textarea
                     id={descId}
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     rows={3}
                     placeholder="When should this be sent? e.g. customer asks for pricing"
-                    className="mt-1.5 w-full resize-none rounded-xl border border-black/10 px-3 py-2.5 text-base leading-relaxed outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 sm:text-sm"
+                    className="mt-1.5 resize-none rounded-xl border-black/10 px-3 py-2.5 text-base leading-relaxed outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 sm:text-sm"
                   />
                 </div>
 
@@ -1035,26 +1038,29 @@ export const MediaGalleryView: React.FC = () => {
                     <label htmlFor={scopeId} className="block text-sm font-bold text-slate-900">
                       Scope
                     </label>
-                    <select
-                      id={scopeId}
-                      value={scope}
-                      onChange={(e) => setScope(e.target.value as MediaScope)}
-                      className="mt-1.5 w-full min-h-11 cursor-pointer rounded-xl bg-white ring-1 ring-slate-200/80 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
-                    >
-                      <option value="customer">Customer</option>
-                      <option value="partner">Partner</option>
-                      <option value="both">Both</option>
-                    </select>
+                    <Select value={scope} onValueChange={(value) => setScope(value as MediaScope)}>
+                      <SelectTrigger
+                        id={scopeId}
+                        className="mt-1.5 h-auto min-h-11 w-full cursor-pointer rounded-xl bg-white px-3 py-2 text-sm shadow-none ring-1 ring-swiss-line focus-visible:ring-2 focus-visible:ring-primary/20"
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="customer">Customer</SelectItem>
+                        <SelectItem value="partner">Partner</SelectItem>
+                        <SelectItem value="both">Both</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div>
                     <label htmlFor={usageId} className="block text-sm font-bold text-slate-900">
                       Usage
                     </label>
-                    <input
+                    <Input
                       id={usageId}
                       value={usage}
                       onChange={(e) => setUsage(e.target.value)}
-                      className="mt-1.5 w-full min-h-11 rounded-xl border border-black/10 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                      className="mt-1.5 h-auto min-h-11 rounded-xl border-black/10 px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
                       placeholder="agent, catalog"
                       autoComplete="off"
                     />
@@ -1065,11 +1071,11 @@ export const MediaGalleryView: React.FC = () => {
                   <label htmlFor={tagsId} className="block text-sm font-bold text-slate-900">
                     Tags
                   </label>
-                  <input
+                  <Input
                     id={tagsId}
                     value={tags}
                     onChange={(e) => setTags(e.target.value)}
-                    className="mt-1.5 w-full min-h-11 rounded-xl border border-black/10 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                    className="mt-1.5 h-auto min-h-11 rounded-xl border-black/10 px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
                     placeholder="pricing, brochure"
                     autoComplete="off"
                   />
@@ -1085,7 +1091,7 @@ export const MediaGalleryView: React.FC = () => {
                 )}
               </div>
 
-              <div className="flex shrink-0 flex-col-reverse gap-2 border-t border-black/5 px-5 py-4 sm:flex-row sm:justify-end sm:gap-3 sm:px-6">
+              <div className="flex shrink-0 flex-col-reverse gap-2 border-t border-swiss-line px-5 py-4 sm:flex-row sm:justify-end sm:gap-3 sm:px-6">
                 <button
                   type="button"
                   onClick={closeForm}

@@ -10,6 +10,7 @@ import {
 } from '../templates/templateBuilderUtils';
 import { TemplateStatusBadge } from '../templates/TemplateStatusBadge';
 import { statusUiToSlug } from '../../lib/templateLabels';
+import { Input } from '../ui/input';
 import {
   buildPaymentTemplateVariables,
   buildPlainPaymentPreview,
@@ -35,7 +36,7 @@ function PlainMessagePreview({ text }: { text: string }) {
       <div className="flex-1 flex items-center justify-center">
         <div className="w-full max-w-[280px] rounded-2xl border-[8px] border-[#1f2c34] bg-[#efeae2] overflow-hidden shadow-lg">
           <div className="px-3 py-4">
-            <div className="bg-white rounded-lg rounded-tl-sm shadow-md overflow-hidden">
+            <div className="bg-white rounded-lg rounded-tl-sm overflow-hidden">
               <p className="px-3 py-2.5 text-sm leading-relaxed text-[#111b21] whitespace-pre-wrap">
                 {text}
               </p>
@@ -205,23 +206,23 @@ export const CreatePaymentRequestModal: React.FC<CreatePaymentRequestModalProps>
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
       <div
-        className="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[92vh] flex flex-col border border-slate-200 overflow-hidden"
+        className="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[92vh] flex flex-col border border-swiss-line overflow-hidden"
         role="dialog"
         aria-labelledby="create-payment-title"
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 shrink-0">
           <div>
-            <h2 id="create-payment-title" className="text-lg font-black text-gray-900">
+            <h2 id="create-payment-title" className="text-lg font-semibold text-swiss-ink">
               New payment request
             </h2>
-            <p className="text-xs text-gray-500 mt-0.5">
+            <p className="text-xs text-swiss-muted mt-0.5">
               Select contact and preview the WhatsApp message before sending
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-gray-400 hover:bg-slate-100 cursor-pointer"
+            className="p-1.5 rounded-lg text-swiss-faint hover:bg-slate-100 cursor-pointer"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -232,11 +233,11 @@ export const CreatePaymentRequestModal: React.FC<CreatePaymentRequestModalProps>
           <div className="flex flex-1 min-h-0 flex-col lg:flex-row overflow-hidden">
             <div className="lg:w-[340px] shrink-0 border-b lg:border-b-0 lg:border-r border-slate-100 p-5 space-y-4 overflow-y-auto">
               <div>
-                <label htmlFor="pay-contact" className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1">
+                <label htmlFor="pay-contact" className="text-xs font-bold text-swiss-muted uppercase tracking-wide block mb-1">
                   Contact
                 </label>
                 {loadingContacts ? (
-                  <div className="flex items-center gap-2 text-sm text-gray-500 py-2">
+                  <div className="flex items-center gap-2 text-sm text-swiss-muted py-2">
                     <Loader2 className="w-4 h-4 animate-spin" />
                     Loading contacts…
                   </div>
@@ -245,7 +246,7 @@ export const CreatePaymentRequestModal: React.FC<CreatePaymentRequestModalProps>
                     id="pay-contact"
                     value={contactId}
                     onChange={(e) => handleContactChange(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium cursor-pointer"
+                    className="w-full px-3 py-2 bg-slate-50 border border-swiss-line rounded-xl text-sm font-medium cursor-pointer"
                   >
                     <option value="">Select a contact…</option>
                     {contacts.map((c) => (
@@ -260,26 +261,26 @@ export const CreatePaymentRequestModal: React.FC<CreatePaymentRequestModalProps>
               {!contactId && (
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label htmlFor="pay-name" className="text-xs font-bold text-gray-500 block mb-1">
+                    <label htmlFor="pay-name" className="text-xs font-bold text-swiss-muted block mb-1">
                       Name
                     </label>
-                    <input
+                    <Input
                       id="pay-name"
                       value={contactName}
                       onChange={(e) => setContactName(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm"
+                      className="h-auto w-full px-3 py-2 border border-swiss-line rounded-xl text-sm"
                       placeholder="Customer name"
                     />
                   </div>
                   <div>
-                    <label htmlFor="pay-phone" className="text-xs font-bold text-gray-500 block mb-1">
+                    <label htmlFor="pay-phone" className="text-xs font-bold text-swiss-muted block mb-1">
                       Phone
                     </label>
-                    <input
+                    <Input
                       id="pay-phone"
                       value={contactPhone}
                       onChange={(e) => setContactPhone(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm"
+                      className="h-auto w-full px-3 py-2 border border-swiss-line rounded-xl text-sm"
                       placeholder="+91…"
                     />
                   </div>
@@ -287,31 +288,31 @@ export const CreatePaymentRequestModal: React.FC<CreatePaymentRequestModalProps>
               )}
 
               <div>
-                <label htmlFor="pay-amount" className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1">
+                <label htmlFor="pay-amount" className="text-xs font-bold text-swiss-muted uppercase tracking-wide block mb-1">
                   Amount (INR)
                 </label>
-                <input
+                <Input
                   id="pay-amount"
                   type="number"
                   min="1"
                   step="0.01"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-mono"
+                  className="h-auto w-full px-3 py-2 border border-swiss-line rounded-xl text-sm font-mono"
                   placeholder="2499"
                   required
                 />
               </div>
 
               <div>
-                <label htmlFor="pay-desc" className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1">
+                <label htmlFor="pay-desc" className="text-xs font-bold text-swiss-muted uppercase tracking-wide block mb-1">
                   Description
                 </label>
-                <input
+                <Input
                   id="pay-desc"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm"
+                  className="h-auto w-full px-3 py-2 border border-swiss-line rounded-xl text-sm"
                   placeholder="Growth plan · Monthly subscription"
                   maxLength={500}
                   required
@@ -319,7 +320,7 @@ export const CreatePaymentRequestModal: React.FC<CreatePaymentRequestModalProps>
               </div>
 
               <div>
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
+                <p className="text-xs font-bold text-swiss-muted uppercase tracking-wide mb-2">
                   WhatsApp message
                 </p>
                 <div className="flex gap-1 p-1 bg-slate-100 rounded-xl">
@@ -328,8 +329,8 @@ export const CreatePaymentRequestModal: React.FC<CreatePaymentRequestModalProps>
                     onClick={() => setSendMode('template')}
                     className={`flex-1 px-3 py-2 text-xs font-bold rounded-lg transition-colors ${
                       sendMode === 'template'
-                        ? 'bg-white text-emerald-700 shadow-sm'
-                        : 'text-gray-600 hover:text-gray-900'
+                        ? 'bg-white text-emerald-700 '
+                        : 'text-swiss-muted hover:text-swiss-ink'
                     }`}
                   >
                     Template
@@ -339,8 +340,8 @@ export const CreatePaymentRequestModal: React.FC<CreatePaymentRequestModalProps>
                     onClick={() => setSendMode('plain')}
                     className={`flex-1 px-3 py-2 text-xs font-bold rounded-lg transition-colors ${
                       sendMode === 'plain'
-                        ? 'bg-white text-emerald-700 shadow-sm'
-                        : 'text-gray-600 hover:text-gray-900'
+                        ? 'bg-white text-emerald-700 '
+                        : 'text-swiss-muted hover:text-swiss-ink'
                     }`}
                   >
                     Quick message
@@ -351,11 +352,11 @@ export const CreatePaymentRequestModal: React.FC<CreatePaymentRequestModalProps>
               {sendMode === 'template' && (
                 <div className="space-y-3">
                   <div>
-                    <label htmlFor="pay-template" className="text-xs font-bold text-gray-500 block mb-1">
+                    <label htmlFor="pay-template" className="text-xs font-bold text-swiss-muted block mb-1">
                       Template
                     </label>
                     {loadingTemplates ? (
-                      <div className="flex items-center gap-2 text-sm text-gray-500 py-2">
+                      <div className="flex items-center gap-2 text-sm text-swiss-muted py-2">
                         <Loader2 className="w-4 h-4 animate-spin" />
                         Loading templates…
                       </div>
@@ -368,7 +369,7 @@ export const CreatePaymentRequestModal: React.FC<CreatePaymentRequestModalProps>
                         id="pay-template"
                         value={templateId}
                         onChange={(e) => setTemplateId(e.target.value)}
-                        className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm cursor-pointer"
+                        className="w-full px-3 py-2 border border-swiss-line rounded-xl text-sm cursor-pointer"
                       >
                         {approvedTemplates.map((t) => (
                           <option key={t.id} value={t.id}>
@@ -380,18 +381,18 @@ export const CreatePaymentRequestModal: React.FC<CreatePaymentRequestModalProps>
                     {selectedTemplate && (
                       <div className="mt-2 flex items-center gap-2">
                         <TemplateStatusBadge status={statusUiToSlug(selectedTemplate.status)} />
-                        <span className="text-xs text-gray-500">{selectedTemplate.category}</span>
+                        <span className="text-xs text-swiss-muted">{selectedTemplate.category}</span>
                       </div>
                     )}
                   </div>
 
                   {selectedTemplate && varCount > 0 && (
                     <div className="space-y-2">
-                      <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">Variables</p>
+                      <p className="text-xs font-bold text-swiss-muted uppercase tracking-wide">Variables</p>
                       {Array.from({ length: varCount }, (_, i) => (
                         <label key={i} className="block">
-                          <span className="text-xs font-semibold text-gray-600">{`{{${i + 1}}}`}</span>
-                          <input
+                          <span className="text-xs font-semibold text-swiss-muted">{`{{${i + 1}}}`}</span>
+                          <Input
                             value={templateVariables[i] ?? ''}
                             onChange={(e) => {
                               const v = e.target.value;
@@ -401,7 +402,7 @@ export const CreatePaymentRequestModal: React.FC<CreatePaymentRequestModalProps>
                                 return next;
                               });
                             }}
-                            className="mt-1 w-full px-3 py-2 border border-slate-200 rounded-xl text-sm"
+                            className="h-auto mt-1 w-full px-3 py-2 border border-swiss-line rounded-xl text-sm"
                           />
                         </label>
                       ))}
@@ -463,7 +464,7 @@ export const CreatePaymentRequestModal: React.FC<CreatePaymentRequestModalProps>
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2.5 border border-slate-200 rounded-xl text-sm font-bold text-gray-700 hover:bg-slate-50 cursor-pointer"
+              className="flex-1 px-4 py-2.5 border border-swiss-line rounded-xl text-sm font-bold text-swiss-ink hover:bg-slate-50 cursor-pointer"
             >
               Cancel
             </button>

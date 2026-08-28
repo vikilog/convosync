@@ -16,6 +16,7 @@ import {
 import { ContactLeadJourneyPanel } from '../leads/ContactLeadJourneyPanel';
 import { ContactLinkedChannelsPanel } from './ContactLinkedChannelsPanel';
 import { TagChipInput } from '../tags/TagChipInput';
+import { Input } from '../ui/input';
 
 export type NewContactPayload = {
   name: string;
@@ -229,16 +230,16 @@ export function AddContactDrawer({ open, onClose, onCreated, onSaved, editContac
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-            className="fixed top-0 right-0 h-full w-full max-w-[420px] bg-white border-l border-slate-200 z-50 flex flex-col shadow-2xl"
+            className="fixed top-0 right-0 h-full w-full max-w-[420px] bg-white border-l border-swiss-line z-50 flex flex-col shadow-2xl"
           >
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
-              <h2 className="text-base font-bold text-gray-900">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-swiss-line">
+              <h2 className="text-base font-bold text-swiss-ink">
                 {isEdit ? 'Edit contact' : 'Add a new contact'}
               </h2>
               <button
                 type="button"
                 onClick={handleClose}
-                className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100"
+                className="p-1.5 rounded-lg text-swiss-faint hover:text-swiss-ink hover:bg-gray-100"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -250,34 +251,34 @@ export function AddContactDrawer({ open, onClose, onCreated, onSaved, editContac
               className="flex-1 overflow-y-auto px-5 py-5 space-y-5"
             >
               <div>
-                <p className="text-sm font-bold text-gray-800 mb-3">System attributes</p>
+                <p className="text-sm font-bold text-swiss-ink mb-3">System attributes</p>
 
                 <label className="block mb-4">
-                  <span className="text-meta font-semibold text-gray-600">
+                  <span className="text-meta font-semibold text-swiss-muted">
                     Nickname <span className="text-red-500">*</span>
                   </span>
-                  <input
+                  <Input
                     required
                     maxLength={250}
                     value={nickname}
                     onChange={(e) => setNickname(e.target.value)}
                     placeholder="Please enter"
-                    className="mt-1.5 w-full text-sm border border-slate-200 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    className="h-auto mt-1.5 w-full text-sm border border-swiss-line rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
-                  <span className="text-xs text-gray-400 mt-1 block text-right">
+                  <span className="text-xs text-swiss-faint mt-1 block text-right">
                     {nickname.length}/250
                   </span>
                 </label>
 
                 <label className="block mb-4">
-                  <span className="text-meta font-semibold text-gray-600">
+                  <span className="text-meta font-semibold text-swiss-muted">
                     Phone number {!phoneLocked && <span className="text-red-500">*</span>}
                   </span>
                   {phoneLocked ? (
-                    <input
+                    <Input
                       readOnly
                       value={editContact?.phone ?? ''}
-                      className="mt-1.5 w-full text-sm border border-slate-200 rounded-lg px-3 py-2.5 bg-gray-50 text-gray-500"
+                      className="h-auto mt-1.5 w-full text-sm border border-swiss-line rounded-lg px-3 py-2.5 bg-gray-50 text-swiss-muted"
                     />
                   ) : (
                     <div className="mt-1.5 flex min-w-0 items-stretch gap-2">
@@ -285,7 +286,7 @@ export function AddContactDrawer({ open, onClose, onCreated, onSaved, editContac
                         value={phoneDial}
                         onChange={(e) => setPhoneDial(e.target.value)}
                         aria-label="Country code"
-                        className="w-auto max-w-[7.5rem] shrink-0 cursor-pointer text-sm border border-slate-200 rounded-lg px-2 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        className="w-auto max-w-[7.5rem] shrink-0 cursor-pointer text-sm border border-swiss-line rounded-lg px-2 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"
                       >
                         {!DIAL_OPTIONS.some((o) => o.dial === phoneDial) && (
                           <option value={phoneDial}>{phoneDial}</option>
@@ -296,32 +297,32 @@ export function AddContactDrawer({ open, onClose, onCreated, onSaved, editContac
                           </option>
                         ))}
                       </select>
-                      <input
+                      <Input
                         required
                         type="tel"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         placeholder="Phone number"
-                        className="min-w-0 flex-1 text-sm border border-slate-200 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        className="h-auto min-w-0 flex-1 text-sm border border-swiss-line rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20"
                       />
                     </div>
                   )}
                   {phoneLocked && (
-                    <span className="text-xs text-gray-400 mt-1 block">
+                    <span className="text-xs text-swiss-faint mt-1 block">
                       Phone cannot be changed for Instagram/Messenger contacts.
                     </span>
                   )}
                 </label>
 
                 <label className="block mb-4">
-                  <span className="text-meta font-semibold text-gray-600 flex items-center gap-1">
+                  <span className="text-meta font-semibold text-swiss-muted flex items-center gap-1">
                     Owner
-                    <Info className="w-3 h-3 text-gray-400" aria-hidden />
+                    <Info className="w-3 h-3 text-swiss-faint" aria-hidden />
                   </span>
                   <select
                     value={ownerId}
                     onChange={(e) => setOwnerId(e.target.value)}
-                    className="mt-1.5 w-full text-sm border border-slate-200 rounded-lg px-3 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    className="mt-1.5 w-full text-sm border border-swiss-line rounded-lg px-3 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"
                   >
                     <option value="">Unassigned</option>
                     {members.map((m) => (
@@ -333,29 +334,29 @@ export function AddContactDrawer({ open, onClose, onCreated, onSaved, editContac
                 </label>
 
                 <label className="block mb-4">
-                  <span className="text-meta font-semibold text-gray-600">Email</span>
-                  <input
+                  <span className="text-meta font-semibold text-swiss-muted">Email</span>
+                  <Input
                     type="email"
                     maxLength={250}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Please enter"
-                    className="mt-1.5 w-full text-sm border border-slate-200 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    className="h-auto mt-1.5 w-full text-sm border border-swiss-line rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
-                  <span className="text-xs text-gray-400 mt-1 block text-right">
+                  <span className="text-xs text-swiss-faint mt-1 block text-right">
                     {email.length}/250
                   </span>
                 </label>
 
                 <div className="block">
-                  <span className="text-meta font-semibold text-gray-600">Tag</span>
+                  <span className="text-meta font-semibold text-swiss-muted">Tag</span>
                   <div className="mt-1.5">
                     <TagChipInput value={tags} onChange={setTags} />
                   </div>
                 </div>
 
                 {isEdit && (
-                  <label className="mt-4 flex items-start gap-2.5 cursor-pointer rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2.5">
+                  <label className="mt-4 flex items-start gap-2.5 cursor-pointer rounded-xl border border-swiss-line bg-slate-50/80 px-3 py-2.5">
                     <input
                       type="checkbox"
                       checked={excludeFromInsights}
@@ -363,10 +364,10 @@ export function AddContactDrawer({ open, onClose, onCreated, onSaved, editContac
                       className="mt-0.5 h-4 w-4 rounded border-slate-300 text-sky-600 focus:ring-sky-500"
                     />
                     <span>
-                      <span className="block text-sm font-bold text-gray-800">
+                      <span className="block text-sm font-bold text-swiss-ink">
                         Exclude from AI insights
                       </span>
-                      <span className="mt-0.5 block text-xs text-gray-500 leading-snug">
+                      <span className="mt-0.5 block text-xs text-swiss-muted leading-snug">
                         For team/test numbers — never run customer insight scoring on this contact.
                       </span>
                     </span>
@@ -392,10 +393,10 @@ export function AddContactDrawer({ open, onClose, onCreated, onSaved, editContac
                 </button>
               ) : (
                 <div className="space-y-2">
-                  <p className="text-sm font-bold text-gray-800">Customized attributes</p>
+                  <p className="text-sm font-bold text-swiss-ink">Customized attributes</p>
                   {customAttrs.map((row, i) => (
                     <div key={i} className="flex gap-2">
-                      <input
+                      <Input
                         value={row.key}
                         onChange={(e) => {
                           const next = [...customAttrs];
@@ -403,9 +404,9 @@ export function AddContactDrawer({ open, onClose, onCreated, onSaved, editContac
                           setCustomAttrs(next);
                         }}
                         placeholder="Attribute name"
-                        className="flex-1 text-sm border border-slate-200 rounded-lg px-2 py-2"
+                        className="h-auto flex-1 text-sm border border-swiss-line rounded-lg px-2 py-2"
                       />
-                      <input
+                      <Input
                         value={row.value}
                         onChange={(e) => {
                           const next = [...customAttrs];
@@ -413,7 +414,7 @@ export function AddContactDrawer({ open, onClose, onCreated, onSaved, editContac
                           setCustomAttrs(next);
                         }}
                         placeholder="Value"
-                        className="flex-1 text-sm border border-slate-200 rounded-lg px-2 py-2"
+                        className="h-auto flex-1 text-sm border border-swiss-line rounded-lg px-2 py-2"
                       />
                     </div>
                   ))}
@@ -430,11 +431,11 @@ export function AddContactDrawer({ open, onClose, onCreated, onSaved, editContac
               {error && <p className="text-xs text-red-600 font-medium">{error}</p>}
             </form>
 
-            <div className="px-5 py-4 border-t border-slate-200 flex justify-end gap-2">
+            <div className="px-5 py-4 border-t border-swiss-line flex justify-end gap-2">
               <button
                 type="button"
                 onClick={handleClose}
-                className="px-5 py-2.5 rounded-lg border border-slate-200 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                className="px-5 py-2.5 rounded-lg border border-swiss-line text-sm font-semibold text-swiss-ink hover:bg-gray-50"
               >
                 Cancel
               </button>

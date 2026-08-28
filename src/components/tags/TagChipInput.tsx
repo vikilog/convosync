@@ -6,6 +6,7 @@
 import { useId, useState } from 'react';
 import { X } from 'lucide-react';
 import { useWorkspaceTags } from '../../lib/useWorkspaceTags';
+import { Input } from '../ui/input';
 
 type Props = {
   value: string[];
@@ -56,7 +57,7 @@ export function TagChipInput({ value, onChange, placeholder = 'Select or create 
           ))}
         </div>
       )}
-      <input
+      <Input
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={(e) => {
@@ -72,8 +73,8 @@ export function TagChipInput({ value, onChange, placeholder = 'Select or create 
         placeholder={placeholder}
         className={
           compact
-            ? 'w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20'
-            : 'w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20'
+            ? 'w-full rounded-lg border border-swiss-line px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20'
+            : 'w-full rounded-lg border border-swiss-line px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20'
         }
       />
       <datalist id={listId}>

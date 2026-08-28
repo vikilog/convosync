@@ -119,10 +119,10 @@ export function ConnectFlowModal({ open, onClose, tableId, columns }: Props) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30">
       <div className="absolute inset-0" onClick={onClose} aria-hidden />
-      <div className="relative w-full max-w-lg space-y-4 rounded-2xl bg-white ring-1 ring-slate-200/80 p-6 shadow-xl max-h-[85vh] overflow-y-auto">
+      <div className="relative w-full max-w-lg space-y-4 bg-white border border-swiss-line p-6 shadow-xl max-h-[85vh] overflow-y-auto">
         <div className="flex items-start justify-between">
           <div>
-            <h3 className="text-base font-black text-gray-950">Connect a Flow</h3>
+            <h3 className="text-base font-semibold text-gray-950">Connect a Flow</h3>
             <p className="mt-1 text-xs text-slate-500">
               Every submission of a connected flow appends one row here, mapped by field.
             </p>
@@ -130,7 +130,7 @@ export function ConnectFlowModal({ open, onClose, tableId, columns }: Props) {
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded-lg text-gray-400 hover:bg-surface-muted"
+            className="p-1 rounded-lg text-swiss-faint hover:bg-surface-muted"
             aria-label="Close"
           >
             <X className="w-4 h-4" />
@@ -138,22 +138,22 @@ export function ConnectFlowModal({ open, onClose, tableId, columns }: Props) {
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-10 text-gray-400">
+          <div className="flex justify-center py-10 text-swiss-faint">
             <Loader2 className="w-6 h-6 animate-spin" />
           </div>
         ) : (
           <>
             {connected.length > 0 ? (
               <div className="space-y-2">
-                <span className="text-sm font-bold text-gray-500 uppercase tracking-wide">
+                <span className="text-sm font-bold text-swiss-muted uppercase tracking-wide">
                   Connected
                 </span>
                 {connected.map((f) => (
                   <div
                     key={f.id}
-                    className="flex items-center justify-between gap-2 rounded-xl border border-black/5 px-3 py-2"
+                    className="flex items-center justify-between gap-2 rounded-xl border border-swiss-line px-3 py-2"
                   >
-                    <span className="text-sm font-semibold text-gray-800">{f.name}</span>
+                    <span className="text-sm font-semibold text-swiss-ink">{f.name}</span>
                     <button
                       type="button"
                       disabled={saving}
@@ -169,18 +169,18 @@ export function ConnectFlowModal({ open, onClose, tableId, columns }: Props) {
             ) : null}
 
             <div className="space-y-2">
-              <span className="text-sm font-bold text-gray-500 uppercase tracking-wide">
+              <span className="text-sm font-bold text-swiss-muted uppercase tracking-wide">
                 Connect a published flow
               </span>
               {available.length === 0 ? (
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-swiss-faint">
                   No other published flows available. Publish a flow first from Templates → Flows.
                 </p>
               ) : (
                 <select
                   value={pickingFlowId}
                   onChange={(e) => void handlePickFlow(e.target.value)}
-                  className="w-full rounded-xl border border-black/5 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="w-full rounded-xl border border-swiss-line px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                 >
                   <option value="">Select a flow…</option>
                   {available.map((f) => (
@@ -195,17 +195,17 @@ export function ConnectFlowModal({ open, onClose, tableId, columns }: Props) {
 
             {pickingFlowId ? (
               loadingFields ? (
-                <div className="flex justify-center py-6 text-gray-400">
+                <div className="flex justify-center py-6 text-swiss-faint">
                   <Loader2 className="w-5 h-5 animate-spin" />
                 </div>
               ) : (
-                <div className="space-y-2 rounded-xl border border-black/5 p-3">
-                  <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">
+                <div className="space-y-2 rounded-xl border border-swiss-line p-3">
+                  <span className="text-xs font-bold text-swiss-muted uppercase tracking-wide">
                     Map columns to flow fields
                   </span>
                   {columns.map((col) => (
                     <div key={col.id} className="flex items-center gap-2">
-                      <span className="w-32 shrink-0 text-xs font-semibold text-gray-700 truncate">
+                      <span className="w-32 shrink-0 text-xs font-semibold text-swiss-ink truncate">
                         {col.label}
                       </span>
                       <select
@@ -213,7 +213,7 @@ export function ConnectFlowModal({ open, onClose, tableId, columns }: Props) {
                         onChange={(e) =>
                           setFieldMap((prev) => ({ ...prev, [col.key]: e.target.value }))
                         }
-                        className="flex-1 rounded-lg border border-black/5 px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        className="flex-1 rounded-lg border border-swiss-line px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20"
                       >
                         <option value="">— not mapped —</option>
                         {flowFields.map((f) => (

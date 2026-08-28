@@ -58,7 +58,7 @@ function emphasizeEntity(message: string): React.ReactNode {
   if (!m) return message;
   return (
     <>
-      <span className="font-semibold text-neutral-900">{m[1]}</span>
+      <span className="font-semibold text-swiss-ink">{m[1]}</span>
       {m[2]}
     </>
   );
@@ -189,8 +189,8 @@ export const NotificationsPanel: React.FC<Props> = ({
             }
             className="fixed inset-y-0 right-0 z-[70] flex w-full max-w-[min(400px,92vw)] flex-col overflow-hidden bg-white shadow-2xl ring-1 ring-black/5"
           >
-            <div className="flex shrink-0 items-center justify-between border-b border-black/5 px-4 py-3">
-              <h3 className="text-sm font-semibold text-neutral-900">
+            <div className="flex shrink-0 items-center justify-between border-b border-swiss-line px-4 py-3">
+              <h3 className="text-sm font-semibold text-swiss-ink">
                 {isActivity ? 'Recent activity' : 'Notifications'}
               </h3>
               <div className="flex items-center gap-1">
@@ -207,7 +207,7 @@ export const NotificationsPanel: React.FC<Props> = ({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 hover:bg-black/[0.04] hover:text-neutral-700"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-swiss-faint hover:bg-black/[0.04] hover:text-swiss-ink"
                   aria-label="Close"
                 >
                   <X className="h-4 w-4" />
@@ -215,7 +215,7 @@ export const NotificationsPanel: React.FC<Props> = ({
               </div>
             </div>
 
-            <div className="flex shrink-0 gap-1 border-b border-black/5 px-2 py-2">
+            <div className="flex shrink-0 gap-1 border-b border-swiss-line px-2 py-2">
               {TABS.map((t) => (
                 <button
                   key={t.id}
@@ -224,7 +224,7 @@ export const NotificationsPanel: React.FC<Props> = ({
                   className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
                     tab === t.id
                       ? 'bg-[#e8ece8] text-primary'
-                      : 'text-neutral-500 hover:bg-black/[0.04] hover:text-neutral-800'
+                      : 'text-swiss-muted hover:bg-black/[0.04] hover:text-swiss-ink'
                   }`}
                 >
                   {t.label}
@@ -234,20 +234,20 @@ export const NotificationsPanel: React.FC<Props> = ({
 
             <div className="min-h-0 flex-1 overflow-y-auto">
               {loading && items.length === 0 ? (
-                <p className="px-4 py-8 text-center text-sm text-neutral-400">Loading…</p>
+                <p className="px-4 py-8 text-center text-sm text-swiss-faint">Loading…</p>
               ) : items.length === 0 ? (
                 <div className="flex flex-col items-center gap-2 px-4 py-10 text-center">
                   {isActivity ? (
-                    <Activity className="h-8 w-8 text-neutral-300" />
+                    <Activity className="h-8 w-8 text-swiss-faint" />
                   ) : (
-                    <Megaphone className="h-8 w-8 text-neutral-300" />
+                    <Megaphone className="h-8 w-8 text-swiss-faint" />
                   )}
-                  <p className="text-sm text-neutral-500">
+                  <p className="text-sm text-swiss-muted">
                     {isActivity ? 'No recent activity' : 'No notifications yet'}
                   </p>
                 </div>
               ) : (
-                <ul className="divide-y divide-black/5">
+                <ul className="divide-y divide-swiss-line">
                   {items.map((item) => (
                     <li key={item.id}>
                       {isActivity ? (
@@ -256,11 +256,11 @@ export const NotificationsPanel: React.FC<Props> = ({
                             <SeverityIcon severity={item.severity} />
                           </div>
                           <div className="min-w-0 flex-1">
-                            <p className="text-sm text-neutral-800">
-                              <span className="font-medium text-neutral-900">{item.title}</span>
-                              <span className="text-neutral-500"> — {item.message}</span>
+                            <p className="text-sm text-swiss-ink">
+                              <span className="font-medium text-swiss-ink">{item.title}</span>
+                              <span className="text-swiss-muted"> — {item.message}</span>
                             </p>
-                            <p className="mt-1 text-[11px] text-neutral-400">
+                            <p className="mt-1 text-[11px] text-swiss-faint">
                               {formatNotificationRelativeTime(Date.parse(item.createdAt))}
                             </p>
                           </div>
@@ -279,11 +279,11 @@ export const NotificationsPanel: React.FC<Props> = ({
                             <SeverityIcon severity={item.severity} />
                           </div>
                           <div className="min-w-0 flex-1">
-                            <p className="text-xs font-medium text-neutral-500">{item.title}</p>
-                            <p className="mt-0.5 text-sm text-neutral-700">
+                            <p className="text-xs font-medium text-swiss-muted">{item.title}</p>
+                            <p className="mt-0.5 text-sm text-swiss-ink">
                               {emphasizeEntity(item.message)}
                             </p>
-                            <p className="mt-1 text-[11px] text-neutral-400">
+                            <p className="mt-1 text-[11px] text-swiss-faint">
                               {formatNotificationRelativeTime(Date.parse(item.createdAt))}
                             </p>
                           </div>
