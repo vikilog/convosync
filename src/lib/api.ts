@@ -2154,11 +2154,6 @@ export const api = {
     }>,
   deleteLeadFunnel: (id: string) =>
     del(`/lead-funnels/${encodeURIComponent(id)}`) as Promise<{ success: boolean }>,
-  getInstalledApps: () => get('/installed-apps') as Promise<{ appIds: string[] }>,
-  installApp: (appId: string) =>
-    post(`/installed-apps/${encodeURIComponent(appId)}`) as Promise<{ success: boolean }>,
-  uninstallApp: (appId: string) =>
-    del(`/installed-apps/${encodeURIComponent(appId)}`) as Promise<{ success: boolean }>,
   createLeadFunnelStage: (
     funnelId: string,
     data: { name: string; isFinal?: boolean }

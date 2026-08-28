@@ -45,10 +45,6 @@ import {
 } from './components/social-listening';
 import { LeadsKanbanView } from './components/leads';
 import { DataTablesView } from './components/data-tables/DataTablesView';
-import { AppStoreView } from './modules/apps/store/AppStoreView';
-import { CRMView } from './modules/apps/crm/CRMView';
-import { AttendanceView } from './modules/apps/attendance/AttendanceView';
-import { AppComingSoonView } from './modules/apps/shared/AppComingSoonView';
 import { motion } from 'motion/react';
 import { tabFromPath, pathForTab, pathForNewCampaign, isNewCampaignPath, type AppTab } from './routes';
 import { KeepAlive } from './components/KeepAlive';
@@ -154,9 +150,6 @@ function AppShell() {
     if (activeTab === 'leads' && location.pathname.startsWith('/leads/')) {
       return;
     }
-    if (activeTab === 'crm' && location.pathname.startsWith('/crm/')) {
-      return;
-    }
     if (activeTab === 'automations' && location.pathname.startsWith('/automations')) {
       return;
     }
@@ -232,8 +225,6 @@ function AppShellLayout({
                   activeTab === 'templates' ||
                   activeTab === 'leads' ||
                   activeTab === 'data' ||
-                  activeTab === 'crm' ||
-                  activeTab === 'attendance' ||
                   activeTab === 'social-listening' ||
                   activeTab === 'automations'
                 ? 'px-2 md:px-4 py-2 md:py-3 flex-1 min-h-0 min-w-0 overflow-hidden'
@@ -253,8 +244,6 @@ function AppShellLayout({
               activeTab === 'templates' ||
               activeTab === 'leads' ||
               activeTab === 'data' ||
-              activeTab === 'crm' ||
-              activeTab === 'attendance' ||
               activeTab === 'social-listening' ||
               activeTab === 'automations' ||
               campaignCreateWizard
@@ -357,31 +346,6 @@ function AppShellLayout({
             {mountedTabs.has('data') && (
               <KeepAlive active={activeTab === 'data'}>
                 <DataTablesView />
-              </KeepAlive>
-            )}
-            {mountedTabs.has('app-store') && (
-              <KeepAlive active={activeTab === 'app-store'}>
-                <AppStoreView />
-              </KeepAlive>
-            )}
-            {mountedTabs.has('crm') && (
-              <KeepAlive active={activeTab === 'crm'}>
-                <CRMView />
-              </KeepAlive>
-            )}
-            {mountedTabs.has('attendance') && (
-              <KeepAlive active={activeTab === 'attendance'}>
-                <AttendanceView />
-              </KeepAlive>
-            )}
-            {mountedTabs.has('dasalon-console') && (
-              <KeepAlive active={activeTab === 'dasalon-console'}>
-                <AppComingSoonView appId="dasalon-console" />
-              </KeepAlive>
-            )}
-            {mountedTabs.has('dasalon-partner') && (
-              <KeepAlive active={activeTab === 'dasalon-partner'}>
-                <AppComingSoonView appId="dasalon-partner" />
               </KeepAlive>
             )}
             {mountedTabs.has('ctwa') && (
@@ -612,16 +576,6 @@ export default function App() {
       />
       <Route
         path="/campaigns/*"
-        element={
-          <ProtectedRoute>
-            <OnboardingGuard>
-              <AppShell />
-            </OnboardingGuard>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/crm/*"
         element={
           <ProtectedRoute>
             <OnboardingGuard>

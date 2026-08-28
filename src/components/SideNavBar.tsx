@@ -30,18 +30,11 @@ import {
   MessageSquare,
   Bell,
   Table2,
-  Blocks,
 } from 'lucide-react';
 import { useSidebar } from '../contexts/SidebarContext';
 import { api, getWorkspaceId } from '../lib/api';
 import { getSocket } from '../lib/socket';
 import { useWorkspaceAccess } from '../hooks/useWorkspaceAccess';
-import {
-  APP_REGISTRY,
-  APPS_CHANGED_EVENT,
-  getInstalledAppIds,
-  refreshInstalledApps,
-} from '../lib/installedApps';
 import {
   GOOGLE_TOOL_META,
   GOOGLE_TOOLS_CHANGED_EVENT,
@@ -108,7 +101,6 @@ export const SideNavBar: React.FC = () => {
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifUnread, setNotifUnread] = useState(0);
   const [bellAttention, setBellAttention] = useState(false);
-  const [installedAppIds, setInstalledAppIds] = useState<string[]>(() => getInstalledAppIds());
   const { collapsed, toggleCollapsed, setCollapsed, mobileOpen, setMobileOpen, toggleMobile, isLargeScreen } =
     useSidebar();
   const sidebarCollapsed = collapsed && isLargeScreen;
@@ -209,13 +201,6 @@ export const SideNavBar: React.FC = () => {
   }, [location.pathname]);
 
   useEffect(() => {
-    const syncFromCache = () => setInstalledAppIds(getInstalledAppIds());
-    void refreshInstalledApps().then(syncFromCache).catch(() => {});
-    window.addEventListener(APPS_CHANGED_EVENT, syncFromCache);
-    return () => window.removeEventListener(APPS_CHANGED_EVENT, syncFromCache);
-  }, [activeWorkspace?.id]);
-
-  useEffect(() => {
     setMobileOpen(false);
   }, [location.pathname, setMobileOpen]);
 
@@ -280,22 +265,9 @@ export const SideNavBar: React.FC = () => {
         { id: 'media-gallery', label: 'Media Gallery', icon: Images },
       ],
     },
-    ...(installedAppIds.length > 0
-      ? [
-          {
-            label: 'Apps',
-            items: APP_REGISTRY.filter((app) => installedAppIds.includes(app.id)).map((app) => ({
-              id: app.tab,
-              label: app.navLabel ?? app.name,
-              icon: app.icon,
-            })),
-          },
-        ]
-      : []),
     {
       label: 'Systems',
       items: [
-        { id: 'app-store', label: 'App Store', icon: Blocks },
         { id: 'integrations', label: 'Integrations', icon: Plug },
         { id: 'settings', label: 'Settings', icon: Settings },
       ],
