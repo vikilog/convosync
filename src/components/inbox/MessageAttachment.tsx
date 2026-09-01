@@ -217,10 +217,25 @@ export function MessageAttachment({ message }: Props) {
       // Still show a document chip when we know the type/name but URL failed.
       if (type === 'document') {
         const label = media?.fileName || message.content || '📎 Document';
+        // `media.fileName` isn't reliably a real filename — some sources (e.g. an
+        // IG share) stash the whole caption there. Only single-line-truncate when
+        // it actually looks like a filename; otherwise wrap it like a message
+        // (long, unbroken content here was forcing the bubble wider than its
+        // container and showing a horizontal scrollbar).
+        const isRealFileName =
+          Boolean(media?.fileName) &&
+          media!.fileName!.length <= 100 &&
+          !media!.fileName!.includes('\n');
         return (
-          <div className="flex items-center gap-2 rounded-lg border border-[#d1d7db] bg-[#f0f2f5] px-3 py-2 text-[#111b21]">
-            <FileText className="w-4 h-4 shrink-0 text-[#128C7E]" />
-            <span className="text-sm font-medium truncate flex-1">{label}</span>
+          <div className="flex items-start gap-2 rounded-lg border border-[#d1d7db] bg-[#f0f2f5] px-3 py-2 text-[#111b21] max-w-full">
+            <FileText className="w-4 h-4 shrink-0 text-[#128C7E] mt-0.5" />
+            <span
+              className={`min-w-0 flex-1 text-sm font-medium ${
+                isRealFileName ? 'truncate' : 'whitespace-pre-wrap break-words'
+              }`}
+            >
+              {label}
+            </span>
           </div>
         );
       }
@@ -359,17 +374,17 @@ export function MessageAttachment({ message }: Props) {
 
   if (isSending) {
     return (
-      <div className="flex items-center gap-2 rounded-lg border border-[#d1d7db] bg-[#f0f2f5] px-3 py-2.5 text-[#111b21]">
+      <div className="flex items-center gap-2 rounded-lg border border-[#d1d7db] bg-[#f0f2f5] px-3 py-2.5 text-[#111b21] max-w-full">
         <Loader2 className="w-4 h-4 shrink-0 animate-spin text-[#128C7E]" />
-        <span className="text-sm font-medium truncate flex-1">{fileName}</span>
+        <span className="min-w-0 flex-1 truncate text-sm font-medium">{fileName}</span>
       </div>
     );
   }
 
   return (
-    <div className="flex items-center gap-2 rounded-lg border border-[#d1d7db] bg-[#f0f2f5] px-3 py-2 text-[#111b21]">
+    <div className="flex items-center gap-2 rounded-lg border border-[#d1d7db] bg-[#f0f2f5] px-3 py-2 text-[#111b21] max-w-full">
       <FileText className="w-4 h-4 shrink-0 text-[#128C7E]" />
-      <span className="text-sm font-medium truncate flex-1">{fileName}</span>
+      <span className="min-w-0 flex-1 truncate text-sm font-medium">{fileName}</span>
       {previewUrl && (
         <button
           type="button"

@@ -5,6 +5,7 @@
 
 import type { FC } from 'react';
 import { CONNECTION_COMPARISON_ROWS } from './connectionComparisonData';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 
 export const ConnectionComparisonTable: FC = () => {
   return (
@@ -19,53 +20,51 @@ export const ConnectionComparisonTable: FC = () => {
         </p>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[640px] text-left border-collapse">
-          <thead>
-            <tr className="border-b border-swiss-line bg-gray-50/80">
-              <th
+      <Table className="min-w-[640px] text-left border-collapse">
+          <TableHeader>
+            <TableRow className="border-b border-swiss-line bg-gray-50/80">
+              <TableHead
                 scope="col"
-                className="px-6 py-4 text-sm font-black uppercase tracking-widest text-swiss-faint w-[28%]"
+                className="px-6 py-4 text-sm font-black uppercase tracking-widest text-swiss-faint w-[28%] whitespace-normal"
               >
                 &nbsp;
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 scope="col"
-                className="px-6 py-4 text-sm font-black text-primary w-[36%]"
+                className="px-6 py-4 text-sm font-black text-primary w-[36%] whitespace-normal"
               >
                 WhatsApp Business API
-              </th>
-              <th
+              </TableHead>
+              <TableHead
                 scope="col"
-                className="px-6 py-4 text-sm font-black text-[#006d2f] w-[36%]"
+                className="px-6 py-4 text-sm font-black text-[#006d2f] w-[36%] whitespace-normal"
               >
                 Business App Coexistence
-              </th>
-            </tr>
-          </thead>
-          <tbody>
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {CONNECTION_COMPARISON_ROWS.map((row, index) => (
-              <tr
+              <TableRow
                 key={row.id}
                 className={index < CONNECTION_COMPARISON_ROWS.length - 1 ? 'border-b border-swiss-line' : ''}
               >
-                <th
+                <TableHead
                   scope="row"
-                  className="px-6 py-4 text-sm font-black text-swiss-ink align-top bg-slate-50/40"
+                  className="px-6 py-4 text-sm font-black text-swiss-ink align-top bg-slate-50/40 whitespace-normal"
                 >
                   {row.label}
-                </th>
-                <td className="px-6 py-4 text-sm font-semibold text-swiss-ink align-top">
+                </TableHead>
+                <TableCell className="px-6 py-4 text-sm font-semibold text-swiss-ink align-top whitespace-normal">
                   {row.businessApi}
-                </td>
-                <td className="px-6 py-4 text-sm font-semibold text-swiss-ink align-top">
+                </TableCell>
+                <TableCell className="px-6 py-4 text-sm font-semibold text-swiss-ink align-top whitespace-normal">
                   {row.coexistence}
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </TableBody>
+      </Table>
     </section>
   );
 };

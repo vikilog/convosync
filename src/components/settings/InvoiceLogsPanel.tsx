@@ -12,6 +12,7 @@ import {
   formatTransactionType,
   invoiceStatusStyles,
 } from '../../lib/billingFormat';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 
 type BillingTransaction = {
   id: string;
@@ -80,33 +81,32 @@ export function InvoiceLogsPanel() {
         </div>
       ) : (
         <div className="overflow-hidden bg-white border border-swiss-line">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[720px] text-left text-xs">
-              <thead>
-                <tr className="border-b border-swiss-line bg-white text-[11px] font-semibold uppercase tracking-wider text-swiss-faint">
-                  <th className="px-4 py-3">Date</th>
-                  <th className="px-4 py-3">Description</th>
-                  <th className="px-4 py-3">Type</th>
-                  <th className="px-4 py-3">Amount</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Payment ID</th>
-                  <th className="px-4 py-3">Order ID</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-swiss-line">
+          <Table className="min-w-[720px] text-left text-xs">
+              <TableHeader>
+                <TableRow className="border-b border-swiss-line bg-white text-[11px] font-semibold uppercase tracking-wider text-swiss-faint">
+                  <TableHead className="px-4 py-3 whitespace-normal">Date</TableHead>
+                  <TableHead className="px-4 py-3 whitespace-normal">Description</TableHead>
+                  <TableHead className="px-4 py-3 whitespace-normal">Type</TableHead>
+                  <TableHead className="px-4 py-3 whitespace-normal">Amount</TableHead>
+                  <TableHead className="px-4 py-3 whitespace-normal">Status</TableHead>
+                  <TableHead className="px-4 py-3 whitespace-normal">Payment ID</TableHead>
+                  <TableHead className="px-4 py-3 whitespace-normal">Order ID</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody className="divide-y divide-swiss-line">
                 {transactions.map((row) => (
-                  <tr key={`${row.source}-${row.id}`} className="hover:bg-surface-muted/70">
-                    <td className="whitespace-nowrap px-4 py-3 text-swiss-muted">
+                  <TableRow key={`${row.source}-${row.id}`} className="hover:bg-surface-muted/70">
+                    <TableCell className="whitespace-nowrap px-4 py-3 text-swiss-muted">
                       {formatBillingDate(row.paidAt ?? row.createdAt)}
-                    </td>
-                    <td className="max-w-[200px] px-4 py-3 font-medium text-swiss-ink">
+                    </TableCell>
+                    <TableCell className="max-w-[200px] px-4 py-3 font-medium text-swiss-ink whitespace-normal">
                       {row.description ?? '—'}
-                    </td>
-                    <td className="px-4 py-3 text-swiss-muted">{formatTransactionType(row.type)}</td>
-                    <td className="whitespace-nowrap px-4 py-3 font-semibold text-swiss-ink">
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-swiss-muted whitespace-normal">{formatTransactionType(row.type)}</TableCell>
+                    <TableCell className="whitespace-nowrap px-4 py-3 font-semibold text-swiss-ink">
                       {formatInrPaise(row.amountPaise, row.currency)}
-                    </td>
-                    <td className="px-4 py-3">
+                    </TableCell>
+                    <TableCell className="px-4 py-3">
                       <span
                         className={`inline-flex rounded-full border px-2 py-0.5 text-sm font-bold capitalize ${
                           invoiceStatusStyles[row.status] ?? invoiceStatusStyles.created
@@ -114,18 +114,17 @@ export function InvoiceLogsPanel() {
                       >
                         {row.status}
                       </span>
-                    </td>
-                    <td className="px-4 py-3 font-mono text-xs text-swiss-muted">
+                    </TableCell>
+                    <TableCell className="px-4 py-3 font-mono text-xs text-swiss-muted">
                       {row.razorpayPaymentId ?? '—'}
-                    </td>
-                    <td className="px-4 py-3 font-mono text-xs text-swiss-muted">
+                    </TableCell>
+                    <TableCell className="px-4 py-3 font-mono text-xs text-swiss-muted">
                       {row.razorpayOrderId ?? '—'}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </TableBody>
+          </Table>
         </div>
       )}
     </div>

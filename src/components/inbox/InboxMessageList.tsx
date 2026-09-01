@@ -24,8 +24,8 @@ type Channel = 'whatsapp' | 'instagram' | 'messenger' | 'email';
 export type AutomationWaitingBanner = {
   automationLabel: string;
   journeyName: string;
-  /** ASK_QUESTION → waiting on reply; WAIT → delay pause */
-  kind: 'reply' | 'delay' | 'other';
+  /** ASK_QUESTION → waiting on reply; WAIT → delay pause; paused → contact-level kill switch is on */
+  kind: 'reply' | 'delay' | 'other' | 'paused';
 };
 
 type Props = {
@@ -538,21 +538,36 @@ const MessageBubble: React.FC<{
 
 function AutomationWaitingCard({ banner }: { banner: AutomationWaitingBanner }) {
   const copy =
-    banner.kind === 'reply'
-      ? `${banner.automationLabel} "${banner.journeyName}" is waiting on this reply`
-      : banner.kind === 'delay'
-        ? `${banner.automationLabel} "${banner.journeyName}" is paused on a wait step`
-        : `${banner.automationLabel} "${banner.journeyName}" is waiting`;
+    banner.kind === 'paused'
+      ? `${banner.automationLabel} is paused for this contact — it won't resume automatically`
+      : banner.kind === 'reply'
+        ? `${banner.automationLabel} "${banner.journeyName}" is waiting on this reply`
+        : banner.kind === 'delay'
+          ? `${banner.automationLabel} "${banner.journeyName}" is paused on a wait step`
+          : `${banner.automationLabel} "${banner.journeyName}" is waiting`;
+
+  const tone =
+    banner.kind === 'paused'
+      ? {
+          wrap: 'border-slate-200 bg-slate-50/90 ring-slate-100',
+          badge: 'bg-slate-100 text-slate-500 ring-slate-200',
+          text: 'text-slate-600',
+        }
+      : {
+          wrap: 'border-[#f2994a]/30 bg-[#fff5e6]/90 ring-[#f2994a]/10',
+          badge: 'bg-[#fff5e6] text-[#b45309] ring-[#f2994a]/25',
+          text: 'text-[#92400e]',
+        };
 
   return (
     <div
       role="status"
-      className="mx-auto my-3 flex max-w-md items-start gap-2.5 rounded-2xl border border-[#f2994a]/30 bg-[#fff5e6]/90 px-3.5 py-2.5 text-left ring-1 ring-[#f2994a]/10"
+      className={`mx-auto my-3 flex max-w-md items-start gap-2.5 rounded-2xl border px-3.5 py-2.5 text-left ring-1 ${tone.wrap}`}
     >
-      <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-[#fff5e6] text-[#b45309] ring-1 ring-[#f2994a]/25">
+      <span className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-xl ring-1 ${tone.badge}`}>
         <PauseCircle className="h-3.5 w-3.5" aria-hidden />
       </span>
-      <p className="min-w-0 text-xs font-semibold leading-snug text-[#92400e]">{copy}</p>
+      <p className={`min-w-0 text-xs font-semibold leading-snug ${tone.text}`}>{copy}</p>
     </div>
   );
 }

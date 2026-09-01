@@ -33,6 +33,7 @@ import { WalletUsageCalculator } from './WalletUsageCalculator';
 import { dispatchWalletBalance } from '../../lib/walletEvents';
 import { WALLET_PRICING_ROWS, type WalletPricingKey } from '../../lib/walletPricing';
 import { Input } from '../ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 
 const CARD_CLASS =
   'bg-white border border-swiss-line p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]';
@@ -534,40 +535,40 @@ export function WalletPanel() {
             </p>
 
             <div className="mt-3 overflow-hidden rounded-lg border border-[#E5E7EB]">
-              <table className="w-full text-left text-xs sm:text-sm">
-                <thead>
-                  <tr className="bg-slate-50 text-[10px] font-semibold uppercase tracking-wide text-slate-500 sm:text-xs">
-                    <th className="px-3 py-2">Feature</th>
-                    <th className="px-3 py-2">Per use</th>
-                    <th className="px-3 py-2 text-right">CC cost</th>
-                  </tr>
-                </thead>
-                <tbody>
+              <Table className="text-left text-xs sm:text-sm">
+                <TableHeader>
+                  <TableRow className="bg-slate-50 text-[10px] font-semibold uppercase tracking-wide text-slate-500 sm:text-xs">
+                    <TableHead className="px-3 py-2 whitespace-normal">Feature</TableHead>
+                    <TableHead className="px-3 py-2 whitespace-normal">Per use</TableHead>
+                    <TableHead className="px-3 py-2 text-right whitespace-normal">CC cost</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {WALLET_PRICING_ROWS.map((row, index) => {
                     const Icon = PRICING_ICONS[row.key];
                     return (
-                      <tr
+                      <TableRow
                         key={row.key}
                         className={index % 2 === 0 ? 'bg-white' : 'bg-surface-muted/80'}
                       >
-                        <td className="px-3 py-2 font-medium text-slate-900">
+                        <TableCell className="px-3 py-2 font-medium text-slate-900 whitespace-normal">
                           <span className="inline-flex items-center gap-1.5">
                             <Icon className="h-3.5 w-3.5 text-slate-400" aria-hidden />
                             {row.feature}
                           </span>
-                        </td>
-                        <td className="px-3 py-2 text-slate-600">{row.unitLabel}</td>
-                        <td
+                        </TableCell>
+                        <TableCell className="px-3 py-2 text-slate-600 whitespace-normal">{row.unitLabel}</TableCell>
+                        <TableCell
                           className="px-3 py-2 text-right font-semibold"
                           style={{ color: BRAND_GOLD }}
                         >
                           {row.rateCcDisplay}
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     );
                   })}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
             <p className="mt-2 text-[11px] text-slate-500">
               CC = ConvoCoins • Rates include provider cost + platform markup

@@ -37,6 +37,7 @@ import { ConnectChannelEmpty } from './ConnectChannelEmpty';
 import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Checkbox } from './ui/checkbox';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 
 type ContactListKey = 'all' | 'unsubscribe' | 'blocklist';
 type ContactChannelKey = 'all' | 'whatsapp' | 'instagram' | 'messenger';
@@ -665,10 +666,10 @@ const ContactsWorkspace: React.FC = () => {
                 </ul>
 
                 <div className="hidden md:block">
-                  <table className="w-full min-w-[760px] text-left">
-                    <thead className="sticky top-0 z-10 bg-surface-muted border-b border-swiss-line">
-                      <tr className="text-[11px] uppercase tracking-wider text-slate-500">
-                        <th className="px-4 py-2 font-bold w-10">
+                  <Table className="min-w-[760px] text-left">
+                    <TableHeader className="sticky top-0 z-10 bg-surface-muted border-b border-swiss-line">
+                      <TableRow className="text-[11px] uppercase tracking-wider text-slate-500 hover:bg-transparent">
+                        <TableHead className="px-4 py-2 font-bold w-10 whitespace-normal">
                           <Checkbox
                             checked={someVisibleSelected && !allVisibleSelected ? 'indeterminate' : allVisibleSelected}
                             onCheckedChange={toggleSelectAll}
@@ -676,24 +677,24 @@ const ContactsWorkspace: React.FC = () => {
                             className="cursor-pointer"
                             aria-label="Select all contacts"
                           />
-                        </th>
-                        <th className="px-4 py-2 font-bold">Contact</th>
-                        <th className="px-4 py-2 font-bold">Phone</th>
-                        <th className="px-4 py-2 font-bold">Email</th>
-                        <th className="px-4 py-2 font-bold">Source</th>
-                        <th className="px-4 py-2 font-bold">List</th>
-                        <th className="px-4 py-2 font-bold">Tags</th>
-                        <th className="px-4 py-2 font-bold">Last active</th>
-                        <th className="px-4 py-2 font-bold text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-200/70 text-sm">
+                        </TableHead>
+                        <TableHead className="px-4 py-2 font-bold whitespace-normal">Contact</TableHead>
+                        <TableHead className="px-4 py-2 font-bold whitespace-normal">Phone</TableHead>
+                        <TableHead className="px-4 py-2 font-bold whitespace-normal">Email</TableHead>
+                        <TableHead className="px-4 py-2 font-bold whitespace-normal">Source</TableHead>
+                        <TableHead className="px-4 py-2 font-bold whitespace-normal">List</TableHead>
+                        <TableHead className="px-4 py-2 font-bold whitespace-normal">Tags</TableHead>
+                        <TableHead className="px-4 py-2 font-bold whitespace-normal">Last active</TableHead>
+                        <TableHead className="px-4 py-2 font-bold text-right whitespace-normal">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody className="divide-y divide-slate-200/70 text-sm">
                       {contacts.map((contact) => (
-                        <tr
+                        <TableRow
                           key={contact.id}
                           className={`hover:bg-surface-muted/70 ${selectedIds.has(contact.id) ? 'bg-primary/15' : ''}`}
                         >
-                          <td className="px-4 py-2">
+                          <TableCell className="px-4 py-2">
                             <Checkbox
                               checked={selectedIds.has(contact.id)}
                               onCheckedChange={() => toggleSelect(contact.id)}
@@ -701,8 +702,8 @@ const ContactsWorkspace: React.FC = () => {
                               className="cursor-pointer"
                               aria-label={`Select ${contact.name}`}
                             />
-                          </td>
-                          <td className="px-4 py-2">
+                          </TableCell>
+                          <TableCell className="px-4 py-2">
                             <button
                               type="button"
                               onClick={() => navigate(pathForContact(contact.id))}
@@ -713,12 +714,12 @@ const ContactsWorkspace: React.FC = () => {
                               </div>
                               <span className="font-semibold text-slate-900 truncate">{contact.name}</span>
                             </button>
-                          </td>
-                          <td className="px-4 py-2 font-mono text-xs text-slate-600">{contact.phone}</td>
-                          <td className="px-4 py-2 text-slate-600">{contact.email || '—'}</td>
-                          <td className="px-4 py-2 text-slate-500">{contact.source}</td>
-                          <td className="px-4 py-2 text-slate-600">{listLabelForContact(contact)}</td>
-                          <td className="px-4 py-2">
+                          </TableCell>
+                          <TableCell className="px-4 py-2 font-mono text-xs text-slate-600">{contact.phone}</TableCell>
+                          <TableCell className="px-4 py-2 text-slate-600">{contact.email || '—'}</TableCell>
+                          <TableCell className="px-4 py-2 text-slate-500">{contact.source}</TableCell>
+                          <TableCell className="px-4 py-2 text-slate-600">{listLabelForContact(contact)}</TableCell>
+                          <TableCell className="px-4 py-2 whitespace-normal">
                             {contact.tags.length === 0 ? (
                               <span className="text-xs text-slate-400">—</span>
                             ) : (
@@ -738,9 +739,9 @@ const ContactsWorkspace: React.FC = () => {
                                 )}
                               </div>
                             )}
-                          </td>
-                          <td className="px-4 py-2 text-xs text-slate-400">{contact.lastActive}</td>
-                          <td className="px-4 py-2 text-right">
+                          </TableCell>
+                          <TableCell className="px-4 py-2 text-xs text-slate-400">{contact.lastActive}</TableCell>
+                          <TableCell className="px-4 py-2 text-right">
                             <button
                               type="button"
                               onClick={() => void openEditContact(contact)}
@@ -758,11 +759,11 @@ const ContactsWorkspace: React.FC = () => {
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
-                          </td>
-                        </tr>
+                          </TableCell>
+                        </TableRow>
                       ))}
-                    </tbody>
-                  </table>
+                    </TableBody>
+                  </Table>
                 </div>
               </>
             )}

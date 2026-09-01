@@ -37,6 +37,7 @@ type Props = {
   onAssignJourney?: (journeyId: string) => void;
   /** e.g. WhatsApp Automation / Instagram Automation */
   automationLabel?: string;
+  automationsPaused?: boolean;
 };
 
 function formatRemaining(ms: number): string {
@@ -222,6 +223,7 @@ export const ContactJourneyPanel: React.FC<Props> = ({
   assignedJourneyId = null,
   onAssignJourney,
   automationLabel = 'Automation',
+  automationsPaused = false,
 }) => {
   const [expanded, setExpanded] = useState(false);
 
@@ -238,7 +240,11 @@ export const ContactJourneyPanel: React.FC<Props> = ({
 
   const currentStep = progress?.steps.find((s) => s.state === 'current');
   const failedStep = progress?.steps.find((s) => s.state === 'failed');
-  const badge = progress ? statusBadge(progress.status) : null;
+  const badge = progress
+    ? automationsPaused && progress.status === 'waiting'
+      ? { label: 'Paused', className: 'bg-slate-50 text-slate-500 border-slate-200', pulse: false }
+      : statusBadge(progress.status)
+    : null;
   const assignedName =
     publishedJourneys.find((j) => j.id === assignedJourneyId)?.name ?? 'Assigned journey';
   const restartJourneyId = assignedJourneyId ?? progress?.journeyId ?? null;

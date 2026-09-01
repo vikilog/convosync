@@ -4,16 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import {
-  Ban,
-  ChevronDown,
-  History,
-  Pencil,
-  Sparkles,
-  Trash2,
-  User,
-  X,
-} from 'lucide-react';
+import { ChevronDown, Pencil, Sparkles, User, X } from 'lucide-react';
 import type { Contact } from '../../types';
 import {
   ContactJourneyPanel,
@@ -37,9 +28,6 @@ type Props = {
   onAssignJourney?: (journeyId: string) => void;
   automationLabel?: string;
   onEditContact: () => void;
-  onDeleteChat: () => void;
-  onBlacklistContact: () => void;
-  onViewAudits: () => void;
   contactHandle: string;
   onClose?: () => void;
 };
@@ -73,9 +61,6 @@ export const InboxContactSidebar: React.FC<Props> = ({
   onAssignJourney,
   automationLabel,
   onEditContact,
-  onDeleteChat,
-  onBlacklistContact,
-  onViewAudits,
   contactHandle,
   onClose,
 }) => {
@@ -274,6 +259,7 @@ export const InboxContactSidebar: React.FC<Props> = ({
               assignedJourneyId={assignedJourneyId}
               onAssignJourney={onAssignJourney}
               automationLabel={automationLabel}
+              automationsPaused={contact.automationsPaused}
             />
 
             <ContactLeadJourneyPanel contactId={contact.id} />
@@ -283,51 +269,6 @@ export const InboxContactSidebar: React.FC<Props> = ({
           <ContactInsightPanel contactId={contact.id} />
         </div>
       </div>
-
-      {tab === 'profile' && (
-        <div className="shrink-0 border-t border-swiss-line bg-surface/90 p-3 backdrop-blur-sm">
-          <p className="mb-2 px-1 text-[11px] font-bold uppercase tracking-wide text-swiss-faint">
-            Actions
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={onEditContact}
-              className="flex cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-swiss-line bg-surface px-3 py-2.5 text-xs font-bold text-swiss-ink transition-colors hover:border-sky-200 hover:bg-surface-muted"
-            >
-              <Pencil className="h-3.5 w-3.5 text-sky-600" />
-              Edit
-            </button>
-            <button
-              type="button"
-              onClick={onViewAudits}
-              className="flex cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-swiss-line bg-surface px-3 py-2.5 text-xs font-bold text-swiss-ink transition-colors hover:border-sky-200 hover:bg-surface-muted"
-            >
-              <History className="h-3.5 w-3.5 text-swiss-muted" />
-              Audits
-            </button>
-          </div>
-
-          <button
-            type="button"
-            onClick={onDeleteChat}
-            className="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-[#fecaca] bg-[#fffafa] px-3 py-2.5 text-xs font-bold text-[#ba1a1a] transition-colors hover:bg-[#fef2f2]"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-            Delete chat
-          </button>
-
-          <button
-            type="button"
-            onClick={onBlacklistContact}
-            disabled={contact.tags.includes('Blocked')}
-            className="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-gray-900 px-3 py-2.5 text-xs font-bold text-white transition-colors hover:bg-gray-950 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            <Ban className="h-3.5 w-3.5 text-[#fca5a5]" />
-            {contact.tags.includes('Blocked') ? 'Blacklisted' : 'Blacklist contact'}
-          </button>
-        </div>
-      )}
     </section>
   );
 };

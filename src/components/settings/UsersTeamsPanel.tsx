@@ -12,6 +12,7 @@ import {
 } from './MemberPermissionsEditor';
 import { InboxScopeEditor } from './InboxScopeEditor';
 import { Input } from '../ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import {
   formatInboxScopeSummary,
   FULL_INBOX_SCOPE,
@@ -284,28 +285,27 @@ export function UsersTeamsPanel() {
             <Loader2 className="w-6 h-6 animate-spin text-primary" />
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead>
-                <tr className="bg-white text-swiss-muted font-bold border-b border-swiss-line">
-                  <th className="px-5 py-3">User</th>
-                  <th className="px-5 py-3">Role</th>
-                  <th className="px-5 py-3">Access</th>
-                  <th className="px-5 py-3">Auto-assign</th>
-                  <th className="px-5 py-3">Status</th>
-                  {canManageUsers && <th className="px-5 py-3 w-28">Actions</th>}
-                </tr>
-              </thead>
-              <tbody>
+          <Table className="text-left text-xs">
+              <TableHeader>
+                <TableRow className="bg-white text-swiss-muted font-bold border-b border-swiss-line">
+                  <TableHead className="px-5 py-3 whitespace-normal">User</TableHead>
+                  <TableHead className="px-5 py-3 whitespace-normal">Role</TableHead>
+                  <TableHead className="px-5 py-3 whitespace-normal">Access</TableHead>
+                  <TableHead className="px-5 py-3 whitespace-normal">Auto-assign</TableHead>
+                  <TableHead className="px-5 py-3 whitespace-normal">Status</TableHead>
+                  {canManageUsers && <TableHead className="px-5 py-3 w-28 whitespace-normal">Actions</TableHead>}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {filtered.map((m) => {
                   const isSelf = m.userId === getUserId();
                   const busy = actionKey?.startsWith(m.id) ?? false;
                   return (
-                    <tr
+                    <TableRow
                       key={m.id}
                       className="border-b border-swiss-line last:border-0 hover:bg-surface-muted/50"
                     >
-                      <td className="px-5 py-4">
+                      <TableCell className="px-5 py-4">
                         <div className="flex items-center gap-3">
                           {m.avatar ? (
                             <img
@@ -328,8 +328,8 @@ export function UsersTeamsPanel() {
                             <p className="text-swiss-faint mt-0.5">{m.email}</p>
                           </div>
                         </div>
-                      </td>
-                      <td className="px-5 py-4">
+                      </TableCell>
+                      <TableCell className="px-5 py-4">
                         {canManageUsers && !m.isOwner ? (
                           <select
                             value={m.role}
@@ -352,8 +352,8 @@ export function UsersTeamsPanel() {
                             )}
                           </span>
                         )}
-                      </td>
-                      <td className="px-5 py-4">
+                      </TableCell>
+                      <TableCell className="px-5 py-4 whitespace-normal">
                         <div className="flex flex-col gap-1">
                           <div className="flex items-center gap-2">
                             <span className="text-swiss-muted font-medium">
@@ -386,8 +386,8 @@ export function UsersTeamsPanel() {
                             </span>
                           )}
                         </div>
-                      </td>
-                      <td className="px-5 py-4">
+                      </TableCell>
+                      <TableCell className="px-5 py-4">
                         <div className="flex items-center gap-2">
                           <label className="flex cursor-pointer items-center gap-1.5">
                             <input
@@ -416,15 +416,15 @@ export function UsersTeamsPanel() {
                             className="h-auto w-14 rounded-lg border border-swiss-line px-1.5 py-1 text-center disabled:opacity-50"
                           />
                         </div>
-                      </td>
-                      <td className="px-5 py-4">
+                      </TableCell>
+                      <TableCell className="px-5 py-4">
                         <span className="inline-flex items-center gap-1.5 text-primary font-bold capitalize">
                           <span className="w-2 h-2 rounded-full bg-primary" />
                           {m.status}
                         </span>
-                      </td>
+                      </TableCell>
                       {canManageUsers && (
-                        <td className="px-5 py-4">
+                        <TableCell className="px-5 py-4">
                           {!m.isOwner && !isSelf ? (
                             <button
                               type="button"
@@ -437,21 +437,20 @@ export function UsersTeamsPanel() {
                           ) : (
                             <span className="text-xs text-gray-300 font-bold">—</span>
                           )}
-                        </td>
+                        </TableCell>
                       )}
-                    </tr>
+                    </TableRow>
                   );
                 })}
                 {filtered.length === 0 && (
-                  <tr>
-                    <td colSpan={canManageUsers ? 6 : 5} className="px-5 py-12 text-center text-swiss-faint">
+                  <TableRow>
+                    <TableCell colSpan={canManageUsers ? 6 : 5} className="px-5 py-12 text-center text-swiss-faint whitespace-normal">
                       No users found for this company.
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 )}
-              </tbody>
-            </table>
-          </div>
+              </TableBody>
+          </Table>
         )}
       </div>
 

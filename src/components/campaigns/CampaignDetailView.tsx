@@ -14,6 +14,7 @@ import {
   X,
 } from 'lucide-react';
 import { useReducedMotion } from 'motion/react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import {
   CartesianGrid,
   Line,
@@ -211,7 +212,7 @@ const RecipientsTable: React.FC<{
 
   return (
     <div className="min-h-0 flex-1 overflow-auto">
-      <table className="w-full table-fixed border-collapse text-left">
+      <Table className="table-fixed border-collapse text-left">
         <colgroup>
           <col className={isEmail ? 'w-[14%]' : 'w-[18%]'} />
           <col className={isEmail ? 'w-[16%]' : 'w-[18%]'} />
@@ -222,59 +223,59 @@ const RecipientsTable: React.FC<{
           <col className="w-[14%]" />
           {showActions && <col className="w-[10%]" />}
         </colgroup>
-        <thead className="sticky top-0 z-10">
-          <tr className="border-b border-swiss-line bg-white/95 backdrop-blur-sm">
-            <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-swiss-faint">
+        <TableHeader className="sticky top-0 z-10">
+          <TableRow className="border-b border-swiss-line bg-white/95 backdrop-blur-sm">
+            <TableHead className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-swiss-faint whitespace-normal">
               Contact
-            </th>
-            <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-swiss-faint">
+            </TableHead>
+            <TableHead className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-swiss-faint whitespace-normal">
               {destLabel}
-            </th>
+            </TableHead>
             {isEmail && (
-              <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-swiss-faint">
+              <TableHead className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-swiss-faint whitespace-normal">
                 Subject
-              </th>
+              </TableHead>
             )}
-            <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-swiss-faint">
+            <TableHead className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-swiss-faint whitespace-normal">
               Status
-            </th>
-            <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-swiss-faint">
+            </TableHead>
+            <TableHead className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-swiss-faint whitespace-normal">
               Sent at
-            </th>
-            <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-swiss-faint">
+            </TableHead>
+            <TableHead className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-swiss-faint whitespace-normal">
               Delivered at
-            </th>
-            <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-swiss-faint">
+            </TableHead>
+            <TableHead className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-swiss-faint whitespace-normal">
               Read at
-            </th>
+            </TableHead>
             {showActions && (
-              <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-swiss-faint">
+              <TableHead className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-swiss-faint whitespace-normal">
                 Action
-              </th>
+              </TableHead>
             )}
-          </tr>
-        </thead>
-        <tbody>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {recipients.map((row) => {
             const statusKey = row.status.toLowerCase();
             const canResend = FAILED_STATUSES.has(statusKey);
             return (
-              <tr
+              <TableRow
                 key={row.messageId}
                 className="border-b border-black/[0.04] transition-colors duration-150 hover:bg-black/[0.015]"
               >
-                <td className="px-5 py-3.5 text-sm font-semibold text-swiss-ink truncate">
+                <TableCell className="px-5 py-3.5 text-sm font-semibold text-swiss-ink truncate">
                   {row.contactName}
-                </td>
-                <td className="px-5 py-3.5 font-mono text-xs text-swiss-muted truncate">
+                </TableCell>
+                <TableCell className="px-5 py-3.5 font-mono text-xs text-swiss-muted truncate">
                   {resolveDest(row)}
-                </td>
+                </TableCell>
                 {isEmail && (
-                  <td className="px-5 py-3.5 text-xs text-swiss-muted truncate">
+                  <TableCell className="px-5 py-3.5 text-xs text-swiss-muted truncate">
                     {row.content || '—'}
-                  </td>
+                  </TableCell>
                 )}
-                <td className="px-5 py-3.5">
+                <TableCell className="px-5 py-3.5">
                   <span
                     className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-semibold capitalize tracking-wide ring-1 ring-inset ${
                       MESSAGE_STATUS_STYLE[statusKey] ??
@@ -291,18 +292,18 @@ const RecipientsTable: React.FC<{
                       {row.errorMessage}
                     </p>
                   )}
-                </td>
-                <td className="whitespace-nowrap px-5 py-3.5 text-xs font-medium tabular-nums text-swiss-muted">
+                </TableCell>
+                <TableCell className="whitespace-nowrap px-5 py-3.5 text-xs font-medium tabular-nums text-swiss-muted">
                   {formatDate(row.sentAt)}
-                </td>
-                <td className="whitespace-nowrap px-5 py-3.5 text-xs font-medium tabular-nums text-swiss-muted">
+                </TableCell>
+                <TableCell className="whitespace-nowrap px-5 py-3.5 text-xs font-medium tabular-nums text-swiss-muted">
                   {formatDate(row.deliveredAt)}
-                </td>
-                <td className="whitespace-nowrap px-5 py-3.5 text-xs font-medium tabular-nums text-swiss-muted">
+                </TableCell>
+                <TableCell className="whitespace-nowrap px-5 py-3.5 text-xs font-medium tabular-nums text-swiss-muted">
                   {formatDate(row.readAt)}
-                </td>
+                </TableCell>
                 {showActions && (
-                  <td className="px-5 py-3.5">
+                  <TableCell className="px-5 py-3.5">
                     {canResend && onResend ? (
                       <ResendButton
                         size="row"
@@ -312,13 +313,13 @@ const RecipientsTable: React.FC<{
                     ) : (
                       <span className="text-xs text-gray-300">—</span>
                     )}
-                  </td>
+                  </TableCell>
                 )}
-              </tr>
+              </TableRow>
             );
           })}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
       {recipients.length < sentCount && sentCount > 0 && (
         <p className="border-t border-swiss-line px-5 py-2.5 text-xs font-medium text-swiss-faint">
           Showing {recipients.length} of {sentCount} sent

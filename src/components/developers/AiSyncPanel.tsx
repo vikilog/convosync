@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { pathForSettingsSection } from '../../routes';
 import { api, parseApiError } from '../../lib/api';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 
 type AiSyncDashboard = {
   connectionStatus: string;
@@ -235,20 +236,20 @@ export function AiSyncPanel() {
           <div className="px-4 py-2 bg-slate-50 text-sm font-bold uppercase text-swiss-muted">
             Recent sync events
           </div>
-          <table className="w-full text-xs">
-            <thead className="text-left text-sm font-bold uppercase text-swiss-muted">
-              <tr>
-                <th className="px-3 py-2">Time</th>
-                <th className="px-3 py-2">Type</th>
-                <th className="px-3 py-2">Status</th>
-              </tr>
-            </thead>
-            <tbody>
+          <Table className="text-xs">
+            <TableHeader className="text-left text-sm font-bold uppercase text-swiss-muted">
+              <TableRow>
+                <TableHead className="px-3 py-2 whitespace-normal">Time</TableHead>
+                <TableHead className="px-3 py-2 whitespace-normal">Type</TableHead>
+                <TableHead className="px-3 py-2 whitespace-normal">Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {events.map((ev) => (
-                <tr key={ev.id} className="border-t border-swiss-line">
-                  <td className="px-3 py-2 text-swiss-muted">{formatDate(ev.createdAt)}</td>
-                  <td className="px-3 py-2 font-mono text-xs">{ev.eventType}</td>
-                  <td className="px-3 py-2 capitalize">
+                <TableRow key={ev.id} className="border-t border-swiss-line">
+                  <TableCell className="px-3 py-2 text-swiss-muted">{formatDate(ev.createdAt)}</TableCell>
+                  <TableCell className="px-3 py-2 font-mono text-xs">{ev.eventType}</TableCell>
+                  <TableCell className="px-3 py-2 capitalize">
                     <span
                       className={
                         ev.status === 'completed'
@@ -265,11 +266,11 @@ export function AiSyncPanel() {
                         {ev.errorMessage}
                       </p>
                     )}
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       )}
     </div>

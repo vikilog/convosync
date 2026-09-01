@@ -19,6 +19,15 @@ import {
 import { api, formatCatchError } from '../../lib/api';
 import { Input } from '../ui/input';
 import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '../ui/table';
+import {
   SesProviderFormFields,
   computeSesSenderEmail,
   splitSenderAgainstIdentities,
@@ -1194,10 +1203,10 @@ export function EmailPanel() {
           {logs.length === 0 ? (
             <p className="text-xs text-swiss-muted text-center py-10">No emails sent yet.</p>
           ) : (
-            <div className="w-full overflow-x-auto">
+            <>
               {/* ponytail: table-fixed + % cols so logs fill the pane; overflow-x only for narrow viewports */}
-              <table className="w-full min-w-[960px] table-fixed text-xs text-left">
-                <caption className="sr-only">Email delivery logs</caption>
+              <Table className="min-w-[960px] table-fixed text-xs text-left">
+                <TableCaption className="sr-only">Email delivery logs</TableCaption>
                 <colgroup>
                   <col className="w-[9%]" />
                   <col className="w-[12%]" />
@@ -1210,65 +1219,65 @@ export function EmailPanel() {
                   <col className="w-[8%]" />
                   <col className="w-[8%]" />
                 </colgroup>
-                <thead className="bg-slate-50 text-swiss-muted font-bold border-b border-swiss-line">
-                  <tr>
-                    <th scope="col" className="px-3 py-2.5 whitespace-nowrap">
+                <TableHeader className="bg-slate-50 text-swiss-muted font-bold border-b border-swiss-line">
+                  <TableRow>
+                    <TableHead scope="col" className="px-3 py-2.5 whitespace-nowrap">
                       Time
-                    </th>
-                    <th scope="col" className="px-3 py-2.5 whitespace-nowrap">
+                    </TableHead>
+                    <TableHead scope="col" className="px-3 py-2.5 whitespace-nowrap">
                       From
-                    </th>
-                    <th scope="col" className="px-3 py-2.5 whitespace-nowrap">
+                    </TableHead>
+                    <TableHead scope="col" className="px-3 py-2.5 whitespace-nowrap">
                       To
-                    </th>
-                    <th scope="col" className="px-3 py-2.5">
+                    </TableHead>
+                    <TableHead scope="col" className="px-3 py-2.5 whitespace-normal">
                       Subject
-                    </th>
-                    <th scope="col" className="px-3 py-2.5 whitespace-nowrap">
+                    </TableHead>
+                    <TableHead scope="col" className="px-3 py-2.5 whitespace-nowrap">
                       Provider
-                    </th>
-                    <th scope="col" className="px-3 py-2.5 whitespace-nowrap">
+                    </TableHead>
+                    <TableHead scope="col" className="px-3 py-2.5 whitespace-nowrap">
                       Status
-                    </th>
+                    </TableHead>
                     {TRACKING_STEPS.map((step) => (
-                      <th
+                      <TableHead
                         key={step}
                         scope="col"
                         className="px-3 py-2.5 whitespace-nowrap capitalize"
                       >
                         {step}
-                      </th>
+                      </TableHead>
                     ))}
-                  </tr>
-                </thead>
-                <tbody>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {logs.map((log) => (
-                    <tr
+                    <TableRow
                       key={log.id}
                       className="border-b border-gray-50 hover:bg-slate-50/50 transition-colors duration-150"
                     >
-                      <td className="px-3 py-2.5 text-swiss-muted whitespace-nowrap tabular-nums truncate">
+                      <TableCell className="px-3 py-2.5 text-swiss-muted whitespace-nowrap tabular-nums truncate">
                         {formatDate(log.createdAt)}
-                      </td>
-                      <td
+                      </TableCell>
+                      <TableCell
                         className="px-3 py-2.5 font-mono text-meta whitespace-nowrap truncate"
                         title={log.sender}
                       >
                         {log.sender}
-                      </td>
-                      <td
+                      </TableCell>
+                      <TableCell
                         className="px-3 py-2.5 font-mono text-meta whitespace-nowrap truncate"
                         title={log.recipient}
                       >
                         {log.recipient}
-                      </td>
-                      <td className="px-3 py-2.5 text-swiss-ink truncate" title={log.subject}>
+                      </TableCell>
+                      <TableCell className="px-3 py-2.5 text-swiss-ink truncate" title={log.subject}>
                         {log.subject}
-                      </td>
-                      <td className="px-3 py-2.5 text-swiss-muted whitespace-nowrap truncate">
+                      </TableCell>
+                      <TableCell className="px-3 py-2.5 text-swiss-muted whitespace-nowrap truncate">
                         {logProviderLabel(log)}
-                      </td>
-                      <td className="px-3 py-2.5 whitespace-nowrap">
+                      </TableCell>
+                      <TableCell className="px-3 py-2.5 whitespace-nowrap">
                         <span
                           className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold uppercase border ${statusBadge(log.status)}`}
                         >
@@ -1279,25 +1288,25 @@ export function EmailPanel() {
                             {log.errorMessage}
                           </p>
                         )}
-                      </td>
+                      </TableCell>
                       {TRACKING_STEPS.map((step) => {
                         const at = eventTimeForStatus(log, step);
                         return (
-                          <td
+                          <TableCell
                             key={step}
                             className={`px-3 py-2.5 whitespace-nowrap tabular-nums truncate ${
                               at ? 'text-swiss-ink' : 'text-swiss-faint'
                             }`}
                           >
                             {formatDate(at)}
-                          </td>
+                          </TableCell>
                         );
                       })}
-                    </tr>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
-            </div>
+                </TableBody>
+              </Table>
+            </>
           )}
         </div>
       )}

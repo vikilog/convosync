@@ -17,7 +17,9 @@ import {
   MessageCircle,
   MessageSquare,
   MessagesSquare,
+  Pause,
   Pencil,
+  Play,
   Unlink,
 } from 'lucide-react';
 import { api } from '../../lib/api';
@@ -132,6 +134,7 @@ export function ContactDetailView({ contactId }: { contactId: string }) {
   const [unlinkingId, setUnlinkingId] = useState<string | null>(null);
   const [editOpen, setEditOpen] = useState(false);
   const [editContact, setEditContact] = useState<ContactEditPayload | null>(null);
+  const [togglingAutomation, setTogglingAutomation] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -175,6 +178,20 @@ export function ContactDetailView({ contactId }: { contactId: string }) {
       window.alert(e instanceof Error ? e.message : 'Unlink failed');
     } finally {
       setUnlinkingId(null);
+    }
+  };
+
+  const toggleAutomationPause = async () => {
+    if (!overview) return;
+    const next = !overview.contact.automationsPaused;
+    setTogglingAutomation(true);
+    try {
+      await api.setContactAutomationPause(contactId, next);
+      setOverview({ ...overview, contact: { ...overview.contact, automationsPaused: next } });
+    } catch (e) {
+      window.alert(e instanceof Error ? e.message : 'Could not update automation status');
+    } finally {
+      setTogglingAutomation(false);
     }
   };
 
@@ -359,6 +376,30 @@ export function ContactDetailView({ contactId }: { contactId: string }) {
                   <MessageSquare className="h-4 w-4" aria-hidden />
                 )}
                 Open inbox
+              </button>
+              <button
+                type="button"
+                onClick={() => void toggleAutomationPause()}
+                disabled={togglingAutomation}
+                title={
+                  contact.automationsPaused
+                    ? 'No automation will trigger for this contact until resumed'
+                    : 'Stop all WhatsApp/Instagram automation from triggering for this contact'
+                }
+                className={`min-h-11 inline-flex cursor-pointer items-center gap-1.5 rounded-xl border px-3.5 py-2 text-sm font-semibold transition-colors duration-200 disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+                  contact.automationsPaused
+                    ? 'border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100'
+                    : 'border-black/10 bg-white text-slate-700 hover:bg-surface-muted'
+                }`}
+              >
+                {togglingAutomation ? (
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                ) : contact.automationsPaused ? (
+                  <Play className="h-4 w-4" aria-hidden />
+                ) : (
+                  <Pause className="h-4 w-4" aria-hidden />
+                )}
+                {contact.automationsPaused ? 'Resume automation' : 'Pause automation'}
               </button>
               <button type="button" onClick={() => void openEdit()} className="btn-primary min-h-11">
                 <Pencil className="h-4 w-4" aria-hidden />

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Loader2, MapPin, RefreshCw } from 'lucide-react';
 import { api, formatCatchError } from '../../lib/api';
 import { formatLastSync } from '../google-tools/business-profile/utils';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 
 type GbpSyncPanelProps = {
   connectionId: string;
@@ -179,38 +180,38 @@ export function GbpSyncPanel({ connectionId, connectionEmail }: GbpSyncPanelProp
           <p className="text-xs text-swiss-faint">No sync activity yet.</p>
         ) : (
           <div className="max-h-56 overflow-auto rounded-xl border border-swiss-line">
-            <table className="w-full text-meta">
-              <thead className="bg-slate-50 sticky top-0">
-                <tr className="text-left text-swiss-muted">
-                  <th className="px-3 py-2 font-bold">Type</th>
-                  <th className="px-3 py-2 font-bold">Status</th>
-                  <th className="px-3 py-2 font-bold">Duration</th>
-                  <th className="px-3 py-2 font-bold">Req/Res</th>
-                  <th className="px-3 py-2 font-bold">Time</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#f0eef5]">
+            <Table className="text-meta">
+              <TableHeader className="bg-slate-50 sticky top-0">
+                <TableRow className="text-left text-swiss-muted">
+                  <TableHead className="px-3 py-2 font-bold whitespace-normal">Type</TableHead>
+                  <TableHead className="px-3 py-2 font-bold whitespace-normal">Status</TableHead>
+                  <TableHead className="px-3 py-2 font-bold whitespace-normal">Duration</TableHead>
+                  <TableHead className="px-3 py-2 font-bold whitespace-normal">Req/Res</TableHead>
+                  <TableHead className="px-3 py-2 font-bold whitespace-normal">Time</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody className="divide-y divide-[#f0eef5]">
                 {logs.map((log) => (
-                  <tr key={log.id}>
-                    <td className="px-3 py-2 font-semibold text-swiss-ink">{log.syncType}</td>
-                    <td
+                  <TableRow key={log.id}>
+                    <TableCell className="px-3 py-2 font-semibold text-swiss-ink">{log.syncType}</TableCell>
+                    <TableCell
                       className={`px-3 py-2 font-bold ${log.status === 'error' ? 'text-red-600' : 'text-[#34A853]'}`}
                     >
                       {log.status}
-                    </td>
-                    <td className="px-3 py-2 text-swiss-muted">
+                    </TableCell>
+                    <TableCell className="px-3 py-2 text-swiss-muted">
                       {log.durationMs != null ? `${log.durationMs}ms` : '—'}
-                    </td>
-                    <td className="px-3 py-2 text-swiss-muted tabular-nums">
+                    </TableCell>
+                    <TableCell className="px-3 py-2 text-swiss-muted tabular-nums">
                       {log.requestCount}/{log.responseCount}
-                    </td>
-                    <td className="px-3 py-2 text-swiss-muted whitespace-nowrap">
+                    </TableCell>
+                    <TableCell className="px-3 py-2 text-swiss-muted whitespace-nowrap">
                       {new Date(log.createdAt).toLocaleString()}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         )}
       </div>

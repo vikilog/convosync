@@ -20,6 +20,7 @@ import {
 import { openRazorpayCheckout } from '../../lib/razorpay';
 import { computeWalletRechargeQuote } from '../../lib/walletRechargeQuote';
 import { Input } from '../ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 
 type WalletSummary = {
   balancePaise: number;
@@ -477,27 +478,27 @@ export function RechargeWalletPanel({
 
       {/* Section 3 — Pricing */}
       <SectionCard title="How ConvoCoins are used">
-        <div className="overflow-x-auto rounded-lg border border-swiss-line">
-          <table className="min-w-full text-left text-sm">
-            <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
-              <tr>
-                <th className="px-4 py-3">Feature</th>
-                <th className="px-4 py-3">Cost per use</th>
-                <th className="px-4 py-3">CC used</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
+        <div className="rounded-lg border border-swiss-line">
+          <Table className="min-w-full text-left text-sm">
+            <TableHeader className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <TableRow>
+                <TableHead className="px-4 py-3 whitespace-normal">Feature</TableHead>
+                <TableHead className="px-4 py-3 whitespace-normal">Cost per use</TableHead>
+                <TableHead className="px-4 py-3 whitespace-normal">CC used</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody className="divide-y divide-slate-100">
               {PRICING_ROWS.map((row) => (
-                <tr key={row.feature}>
-                  <td className="px-4 py-3 font-medium text-slate-900">{row.feature}</td>
-                  <td className="px-4 py-3 text-slate-600">{row.cost}</td>
-                  <td className="px-4 py-3 font-medium" style={{ color: BRAND_GOLD }}>
+                <TableRow key={row.feature}>
+                  <TableCell className="px-4 py-3 font-medium text-slate-900 whitespace-normal">{row.feature}</TableCell>
+                  <TableCell className="px-4 py-3 text-slate-600 whitespace-normal">{row.cost}</TableCell>
+                  <TableCell className="px-4 py-3 font-medium" style={{ color: BRAND_GOLD }}>
                     {row.cc}
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
         <p className="mt-3 text-xs text-slate-500">
           CC = ConvoCoins • Prices reflect provider costs + platform fee

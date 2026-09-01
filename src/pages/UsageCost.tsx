@@ -25,6 +25,7 @@ import {
   Receipt,
 } from 'lucide-react';
 import { api } from '../lib/api';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 
 /** Wallet units (1:1 with INR) shown as tokens — never ₹. Always 2 decimal places. */
 function formatTokens(amount: number, decimals = 2): string {
@@ -496,24 +497,24 @@ export const UsageCost: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <div className="min-w-0 overflow-x-auto">
-            <table className="w-full min-w-[320px] text-left text-sm">
-              <thead>
-                <tr className="border-b border-slate-100">
+          <div className="min-w-0">
+            <Table className="min-w-[320px] text-left text-sm">
+              <TableHeader>
+                <TableRow className="border-b border-slate-100">
                   {['Type', 'Conversations', 'Rate', 'Tokens'].map((h) => (
-                    <th
+                    <TableHead
                       key={h}
-                      className="pb-2 pr-3 text-[10px] font-semibold uppercase tracking-wide text-slate-400 last:pr-0"
+                      className="pb-2 pr-3 text-[10px] font-semibold uppercase tracking-wide text-slate-400 last:pr-0 whitespace-normal"
                     >
                       {h}
-                    </th>
+                    </TableHead>
                   ))}
-                </tr>
-              </thead>
-              <tbody>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {whatsapp.rows.map((row) => (
-                  <tr key={row.key} className="border-b border-slate-50">
-                    <td className="py-2.5 pr-3">
+                  <TableRow key={row.key} className="border-b border-slate-50">
+                    <TableCell className="py-2.5 pr-3">
                       <div className="flex items-center gap-2">
                         <span className={`h-2 w-2 shrink-0 rounded-full ${row.dot}`} />
                         <span
@@ -522,28 +523,28 @@ export const UsageCost: React.FC = () => {
                           {row.label}
                         </span>
                       </div>
-                    </td>
-                    <td className="py-2.5 pr-3 tabular-nums text-slate-700">
+                    </TableCell>
+                    <TableCell className="py-2.5 pr-3 tabular-nums text-slate-700">
                       {formatCount(row.conversations)}
-                    </td>
-                    <td className="py-2.5 pr-3 text-slate-600">{formatApiRateAsTokens(row.rate)}</td>
-                    <td className="py-2.5 tabular-nums font-medium text-slate-900">
+                    </TableCell>
+                    <TableCell className="py-2.5 pr-3 text-slate-600">{formatApiRateAsTokens(row.rate)}</TableCell>
+                    <TableCell className="py-2.5 tabular-nums font-medium text-slate-900">
                       {formatTokens(row.billedCost)}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-                <tr>
-                  <td className="pt-3 pr-3 font-bold text-slate-900">Total</td>
-                  <td className="pt-3 pr-3 font-bold tabular-nums text-slate-900">
+                <TableRow>
+                  <TableCell className="pt-3 pr-3 font-bold text-slate-900">Total</TableCell>
+                  <TableCell className="pt-3 pr-3 font-bold tabular-nums text-slate-900">
                     {formatCount(totalConversations)}
-                  </td>
-                  <td className="pt-3 pr-3 text-slate-400">—</td>
-                  <td className="pt-3 font-bold tabular-nums text-slate-900">
+                  </TableCell>
+                  <TableCell className="pt-3 pr-3 text-slate-400">—</TableCell>
+                  <TableCell className="pt-3 font-bold tabular-nums text-slate-900">
                     {formatTokens(grossWhatsAppCost)}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
             <p className="mt-2 text-[11px] leading-relaxed text-slate-400">
               * Service (inbox) conversations: 0 tokens. Marketing / Utility / Auth bill per conversation.
             </p>
@@ -648,51 +649,51 @@ export const UsageCost: React.FC = () => {
         {ai.billingMode === 'byok' ? null : (
         <div className="mt-5 grid grid-cols-1 gap-6 lg:grid-cols-2">
           <div>
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="border-b border-slate-100">
+            <Table className="text-left text-sm">
+              <TableHeader>
+                <TableRow className="border-b border-slate-100">
                   {['Type', 'Tokens', 'Rate', 'Tokens charged'].map((h) => (
-                    <th
+                    <TableHead
                       key={h}
-                      className="pb-2 pr-3 text-[10px] font-semibold uppercase tracking-wide text-slate-400 last:pr-0"
+                      className="pb-2 pr-3 text-[10px] font-semibold uppercase tracking-wide text-slate-400 last:pr-0 whitespace-normal"
                     >
                       {h}
-                    </th>
+                    </TableHead>
                   ))}
-                </tr>
-              </thead>
-              <tbody className="text-slate-700">
-                <tr className="border-b border-slate-50">
-                  <td className="py-2.5 pr-3 font-medium text-slate-900">Input Tokens</td>
-                  <td className="py-2.5 pr-3 tabular-nums">{formatCount(ai.inputTokens)}</td>
-                  <td className="py-2.5 pr-3 text-slate-600">
+                </TableRow>
+              </TableHeader>
+              <TableBody className="text-slate-700">
+                <TableRow className="border-b border-slate-50">
+                  <TableCell className="py-2.5 pr-3 font-medium text-slate-900">Input Tokens</TableCell>
+                  <TableCell className="py-2.5 pr-3 tabular-nums">{formatCount(ai.inputTokens)}</TableCell>
+                  <TableCell className="py-2.5 pr-3 text-slate-600">
                     {formatTokenRate(ai.inputRateInrPer1k, '1K')}
-                  </td>
-                  <td className="py-2.5 tabular-nums font-medium text-slate-900">
+                  </TableCell>
+                  <TableCell className="py-2.5 tabular-nums font-medium text-slate-900">
                     {formatTokens(
                       ai.inputCostInr ?? (ai.inputTokens / 1000) * ai.inputRateInrPer1k
                     )}
-                  </td>
-                </tr>
-                <tr className="border-b border-slate-50">
-                  <td className="py-2.5 pr-3 font-medium text-slate-900">Output Tokens</td>
-                  <td className="py-2.5 pr-3 tabular-nums">{formatCount(ai.outputTokens)}</td>
-                  <td className="py-2.5 pr-3 text-slate-600">
+                  </TableCell>
+                </TableRow>
+                <TableRow className="border-b border-slate-50">
+                  <TableCell className="py-2.5 pr-3 font-medium text-slate-900">Output Tokens</TableCell>
+                  <TableCell className="py-2.5 pr-3 tabular-nums">{formatCount(ai.outputTokens)}</TableCell>
+                  <TableCell className="py-2.5 pr-3 text-slate-600">
                     {formatTokenRate(ai.outputRateInrPer1k, '1K')}
-                  </td>
-                  <td className="py-2.5 tabular-nums font-medium text-slate-900">
+                  </TableCell>
+                  <TableCell className="py-2.5 tabular-nums font-medium text-slate-900">
                     {formatTokens(
                       ai.outputCostInr ?? (ai.outputTokens / 1000) * ai.outputRateInrPer1k
                     )}
-                  </td>
-                </tr>
-                <tr className="border-b border-slate-50">
-                  <td className="py-2.5 pr-3 font-medium text-slate-900">Provider subtotal</td>
-                  <td className="py-2.5 pr-3 font-medium tabular-nums text-slate-900">
+                  </TableCell>
+                </TableRow>
+                <TableRow className="border-b border-slate-50">
+                  <TableCell className="py-2.5 pr-3 font-medium text-slate-900">Provider subtotal</TableCell>
+                  <TableCell className="py-2.5 pr-3 font-medium tabular-nums text-slate-900">
                     {formatCount(ai.totalTokens)}
-                  </td>
-                  <td className="py-2.5 pr-3" />
-                  <td className="py-2.5 font-medium tabular-nums text-slate-900">
+                  </TableCell>
+                  <TableCell className="py-2.5 pr-3" />
+                  <TableCell className="py-2.5 font-medium tabular-nums text-slate-900">
                     {formatTokens(
                       ai.rawCostInr ??
                         (ai.inputCostInr != null && ai.outputCostInr != null
@@ -700,46 +701,46 @@ export const UsageCost: React.FC = () => {
                           : (ai.inputTokens / 1000) * ai.inputRateInrPer1k +
                             (ai.outputTokens / 1000) * ai.outputRateInrPer1k)
                     )}
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
                 {(ai.markupInr ?? 0) > 0 ? (
-                  <tr className="border-b border-slate-50 text-slate-500">
-                    <td className="py-2 pr-3 pl-2">
+                  <TableRow className="border-b border-slate-50 text-slate-500">
+                    <TableCell className="py-2 pr-3 pl-2 whitespace-normal">
                       Platform markup ({(((ai.markupMultiplier ?? 1.35) - 1) * 100).toFixed(0)}%)
-                    </td>
-                    <td className="py-2 pr-3" />
-                    <td className="py-2 pr-3" />
-                    <td className="py-2 tabular-nums">{formatTokens(ai.markupInr ?? 0)}</td>
-                  </tr>
+                    </TableCell>
+                    <TableCell className="py-2 pr-3" />
+                    <TableCell className="py-2 pr-3" />
+                    <TableCell className="py-2 tabular-nums">{formatTokens(ai.markupInr ?? 0)}</TableCell>
+                  </TableRow>
                 ) : null}
-                <tr className="border-b border-slate-100">
-                  <td className="py-2.5 pr-3 font-bold text-slate-900">Token charge</td>
-                  <td className="py-2.5 pr-3" />
-                  <td className="py-2.5 pr-3" />
-                  <td className="py-2.5 font-bold tabular-nums text-slate-900">
+                <TableRow className="border-b border-slate-100">
+                  <TableCell className="py-2.5 pr-3 font-bold text-slate-900">Token charge</TableCell>
+                  <TableCell className="py-2.5 pr-3" />
+                  <TableCell className="py-2.5 pr-3" />
+                  <TableCell className="py-2.5 font-bold tabular-nums text-slate-900">
                     {formatTokens(ai.grossCostInr)}
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
                 {ai.includedTokens > 0 ? (
-                  <tr className="border-b border-slate-50 text-slate-500">
-                    <td className="py-2 pr-3 pl-2">Included credit</td>
-                    <td className="py-2 pr-3" />
-                    <td className="py-2 pr-3" />
-                    <td className="py-2 tabular-nums text-primary">
+                  <TableRow className="border-b border-slate-50 text-slate-500">
+                    <TableCell className="py-2 pr-3 pl-2">Included credit</TableCell>
+                    <TableCell className="py-2 pr-3" />
+                    <TableCell className="py-2 pr-3" />
+                    <TableCell className="py-2 tabular-nums text-primary">
                       -{formatTokens(ai.includedCreditInr)}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ) : null}
-                <tr>
-                  <td className="pt-2 pr-3 font-bold text-slate-900">Final billed</td>
-                  <td className="pt-2 pr-3" />
-                  <td className="pt-2 pr-3" />
-                  <td className="pt-2 font-bold tabular-nums text-slate-900">
+                <TableRow>
+                  <TableCell className="pt-2 pr-3 font-bold text-slate-900">Final billed</TableCell>
+                  <TableCell className="pt-2 pr-3" />
+                  <TableCell className="pt-2 pr-3" />
+                  <TableCell className="pt-2 font-bold tabular-nums text-slate-900">
                     {formatTokens(ai.billedCostInr)}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
 
             <div className="mt-5">
               <p className="mb-2 text-xs font-semibold text-slate-500">Daily token usage</p>
@@ -825,43 +826,43 @@ export const UsageCost: React.FC = () => {
           </p>
         </div>
 
-        <div className="mt-5 min-w-0 overflow-x-auto">
-            <table className="w-full max-w-2xl min-w-[280px] text-left text-sm">
-              <thead>
-                <tr className="border-b border-slate-100">
+        <div className="mt-5 min-w-0">
+            <Table className="max-w-2xl min-w-[280px] text-left text-sm">
+              <TableHeader>
+                <TableRow className="border-b border-slate-100">
                   {['Line', 'Emails', 'Rate', 'Tokens Charged'].map((h) => (
-                    <th
+                    <TableHead
                       key={h}
-                      className="pb-2 pr-3 text-[10px] font-semibold uppercase tracking-wide text-slate-400 last:pr-0"
+                      className="pb-2 pr-3 text-[10px] font-semibold uppercase tracking-wide text-slate-400 last:pr-0 whitespace-normal"
                     >
                       {h}
-                    </th>
+                    </TableHead>
                   ))}
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="border-b border-slate-50">
-                  <td className="py-2.5 pr-3 text-slate-700">Emails sent</td>
-                  <td className="py-2.5 pr-3 tabular-nums text-slate-700">
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow className="border-b border-slate-50">
+                  <TableCell className="py-2.5 pr-3 text-slate-700">Emails sent</TableCell>
+                  <TableCell className="py-2.5 pr-3 tabular-nums text-slate-700">
                     {formatCount(email.sent)}
-                  </td>
-                  <td className="py-2.5 pr-3 text-slate-600">
+                  </TableCell>
+                  <TableCell className="py-2.5 pr-3 text-slate-600">
                     {formatTokenRate(emailRate, 'email', 0)}
-                  </td>
-                  <td className="py-2.5 tabular-nums font-medium text-slate-900">
+                  </TableCell>
+                  <TableCell className="py-2.5 tabular-nums font-medium text-slate-900">
                     {formatTokens(emailGross)}
-                  </td>
-                </tr>
-                <tr>
-                  <td className="pt-2 pr-3 font-bold text-slate-900">Final billed</td>
-                  <td className="pt-2 pr-3" />
-                  <td className="pt-2 pr-3" />
-                  <td className="pt-2 font-bold tabular-nums text-slate-900">
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="pt-2 pr-3 font-bold text-slate-900">Final billed</TableCell>
+                  <TableCell className="pt-2 pr-3" />
+                  <TableCell className="pt-2 pr-3" />
+                  <TableCell className="pt-2 font-bold tabular-nums text-slate-900">
                     {formatTokens(emailBilledTotal)}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
         </div>
       </section>
     </div>

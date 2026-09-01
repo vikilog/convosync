@@ -14,6 +14,7 @@ import { api } from '../lib/api';
 import { pathForIntegrationsChannel, pathForTab } from '../routes';
 import { useKeepAliveActivation, useKeepAliveActive } from './KeepAlive';
 import { CreatePaymentRequestModal } from './pay/CreatePaymentRequestModal';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 
 type PaymentRequest = {
   id: string;
@@ -313,30 +314,29 @@ export const PayView: React.FC = () => {
         </div>
 
         <div className="bg-white border border-swiss-line overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-white text-left text-xs font-bold uppercase tracking-wide text-swiss-muted">
-                  <th className="px-4 py-3">Contact</th>
-                  <th className="px-4 py-3">Amount</th>
-                  <th className="px-4 py-3">Description</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Updated</th>
-                  <th className="px-4 py-3 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
+          <Table className="w-full text-sm">
+              <TableHeader>
+                <TableRow className="bg-white text-left text-xs font-bold uppercase tracking-wide text-swiss-muted">
+                  <TableHead className="px-4 py-3 whitespace-normal">Contact</TableHead>
+                  <TableHead className="px-4 py-3 whitespace-normal">Amount</TableHead>
+                  <TableHead className="px-4 py-3 whitespace-normal">Description</TableHead>
+                  <TableHead className="px-4 py-3 whitespace-normal">Status</TableHead>
+                  <TableHead className="px-4 py-3 whitespace-normal">Updated</TableHead>
+                  <TableHead className="px-4 py-3 text-right whitespace-normal">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody className="divide-y divide-slate-100">
                 {requests.map((row) => (
-                  <tr key={row.id} className="hover:bg-surface-muted/60">
-                    <td className="px-4 py-3">
+                  <TableRow key={row.id} className="hover:bg-surface-muted/60">
+                    <TableCell className="px-4 py-3 whitespace-normal">
                       <p className="font-bold text-swiss-ink">{row.contactName}</p>
                       <p className="text-xs text-swiss-muted">{row.contactPhone}</p>
-                    </td>
-                    <td className="px-4 py-3 font-mono font-bold text-swiss-ink">
+                    </TableCell>
+                    <TableCell className="px-4 py-3 font-mono font-bold text-swiss-ink">
                       {fmtInr(row.amountPaise)}
-                    </td>
-                    <td className="px-4 py-3 text-swiss-ink max-w-[200px] truncate">{row.description}</td>
-                    <td className="px-4 py-3">
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-swiss-ink max-w-[200px] truncate">{row.description}</TableCell>
+                    <TableCell className="px-4 py-3">
                       <span
                         className={`inline-flex px-2 py-0.5 rounded-full text-xs font-bold capitalize ${
                           STATUS_STYLES[row.status] ?? STATUS_STYLES.draft
@@ -344,11 +344,11 @@ export const PayView: React.FC = () => {
                       >
                         {row.status}
                       </span>
-                    </td>
-                    <td className="px-4 py-3 text-xs text-swiss-muted">
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-xs text-swiss-muted">
                       {fmtDate(row.paidAt ?? row.sentAt ?? row.createdAt)}
-                    </td>
-                    <td className="px-4 py-3">
+                    </TableCell>
+                    <TableCell className="px-4 py-3">
                       <div className="flex items-center justify-end gap-2">
                         {(row.status === 'draft' || row.status === 'sent') && (
                           <button
@@ -397,12 +397,11 @@ export const PayView: React.FC = () => {
                           </a>
                         )}
                       </div>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </TableBody>
+          </Table>
 
           {requests.length === 0 && (
             <div className="text-center py-16 px-4">

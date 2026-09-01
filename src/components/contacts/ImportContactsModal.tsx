@@ -8,6 +8,7 @@ import { X, Upload, Loader2, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { api, formatCatchError } from '../../lib/api';
 import { parseContactCsv, type ContactCsvRow } from './parseContactCsv';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 
 type Props = {
   open: boolean;
@@ -246,34 +247,34 @@ export const ImportContactsModal: React.FC<Props> = ({ open, onClose, onImported
               {preview.length > 0 && !result && (
                 <div className="flex-1 min-h-0 rounded-xl border border-swiss-line overflow-hidden flex flex-col">
                   <div className="flex-1 min-h-0 overflow-auto">
-                    <table className="w-full text-left text-xs">
-                      <thead className="bg-white sticky top-0 z-10">
-                        <tr>
-                          <th className="px-2 py-2 font-semibold w-10">#</th>
-                          <th className="px-2 py-2 font-semibold">Name</th>
-                          <th className="px-2 py-2 font-semibold">Phone</th>
-                          <th className="px-2 py-2 font-semibold">Email</th>
-                          <th className="px-2 py-2 font-semibold">Tags</th>
-                        </tr>
-                      </thead>
-                      <tbody>
+                    <Table className="text-left text-xs">
+                      <TableHeader className="bg-white sticky top-0 z-10">
+                        <TableRow>
+                          <TableHead className="px-2 py-2 font-semibold w-10">#</TableHead>
+                          <TableHead className="px-2 py-2 font-semibold whitespace-normal">Name</TableHead>
+                          <TableHead className="px-2 py-2 font-semibold whitespace-normal">Phone</TableHead>
+                          <TableHead className="px-2 py-2 font-semibold whitespace-normal">Email</TableHead>
+                          <TableHead className="px-2 py-2 font-semibold whitespace-normal">Tags</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
                         {preview.map((r, i) => (
-                          <tr key={`${r.phone}-${i}`} className="border-t border-swiss-line">
-                            <td className="px-2 py-1.5 text-slate-400 tabular-nums">{i + 1}</td>
-                            <td className="px-2 py-1.5 max-w-[9rem] truncate" title={r.name}>
+                          <TableRow key={`${r.phone}-${i}`} className="border-t border-swiss-line">
+                            <TableCell className="px-2 py-1.5 text-slate-400 tabular-nums">{i + 1}</TableCell>
+                            <TableCell className="px-2 py-1.5 max-w-[9rem] truncate" title={r.name}>
                               {r.name}
-                            </td>
-                            <td className="px-2 py-1.5 font-mono whitespace-nowrap">{r.phone}</td>
-                            <td className="px-2 py-1.5 max-w-[8rem] truncate text-slate-600">
+                            </TableCell>
+                            <TableCell className="px-2 py-1.5 font-mono whitespace-nowrap">{r.phone}</TableCell>
+                            <TableCell className="px-2 py-1.5 max-w-[8rem] truncate text-slate-600">
                               {r.email || '—'}
-                            </td>
-                            <td className="px-2 py-1.5 max-w-[7rem] truncate text-slate-600">
+                            </TableCell>
+                            <TableCell className="px-2 py-1.5 max-w-[7rem] truncate text-slate-600">
                               {r.tags.join(', ') || '—'}
-                            </td>
-                          </tr>
+                            </TableCell>
+                          </TableRow>
                         ))}
-                      </tbody>
-                    </table>
+                      </TableBody>
+                    </Table>
                   </div>
                 </div>
               )}

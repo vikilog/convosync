@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { api, parseApiError } from '../../lib/api';
 import { Input } from '../ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 
 const WEBHOOK_EVENTS = [
   'contact.created',
@@ -460,32 +461,32 @@ export function WebhooksPanel() {
 
       {tab === 'logs' && (
         <div className="rounded-2xl border border-swiss-line bg-white overflow-hidden">
-          <table className="w-full text-xs">
-            <thead className="bg-slate-50 text-left text-sm font-bold uppercase text-swiss-muted">
-              <tr>
-                <th className="px-3 py-2">Time</th>
-                <th className="px-3 py-2">Direction</th>
-                <th className="px-3 py-2">Event</th>
-                <th className="px-3 py-2">Status</th>
-                <th className="px-3 py-2">Attempt</th>
-              </tr>
-            </thead>
-            <tbody>
+          <Table className="text-xs">
+            <TableHeader className="bg-slate-50 text-left text-sm font-bold uppercase text-swiss-muted">
+              <TableRow>
+                <TableHead className="px-3 py-2 whitespace-normal">Time</TableHead>
+                <TableHead className="px-3 py-2 whitespace-normal">Direction</TableHead>
+                <TableHead className="px-3 py-2 whitespace-normal">Event</TableHead>
+                <TableHead className="px-3 py-2 whitespace-normal">Status</TableHead>
+                <TableHead className="px-3 py-2 whitespace-normal">Attempt</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {logs.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="px-3 py-8 text-center text-swiss-faint">
+                <TableRow>
+                  <TableCell colSpan={5} className="px-3 py-8 text-center text-swiss-faint whitespace-normal">
                     No delivery logs yet.
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               )}
               {logs.map((log) => (
-                <tr key={log.id} className="border-t border-swiss-line">
-                  <td className="px-3 py-2 text-swiss-muted whitespace-nowrap">
+                <TableRow key={log.id} className="border-t border-swiss-line">
+                  <TableCell className="px-3 py-2 text-swiss-muted whitespace-nowrap">
                     {formatDate(log.createdAt)}
-                  </td>
-                  <td className="px-3 py-2 capitalize">{log.direction}</td>
-                  <td className="px-3 py-2 font-mono text-xs">{log.eventType}</td>
-                  <td className="px-3 py-2">
+                  </TableCell>
+                  <TableCell className="px-3 py-2 capitalize">{log.direction}</TableCell>
+                  <TableCell className="px-3 py-2 font-mono text-xs">{log.eventType}</TableCell>
+                  <TableCell className="px-3 py-2">
                     <span
                       className={`inline-flex items-center gap-1 font-bold ${
                         log.status === 'success'
@@ -504,12 +505,12 @@ export function WebhooksPanel() {
                         {log.errorMessage}
                       </p>
                     )}
-                  </td>
-                  <td className="px-3 py-2">{log.attempt}</td>
-                </tr>
+                  </TableCell>
+                  <TableCell className="px-3 py-2">{log.attempt}</TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       )}
     </div>

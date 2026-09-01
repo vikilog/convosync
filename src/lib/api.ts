@@ -865,6 +865,11 @@ export const api = {
         source: string | null;
       }>;
     }>,
+  setContactAutomationPause: (id: string, paused: boolean) =>
+    post(`/contacts/${encodeURIComponent(id)}/automation-pause`, { paused }) as Promise<{
+      id: string;
+      automationsPaused: boolean;
+    }>,
   getContactOverview: (id: string) =>
     get(`/contacts/${encodeURIComponent(id)}/overview`) as Promise<{
       contact: {
@@ -877,6 +882,7 @@ export const api = {
         tags: string[];
         customFields: unknown;
         excludeFromInsights: boolean;
+        automationsPaused: boolean;
         linkGroupId: string | null;
         channel: 'whatsapp' | 'instagram' | 'messenger';
         createdAt: string;

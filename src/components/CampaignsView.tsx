@@ -102,6 +102,7 @@ import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Checkbox } from './ui/checkbox';
+import { Table, TableHead, TableHeader, TableRow } from './ui/table';
 
 function isMediaHeaderFormat(format: HeaderFormat): format is 'image' | 'video' | 'document' {
   return format === 'image' || format === 'video' || format === 'document';
@@ -773,10 +774,9 @@ const CampaignListPanel: React.FC<{
           </div>
         ) : (
           <div className="overflow-hidden bg-white border border-swiss-line">
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[780px] text-left">
-                <thead>
-                  <tr className="border-b border-black/[0.04] bg-primary/[0.04]">
+            <Table className="min-w-[780px] text-left">
+                <TableHeader>
+                  <TableRow className="border-b border-black/[0.04] bg-primary/[0.04] hover:bg-primary/[0.04]">
                     {(
                       [
                         { label: 'Campaign' },
@@ -799,11 +799,11 @@ const CampaignListPanel: React.FC<{
                             : 'descending'
                           : 'none';
                       return (
-                        <th
+                        <TableHead
                           key={col.label}
                           scope="col"
                           aria-sort={ariaSort}
-                          className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-swiss-faint"
+                          className="px-4 py-2.5 whitespace-normal text-[11px] font-semibold uppercase tracking-[0.1em] text-swiss-faint"
                         >
                           {sortable ? (
                             <button
@@ -823,11 +823,11 @@ const CampaignListPanel: React.FC<{
                           ) : (
                             col.label
                           )}
-                        </th>
+                        </TableHead>
                       );
                     })}
-                  </tr>
-                </thead>
+                  </TableRow>
+                </TableHeader>
                 <motion.tbody
                   className="divide-y divide-black/[0.04]"
                   variants={rowListVariants}
@@ -853,7 +853,7 @@ const CampaignListPanel: React.FC<{
                         className="cursor-pointer transition-colors duration-150 hover:bg-primary/[0.04]"
                       >
                         <td className="px-4 py-3 align-middle">
-                          <p className="text-sm font-bold leading-snug text-swiss-ink">
+                          <p className="text-sm font-semibold leading-snug text-swiss-ink">
                             {campaignListTitle(campaign.name)}
                           </p>
                         </td>
@@ -867,7 +867,7 @@ const CampaignListPanel: React.FC<{
                           </span>
                         </td>
                         <td className="px-4 py-3 align-middle">
-                          <p className="text-sm font-bold tabular-nums text-swiss-ink">
+                          <p className="text-sm font-medium tabular-nums text-swiss-ink">
                             {campaign.totalRecipients.toLocaleString()} contacts
                           </p>
                         </td>
@@ -922,14 +922,14 @@ const CampaignListPanel: React.FC<{
                           </span>
                         </td>
                         <td className="px-4 py-3 align-middle">
-                          <p className="text-meta font-bold tabular-nums text-swiss-ink">
+                          <p className="text-meta font-medium tabular-nums text-swiss-ink">
                             {formatCampaignDateShort(campaign.createdAt)}
                           </p>
                         </td>
                         <td className="px-4 py-3 align-middle">
                           {whenAt ? (
                             <p
-                              className={`text-meta font-bold tabular-nums ${
+                              className={`text-meta font-medium tabular-nums ${
                                 campaign.status === 'Scheduled' && campaign.scheduledAt
                                   ? 'text-amber-800'
                                   : 'text-swiss-ink'
@@ -945,8 +945,7 @@ const CampaignListPanel: React.FC<{
                     );
                   })}
                 </motion.tbody>
-              </table>
-            </div>
+              </Table>
           </div>
         )}
       </div>

@@ -129,6 +129,7 @@ export interface Contact {
   instagramVerified?: boolean;
   instagramFollowsBusiness?: boolean;
   instagramBusinessFollowsUser?: boolean;
+  automationsPaused?: boolean;
 }
 
 export interface Segment {

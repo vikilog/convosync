@@ -7,6 +7,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Gauge, Loader2 } from 'lucide-react';
 import { api, formatCatchError } from '../../lib/api';
 import { formatCc, inrToCc } from '../../lib/convocoins';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 
 type UsageRow = {
   feature: string;
@@ -186,27 +187,27 @@ export function UsageMeteringSection({ refreshKey = 0 }: { refreshKey?: number }
           <Loader2 className="h-5 w-5 animate-spin" />
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-swiss-line">
-          <table className="min-w-full text-left text-sm">
-            <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
-              <tr>
-                <th className="px-4 py-3">Feature</th>
-                <th className="px-4 py-3">Billing</th>
-                <th className="px-4 py-3">This month</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
+        <div className="rounded-lg border border-swiss-line">
+          <Table className="min-w-full text-left text-sm">
+            <TableHeader className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <TableRow>
+                <TableHead className="px-4 py-3 whitespace-normal">Feature</TableHead>
+                <TableHead className="px-4 py-3 whitespace-normal">Billing</TableHead>
+                <TableHead className="px-4 py-3 whitespace-normal">This month</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody className="divide-y divide-slate-100">
               {rows.map((row) => (
-                <tr key={row.feature} className="bg-white">
-                  <td className="px-4 py-3 font-medium text-slate-900">{row.feature}</td>
-                  <td className="px-4 py-3 text-slate-600">{row.billing}</td>
-                  <td className={`px-4 py-3 text-slate-600 ${row.usageClass ?? ''}`}>
+                <TableRow key={row.feature} className="bg-white">
+                  <TableCell className="px-4 py-3 font-medium text-slate-900 whitespace-normal">{row.feature}</TableCell>
+                  <TableCell className="px-4 py-3 text-slate-600 whitespace-normal">{row.billing}</TableCell>
+                  <TableCell className={`px-4 py-3 text-slate-600 whitespace-normal ${row.usageClass ?? ''}`}>
                     {row.usage}
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       )}
     </section>

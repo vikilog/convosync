@@ -23,6 +23,9 @@ import {
   Mail,
   X,
   OctagonX,
+  Pause,
+  Play,
+  Trash2,
 } from 'lucide-react';
 import { Contact, ChatMessage, type ChatMessageType } from '../types';
 import { api, formatCatchError, getUserName, SendFailedError } from '../lib/api';
@@ -68,7 +71,7 @@ import {
   type AutomationWaitingBanner,
 } from './inbox/InboxMessageList';
 import { InboxContactSidebar } from './inbox/InboxContactSidebar';
-import { ContactHistoricalAuditsModal } from './inbox/ContactHistoricalAuditsModal';
+import { DeleteChatConfirmDialog } from './inbox/DeleteChatConfirmDialog';
 import { useContactJourneyProgress } from '../hooks/useContactJourneyProgress';
 import { useIsLargeUp } from '../hooks/useBreakpoint';
 import { Input } from './ui/input';
@@ -543,7 +546,8 @@ export const InboxView: React.FC = () => {
   const [newChatOpen, setNewChatOpen] = useState(false);
   const [newContactOpen, setNewContactOpen] = useState(false);
   const [newChatPhoneNumberId, setNewChatPhoneNumberId] = useState<string | undefined>();
-  const [auditsOpen, setAuditsOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deletingChat, setDeletingChat] = useState(false);
   const [sendingMedia, setSendingMedia] = useState(false);
   const [sendingText, setSendingText] = useState(false);
   // Synchronous guard: `sendingMedia` state isn't visible until the next
@@ -675,6 +679,13 @@ export const InboxView: React.FC = () => {
 
   const automationWaitingBanner = useMemo((): AutomationWaitingBanner | null => {
     if (!journeyProgress || journeyProgress.status !== 'waiting') return null;
+    if (selectedContact?.automationsPaused) {
+      return {
+        automationLabel: automationMenuLabel,
+        journeyName: journeyProgress.journeyName,
+        kind: 'paused',
+      };
+    }
     const current = journeyProgress.steps.find((s) => s.state === 'current');
     const kind: AutomationWaitingBanner['kind'] =
       current?.type === 'ASK_QUESTION' ||
@@ -688,7 +699,7 @@ export const InboxView: React.FC = () => {
       journeyName: journeyProgress.journeyName,
       kind,
     };
-  }, [journeyProgress, automationMenuLabel]);
+  }, [journeyProgress, automationMenuLabel, selectedContact?.automationsPaused]);
 
   const lastInboundAt = useMemo(() => {
     for (let i = activeHistory.length - 1; i >= 0; i -= 1) {
@@ -702,6 +713,18 @@ export const InboxView: React.FC = () => {
   const messagingWindow = useMemo(
     () => messagingWindowFromLastInbound(lastInboundAt),
     [lastInboundAt]
+  );
+
+  const composerChannel = selectedContact ? contactChannel(selectedContact) : null;
+  // Outside the 24h window, free-form sends (text/media/AI/canned) fail on Meta's
+  // side — WhatsApp can still restart the conversation with a template, so only
+  // that stays enabled there; Instagram/Messenger have no such exception.
+  const composerWindowClosed = Boolean(
+    messagingWindow &&
+      !messagingWindow.open &&
+      (composerChannel === 'whatsapp' ||
+        composerChannel === 'instagram' ||
+        composerChannel === 'messenger')
   );
 
   useEffect(() => {
@@ -1028,8 +1051,9 @@ export const InboxView: React.FC = () => {
       tags?: string[];
       name?: string;
       avatar?: string;
+      automationsPaused?: boolean;
     }) => {
-      const { contactId, tags, name, avatar } = payload;
+      const { contactId, tags, name, avatar, automationsPaused } = payload;
       if (!contactId) return;
       setInboxThreads((prev) =>
         prev.map((t) =>
@@ -1039,6 +1063,7 @@ export const InboxView: React.FC = () => {
                 ...(tags && { tags }),
                 ...(name && { name }),
                 ...(avatar && { avatar }),
+                ...(automationsPaused !== undefined && { automationsPaused }),
               }
             : t
         )
@@ -1822,14 +1847,9 @@ export const InboxView: React.FC = () => {
     [selectThread]
   );
 
-  const handleDeleteConversation = async () => {
+  const confirmDeleteConversation = async () => {
     if (!selectedThread) return;
-    const label = selectedThread.name || contactDisplayHandle(selectedThread);
-    const confirmed = window.confirm(
-      `Delete this chat with ${label}? Messages will be removed from the inbox.`
-    );
-    if (!confirmed) return;
-
+    setDeletingChat(true);
     setSendError(null);
     try {
       await api.deleteConversation(selectedThread.conversationId);
@@ -1850,28 +1870,22 @@ export const InboxView: React.FC = () => {
         return next;
       });
       setSelectedConversationId('');
+      setDeleteConfirmOpen(false);
     } catch (err) {
       setSendError(err instanceof Error ? err.message : 'Failed to delete chat');
+    } finally {
+      setDeletingChat(false);
     }
   };
 
-  const handleBlacklistContact = async () => {
-    if (!selectedThread || selectedThread.tags.includes('Blocked')) return;
-    const label = selectedThread.name || contactDisplayHandle(selectedThread);
-    const confirmed = window.confirm(
-      `Blacklist ${label}? They'll be excluded from future campaigns.`
-    );
-    if (!confirmed) return;
-
-    setSendError(null);
+  const handleToggleAutomationPause = async () => {
+    if (!selectedThread) return;
+    const next = !selectedThread.automationsPaused;
     try {
-      // Matches backend's contactOptOut.service.ts BLOCKED_TAG — campaign
-      // audience building already excludes contacts carrying this tag.
-      const nextTags = Array.from(new Set([...selectedThread.tags, 'Blocked']));
-      await api.updateContact(selectedThread.id, { tags: nextTags });
+      await api.setContactAutomationPause(selectedThread.id, next);
       // Local state updates via the contact_updated socket event this call triggers.
     } catch (err) {
-      setSendError(err instanceof Error ? err.message : 'Failed to blacklist contact');
+      setSendError(err instanceof Error ? err.message : 'Failed to update automation status');
     }
   };
 
@@ -2047,9 +2061,6 @@ export const InboxView: React.FC = () => {
           });
         },
         onEditContact: () => void openEditContact(),
-        onDeleteChat: () => void handleDeleteConversation(),
-        onBlacklistContact: () => void handleBlacklistContact(),
-        onViewAudits: () => setAuditsOpen(true),
         onClose: () => setDetailsOpen(false),
       }
     : null;
@@ -2462,12 +2473,18 @@ export const InboxView: React.FC = () => {
                     <h3 className="truncate text-sm font-semibold leading-tight text-gray-950">
                       {selectedContact.name}
                     </h3>
-                    {journeyProgress?.status === 'waiting' && (
-                      <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[#f2994a]/30 bg-[#fff5e6] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#b45309]">
-                        <PauseCircle className="h-3 w-3" aria-hidden />
-                        Automation waiting
-                      </span>
-                    )}
+                    {journeyProgress?.status === 'waiting' &&
+                      (selectedContact.automationsPaused ? (
+                        <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                          <Pause className="h-3 w-3" aria-hidden />
+                          Automation paused
+                        </span>
+                      ) : (
+                        <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[#f2994a]/30 bg-[#fff5e6] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#b45309]">
+                          <PauseCircle className="h-3 w-3" aria-hidden />
+                          Automation waiting
+                        </span>
+                      ))}
                   </div>
                   {selectedThread &&
                     (() => {
@@ -2554,6 +2571,40 @@ export const InboxView: React.FC = () => {
 
                 <button
                   type="button"
+                  onClick={() => void handleToggleAutomationPause()}
+                  className={`inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 ${
+                    selectedContact.automationsPaused
+                      ? 'text-[#b45309] hover:bg-[#fff5e6]'
+                      : 'text-swiss-muted hover:bg-primary/10 hover:text-primary'
+                  }`}
+                  aria-label={
+                    selectedContact.automationsPaused ? 'Resume automation' : 'Pause automation'
+                  }
+                  title={
+                    selectedContact.automationsPaused
+                      ? 'No automation will trigger for this contact until resumed'
+                      : 'Stop all automation from triggering for this contact'
+                  }
+                >
+                  {selectedContact.automationsPaused ? (
+                    <Play className="h-4 w-4" />
+                  ) : (
+                    <Pause className="h-4 w-4" />
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setDeleteConfirmOpen(true)}
+                  className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl text-swiss-muted transition-colors duration-200 hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                  aria-label="Delete chat history"
+                  title="Delete chat history"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+
+                <button
+                  type="button"
                   onClick={() => setDetailsOpen(true)}
                   className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl text-swiss-muted transition-colors duration-200 hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
                   aria-label="Open contact profile"
@@ -2623,20 +2674,25 @@ export const InboxView: React.FC = () => {
 
               {selectedContact &&
                 (contactChannel(selectedContact) === 'instagram' ||
-                  contactChannel(selectedContact) === 'messenger') &&
+                  contactChannel(selectedContact) === 'messenger' ||
+                  contactChannel(selectedContact) === 'whatsapp') &&
                 messagingWindow &&
                 (() => {
-                  const isIg = contactChannel(selectedContact) === 'instagram';
-                  const label = isIg ? 'Instagram DM' : 'Messenger';
-                  const fromLabel = isIg ? instagramInboxLabel : messengerInboxLabel;
+                  const ch = contactChannel(selectedContact);
+                  const isIg = ch === 'instagram';
+                  const isWa = ch === 'whatsapp';
+                  const label = isWa ? 'WhatsApp' : isIg ? 'Instagram DM' : 'Messenger';
+                  const fromLabel = isWa ? null : isIg ? instagramInboxLabel : messengerInboxLabel;
                   const remaining = formatMessagingWindowRemaining(messagingWindow.remainingMs);
                   if (messagingWindow.open) {
                     return (
                       <p
                         className={`mb-2 rounded-xl px-3 py-2 text-xs font-bold ring-1 ${
-                          isIg
-                            ? 'bg-[#fce8f0]/90 text-[#C13584] ring-[#E1306C]/15'
-                            : 'bg-[#e8f4ff]/90 text-[#1877F2] ring-[#1877F2]/15'
+                          isWa
+                            ? 'bg-[#e6f7ec]/90 text-[#006d2f] ring-[#5dfd8a]/30'
+                            : isIg
+                              ? 'bg-[#fce8f0]/90 text-[#C13584] ring-[#E1306C]/15'
+                              : 'bg-[#e8f4ff]/90 text-[#1877F2] ring-[#1877F2]/15'
                         }`}
                       >
                         {label}
@@ -2648,8 +2704,10 @@ export const InboxView: React.FC = () => {
                   return (
                     <p className="mb-2 rounded-xl bg-amber-50 px-3 py-2 text-xs font-bold text-amber-800 ring-1 ring-amber-200/80">
                       {label} 24h reply window expired
-                      {fromLabel ? ` (${fromLabel})` : ''}. Customer must message again before
-                      free-form replies work.
+                      {fromLabel ? ` (${fromLabel})` : ''}.{' '}
+                      {isWa
+                        ? 'Free-form replies are off — send a template to restart the conversation.'
+                        : 'Customer must message again before free-form replies work.'}
                     </p>
                   );
                 })()}
@@ -2740,24 +2798,41 @@ export const InboxView: React.FC = () => {
                     }
                   }}
                   placeholder={
-                    sendingMedia
-                      ? 'Sending attachment…'
-                      : selectedContact &&
-                          (contactChannel(selectedContact) === 'whatsapp' ||
-                            contactChannel(selectedContact) === 'instagram')
-                        ? 'Type a message…'
-                        : 'Type your message…'
+                    composerWindowClosed
+                      ? composerChannel === 'whatsapp'
+                        ? '24h window closed — send a template to reopen it'
+                        : '24h window closed — customer must message first'
+                      : sendingMedia
+                        ? 'Sending attachment…'
+                        : selectedContact &&
+                            (contactChannel(selectedContact) === 'whatsapp' ||
+                              contactChannel(selectedContact) === 'instagram')
+                          ? 'Type a message…'
+                          : 'Type your message…'
                   }
                   rows={1}
-                  disabled={sendingMedia}
+                  disabled={sendingMedia || composerWindowClosed}
                   className="max-h-20 min-h-9 flex-1 resize-none border-0 bg-transparent py-2.5 pl-2.5 pr-1 text-sm font-medium leading-5 outline-none [field-sizing:fixed] focus-visible:outline-none focus-visible:ring-0 disabled:opacity-60"
                 />
+
+                {composerWindowClosed && composerChannel === 'whatsapp' && (
+                  <button
+                    type="button"
+                    onClick={() => void handleTriggerTemplate()}
+                    className="mr-0.5 inline-flex h-9 shrink-0 cursor-pointer items-center gap-1.5 rounded-xl bg-channel-green px-3 text-xs font-bold text-white transition-colors duration-200 hover:bg-[#20bd5a]"
+                  >
+                    <FileText className="h-3.5 w-3.5" />
+                    Send template
+                  </button>
+                )}
 
                 <div className="flex shrink-0 items-center gap-0.5 pr-0.5">
                   <div className="relative" ref={composerActionsRef}>
                     <button
                       type="button"
-                      disabled={sendingMedia}
+                      disabled={
+                        sendingMedia || (composerWindowClosed && composerChannel !== 'whatsapp')
+                      }
                       onClick={() => setComposerActionsOpen((open) => !open)}
                       className={`inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl transition-colors duration-200 disabled:opacity-40 ${
                         composerActionsOpen
@@ -2782,7 +2857,7 @@ export const InboxView: React.FC = () => {
                           <button
                             type="button"
                             role="menuitem"
-                            disabled={sendingMedia}
+                            disabled={sendingMedia || composerWindowClosed}
                             onClick={() => {
                               setComposerActionsOpen(false);
                               setSendMediaDialogOpen(true);
@@ -2796,7 +2871,7 @@ export const InboxView: React.FC = () => {
                         <button
                           type="button"
                           role="menuitem"
-                          disabled={sendingMedia}
+                          disabled={sendingMedia || composerWindowClosed}
                           onClick={() => {
                             setComposerActionsOpen(false);
                             void handleAiSuggest();
@@ -2809,7 +2884,7 @@ export const InboxView: React.FC = () => {
                         <button
                           type="button"
                           role="menuitem"
-                          disabled={sendingMedia}
+                          disabled={sendingMedia || composerWindowClosed}
                           onClick={() => {
                             setComposerActionsOpen(false);
                             setSendError(null);
@@ -2867,7 +2942,10 @@ export const InboxView: React.FC = () => {
                     type="button"
                     onClick={handleSendMessage}
                     disabled={
-                      (!messageInput.trim() && !pendingComposerFile) || sendingMedia || sendingText
+                      (!messageInput.trim() && !pendingComposerFile) ||
+                      sendingMedia ||
+                      sendingText ||
+                      composerWindowClosed
                     }
                     className="ml-0.5 inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl bg-channel-green text-white shadow-emerald-600/15 transition-colors duration-200 hover:bg-[#20bd5a] disabled:cursor-not-allowed disabled:opacity-40"
                     aria-label={sendingMedia || sendingText ? 'Sending' : 'Send message'}
@@ -2932,12 +3010,12 @@ export const InboxView: React.FC = () => {
         onSelect={(selection) => void handleCannedSelect(selection)}
       />
 
-      <ContactHistoricalAuditsModal
-        open={auditsOpen}
-        contactId={selectedContact?.id ?? null}
+      <DeleteChatConfirmDialog
+        open={deleteConfirmOpen}
         contactName={selectedContact?.name}
-        contactPhone={selectedContact?.phone}
-        onClose={() => setAuditsOpen(false)}
+        busy={deletingChat}
+        onClose={() => setDeleteConfirmOpen(false)}
+        onConfirm={() => void confirmDeleteConversation()}
       />
 
       <InboxNewChatPicker

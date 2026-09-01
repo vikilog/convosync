@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Image as ImageIcon } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../ui/table';
 
 export function TopPostsTable({
   posts,
@@ -33,20 +34,19 @@ export function TopPostsTable({
           No post activity in this range yet.
         </p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[480px] text-left text-xs">
-            <thead>
-              <tr className="border-b border-swiss-line text-[10px] font-bold uppercase tracking-wide text-swiss-faint">
-                <th className="pb-2 pr-3 font-bold">Post</th>
-                <th className="pb-2 pr-3 font-bold">Comments</th>
-                <th className="pb-2 pr-3 font-bold">Leads</th>
-                <th className="pb-2 font-bold" />
-              </tr>
-            </thead>
-            <tbody>
+        <Table className="min-w-[480px] text-left text-xs">
+            <TableHeader>
+              <TableRow className="border-b border-swiss-line text-[10px] font-bold uppercase tracking-wide text-swiss-faint">
+                <TableHead className="pb-2 pr-3 font-bold whitespace-normal">Post</TableHead>
+                <TableHead className="pb-2 pr-3 font-bold whitespace-normal">Comments</TableHead>
+                <TableHead className="pb-2 pr-3 font-bold whitespace-normal">Leads</TableHead>
+                <TableHead className="pb-2 font-bold whitespace-normal" />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {posts.map((p) => (
-                <tr key={p.postId} className="border-b border-swiss-line last:border-b-0">
-                  <td className="py-2.5 pr-3">
+                <TableRow key={p.postId} className="border-b border-swiss-line last:border-b-0">
+                  <TableCell className="py-2.5 pr-3 whitespace-normal">
                     <div className="flex items-center gap-2.5">
                       {p.postThumbnailUrl ? (
                         <img
@@ -63,26 +63,25 @@ export function TopPostsTable({
                         {p.postCaption || 'Untitled post'}
                       </p>
                     </div>
-                  </td>
-                  <td className="py-2.5 pr-3 tabular-nums font-bold text-swiss-ink">
+                  </TableCell>
+                  <TableCell className="py-2.5 pr-3 tabular-nums font-bold text-swiss-ink">
                     {p.commentCount}
-                  </td>
-                  <td className="py-2.5 pr-3 tabular-nums font-bold text-swiss-ink">
+                  </TableCell>
+                  <TableCell className="py-2.5 pr-3 tabular-nums font-bold text-swiss-ink">
                     {p.leadCount}
-                  </td>
-                  <td className="py-2.5 text-right">
+                  </TableCell>
+                  <TableCell className="py-2.5 text-right">
                     <Link
                       to={`/social-listening/media/${encodeURIComponent(p.postId)}`}
                       className="font-bold text-primary hover:underline"
                     >
                       Open →
                     </Link>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </TableBody>
+          </Table>
       )}
     </div>
   );
