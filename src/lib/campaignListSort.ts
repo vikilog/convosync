@@ -1,7 +1,12 @@
 import type { CampaignRecord } from '../types';
 
-export type CampaignListSortKey = 'created' | 'when';
+export type CampaignListSortKey = 'created' | 'when' | 'status' | 'channel';
 export type CampaignListSortDir = 'asc' | 'desc';
+
+function compareStrings(a: string, b: string, dir: CampaignListSortDir): number {
+  const cmp = a.localeCompare(b);
+  return dir === 'asc' ? cmp : -cmp;
+}
 
 /** Same datetime the When column cell displays. */
 export function campaignWhenAt(
@@ -36,6 +41,12 @@ export function sortCampaignsForList(
   return [...campaigns].sort((a, b) => {
     if (key === 'created') {
       return compareIsoDates(a.createdAt, b.createdAt, dir);
+    }
+    if (key === 'status') {
+      return compareStrings(a.status, b.status, dir);
+    }
+    if (key === 'channel') {
+      return compareStrings(a.channel, b.channel, dir);
     }
     return compareIsoDates(campaignWhenAt(a), campaignWhenAt(b), dir);
   });

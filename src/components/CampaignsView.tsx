@@ -104,7 +104,7 @@ import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Checkbox } from './ui/checkbox';
-import { Table, TableHead, TableHeader, TableRow } from './ui/table';
+import { Table, TableBody, TableHead, TableHeader, TableRow } from './ui/table';
 
 function isMediaHeaderFormat(format: HeaderFormat): format is 'image' | 'video' | 'document' {
   return format === 'image' || format === 'video' || format === 'document';
@@ -550,8 +550,6 @@ function campaignProgressPct(sent: number, total: number): number {
   return Math.min(100, Math.max(0, (sent / total) * 100));
 }
 
-const LIST_EASE = [0.22, 1, 0.36, 1] as const;
-
 /** Schedule times are entered/interpreted in whatever timezone the browser is set
  * to, with no indicator anywhere — silently wrong if a teammate opens the same
  * scheduled campaign from a different-timezone browser and re-saves without
@@ -719,7 +717,6 @@ const CampaignListPanel: React.FC<{
   onRefresh,
   onOpenCampaign,
 }) => {
-  const reduceMotion = useReducedMotion();
   const [sortKey, setSortKey] = useState<CampaignListSortKey>('created');
   const [sortDir, setSortDir] = useState<CampaignListSortDir>('desc');
   const q = search.trim().toLowerCase();
@@ -729,7 +726,18 @@ const CampaignListPanel: React.FC<{
       c.segmentLabel.toLowerCase().includes(q) ||
       c.channel.includes(q)
   );
-  const displayed = sortCampaignsForList(filtered, sortKey, sortDir);
+  const sorted = sortCampaignsForList(filtered, sortKey, sortDir);
+
+  const PAGE_SIZE = 25;
+  const [page, setPage] = useState(1);
+  const pageCount = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
+  const safePage = Math.min(page, pageCount);
+  const displayed = sorted.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+  // Search/sort narrowing the list can leave `page` pointing past the new end.
+  useEffect(() => {
+    setPage(1);
+  }, [q, sortKey, sortDir]);
+
   const [busyId, setBusyId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<CampaignRecord | null>(null);
@@ -803,21 +811,6 @@ const CampaignListPanel: React.FC<{
     completed: campaigns.reduce((n, c) => n + (c.status === 'Completed' ? 1 : 0), 0),
     failed: campaigns.reduce((n, c) => n + (c.status === 'Failed' ? 1 : 0), 0),
     scheduled: campaigns.reduce((n, c) => n + (c.status === 'Scheduled' ? 1 : 0), 0),
-  };
-
-  const rowListVariants = {
-    hidden: {},
-    visible: {
-      transition: reduceMotion ? { staggerChildren: 0 } : { staggerChildren: 0.035 },
-    },
-  };
-  const rowItemVariants = {
-    hidden: reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 6 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: reduceMotion ? 0 : 0.28, ease: LIST_EASE },
-    },
   };
 
   const statCells: Array<{ label: string; value: number; tone?: string }> = [
@@ -957,11 +950,11 @@ const CampaignListPanel: React.FC<{
                     {(
                       [
                         { label: 'Campaign' },
-                        { label: 'Channel' },
+                        { label: 'Channel', sort: 'channel' as const },
                         { label: 'Audience' },
                         { label: 'Tag' },
                         { label: 'Progress' },
-                        { label: 'Status' },
+                        { label: 'Status', sort: 'status' as const },
                         { label: 'Created', sort: 'created' as const },
                         { label: 'When', sort: 'when' as const },
                         { label: 'Actions' },
@@ -1006,13 +999,8 @@ const CampaignListPanel: React.FC<{
                     })}
                   </TableRow>
                 </TableHeader>
-                <motion.tbody
-                  className="divide-y divide-black/[0.04]"
-                  variants={rowListVariants}
-                  initial="hidden"
-                  animate="visible"
-                >
-                  {displayed.map((campaign, rowIndex) => {
+                <TableBody className="divide-y divide-black/[0.04]">
+                  {displayed.map((campaign) => {
                     const ch = CAMPAIGN_CHANNELS.find((c) => c.id === campaign.channel);
                     const channelLabel = ch?.name ?? campaign.channel;
                     const statusMeta = CAMPAIGN_STATUS_ICON[campaign.status];
@@ -1024,9 +1012,8 @@ const CampaignListPanel: React.FC<{
                     const accent = campaignProgressAccent(campaign.status);
                     const whenAt = campaignWhenAt(campaign);
                     return (
-                      <motion.tr
+                      <TableRow
                         key={campaign.id}
-                        variants={rowItemVariants}
                         onClick={() => onOpenCampaign(campaign.id)}
                         className="cursor-pointer transition-colors duration-150 hover:bg-primary/[0.04]"
                       >
@@ -1057,18 +1044,11 @@ const CampaignListPanel: React.FC<{
                         <td className="px-4 py-3 align-middle">
                           <div className="flex min-w-[9rem] max-w-[12rem] items-center gap-2.5">
                             <div className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-sm bg-black/[0.04]">
-                              <motion.div
-                                className="h-full origin-left rounded-sm"
+                              <div
+                                className="h-full rounded-sm"
                                 style={{
                                   backgroundColor: accent,
                                   width: `${Math.max(pct, pct > 0 ? 2 : 0)}%`,
-                                }}
-                                initial={reduceMotion ? false : { scaleX: 0 }}
-                                animate={{ scaleX: 1 }}
-                                transition={{
-                                  delay: reduceMotion ? 0 : 0.06 + rowIndex * 0.03,
-                                  duration: reduceMotion ? 0 : 0.45,
-                                  ease: LIST_EASE,
                                 }}
                                 role="progressbar"
                                 aria-valuenow={Math.round(pct)}
@@ -1175,11 +1155,40 @@ const CampaignListPanel: React.FC<{
                             )}
                           </div>
                         </td>
-                      </motion.tr>
+                      </TableRow>
                     );
                   })}
-                </motion.tbody>
+                </TableBody>
               </Table>
+              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-swiss-line px-4 py-3">
+                <p className="text-xs font-medium text-swiss-faint">
+                  Showing {sorted.length === 0 ? 0 : (safePage - 1) * PAGE_SIZE + 1}–
+                  {Math.min(safePage * PAGE_SIZE, sorted.length)} of {sorted.length}
+                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={safePage <= 1}
+                    className="inline-flex items-center gap-1 rounded-lg border border-swiss-line bg-white px-3 py-1.5 text-xs font-semibold text-swiss-ink hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
+                    Prev
+                  </button>
+                  <span className="text-xs font-medium text-swiss-faint">
+                    Page {safePage} of {pageCount}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
+                    disabled={safePage >= pageCount}
+                    className="inline-flex items-center gap-1 rounded-lg border border-swiss-line bg-white px-3 py-1.5 text-xs font-semibold text-swiss-ink hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Next
+                    <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+                  </button>
+                </div>
+              </div>
           </div>
         )}
       </div>

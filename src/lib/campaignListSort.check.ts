@@ -64,4 +64,28 @@ assert.deepEqual(
   ['sched', 'old', 'new']
 );
 
+const statusRows = [
+  stub({ id: 'a', status: 'Running' }),
+  stub({ id: 'b', status: 'Draft' }),
+  stub({ id: 'c', status: 'Completed' }),
+];
+assert.deepEqual(
+  sortCampaignsForList(statusRows, 'status', 'asc').map((c) => c.id),
+  ['c', 'b', 'a'] // Completed, Draft, Running — alphabetical
+);
+assert.deepEqual(
+  sortCampaignsForList(statusRows, 'status', 'desc').map((c) => c.id),
+  ['a', 'b', 'c']
+);
+
+const channelRows = [
+  stub({ id: 'x', channel: 'whatsapp' }),
+  stub({ id: 'y', channel: 'email' }),
+  stub({ id: 'z', channel: 'instagram' }),
+];
+assert.deepEqual(
+  sortCampaignsForList(channelRows, 'channel', 'asc').map((c) => c.id),
+  ['y', 'z', 'x'] // email, instagram, whatsapp
+);
+
 console.log('campaignListSort.check.ts: ok');
