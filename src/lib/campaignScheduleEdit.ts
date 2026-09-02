@@ -22,6 +22,8 @@ export type ScheduledWizardSeed = {
   channel: 'whatsapp' | 'email' | 'instagram';
   audienceType: 'all' | 'segment';
   segmentIds: string[];
+  /** 'any' = union (OR) · 'all' = intersection (AND) — only matters with 2+ tags. */
+  tagMatchMode: 'any' | 'all';
   templateId: string | null;
   templateName: string | null;
   variableMappings: Record<string, string>;
@@ -37,6 +39,7 @@ export function wizardSeedFromCampaignDetail(detail: {
   channel: string;
   audienceType: string;
   segmentIds: string[];
+  tagMatchMode?: string | null;
   template: { id: string; name: string } | null;
   variableMappings: Record<string, string>;
   headerMediaStorageKey: string | null;
@@ -56,6 +59,7 @@ export function wizardSeedFromCampaignDetail(detail: {
       detail.channel === 'email' || detail.channel === 'instagram' ? detail.channel : 'whatsapp',
     audienceType,
     segmentIds: audienceType === 'all' ? [] : detail.segmentIds.filter((id) => id && id !== 'all'),
+    tagMatchMode: detail.tagMatchMode === 'all' ? 'all' : 'any',
     templateId: detail.template?.id ?? null,
     templateName: detail.template?.name ?? null,
     variableMappings: { ...detail.variableMappings },

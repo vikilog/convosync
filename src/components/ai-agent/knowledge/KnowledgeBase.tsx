@@ -4,6 +4,7 @@ import type { KnowledgeItem, KnowledgeStatus, KnowledgeType } from '../types';
 import { api } from '../../../lib/api';
 import { AddKnowledgeModal } from './AddKnowledgeModal';
 import { EditKnowledgeModal, type KnowledgeEditPayload } from './EditKnowledgeModal';
+import { KnowledgeStatsPanel } from './KnowledgeStatsPanel';
 import { Input } from '../../ui/input';
 
 type Props = {
@@ -114,12 +115,12 @@ export const KnowledgeBase: React.FC<Props> = ({ agentId }) => {
     }
   };
 
-  const handleItemAdded = (item: KnowledgeItem) => {
+  const handleItemAdded = (item: KnowledgeItem, message = 'Knowledge item added successfully') => {
     setItems((prev) => {
       if (prev.some((i) => i.id === item.id)) return prev;
       return [item, ...prev];
     });
-    setToast('Online data added successfully');
+    setToast(message);
   };
 
   const handleEditSave = async (data: KnowledgeEditPayload) => {
@@ -177,6 +178,8 @@ export const KnowledgeBase: React.FC<Props> = ({ agentId }) => {
           + Add knowledge
         </button>
       </div>
+
+      <KnowledgeStatsPanel agentId={agentId} />
 
       <div className="relative max-w-md mb-4">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280]" />
@@ -266,6 +269,7 @@ export const KnowledgeBase: React.FC<Props> = ({ agentId }) => {
           onClose={() => setShowAdd(false)}
           onSubmit={(data) => void handleAdd(data)}
           onItemAdded={handleItemAdded}
+          onAttachmentSaved={() => setToast('Attachment saved to Media Gallery')}
           submitting={submitting}
         />
       )}

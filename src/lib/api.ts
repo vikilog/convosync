@@ -995,14 +995,18 @@ export const api = {
     get('/contacts/campaign-audience', { channel }),
   getCampaignAudienceContacts: (
     channel: 'whatsapp' | 'email' | 'instagram',
-    segmentIdOrIds: string | string[]
+    segmentIdOrIds: string | string[],
+    tagMatchMode: 'any' | 'all' = 'any'
   ) => {
     const ids = Array.isArray(segmentIdOrIds) ? segmentIdOrIds : [segmentIdOrIds];
     const params: Record<string, string> = {
       channel,
       segmentId: ids[0] ?? 'all',
     };
-    if (ids.length > 1) params.segmentIds = JSON.stringify(ids);
+    if (ids.length > 1) {
+      params.segmentIds = JSON.stringify(ids);
+      params.matchMode = tagMatchMode;
+    }
     return get('/contacts/campaign-audience/contacts', params);
   },
 
@@ -1121,6 +1125,12 @@ export const api = {
     }
   ) => patch(`/campaigns/${id}`, data),
   sendCampaign: (id: string) => post(`/campaigns/${id}/send`),
+  /** Stops a scheduled campaign from firing (or a running one from continuing) — reversible, keeps the record. */
+  cancelCampaign: (id: string) => post(`/campaigns/${id}/cancel`, {}),
+  /** Re-arms a paused (cancelled) campaign at its original scheduledAt — only works while that time is still ahead. */
+  resumeCampaign: (id: string) => post(`/campaigns/${id}/resume`, {}),
+  /** Permanently removes the campaign record. Backend blocks this within 2 minutes of a scheduled send. */
+  deleteCampaign: (id: string) => del(`/campaigns/${id}`),
   resendCampaignFailed: (id: string) =>
     post(`/campaigns/${id}/resend-failed`, {}) as Promise<{
       total: number;
@@ -1193,6 +1203,28 @@ export const api = {
     post(`/agents/${agentId}/knowledge/fetch-url`, data),
   deleteAgentKnowledge: (agentId: string, kId: string) =>
     del(`/agents/${agentId}/knowledge/${kId}`),
+  /** Parses PDF/DOCX/TXT/MD server-side and indexes the real extracted text. */
+  uploadAgentKnowledgeDocument: async (agentId: string, file: File) => {
+    const form = new FormData();
+    form.append('title', file.name);
+    form.append('file', file);
+    const res = await fetch(`${resolveApiBaseUrl()}/agents/${agentId}/knowledge/upload`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: form,
+    });
+    await assertOk(res);
+    return res.json();
+  },
+  getAgentRetrievalStats: (agentId: string) =>
+    get(`/agents/${agentId}/retrieval-stats`) as Promise<{
+      success: boolean;
+      data: {
+        total: number;
+        counts: Record<'cache' | 'direct' | 'rag' | 'full_llm' | 'escalate', number>;
+        percentages: Record<'cache' | 'direct' | 'rag' | 'full_llm' | 'escalate', number>;
+      };
+    }>,
 
   getMediaGallery: (params?: {
     activeOnly?: boolean;

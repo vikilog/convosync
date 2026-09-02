@@ -148,6 +148,7 @@ export function mapContactFromApi(raw: Record<string, unknown>, conv?: Record<st
     instagramFollowsBusiness: parseInstagramYesNo(customFields.instagramFollowsBusiness),
     instagramBusinessFollowsUser: parseInstagramYesNo(customFields.instagramBusinessFollowsUser),
     automationsPaused: Boolean(raw.automationsPaused),
+    customFields: (raw.customFields as Record<string, unknown>) || undefined,
     journeyStatus:
       (raw.journeyStatus as Contact['journeyStatus']) ||
       (conv ? 'In Discussion' : channel === 'instagram' ? 'WhatsApp Initiated' : 'WhatsApp Initiated'),

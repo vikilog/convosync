@@ -3,6 +3,7 @@ import {
   Cloud,
   FileText,
   Image as ImageIcon,
+  Link2,
   Loader2,
   MoreHorizontal,
   Music,
@@ -509,6 +510,21 @@ export const MediaGalleryView: React.FC = () => {
     }
   };
 
+  const copyLink = async (item: MediaAsset) => {
+    setOpenMenuId(null);
+    if (busyRef.current.has(item.id)) return;
+    markBusy(item.id);
+    try {
+      const { url } = await api.getMediaGallerySignedUrl(item.id);
+      await navigator.clipboard.writeText(url);
+      setToast('Link copied — valid for 7 days');
+    } catch (err) {
+      setToast(err instanceof Error ? err.message : 'Could not copy link');
+    } finally {
+      clearBusy(item.id);
+    }
+  };
+
   const handleDelete = async (item: MediaAsset) => {
     setOpenMenuId(null);
     if (busyRef.current.has(item.id)) return;
@@ -820,6 +836,15 @@ export const MediaGalleryView: React.FC = () => {
                               }}
                               className="absolute right-0 top-full z-20 mt-1 w-40 overflow-hidden rounded-lg border border-swiss-line bg-white py-1 shadow-lg shadow-slate-900/10"
                             >
+                              <button
+                                type="button"
+                                role="menuitem"
+                                onClick={() => void copyLink(item)}
+                                className="flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-xs font-semibold text-slate-800 hover:bg-slate-50"
+                              >
+                                <Link2 className="h-3.5 w-3.5 text-slate-500" aria-hidden />
+                                Copy link
+                              </button>
                               <button
                                 type="button"
                                 role="menuitem"

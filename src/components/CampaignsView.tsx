@@ -39,6 +39,8 @@ import {
   ChevronUp,
   ChevronDown,
   AlertTriangle,
+  Pause,
+  Trash2,
 } from 'lucide-react';
 import {
   CAMPAIGN_CHANNELS,
@@ -51,7 +53,7 @@ import {
   EmailTemplateRecord,
   InstagramCampaignConfig,
 } from '../types';
-import { api, parseApiError } from '../lib/api';
+import { api, parseApiError, formatCatchError } from '../lib/api';
 import {
   campaignWhenAt,
   nextCampaignListSort,
@@ -562,6 +564,63 @@ const SCHEDULE_TIMEZONE_LABEL = (() => {
   }
 })();
 
+/**
+ * Representative IANA zone per audience-country tag (from CSV-imported
+ * leads). Countries spanning multiple zones (US, AU, BR) use their most
+ * common business zone — shown as a heads-up, not a per-recipient guarantee.
+ */
+const COUNTRY_TIMEZONES: Record<string, { tz: string; name: string }> = {
+  in: { tz: 'Asia/Kolkata', name: 'India' },
+  us: { tz: 'America/New_York', name: 'United States (Eastern)' },
+  uk: { tz: 'Europe/London', name: 'United Kingdom' },
+  es: { tz: 'Europe/Madrid', name: 'Spain' },
+  it: { tz: 'Europe/Rome', name: 'Italy' },
+  de: { tz: 'Europe/Berlin', name: 'Germany' },
+  nl: { tz: 'Europe/Amsterdam', name: 'Netherlands' },
+  fr: { tz: 'Europe/Paris', name: 'France' },
+  ae: { tz: 'Asia/Dubai', name: 'UAE' },
+  au: { tz: 'Australia/Sydney', name: 'Australia (Eastern)' },
+  sg: { tz: 'Asia/Singapore', name: 'Singapore' },
+  pl: { tz: 'Europe/Warsaw', name: 'Poland' },
+  br: { tz: 'America/Sao_Paulo', name: 'Brazil' },
+};
+
+/** First recognized country tag among the selected segments, if any. */
+function audienceCountryFromSegmentIds(segmentIds: string[]): { tz: string; name: string; code: string } | null {
+  for (const id of segmentIds) {
+    const code = id.startsWith('tag:') ? id.slice(4).trim().toLowerCase() : '';
+    const match = COUNTRY_TIMEZONES[code];
+    if (match) return { ...match, code };
+  }
+  return null;
+}
+
+function formatZonedTime(date: Date, tz: string): string {
+  try {
+    return date.toLocaleString(undefined, {
+      timeZone: tz,
+      weekday: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+      month: 'short',
+      day: 'numeric',
+    });
+  } catch {
+    return date.toLocaleString();
+  }
+}
+
+function formatZonedOffset(tz: string): string {
+  try {
+    const parts = new Intl.DateTimeFormat('en-US', { timeZone: tz, timeZoneName: 'shortOffset' }).formatToParts(
+      new Date()
+    );
+    return parts.find((p) => p.type === 'timeZoneName')?.value ?? '';
+  } catch {
+    return '';
+  }
+}
+
 function formatCampaignDateShort(iso: string | null): string {
   if (!iso) return '—';
   const d = new Date(iso);
@@ -591,6 +650,55 @@ function metersEmailCc(defaultProvider: string | null | undefined): boolean {
   if (!defaultProvider) return true;
   return defaultProvider === 'CONVOSYNC_MANAGED' || defaultProvider === 'WABIZ_MANAGED';
 }
+
+/** In-house confirm dialog — deliberately not window.confirm, so it matches app styling and can't be dismissed by accident on a stray click. */
+const ConfirmDialog: React.FC<{
+  title: string;
+  message: string;
+  confirmLabel?: string;
+  danger?: boolean;
+  busy?: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+}> = ({ title, message, confirmLabel = 'Confirm', danger, busy, onConfirm, onCancel }) => (
+  <div
+    className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4"
+    onClick={onCancel}
+  >
+    <div
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="confirm-dialog-title"
+      className="w-full max-w-sm rounded-2xl border border-swiss-line bg-white p-6 shadow-2xl"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <h3 id="confirm-dialog-title" className="text-base font-bold text-swiss-ink mb-2">
+        {title}
+      </h3>
+      <p className="text-sm text-swiss-faint mb-6">{message}</p>
+      <div className="flex justify-end gap-3">
+        <button
+          type="button"
+          onClick={onCancel}
+          disabled={busy}
+          className="px-4 py-2 text-sm font-bold text-swiss-faint hover:text-swiss-ink disabled:opacity-50"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          onClick={onConfirm}
+          disabled={busy}
+          className={`px-4 py-2 rounded-xl text-sm font-bold text-white disabled:opacity-60 ${
+            danger ? 'bg-red-600 hover:bg-red-700' : 'bg-primary hover:bg-primary-hover'
+          }`}
+        >
+          {busy ? 'Working…' : confirmLabel}
+        </button>
+      </div>
+    </div>
+  </div>
+);
 
 const CampaignListPanel: React.FC<{
   campaigns: CampaignRecord[];
@@ -622,6 +730,66 @@ const CampaignListPanel: React.FC<{
       c.channel.includes(q)
   );
   const displayed = sortCampaignsForList(filtered, sortKey, sortDir);
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<CampaignRecord | null>(null);
+
+  /** Delete is blocked inside this window before send — same rule the backend enforces. */
+  const DELETE_SEND_LOCK_MS = 2 * 60 * 1000;
+  const canDeleteNow = (c: CampaignRecord): boolean => {
+    if (c.status === 'Running') return false;
+    if (c.status === 'Scheduled' && c.scheduledAt) {
+      return new Date(c.scheduledAt).getTime() - Date.now() >= DELETE_SEND_LOCK_MS;
+    }
+    return true;
+  };
+
+  /** Resume only makes sense while the original send time is still ahead of us. */
+  const canResumeNow = (c: CampaignRecord): boolean =>
+    c.status === 'Cancelled' && !!c.scheduledAt && new Date(c.scheduledAt).getTime() > Date.now();
+
+  const pauseCampaign = async (c: CampaignRecord) => {
+    setBusyId(c.id);
+    setActionError(null);
+    try {
+      await api.cancelCampaign(c.id);
+      onRefresh();
+    } catch (err) {
+      setActionError(formatCatchError(err));
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const resumeCampaign = async (c: CampaignRecord) => {
+    setBusyId(c.id);
+    setActionError(null);
+    try {
+      await api.resumeCampaign(c.id);
+      onRefresh();
+    } catch (err) {
+      setActionError(formatCatchError(err));
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    const c = deleteTarget;
+    setBusyId(c.id);
+    setActionError(null);
+    try {
+      await api.deleteCampaign(c.id);
+      setDeleteTarget(null);
+      onRefresh();
+    } catch (err) {
+      setActionError(formatCatchError(err));
+      setDeleteTarget(null);
+    } finally {
+      setBusyId(null);
+    }
+  };
 
   const onSortHeader = (key: CampaignListSortKey) => {
     const next = nextCampaignListSort(sortKey, sortDir, key);
@@ -745,6 +913,15 @@ const CampaignListPanel: React.FC<{
           </p>
         )}
 
+        {actionError && (
+          <p
+            className="rounded-xl border border-red-100 bg-red-50 px-3 py-2 text-sm font-bold text-red-600"
+            role="alert"
+          >
+            {actionError}
+          </p>
+        )}
+
         {loading ? (
           <div className="flex justify-center py-16 text-swiss-faint" aria-busy="true">
             <Loader2 className="h-8 w-8 animate-spin" aria-hidden />
@@ -787,6 +964,7 @@ const CampaignListPanel: React.FC<{
                         { label: 'Status' },
                         { label: 'Created', sort: 'created' as const },
                         { label: 'When', sort: 'when' as const },
+                        { label: 'Actions' },
                       ] as const
                     ).map((col) => {
                       const sortable = 'sort' in col ? col.sort : undefined;
@@ -941,6 +1119,62 @@ const CampaignListPanel: React.FC<{
                             <p className="text-meta font-medium text-swiss-faint">—</p>
                           )}
                         </td>
+                        <td className="px-4 py-3 align-middle">
+                          <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                            {campaign.status === 'Scheduled' && (
+                              <button
+                                type="button"
+                                disabled={busyId === campaign.id}
+                                onClick={() => void pauseCampaign(campaign)}
+                                title="Pause this schedule — stops it from sending, keeps the campaign"
+                                className="inline-flex items-center justify-center p-1.5 rounded-md text-amber-700 hover:bg-amber-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                <Pause className="h-4 w-4" aria-hidden />
+                              </button>
+                            )}
+                            {campaign.status === 'Cancelled' &&
+                              (canResumeNow(campaign) ? (
+                                <button
+                                  type="button"
+                                  disabled={busyId === campaign.id}
+                                  onClick={() => void resumeCampaign(campaign)}
+                                  title="Resume — re-arms the original schedule time"
+                                  className="inline-flex items-center justify-center p-1.5 rounded-md text-primary hover:bg-primary/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                  <PlayCircle className="h-4 w-4" aria-hidden />
+                                </button>
+                              ) : (
+                                <span
+                                  title="Original send time has passed — edit the campaign to set a new time"
+                                  className="inline-flex items-center justify-center p-1.5 text-swiss-faint/40 cursor-not-allowed"
+                                >
+                                  <PlayCircle className="h-4 w-4" aria-hidden />
+                                </span>
+                              ))}
+                            {canDeleteNow(campaign) ? (
+                              <button
+                                type="button"
+                                disabled={busyId === campaign.id}
+                                onClick={() => setDeleteTarget(campaign)}
+                                title="Delete campaign"
+                                className="inline-flex items-center justify-center p-1.5 rounded-md text-red-600 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                <Trash2 className="h-4 w-4" aria-hidden />
+                              </button>
+                            ) : (
+                              <span
+                                title={
+                                  campaign.status === 'Running'
+                                    ? 'Cannot delete while sending'
+                                    : 'Too close to send time — pause it first, or wait for it to complete'
+                                }
+                                className="inline-flex items-center justify-center p-1.5 text-swiss-faint/40 cursor-not-allowed"
+                              >
+                                <Trash2 className="h-4 w-4" aria-hidden />
+                              </span>
+                            )}
+                          </div>
+                        </td>
                       </motion.tr>
                     );
                   })}
@@ -949,6 +1183,17 @@ const CampaignListPanel: React.FC<{
           </div>
         )}
       </div>
+      {deleteTarget && (
+        <ConfirmDialog
+          title="Delete campaign?"
+          message={`"${deleteTarget.name}" will be permanently removed. This can't be undone.`}
+          confirmLabel="Delete"
+          danger
+          busy={busyId === deleteTarget.id}
+          onConfirm={() => void confirmDelete()}
+          onCancel={() => setDeleteTarget(null)}
+        />
+      )}
     </div>
   );
 };
@@ -982,6 +1227,14 @@ const CampaignsWorkspace: React.FC = () => {
 
   const [selectedAudienceType, setSelectedAudienceType] = useState('segment');
   const [selectedSegmentIds, setSelectedSegmentIds] = useState<string[]>([]);
+  /** 'any' = union (OR) · 'all' = intersection (AND) — only matters once 2+ tags are selected. */
+  const [selectedTagMatchMode, setSelectedTagMatchMode] = useState<'any' | 'all'>('any');
+  /** Ticks once a minute so the "current time there" readout on the Review step stays live. */
+  const [nowTick, setNowTick] = useState(() => Date.now());
+  useEffect(() => {
+    const id = window.setInterval(() => setNowTick(Date.now()), 60_000);
+    return () => window.clearInterval(id);
+  }, []);
   const [tagQuery, setTagQuery] = useState('');
   const [audienceData, setAudienceData] = useState<CampaignAudienceResponse | null>(null);
   const [audienceLoading, setAudienceLoading] = useState(true);
@@ -1010,8 +1263,9 @@ const CampaignsWorkspace: React.FC = () => {
       .filter((n): n is string => !!n);
     if (names.length === 0) return 'No tags selected';
     if (names.length === 1) return `Tag: ${names[0]}`;
-    if (names.length <= 3) return `Tags: ${names.join(', ')}`;
-    return `${names.length} tags · ${audienceContactsTotal.toLocaleString()} contacts`;
+    const joiner = selectedTagMatchMode === 'all' ? ' AND ' : ', ';
+    if (names.length <= 3) return `Tags: ${names.join(joiner)}`;
+    return `${names.length} tags (${selectedTagMatchMode === 'all' ? 'AND' : 'OR'}) · ${audienceContactsTotal.toLocaleString()} contacts`;
   };
 
   const toggleAudienceTag = (segmentId: string) => {
@@ -1076,6 +1330,7 @@ const CampaignsWorkspace: React.FC = () => {
     setSelectedChannel('whatsapp');
     setSelectedAudienceType('segment');
     setSelectedSegmentIds([]);
+    setSelectedTagMatchMode('any');
     setTagQuery('');
     setSelectedTemplateName('');
     setSelectedEmailTemplateId('');
@@ -1127,6 +1382,7 @@ const CampaignsWorkspace: React.FC = () => {
     setSelectedChannel(seed.channel);
     setSelectedAudienceType(seed.audienceType);
     setSelectedSegmentIds(seed.segmentIds);
+    setSelectedTagMatchMode(seed.tagMatchMode);
     setIsScheduled(true);
     const local = isoToLocalDateTime(seed.scheduledAt);
     setScheduledDate(local.date);
@@ -1220,6 +1476,7 @@ const CampaignsWorkspace: React.FC = () => {
         if (seed && seed.channel === selectedChannel) {
           setSelectedAudienceType(seed.audienceType);
           setSelectedSegmentIds(seed.segmentIds);
+          setSelectedTagMatchMode(seed.tagMatchMode);
           return;
         }
         const tagSegments = data.segments.filter((s) => s.id !== 'all');
@@ -1230,6 +1487,7 @@ const CampaignsWorkspace: React.FC = () => {
           setSelectedSegmentIds([]);
           setSelectedAudienceType('all');
         }
+        setSelectedTagMatchMode('any');
       })
       .catch((err) => {
         if (!cancelled) {
@@ -1298,7 +1556,7 @@ const CampaignsWorkspace: React.FC = () => {
       selectedAudienceType === 'all' ? ['all'] : selectedSegmentIds;
 
     api
-      .getCampaignAudienceContacts(selectedChannel, segmentIds)
+      .getCampaignAudienceContacts(selectedChannel, segmentIds, selectedTagMatchMode)
       .then((raw) => {
         if (cancelled) return;
         const data = raw as CampaignAudienceContactsResponse;
@@ -1321,7 +1579,14 @@ const CampaignsWorkspace: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [selectedChannel, activeAudienceSegmentKey, selectedAudienceType, selectedSegmentIds, viewMode]);
+  }, [
+    selectedChannel,
+    activeAudienceSegmentKey,
+    selectedAudienceType,
+    selectedSegmentIds,
+    selectedTagMatchMode,
+    viewMode,
+  ]);
 
   const [templates, setTemplates] = useState<CampaignTemplate[]>([]);
   const [templatesLoading, setTemplatesLoading] = useState(true);
@@ -1805,6 +2070,7 @@ const CampaignsWorkspace: React.FC = () => {
         channel: selectedChannel,
         segmentId: segmentIds[0] ?? 'all',
         segmentIds,
+        tagMatchMode: selectedTagMatchMode,
         variableMappings: mappings,
         ...headerMediaFilter,
       };
@@ -2240,8 +2506,39 @@ const CampaignsWorkspace: React.FC = () => {
                               Tags
                             </p>
                             <p className="mt-0.5 text-xs text-slate-500">
-                              Select tags for this campaign (union of matching contacts)
+                              Select tags for this campaign
+                              {selectedSegmentIds.length > 1
+                                ? selectedTagMatchMode === 'all'
+                                  ? ' (contacts with every selected tag)'
+                                  : ' (contacts with any selected tag)'
+                                : ' (union of matching contacts)'}
                             </p>
+                            {selectedSegmentIds.length > 1 && (
+                              <div className="mt-2 inline-flex rounded-lg border border-swiss-line bg-slate-50 p-0.5">
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedTagMatchMode('any')}
+                                  className={`rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
+                                    selectedTagMatchMode === 'any'
+                                      ? 'bg-primary text-white'
+                                      : 'text-slate-600 hover:text-primary'
+                                  }`}
+                                >
+                                  Any tag (OR)
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedTagMatchMode('all')}
+                                  className={`rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
+                                    selectedTagMatchMode === 'all'
+                                      ? 'bg-primary text-white'
+                                      : 'text-slate-600 hover:text-primary'
+                                  }`}
+                                >
+                                  All tags (AND)
+                                </button>
+                              </div>
+                            )}
                           </div>
                           {taggedSegments.length > 0 && (
                             <div className="relative w-full sm:w-56">
@@ -2895,6 +3192,43 @@ const CampaignsWorkspace: React.FC = () => {
                           Times shown in your browser's timezone
                           {SCHEDULE_TIMEZONE_LABEL ? ` (${SCHEDULE_TIMEZONE_LABEL})` : ''}.
                         </p>
+                        {(() => {
+                          const audienceCountry = audienceCountryFromSegmentIds(
+                            selectedAudienceType === 'all' ? [] : selectedSegmentIds
+                          );
+                          if (!audienceCountry) return null;
+                          const nowThere = formatZonedTime(new Date(nowTick), audienceCountry.tz);
+                          const offset = formatZonedOffset(audienceCountry.tz);
+                          let runsAtThere: string | null = null;
+                          let deltaLabel: string | null = null;
+                          try {
+                            const scheduledIso = localDateTimeToIso(scheduledDate, scheduledTime);
+                            const scheduledMs = new Date(scheduledIso).getTime();
+                            runsAtThere = formatZonedTime(new Date(scheduledIso), audienceCountry.tz);
+                            const deltaMs = scheduledMs - nowTick;
+                            const deltaH = Math.floor(Math.abs(deltaMs) / 3_600_000);
+                            const deltaM = Math.floor((Math.abs(deltaMs) % 3_600_000) / 60_000);
+                            deltaLabel = deltaMs >= 0 ? `in ${deltaH}h ${deltaM}m` : `${deltaH}h ${deltaM}m ago`;
+                          } catch {
+                            // invalid/incomplete date or time inputs — skip the "runs at" line
+                          }
+                          return (
+                            <div className="col-span-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs">
+                              <p className="font-bold text-amber-900">
+                                Audience timezone: {audienceCountry.name} ({offset})
+                              </p>
+                              <p className="mt-1 text-amber-800">
+                                Current time there: <span className="font-semibold">{nowThere}</span>
+                              </p>
+                              {runsAtThere && (
+                                <p className="mt-0.5 text-amber-800">
+                                  Runs at: <span className="font-semibold">{runsAtThere}</span>
+                                  {deltaLabel ? ` (${deltaLabel})` : ''}
+                                </p>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </div>
                     )}
                   </div>

@@ -78,13 +78,11 @@ type NavSection = {
   items: NavItem[];
 };
 
-function SectionLabel({ label, collapsed }: { label: string; collapsed: boolean }) {
+function SectionLabel({ collapsed }: { collapsed: boolean }) {
   if (collapsed) return null;
-  return (
-    <p className="px-3 pb-2 pt-5 font-swiss text-[11px] font-semibold uppercase tracking-[0.08em] text-swiss-muted first:pt-0">
-      {label}
-    </p>
-  );
+  // Spacer only — keeps the visual gap between nav groups without the
+  // "GENERAL" / "MARKETING" / "SYSTEMS" section-label text.
+  return <div className="pt-5 first:pt-0" />;
 }
 
 export const SideNavBar: React.FC = () => {
@@ -393,7 +391,7 @@ export const SideNavBar: React.FC = () => {
         <nav className="flex-1 px-2 pb-2">
           {visibleNavSections.map((section) => (
             <div key={section.label}>
-              <SectionLabel label={section.label} collapsed={sidebarCollapsed} />
+              <SectionLabel collapsed={sidebarCollapsed} />
               <div className="space-y-0.5">
                 {section.items.map((item) => {
                   const Icon = item.icon;

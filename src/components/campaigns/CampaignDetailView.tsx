@@ -96,12 +96,12 @@ const DeliveryTrendChart: React.FC<{ series: CampaignDeliveryTrendPoint[] }> = (
     <div className="border-b border-swiss-line px-5 py-5">
       <div className="mb-3 flex items-end justify-between gap-3">
         <div>
-          <h4 className="text-sm font-semibold text-swiss-ink">Delivery pace</h4>
+          <h4 className="text-sm font-medium text-swiss-ink">Delivery pace</h4>
           <p className="mt-0.5 text-[11px] font-medium text-swiss-faint">
             Cumulative delivered vs time
           </p>
         </div>
-        <p className="shrink-0 text-xs font-semibold tabular-nums text-swiss-muted">
+        <p className="shrink-0 text-xs font-medium tabular-nums text-swiss-muted">
           {deliveredTotal != null ? (
             <>
               <span className="text-primary">{deliveredTotal}</span>
@@ -118,7 +118,7 @@ const DeliveryTrendChart: React.FC<{ series: CampaignDeliveryTrendPoint[] }> = (
             className="flex h-full min-h-[180px] flex-col items-center justify-center px-4 text-center"
             role="status"
           >
-            <p className="text-sm font-semibold text-swiss-muted">Pace chart pending</p>
+            <p className="text-sm font-medium text-swiss-muted">Pace chart pending</p>
             <p className="mt-1 max-w-sm text-xs font-medium leading-relaxed text-swiss-faint">
               Cumulative delivery appears once delivered timestamps land — common until webhook
               timeline backfill finishes.
@@ -197,7 +197,7 @@ const RecipientsTable: React.FC<{
     return (
       <div className="flex min-h-[220px] flex-1 items-center justify-center p-10 text-center">
         <div className="max-w-md">
-          <p className="text-sm font-semibold text-swiss-muted">No delivery logs yet</p>
+          <p className="text-sm font-medium text-swiss-muted">No delivery logs yet</p>
           <p className="mt-1 text-xs font-medium leading-relaxed text-swiss-faint">
             {status === 'Draft' || status === 'Scheduled'
               ? status === 'Scheduled'
@@ -225,31 +225,31 @@ const RecipientsTable: React.FC<{
         </colgroup>
         <TableHeader className="sticky top-0 z-10">
           <TableRow className="border-b border-swiss-line bg-white/95 backdrop-blur-sm">
-            <TableHead className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-swiss-faint whitespace-normal">
+            <TableHead className="px-5 py-3 text-[11px] font-medium uppercase tracking-[0.1em] text-swiss-faint whitespace-normal">
               Contact
             </TableHead>
-            <TableHead className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-swiss-faint whitespace-normal">
+            <TableHead className="px-5 py-3 text-[11px] font-medium uppercase tracking-[0.1em] text-swiss-faint whitespace-normal">
               {destLabel}
             </TableHead>
             {isEmail && (
-              <TableHead className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-swiss-faint whitespace-normal">
+              <TableHead className="px-5 py-3 text-[11px] font-medium uppercase tracking-[0.1em] text-swiss-faint whitespace-normal">
                 Subject
               </TableHead>
             )}
-            <TableHead className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-swiss-faint whitespace-normal">
+            <TableHead className="px-5 py-3 text-[11px] font-medium uppercase tracking-[0.1em] text-swiss-faint whitespace-normal">
               Status
             </TableHead>
-            <TableHead className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-swiss-faint whitespace-normal">
+            <TableHead className="px-5 py-3 text-[11px] font-medium uppercase tracking-[0.1em] text-swiss-faint whitespace-normal">
               Sent at
             </TableHead>
-            <TableHead className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-swiss-faint whitespace-normal">
+            <TableHead className="px-5 py-3 text-[11px] font-medium uppercase tracking-[0.1em] text-swiss-faint whitespace-normal">
               Delivered at
             </TableHead>
-            <TableHead className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-swiss-faint whitespace-normal">
+            <TableHead className="px-5 py-3 text-[11px] font-medium uppercase tracking-[0.1em] text-swiss-faint whitespace-normal">
               Read at
             </TableHead>
             {showActions && (
-              <TableHead className="px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-swiss-faint whitespace-normal">
+              <TableHead className="px-5 py-3 text-[11px] font-medium uppercase tracking-[0.1em] text-swiss-faint whitespace-normal">
                 Action
               </TableHead>
             )}
@@ -264,7 +264,7 @@ const RecipientsTable: React.FC<{
                 key={row.messageId}
                 className="border-b border-black/[0.04] transition-colors duration-150 hover:bg-black/[0.015]"
               >
-                <TableCell className="px-5 py-3.5 text-sm font-semibold text-swiss-ink truncate">
+                <TableCell className="px-5 py-3.5 text-sm font-medium text-swiss-ink truncate">
                   {row.contactName}
                 </TableCell>
                 <TableCell className="px-5 py-3.5 font-mono text-xs text-swiss-muted truncate">
@@ -277,7 +277,7 @@ const RecipientsTable: React.FC<{
                 )}
                 <TableCell className="px-5 py-3.5">
                   <span
-                    className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-semibold capitalize tracking-wide ring-1 ring-inset ${
+                    className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium capitalize tracking-wide ring-1 ring-inset ${
                       MESSAGE_STATUS_STYLE[statusKey] ??
                       'bg-gray-100 text-swiss-muted ring-gray-200'
                     }`}
@@ -444,11 +444,11 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
           type="button"
           onClick={() => navigate(pathForTab('campaigns'))}
           aria-label="Back to campaigns"
-          className="flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-primary mb-4"
+          className="flex items-center gap-1.5 text-sm font-medium text-swiss-muted hover:text-primary mb-4"
         >
           <ArrowLeft className="w-4 h-4" aria-hidden />
         </button>
-        <div className="bg-red-50 border border-red-100 text-red-700 text-sm font-bold rounded-2xl p-6">
+        <div className="bg-red-50 border border-red-100 text-red-700 text-sm font-medium rounded-2xl p-6">
           {error ?? 'Campaign not found'}
         </div>
       </div>
@@ -473,15 +473,15 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
             >
               <ArrowLeft className="w-4 h-4" aria-hidden />
             </button>
-            <h2 className="text-base font-semibold text-swiss-ink break-words">{detail.name}</h2>
+            <h2 className="text-base font-medium text-swiss-ink break-words">{detail.name}</h2>
             <span
-              className={`inline-flex text-sm font-black px-2 py-0.5 rounded-lg border ${STATUS_STYLE[detail.status]}`}
+              className={`inline-flex text-sm font-medium px-2 py-0.5 rounded-lg border ${STATUS_STYLE[detail.status]}`}
             >
               {detail.status}
             </span>
             {ch && (
               <span
-                className="inline-flex text-sm font-black px-2 py-0.5 rounded-lg border"
+                className="inline-flex text-sm font-medium px-2 py-0.5 rounded-lg border"
                 style={{
                   background: ch.bgColor,
                   borderColor: ch.borderColor,
@@ -499,7 +499,7 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
                 onClick={() => canEditSchedule && openFullEdit()}
                 disabled={!canEditSchedule}
                 title={canEditSchedule ? 'Edit campaign' : SCHEDULED_CAMPAIGN_EDIT_BLOCKED_HINT}
-                className="cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-white border border-swiss-line hover:bg-surface-muted text-swiss-ink rounded-xl text-xs font-bold disabled:cursor-not-allowed disabled:opacity-45 transition-colors duration-200"
+                className="cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-white border border-swiss-line hover:bg-surface-muted text-swiss-ink rounded-xl text-xs font-medium disabled:cursor-not-allowed disabled:opacity-45 transition-colors duration-200"
               >
                 <Pencil className="w-3.5 h-3.5" aria-hidden />
                 Edit
@@ -516,7 +516,7 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-x-5 gap-y-1 text-meta font-bold text-swiss-muted pt-1 border-t border-swiss-line">
+        <div className="flex flex-wrap gap-x-5 gap-y-1 text-meta font-medium text-swiss-muted pt-1 border-t border-swiss-line">
           <span>
             <span className="text-swiss-faint">Recipients </span>
             {insights.totalRecipients.toLocaleString()}
@@ -568,7 +568,7 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
           )}
         </div>
         {actionError && (
-          <p className="text-xs text-red-600 font-bold pt-1">{actionError}</p>
+          <p className="text-xs text-red-600 font-medium pt-1">{actionError}</p>
         )}
       </div>
 
@@ -577,12 +577,12 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
       )}
 
       <div className="bg-white border border-swiss-line p-5">
-        <h3 className="text-sm font-semibold text-swiss-ink uppercase tracking-wider mb-3">Details</h3>
+        <h3 className="text-sm font-medium text-swiss-ink uppercase tracking-wider mb-3">Details</h3>
         <dl className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-3">
           {detailRows.map(([label, value]) => (
             <div key={label} className="min-w-0">
-              <dt className="text-xs text-swiss-faint font-bold">{label}</dt>
-              <dd className="mt-0.5 text-sm text-swiss-ink font-bold break-words">{value}</dd>
+              <dt className="text-xs text-swiss-faint font-medium">{label}</dt>
+              <dd className="mt-0.5 text-sm text-swiss-ink font-medium break-words">{value}</dd>
             </div>
           ))}
         </dl>
@@ -596,7 +596,7 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
           <div className="min-w-0">
             <h3
               id="campaign-recipients-heading"
-              className="text-sm font-semibold tracking-tight text-swiss-ink"
+              className="text-sm font-medium tracking-tight text-swiss-ink"
             >
               Recipients
             </h3>
@@ -604,7 +604,7 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
               Per-message delivery status and timestamps
             </p>
           </div>
-          <span className="shrink-0 text-xs font-semibold tabular-nums text-swiss-muted">
+          <span className="shrink-0 text-xs font-medium tabular-nums text-swiss-muted">
             {detail.recipients.length > 0
               ? `${detail.recipients.length} logged`
               : detail.sentCount > 0
@@ -628,10 +628,10 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
           <div className="bg-white rounded-2xl border border-black/10 shadow-xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden">
             <div className="px-5 py-3 border-b border-swiss-line flex items-center justify-between gap-3 shrink-0">
               <div>
-                <h3 className="text-sm font-semibold text-swiss-ink">
+                <h3 className="text-sm font-medium text-swiss-ink">
                   Failed recipients ({failedRecipients.length})
                 </h3>
-                <p className="text-xs text-swiss-faint font-bold mt-0.5">
+                <p className="text-xs text-swiss-faint font-medium mt-0.5">
                   Resend uses the original payload through the same send pipeline
                 </p>
               </div>
@@ -641,7 +641,7 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
                     type="button"
                     disabled={resendingAll}
                     onClick={() => void handleResendAll()}
-                    className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-600 text-white text-xs font-black hover:bg-red-700 disabled:opacity-50"
+                    className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-600 text-white text-xs font-medium hover:bg-red-700 disabled:opacity-50"
                   >
                     {resendingAll ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden />
@@ -662,7 +662,7 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
             <div className="min-h-0 flex-1 overflow-auto">
               {failedRecipients.length === 0 ? (
                 <div className="p-10 text-center">
-                  <p className="text-sm font-bold text-swiss-muted">No failed recipients</p>
+                  <p className="text-sm font-medium text-swiss-muted">No failed recipients</p>
                   <p className="text-xs text-swiss-faint mt-1">All failures have been resent or cleared.</p>
                 </div>
               ) : (
@@ -697,12 +697,12 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
         {mainContent}
       </section>
       <aside className="w-full xl:w-[320px] shrink-0 p-5 flex flex-col bg-white border-t xl:border-t-0 xl:border-l border-swiss-line overflow-y-auto">
-        <p className="text-sm font-black text-swiss-faint uppercase tracking-widest mb-4">
+        <p className="text-sm font-medium text-swiss-faint uppercase tracking-widest mb-4">
           Message sent
         </p>
         <WhatsAppMessagePreview body={messageBody} />
         {detail.template?.name && (
-          <p className="text-xs text-swiss-faint font-bold mt-4">
+          <p className="text-xs text-swiss-faint font-medium mt-4">
             Template: <span className="text-swiss-muted">{detail.template.name}</span>
           </p>
         )}

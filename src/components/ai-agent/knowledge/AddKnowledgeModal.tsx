@@ -16,7 +16,8 @@ type Props = {
     url?: string;
     metadata?: Record<string, unknown>;
   }) => void;
-  onItemAdded?: (item: KnowledgeItem) => void;
+  onItemAdded?: (item: KnowledgeItem, message?: string) => void;
+  onAttachmentSaved?: () => void;
   submitting?: boolean;
 };
 
@@ -54,7 +55,7 @@ const OPTIONS: {
     title: 'Attachment',
     boldLabel: 'Upload a complete document, image, or video',
     description:
-      'AI does not learn or split it: it only detects the right moment and sends the original file.',
+      'Saved to Media Gallery — the AI detects the right moment and sends the original file (shared across this workspace’s agents).',
     icon: <Paperclip className="w-5 h-5" />,
     badge: 'New',
   },
@@ -65,60 +66,43 @@ export const AddKnowledgeModal: React.FC<Props> = ({
   onClose,
   onSubmit,
   onItemAdded,
+  onAttachmentSaved,
   submitting,
 }) => {
   const [step, setStep] = useState<'select' | 'form'>('select');
   const [selected, setSelected] = useState<KnowledgeType | null>(null);
-  const [docFiles, setDocFiles] = useState<File[]>([]);
   const [qnaPairs, setQnaPairs] = useState<QnAPair[]>([{ question: '', answer: '' }]);
-  const [attachment, setAttachment] = useState({
-    file: null as File | null,
-    name: '',
-    description: '',
-  });
 
-  const canProceed =
-    selected === 'document'
-      ? docFiles.length > 0
-      : selected === 'qna'
-        ? qnaPairs.some((p) => p.question.trim() && p.answer.trim())
-        : selected === 'attachment'
-          ? attachment.file && attachment.name.trim()
-          : false;
+  const canProceed = selected === 'qna' ? qnaPairs.some((p) => p.question.trim() && p.answer.trim()) : true;
 
   const handleSubmit = () => {
-    if (!selected) return;
-
-    if (selected === 'document') {
-      onSubmit({
-        type: 'document',
-        title: docFiles[0]?.name ?? 'Document',
-        metadata: { fileNames: docFiles.map((f) => f.name) },
-      });
-    } else if (selected === 'qna') {
-      const first = qnaPairs.find((p) => p.question.trim() && p.answer.trim());
-      onSubmit({
-        type: 'qna',
-        title: first?.question ?? 'Q&A',
-        content: JSON.stringify(qnaPairs.filter((p) => p.question.trim())),
-        metadata: { pairs: qnaPairs },
-      });
-    } else if (selected === 'attachment') {
-      onSubmit({
-        type: 'attachment',
-        title: attachment.name,
-        content: attachment.description,
-        metadata: { fileName: attachment.file?.name },
-      });
-    }
+    if (!selected || selected !== 'qna') return;
+    const first = qnaPairs.find((p) => p.question.trim() && p.answer.trim());
+    onSubmit({
+      type: 'qna',
+      title: first?.question ?? 'Q&A',
+      content: JSON.stringify(qnaPairs.filter((p) => p.question.trim())),
+      metadata: { pairs: qnaPairs },
+    });
   };
 
   const handleOnlineSaved = (item: KnowledgeItem) => {
-    onItemAdded?.(item);
+    onItemAdded?.(item, 'Online data added successfully');
     onClose();
   };
 
-  const showFooter = step === 'select' || (selected !== 'online_data' && step === 'form');
+  const handleDocumentSaved = (item: KnowledgeItem) => {
+    onItemAdded?.(item, 'Document added successfully');
+  };
+
+  const handleAttachmentSaved = () => {
+    onAttachmentSaved?.();
+    onClose();
+  };
+
+  // Document/Attachment/Online data upload themselves inline and manage their
+  // own save action — only Q&A submits through the shared footer button.
+  const showFooter = step === 'select' || (selected === 'qna' && step === 'form');
 
   return (
     <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -162,12 +146,14 @@ export const AddKnowledgeModal: React.FC<Props> = ({
             </div>
           ) : (
             <div>
-              {selected === 'document' && <DocumentUpload onFilesChange={setDocFiles} />}
+              {selected === 'document' && (
+                <DocumentUpload agentId={agentId} onSaved={handleDocumentSaved} />
+              )}
               {selected === 'online_data' && (
                 <OnlineDataForm agentId={agentId} onSaved={handleOnlineSaved} />
               )}
               {selected === 'qna' && <QnAForm onChange={setQnaPairs} />}
-              {selected === 'attachment' && <AttachmentUpload onChange={setAttachment} />}
+              {selected === 'attachment' && <AttachmentUpload onSaved={handleAttachmentSaved} />}
             </div>
           )}
         </div>

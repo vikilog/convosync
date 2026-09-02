@@ -53,7 +53,7 @@ const QuietEmpty: React.FC<{ title: string; description: string; className?: str
     className={`flex h-full min-h-[140px] flex-col items-center justify-center px-4 py-8 text-center ${className}`}
     role="status"
   >
-    <p className="text-sm font-semibold text-swiss-muted">{title}</p>
+    <p className="text-sm font-medium text-swiss-muted">{title}</p>
     <p className="mt-1 max-w-sm text-xs font-medium leading-relaxed text-swiss-faint">
       {description}
     </p>
@@ -75,10 +75,10 @@ const KpiCell: React.FC<{
 
   return (
     <div className="min-w-0 px-5 py-5 sm:px-6">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-swiss-faint">
+      <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-swiss-faint">
         {label}
       </p>
-      <p className={`mt-1.5 text-[1.75rem] font-semibold tracking-tight tabular-nums leading-none ${valueTone}`}>
+      <p className={`mt-1.5 text-[1.75rem] font-medium tracking-tight tabular-nums leading-none ${valueTone}`}>
         {value}
       </p>
       {hint && (
@@ -114,9 +114,9 @@ const StatusFunnel: React.FC<{
         return (
           <div key={step.key} role="listitem" className="min-w-0">
             <div className="mb-1 flex items-baseline justify-between gap-3">
-              <span className="text-sm font-semibold text-swiss-ink">{step.label}</span>
-              <span className="shrink-0 text-xs font-semibold tabular-nums text-swiss-muted">
-                <span className="text-sm font-semibold text-swiss-ink">
+              <span className="text-sm font-medium text-swiss-ink">{step.label}</span>
+              <span className="shrink-0 text-xs font-medium tabular-nums text-swiss-muted">
+                <span className="text-sm font-medium text-swiss-ink">
                   {step.count.toLocaleString()}
                 </span>
                 <span className="ml-1.5 text-swiss-faint">{step.pct}%</span>
@@ -187,7 +187,7 @@ const FailureReasons: React.FC<{
               <span className="min-w-0 break-words text-sm font-medium text-swiss-ink">
                 {row.reason}
               </span>
-              <span className="shrink-0 text-xs font-semibold tabular-nums text-swiss-muted">
+              <span className="shrink-0 text-xs font-medium tabular-nums text-swiss-muted">
                 {row.count}
                 <span className="ml-1 text-swiss-faint">{row.pct}%</span>
               </span>
@@ -217,16 +217,16 @@ const LagHistogram: React.FC<{
     <div className="min-w-0">
       <div className="mb-3 flex items-end justify-between gap-2">
         <div>
-          <h4 className="text-sm font-semibold text-swiss-ink">{title}</h4>
+          <h4 className="text-sm font-medium text-swiss-ink">{title}</h4>
           <p className="mt-0.5 text-[11px] font-medium text-swiss-faint">
             {hasData ? `${samples} sample${samples === 1 ? '' : 's'}` : 'Timeline pending'}
           </p>
         </div>
         <div className="text-right">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-swiss-faint">
+          <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-swiss-faint">
             Median
           </p>
-          <p className="text-sm font-semibold tabular-nums text-swiss-ink">
+          <p className="text-sm font-medium tabular-nums text-swiss-ink">
             {formatMedian(medianMs)}
           </p>
         </div>
@@ -306,7 +306,7 @@ export const CampaignDetailAnalytics: React.FC<Props> = ({ channel, analytics })
         <div>
           <h3
             id="campaign-analytics-heading"
-            className="text-sm font-semibold tracking-tight text-swiss-ink"
+            className="text-sm font-medium tracking-tight text-swiss-ink"
           >
             Analytics
           </h3>
@@ -348,7 +348,7 @@ export const CampaignDetailAnalytics: React.FC<Props> = ({ channel, analytics })
 
       <div className="grid grid-cols-1 gap-0 xl:grid-cols-2">
         <div className="min-w-0 border-b border-swiss-line px-5 py-5 sm:px-6 xl:border-b-0 xl:border-r">
-          <h4 className="text-sm font-semibold text-swiss-ink">Status funnel</h4>
+          <h4 className="text-sm font-medium text-swiss-ink">Status funnel</h4>
           <p className="mb-4 text-[11px] font-medium text-swiss-faint">
             Sent → Delivered → {readLabel}
             {analytics.funnel.some((s) => s.key === 'failed' && s.count > 0) ? ' · Failed' : ''}
@@ -357,7 +357,7 @@ export const CampaignDetailAnalytics: React.FC<Props> = ({ channel, analytics })
         </div>
 
         <div className="min-w-0 border-b border-swiss-line px-5 py-5 sm:px-6 xl:border-b-0">
-          <h4 className="text-sm font-semibold text-swiss-ink">Failure reasons</h4>
+          <h4 className="text-sm font-medium text-swiss-ink">Failure reasons</h4>
           <p className="mb-4 text-[11px] font-medium text-swiss-faint">
             Per-recipient error breakdown
           </p>
@@ -372,7 +372,7 @@ export const CampaignDetailAnalytics: React.FC<Props> = ({ channel, analytics })
         >
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" aria-hidden />
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-amber-950">Timing charts on hold</p>
+            <p className="text-sm font-medium text-amber-950">Timing charts on hold</p>
             <p className="mt-0.5 text-xs font-medium leading-relaxed text-amber-900/75">
               {analytics.lag.blockedReason} Lag histograms usually appear after status timeline
               backfill.

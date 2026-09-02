@@ -20,6 +20,8 @@ import {
   Trash2,
   ChevronLeft,
   ChevronRight,
+  Columns3,
+  X,
 } from 'lucide-react';
 import { Contact } from '../types';
 import { api } from '../lib/api';
@@ -38,12 +40,39 @@ import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Checkbox } from './ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu';
 
 type ContactListKey = 'all' | 'unsubscribe' | 'blocklist';
 type ContactChannelKey = 'all' | 'whatsapp' | 'instagram' | 'messenger';
 type ContactsPageTab = 'dashboard' | 'contacts';
 
 const PAGE_SIZE_OPTIONS = [25, 50, 100] as const;
+const CUSTOM_COLUMNS_STORAGE_KEY = 'contacts_table_custom_columns';
+
+/** "sourceUrl" -> "Source url" — best-effort label for an arbitrary customFields key. */
+function labelForCustomFieldKey(key: string): string {
+  const spaced = key.replace(/([a-z0-9])([A-Z])/g, '$1 $2').replace(/[_-]+/g, ' ');
+  const lower = spaced.toLowerCase();
+  return lower.charAt(0).toUpperCase() + lower.slice(1);
+}
+
+function formatCustomFieldValue(value: unknown): string {
+  if (value === null || value === undefined || value === '') return '—';
+  if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+  if (typeof value === 'string' || typeof value === 'number') return String(value);
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return String(value);
+  }
+}
 
 const LIST_NAV: { id: ContactListKey; label: string; icon: React.ReactNode }[] = [
   { id: 'all', label: 'All', icon: <Users className="w-4 h-4" /> },
@@ -142,6 +171,40 @@ const ContactsWorkspace: React.FC = () => {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [tagDeleting, setTagDeleting] = useState(false);
+  const [customColumnKeys, setCustomColumnKeys] = useState<string[]>(() => {
+    try {
+      const raw = localStorage.getItem(CUSTOM_COLUMNS_STORAGE_KEY);
+      const parsed = raw ? (JSON.parse(raw) as unknown) : [];
+      return Array.isArray(parsed) ? parsed.filter((v): v is string => typeof v === 'string') : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(CUSTOM_COLUMNS_STORAGE_KEY, JSON.stringify(customColumnKeys));
+    } catch {
+      // best-effort — a full/blocked localStorage shouldn't break the table
+    }
+  }, [customColumnKeys]);
+
+  // Custom fields are free-form per-contact JSON (CSV-import extras, etc.) —
+  // the picker offers whatever keys actually show up across loaded contacts,
+  // not a fixed list.
+  const availableCustomFieldKeys = useMemo(() => {
+    const keys = new Set<string>();
+    for (const contact of contacts) {
+      for (const key of Object.keys(contact.customFields ?? {})) keys.add(key);
+    }
+    return [...keys].sort((a, b) => a.localeCompare(b));
+  }, [contacts]);
+
+  const toggleCustomColumn = useCallback((key: string) => {
+    setCustomColumnKeys((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+    );
+  }, []);
 
   const connectedChannels = useMemo(() => {
     const channels: Array<'whatsapp' | 'instagram' | 'messenger'> = [];
@@ -580,6 +643,38 @@ const ContactsWorkspace: React.FC = () => {
                   </button>
                 ) : null}
 
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-swiss-line bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-surface-muted whitespace-nowrap"
+                    >
+                      <Columns3 className="w-4 h-4" />
+                      Add column
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel>Custom fields</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {availableCustomFieldKeys.length === 0 ? (
+                      <p className="px-1.5 py-1.5 text-xs text-slate-400">
+                        No custom fields on any loaded contact yet.
+                      </p>
+                    ) : (
+                      availableCustomFieldKeys.map((key) => (
+                        <DropdownMenuCheckboxItem
+                          key={key}
+                          checked={customColumnKeys.includes(key)}
+                          onCheckedChange={() => toggleCustomColumn(key)}
+                          onSelect={(e) => e.preventDefault()}
+                        >
+                          {labelForCustomFieldKey(key)}
+                        </DropdownMenuCheckboxItem>
+                      ))
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
                 <button
                   type="button"
                   onClick={openAddContact}
@@ -685,6 +780,21 @@ const ContactsWorkspace: React.FC = () => {
                         <TableHead className="px-4 py-2 font-bold whitespace-normal">List</TableHead>
                         <TableHead className="px-4 py-2 font-bold whitespace-normal">Tags</TableHead>
                         <TableHead className="px-4 py-2 font-bold whitespace-normal">Last active</TableHead>
+                        {customColumnKeys.map((key) => (
+                          <TableHead key={key} className="px-4 py-2 font-bold whitespace-normal">
+                            <span className="inline-flex items-center gap-1">
+                              {labelForCustomFieldKey(key)}
+                              <button
+                                type="button"
+                                onClick={() => toggleCustomColumn(key)}
+                                className="text-slate-400 hover:text-red-600"
+                                aria-label={`Remove ${labelForCustomFieldKey(key)} column`}
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </span>
+                          </TableHead>
+                        ))}
                         <TableHead className="px-4 py-2 font-bold text-right whitespace-normal">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -741,6 +851,18 @@ const ContactsWorkspace: React.FC = () => {
                             )}
                           </TableCell>
                           <TableCell className="px-4 py-2 text-xs text-slate-400">{contact.lastActive}</TableCell>
+                          {customColumnKeys.map((key) => {
+                            const value = formatCustomFieldValue(contact.customFields?.[key]);
+                            return (
+                              <TableCell
+                                key={key}
+                                className="px-4 py-2 text-slate-600 max-w-[220px] truncate"
+                                title={value}
+                              >
+                                {value}
+                              </TableCell>
+                            );
+                          })}
                           <TableCell className="px-4 py-2 text-right">
                             <button
                               type="button"

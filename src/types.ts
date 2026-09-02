@@ -130,6 +130,8 @@ export interface Contact {
   instagramFollowsBusiness?: boolean;
   instagramBusinessFollowsUser?: boolean;
   automationsPaused?: boolean;
+  /** Raw per-contact JSON blob (e.g. CSV-import extras: city, website, notes) — source for user-picked custom table columns. */
+  customFields?: Record<string, unknown>;
 }
 
 export interface Segment {

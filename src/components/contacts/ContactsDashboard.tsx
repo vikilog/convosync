@@ -13,6 +13,7 @@ import {
   Facebook,
   Tag,
   Mail,
+  Globe,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -39,6 +40,7 @@ export type ContactDashboardStats = {
   channels: { whatsapp: number; instagram: number; messenger: number };
   sources: { source: string; count: number }[];
   topTags: { tag: string; count: number }[];
+  countries: { country: string; count: number }[];
 };
 
 type GrowthRange = 'today' | 'yesterday' | 'week' | 'month' | 'custom';
@@ -69,6 +71,54 @@ const SOURCE_COLORS = [
   '#6bbfa5',
   '#8fd0bb',
 ];
+
+// "UK" isn't a real ISO-3166 region code (GB is) — Intl.DisplayNames won't
+// resolve it, and it's what our own CSV imports use, so override it explicitly.
+const COUNTRY_NAME_OVERRIDES: Record<string, string> = { UK: 'United Kingdom' };
+let regionDisplayNames: Intl.DisplayNames | null = null;
+try {
+  regionDisplayNames = new Intl.DisplayNames(['en'], { type: 'region' });
+} catch {
+  regionDisplayNames = null;
+}
+function countryNameFor(code: string): string {
+  const upper = code.trim().toUpperCase();
+  if (COUNTRY_NAME_OVERRIDES[upper]) return COUNTRY_NAME_OVERRIDES[upper];
+  try {
+    const name = regionDisplayNames?.of(upper);
+    if (name && name !== upper) return name;
+  } catch {
+    // invalid/unrecognized region code — fall back to showing the raw code
+  }
+  return upper;
+}
+
+function CountryTooltip({
+  active,
+  payload,
+}: {
+  active?: boolean;
+  payload?: { payload: { name: string; fullName: string; count: number } }[];
+}) {
+  if (!active || !payload?.length) return null;
+  const point = payload[0].payload;
+  return (
+    <div
+      style={{
+        borderRadius: 10,
+        border: '1px solid rgba(6,78,59,0.15)',
+        fontSize: 12,
+        background: 'white',
+        padding: '6px 10px',
+      }}
+    >
+      <p style={{ fontWeight: 600, margin: 0 }}>
+        {point.name} · {point.fullName}
+      </p>
+      <p style={{ margin: 0, color: '#475569' }}>{point.count.toLocaleString()} contacts</p>
+    </div>
+  );
+}
 
 function StatCard({
   label,
@@ -220,6 +270,16 @@ export const ContactsDashboard: React.FC<{
   const sourceData = stats.sources.map((s, i) => ({
     name: s.source,
     count: s.count,
+    fill: SOURCE_COLORS[i % SOURCE_COLORS.length],
+  }));
+
+  // Only worth a panel once contacts actually span more than one country —
+  // otherwise it's a single full-width bar telling you nothing.
+  const showCountries = stats.countries.length > 1;
+  const countryData = stats.countries.map((c, i) => ({
+    name: c.country,
+    fullName: countryNameFor(c.country),
+    count: c.count,
     fill: SOURCE_COLORS[i % SOURCE_COLORS.length],
   }));
 
@@ -499,6 +559,57 @@ export const ContactsDashboard: React.FC<{
           )}
         </div>
       </div>
+
+      {showCountries && (
+        <div className="rounded-xl border border-primary/15 bg-primary/[0.03] p-4">
+          <div className="mb-3 flex items-center gap-2">
+            <Globe className="h-4 w-4 text-primary" />
+            <div>
+              <h3 className="text-sm font-bold text-slate-900">By country</h3>
+              <p className="text-xs text-slate-500">Contacts across {countryData.length} countries</p>
+            </div>
+          </div>
+          <div className="h-[200px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={countryData} margin={{ top: 4, right: 12, left: 0, bottom: 4 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e2dc" vertical={false} />
+                <XAxis
+                  dataKey="name"
+                  tick={{ fontSize: 11, fill: '#475569' }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  allowDecimals={false}
+                  tick={{ fontSize: 11, fill: '#64748b' }}
+                  axisLine={false}
+                  tickLine={false}
+                  width={32}
+                />
+                <Tooltip content={<CountryTooltip />} cursor={{ fill: 'rgba(0,0,0,0.03)' }} />
+                <Bar dataKey="count" name="Contacts" radius={[6, 6, 0, 0]}>
+                  {countryData.map((entry) => (
+                    <Cell key={entry.name} fill={entry.fill} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="mt-1 flex flex-wrap justify-center gap-x-3 gap-y-1">
+            {countryData.map((c) => (
+              <div key={c.name} className="flex items-center gap-1.5 text-xs text-slate-600">
+                <span
+                  className="h-2.5 w-2.5 rounded-full"
+                  style={{ backgroundColor: c.fill }}
+                  aria-hidden="true"
+                />
+                <span>{c.name}</span>
+                <span className="font-semibold text-slate-800">{c.count.toLocaleString()}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
