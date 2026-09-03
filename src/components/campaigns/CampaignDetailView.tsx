@@ -11,6 +11,7 @@ import {
   Loader2,
   Pencil,
   RefreshCw,
+  RotateCcw,
   X,
 } from 'lucide-react';
 import { useReducedMotion } from 'motion/react';
@@ -33,6 +34,7 @@ import {
 } from '../../types';
 import { api } from '../../lib/api';
 import {
+  isFailedCampaignRelaunchable,
   isScheduledCampaignEditable,
   SCHEDULED_CAMPAIGN_EDIT_BLOCKED_HINT,
 } from '../../lib/campaignScheduleEdit';
@@ -405,6 +407,7 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
     ? isScheduledCampaignEditable(detail.status, detail.scheduledAt)
     : false;
   const isScheduled = detail?.status === 'Scheduled';
+  const isFailed = detail ? isFailedCampaignRelaunchable(detail.status) : false;
 
   const detailRows = useMemo((): [string, string][] => {
     if (!detail) return [];
@@ -503,6 +506,17 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
               >
                 <Pencil className="w-3.5 h-3.5" aria-hidden />
                 Edit
+              </button>
+            )}
+            {isFailed && (
+              <button
+                type="button"
+                onClick={openFullEdit}
+                title="Edit and relaunch this campaign"
+                className="cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-white border border-swiss-line hover:bg-surface-muted text-swiss-ink rounded-xl text-xs font-medium transition-colors duration-200"
+              >
+                <RotateCcw className="w-3.5 h-3.5" aria-hidden />
+                Relaunch
               </button>
             )}
             <button

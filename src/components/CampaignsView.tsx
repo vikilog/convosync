@@ -41,6 +41,7 @@ import {
   AlertTriangle,
   Pause,
   Trash2,
+  RotateCcw,
 } from 'lucide-react';
 import {
   CAMPAIGN_CHANNELS,
@@ -87,6 +88,7 @@ import {
 import { campaignIdFromPath, pathForCampaign, pathForNewCampaign, isNewCampaignPath, pathForTab } from '../routes';
 import {
   defaultScheduleLocal,
+  isFailedCampaignRelaunchable,
   isScheduledCampaignEditable,
   isoToLocalDateTime,
   localDateTimeToIso,
@@ -707,6 +709,7 @@ const CampaignListPanel: React.FC<{
   onCreate: () => void;
   onRefresh: () => void;
   onOpenCampaign: (id: string) => void;
+  onRelaunch: (id: string) => void;
 }> = ({
   campaigns,
   loading,
@@ -716,6 +719,7 @@ const CampaignListPanel: React.FC<{
   onCreate,
   onRefresh,
   onOpenCampaign,
+  onRelaunch,
 }) => {
   const [sortKey, setSortKey] = useState<CampaignListSortKey>('created');
   const [sortDir, setSortDir] = useState<CampaignListSortDir>('desc');
@@ -1131,6 +1135,17 @@ const CampaignListPanel: React.FC<{
                                   <PlayCircle className="h-4 w-4" aria-hidden />
                                 </span>
                               ))}
+                            {campaign.status === 'Failed' && (
+                              <button
+                                type="button"
+                                disabled={busyId === campaign.id}
+                                onClick={() => onRelaunch(campaign.id)}
+                                title="Relaunch — edit and send again"
+                                className="inline-flex items-center justify-center p-1.5 rounded-md text-primary hover:bg-primary/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                <RotateCcw className="h-4 w-4" aria-hidden />
+                              </button>
+                            )}
                             {canDeleteNow(campaign) ? (
                               <button
                                 type="button"
@@ -1238,6 +1253,15 @@ const CampaignsWorkspace: React.FC = () => {
   const [selectedSegmentIds, setSelectedSegmentIds] = useState<string[]>([]);
   /** 'any' = union (OR) · 'all' = intersection (AND) — only matters once 2+ tags are selected. */
   const [selectedTagMatchMode, setSelectedTagMatchMode] = useState<'any' | 'all'>('any');
+  /** How a recipient's reply to this campaign is routed — see campaignReplyRouting.service.ts. */
+  const [replyHandling, setReplyHandling] = useState<'default' | 'journey' | 'ai_agent'>('default');
+  const [replyJourneyId, setReplyJourneyId] = useState<string | null>(null);
+  const [replyAgentId, setReplyAgentId] = useState<string | null>(null);
+  const [replyJourneys, setReplyJourneys] = useState<{ id: string; name: string }[]>([]);
+  const [replyAgents, setReplyAgents] = useState<{ id: string; name: string }[]>([]);
+  /** Editing a failed campaign to relaunch it — unlike editing a scheduled
+   * campaign, this doesn't have to stay scheduled; "send now" is allowed. */
+  const [isRelaunchingFailed, setIsRelaunchingFailed] = useState(false);
   /** Ticks once a minute so the "current time there" readout on the Review step stays live. */
   const [nowTick, setNowTick] = useState(() => Date.now());
   useEffect(() => {
@@ -1308,6 +1332,41 @@ const CampaignsWorkspace: React.FC = () => {
     }
   }, [viewMode, loadCampaigns]);
 
+  useEffect(() => {
+    if (viewMode !== 'create') return;
+    (async () => {
+      try {
+        const journeys = (await api.getJourneys()) as { id: string; name: string; status: string }[];
+        setReplyJourneys(
+          journeys.filter((j) => j.status === 'published').map((j) => ({ id: j.id, name: j.name }))
+        );
+      } catch {
+        setReplyJourneys([]);
+      }
+      try {
+        const agents = (await api.getAgents()) as {
+          id: string;
+          name: string;
+          category: string;
+          isPublished: boolean;
+          isEnabled: boolean;
+        }[];
+        setReplyAgents(
+          agents
+            .filter(
+              (a) =>
+                a.isPublished &&
+                a.isEnabled &&
+                (a.category === 'ai_agent' || a.category === 'responsive')
+            )
+            .map((a) => ({ id: a.id, name: a.name }))
+        );
+      } catch {
+        setReplyAgents([]);
+      }
+    })();
+  }, [viewMode]);
+
   useKeepAliveActivation(() => {
     if (viewModeRef.current === 'list') {
       void loadCampaigns({ silent: true });
@@ -1340,6 +1399,10 @@ const CampaignsWorkspace: React.FC = () => {
     setSelectedAudienceType('segment');
     setSelectedSegmentIds([]);
     setSelectedTagMatchMode('any');
+    setReplyHandling('default');
+    setReplyJourneyId(null);
+    setReplyAgentId(null);
+    setIsRelaunchingFailed(false);
     setTagQuery('');
     setSelectedTemplateName('');
     setSelectedEmailTemplateId('');
@@ -1392,7 +1455,12 @@ const CampaignsWorkspace: React.FC = () => {
     setSelectedAudienceType(seed.audienceType);
     setSelectedSegmentIds(seed.segmentIds);
     setSelectedTagMatchMode(seed.tagMatchMode);
-    setIsScheduled(true);
+    setReplyHandling(seed.replyHandling);
+    setReplyJourneyId(seed.replyJourneyId);
+    setReplyAgentId(seed.replyAgentId);
+    // A failed campaign relaunch has no schedule to preserve — default to
+    // "send now" and let the user opt into scheduling fresh if they want.
+    setIsScheduled(Boolean(seed.scheduledAt));
     const local = isoToLocalDateTime(seed.scheduledAt);
     setScheduledDate(local.date);
     setScheduledTime(local.time);
@@ -1423,7 +1491,8 @@ const CampaignsWorkspace: React.FC = () => {
         const raw = (await api.getCampaign(campaignId)) as Record<string, unknown>;
         if (seq !== editLoadSeqRef.current) return;
         const detail = mapCampaignDetailFromApi(raw);
-        if (!isScheduledCampaignEditable(detail.status, detail.scheduledAt)) {
+        const failedRelaunch = isFailedCampaignRelaunchable(detail.status);
+        if (!isScheduledCampaignEditable(detail.status, detail.scheduledAt) && !failedRelaunch) {
           setLaunchError(SCHEDULED_CAMPAIGN_EDIT_BLOCKED_HINT);
           setLaunching(false);
           return;
@@ -1434,6 +1503,7 @@ const CampaignsWorkspace: React.FC = () => {
           setLaunching(false);
           return;
         }
+        setIsRelaunchingFailed(failedRelaunch);
         applyEditSeedToWizard(seed);
         setEditingCampaignId(campaignId);
         setLaunchError(null);
@@ -1991,8 +2061,11 @@ const CampaignsWorkspace: React.FC = () => {
       return fail('Your audience is empty. Add contacts or choose a different segment.');
     }
 
-    // Edit must stay scheduled — no immediate send / duplicate create.
-    const mustSchedule = isEditing || isScheduled;
+    // Editing a scheduled campaign must stay scheduled — no immediate send /
+    // duplicate create. Relaunching a failed campaign has no such
+    // requirement; it follows the same schedule-or-send-now choice as a
+    // brand-new campaign.
+    const mustSchedule = (isEditing && !isRelaunchingFailed) || isScheduled;
 
     // Sending now is irreversible (unlike a scheduled send, which can be
     // cancelled) — require an explicit confirmation before it fires.
@@ -2082,6 +2155,13 @@ const CampaignsWorkspace: React.FC = () => {
         tagMatchMode: selectedTagMatchMode,
         variableMappings: mappings,
         ...headerMediaFilter,
+        ...(replyHandling !== 'default'
+          ? {
+              replyHandling,
+              ...(replyHandling === 'journey' && replyJourneyId ? { replyJourneyId } : {}),
+              ...(replyHandling === 'ai_agent' && replyAgentId ? { replyAgentId } : {}),
+            }
+          : {}),
       };
 
       if (isEditing && editingCampaignId && scheduledAtIso) {
@@ -2098,6 +2178,36 @@ const CampaignsWorkspace: React.FC = () => {
           sentCount: 0,
           totalRecipients: audienceCount(),
           scheduled: true,
+        });
+        setLastCreatedCampaignId(editingCampaignId);
+        setCampaignLaunched(true);
+        loadCampaigns();
+        return;
+      }
+
+      if (isEditing && editingCampaignId && !scheduledAtIso) {
+        // Relaunching a failed campaign with no schedule chosen — fix the
+        // config, then send immediately (mirrors the create-and-send-now
+        // flow below, just against the existing campaign row instead of a
+        // freshly created one).
+        await api.updateCampaign(editingCampaignId, {
+          name: resolvedName,
+          templateId,
+          channel: selectedChannel,
+          audienceType: selectedAudienceType === 'all' ? 'all' : 'segment',
+          audienceFilter: audiencePayload,
+        });
+        pendingEditSeedRef.current = null;
+
+        const relaunchResult = (await api.sendCampaign(editingCampaignId)) as {
+          sentCount?: number;
+          totalRecipients?: number;
+        };
+
+        setLaunchResult({
+          sentCount: relaunchResult.sentCount ?? 0,
+          totalRecipients: relaunchResult.totalRecipients ?? audienceCount(),
+          scheduled: false,
         });
         setLastCreatedCampaignId(editingCampaignId);
         setCampaignLaunched(true);
@@ -2175,6 +2285,7 @@ const CampaignsWorkspace: React.FC = () => {
         onCreate={openCreateWizard}
         onRefresh={loadCampaigns}
         onOpenCampaign={(id) => navigate(pathForCampaign(id))}
+        onRelaunch={(id) => void openEditWizard(id)}
       />
     );
   }
@@ -3241,6 +3352,68 @@ const CampaignsWorkspace: React.FC = () => {
                       </div>
                     )}
                   </div>
+
+                  {selectedChannel !== 'email' && (
+                    <div className="bg-white border border-swiss-line p-4 rounded-xl space-y-3">
+                      <div>
+                        <p className="text-sm font-bold text-swiss-ink">When they reply</p>
+                        <p className="text-xs text-swiss-faint font-bold">
+                          Route recipients who reply to this campaign — instead of default inbox/AI
+                          handling.
+                        </p>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2">
+                        {(
+                          [
+                            { id: 'default', label: 'Default' },
+                            { id: 'journey', label: 'Automation' },
+                            { id: 'ai_agent', label: 'AI agent' },
+                          ] as const
+                        ).map((opt) => (
+                          <button
+                            key={opt.id}
+                            type="button"
+                            onClick={() => setReplyHandling(opt.id)}
+                            className={`rounded-lg border px-3 py-2 text-xs font-bold transition-colors duration-200 ${
+                              replyHandling === opt.id
+                                ? 'border-primary bg-primary/10 text-primary'
+                                : 'border-swiss-line text-slate-600 hover:bg-slate-50'
+                            }`}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                      {replyHandling === 'journey' && (
+                        <select
+                          value={replyJourneyId ?? ''}
+                          onChange={(e) => setReplyJourneyId(e.target.value || null)}
+                          className="h-auto w-full rounded-xl border border-swiss-line bg-slate-50 px-3 py-2 text-sm font-semibold outline-none focus-visible:ring-2 focus-visible:ring-primary/15"
+                        >
+                          <option value="">Select an automation…</option>
+                          {replyJourneys.map((j) => (
+                            <option key={j.id} value={j.id}>
+                              {j.name}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                      {replyHandling === 'ai_agent' && (
+                        <select
+                          value={replyAgentId ?? ''}
+                          onChange={(e) => setReplyAgentId(e.target.value || null)}
+                          className="h-auto w-full rounded-xl border border-swiss-line bg-slate-50 px-3 py-2 text-sm font-semibold outline-none focus-visible:ring-2 focus-visible:ring-primary/15"
+                        >
+                          <option value="">Select an AI agent…</option>
+                          {replyAgents.map((a) => (
+                            <option key={a.id} value={a.id}>
+                              {a.name}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                    </div>
+                  )}
 
                   <div className="bg-primary/5 p-4 rounded-xl border border-primary/10 flex gap-3">
                     <ShieldCheck className="w-5 h-5 text-primary shrink-0 mt-0.5" />

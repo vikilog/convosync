@@ -104,6 +104,7 @@ export interface Contact {
   avatar?: string;
   lastActive: string;
   unreadCount: number;
+  isFavorite?: boolean;
   lastMessage: string;
   status: 'Open' | 'Pending' | 'Resolved';
   assignedAgent: string;
@@ -310,6 +311,10 @@ export interface CampaignDetail {
   headerMediaMimeType: string | null;
   headerMediaFileName: string | null;
   headerMediaAssetId: string | null;
+  /** How a recipient's reply to this campaign is routed — 'default' or unset = normal inbox/AI handling. */
+  replyHandling: 'default' | 'journey' | 'ai_agent' | null;
+  replyJourneyId: string | null;
+  replyAgentId: string | null;
   insights: CampaignInsights;
   analytics: CampaignAnalytics | null;
   recipients: CampaignRecipientInsight[];

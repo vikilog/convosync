@@ -26,6 +26,10 @@ import {
   Pause,
   Play,
   Trash2,
+  Star,
+  Check,
+  SlidersHorizontal,
+  ListChecks,
 } from 'lucide-react';
 import { Contact, ChatMessage, type ChatMessageType } from '../types';
 import { api, formatCatchError, getUserName, SendFailedError } from '../lib/api';
@@ -443,6 +447,7 @@ const FILTER_TABS = [
   { id: 'all' as const, label: 'All' },
   { id: 'mine' as const, label: 'Mine' },
   { id: 'unassigned' as const, label: 'Unassigned' },
+  { id: 'unread' as const, label: 'Unread' },
 ];
 
 const CHANNEL_TABS: { id: InboxChannel; label: string }[] = [
@@ -476,6 +481,15 @@ function contactDisplayHandle(contact: Contact): string {
   return contact.handle || contact.phone;
 }
 
+/** At most 2 initials (first word + last word) — a name with many words
+ * (e.g. a full business name) must not overflow the small avatar circle. */
+function initialsFor(name: string): string {
+  const words = name.trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return '';
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+  return (words[0][0] + words[words.length - 1][0]).toUpperCase();
+}
+
 export const InboxView: React.FC = () => {
   const navigate = useNavigate();
   const { inboxScope } = useWorkspaceAccess();
@@ -502,6 +516,17 @@ export const InboxView: React.FC = () => {
   const [mobilePane, setMobilePane] = useState<'list' | 'chat'>('list');
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [listSearch, setListSearch] = useState('');
+  /** Empty = no tag filter. Multiple selected tags match with OR (any). */
+  const [tagFilter, setTagFilter] = useState<string[]>([]);
+  const [filterPanelOpen, setFilterPanelOpen] = useState(false);
+  const [selectedThreadIds, setSelectedThreadIds] = useState<Set<string>>(new Set());
+  const [batchSheetOpen, setBatchSheetOpen] = useState(false);
+  const [batchTagInput, setBatchTagInput] = useState('');
+  const [batchBusy, setBatchBusy] = useState(false);
+  const [batchError, setBatchError] = useState<string | null>(null);
+  const [batchConfirm, setBatchConfirm] = useState<
+    { kind: 'automation' | 'agent'; id: string; name: string } | null
+  >(null);
   const [inboxThreads, setInboxThreads] = useState<InboxThread[]>([]);
   const [selectedConversationId, setSelectedConversationId] = useState<string>('');
   const [chatHistories, setChatHistories] = useState<Record<string, ChatMessage[]>>({});
@@ -515,7 +540,8 @@ export const InboxView: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  const [filterTab, setFilterTab] = useState<'all' | 'mine' | 'unassigned'>('all');
+  const [filterTab, setFilterTab] = useState<'all' | 'mine' | 'unassigned' | 'unread'>('all');
+  const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [channelFilter, setChannelFilter] = useState<InboxChannel>('whatsapp');
   const [instagramSyncing, setInstagramSyncing] = useState(false);
   const [instagramSyncHint, setInstagramSyncHint] = useState<string | null>(null);
@@ -610,6 +636,14 @@ export const InboxView: React.FC = () => {
     }
   }, [channelFilter, visibleChannelTabs]);
 
+  const availableTags = useMemo(() => {
+    const set = new Set<string>();
+    for (const t of inboxThreads) {
+      for (const tag of t.tags ?? []) set.add(tag);
+    }
+    return [...set].sort((a, b) => a.localeCompare(b));
+  }, [inboxThreads]);
+
   const filteredThreads = inboxThreads.filter((thread) => {
     const channel = contactChannel(thread);
     const matchesChannel = channel === channelFilter;
@@ -629,7 +663,12 @@ export const InboxView: React.FC = () => {
       (thread.phone || '').toLowerCase().includes(q) ||
       (thread.lastMessage || '').toLowerCase().includes(q);
 
-    if (!matchesChannel || !matchesScope || !matchesSearch) return false;
+    const matchesTags =
+      tagFilter.length === 0 || tagFilter.some((tag) => thread.tags?.includes(tag));
+    const matchesFavorite = !favoritesOnly || thread.isFavorite;
+
+    if (!matchesChannel || !matchesScope || !matchesSearch || !matchesTags || !matchesFavorite)
+      return false;
 
     if (filterTab === 'mine') {
       return assignedToByConversationId[thread.conversationId] === `user:${currentUserId}`;
@@ -637,8 +676,87 @@ export const InboxView: React.FC = () => {
     if (filterTab === 'unassigned') {
       return !assignedToByConversationId[thread.conversationId];
     }
+    if (filterTab === 'unread') {
+      return thread.unreadCount > 0;
+    }
     return true;
   });
+
+  // Selections are only meaningful against the currently-visible list — drop
+  // them when the list itself changes scope, so a bulk action never silently
+  // fires against chats the user can no longer see.
+  useEffect(() => {
+    setSelectedThreadIds(new Set());
+  }, [channelFilter, filterTab, tagFilter, favoritesOnly]);
+
+  const toggleThreadSelected = (conversationId: string) => {
+    setSelectedThreadIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(conversationId)) next.delete(conversationId);
+      else next.add(conversationId);
+      return next;
+    });
+  };
+
+  const selectedThreadsList = filteredThreads.filter((t) => selectedThreadIds.has(t.conversationId));
+
+  const runBatchAssign = async (assigneeType: 'journey' | 'ai_agent', assigneeId: string) => {
+    setBatchBusy(true);
+    setBatchError(null);
+    let failed = 0;
+    for (const convId of selectedThreadIds) {
+      const ok = await persistConversation({ assigneeType, assigneeId }, convId);
+      if (!ok) failed += 1;
+    }
+    setBatchBusy(false);
+    setBatchConfirm(null);
+    setSelectedThreadIds(new Set());
+    if (failed > 0) setBatchError(`${failed} of ${selectedThreadsList.length} chats failed to update.`);
+  };
+
+  const runBatchTag = async (tag: string) => {
+    const trimmed = tag.trim();
+    if (!trimmed) return;
+    setBatchBusy(true);
+    setBatchError(null);
+    const succeededIds = new Set<string>();
+    for (const thread of selectedThreadsList) {
+      try {
+        const nextTags = thread.tags.includes(trimmed) ? thread.tags : [...thread.tags, trimmed];
+        await api.updateContact(thread.id, { tags: nextTags });
+        succeededIds.add(thread.conversationId);
+      } catch {
+        // left out of succeededIds — surfaced via the failed count below
+      }
+    }
+    setInboxThreads((prev) =>
+      prev.map((t) =>
+        succeededIds.has(t.conversationId) && !t.tags.includes(trimmed)
+          ? { ...t, tags: [...t.tags, trimmed] }
+          : t
+      )
+    );
+    const failed = selectedThreadsList.length - succeededIds.size;
+    setBatchBusy(false);
+    setBatchSheetOpen(false);
+    setBatchTagInput('');
+    setSelectedThreadIds(new Set());
+    if (failed > 0) setBatchError(`${failed} of ${selectedThreadsList.length} chats failed to tag.`);
+  };
+
+  const runBatchResolve = async () => {
+    setBatchBusy(true);
+    setBatchError(null);
+    let failed = 0;
+    for (const convId of selectedThreadIds) {
+      const ok = await persistConversation({ status: 'resolved' }, convId);
+      if (!ok) failed += 1;
+    }
+    setBatchBusy(false);
+    setBatchSheetOpen(false);
+    setSelectedThreadIds(new Set());
+    if (failed > 0) setBatchError(`${failed} of ${selectedThreadsList.length} chats failed to resolve.`);
+  };
 
   const selectedThread =
     filteredThreads.find((t) => t.conversationId === selectedConversationId) ?? undefined;
@@ -729,6 +847,10 @@ export const InboxView: React.FC = () => {
 
   useEffect(() => {
     if (loading) return;
+    // Unread is a review list, not a navigation tab — auto-selecting the first
+    // match would mark it read and drop it from the list, which re-triggers this
+    // effect on the next one and cascades through marking every unread chat read.
+    if (filterTab === 'unread') return;
     if (!filteredThreads.length) {
       if (selectedConversationId) setSelectedConversationId('');
       return;
@@ -736,7 +858,7 @@ export const InboxView: React.FC = () => {
     if (!filteredThreads.some((t) => t.conversationId === selectedConversationId)) {
       setSelectedConversationId(filteredThreads[0].conversationId);
     }
-  }, [loading, filteredThreads, selectedConversationId]);
+  }, [loading, filteredThreads, selectedConversationId, filterTab]);
 
   const sumUnreadForNav = useCallback(
     (threads: InboxThread[], activeConversationId: string) =>
@@ -762,6 +884,18 @@ export const InboxView: React.FC = () => {
       return next;
     });
   }, [sumUnreadForNav, isLargeUp]);
+
+  const toggleFavorite = useCallback((conversationId: string, next: boolean) => {
+    setInboxThreads((prev) =>
+      prev.map((t) => (t.conversationId === conversationId ? { ...t, isFavorite: next } : t))
+    );
+    api.updateConversation(conversationId, { isFavorite: next }).catch((err) => {
+      console.error('Failed to update favorite', err);
+      setInboxThreads((prev) =>
+        prev.map((t) => (t.conversationId === conversationId ? { ...t, isFavorite: !next } : t))
+      );
+    });
+  }, []);
 
   const loadConversations = useCallback(async (options?: { silent?: boolean }) => {
     if (!options?.silent) {
@@ -1316,13 +1450,16 @@ export const InboxView: React.FC = () => {
     scrollToBottom();
   }, [activeHistory]);
 
-  const persistConversation = async (patch: {
-    status?: string;
-    assigneeType?: string | null;
-    assigneeId?: string | null;
-  }) => {
-    if (!selectedThread) return;
-    const convId = selectedThread.conversationId;
+  const persistConversation = async (
+    patch: {
+      status?: string;
+      assigneeType?: string | null;
+      assigneeId?: string | null;
+    },
+    conversationId?: string
+  ): Promise<boolean> => {
+    const convId = conversationId ?? selectedThread?.conversationId;
+    if (!convId) return false;
     try {
       const updated = (await api.updateConversation(convId, patch)) as Record<string, unknown>;
       const assigneeValue = encodeAssigneeFromConv(updated);
@@ -1352,9 +1489,11 @@ export const InboxView: React.FC = () => {
       if (patch.assigneeType === 'journey') {
         setJourneyProgressRefresh((n) => n + 1);
       }
+      return true;
     } catch (err) {
       console.error(err);
       setSendError(err instanceof Error ? err.message : 'Failed to update assignment');
+      return false;
     }
   };
 
@@ -2078,28 +2217,6 @@ export const InboxView: React.FC = () => {
           <div
             className="flex min-w-0 gap-1 rounded-xl bg-surface-muted p-1 ring-1 ring-swiss-line"
             role="tablist"
-            aria-label="Filter conversations"
-          >
-            {FILTER_TABS.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                role="tab"
-                aria-selected={filterTab === tab.id}
-                onClick={() => setFilterTab(tab.id)}
-                className={`flex-1 cursor-pointer rounded-lg py-1.5 text-xs font-bold transition-colors duration-200 ${
-                  filterTab === tab.id
-                    ? 'bg-white text-primary ring-1 ring-primary/15'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-          <div
-            className="flex min-w-0 gap-1 rounded-xl bg-surface-muted p-1 ring-1 ring-swiss-line"
-            role="tablist"
             aria-label="Channel"
           >
             {visibleChannelTabs.map((tab) => {
@@ -2159,20 +2276,56 @@ export const InboxView: React.FC = () => {
               </button>
             ) : null}
           </div>
-          <label className="relative block">
-            <span className="sr-only">Search conversations</span>
-            <Search
-              className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400"
-              aria-hidden
-            />
-            <Input
-              type="search"
-              value={listSearch}
-              onChange={(e) => setListSearch(e.target.value)}
-              placeholder="Search conversations…"
-              className="h-auto min-h-10 cursor-text rounded-xl border-swiss-line bg-surface-muted py-2 pl-8 pr-3 text-sm font-medium text-swiss-ink outline-none transition-colors duration-200 placeholder:text-slate-400 focus-visible:border-primary/40 focus-visible:ring-2 focus-visible:ring-primary/15"
-            />
-          </label>
+          <div className="flex gap-2">
+            <label className="relative block flex-1 min-w-0">
+              <span className="sr-only">Search conversations</span>
+              <Search
+                className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400"
+                aria-hidden
+              />
+              <Input
+                type="search"
+                value={listSearch}
+                onChange={(e) => setListSearch(e.target.value)}
+                placeholder="Search conversations…"
+                className="h-auto min-h-10 cursor-text rounded-xl border-swiss-line bg-surface-muted py-2 pl-8 pr-3 text-sm font-medium text-swiss-ink outline-none transition-colors duration-200 placeholder:text-slate-400 focus-visible:border-primary/40 focus-visible:ring-2 focus-visible:ring-primary/15"
+              />
+            </label>
+            <div className="relative shrink-0">
+              <button
+                type="button"
+                onClick={() => setFilterPanelOpen(true)}
+                aria-label="Filter conversations"
+                title="Filter conversations"
+                className={`relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border transition-colors duration-200 ${
+                  filterTab !== 'all' || tagFilter.length > 0 || favoritesOnly
+                    ? 'border-primary/30 bg-primary/10 text-primary'
+                    : 'border-swiss-line bg-surface-muted text-slate-600 hover:bg-white'
+                }`}
+              >
+                <SlidersHorizontal className="h-4 w-4" aria-hidden />
+                {(filterTab !== 'all' || tagFilter.length > 0 || favoritesOnly) && (
+                  <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-black text-white">
+                    {(filterTab !== 'all' ? 1 : 0) + tagFilter.length + (favoritesOnly ? 1 : 0)}
+                  </span>
+                )}
+              </button>
+            </div>
+            {selectedThreadIds.size > 0 && (
+              <button
+                type="button"
+                onClick={() => setBatchSheetOpen(true)}
+                aria-label="Batch actions"
+                title="Batch actions"
+                className="relative flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-primary/30 bg-primary/10 text-primary transition-colors duration-200"
+              >
+                <ListChecks className="h-4 w-4" aria-hidden />
+                <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-black text-white">
+                  {selectedThreadIds.size}
+                </span>
+              </button>
+            )}
+          </div>
         </div>
 
         {channelFilter === 'instagram' &&
@@ -2255,6 +2408,25 @@ export const InboxView: React.FC = () => {
                   }`}
                 >
                   <div className="flex items-start gap-2.5 min-w-0">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleThreadSelected(thread.conversationId);
+                      }}
+                      aria-label={
+                        selectedThreadIds.has(thread.conversationId) ? 'Deselect chat' : 'Select chat'
+                      }
+                      className={`mt-2 flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors duration-200 ${
+                        selectedThreadIds.has(thread.conversationId)
+                          ? 'border-primary bg-primary text-white'
+                          : 'border-swiss-line bg-white'
+                      }`}
+                    >
+                      {selectedThreadIds.has(thread.conversationId) && (
+                        <Check className="h-3 w-3" aria-hidden />
+                      )}
+                    </button>
                     <div className="relative shrink-0">
                       {thread.avatar ? (
                         <img
@@ -2274,10 +2446,7 @@ export const InboxView: React.FC = () => {
                           thread.avatar ? 'hidden' : ''
                         }`}
                       >
-                        {thread.name
-                          .split(' ')
-                          .map((n) => n[0])
-                          .join('')}
+                        {initialsFor(thread.name)}
                       </div>
                       <span
                         className={`absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-white ring-2 ring-white ${
@@ -2355,6 +2524,22 @@ export const InboxView: React.FC = () => {
                             return null;
                           })()}
                         </div>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleFavorite(thread.conversationId, !thread.isFavorite);
+                          }}
+                          className={`shrink-0 rounded-full p-0.5 transition-colors duration-200 ${
+                            thread.isFavorite
+                              ? 'text-amber-400'
+                              : 'text-transparent group-hover:text-slate-300 hover:text-amber-400!'
+                          }`}
+                          title={thread.isFavorite ? 'Remove from favorites' : 'Mark as favorite'}
+                          aria-label={thread.isFavorite ? 'Remove from favorites' : 'Mark as favorite'}
+                        >
+                          <Star className="h-3.5 w-3.5" fill="currentColor" />
+                        </button>
                         <span
                           className={`shrink-0 font-mono text-meta font-bold leading-none ${
                             unread ? 'text-primary' : 'text-swiss-faint'
@@ -2462,10 +2647,7 @@ export const InboxView: React.FC = () => {
                       selectedContact.avatar ? 'hidden' : ''
                     }`}
                   >
-                    {selectedContact.name
-                      .split(' ')
-                      .map((n) => n[0])
-                      .join('')}
+                    {initialsFor(selectedContact.name)}
                   </div>
                 </div>
                 <div className="ml-3 min-w-0">
@@ -3017,6 +3199,374 @@ export const InboxView: React.FC = () => {
         onClose={() => setDeleteConfirmOpen(false)}
         onConfirm={() => void confirmDeleteConversation()}
       />
+
+      <AnimatePresence>
+        {filterPanelOpen && (
+          <>
+            <motion.button
+              type="button"
+              aria-label="Close"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-gray-900/40 z-40"
+              onClick={() => setFilterPanelOpen(false)}
+            />
+            <motion.aside
+              role="dialog"
+              aria-labelledby="inbox-filters-title"
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+              className="fixed top-0 right-0 h-full w-full max-w-[360px] bg-white border-l border-swiss-line z-50 flex flex-col shadow-2xl"
+            >
+              <div className="flex items-center justify-between px-5 py-4 border-b border-swiss-line shrink-0">
+                <h2 id="inbox-filters-title" className="text-base font-bold text-swiss-ink">
+                  Filter conversations
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setFilterPanelOpen(false)}
+                  className="p-1.5 rounded-lg text-swiss-faint hover:text-swiss-ink hover:bg-gray-100"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="flex-1 min-h-0 overflow-y-auto px-5 py-4 space-y-5">
+                <div>
+                  <p className="mb-2 text-[11px] font-black uppercase tracking-wide text-slate-400">
+                    Status
+                  </p>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {FILTER_TABS.map((tab) => (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => setFilterTab(tab.id)}
+                        className={`cursor-pointer rounded-lg px-3 py-2 text-sm font-bold transition-colors duration-200 ${
+                          filterTab === tab.id
+                            ? 'bg-primary/10 text-primary ring-1 ring-primary/20'
+                            : 'text-slate-600 hover:bg-surface-muted'
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="flex items-center justify-between rounded-lg px-1 py-1 cursor-pointer">
+                    <span className="flex items-center gap-2 text-sm font-bold text-swiss-ink">
+                      <Star className="h-4 w-4 text-amber-400" fill="currentColor" aria-hidden />
+                      Favorites only
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={favoritesOnly}
+                      onChange={(e) => setFavoritesOnly(e.target.checked)}
+                      className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary/30"
+                    />
+                  </label>
+                </div>
+
+                {availableTags.length > 0 && (
+                  <div>
+                    <div className="mb-2 flex items-center justify-between">
+                      <p className="text-[11px] font-black uppercase tracking-wide text-slate-400">
+                        Tags
+                      </p>
+                      {tagFilter.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setTagFilter([])}
+                          className="cursor-pointer text-xs font-bold text-primary hover:underline"
+                        >
+                          Clear
+                        </button>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {availableTags.map((tag) => {
+                        const checked = tagFilter.includes(tag);
+                        return (
+                          <button
+                            key={tag}
+                            type="button"
+                            onClick={() =>
+                              setTagFilter((prev) =>
+                                prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+                              )
+                            }
+                            aria-pressed={checked}
+                            className={`cursor-pointer rounded-full border px-3 py-1.5 text-xs font-bold transition-colors duration-200 ${
+                              checked
+                                ? 'border-primary bg-primary text-white'
+                                : 'border-swiss-line bg-white text-slate-600 hover:bg-surface-muted'
+                            }`}
+                          >
+                            {tag}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="shrink-0 flex justify-between gap-2 border-t border-swiss-line px-5 py-3 bg-white">
+                <button
+                  type="button"
+                  disabled={filterTab === 'all' && tagFilter.length === 0 && !favoritesOnly}
+                  onClick={() => {
+                    setFilterTab('all');
+                    setTagFilter([]);
+                    setFavoritesOnly(false);
+                  }}
+                  className="rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-surface-muted disabled:opacity-40"
+                >
+                  Clear all
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFilterPanelOpen(false)}
+                  className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-white hover:bg-primary-hover"
+                >
+                  Done
+                </button>
+              </div>
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {batchSheetOpen && selectedThreadIds.size > 0 && (
+          <>
+            <motion.button
+              type="button"
+              aria-label="Close"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-gray-900/40 z-40"
+              onClick={() => setBatchSheetOpen(false)}
+            />
+            <motion.aside
+              role="dialog"
+              aria-labelledby="inbox-batch-actions-title"
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+              className="fixed top-0 right-0 h-full w-full max-w-[360px] bg-white border-l border-swiss-line z-50 flex flex-col shadow-2xl"
+            >
+              <div className="flex items-center justify-between px-5 py-4 border-b border-swiss-line shrink-0">
+                <h2 id="inbox-batch-actions-title" className="text-base font-bold text-swiss-ink">
+                  {selectedThreadIds.size} chat{selectedThreadIds.size === 1 ? '' : 's'} selected
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setBatchSheetOpen(false)}
+                  className="p-1.5 rounded-lg text-swiss-faint hover:text-swiss-ink hover:bg-gray-100"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="flex-1 min-h-0 overflow-y-auto px-5 py-4 space-y-5">
+                <div>
+                  <p className="mb-2 text-[11px] font-black uppercase tracking-wide text-slate-400">
+                    Assign automation
+                  </p>
+                  {publishedWhatsAppJourneys.length === 0 ? (
+                    <p className="text-xs text-slate-400">No published automations</p>
+                  ) : (
+                    <ul className="space-y-1">
+                      {publishedWhatsAppJourneys.map((j) => (
+                        <li key={j.id}>
+                          <button
+                            type="button"
+                            disabled={batchBusy}
+                            onClick={() => {
+                              setBatchSheetOpen(false);
+                              setBatchConfirm({ kind: 'automation', id: j.id, name: j.name });
+                            }}
+                            className="block w-full cursor-pointer truncate rounded-lg px-3 py-2.5 text-left text-sm font-medium text-swiss-ink hover:bg-surface-muted disabled:opacity-50"
+                          >
+                            {j.name}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                <div>
+                  <p className="mb-2 text-[11px] font-black uppercase tracking-wide text-slate-400">
+                    Assign AI agent
+                  </p>
+                  {aiAgents.length === 0 ? (
+                    <p className="text-xs text-slate-400">No AI agents</p>
+                  ) : (
+                    <ul className="space-y-1">
+                      {aiAgents.map((a) => (
+                        <li key={a.id}>
+                          <button
+                            type="button"
+                            disabled={batchBusy}
+                            onClick={() => {
+                              setBatchSheetOpen(false);
+                              setBatchConfirm({ kind: 'agent', id: a.id, name: a.name });
+                            }}
+                            className="block w-full cursor-pointer truncate rounded-lg px-3 py-2.5 text-left text-sm font-medium text-swiss-ink hover:bg-surface-muted disabled:opacity-50"
+                          >
+                            {a.name}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                <div>
+                  <p className="mb-2 text-[11px] font-black uppercase tracking-wide text-slate-400">
+                    Add tag
+                  </p>
+                  <Input
+                    type="text"
+                    value={batchTagInput}
+                    onChange={(e) => setBatchTagInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') void runBatchTag(batchTagInput);
+                    }}
+                    placeholder="Tag name…"
+                    className="h-auto w-full rounded-lg border-swiss-line px-3 py-2 text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-primary/15"
+                  />
+                  {availableTags.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {availableTags.map((tag) => (
+                        <button
+                          key={tag}
+                          type="button"
+                          disabled={batchBusy}
+                          onClick={() => void runBatchTag(tag)}
+                          className="cursor-pointer rounded-full border border-swiss-line bg-white px-3 py-1.5 text-xs font-bold text-slate-600 hover:bg-surface-muted disabled:opacity-50"
+                        >
+                          {tag}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    disabled={!batchTagInput.trim() || batchBusy}
+                    onClick={() => void runBatchTag(batchTagInput)}
+                    className="mt-2 w-full cursor-pointer rounded-lg bg-primary px-3 py-2 text-sm font-bold text-white disabled:opacity-50"
+                  >
+                    Apply
+                  </button>
+                </div>
+
+                <div>
+                  <p className="mb-2 text-[11px] font-black uppercase tracking-wide text-slate-400">
+                    Status
+                  </p>
+                  <button
+                    type="button"
+                    disabled={batchBusy}
+                    onClick={() => void runBatchResolve()}
+                    className="w-full cursor-pointer rounded-lg border border-swiss-line bg-surface-muted px-3 py-2.5 text-left text-sm font-bold text-slate-700 hover:bg-white disabled:opacity-50"
+                  >
+                    Mark resolved
+                  </button>
+                </div>
+
+                {batchError && (
+                  <p className="text-xs font-semibold text-red-600">{batchError}</p>
+                )}
+              </div>
+
+              <div className="shrink-0 flex items-center justify-between gap-2 border-t border-swiss-line px-5 py-3 bg-white">
+                <button
+                  type="button"
+                  disabled={batchBusy}
+                  onClick={() => {
+                    setSelectedThreadIds(new Set());
+                    setBatchSheetOpen(false);
+                  }}
+                  className="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-surface-muted disabled:opacity-50"
+                >
+                  Clear selection
+                </button>
+                {batchBusy && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
+              </div>
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
+
+      {batchConfirm && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
+          <div
+            className="w-full max-w-sm bg-white border border-swiss-line shadow-xl"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="batch-assign-confirm-title"
+          >
+            <div className="flex items-center justify-between border-b border-swiss-line px-5 py-3">
+              <h4 id="batch-assign-confirm-title" className="text-sm font-bold text-slate-900">
+                Assign to {selectedThreadIds.size} chats
+              </h4>
+              <button
+                type="button"
+                onClick={() => setBatchConfirm(null)}
+                disabled={batchBusy}
+                className="cursor-pointer rounded-lg p-1 text-slate-500 hover:bg-slate-100 disabled:opacity-50"
+                aria-label="Close"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="px-5 py-4">
+              <p className="text-sm text-slate-600">
+                {batchConfirm.kind === 'automation' ? 'Automation' : 'AI agent'}{' '}
+                <span className="font-semibold text-slate-900">{batchConfirm.name}</span> will be
+                assigned to all {selectedThreadIds.size} selected chats.{' '}
+                {batchConfirm.kind === 'automation'
+                  ? 'This starts the automation immediately for each one, sending its first message right away.'
+                  : 'The agent will pick up and reply to each chat right away.'}
+              </p>
+            </div>
+            <div className="flex gap-2 border-t border-swiss-line px-5 py-3">
+              <button
+                type="button"
+                disabled={batchBusy}
+                onClick={() => setBatchConfirm(null)}
+                className="flex-1 cursor-pointer rounded-lg border border-swiss-line px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={batchBusy}
+                onClick={() =>
+                  void runBatchAssign(
+                    batchConfirm.kind === 'automation' ? 'journey' : 'ai_agent',
+                    batchConfirm.id
+                  )
+                }
+                className="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-primary px-3 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover disabled:opacity-60"
+              >
+                {batchBusy && <Loader2 className="h-4 w-4 animate-spin" />}
+                {batchBusy ? 'Assigning…' : 'Assign'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <InboxNewChatPicker
         open={newChatOpen}

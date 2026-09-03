@@ -3,6 +3,7 @@
  * Create New → choose channel → name dialog → existing builder routes.
  */
 import { useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import {
@@ -81,7 +82,7 @@ function ChannelChooserDialog({
   onPick: (channel: Channel | 'whatsapp-gallery') => void;
   instagramAllowed: boolean;
 }) {
-  return (
+  return createPortal(
     <AnimatePresence>
       {open ? (
         <motion.div
@@ -160,7 +161,8 @@ function ChannelChooserDialog({
           </motion.div>
         </motion.div>
       ) : null}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }
 

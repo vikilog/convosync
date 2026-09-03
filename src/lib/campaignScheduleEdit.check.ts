@@ -4,6 +4,7 @@
  */
 import assert from 'node:assert/strict';
 import {
+  isFailedCampaignRelaunchable,
   isScheduledCampaignEditable,
   minScheduleTimeFor,
   SCHEDULED_CAMPAIGN_EDIT_LEAD_MS,
@@ -47,6 +48,31 @@ assert.deepEqual(seed.segmentIds, ['tag:vip', 'tag:leads']);
 assert.equal(seed.templateId, 't1');
 assert.equal(seed.variableMappings['1'], 'first_name');
 assert.equal(wizardSeedFromCampaignDetail({ ...seed!, scheduledAt: null, segmentIds: [] }), null);
+
+assert.equal(isFailedCampaignRelaunchable('failed'), true);
+assert.equal(isFailedCampaignRelaunchable('Failed'), true);
+assert.equal(isFailedCampaignRelaunchable('scheduled'), false);
+assert.equal(isFailedCampaignRelaunchable(null), false);
+
+// A failed campaign with no schedule (sent immediately) still seeds — relaunch
+// isn't gated on having had a schedule.
+const failedSeed = wizardSeedFromCampaignDetail({
+  status: 'failed',
+  channel: 'whatsapp',
+  audienceType: 'all',
+  segmentIds: [],
+  template: { id: 't2', name: 'retry-me' },
+  variableMappings: {},
+  headerMediaStorageKey: null,
+  headerMediaMimeType: null,
+  headerMediaFileName: null,
+  headerMediaAssetId: null,
+  name: 'Failed campaign',
+  scheduledAt: null,
+});
+assert.ok(failedSeed);
+assert.equal(failedSeed.scheduledAt, null);
+assert.equal(failedSeed.templateId, 't2');
 
 // todayLocal must always be "today", even late at night — this is what
 // previously broke: the date <input> min used defaultScheduleLocal() (now +

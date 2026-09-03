@@ -115,7 +115,7 @@ export function InboxAssigneePicker({
         }}
         className="flex items-center gap-1 bg-transparent border-none text-sm font-bold text-swiss-ink focus:ring-0 outline-none p-0 cursor-pointer max-w-[180px]"
       >
-        <span className="truncate">{displayLabel}</span>
+        <span className="min-w-0 truncate">{displayLabel}</span>
         <ChevronDown
           className={`w-3.5 h-3.5 text-swiss-faint shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}
         />

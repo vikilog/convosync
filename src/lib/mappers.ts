@@ -130,6 +130,7 @@ export function mapContactFromApi(raw: Record<string, unknown>, conv?: Record<st
     avatar: raw.avatar as string | undefined,
     lastActive: formatInboxListTime((conv?.lastMessageAt as string) || (raw.updatedAt as string)),
     unreadCount: Number(conv?.unreadCount ?? 0),
+    isFavorite: Boolean(conv?.isFavorite),
     lastMessage: String(conv?.lastMessage ?? ''),
     status: capitalizeStatus(String(conv?.status ?? 'open')),
     assignedAgent: assigneeDisplayFromConv(conv),
@@ -734,6 +735,12 @@ export function mapCampaignDetailFromApi(raw: Record<string, unknown>): Campaign
       typeof filter.headerMediaFileName === 'string' ? filter.headerMediaFileName : null,
     headerMediaAssetId:
       typeof filter.headerMediaAssetId === 'string' ? filter.headerMediaAssetId : null,
+    replyHandling:
+      filter.replyHandling === 'journey' || filter.replyHandling === 'ai_agent'
+        ? filter.replyHandling
+        : null,
+    replyJourneyId: typeof filter.replyJourneyId === 'string' ? filter.replyJourneyId : null,
+    replyAgentId: typeof filter.replyAgentId === 'string' ? filter.replyAgentId : null,
     insights,
     analytics,
     recipients,

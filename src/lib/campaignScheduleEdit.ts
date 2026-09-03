@@ -17,6 +17,11 @@ export function isScheduledCampaignEditable(
   return t - now > SCHEDULED_CAMPAIGN_EDIT_LEAD_MS;
 }
 
+/** A failed campaign can always be edited and relaunched, regardless of schedule. */
+export function isFailedCampaignRelaunchable(status: string | null | undefined): boolean {
+  return (status ?? '').toLowerCase() === 'failed';
+}
+
 /** Wizard fields hydrated from a scheduled campaign for full edit. */
 export type ScheduledWizardSeed = {
   channel: 'whatsapp' | 'email' | 'instagram';
@@ -31,11 +36,16 @@ export type ScheduledWizardSeed = {
   headerMediaMimeType: string | null;
   headerMediaFileName: string | null;
   headerMediaAssetId: string | null;
+  replyHandling: 'default' | 'journey' | 'ai_agent';
+  replyJourneyId: string | null;
+  replyAgentId: string | null;
   name: string;
-  scheduledAt: string;
+  /** null for a failed campaign that was never scheduled (sent immediately). */
+  scheduledAt: string | null;
 };
 
 export function wizardSeedFromCampaignDetail(detail: {
+  status?: string | null;
   channel: string;
   audienceType: string;
   segmentIds: string[];
@@ -46,10 +56,15 @@ export function wizardSeedFromCampaignDetail(detail: {
   headerMediaMimeType: string | null;
   headerMediaFileName: string | null;
   headerMediaAssetId: string | null;
+  replyHandling?: 'default' | 'journey' | 'ai_agent' | null;
+  replyJourneyId?: string | null;
+  replyAgentId?: string | null;
   name: string;
   scheduledAt: string | null;
 }): ScheduledWizardSeed | null {
-  if (!detail.scheduledAt) return null;
+  // A scheduled campaign always has a schedule to edit; a failed campaign is
+  // editable/relaunchable even without one (it may have been sent immediately).
+  if (!detail.scheduledAt && !isFailedCampaignRelaunchable(detail.status)) return null;
   const audienceType =
     detail.audienceType === 'all' || detail.segmentIds.some((id) => id === 'all')
       ? 'all'
@@ -67,6 +82,11 @@ export function wizardSeedFromCampaignDetail(detail: {
     headerMediaMimeType: detail.headerMediaMimeType,
     headerMediaFileName: detail.headerMediaFileName,
     headerMediaAssetId: detail.headerMediaAssetId,
+    replyHandling: detail.replyHandling === 'journey' || detail.replyHandling === 'ai_agent'
+      ? detail.replyHandling
+      : 'default',
+    replyJourneyId: detail.replyJourneyId ?? null,
+    replyAgentId: detail.replyAgentId ?? null,
     name: detail.name,
     scheduledAt: detail.scheduledAt,
   };
