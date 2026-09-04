@@ -50,7 +50,7 @@ function Sparkline({ values }: { values: number[] }) {
  */
 export function DashboardStatRail({ stats }: { stats: DashboardStat[] }) {
   return (
-    <div className="grid grid-cols-1 gap-px overflow-hidden border-y border-swiss-line bg-swiss-line sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-px overflow-hidden rounded-[12px] border border-swiss-line bg-swiss-line sm:grid-cols-2 lg:grid-cols-3">
       {stats.map((stat) => (
         <div key={stat.key} className="bg-white px-5 py-5">
           <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-swiss-muted">

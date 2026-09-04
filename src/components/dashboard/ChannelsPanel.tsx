@@ -62,10 +62,7 @@ export const ChannelsPanel: React.FC<ChannelsPanelProps> = ({
 }) => {
   return (
     <div className="flex h-full flex-col font-swiss">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-swiss-muted">
-        Channels
-      </p>
-      <p className="mb-3 text-[11px] text-swiss-faint">What's connected, and what your plan allows</p>
+      <p className="mb-3 text-[13.5px] font-bold text-swiss-ink">Channels</p>
 
       <ul className="divide-y divide-swiss-line">
         {channels.map((channel) => {

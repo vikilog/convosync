@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400&family=Work+Sans:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400&family=Work+Sans:wght@300;400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -80,12 +80,14 @@
   --color-surface-muted: #eae9e6;
 
   /* Swiss Minimal direction — layout/type only; accent follows the logo-accurate green above. */
-  --font-swiss: "Work Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-swiss: "Manrope", ui-sans-serif, system-ui, sans-serif;
   --color-swiss-ink: #111111;
   --color-swiss-muted: #8a8a8a;
   --color-swiss-faint: #c4c4c4;
   --color-swiss-line: #e4e4e4;
-  --color-swiss-accent: #078038;
+  --color-swiss-accent: #064e3b;
+  --color-swiss-accent-soft: #e8f0ec;
+  --color-swiss-accent-hover: #053d2e;
 }
 
 html {

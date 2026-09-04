@@ -462,7 +462,7 @@ export const TemplatesView: React.FC = () => {
   };
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-3 animate-scale-up">
+    <div className="flex h-full min-h-0 flex-col gap-3 animate-scale-up font-swiss">
       <div className="flex shrink-0 flex-wrap gap-2">
         {whatsappConnected && (
           <button
@@ -484,7 +484,7 @@ export const TemplatesView: React.FC = () => {
             onClick={() => navigate(pathForTemplatesList('email'))}
             className={`px-3 py-2 rounded-xl text-sm font-bold border inline-flex items-center gap-1.5 ${
               channel === 'email'
-                ? 'bg-primary text-white border-primary'
+                ? 'bg-swiss-accent text-white border-swiss-accent'
                 : 'bg-white text-swiss-ink border-swiss-line'
             }`}
           >
@@ -497,7 +497,7 @@ export const TemplatesView: React.FC = () => {
           onClick={() => navigate(pathForTemplatesList('canned'))}
           className={`px-3 py-2 rounded-xl text-sm font-bold border inline-flex items-center gap-1.5 ${
             channel === 'canned'
-              ? 'bg-primary text-white border-primary'
+              ? 'bg-swiss-accent text-white border-swiss-accent'
               : 'bg-white text-swiss-ink border-swiss-line'
           }`}
         >
@@ -510,7 +510,7 @@ export const TemplatesView: React.FC = () => {
             onClick={() => navigate(pathForTemplatesList('flow'))}
             className={`px-3 py-2 rounded-xl text-sm font-bold border inline-flex items-center gap-1.5 ${
               channel === 'flow'
-                ? 'bg-primary text-white border-primary'
+                ? 'bg-swiss-accent text-white border-swiss-accent'
                 : 'bg-white text-swiss-ink border-swiss-line'
             }`}
           >
@@ -525,7 +525,7 @@ export const TemplatesView: React.FC = () => {
         <button
           type="button"
           onClick={() => navigate(pathForTab('automations'))}
-          className="cursor-pointer font-semibold text-primary underline-offset-2 hover:underline"
+          className="cursor-pointer font-semibold text-swiss-accent underline-offset-2 hover:underline"
         >
           Open Automations
         </button>
@@ -551,7 +551,7 @@ export const TemplatesView: React.FC = () => {
       <div className="p-4 bg-white border border-swiss-line flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-2.5">
           {channel === 'whatsapp' && (
-            <div className="flex items-center gap-1 bg-slate-50 px-2.5 py-1.5 rounded-xl border border-swiss-line">
+            <div className="flex items-center gap-1 bg-white px-2.5 py-1.5 rounded-xl border border-swiss-line">
               <span className="text-meta font-bold text-swiss-faint mr-1">Category:</span>
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                 <SelectTrigger className="h-auto border-none bg-transparent p-0 text-meta font-bold text-swiss-ink shadow-none focus-visible:ring-0">
@@ -575,7 +575,7 @@ export const TemplatesView: React.FC = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search templates..."
-              className="h-auto rounded-xl border-swiss-line bg-slate-50 py-1.5 pl-9 pr-3 text-meta font-semibold outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
+              className="h-auto rounded-xl border-swiss-line bg-white py-1.5 pl-9 pr-3 text-meta font-semibold outline-none focus-visible:ring-2 focus-visible:ring-swiss-accent/20"
             />
           </div>
         </div>
@@ -600,7 +600,7 @@ export const TemplatesView: React.FC = () => {
             onClick={openCreate}
             className={`px-3 py-2 text-white rounded-xl text-meta font-bold flex items-center gap-1.5 ${
               channel === 'email'
-                ? 'bg-primary hover:bg-primary-hover'
+                ? 'bg-swiss-accent hover:bg-swiss-accent-hover'
                 : 'bg-[#008069] hover:bg-[#006e5b]'
             }`}
           >
@@ -679,7 +679,7 @@ function EmptyState({ channel, onCreate }: { channel: Channel; onCreate: () => v
         onClick={onCreate}
         className={`mt-4 px-4 py-2 text-white rounded-xl text-sm font-bold ${
           channel === 'email' || channel === 'canned'
-            ? 'bg-primary hover:bg-primary-hover'
+            ? 'bg-swiss-accent hover:bg-swiss-accent-hover'
             : 'bg-[#008069]'
         }`}
       >
@@ -743,7 +743,7 @@ function WhatsAppCard({
               title="Refresh status from Meta"
               onClick={(e) => void handleRefresh(e)}
               disabled={refreshing}
-              className="p-1 rounded-md hover:bg-surface-muted text-slate-500 hover:text-primary disabled:opacity-50 cursor-pointer"
+              className="p-1 rounded-md hover:bg-surface-muted text-slate-500 hover:text-swiss-accent disabled:opacity-50 cursor-pointer"
             >
               <RefreshCw className={`w-3 h-3 ${refreshing ? 'animate-spin' : ''}`} />
             </button>
@@ -859,7 +859,7 @@ function EmailCard({
 
   return (
     <div
-      className="bg-white border border-swiss-line p-3 flex flex-col text-left hover:border-primary/30 transition-all cursor-pointer"
+      className="bg-white border border-swiss-line p-3 flex flex-col text-left hover:border-swiss-accent/30 transition-all cursor-pointer"
       onClick={onOpen}
       onKeyDown={(e) => e.key === 'Enter' && onOpen()}
       role="button"
@@ -870,8 +870,8 @@ function EmailCard({
         <span
           className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded border shrink-0 ${
             template.status === 'active'
-              ? 'bg-primary/10 text-primary border-primary/20'
-              : 'bg-gray-50 text-swiss-muted border-gray-200'
+              ? 'bg-swiss-accent/10 text-swiss-accent border-swiss-accent/20'
+              : 'bg-white text-swiss-muted border-gray-200'
           }`}
         >
           {template.status}

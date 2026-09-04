@@ -21,13 +21,13 @@ type Props = {
 
 function TriggerIcon({ event }: { event?: string | null }) {
   if (event === 'contact.created') {
-    return <UserPlus className="h-4 w-4 text-primary" strokeWidth={2.25} />;
+    return <UserPlus className="h-4 w-4 text-swiss-accent" strokeWidth={2.25} />;
   }
   if (event === 'contact.tag_added') {
-    return <Tag className="h-4 w-4 text-primary" strokeWidth={2.25} />;
+    return <Tag className="h-4 w-4 text-swiss-accent" strokeWidth={2.25} />;
   }
   // message.received / conversation.opened / manual → message
-  return <MessageCircle className="h-4 w-4 text-primary" strokeWidth={2.25} />;
+  return <MessageCircle className="h-4 w-4 text-swiss-accent" strokeWidth={2.25} />;
 }
 
 function triggerLabel(event?: string | null) {
@@ -60,7 +60,7 @@ export function JourneyList({
           <button
             type="button"
             onClick={onOpenGallery}
-            className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-sm font-bold text-primary transition-colors hover:bg-primary/10"
+            className="inline-flex items-center gap-2 rounded-full border border-swiss-accent/20 bg-swiss-accent/5 px-4 py-2 text-sm font-bold text-swiss-accent transition-colors hover:bg-swiss-accent/10"
           >
             <LayoutGrid className="h-4 w-4" />
             Gallery
@@ -68,7 +68,7 @@ export function JourneyList({
           <button
             type="button"
             onClick={onCreateBlank}
-            className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-primary-hover"
+            className="inline-flex items-center gap-2 rounded-full bg-swiss-accent px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-swiss-accent-hover"
           >
             <Plus className="h-4 w-4" />
             New journey
@@ -83,7 +83,7 @@ export function JourneyList({
         </div>
       ) : journeys.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-black/10 bg-white p-8 text-center">
-          <Workflow className="mx-auto mb-3 h-7 w-7 text-primary" />
+          <Workflow className="mx-auto mb-3 h-7 w-7 text-swiss-accent" />
           <p className="font-bold text-swiss-ink">No journeys yet</p>
           <p className="mt-1 text-sm text-swiss-muted">
             Browse the gallery for starters, or create a blank journey.
@@ -91,7 +91,7 @@ export function JourneyList({
           <button
             type="button"
             onClick={onOpenGallery}
-            className="mt-3 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-sm font-bold text-primary hover:bg-primary/10"
+            className="mt-3 inline-flex items-center gap-2 rounded-full border border-swiss-accent/20 bg-swiss-accent/5 px-4 py-2 text-sm font-bold text-swiss-accent hover:bg-swiss-accent/10"
           >
             <LayoutGrid className="h-4 w-4" />
             Open gallery
@@ -112,21 +112,21 @@ export function JourneyList({
                   className="flex min-w-0 flex-1 cursor-pointer items-center gap-3 px-3 py-2.5 text-left"
                 >
                   <span
-                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10"
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-swiss-accent/10"
                     title={triggerLabel(j.triggerEvent)}
                   >
                     <TriggerIcon event={j.triggerEvent} />
                   </span>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <h3 className="truncate text-sm font-bold text-gray-950 group-hover:text-primary">
+                      <h3 className="truncate text-sm font-bold text-gray-950 group-hover:text-swiss-accent">
                         {j.name}
                       </h3>
                       <span
                         className={`shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide ${
                           published
-                            ? 'bg-primary/10 text-primary'
-                            : 'bg-gray-100 text-swiss-muted'
+                            ? 'bg-swiss-accent/10 text-swiss-accent'
+                            : 'bg-white text-swiss-muted border border-gray-200'
                         }`}
                       >
                         {j.status}

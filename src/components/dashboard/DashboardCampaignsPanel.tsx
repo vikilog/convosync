@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ArrowUpRight, Mail, MessageCircle, Plus } from 'lucide-react';
 import type { QuickCampaign, QuickCampaignStatus } from '../../types';
 
@@ -10,20 +10,20 @@ interface DashboardCampaignsPanelProps {
   onOpenCampaign?: (id: string) => void;
 }
 
-function statusClass(status: QuickCampaignStatus): string {
+function statusPillClass(status: QuickCampaignStatus): string {
   switch (status) {
     case 'Completed':
-      return 'text-swiss-ink';
+      return 'bg-swiss-line/50 text-swiss-ink';
     case 'Running':
     case 'Active':
     case 'Scheduled':
-      return 'text-swiss-accent';
+      return 'bg-swiss-accent-soft text-swiss-accent';
     case 'Paused':
-      return 'text-swiss-muted';
+      return 'bg-swiss-line/50 text-swiss-muted';
     case 'Failed':
-      return 'text-red-600';
+      return 'bg-red-50 text-red-600';
     case 'Draft':
-      return 'text-swiss-faint';
+      return 'bg-swiss-line/50 text-swiss-faint';
   }
 }
 
@@ -62,23 +62,49 @@ export const DashboardCampaignsPanel: React.FC<DashboardCampaignsPanelProps> = (
   onViewAll,
   onOpenCampaign,
 }) => {
-  const upcomingItems = upcoming.slice(0, 2);
-  const recentItems = recent.slice(0, 3);
+  const upcomingItems = upcoming.slice(0, 4);
+  const recentItems = recent.slice(0, 4);
   const isEmpty = upcomingItems.length === 0 && recentItems.length === 0;
+  const [tab, setTab] = useState<'upcoming' | 'recent'>('upcoming');
+  const activeItems = (tab === 'upcoming' ? upcomingItems : recentItems).map((c) => ({
+    campaign: c,
+    meta: tab === 'upcoming' ? upcomingMeta(c) : recentMeta(c),
+  }));
 
   return (
     <div className="flex h-full flex-col font-swiss">
-      <div className="mb-4 flex items-baseline justify-between">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-swiss-muted">
-          Campaigns
-        </p>
+      <div className="mb-3 flex items-center justify-between">
+        <p className="text-[13.5px] font-bold text-swiss-ink">Campaigns</p>
         <button
           type="button"
-          onClick={onViewAll}
-          className="inline-flex cursor-pointer items-center gap-1 text-[11px] font-medium text-swiss-accent"
+          onClick={onNewCampaign}
+          className="inline-flex cursor-pointer items-center gap-1 rounded-lg bg-swiss-accent px-3 py-1.5 text-[11.5px] font-semibold text-white"
         >
-          View all
-          <ArrowUpRight className="h-3 w-3" />
+          <Plus className="h-3.5 w-3.5" />
+          New
+        </button>
+      </div>
+
+      <div className="mb-1 flex gap-4 border-b border-swiss-line">
+        <button
+          type="button"
+          onClick={() => setTab('upcoming')}
+          className={`cursor-pointer pb-2 text-[12px] font-semibold ${
+            tab === 'upcoming'
+              ? 'border-b-2 border-swiss-accent text-swiss-ink'
+              : 'text-swiss-faint'
+          }`}
+        >
+          Upcoming
+        </button>
+        <button
+          type="button"
+          onClick={() => setTab('recent')}
+          className={`cursor-pointer pb-2 text-[12px] font-semibold ${
+            tab === 'recent' ? 'border-b-2 border-swiss-accent text-swiss-ink' : 'text-swiss-faint'
+          }`}
+        >
+          Recent
         </button>
       </div>
 
@@ -94,12 +120,13 @@ export const DashboardCampaignsPanel: React.FC<DashboardCampaignsPanelProps> = (
             Start your first campaign
           </button>
         </div>
+      ) : activeItems.length === 0 ? (
+        <p className="flex-1 py-6 text-center text-[12px] text-swiss-muted">
+          No {tab} campaigns.
+        </p>
       ) : (
-        <div className="divide-y divide-swiss-line">
-          {[
-            ...upcomingItems.map((c) => ({ campaign: c, meta: upcomingMeta(c) })),
-            ...recentItems.map((c) => ({ campaign: c, meta: recentMeta(c) })),
-          ].map(({ campaign, meta }) => (
+        <div className="flex-1 divide-y divide-swiss-line">
+          {activeItems.map(({ campaign, meta }) => (
             <button
               key={campaign.id}
               type="button"
@@ -112,7 +139,7 @@ export const DashboardCampaignsPanel: React.FC<DashboardCampaignsPanelProps> = (
                 <p className="text-[11px] text-swiss-muted">{meta}</p>
               </div>
               <span
-                className={`shrink-0 text-[10px] font-semibold uppercase tracking-wide ${statusClass(campaign.status)}`}
+                className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${statusPillClass(campaign.status)}`}
               >
                 {campaign.status}
               </span>
@@ -120,6 +147,15 @@ export const DashboardCampaignsPanel: React.FC<DashboardCampaignsPanelProps> = (
           ))}
         </div>
       )}
+
+      <button
+        type="button"
+        onClick={onViewAll}
+        className="mt-3 inline-flex cursor-pointer items-center justify-center gap-1 text-[11.5px] font-semibold text-swiss-accent"
+      >
+        View all campaigns
+        <ArrowUpRight className="h-3 w-3" />
+      </button>
     </div>
   );
 };

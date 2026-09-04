@@ -28,12 +28,10 @@ import {
   Ear,
   UsersRound,
   MessageSquare,
-  Bell,
   Table2,
 } from 'lucide-react';
 import { useSidebar } from '../contexts/SidebarContext';
 import { api, getWorkspaceId } from '../lib/api';
-import { getSocket } from '../lib/socket';
 import { useWorkspaceAccess } from '../hooks/useWorkspaceAccess';
 import {
   GOOGLE_TOOL_META,
@@ -49,7 +47,6 @@ import {
 } from '../lib/inboxEvents';
 import { TEAM_CHAT_UNREAD_TOTAL_EVENT } from '../lib/teamChatEvents';
 import { COMPANY_UPDATED_EVENT } from '../lib/companyEvents';
-import { NotificationsPanel } from './notifications/NotificationsPanel';
 import type { WorkspaceSummary } from './WorkspaceSwitcherDialog';
 
 const SIDEBAR_HIDDEN_TABS = new Set([
@@ -96,40 +93,10 @@ export const SideNavBar: React.FC = () => {
   const [googleToolsOpen, setGoogleToolsOpen] = useState(() =>
     location.pathname.startsWith('/google-tools')
   );
-  const [notifOpen, setNotifOpen] = useState(false);
-  const [notifUnread, setNotifUnread] = useState(0);
-  const [bellAttention, setBellAttention] = useState(false);
   const { collapsed, toggleCollapsed, setCollapsed, mobileOpen, setMobileOpen, toggleMobile, isLargeScreen } =
     useSidebar();
   const sidebarCollapsed = collapsed && isLargeScreen;
   const { canTab } = useWorkspaceAccess();
-
-  const refreshNotifUnread = useCallback(async () => {
-    try {
-      const res = await api.getInAppNotificationUnreadCount();
-      setNotifUnread(res.unread ?? 0);
-    } catch {
-      // ignore
-    }
-  }, []);
-
-  useEffect(() => {
-    if (notifOpen) setBellAttention(false);
-  }, [notifOpen]);
-
-  useEffect(() => {
-    void refreshNotifUnread();
-    const s = getSocket();
-    const onNote = (payload?: { forBell?: boolean }) => {
-      void refreshNotifUnread();
-      if (payload?.forBell === false) return;
-      if (!notifOpen) setBellAttention(true);
-    };
-    s.on('workspace_notification', onNote);
-    return () => {
-      s.off('workspace_notification', onNote);
-    };
-  }, [refreshNotifUnread, activeWorkspace?.id, notifOpen]);
 
   useEffect(() => {
     const wsId = getWorkspaceId();
@@ -302,10 +269,12 @@ export const SideNavBar: React.FC = () => {
     canTab('google-tools');
 
   const navLinkClass = (active: boolean, collapsed: boolean) =>
-    `relative w-full flex items-center font-swiss ${
+    `relative w-full flex items-center rounded-lg font-swiss ${
       collapsed ? 'justify-center px-2 py-2.5' : 'gap-2.5 px-3 py-2'
     } text-[14.5px] transition-colors duration-150 ${
-      active ? 'font-semibold text-swiss-ink' : 'font-normal text-swiss-muted hover:text-swiss-ink'
+      active
+        ? 'bg-swiss-accent-soft font-semibold text-swiss-accent'
+        : 'font-normal text-swiss-muted hover:text-swiss-ink'
     }`;
 
   return (
@@ -440,7 +409,7 @@ export const SideNavBar: React.FC = () => {
                             >
                               <Icon
                                 className={`h-4 w-4 shrink-0 ${
-                                  active ? 'text-swiss-ink' : 'text-swiss-faint'
+                                  active ? 'text-swiss-accent' : 'text-swiss-faint'
                                 }`}
                                 strokeWidth={1.75}
                               />
@@ -487,7 +456,7 @@ export const SideNavBar: React.FC = () => {
                 <div className={`flex items-center ${sidebarCollapsed ? '' : 'gap-2'}`}>
                   <CalendarDays
                     className={`h-4 w-4 shrink-0 ${
-                      isGoogleToolsRoute ? 'text-swiss-ink' : 'text-swiss-faint'
+                      isGoogleToolsRoute ? 'text-swiss-accent' : 'text-swiss-faint'
                     }`}
                     strokeWidth={1.75}
                   />
@@ -514,11 +483,11 @@ export const SideNavBar: React.FC = () => {
                         key={tool}
                         to={toolPath}
                         className={`font-swiss flex w-full items-center gap-2 px-2.5 py-1.5 text-[14.5px] transition-colors ${
-                          isActive ? 'font-semibold text-swiss-ink' : 'text-swiss-muted hover:text-swiss-ink'
+                          isActive ? 'font-semibold text-swiss-accent' : 'text-swiss-muted hover:text-swiss-ink'
                         }`}
                       >
                         <ToolIcon
-                          className={`h-4 w-4 shrink-0 ${isActive ? 'text-swiss-ink' : 'text-swiss-faint'}`}
+                          className={`h-4 w-4 shrink-0 ${isActive ? 'text-swiss-accent' : 'text-swiss-faint'}`}
                           strokeWidth={1.75}
                         />
                         <span>{meta.shortLabel}</span>
@@ -545,7 +514,7 @@ export const SideNavBar: React.FC = () => {
                       <>
                         <Icon
                           className={`h-4 w-4 shrink-0 ${
-                            isActive ? 'text-swiss-ink' : 'text-swiss-faint'
+                            isActive ? 'text-swiss-accent' : 'text-swiss-faint'
                           }`}
                           strokeWidth={1.75}
                         />
@@ -558,45 +527,7 @@ export const SideNavBar: React.FC = () => {
             </div>
           )}
         </nav>
-
-        <div
-          className={`mt-auto space-y-0.5 border-t border-swiss-line ${
-            sidebarCollapsed ? 'p-2' : 'px-2 py-2'
-          }`}
-        >
-          <button
-            type="button"
-            onClick={() => setNotifOpen((v) => !v)}
-            title={sidebarCollapsed ? 'Notifications' : undefined}
-            className={navLinkClass(notifOpen, sidebarCollapsed)}
-            aria-label="Notifications"
-            aria-expanded={notifOpen}
-          >
-            <div className="relative shrink-0">
-              <Bell
-                className={`h-4 w-4 ${notifOpen ? 'text-swiss-ink' : 'text-swiss-faint'}${
-                  bellAttention && !notifOpen ? ' notif-bell-attention' : ''
-                }`}
-                strokeWidth={1.75}
-              />
-              {notifUnread > 0 && (
-                <span
-                  className={`absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full border-2 border-white bg-red-500${
-                    bellAttention && !notifOpen ? ' animate-pulse' : ''
-                  }`}
-                />
-              )}
-            </div>
-            {!sidebarCollapsed && <span>Notifications</span>}
-          </button>
-        </div>
       </aside>
-
-      <NotificationsPanel
-        open={notifOpen}
-        onClose={() => setNotifOpen(false)}
-        onUnreadChange={setNotifUnread}
-      />
     </>
   );
 };

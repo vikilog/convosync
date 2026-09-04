@@ -72,24 +72,39 @@ export const MessagePerformanceChart: React.FC<MessagePerformanceChartProps> = (
 
   return (
     <div className="flex h-full flex-col font-swiss">
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-baseline sm:justify-between">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-swiss-muted">
-          Message performance
-        </p>
-        <div className="inline-flex items-center gap-4">
+      <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-[13.5px] font-bold text-swiss-ink">Message performance</p>
+        <div className="inline-flex items-center gap-0.5 rounded-lg bg-swiss-line/40 p-0.5">
           {ranges.map((range) => (
             <button
               key={range}
               type="button"
               onClick={() => onRangeChange(range)}
-              className={`cursor-pointer text-[11px] font-medium transition-colors ${
-                activeRange === range ? 'text-swiss-accent' : 'text-swiss-faint hover:text-swiss-muted'
+              className={`cursor-pointer rounded-md px-2.5 py-1 text-[11px] font-semibold transition-colors ${
+                activeRange === range
+                  ? 'bg-swiss-accent text-white'
+                  : 'text-swiss-muted hover:text-swiss-ink'
               }`}
             >
-              {range}d
+              {range}D
             </button>
           ))}
         </div>
+      </div>
+
+      <div className="mb-3 flex items-center gap-5 text-[11px] text-swiss-muted">
+        <span className="flex items-center gap-1.5">
+          <span className="h-2 w-2 rounded-full bg-swiss-ink" />
+          Sent
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="h-2 w-2 rounded-full bg-swiss-accent" />
+          Delivered
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="h-2 w-2 rounded-full bg-swiss-faint" />
+          Read
+        </span>
       </div>
 
       <div className="min-h-[240px] flex-1">
@@ -160,21 +175,6 @@ export const MessagePerformanceChart: React.FC<MessagePerformanceChartProps> = (
             </ComposedChart>
           </ResponsiveContainer>
         )}
-      </div>
-
-      <div className="mt-4 flex items-center gap-5 text-[11px] text-swiss-muted">
-        <span className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-swiss-ink" />
-          Sent
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-swiss-accent" />
-          Delivered
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-swiss-faint" />
-          Read
-        </span>
       </div>
     </div>
   );

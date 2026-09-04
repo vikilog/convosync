@@ -226,7 +226,7 @@ export function IgJourneyBuilder({ journey, onBack }: Props) {
   );
 
   return (
-    <div className="ig-automation-module flex h-full min-h-0 flex-col gap-3">
+    <div className="ig-automation-module flex h-full min-h-0 flex-col gap-3 font-swiss">
       <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 rounded-xl border-[0.5px] border-border-subtle bg-white px-4 py-2.5">
         <div className="flex min-w-0 items-center gap-2 text-sm">
           <button

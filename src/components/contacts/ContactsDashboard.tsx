@@ -130,15 +130,15 @@ function StatCard({
   icon: React.ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-primary/15 bg-primary/[0.04] p-4">
+    <div className="rounded-xl border border-swiss-accent/15 bg-swiss-accent/[0.04] p-4">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-primary/70">{label}</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-swiss-accent/70">{label}</p>
           <p className="mt-1 text-2xl font-bold tabular-nums text-slate-900">
             {value.toLocaleString()}
           </p>
         </div>
-        <div className="rounded-lg bg-primary/10 p-2 text-primary">{icon}</div>
+        <div className="rounded-lg bg-swiss-accent/10 p-2 text-swiss-accent">{icon}</div>
       </div>
     </div>
   );
@@ -324,7 +324,7 @@ export const ContactsDashboard: React.FC<{
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-3">
-        <div className="xl:col-span-2 rounded-xl border border-primary/15 bg-primary/[0.03] p-4">
+        <div className="xl:col-span-2 rounded-xl border border-swiss-accent/15 bg-swiss-accent/[0.03] p-4">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <div className="min-w-0 shrink-0">
               <h3 className="text-sm font-bold text-slate-900">New contacts</h3>
@@ -332,7 +332,7 @@ export const ContactsDashboard: React.FC<{
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <div className="inline-flex flex-wrap rounded-lg border border-primary/15 bg-black/[0.03] p-0.5">
+              <div className="inline-flex flex-wrap rounded-lg border border-swiss-accent/15 bg-black/[0.03] p-0.5">
                 {GROWTH_RANGES.map((r) => (
                   <button
                     key={r.id}
@@ -340,8 +340,8 @@ export const ContactsDashboard: React.FC<{
                     onClick={() => setGrowthRange(r.id)}
                     className={`rounded-md px-2.5 py-1 text-[11px] font-semibold transition-colors ${
                       growthRange === r.id
-                        ? 'bg-primary text-white '
-                        : 'text-slate-600 hover:text-primary'
+                        ? 'bg-swiss-accent text-white '
+                        : 'text-slate-600 hover:text-swiss-accent'
                     }`}
                   >
                     {r.label}
@@ -366,7 +366,7 @@ export const ContactsDashboard: React.FC<{
                   />
                 </div>
               )}
-              <p className="text-sm font-bold tabular-nums text-primary">
+              <p className="text-sm font-bold tabular-nums text-swiss-accent">
                 +{growthTotal.toLocaleString()}
               </p>
             </div>
@@ -431,7 +431,7 @@ export const ContactsDashboard: React.FC<{
           </div>
         </div>
 
-        <div className="rounded-xl border border-primary/15 bg-primary/[0.03] p-4">
+        <div className="rounded-xl border border-swiss-accent/15 bg-swiss-accent/[0.03] p-4">
           <h3 className="text-sm font-bold text-slate-900">By channel</h3>
           <p className="mb-2 text-xs text-slate-500">{channelSubtitle}</p>
           <div className="h-[180px] w-full">
@@ -469,7 +469,7 @@ export const ContactsDashboard: React.FC<{
           <div className="mt-1 flex flex-wrap justify-center gap-x-3 gap-y-1">
             {channelLegend.map((c) => (
               <div key={c.name} className="flex items-center gap-1.5 text-xs text-slate-600">
-                <c.icon className="h-3.5 w-3.5 text-primary" />
+                <c.icon className="h-3.5 w-3.5 text-swiss-accent" />
                 <span>{c.name}</span>
                 <span className="font-semibold text-slate-800">{c.value.toLocaleString()}</span>
               </div>
@@ -479,7 +479,7 @@ export const ContactsDashboard: React.FC<{
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-        <div className="rounded-xl border border-primary/15 bg-primary/[0.03] p-4">
+        <div className="rounded-xl border border-swiss-accent/15 bg-swiss-accent/[0.03] p-4">
           <h3 className="text-sm font-bold text-slate-900">Top sources</h3>
           <p className="mb-3 text-xs text-slate-500">Where contacts came from</p>
           <div className="h-[200px] w-full">
@@ -522,9 +522,9 @@ export const ContactsDashboard: React.FC<{
           </div>
         </div>
 
-        <div className="rounded-xl border border-primary/15 bg-primary/[0.03] p-4">
+        <div className="rounded-xl border border-swiss-accent/15 bg-swiss-accent/[0.03] p-4">
           <div className="mb-3 flex items-center gap-2">
-            <Tag className="h-4 w-4 text-primary" />
+            <Tag className="h-4 w-4 text-swiss-accent" />
             <div>
               <h3 className="text-sm font-bold text-slate-900">Top tags</h3>
               <p className="text-xs text-slate-500">Most used labels</p>
@@ -548,7 +548,7 @@ export const ContactsDashboard: React.FC<{
                     </div>
                     <div className="h-1.5 overflow-hidden rounded-full bg-white">
                       <div
-                        className="h-full rounded-full bg-primary"
+                        className="h-full rounded-full bg-swiss-accent"
                         style={{ width: `${Math.max(pct, 2)}%` }}
                       />
                     </div>
@@ -561,9 +561,9 @@ export const ContactsDashboard: React.FC<{
       </div>
 
       {showCountries && (
-        <div className="rounded-xl border border-primary/15 bg-primary/[0.03] p-4">
+        <div className="rounded-xl border border-swiss-accent/15 bg-swiss-accent/[0.03] p-4">
           <div className="mb-3 flex items-center gap-2">
-            <Globe className="h-4 w-4 text-primary" />
+            <Globe className="h-4 w-4 text-swiss-accent" />
             <div>
               <h3 className="text-sm font-bold text-slate-900">By country</h3>
               <p className="text-xs text-slate-500">Contacts across {countryData.length} countries</p>

@@ -89,7 +89,7 @@ export function JourneyWorkspace() {
     if (journeyLoading || !activeJourney) {
       return (
         <div className="flex h-full min-h-0 items-center justify-center text-sm text-slate-500">
-          <Loader2 className="mr-2 h-5 w-5 animate-spin text-primary" />
+          <Loader2 className="mr-2 h-5 w-5 animate-spin text-swiss-accent" />
           Opening journey…
         </div>
       );
@@ -145,7 +145,7 @@ export function JourneyWorkspace() {
 
   return (
     <div className="flex h-full min-h-0 items-center justify-center text-sm text-slate-500">
-      <Loader2 className="mr-2 h-5 w-5 animate-spin text-primary" />
+      <Loader2 className="mr-2 h-5 w-5 animate-spin text-swiss-accent" />
       Opening automations…
     </div>
   );

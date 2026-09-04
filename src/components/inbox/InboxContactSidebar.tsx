@@ -48,7 +48,7 @@ function tagStyles(tag: string): string {
   if (normalized.includes('cold')) {
     return 'bg-sky-50 text-sky-600 border-sky-100';
   }
-  return 'bg-surface-muted text-slate-600 border-swiss-line';
+  return 'bg-white text-slate-600 border-swiss-line';
 }
 
 export const InboxContactSidebar: React.FC<Props> = ({
@@ -76,14 +76,14 @@ export const InboxContactSidebar: React.FC<Props> = ({
     .toUpperCase();
 
   return (
-    <section className="flex h-full w-full shrink-0 flex-col bg-surface-muted text-left">
+    <section className="flex h-full w-full shrink-0 flex-col bg-white font-swiss text-left">
       {onClose && (
-        <div className="flex items-center justify-between border-b border-swiss-line bg-surface px-3 py-2.5">
+        <div className="flex items-center justify-between border-b border-swiss-line bg-white px-3 py-2.5">
           <p className="text-sm font-bold text-swiss-ink">Contact & journey</p>
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl text-swiss-muted transition-colors duration-200 hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+            className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl text-swiss-muted transition-colors duration-200 hover:bg-swiss-accent/10 hover:text-swiss-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swiss-accent/30"
             aria-label="Close contact details"
           >
             <X className="h-4 w-4" />
@@ -94,7 +94,7 @@ export const InboxContactSidebar: React.FC<Props> = ({
       <div
         role="tablist"
         aria-label="Contact sidebar"
-        className="shrink-0 flex border-b border-swiss-line bg-surface px-2 pt-2 gap-0.5"
+        className="shrink-0 flex border-b border-swiss-line bg-white px-2 pt-2 gap-0.5"
       >
         {TABS.map(({ id, label, icon: Icon }) => {
           const active = tab === id;
@@ -107,11 +107,11 @@ export const InboxContactSidebar: React.FC<Props> = ({
               onClick={() => setTab(id)}
               className={`flex flex-1 items-center justify-center gap-1.5 rounded-t-lg px-2 py-2 text-[11px] font-bold transition-colors duration-200 cursor-pointer ${
                 active
-                  ? 'bg-surface-muted text-primary border border-b-0 border-swiss-line'
-                  : 'text-swiss-muted hover:text-swiss-ink hover:bg-surface-muted/80'
+                  ? 'bg-white text-swiss-accent border border-b-0 border-swiss-line'
+                  : 'text-swiss-muted hover:text-swiss-ink hover:bg-swiss-accent/5'
               }`}
             >
-              <Icon className={`h-3.5 w-3.5 shrink-0 ${active ? 'text-primary' : ''}`} />
+              <Icon className={`h-3.5 w-3.5 shrink-0 ${active ? 'text-swiss-accent' : ''}`} />
               <span className="truncate">{label}</span>
             </button>
           );
@@ -124,11 +124,11 @@ export const InboxContactSidebar: React.FC<Props> = ({
           hidden={tab !== 'profile'}
           className={tab === 'profile' ? 'space-y-3' : 'hidden'}
         >
-            <article className="overflow-hidden rounded-2xl border border-swiss-line bg-surface ">
+            <article className="overflow-hidden rounded-2xl border border-swiss-line bg-white ">
               <button
                 type="button"
                 onClick={() => setProfileOpen((o) => !o)}
-                className="flex w-full cursor-pointer items-center gap-2 p-3 text-left transition-colors hover:bg-surface-muted"
+                className="flex w-full cursor-pointer items-center gap-2 p-3 text-left transition-colors hover:bg-swiss-accent/5"
                 aria-expanded={profileOpen}
               >
                 {contact.avatar ? (

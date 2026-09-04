@@ -16,7 +16,7 @@ import { CarouselAttachment } from './CarouselAttachment';
 import { WhatsAppTemplateMessageBubble } from '../templates/WhatsAppTemplatePreview';
 import { headerFormatFromApi, type ButtonKind } from '../templates/templateBuilderUtils';
 
-const WA_CHAT_BG = '#e5ddd5';
+const WA_CHAT_BG = '#ffffff';
 const EASE = [0.22, 1, 0.36, 1] as const;
 
 type Channel = 'whatsapp' | 'instagram' | 'messenger' | 'email';
@@ -248,15 +248,11 @@ const MessageBubble: React.FC<{
     const bubbleBase = isWhatsApp
       ? 'shadow-[0_1px_0.5px_rgba(11,20,26,0.13)] ' +
         (isContact
-          ? 'bg-white rounded-lg rounded-tl-none'
-          : 'bg-[#d9fdd3] rounded-lg rounded-tr-none')
-      : channel === 'messenger'
-        ? isContact
-          ? 'bg-white rounded-2xl rounded-tl-md border border-swiss-line '
-          : 'bg-[#0084ff] rounded-2xl rounded-tr-md '
-        : isContact
-          ? 'bg-white rounded-2xl rounded-tl-md border border-swiss-line '
-          : 'bg-gradient-to-br from-[#833AB4]/95 to-[#E1306C] rounded-2xl rounded-tr-md ';
+          ? 'bg-white border border-gray-200 rounded-lg rounded-tl-none'
+          : 'bg-swiss-accent rounded-lg rounded-tr-none')
+      : isContact
+        ? 'bg-white border border-gray-200 rounded-2xl rounded-tl-md '
+        : 'bg-swiss-accent rounded-2xl rounded-tr-md ';
 
     return (
       <motion.div
@@ -315,7 +311,7 @@ const MessageBubble: React.FC<{
           isContact ? 'items-start mr-auto' : 'items-end ml-auto'
         }`}
       >
-        <div className="w-full bg-white rounded-lg rounded-tl-sm shadow-[0_1px_0.5px_rgba(11,20,26,0.13)] overflow-hidden">
+        <div className="w-full bg-white border border-swiss-line rounded-lg rounded-tl-sm shadow-[0_1px_0.5px_rgba(11,20,26,0.13)] overflow-hidden">
           <div className="flex items-center gap-1.5 px-3.5 pt-3 pb-2 border-b border-[#e9edef]">
             <ClipboardCheck className="w-4 h-4 text-channel-green shrink-0" />
             <span className="text-sm font-bold text-[#111b21] truncate">
@@ -400,8 +396,16 @@ const MessageBubble: React.FC<{
     const bubbleBase =
       'shadow-[0_1px_0.5px_rgba(11,20,26,0.13)] ' +
       (isContact
-        ? 'bg-white rounded-lg rounded-tl-none'
-        : 'bg-[#d9fdd3] rounded-lg rounded-tr-none');
+        ? 'bg-white border border-gray-200 rounded-lg rounded-tl-none'
+        : 'bg-swiss-accent rounded-lg rounded-tr-none');
+    const textClass = isContact
+      ? isDeleted
+        ? 'italic text-swiss-muted'
+        : 'text-swiss-ink'
+      : isDeleted
+        ? 'italic text-white/70'
+        : 'text-white';
+    const metaClass = isContact ? 'text-swiss-faint' : 'text-white/70';
 
     return (
       <motion.div
@@ -413,7 +417,7 @@ const MessageBubble: React.FC<{
         <div
           className={`relative px-2.5 pt-1.5 pb-1 text-sm leading-[19px] whitespace-pre-wrap break-words ${bubbleBase}`}
         >
-          <div className={`pr-14 ${isDeleted ? 'italic text-[#667781]' : 'text-[#111b21]'}`}>
+          <div className={`pr-14 ${textClass}`}>
             {isDeleted
               ? WA_DELETED_MESSAGE
               : message.content === '[media]'
@@ -421,11 +425,11 @@ const MessageBubble: React.FC<{
                 : message.content}
           </div>
           {isJourneyMessage && !isDeleted && (
-            <p className="text-xs text-[#667781] font-medium mt-1 leading-tight">
+            <p className={`text-xs font-medium mt-1 leading-tight ${metaClass}`}>
               Automated · Journey
             </p>
           )}
-          <span className="absolute bottom-1 right-2 flex items-center gap-0.5 text-meta text-[#667781] leading-none">
+          <span className={`absolute bottom-1 right-2 flex items-center gap-0.5 text-meta leading-none ${metaClass}`}>
             {time}
             {!isDeleted ? deliveryStatusIcon : null}
           </span>
@@ -449,12 +453,7 @@ const MessageBubble: React.FC<{
     );
   }
 
-  const outboundClass =
-    channel === 'instagram'
-      ? 'bg-gradient-to-br from-[#833AB4]/90 to-[#E1306C] border-transparent text-white'
-      : channel === 'messenger'
-        ? 'bg-[#0084ff] border-[#0084ff] text-white'
-        : 'bg-channel-green border-channel-green text-white';
+  const outboundClass = 'bg-swiss-accent border-swiss-accent text-white';
 
   const footerStatus =
     !isContact &&
@@ -467,7 +466,7 @@ const MessageBubble: React.FC<{
     ) : message.status === 'read' ? (
       <CheckCheck
         className={`w-3.5 h-3.5 ${
-          channel === 'instagram' ? 'text-sky-500' : channel === 'email' ? 'text-sky-500' : 'text-accent-green'
+          channel === 'instagram' ? 'text-sky-500' : channel === 'email' ? 'text-sky-500' : 'text-swiss-accent'
         }`}
       />
     ) : message.status === 'delivered' ? (
@@ -499,7 +498,7 @@ const MessageBubble: React.FC<{
           isEmailTemplateBubble ? '' : 'whitespace-pre-wrap'
         } ${
           isContact
-            ? 'bg-white border-swiss-line text-swiss-ink rounded-tl-md'
+            ? 'bg-white border-gray-200 text-swiss-ink rounded-tl-md'
             : `${outboundClass} rounded-tr-md border-transparent`
         }`}
       >

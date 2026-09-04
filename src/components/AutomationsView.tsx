@@ -153,7 +153,7 @@ function ChannelChooserDialog({
               <button
                 type="button"
                 onClick={() => onPick('whatsapp-gallery')}
-                className="w-full cursor-pointer rounded-xl px-3 py-2 text-center text-xs font-semibold text-primary transition-colors hover:bg-primary/5"
+                className="w-full cursor-pointer rounded-xl px-3 py-2 text-center text-xs font-semibold text-swiss-accent transition-colors hover:bg-swiss-accent/5"
               >
                 Or browse WhatsApp templates →
               </button>
@@ -265,7 +265,7 @@ export function AutomationsView() {
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 font-swiss">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="font-display text-lg font-semibold text-gray-950">Automations</h2>
@@ -278,7 +278,7 @@ export function AutomationsView() {
         <button
           type="button"
           onClick={() => setChooserOpen(true)}
-          className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-primary-hover"
+          className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full bg-swiss-accent px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-swiss-accent-hover"
         >
           <Plus className="h-4 w-4" aria-hidden />
           Create new
@@ -301,7 +301,7 @@ export function AutomationsView() {
             onClick={() => setFilter(tab.id)}
             className={`cursor-pointer rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
               filter === tab.id
-                ? 'bg-primary text-white'
+                ? 'bg-swiss-accent text-white'
                 : 'bg-white text-slate-600 hover:bg-surface-muted'
             }`}
           >
@@ -317,7 +317,7 @@ export function AutomationsView() {
         </div>
       ) : visible.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-black/10 bg-white p-8 text-center">
-          <Workflow className="mx-auto mb-3 h-7 w-7 text-primary" aria-hidden />
+          <Workflow className="mx-auto mb-3 h-7 w-7 text-swiss-accent" aria-hidden />
           <p className="font-bold text-swiss-ink">No automations yet</p>
           <p className="mt-1 text-sm text-swiss-muted">
             {instagramAutomationAllowed
@@ -327,7 +327,7 @@ export function AutomationsView() {
           <button
             type="button"
             onClick={() => setChooserOpen(true)}
-            className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-hover"
+            className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-full bg-swiss-accent px-4 py-2 text-sm font-bold text-white hover:bg-swiss-accent-hover"
           >
             <Plus className="h-4 w-4" aria-hidden />
             Create new
@@ -364,7 +364,7 @@ export function AutomationsView() {
                     <div className="flex flex-wrap items-center gap-1.5">
                       <h3
                         className={`truncate text-sm font-bold text-gray-950 ${
-                          isWa ? 'group-hover:text-primary' : 'group-hover:text-[#833AB4]'
+                          isWa ? 'group-hover:text-swiss-accent' : 'group-hover:text-[#833AB4]'
                         }`}
                       >
                         {row.name}
@@ -381,8 +381,8 @@ export function AutomationsView() {
                       <span
                         className={`shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide ${
                           published
-                            ? 'bg-primary/10 text-primary'
-                            : 'bg-gray-100 text-swiss-muted'
+                            ? 'bg-swiss-accent/10 text-swiss-accent'
+                            : 'bg-white text-swiss-muted border border-gray-200'
                         }`}
                       >
                         {row.status}

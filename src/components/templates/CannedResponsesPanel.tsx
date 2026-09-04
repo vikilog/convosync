@@ -237,7 +237,7 @@ export const CannedResponsesPanel: React.FC<Props> = ({
         <button
           type="button"
           onClick={handleAdd}
-          className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-3.5 py-2 text-sm font-semibold text-white hover:bg-primary-hover"
+          className="inline-flex items-center gap-1.5 rounded-xl bg-swiss-accent px-3.5 py-2 text-sm font-semibold text-white hover:bg-swiss-accent-hover"
         >
           <Plus className="h-4 w-4" />
           Add Canned Response
@@ -249,7 +249,7 @@ export const CannedResponsesPanel: React.FC<Props> = ({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by short code or content"
-            className="h-auto w-full rounded-xl bg-surface-muted py-2 pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-primary/15"
+            className="h-auto w-full rounded-xl border border-swiss-line bg-white py-2 pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-swiss-accent/15"
           />
         </div>
       </div>
@@ -270,9 +270,9 @@ export const CannedResponsesPanel: React.FC<Props> = ({
             {selectedId === 'new' && (
               <button
                 type="button"
-                className="relative w-full border-b border-swiss-line bg-primary/[0.04] px-4 py-3.5 text-left"
+                className="relative w-full border-b border-swiss-line bg-swiss-accent/[0.04] px-4 py-3.5 text-left"
               >
-                <span className="absolute bottom-0 left-0 top-0 w-1 rounded-r bg-primary" />
+                <span className="absolute bottom-0 left-0 top-0 w-1 rounded-r bg-swiss-accent" />
                 <p className="pl-2 text-sm font-semibold text-dark-navy">New Canned Response</p>
               </button>
             )}
@@ -284,11 +284,11 @@ export const CannedResponsesPanel: React.FC<Props> = ({
                   type="button"
                   onClick={() => setSelectedId(item.id)}
                   className={`relative w-full border-b border-swiss-line px-4 py-3.5 text-left transition-colors ${
-                    active ? 'bg-primary/[0.04]' : 'hover:bg-surface-muted/70'
+                    active ? 'bg-swiss-accent/[0.04]' : 'hover:bg-surface-muted/70'
                   }`}
                 >
                   {active && (
-                    <span className="absolute bottom-0 left-0 top-0 w-1 rounded-r bg-primary" />
+                    <span className="absolute bottom-0 left-0 top-0 w-1 rounded-r bg-swiss-accent" />
                   )}
                   <p className="flex items-center gap-1.5 truncate pl-2 text-sm font-semibold text-dark-navy">
                     <span className="truncate">{listLabel(item)}</span>
@@ -312,7 +312,7 @@ export const CannedResponsesPanel: React.FC<Props> = ({
                 <button
                   type="button"
                   onClick={handleAdd}
-                  className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-primary px-3.5 py-2 text-sm font-semibold text-white hover:bg-primary-hover"
+                  className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-swiss-accent px-3.5 py-2 text-sm font-semibold text-white hover:bg-swiss-accent-hover"
                 >
                   <Plus className="h-4 w-4" />
                   Add Canned Response
@@ -339,7 +339,7 @@ export const CannedResponsesPanel: React.FC<Props> = ({
                         setShortcut(e.target.value.replace(/\s/g, '').slice(0, SHORTCUT_MAX))
                       }
                       placeholder="Text that trigger canned responses"
-                      className="h-auto w-full rounded-xl bg-surface-muted px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/15"
+                      className="h-auto w-full rounded-xl border border-swiss-line bg-white px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-swiss-accent/15"
                     />
                   </div>
 
@@ -373,7 +373,7 @@ export const CannedResponsesPanel: React.FC<Props> = ({
                         </div>
                         <label
                           htmlFor={mediaInputId}
-                          className="cursor-pointer rounded-md p-1.5 text-swiss-ink transition-colors hover:bg-surface hover:text-primary"
+                          className="cursor-pointer rounded-md p-1.5 text-swiss-ink transition-colors hover:bg-surface hover:text-swiss-accent"
                           title="Attach image, video, audio, or document"
                         >
                           <Paperclip className="pointer-events-none h-4 w-4" />
@@ -458,7 +458,7 @@ export const CannedResponsesPanel: React.FC<Props> = ({
                     type="button"
                     disabled={!canSave}
                     onClick={() => void handleSave()}
-                    className="rounded-xl bg-primary px-5 py-2 text-sm font-semibold text-white hover:bg-primary-hover disabled:opacity-50"
+                    className="rounded-xl bg-swiss-accent px-5 py-2 text-sm font-semibold text-white hover:bg-swiss-accent-hover disabled:opacity-50"
                   >
                     {saving ? 'Saving…' : selectedId === 'new' ? 'Create' : 'Save'}
                   </button>

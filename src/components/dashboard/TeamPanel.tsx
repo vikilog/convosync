@@ -20,22 +20,7 @@ export const TeamPanel: React.FC<TeamPanelProps> = ({ members, onViewAll }) => {
 
   return (
     <div className="flex h-full flex-col font-swiss">
-      <div className="mb-1 flex items-baseline justify-between">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-swiss-muted">
-          Team
-        </p>
-        <button
-          type="button"
-          onClick={onViewAll}
-          className="inline-flex cursor-pointer items-center gap-1 text-[11px] font-medium text-swiss-accent"
-        >
-          Manage
-          <ArrowUpRight className="h-3 w-3" />
-        </button>
-      </div>
-      <p className="mb-3 text-[11px] text-swiss-faint">
-        {members.length} member{members.length === 1 ? '' : 's'} in this workspace
-      </p>
+      <p className="mb-3 text-[13.5px] font-bold text-swiss-ink">Team</p>
 
       {items.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center py-6 text-center">
@@ -74,6 +59,15 @@ export const TeamPanel: React.FC<TeamPanelProps> = ({ members, onViewAll }) => {
           ))}
         </ul>
       )}
+
+      <button
+        type="button"
+        onClick={onViewAll}
+        className="mt-3 inline-flex cursor-pointer items-center justify-center gap-1 text-[11.5px] font-semibold text-swiss-accent"
+      >
+        View all
+        <ArrowUpRight className="h-3 w-3" />
+      </button>
     </div>
   );
 };

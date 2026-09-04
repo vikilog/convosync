@@ -43,7 +43,7 @@ export function JourneyAutomationGallery({
             <button
               type="button"
               onClick={onStartBlank}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-primary/20 bg-primary/5 px-3 py-1.5 text-xs font-bold text-primary hover:bg-primary/10"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-swiss-accent/20 bg-swiss-accent/5 px-3 py-1.5 text-xs font-bold text-swiss-accent hover:bg-swiss-accent/10"
             >
               <MessagesSquare className="w-3.5 h-3.5" />
               Start blank
@@ -61,15 +61,15 @@ export function JourneyAutomationGallery({
               key={template.id}
               type="button"
               onClick={() => onSelect(template)}
-              className="group text-left rounded-2xl border border-primary/15 bg-primary/[0.04] p-4 transition-colors hover:border-primary/35 hover:bg-primary/[0.08]"
+              className="group text-left rounded-2xl border border-swiss-accent/15 bg-swiss-accent/[0.04] p-4 transition-colors hover:border-swiss-accent/35 hover:bg-swiss-accent/[0.08]"
             >
               <div className="flex items-start gap-3">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-swiss-accent/15 text-swiss-accent">
                   <Icon className="h-4 w-4" />
                 </span>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="text-sm font-bold text-swiss-ink group-hover:text-primary">
+                    <p className="text-sm font-bold text-swiss-ink group-hover:text-swiss-accent">
                       {template.name}
                     </p>
                     {isConvoSync ? (
@@ -77,7 +77,7 @@ export function JourneyAutomationGallery({
                         ConvoSync
                       </span>
                     ) : null}
-                    <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
+                    <span className="rounded-full bg-swiss-accent/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-swiss-accent">
                       {template.triggerLabel}
                     </span>
                   </div>

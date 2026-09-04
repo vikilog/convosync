@@ -105,7 +105,7 @@ function statusBadge(status: string) {
     default:
       return {
         label: status,
-        className: 'bg-gray-50 text-swiss-muted border-gray-200',
+        className: 'bg-white text-swiss-muted border-gray-200',
         pulse: false,
       };
   }
@@ -150,7 +150,7 @@ function StepDot({ state }: { state: JourneyProgressStep['state'] }) {
   if (state === 'current') {
     return (
       <span className="absolute -left-[21px] top-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-channel-green ring-2 ring-emerald-100">
-        <span className="h-1 w-1 animate-pulse rounded-full bg-surface" />
+        <span className="h-1 w-1 animate-pulse rounded-full bg-white" />
       </span>
     );
   }
@@ -242,7 +242,7 @@ export const ContactJourneyPanel: React.FC<Props> = ({
   const failedStep = progress?.steps.find((s) => s.state === 'failed');
   const badge = progress
     ? automationsPaused && progress.status === 'waiting'
-      ? { label: 'Paused', className: 'bg-slate-50 text-slate-500 border-slate-200', pulse: false }
+      ? { label: 'Paused', className: 'bg-white text-slate-500 border-slate-200', pulse: false }
       : statusBadge(progress.status)
     : null;
   const assignedName =
@@ -252,7 +252,7 @@ export const ContactJourneyPanel: React.FC<Props> = ({
 
   if (initialLoading && !progress) {
     return (
-      <div className="animate-pulse rounded-2xl border border-swiss-line bg-surface p-4 ">
+      <div className="animate-pulse rounded-2xl border border-swiss-line bg-white p-4 ">
         <div className="mb-2 h-3 w-28 rounded bg-gray-200" />
         <div className="h-4 w-full rounded bg-gray-200" />
       </div>
@@ -263,7 +263,7 @@ export const ContactJourneyPanel: React.FC<Props> = ({
 
   return (
     <article
-        className={`overflow-hidden rounded-2xl border bg-surface transition-colors ${
+        className={`overflow-hidden rounded-2xl border bg-white transition-colors ${
         isActive ? 'border-sky-200' : 'border-swiss-line'
       }`}
     >

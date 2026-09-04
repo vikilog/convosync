@@ -5,10 +5,11 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, Send, Clock, Activity, Inbox, CalendarClock, TrendingUp } from 'lucide-react';
+import { Users, Send, Clock, Activity, Inbox, CalendarClock, TrendingUp, Bell } from 'lucide-react';
 import { useKeepAliveActivation } from './KeepAlive';
 import { QuickCampaign } from '../types';
 import { api, getUserName } from '../lib/api';
+import { NotificationsPanel } from './notifications/NotificationsPanel';
 import { mapChartDay, mapQuickCampaignFromApi } from '../lib/mappers';
 import { OnboardingProfileBanner } from './onboarding/OnboardingProfileBanner';
 import { DashboardStatRail, type DashboardStat } from './dashboard/DashboardStatRail';
@@ -70,6 +71,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const [teamMembers, setTeamMembers] = useState<DashboardTeamMember[]>([]);
   const [chartRange, setChartRange] = useState<ChartRange>(7);
   const [loading, setLoading] = useState(true);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifUnread, setNotifUnread] = useState(0);
+
+  useEffect(() => {
+    api
+      .getInAppNotificationUnreadCount()
+      .then((res) => setNotifUnread(res.unread ?? 0))
+      .catch(() => {});
+  }, []);
 
   const contactsCount = useCountUp(totalContacts, 1000);
   const messagesCount = useCountUp(messagesToday, 1000);
@@ -411,31 +421,58 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   }
 
   const firstName = getFirstName(getUserName() || 'there');
+  const formattedDate = new Date()
+    .toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    })
+    .split(' ')
+    .join(' · ');
 
   return (
     <div className="w-full min-h-full space-y-11 bg-white pb-10 font-swiss">
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h1 className="text-[28px] font-light tracking-tight text-swiss-ink">
-          {getTimeGreeting()}, {firstName}
-        </h1>
-        <p className="text-[11px] font-medium tracking-wide text-swiss-muted">
-          {new Date()
-            .toLocaleDateString('en-GB', {
-              day: 'numeric',
-              month: 'long',
-              year: 'numeric',
-            })
-            .split(' ')
-            .join(' · ')}
-        </p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="text-[18px] font-bold text-swiss-ink">Dashboard</p>
+          <p className="mt-0.5 text-[12px] text-swiss-muted">
+            {getTimeGreeting()}, {firstName} · {formattedDate}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <div className="rounded-lg bg-swiss-line/40 px-3 py-2 text-[12.5px] font-medium text-swiss-muted">
+            Last {chartRange} Days
+          </div>
+          <button
+            type="button"
+            onClick={() => setNotifOpen((v) => !v)}
+            aria-label="Notifications"
+            className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-swiss-line text-swiss-muted transition-colors hover:text-swiss-ink"
+          >
+            <Bell className="h-4 w-4" strokeWidth={1.75} />
+            {notifUnread > 0 ? (
+              <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full border-2 border-white bg-red-500" />
+            ) : null}
+          </button>
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-swiss-line/40 text-[12px] font-semibold text-swiss-ink">
+            {firstName.charAt(0).toUpperCase()}
+          </div>
+        </div>
       </div>
+
+      <NotificationsPanel
+        open={notifOpen}
+        onClose={() => setNotifOpen(false)}
+        onUnreadChange={setNotifUnread}
+      />
 
       <OnboardingProfileBanner />
 
       <DashboardStatRail stats={stats} />
 
-      <div className="grid grid-cols-1 gap-16 lg:grid-cols-5 lg:items-stretch">
-        <div className="lg:col-span-3">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-5 lg:items-stretch">
+        <div className="rounded-[12px] border border-swiss-line bg-white p-5 lg:col-span-3">
           <MessagePerformanceChart
             data={showChartEmpty ? [] : chartData}
             activeRange={chartRange}
@@ -443,7 +480,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             onNewCampaign={onNewCampaign}
           />
         </div>
-        <div className="lg:col-span-2">
+        <div className="rounded-[12px] border border-swiss-line bg-white p-5 lg:col-span-2">
           <DashboardCampaignsPanel
             upcoming={upcomingCampaigns}
             recent={quickCampaigns}
@@ -454,21 +491,29 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-4 lg:items-stretch">
-        <NeedsReplyPanel
-          conversations={waitingConversations}
-          onOpenInbox={() => navigate(pathForTab('inbox'))}
-        />
-        <AiAgentsPanel agents={agents} onViewAll={() => navigate(pathForTab('ai-agent'))} />
-        <ChannelsPanel
-          channels={channels}
-          onConnect={(kind) => navigate(pathForIntegrationsChannel(kind))}
-          onUpgrade={() => navigate(PLAN_UPGRADE_PATH)}
-        />
-        <TeamPanel
-          members={teamMembers}
-          onViewAll={() => navigate(pathForSettingsSection('users'))}
-        />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:items-stretch">
+        <div className="rounded-[12px] border border-swiss-line bg-white p-5">
+          <NeedsReplyPanel
+            conversations={waitingConversations}
+            onOpenInbox={() => navigate(pathForTab('inbox'))}
+          />
+        </div>
+        <div className="rounded-[12px] border border-swiss-line bg-white p-5">
+          <AiAgentsPanel agents={agents} onViewAll={() => navigate(pathForTab('ai-agent'))} />
+        </div>
+        <div className="rounded-[12px] border border-swiss-line bg-white p-5">
+          <ChannelsPanel
+            channels={channels}
+            onConnect={(kind) => navigate(pathForIntegrationsChannel(kind))}
+            onUpgrade={() => navigate(PLAN_UPGRADE_PATH)}
+          />
+        </div>
+        <div className="rounded-[12px] border border-swiss-line bg-white p-5">
+          <TeamPanel
+            members={teamMembers}
+            onViewAll={() => navigate(pathForSettingsSection('users'))}
+          />
+        </div>
       </div>
     </div>
   );

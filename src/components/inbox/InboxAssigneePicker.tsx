@@ -128,7 +128,7 @@ export function InboxAssigneePicker({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.15 }}
-            className="absolute right-0 top-full mt-2 z-40 w-64 bg-surface border border-swiss-line rounded-xl shadow-xl overflow-hidden"
+            className="absolute right-0 top-full mt-2 z-40 w-64 bg-white border border-swiss-line rounded-xl shadow-xl overflow-hidden"
           >
             {submenu === 'main' && (
               <div className="py-1">

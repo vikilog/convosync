@@ -47,12 +47,12 @@ import { ResendButton } from '../shared/ResendButton';
 const FAILED_STATUSES = new Set(['failed', 'bounced', 'rejected']);
 
 const STATUS_STYLE: Record<CampaignRecordStatus, string> = {
-  Draft: 'bg-gray-100 text-swiss-muted border-gray-200',
+  Draft: 'bg-white text-swiss-muted border-gray-200',
   Scheduled: 'bg-amber-50 text-amber-800 border-amber-100',
   Running: 'bg-blue-50 text-blue-700 border-blue-100',
   Completed: 'bg-green-50 text-green-700 border-green-100',
   Failed: 'bg-red-50 text-red-700 border-red-100',
-  Cancelled: 'bg-gray-100 text-swiss-muted border-gray-200',
+  Cancelled: 'bg-white text-swiss-muted border-gray-200',
 };
 
 const MESSAGE_STATUS_STYLE: Record<string, string> = {
@@ -60,8 +60,8 @@ const MESSAGE_STATUS_STYLE: Record<string, string> = {
   opened: 'text-emerald-800 bg-emerald-50/90 ring-emerald-200/70',
   clicked: 'text-emerald-800 bg-emerald-50/90 ring-emerald-200/70',
   delivered: 'text-sky-800 bg-sky-50/90 ring-sky-200/70',
-  sent: 'text-slate-700 bg-slate-100/90 ring-swiss-line',
-  resent: 'text-primary bg-primary/8 ring-primary/20',
+  sent: 'text-slate-700 bg-white/90 ring-swiss-line',
+  resent: 'text-swiss-accent bg-swiss-accent/8 ring-swiss-accent/20',
   queued: 'text-amber-800 bg-amber-50/90 ring-amber-200/70',
   resend_pending: 'text-amber-800 bg-amber-50/90 ring-amber-200/70',
   failed: 'text-red-800 bg-red-50/90 ring-red-200/70',
@@ -106,7 +106,7 @@ const DeliveryTrendChart: React.FC<{ series: CampaignDeliveryTrendPoint[] }> = (
         <p className="shrink-0 text-xs font-medium tabular-nums text-swiss-muted">
           {deliveredTotal != null ? (
             <>
-              <span className="text-primary">{deliveredTotal}</span>
+              <span className="text-swiss-accent">{deliveredTotal}</span>
               <span className="ml-1 text-swiss-faint">delivered</span>
             </>
           ) : (
@@ -159,9 +159,9 @@ const DeliveryTrendChart: React.FC<{ series: CampaignDeliveryTrendPoint[] }> = (
                 type="monotone"
                 dataKey="cumulative"
                 name="Delivered"
-                stroke="var(--color-primary, #078038)"
+                stroke="var(--color-swiss-accent, #064e3b)"
                 strokeWidth={2}
-                dot={series.length <= 24 ? { r: 2.5, fill: 'var(--color-primary, #078038)' } : false}
+                dot={series.length <= 24 ? { r: 2.5, fill: 'var(--color-swiss-accent, #064e3b)' } : false}
                 activeDot={{ r: 4, strokeWidth: 2, stroke: '#fafaf8' }}
                 animationDuration={shouldReduceMotion ? 0 : 500}
                 isAnimationActive={!shouldReduceMotion}
@@ -281,7 +281,7 @@ const RecipientsTable: React.FC<{
                   <span
                     className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium capitalize tracking-wide ring-1 ring-inset ${
                       MESSAGE_STATUS_STYLE[statusKey] ??
-                      'bg-gray-100 text-swiss-muted ring-gray-200'
+                      'bg-white text-swiss-muted ring-gray-200'
                     }`}
                   >
                     {row.status.replace('_', ' ')}
@@ -435,7 +435,7 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
   if (loading) {
     return (
       <div className="flex-1 h-[calc(100vh-64px)] flex items-center justify-center bg-white">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <Loader2 className="w-8 h-8 animate-spin text-swiss-accent" />
       </div>
     );
   }
@@ -447,7 +447,7 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
           type="button"
           onClick={() => navigate(pathForTab('campaigns'))}
           aria-label="Back to campaigns"
-          className="flex items-center gap-1.5 text-sm font-medium text-swiss-muted hover:text-primary mb-4"
+          className="flex items-center gap-1.5 text-sm font-medium text-swiss-muted hover:text-swiss-accent mb-4"
         >
           <ArrowLeft className="w-4 h-4" aria-hidden />
         </button>
@@ -472,7 +472,7 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
               type="button"
               onClick={() => navigate(pathForTab('campaigns'))}
               aria-label="Back to campaigns"
-              className="shrink-0 flex items-center text-swiss-muted hover:text-primary cursor-pointer transition-colors duration-200"
+              className="shrink-0 flex items-center text-swiss-muted hover:text-swiss-accent cursor-pointer transition-colors duration-200"
             >
               <ArrowLeft className="w-4 h-4" aria-hidden />
             </button>
@@ -699,14 +699,14 @@ export const CampaignDetailView: React.FC<Props> = ({ campaignId }) => {
 
   if (!showWhatsAppPreview) {
     return (
-      <div className="flex-1 h-[calc(100vh-64px)] overflow-y-auto bg-white selection:bg-primary/15">
+      <div className="flex-1 h-[calc(100vh-64px)] overflow-y-auto bg-white selection:bg-swiss-accent/15">
         <div className="max-w-7xl">{mainContent}</div>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 flex flex-col xl:flex-row h-[calc(100vh-64px)] overflow-hidden bg-white selection:bg-primary/15">
+    <div className="flex-1 flex flex-col xl:flex-row h-[calc(100vh-64px)] overflow-hidden bg-white font-swiss selection:bg-swiss-accent/15">
       <section className="flex-1 flex flex-col min-w-0 min-h-0 overflow-y-auto border-r border-swiss-line">
         {mainContent}
       </section>

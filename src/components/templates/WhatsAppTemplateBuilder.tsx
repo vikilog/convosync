@@ -626,7 +626,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex h-dvh flex-col overflow-hidden bg-white transition-[left] duration-200 ease-out"
+      className="fixed inset-0 z-50 flex h-dvh flex-col overflow-hidden bg-white font-swiss transition-[left] duration-200 ease-out"
       style={{ left: sidebarOffset }}
     >
       <header className="bg-white border-b border-swiss-line px-5 py-2.5 flex items-center justify-between gap-4 shrink-0">
@@ -663,7 +663,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
             type="button"
             disabled={saving}
             onClick={() => handleSave(false)}
-            className="px-4 py-2 text-sm font-semibold text-white bg-primary hover:bg-primary-hover rounded-lg flex items-center gap-2 disabled:opacity-50"
+            className="px-4 py-2 text-sm font-semibold text-white bg-swiss-accent hover:bg-swiss-accent-hover rounded-lg flex items-center gap-2 disabled:opacity-50"
           >
             {saving && <Loader2 className="w-4 h-4 animate-spin" />}
             {contentLocked
@@ -712,8 +712,8 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                           : 'cursor-pointer'
                       } ${
                         category === c.value
-                          ? 'border-primary bg-primary/10'
-                          : 'border-swiss-line bg-surface-muted/60 hover:border-primary/30'
+                          ? 'border-swiss-accent bg-swiss-accent/10'
+                          : 'border-swiss-line bg-white hover:border-swiss-accent/30'
                       }`}
                     >
                       <div className="flex items-center gap-2">
@@ -723,7 +723,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                           checked={category === c.value}
                           onChange={() => setCategory(c.value)}
                           disabled={contentLocked}
-                          className="accent-primary cursor-pointer disabled:cursor-not-allowed"
+                          className="accent-swiss-accent cursor-pointer disabled:cursor-not-allowed"
                         />
                         <p className="text-sm font-semibold text-[#050505]">{c.title}</p>
                       </div>
@@ -756,7 +756,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                       }}
                       disabled={nameLocked}
                       placeholder="e.g. order_confirmation"
-                      className="h-auto w-full rounded-lg bg-surface-muted px-3 py-2.5 font-mono text-sm text-[#050505] outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/15 disabled:opacity-60"
+                      className="h-auto w-full rounded-lg border border-swiss-line bg-white px-3 py-2.5 font-mono text-sm text-[#050505] outline-none transition-colors focus:border-swiss-accent focus:ring-2 focus:ring-swiss-accent/15 disabled:opacity-60"
                     />
                     <p className="mt-1 font-mono text-meta text-[#65676b]">{displayName}</p>
                     {isUrlLikeName(name) && (
@@ -776,7 +776,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                       id="wa-tpl-language"
                       value={language}
                       onChange={(e) => setLanguage(e.target.value)}
-                      className="w-full cursor-pointer rounded-lg bg-surface-muted px-3 py-2.5 text-sm text-[#050505] outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/15"
+                      className="w-full cursor-pointer rounded-lg border border-swiss-line bg-white px-3 py-2.5 text-sm text-[#050505] outline-none transition-colors focus:border-swiss-accent focus:ring-2 focus:ring-swiss-accent/15"
                     >
                       {languageOptions.map((l) => (
                         <option key={l.value} value={l.value}>
@@ -814,8 +814,8 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                           onClick={() => selectHeaderFormat(opt.value)}
                           className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
                             headerFormat === opt.value
-                              ? 'border-primary bg-primary/10 text-primary'
-                              : 'border-black/10 bg-white text-[#050505] hover:border-primary/50'
+                              ? 'border-swiss-accent bg-swiss-accent/10 text-swiss-accent'
+                              : 'border-black/10 bg-white text-[#050505] hover:border-swiss-accent/50'
                           }`}
                         >
                           {opt.icon}
@@ -830,7 +830,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                         onChange={(e) => setHeader(e.target.value.slice(0, HEADER_MAX))}
                         placeholder="Add a short header line"
                         maxLength={HEADER_MAX}
-                        className="h-auto w-full bg-surface-muted rounded-lg px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
+                        className="h-auto w-full border border-swiss-line bg-white rounded-lg px-3 py-2.5 text-sm outline-none focus:border-swiss-accent focus:ring-2 focus:ring-swiss-accent/15"
                       />
                     )}
 
@@ -848,7 +848,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                           }}
                         />
                         {previewMediaUrl ? (
-                          <div className="rounded-lg bg-surface-muted/40 p-3 space-y-3">
+                          <div className="rounded-lg border border-swiss-line bg-white p-3 space-y-3">
                             <div className="flex items-start gap-3">
                               <button
                                 type="button"
@@ -858,7 +858,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                                 aria-label={`Edit header ${headerFormat}`}
                               >
                                 {uploadingMedia ? (
-                                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                                  <Loader2 className="w-6 h-6 animate-spin text-swiss-accent" />
                                 ) : headerFormat === 'image' ? (
                                   <img
                                     src={previewMediaUrl}
@@ -872,7 +872,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                                     muted
                                   />
                                 ) : (
-                                  <FileText className="w-8 h-8 text-primary" />
+                                  <FileText className="w-8 h-8 text-swiss-accent" />
                                 )}
                                 {!uploadingMedia && (
                                   <span className="absolute inset-0 flex items-center justify-center bg-[#050505]/45 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
@@ -894,7 +894,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                                   type="button"
                                   disabled={uploadingMedia}
                                   onClick={() => fileInputRef.current?.click()}
-                                  className="mt-2 inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary-hover disabled:opacity-60"
+                                  className="mt-2 inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-swiss-accent px-3 py-1.5 text-xs font-semibold text-white hover:bg-swiss-accent-hover disabled:opacity-60"
                                 >
                                   {uploadingMedia ? (
                                     <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden />
@@ -911,16 +911,16 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                             type="button"
                             disabled={uploadingMedia}
                             onClick={() => fileInputRef.current?.click()}
-                            className="w-full border-2 border-dashed border-black/10 rounded-lg px-4 py-8 flex flex-col items-center justify-center gap-2 text-[#65676b] hover:border-primary hover:bg-surface-muted transition-colors disabled:opacity-60 cursor-pointer"
+                            className="w-full border-2 border-dashed border-black/10 rounded-lg px-4 py-8 flex flex-col items-center justify-center gap-2 text-[#65676b] hover:border-swiss-accent hover:bg-surface-muted transition-colors disabled:opacity-60 cursor-pointer"
                           >
                             {uploadingMedia ? (
                               <>
-                                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                                <Loader2 className="w-8 h-8 animate-spin text-swiss-accent" />
                                 <span className="text-sm font-medium">Uploading to Meta…</span>
                               </>
                             ) : (
                               <>
-                                <Upload className="w-8 h-8 text-primary" />
+                                <Upload className="w-8 h-8 text-swiss-accent" />
                                 <span className="text-sm font-semibold text-[#050505]">
                                   Upload sample {headerFormat}
                                 </span>
@@ -955,13 +955,13 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                       onChange={(e) => setBodyPattern(e.target.value.slice(0, BODY_MAX))}
                       rows={8}
                       placeholder="Write your message. Use {{1}}, {{2}} for variables."
-                      className="min-h-0 w-full bg-surface-muted rounded-lg px-3 py-2 text-sm leading-relaxed outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 resize-none min-h-[160px]"
+                      className="min-h-0 w-full border border-swiss-line bg-white rounded-lg px-3 py-2 text-sm leading-relaxed outline-none focus:border-swiss-accent focus:ring-2 focus:ring-swiss-accent/15 resize-none min-h-[160px]"
                     />
                     <div className="flex flex-wrap items-center gap-2 mt-1.5">
                       <button
                         type="button"
                         onClick={insertVariable}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 text-meta font-semibold text-primary border border-primary rounded-md hover:bg-primary/10"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 text-meta font-semibold text-swiss-accent border border-swiss-accent rounded-md hover:bg-swiss-accent/10"
                       >
                         <Plus className="w-3.5 h-3.5" />
                         Add variable
@@ -978,7 +978,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                       onChange={(e) => setFooter(e.target.value.slice(0, FOOTER_MAX))}
                       maxLength={FOOTER_MAX}
                       placeholder="Reply STOP to unsubscribe"
-                      className="h-auto w-full bg-surface-muted rounded-lg px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
+                      className="h-auto w-full border border-swiss-line bg-white rounded-lg px-3 py-2 text-sm outline-none focus:border-swiss-accent focus:ring-2 focus:ring-swiss-accent/15"
                     />
                   </div>
 
@@ -994,7 +994,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                         <button
                           type="button"
                           onClick={() => setShowButtonMenu((v) => !v)}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-primary px-3 py-2 text-sm font-semibold text-primary hover:bg-primary/10"
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-swiss-accent px-3 py-2 text-sm font-semibold text-swiss-accent hover:bg-swiss-accent/10"
                         >
                           <Plus className="w-4 h-4" />
                           Add button
@@ -1008,7 +1008,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                                 onClick={() => addButton(opt.value)}
                                 className="w-full flex items-start gap-3 px-4 py-3 text-left hover:bg-surface-muted border-b border-swiss-line last:border-0"
                               >
-                                <span className="mt-0.5 text-primary">{opt.icon}</span>
+                                <span className="mt-0.5 text-swiss-accent">{opt.icon}</span>
                                 <span>
                                   <span className="block text-sm font-semibold text-[#050505]">
                                     {opt.label}
@@ -1056,7 +1056,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                                       ? 'Open'
                                       : 'Quick reply'
                               }
-                              className="h-auto w-full bg-surface-muted rounded-lg px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
+                              className="h-auto w-full border border-swiss-line bg-white rounded-lg px-3 py-2 text-sm outline-none focus:border-swiss-accent focus:ring-2 focus:ring-swiss-accent/15"
                             />
                           </div>
                           {buttonKind === 'URL' && (
@@ -1069,7 +1069,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                                   value={buttonUrl}
                                   onChange={(e) => setButtonUrl(e.target.value)}
                                   placeholder="https://www.example.com or https://example.com/{{1}}"
-                                  className="h-auto w-full bg-surface-muted rounded-lg px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
+                                  className="h-auto w-full border border-swiss-line bg-white rounded-lg px-3 py-2 text-sm outline-none focus:border-swiss-accent focus:ring-2 focus:ring-swiss-accent/15"
                                 />
                               </div>
                               {/\{\{\d+\}\}/.test(buttonUrl) && (
@@ -1081,7 +1081,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                                     value={buttonUrlSample}
                                     onChange={(e) => setButtonUrlSample(e.target.value)}
                                     placeholder="sample_payment_id"
-                                    className="h-auto w-full bg-surface-muted rounded-lg px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
+                                    className="h-auto w-full border border-swiss-line bg-white rounded-lg px-3 py-2 text-sm outline-none focus:border-swiss-accent focus:ring-2 focus:ring-swiss-accent/15"
                                   />
                                   <p className="text-meta text-[#65676b] mt-1">
                                     Meta needs a sample value for {'{{1}}'} in the button URL (not the
@@ -1100,7 +1100,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                                 value={buttonPhone}
                                 onChange={(e) => setButtonPhone(e.target.value)}
                                 placeholder="+91 98765 43210"
-                                className="h-auto w-full bg-surface-muted rounded-lg px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
+                                className="h-auto w-full border border-swiss-line bg-white rounded-lg px-3 py-2 text-sm outline-none focus:border-swiss-accent focus:ring-2 focus:ring-swiss-accent/15"
                               />
                               <p className="text-meta text-[#65676b] mt-1">
                                 Include country code, e.g. +91 for India
@@ -1115,7 +1115,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                               <select
                                 value={buttonFlowId}
                                 onChange={(e) => setButtonFlowId(e.target.value)}
-                                className="w-full bg-surface-muted rounded-lg px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
+                                className="w-full border border-swiss-line bg-white rounded-lg px-3 py-2 text-sm outline-none focus:border-swiss-accent focus:ring-2 focus:ring-swiss-accent/15"
                               >
                                 <option value="">Select a published flow</option>
                                 {publishedFlows.map((f) => (
@@ -1145,7 +1145,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                       </p>
                       {variableSamples.map((sample, i) => (
                         <div key={i} className="flex items-center gap-2">
-                          <span className="w-12 text-meta font-mono font-semibold text-primary">
+                          <span className="w-12 text-meta font-mono font-semibold text-swiss-accent">
                             {`{{${i + 1}}}`}
                           </span>
                           <Input
@@ -1155,7 +1155,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                               next[i] = e.target.value;
                               setVariableSamples(next);
                             }}
-                            className="h-auto flex-1 bg-white ring-1 ring-swiss-line rounded-lg px-3 py-1.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/15"
+                            className="h-auto flex-1 bg-white ring-1 ring-swiss-line rounded-lg px-3 py-1.5 text-sm outline-none focus:border-swiss-accent focus:ring-2 focus:ring-swiss-accent/15"
                           />
                         </div>
                       ))}
@@ -1168,7 +1168,7 @@ export const WhatsAppTemplateBuilder: React.FC<Props> = ({
                         type="checkbox"
                         checked={submitToMeta}
                         onChange={(e) => setSubmitToMeta(e.target.checked)}
-                        className="mt-0.5 accent-primary"
+                        className="mt-0.5 accent-swiss-accent"
                       />
                       <div>
                         <p className="text-sm font-semibold text-[#050505]">

@@ -36,20 +36,14 @@ export const NeedsReplyPanel: React.FC<NeedsReplyPanelProps> = ({
 
   return (
     <div className="flex h-full flex-col font-swiss">
-      <div className="mb-1 flex items-baseline justify-between">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-swiss-muted">
-          Needs a reply
-        </p>
-        <button
-          type="button"
-          onClick={onOpenInbox}
-          className="inline-flex cursor-pointer items-center gap-1 text-[11px] font-medium text-swiss-accent"
-        >
-          Open inbox
-          <ArrowUpRight className="h-3 w-3" />
-        </button>
+      <div className="mb-3 flex items-center gap-1.5">
+        <p className="text-[13.5px] font-bold text-swiss-ink">Needs a reply</p>
+        {conversations.length > 0 ? (
+          <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+            {conversations.length}
+          </span>
+        ) : null}
       </div>
-      <p className="mb-3 text-[11px] text-swiss-faint">Oldest unread first</p>
 
       {items.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center py-8 text-center">
@@ -97,6 +91,15 @@ export const NeedsReplyPanel: React.FC<NeedsReplyPanelProps> = ({
           })}
         </ul>
       )}
+
+      <button
+        type="button"
+        onClick={onOpenInbox}
+        className="mt-3 inline-flex cursor-pointer items-center justify-center gap-1 text-[11.5px] font-semibold text-swiss-accent"
+      >
+        View inbox
+        <ArrowUpRight className="h-3 w-3" />
+      </button>
     </div>
   );
 };

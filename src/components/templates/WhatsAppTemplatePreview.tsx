@@ -61,7 +61,7 @@ export function WhatsAppTemplateMessageBubble({
   const mediaPad = compact ? 'py-5 px-3' : 'py-8 px-4';
 
   return (
-    <div className="max-w-[95%] bg-white rounded-lg rounded-tl-sm overflow-hidden text-[#111b21]">
+    <div className="max-w-[95%] bg-white border border-swiss-line rounded-lg rounded-tl-sm overflow-hidden text-[#111b21]">
       {showMediaHeader && (
         <div className="bg-[#f0f2f5] border-b border-[#e9edef]">
           {headerFormat === 'image' && headerMediaPreviewUrl ? (

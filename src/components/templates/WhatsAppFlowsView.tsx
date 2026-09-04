@@ -32,7 +32,7 @@ function StatusBadge({ status }: { status: string }) {
   return (
     <span
       className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide ${
-        isPublished ? 'bg-[#e6f7ec] text-channel-green' : 'bg-slate-100 text-swiss-muted'
+        isPublished ? 'bg-[#e6f7ec] text-channel-green' : 'bg-white text-swiss-muted border border-gray-200'
       }`}
     >
       {isPublished ? 'Published' : 'Draft'}
@@ -90,13 +90,13 @@ export const WhatsAppFlowsView: React.FC = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search flows..."
-            className="h-auto w-full bg-slate-50 border border-swiss-line rounded-xl py-1.5 pl-9 pr-3 text-meta font-semibold outline-none focus:ring-2 focus:ring-primary/20"
+            className="h-auto w-full bg-white border border-swiss-line rounded-xl py-1.5 pl-9 pr-3 text-meta font-semibold outline-none focus:ring-2 focus:ring-swiss-accent/20"
           />
         </div>
         <button
           type="button"
           onClick={() => navigate(pathForTemplateEditor('flow', null))}
-          className="px-3 py-2 bg-primary hover:bg-primary-hover text-white rounded-xl text-meta font-bold flex items-center gap-1.5"
+          className="px-3 py-2 bg-swiss-accent hover:bg-swiss-accent-hover text-white rounded-xl text-meta font-bold flex items-center gap-1.5"
         >
           <Plus className="w-3.5 h-3.5" />
           Create flow

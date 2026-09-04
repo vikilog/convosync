@@ -2152,7 +2152,7 @@ export const InboxView: React.FC = () => {
 
   if (showConnectChannelEmpty) {
     return (
-      <div className="flex flex-row h-full min-h-0 overflow-hidden bg-surface-muted border-t border-swiss-line selection:bg-primary/15">
+      <div className="flex flex-row h-full min-h-0 overflow-hidden bg-white border-t border-swiss-line font-swiss selection:bg-swiss-accent/15">
         <ConnectChannelEmpty
           onConnect={() => navigate(pathForIntegrationsChannel('whatsapp'))}
         />
@@ -2205,7 +2205,7 @@ export const InboxView: React.FC = () => {
     : null;
 
   return (
-    <div className="flex flex-row h-full min-h-0 overflow-hidden bg-surface-muted border-t border-swiss-line selection:bg-primary/15">
+    <div className="flex flex-row h-full min-h-0 overflow-hidden bg-white border-t border-swiss-line font-swiss selection:bg-swiss-accent/15">
       <section
         className={`${
           isLargeUp ? 'w-[300px] xl:w-[320px]' : 'w-full'
@@ -2215,7 +2215,7 @@ export const InboxView: React.FC = () => {
       >
         <div className="p-3 border-b border-swiss-line flex flex-col gap-2.5">
           <div
-            className="flex min-w-0 gap-1 rounded-xl bg-surface-muted p-1 ring-1 ring-swiss-line"
+            className="flex min-w-0 gap-1 rounded-xl bg-white p-1 ring-1 ring-swiss-line"
             role="tablist"
             aria-label="Channel"
           >
@@ -2268,7 +2268,7 @@ export const InboxView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setNewChatOpen(true)}
-                className="shrink-0 cursor-pointer rounded-lg bg-primary p-1.5 text-white transition-colors duration-200 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                className="shrink-0 cursor-pointer rounded-lg bg-swiss-accent p-1.5 text-white transition-colors duration-200 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swiss-accent/30"
                 title={channelFilter === 'email' ? 'New email' : 'New WhatsApp chat'}
                 aria-label={channelFilter === 'email' ? 'New email' : 'New WhatsApp chat'}
               >
@@ -2288,7 +2288,7 @@ export const InboxView: React.FC = () => {
                 value={listSearch}
                 onChange={(e) => setListSearch(e.target.value)}
                 placeholder="Search conversations…"
-                className="h-auto min-h-10 cursor-text rounded-xl border-swiss-line bg-surface-muted py-2 pl-8 pr-3 text-sm font-medium text-swiss-ink outline-none transition-colors duration-200 placeholder:text-slate-400 focus-visible:border-primary/40 focus-visible:ring-2 focus-visible:ring-primary/15"
+                className="h-auto min-h-10 cursor-text rounded-xl border-swiss-line bg-white py-2 pl-8 pr-3 text-sm font-medium text-swiss-ink outline-none transition-colors duration-200 placeholder:text-slate-400 focus-visible:border-swiss-accent/40 focus-visible:ring-2 focus-visible:ring-swiss-accent/15"
               />
             </label>
             <div className="relative shrink-0">
@@ -2299,13 +2299,13 @@ export const InboxView: React.FC = () => {
                 title="Filter conversations"
                 className={`relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border transition-colors duration-200 ${
                   filterTab !== 'all' || tagFilter.length > 0 || favoritesOnly
-                    ? 'border-primary/30 bg-primary/10 text-primary'
-                    : 'border-swiss-line bg-surface-muted text-slate-600 hover:bg-white'
+                    ? 'border-swiss-accent/30 bg-swiss-accent/10 text-swiss-accent'
+                    : 'border-swiss-line bg-white text-slate-600 hover:bg-white'
                 }`}
               >
                 <SlidersHorizontal className="h-4 w-4" aria-hidden />
                 {(filterTab !== 'all' || tagFilter.length > 0 || favoritesOnly) && (
-                  <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-black text-white">
+                  <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-swiss-accent px-1 text-[10px] font-black text-white">
                     {(filterTab !== 'all' ? 1 : 0) + tagFilter.length + (favoritesOnly ? 1 : 0)}
                   </span>
                 )}
@@ -2317,10 +2317,10 @@ export const InboxView: React.FC = () => {
                 onClick={() => setBatchSheetOpen(true)}
                 aria-label="Batch actions"
                 title="Batch actions"
-                className="relative flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-primary/30 bg-primary/10 text-primary transition-colors duration-200"
+                className="relative flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-swiss-accent/30 bg-swiss-accent/10 text-swiss-accent transition-colors duration-200"
               >
                 <ListChecks className="h-4 w-4" aria-hidden />
-                <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-black text-white">
+                <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-swiss-accent px-1 text-[10px] font-black text-white">
                   {selectedThreadIds.size}
                 </span>
               </button>
@@ -2368,7 +2368,7 @@ export const InboxView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => loadConversations()}
-                  className="mx-auto mt-3 block cursor-pointer text-primary hover:underline"
+                  className="mx-auto mt-3 block cursor-pointer text-swiss-accent hover:underline"
                 >
                   Retry
                 </button>
@@ -2401,9 +2401,9 @@ export const InboxView: React.FC = () => {
                   }}
                   className={`group relative cursor-pointer border-l-[3px] px-3 py-2.5 text-left transition-colors duration-200 ${
                     isActive
-                      ? 'border-l-primary bg-primary/10'
+                      ? 'border-l-swiss-accent bg-swiss-accent/10'
                       : unread
-                        ? 'border-l-transparent bg-emerald-50/40 hover:bg-primary/5'
+                        ? 'border-l-transparent bg-emerald-50/40 hover:bg-swiss-accent/5'
                         : 'border-l-transparent hover:bg-gray-50'
                   }`}
                 >
@@ -2419,7 +2419,7 @@ export const InboxView: React.FC = () => {
                       }
                       className={`mt-2 flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors duration-200 ${
                         selectedThreadIds.has(thread.conversationId)
-                          ? 'border-primary bg-primary text-white'
+                          ? 'border-swiss-accent bg-swiss-accent text-white'
                           : 'border-swiss-line bg-white'
                       }`}
                     >
@@ -2432,7 +2432,7 @@ export const InboxView: React.FC = () => {
                         <img
                           src={thread.avatar}
                           alt={thread.name}
-                          className="h-10 w-10 rounded-full border border-swiss-line object-cover bg-surface-muted"
+                          className="h-10 w-10 rounded-full border border-swiss-line object-cover bg-white"
                           referrerPolicy="no-referrer"
                           onError={(e) => {
                             e.currentTarget.style.display = 'none';
@@ -2442,7 +2442,7 @@ export const InboxView: React.FC = () => {
                         />
                       ) : null}
                       <div
-                        className={`flex h-10 w-10 items-center justify-center rounded-full border border-swiss-line bg-primary/10 text-xs font-black text-primary ${
+                        className={`flex h-10 w-10 items-center justify-center rounded-full border border-swiss-line bg-swiss-accent/10 text-xs font-black text-swiss-accent ${
                           thread.avatar ? 'hidden' : ''
                         }`}
                       >
@@ -2484,8 +2484,8 @@ export const InboxView: React.FC = () => {
                               unread
                                 ? 'font-bold text-gray-950'
                                 : isActive
-                                  ? 'font-semibold text-primary'
-                                  : 'font-semibold text-swiss-ink group-hover:text-primary'
+                                  ? 'font-semibold text-swiss-accent'
+                                  : 'font-semibold text-swiss-ink group-hover:text-swiss-accent'
                             }`}
                           >
                             {thread.name}
@@ -2513,7 +2513,7 @@ export const InboxView: React.FC = () => {
                               const initial = (human?.name || 'A').charAt(0).toUpperCase();
                               return (
                                 <span
-                                  className="shrink-0 inline-flex items-center justify-center w-4 h-4 rounded-full bg-primary/10 text-primary text-[9px] font-black"
+                                  className="shrink-0 inline-flex items-center justify-center w-4 h-4 rounded-full bg-swiss-accent/10 text-swiss-accent text-[9px] font-black"
                                   title={human?.name || 'Human agent'}
                                   aria-label={human?.name || 'Human agent'}
                                 >
@@ -2542,14 +2542,14 @@ export const InboxView: React.FC = () => {
                         </button>
                         <span
                           className={`shrink-0 font-mono text-meta font-bold leading-none ${
-                            unread ? 'text-primary' : 'text-swiss-faint'
+                            unread ? 'text-swiss-accent' : 'text-swiss-faint'
                           }`}
                         >
                           {thread.lastActive}
                         </span>
                       </div>
                       {showWaLine && (
-                        <p className="text-meta font-bold text-primary truncate mt-0.5">
+                        <p className="text-meta font-bold text-swiss-accent truncate mt-0.5">
                           {waLine}
                         </p>
                       )}
@@ -2564,7 +2564,7 @@ export const InboxView: React.FC = () => {
                             : thread.lastMessage}
                         </p>
                         {unread && (
-                          <span className="bg-channel-green text-white text-badge min-w-[18px] h-[18px] px-1 rounded-full font-black flex items-center justify-center leading-none shrink-0">
+                          <span className="bg-swiss-accent text-white text-badge min-w-[18px] h-[18px] px-1 rounded-full font-black flex items-center justify-center leading-none shrink-0">
                             {thread.unreadCount > 99 ? '99+' : thread.unreadCount}
                           </span>
                         )}
@@ -2606,7 +2606,7 @@ export const InboxView: React.FC = () => {
       </section>
 
       <section
-        className={`flex-1 flex-col bg-surface-muted h-full overflow-hidden relative ${
+        className={`flex-1 flex-col bg-white h-full overflow-hidden relative ${
           !isLargeUp && mobilePane !== 'chat' ? 'hidden' : 'flex'
         }`}
       >
@@ -2616,13 +2616,13 @@ export const InboxView: React.FC = () => {
           <EmptyChatPanel message="Select a conversation from the list, or wait for new chats to arrive." />
         ) : (
           <>
-            <div className="flex h-16 items-center justify-between gap-2 border-b border-swiss-line bg-surface px-3 md:px-4">
+            <div className="flex h-16 items-center justify-between gap-2 border-b border-swiss-line bg-white px-3 md:px-4">
               <div className="flex min-w-0 items-center text-left">
                 {!isLargeUp && (
                   <button
                     type="button"
                     onClick={() => setMobilePane('list')}
-                    className="mr-2 inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-xl text-swiss-muted transition-colors duration-200 hover:bg-primary/10 hover:text-primary"
+                    className="mr-2 inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-xl text-swiss-muted transition-colors duration-200 hover:bg-swiss-accent/10 hover:text-swiss-accent"
                     aria-label="Back to conversations"
                   >
                     <ArrowLeft className="h-4 w-4" />
@@ -2633,7 +2633,7 @@ export const InboxView: React.FC = () => {
                     <img
                       src={selectedContact.avatar}
                       alt={selectedContact.name}
-                      className="h-10 w-10 rounded-full object-cover bg-surface-muted ring-1 ring-black/5"
+                      className="h-10 w-10 rounded-full object-cover bg-white ring-1 ring-black/5"
                       referrerPolicy="no-referrer"
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
@@ -2643,7 +2643,7 @@ export const InboxView: React.FC = () => {
                     />
                   ) : null}
                   <div
-                    className={`flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-xs font-black text-primary ring-1 ring-primary/15 ${
+                    className={`flex h-10 w-10 items-center justify-center rounded-full bg-swiss-accent/10 text-xs font-black text-swiss-accent ring-1 ring-swiss-accent/15 ${
                       selectedContact.avatar ? 'hidden' : ''
                     }`}
                   >
@@ -2657,7 +2657,7 @@ export const InboxView: React.FC = () => {
                     </h3>
                     {journeyProgress?.status === 'waiting' &&
                       (selectedContact.automationsPaused ? (
-                        <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                        <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">
                           <Pause className="h-3 w-3" aria-hidden />
                           Automation paused
                         </span>
@@ -2691,9 +2691,9 @@ export const InboxView: React.FC = () => {
               <div className="flex shrink-0 items-center gap-1.5 md:gap-2">
                 {/* ponytail: inbox voice-call button parked for later release — restore Phone import + createCall handler */}
 
-                <div className="hidden items-center rounded-xl bg-surface-muted px-2.5 py-1.5 ring-1 ring-swiss-line lg:flex">
+                <div className="hidden items-center rounded-xl bg-white px-2.5 py-1.5 ring-1 ring-swiss-line lg:flex">
                   <span className="mr-1 flex items-center gap-1 text-sm font-bold text-swiss-muted">
-                    <User className="h-3.5 w-3.5 text-primary" /> Active :
+                    <User className="h-3.5 w-3.5 text-swiss-accent" /> Active :
                   </span>
                   <InboxAssigneePicker
                     value={activeAssigneeValue}
@@ -2754,10 +2754,10 @@ export const InboxView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => void handleToggleAutomationPause()}
-                  className={`inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 ${
+                  className={`inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swiss-accent/30 ${
                     selectedContact.automationsPaused
                       ? 'text-[#b45309] hover:bg-[#fff5e6]'
-                      : 'text-swiss-muted hover:bg-primary/10 hover:text-primary'
+                      : 'text-swiss-muted hover:bg-swiss-accent/10 hover:text-swiss-accent'
                   }`}
                   aria-label={
                     selectedContact.automationsPaused ? 'Resume automation' : 'Pause automation'
@@ -2778,7 +2778,7 @@ export const InboxView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setDeleteConfirmOpen(true)}
-                  className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl text-swiss-muted transition-colors duration-200 hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                  className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl text-swiss-muted transition-colors duration-200 hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swiss-accent/30"
                   aria-label="Delete chat history"
                   title="Delete chat history"
                 >
@@ -2788,7 +2788,7 @@ export const InboxView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setDetailsOpen(true)}
-                  className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl text-swiss-muted transition-colors duration-200 hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                  className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl text-swiss-muted transition-colors duration-200 hover:bg-swiss-accent/10 hover:text-swiss-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swiss-accent/30 lg:hidden"
                   aria-label="Open contact profile"
                   title="Contact & journey"
                 >
@@ -2811,7 +2811,7 @@ export const InboxView: React.FC = () => {
               onLoadOlder={() => void handleLoadOlderMessages()}
             />
 
-            <div className="border-t border-swiss-line bg-surface p-2.5 text-left">
+            <div className="border-t border-swiss-line bg-white p-2.5 text-left">
               {isAiAssigneeValue(activeAssigneeValue) ? (
                 <div className="mb-2 flex items-center justify-between gap-2 rounded-xl border border-violet-200 bg-violet-50/80 px-3 py-2">
                   <span className="inline-flex items-center gap-1.5 text-sm font-bold text-violet-700 min-w-0">
@@ -2925,7 +2925,7 @@ export const InboxView: React.FC = () => {
               ) : (
               <>
               {pendingComposerFile && (
-                <div className="mb-2 flex items-center gap-2 rounded-lg border border-swiss-line bg-surface-muted px-3 py-2">
+                <div className="mb-2 flex items-center gap-2 rounded-lg border border-swiss-line bg-white px-3 py-2">
                   {pendingComposerFile.type.startsWith('image/') && pendingComposerPreview ? (
                     <img
                       src={pendingComposerPreview}
@@ -2964,10 +2964,10 @@ export const InboxView: React.FC = () => {
               />
 
               <div
-                className={`flex min-h-11 items-center gap-0.5 rounded-2xl bg-surface px-1.5 ring-1 transition-shadow duration-200 ${
+                className={`flex min-h-11 items-center gap-0.5 rounded-2xl bg-white px-1.5 ring-1 transition-shadow duration-200 ${
                   sendingMedia
-                    ? 'ring-2 ring-primary/25'
-                    : 'ring-swiss-line focus-within:ring-2 focus-within:ring-primary/20'
+                    ? 'ring-2 ring-swiss-accent/25'
+                    : 'ring-swiss-line focus-within:ring-2 focus-within:ring-swiss-accent/20'
                 }`}
               >
                 <Textarea
@@ -3018,8 +3018,8 @@ export const InboxView: React.FC = () => {
                       onClick={() => setComposerActionsOpen((open) => !open)}
                       className={`inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl transition-colors duration-200 disabled:opacity-40 ${
                         composerActionsOpen
-                          ? 'bg-primary/10 text-primary'
-                          : 'text-swiss-faint hover:bg-primary/10 hover:text-primary'
+                          ? 'bg-swiss-accent/10 text-swiss-accent'
+                          : 'text-swiss-faint hover:bg-swiss-accent/10 hover:text-swiss-accent'
                       }`}
                       title="More options"
                       aria-label="More options"
@@ -3031,7 +3031,7 @@ export const InboxView: React.FC = () => {
                     {composerActionsOpen && selectedContact && (
                       <div
                         role="menu"
-                        className="absolute bottom-full right-0 z-50 mb-2 w-[min(240px,calc(100vw-2rem))] rounded-2xl bg-surface py-1.5 shadow-lg shadow-black/10 ring-1 ring-swiss-line"
+                        className="absolute bottom-full right-0 z-50 mb-2 w-[min(240px,calc(100vw-2rem))] rounded-2xl bg-white py-1.5 shadow-lg shadow-black/10 ring-1 ring-swiss-line"
                       >
                         {(contactChannel(selectedContact) === 'whatsapp' ||
                           contactChannel(selectedContact) === 'instagram' ||
@@ -3044,7 +3044,7 @@ export const InboxView: React.FC = () => {
                               setComposerActionsOpen(false);
                               setSendMediaDialogOpen(true);
                             }}
-                            className="flex w-full cursor-pointer items-center gap-3 px-3 py-2.5 text-sm font-semibold text-swiss-ink transition-colors duration-200 hover:bg-primary/5 hover:text-primary disabled:opacity-40"
+                            className="flex w-full cursor-pointer items-center gap-3 px-3 py-2.5 text-sm font-semibold text-swiss-ink transition-colors duration-200 hover:bg-swiss-accent/5 hover:text-swiss-accent disabled:opacity-40"
                           >
                             <Paperclip className="h-4 w-4 shrink-0" />
                             Media
@@ -3058,9 +3058,9 @@ export const InboxView: React.FC = () => {
                             setComposerActionsOpen(false);
                             void handleAiSuggest();
                           }}
-                          className="flex w-full cursor-pointer items-center gap-3 px-3 py-2.5 text-sm font-semibold text-swiss-ink transition-colors duration-200 hover:bg-primary/5 hover:text-primary disabled:opacity-40"
+                          className="flex w-full cursor-pointer items-center gap-3 px-3 py-2.5 text-sm font-semibold text-swiss-ink transition-colors duration-200 hover:bg-swiss-accent/5 hover:text-swiss-accent disabled:opacity-40"
                         >
-                          <Sparkles className="h-4 w-4 shrink-0 text-primary" />
+                          <Sparkles className="h-4 w-4 shrink-0 text-swiss-accent" />
                           AI suggest
                         </button>
                         <button
@@ -3072,7 +3072,7 @@ export const InboxView: React.FC = () => {
                             setSendError(null);
                             setShowCannedPicker(true);
                           }}
-                          className="flex w-full cursor-pointer items-center gap-3 px-3 py-2.5 text-sm font-semibold text-swiss-ink transition-colors duration-200 hover:bg-primary/5 hover:text-primary disabled:opacity-40"
+                          className="flex w-full cursor-pointer items-center gap-3 px-3 py-2.5 text-sm font-semibold text-swiss-ink transition-colors duration-200 hover:bg-swiss-accent/5 hover:text-swiss-accent disabled:opacity-40"
                         >
                           <MessageSquareText className="h-4 w-4 shrink-0" />
                           Canned responses
@@ -3088,7 +3088,7 @@ export const InboxView: React.FC = () => {
                                 setComposerActionsOpen(false);
                                 void handleTriggerTemplate();
                               }}
-                              className="flex w-full cursor-pointer items-center gap-3 px-3 py-2.5 text-sm font-semibold text-swiss-ink transition-colors duration-200 hover:bg-primary/5 hover:text-primary disabled:opacity-40"
+                              className="flex w-full cursor-pointer items-center gap-3 px-3 py-2.5 text-sm font-semibold text-swiss-ink transition-colors duration-200 hover:bg-swiss-accent/5 hover:text-swiss-accent disabled:opacity-40"
                             >
                               <FileText className="h-4 w-4 shrink-0" />
                               Templates
@@ -3108,7 +3108,7 @@ export const InboxView: React.FC = () => {
                                   setMessageInput((prev) => prev + emoji);
                                   setComposerActionsOpen(false);
                                 }}
-                                className="h-8 w-8 cursor-pointer rounded-lg text-base transition-colors duration-200 hover:bg-primary/5 disabled:opacity-40"
+                                className="h-8 w-8 cursor-pointer rounded-lg text-base transition-colors duration-200 hover:bg-swiss-accent/5 disabled:opacity-40"
                                 aria-label={`Insert ${emoji}`}
                               >
                                 {emoji}
@@ -3129,7 +3129,7 @@ export const InboxView: React.FC = () => {
                       sendingText ||
                       composerWindowClosed
                     }
-                    className="ml-0.5 inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl bg-channel-green text-white shadow-emerald-600/15 transition-colors duration-200 hover:bg-[#20bd5a] disabled:cursor-not-allowed disabled:opacity-40"
+                    className="ml-0.5 inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl bg-swiss-accent text-white shadow-emerald-600/15 transition-colors duration-200 hover:bg-swiss-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
                     aria-label={sendingMedia || sendingText ? 'Sending' : 'Send message'}
                   >
                     {sendingMedia || sendingText ? (
@@ -3147,8 +3147,14 @@ export const InboxView: React.FC = () => {
         )}
       </section>
 
+      {profileSidebarProps && (
+        <section className="hidden w-[360px] xl:w-[380px] shrink-0 flex-col border-l border-swiss-line bg-white h-full overflow-hidden lg:flex">
+          <InboxContactSidebar {...profileSidebarProps} onClose={undefined} />
+        </section>
+      )}
+
       <AnimatePresence>
-        {profileSidebarProps && detailsOpen && (
+        {!isLargeUp && profileSidebarProps && detailsOpen && (
           <>
             <motion.button
               type="button"
@@ -3169,7 +3175,7 @@ export const InboxView: React.FC = () => {
                   ? { duration: 0 }
                   : { type: 'spring', damping: 28, stiffness: 320 }
               }
-              className="fixed inset-y-0 right-0 z-50 w-full max-w-[min(400px,92vw)] overflow-hidden bg-surface shadow-2xl ring-1 ring-black/5"
+              className="fixed inset-y-0 right-0 z-50 w-full max-w-[min(400px,92vw)] overflow-hidden bg-white shadow-2xl ring-1 ring-black/5"
             >
               <InboxContactSidebar {...profileSidebarProps} />
             </motion.div>
@@ -3247,7 +3253,7 @@ export const InboxView: React.FC = () => {
                         onClick={() => setFilterTab(tab.id)}
                         className={`cursor-pointer rounded-lg px-3 py-2 text-sm font-bold transition-colors duration-200 ${
                           filterTab === tab.id
-                            ? 'bg-primary/10 text-primary ring-1 ring-primary/20'
+                            ? 'bg-swiss-accent/10 text-swiss-accent ring-1 ring-swiss-accent/20'
                             : 'text-slate-600 hover:bg-surface-muted'
                         }`}
                       >
@@ -3267,7 +3273,7 @@ export const InboxView: React.FC = () => {
                       type="checkbox"
                       checked={favoritesOnly}
                       onChange={(e) => setFavoritesOnly(e.target.checked)}
-                      className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary/30"
+                      className="h-4 w-4 rounded border-slate-300 text-swiss-accent focus:ring-swiss-accent/30"
                     />
                   </label>
                 </div>
@@ -3282,7 +3288,7 @@ export const InboxView: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => setTagFilter([])}
-                          className="cursor-pointer text-xs font-bold text-primary hover:underline"
+                          className="cursor-pointer text-xs font-bold text-swiss-accent hover:underline"
                         >
                           Clear
                         </button>
@@ -3303,7 +3309,7 @@ export const InboxView: React.FC = () => {
                             aria-pressed={checked}
                             className={`cursor-pointer rounded-full border px-3 py-1.5 text-xs font-bold transition-colors duration-200 ${
                               checked
-                                ? 'border-primary bg-primary text-white'
+                                ? 'border-swiss-accent bg-swiss-accent text-white'
                                 : 'border-swiss-line bg-white text-slate-600 hover:bg-surface-muted'
                             }`}
                           >
@@ -3332,7 +3338,7 @@ export const InboxView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setFilterPanelOpen(false)}
-                  className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-white hover:bg-primary-hover"
+                  className="rounded-full bg-swiss-accent px-5 py-2 text-sm font-semibold text-white hover:bg-swiss-accent-hover"
                 >
                   Done
                 </button>
@@ -3443,7 +3449,7 @@ export const InboxView: React.FC = () => {
                       if (e.key === 'Enter') void runBatchTag(batchTagInput);
                     }}
                     placeholder="Tag name…"
-                    className="h-auto w-full rounded-lg border-swiss-line px-3 py-2 text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-primary/15"
+                    className="h-auto w-full rounded-lg border-swiss-line px-3 py-2 text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-swiss-accent/15"
                   />
                   {availableTags.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-1.5">
@@ -3464,7 +3470,7 @@ export const InboxView: React.FC = () => {
                     type="button"
                     disabled={!batchTagInput.trim() || batchBusy}
                     onClick={() => void runBatchTag(batchTagInput)}
-                    className="mt-2 w-full cursor-pointer rounded-lg bg-primary px-3 py-2 text-sm font-bold text-white disabled:opacity-50"
+                    className="mt-2 w-full cursor-pointer rounded-lg bg-swiss-accent px-3 py-2 text-sm font-bold text-white disabled:opacity-50"
                   >
                     Apply
                   </button>
@@ -3478,7 +3484,7 @@ export const InboxView: React.FC = () => {
                     type="button"
                     disabled={batchBusy}
                     onClick={() => void runBatchResolve()}
-                    className="w-full cursor-pointer rounded-lg border border-swiss-line bg-surface-muted px-3 py-2.5 text-left text-sm font-bold text-slate-700 hover:bg-white disabled:opacity-50"
+                    className="w-full cursor-pointer rounded-lg border border-swiss-line bg-white px-3 py-2.5 text-left text-sm font-bold text-slate-700 hover:bg-white disabled:opacity-50"
                   >
                     Mark resolved
                   </button>
@@ -3501,7 +3507,7 @@ export const InboxView: React.FC = () => {
                 >
                   Clear selection
                 </button>
-                {batchBusy && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
+                {batchBusy && <Loader2 className="h-4 w-4 animate-spin text-swiss-accent" />}
               </div>
             </motion.aside>
           </>
@@ -3558,7 +3564,7 @@ export const InboxView: React.FC = () => {
                     batchConfirm.id
                   )
                 }
-                className="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-primary px-3 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover disabled:opacity-60"
+                className="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-swiss-accent px-3 py-2.5 text-sm font-semibold text-white hover:bg-swiss-accent-hover disabled:opacity-60"
               >
                 {batchBusy && <Loader2 className="h-4 w-4 animate-spin" />}
                 {batchBusy ? 'Assigning…' : 'Assign'}

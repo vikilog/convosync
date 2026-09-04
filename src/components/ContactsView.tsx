@@ -98,7 +98,7 @@ const CHANNEL_NAV: {
     id: 'all',
     label: 'All channels',
     icon: <LayoutGrid className="w-4 h-4" />,
-    activeClass: 'bg-primary/15 text-primary',
+    activeClass: 'bg-swiss-accent/15 text-swiss-accent',
   },
   {
     id: 'whatsapp',
@@ -122,7 +122,7 @@ const CHANNEL_NAV: {
 
 /** Compact toolbar selects — never stretch. */
 const FILTER_SELECT_CLASS =
-  'h-auto shrink-0 rounded-lg border-swiss-line bg-white px-2.5 py-2 text-sm font-semibold text-slate-800 shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary';
+  'h-auto shrink-0 rounded-lg border-swiss-line bg-white px-2.5 py-2 text-sm font-semibold text-slate-800 shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swiss-accent/20 focus-visible:border-swiss-accent';
 
 export const ContactsView: React.FC = () => {
   const location = useLocation();
@@ -460,7 +460,7 @@ const ContactsWorkspace: React.FC = () => {
 
   if (showConnectChannelEmpty) {
     return (
-      <div className="h-full min-h-0 border border-swiss-line bg-white overflow-hidden flex">
+      <div className="h-full min-h-0 border border-swiss-line bg-white overflow-hidden flex font-swiss">
         <ConnectChannelEmpty
           onConnect={() => navigate(pathForIntegrationsChannel('whatsapp'))}
         />
@@ -469,17 +469,17 @@ const ContactsWorkspace: React.FC = () => {
   }
 
   return (
-    <div className="h-full min-h-0 border border-swiss-line bg-white overflow-hidden">
+    <div className="h-full min-h-0 border border-swiss-line bg-white overflow-hidden font-swiss">
       <div className="h-full min-h-0">
         <section className="min-h-0 h-full flex flex-col">
           <div className="border-b border-swiss-line bg-white px-3 md:px-4 py-3 space-y-3">
-            <div className="inline-flex rounded-lg bg-surface-muted p-0.5">
+            <div className="inline-flex rounded-lg bg-white ring-1 ring-swiss-line p-0.5">
               <button
                 type="button"
                 onClick={() => navigate(pathForContactsDashboard())}
                 className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer ${
                   pageTab === 'dashboard'
-                    ? 'bg-white text-primary ring-1 ring-swiss-line'
+                    ? 'bg-swiss-accent-soft text-swiss-accent'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
@@ -490,7 +490,7 @@ const ContactsWorkspace: React.FC = () => {
                 onClick={() => navigate(pathForContactsList())}
                 className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer ${
                   pageTab === 'contacts'
-                    ? 'bg-white text-primary ring-1 ring-swiss-line'
+                    ? 'bg-swiss-accent-soft text-swiss-accent'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
@@ -508,7 +508,7 @@ const ContactsWorkspace: React.FC = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search name, phone, email..."
-                  className="h-auto rounded-lg border-swiss-line bg-white py-2 pl-9 pr-3 text-sm text-slate-800 focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
+                  className="h-auto rounded-lg border-swiss-line bg-white py-2 pl-9 pr-3 text-sm text-slate-800 focus-visible:border-swiss-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swiss-accent/20"
                 />
               </div>
 
@@ -587,11 +587,11 @@ const ContactsWorkspace: React.FC = () => {
                       onClick={() => setChannelFilter(item.id)}
                       className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 py-1.5 text-xs font-semibold border transition-colors cursor-pointer ${
                         active
-                          ? 'bg-primary/15 text-primary border-primary/20'
+                          ? 'bg-swiss-accent/15 text-swiss-accent border-swiss-accent/20'
                           : 'bg-white text-slate-600 border-swiss-line hover:bg-surface-muted'
                       }`}
                     >
-                      <span className={active ? 'text-primary' : 'text-slate-400'}>{item.icon}</span>
+                      <span className={active ? 'text-swiss-accent' : 'text-slate-400'}>{item.icon}</span>
                       {item.label}
                     </button>
                   );
@@ -678,7 +678,7 @@ const ContactsWorkspace: React.FC = () => {
                 <button
                   type="button"
                   onClick={openAddContact}
-                  className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-white hover:bg-primary-hover whitespace-nowrap"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-swiss-accent px-3 py-2 text-sm font-semibold text-white hover:bg-swiss-accent-hover whitespace-nowrap"
                 >
                   <UserPlus className="w-4 h-4" />
                   Add contact
@@ -702,8 +702,8 @@ const ContactsWorkspace: React.FC = () => {
               </div>
             ) : contacts.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center px-6 text-center">
-                <div className="w-16 h-16 rounded-xl bg-surface-muted flex items-center justify-center mb-3">
-                  <Users className="w-7 h-7 text-slate-400" />
+                <div className="w-16 h-16 rounded-xl bg-swiss-accent-soft flex items-center justify-center mb-3">
+                  <Users className="w-7 h-7 text-swiss-accent" />
                 </div>
                 <p className="text-sm font-semibold text-slate-700">No contacts found</p>
                 <p className="mt-1 text-xs text-slate-500 max-w-xs">
@@ -735,7 +735,7 @@ const ContactsWorkspace: React.FC = () => {
                           className="shrink-0 cursor-pointer"
                           aria-label={`Select ${contact.name}`}
                         />
-                        <div className="w-8 h-8 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center shrink-0">
+                        <div className="w-8 h-8 rounded-full bg-swiss-accent/10 text-swiss-accent text-xs font-bold flex items-center justify-center shrink-0">
                           {contact.name.charAt(0).toUpperCase()}
                         </div>
                         <button
@@ -762,7 +762,7 @@ const ContactsWorkspace: React.FC = () => {
 
                 <div className="hidden md:block">
                   <Table className="min-w-[760px] text-left">
-                    <TableHeader className="sticky top-0 z-10 bg-surface-muted border-b border-swiss-line">
+                    <TableHeader className="sticky top-0 z-10 bg-white border-b border-swiss-line">
                       <TableRow className="text-[11px] uppercase tracking-wider text-slate-500 hover:bg-transparent">
                         <TableHead className="px-4 py-2 font-bold w-10 whitespace-normal">
                           <Checkbox
@@ -802,7 +802,7 @@ const ContactsWorkspace: React.FC = () => {
                       {contacts.map((contact) => (
                         <TableRow
                           key={contact.id}
-                          className={`hover:bg-surface-muted/70 ${selectedIds.has(contact.id) ? 'bg-primary/15' : ''}`}
+                          className={`hover:bg-surface-muted/70 ${selectedIds.has(contact.id) ? 'bg-swiss-accent/15' : ''}`}
                         >
                           <TableCell className="px-4 py-2">
                             <Checkbox
@@ -819,7 +819,7 @@ const ContactsWorkspace: React.FC = () => {
                               onClick={() => navigate(pathForContact(contact.id))}
                               className="flex items-center gap-2 min-w-0 cursor-pointer"
                             >
-                              <div className="w-7 h-7 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center shrink-0">
+                              <div className="w-7 h-7 rounded-full bg-swiss-accent/10 text-swiss-accent text-xs font-bold flex items-center justify-center shrink-0">
                                 {contact.name.charAt(0).toUpperCase()}
                               </div>
                               <span className="font-semibold text-slate-900 truncate">{contact.name}</span>
@@ -837,7 +837,7 @@ const ContactsWorkspace: React.FC = () => {
                                 {contact.tags.slice(0, 2).map((tag) => (
                                   <span
                                     key={tag}
-                                    className="rounded-md bg-primary/15 px-1.5 py-0.5 text-[11px] font-semibold text-primary"
+                                    className="rounded-md bg-swiss-accent/15 px-1.5 py-0.5 text-[11px] font-semibold text-swiss-accent"
                                   >
                                     {tag}
                                   </span>
@@ -867,7 +867,7 @@ const ContactsWorkspace: React.FC = () => {
                             <button
                               type="button"
                               onClick={() => void openEditContact(contact)}
-                              className="inline-flex items-center justify-center p-1.5 rounded-md text-slate-400 hover:text-primary hover:bg-primary/15"
+                              className="inline-flex items-center justify-center p-1.5 rounded-md text-slate-400 hover:text-swiss-accent hover:bg-swiss-accent/15"
                               aria-label={`Edit ${contact.name}`}
                             >
                               <Pencil className="w-4 h-4" />

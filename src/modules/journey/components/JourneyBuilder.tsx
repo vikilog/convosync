@@ -231,7 +231,7 @@ export function JourneyBuilder({ journey, onBack }: Props) {
   );
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-3">
+    <div className="flex h-full min-h-0 flex-col gap-3 font-swiss">
       <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 rounded-xl border-[0.5px] border-border-subtle bg-white px-4 py-2.5">
         <div className="flex min-w-0 items-center gap-2 text-sm">
           <button
@@ -327,7 +327,7 @@ export function JourneyBuilder({ journey, onBack }: Props) {
           >
             {isLoading && !graph ? (
               <div className="flex h-full min-h-0 items-center justify-center rounded-xl border-[0.5px] border-border-subtle bg-white text-sm text-slate-500">
-                <Loader2 className="mr-2 h-5 w-5 animate-spin text-primary" />
+                <Loader2 className="mr-2 h-5 w-5 animate-spin text-swiss-accent" />
                 Loading workflow…
               </div>
             ) : (

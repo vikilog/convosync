@@ -80,7 +80,7 @@ export function ContactLeadJourneyPanel({
   if (!journey) return null;
 
   return (
-    <article className="rounded-xl border border-swiss-line bg-slate-50/80 p-3">
+    <article className="rounded-xl border border-swiss-line bg-white p-3">
       <div className="flex items-start justify-between gap-2">
         <h4 className="flex items-center gap-1.5 text-sm font-bold text-swiss-ink">
           <Filter className="h-3.5 w-3.5 text-primary" />

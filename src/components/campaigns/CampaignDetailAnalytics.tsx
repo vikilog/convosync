@@ -25,7 +25,7 @@ function formatDate(iso: string | null): string {
 /** Stage accents — green only on delivered; others stay neutral/ink. */
 const STAGE_ACCENT: Record<string, string> = {
   sent: '#64748b',
-  delivered: 'var(--color-primary, #078038)',
+  delivered: 'var(--color-swiss-accent, #064e3b)',
   read: '#334155',
   opened: '#334155',
   failed: '#b91c1c',
@@ -68,7 +68,7 @@ const KpiCell: React.FC<{
 }> = ({ label, value, hint, accent = 'none' }) => {
   const valueTone =
     accent === 'primary'
-      ? 'text-primary'
+      ? 'text-swiss-accent'
       : accent === 'danger'
         ? 'text-red-700'
         : 'text-swiss-ink';

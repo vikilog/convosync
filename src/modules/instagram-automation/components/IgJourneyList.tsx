@@ -108,7 +108,7 @@ export function IgJourneyList({ journeys, loading, onCreateBlank, onOpen, onDele
                         className={`shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide ${
                           published
                             ? `${IG_GRADIENT_SOFT} text-[#833AB4]`
-                            : 'bg-gray-100 text-swiss-muted'
+                            : 'bg-white text-swiss-muted border border-gray-200'
                         }`}
                       >
                         {j.status}

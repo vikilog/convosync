@@ -104,7 +104,7 @@ export function JourneyNameDialog({
                   }}
                   autoFocus
                   placeholder="e.g. Welcome new contacts"
-                  className="h-auto mt-1.5 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm font-semibold text-swiss-ink outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  className="h-auto mt-1.5 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm font-semibold text-swiss-ink outline-none focus:ring-2 focus:ring-swiss-accent/20 focus:border-swiss-accent"
                 />
               </label>
               {error && (
@@ -125,7 +125,7 @@ export function JourneyNameDialog({
                 type="button"
                 onClick={submit}
                 disabled={loading}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-black text-white rounded-full bg-primary hover:bg-primary-hover disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-black text-white rounded-full bg-swiss-accent hover:bg-swiss-accent-hover disabled:opacity-50"
               >
                 {loading && <Loader2 className="w-4 h-4 animate-spin" />}
                 {confirmLabel}

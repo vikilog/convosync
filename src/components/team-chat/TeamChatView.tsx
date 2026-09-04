@@ -54,7 +54,7 @@ function Avatar({
   return (
     <div className="relative shrink-0">
       <div
-        className={`flex items-center justify-center overflow-hidden rounded-full bg-[#e6fcef] font-semibold text-primary ${dim}`}
+        className={`flex items-center justify-center overflow-hidden rounded-full bg-swiss-accent-soft font-semibold text-swiss-accent ${dim}`}
       >
         {avatar ? (
           <img src={avatar} alt="" className="h-full w-full object-cover" />
@@ -288,7 +288,7 @@ export const TeamChatView: React.FC = () => {
   };
 
   return (
-    <div className="flex h-full min-h-0 flex-row overflow-hidden border-t border-swiss-line bg-surface-muted selection:bg-primary/15">
+    <div className="flex h-full min-h-0 flex-row overflow-hidden border-t border-swiss-line bg-white font-swiss selection:bg-swiss-accent/15">
       <section
         className={`${
           isLargeUp ? 'w-[300px] xl:w-[320px]' : 'w-full'
@@ -312,7 +312,7 @@ export const TeamChatView: React.FC = () => {
               value={listSearch}
               onChange={(e) => setListSearch(e.target.value)}
               placeholder="Search teammates…"
-              className="h-auto min-h-10 w-full cursor-text rounded-xl border border-swiss-line bg-surface-muted py-2 pl-8 pr-3 text-sm font-medium text-swiss-ink outline-none transition-colors duration-200 placeholder:text-slate-400 focus:border-primary/40 focus:ring-2 focus:ring-primary/15"
+              className="h-auto min-h-10 w-full cursor-text rounded-xl border border-swiss-line bg-white py-2 pl-8 pr-3 text-sm font-medium text-swiss-ink outline-none transition-colors duration-200 placeholder:text-slate-400 focus:border-swiss-accent/40 focus:ring-2 focus:ring-swiss-accent/15"
             />
           </label>
         </div>
@@ -339,7 +339,7 @@ export const TeamChatView: React.FC = () => {
                   type="button"
                   onClick={() => selectPeer(peer.userId)}
                   className={`flex w-full items-center gap-3 border-b border-black/4 px-3 py-3 text-left transition-colors ${
-                    active ? 'bg-primary/8' : 'hover:bg-surface-muted'
+                    active ? 'bg-swiss-accent/8' : 'hover:bg-surface-muted'
                   }`}
                 >
                   <Avatar name={peer.name} avatar={peer.avatar} online={peer.online} />
@@ -367,7 +367,7 @@ export const TeamChatView: React.FC = () => {
                         {preview}
                       </p>
                       {unread > 0 && (
-                        <span className="shrink-0 rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-bold text-white">
+                        <span className="shrink-0 rounded-full bg-swiss-accent px-1.5 py-0.5 text-[10px] font-bold text-white">
                           {unread > 99 ? '99+' : unread}
                         </span>
                       )}
@@ -387,7 +387,7 @@ export const TeamChatView: React.FC = () => {
       >
         {!selectedPeer ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-2 px-6 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-surface-muted text-swiss-faint">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-swiss-faint">
               <MessageSquare className="h-5 w-5" />
             </div>
             <p className="text-sm font-medium text-swiss-ink">Select a teammate</p>
@@ -424,7 +424,7 @@ export const TeamChatView: React.FC = () => {
               </div>
             </div>
 
-            <div className="min-h-0 flex-1 space-y-2 overflow-y-auto bg-surface-muted/40 px-4 py-4">
+            <div className="min-h-0 flex-1 space-y-2 overflow-y-auto bg-white/40 px-4 py-4">
               {loadingThread ? (
                 <p className="py-10 text-center text-sm text-swiss-faint">Loading chat…</p>
               ) : messages.length === 0 ? (
@@ -442,7 +442,7 @@ export const TeamChatView: React.FC = () => {
                       <div
                         className={`max-w-[min(72%,28rem)] rounded-2xl px-3 py-2 text-sm ${
                           mine
-                            ? 'rounded-br-md bg-primary text-white'
+                            ? 'rounded-br-md bg-swiss-accent text-white'
                             : 'rounded-bl-md bg-white text-swiss-ink ring-1 ring-black/5'
                         }`}
                       >
@@ -474,12 +474,12 @@ export const TeamChatView: React.FC = () => {
                 onChange={(e) => setDraft(e.target.value)}
                 placeholder={`Message ${selectedPeer.name.split(' ')[0] || selectedPeer.name}…`}
                 maxLength={4000}
-                className="h-auto min-w-0 flex-1 rounded-lg border border-black/10 bg-white px-3 py-2.5 text-sm text-swiss-ink placeholder:text-swiss-faint focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/15"
+                className="h-auto min-w-0 flex-1 rounded-lg border border-black/10 bg-white px-3 py-2.5 text-sm text-swiss-ink placeholder:text-swiss-faint focus:border-swiss-accent/40 focus:outline-none focus:ring-2 focus:ring-swiss-accent/15"
               />
               <button
                 type="submit"
                 disabled={!draft.trim() || sending}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white transition-colors hover:bg-primary-hover disabled:opacity-40"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-swiss-accent text-white transition-colors hover:bg-swiss-accent-hover disabled:opacity-40"
                 aria-label="Send message"
               >
                 <Send className="h-4 w-4" />
