@@ -115,7 +115,7 @@ export const AiAgentEditorView: React.FC<Props> = ({ agentId, pathname }) => {
         <button
           type="button"
           onClick={() => navigate(pathForTab('ai-agent'))}
-          className="mt-4 text-sm font-bold text-primary hover:underline"
+          className="mt-4 text-sm font-bold text-swiss-accent hover:underline"
         >
           Back to agents
         </button>
@@ -137,7 +137,7 @@ export const AiAgentEditorView: React.FC<Props> = ({ agentId, pathname }) => {
       </button>
 
           <div className="flex w-full min-h-[calc(100vh-12rem)] overflow-hidden bg-white border border-swiss-line ">
-        <aside className="w-[148px] shrink-0 border-r border-swiss-line bg-surface-muted py-3">
+        <aside className="w-[148px] shrink-0 border-r border-swiss-line bg-white py-3">
           <p className="px-3 text-sm font-bold text-swiss-ink truncate mb-3" title={agent.name}>
             {agent.name}
           </p>
@@ -150,7 +150,7 @@ export const AiAgentEditorView: React.FC<Props> = ({ agentId, pathname }) => {
               className={({ isActive }) =>
                 `block px-2.5 py-1.5 rounded-md text-meta transition-all ${
                   isActive
-                    ? 'bg-white text-primary font-bold border border-primary/15'
+                    ? 'bg-white text-swiss-accent font-bold border border-swiss-accent/15'
                     : 'text-swiss-muted hover:bg-surface-muted'
                 }`
               }
@@ -162,7 +162,7 @@ export const AiAgentEditorView: React.FC<Props> = ({ agentId, pathname }) => {
               className={({ isActive }) =>
                 `block px-2.5 py-1.5 rounded-md text-meta transition-all ${
                   isActive
-                    ? 'bg-white text-primary font-bold border border-primary/15'
+                    ? 'bg-white text-swiss-accent font-bold border border-swiss-accent/15'
                     : 'text-swiss-muted hover:bg-surface-muted'
                 }`
               }
@@ -217,7 +217,7 @@ export const AiAgentEditorView: React.FC<Props> = ({ agentId, pathname }) => {
 
                   <div className="grid grid-cols-1 sm:grid-cols-[120px_1fr] gap-6 items-start">
                     <div>
-                      <label className="block w-[120px] h-[120px] border-2 border-dashed border-swiss-line rounded-xl bg-gray-50 cursor-pointer overflow-hidden hover:border-primary/40 transition-colors">
+                      <label className="block w-[120px] h-[120px] border-2 border-dashed border-swiss-line rounded-xl bg-white cursor-pointer overflow-hidden hover:border-swiss-accent/40 transition-colors">
                         {agent.avatarUrl ? (
                           <img src={agent.avatarUrl} alt="" className="w-full h-full object-cover" />
                         ) : (
@@ -251,7 +251,7 @@ export const AiAgentEditorView: React.FC<Props> = ({ agentId, pathname }) => {
                             setAgent((prev) => (prev ? { ...prev, name } : prev));
                             scheduleSave({ name });
                           }}
-                          className="h-auto w-full border border-swiss-line rounded-lg py-2.5 px-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                          className="h-auto w-full border border-swiss-line rounded-lg py-2.5 px-3 text-sm focus:ring-2 focus:ring-swiss-accent/20 focus:border-swiss-accent outline-none"
                         />
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-swiss-faint font-mono">
                           {agent.name.length}/250
@@ -276,7 +276,7 @@ export const AiAgentEditorView: React.FC<Props> = ({ agentId, pathname }) => {
                           scheduleSave({ welcomeMessageText });
                         }}
                         placeholder="Hi! How can we help you today?"
-                        className="min-h-0 mt-3 w-full max-w-lg border border-swiss-line rounded-lg py-2 px-3 text-sm min-h-[72px] resize-none focus:ring-2 focus:ring-primary/20 outline-none"
+                        className="min-h-0 mt-3 w-full max-w-lg border border-swiss-line rounded-lg py-2 px-3 text-sm min-h-[72px] resize-none focus:ring-2 focus:ring-swiss-accent/20 outline-none"
                       />
                     )}
                   </div>
@@ -291,7 +291,7 @@ export const AiAgentEditorView: React.FC<Props> = ({ agentId, pathname }) => {
                       }}
                       className="sr-only peer"
                     />
-                    <div className="w-10 h-5 bg-gray-200 rounded-full peer peer-checked:bg-primary after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:after:translate-x-5" />
+                    <div className="w-10 h-5 bg-gray-200 rounded-full peer peer-checked:bg-swiss-accent after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:after:translate-x-5" />
                   </label>
                 </section>
 
@@ -317,7 +317,7 @@ export const AiAgentEditorView: React.FC<Props> = ({ agentId, pathname }) => {
                             setAgent((prev) => (prev ? { ...prev, intentFallback: option.id } : prev));
                             void persist({ intentFallback: option.id });
                           }}
-                          className="w-4 h-4 text-primary border-gray-300 focus:ring-primary"
+                          className="w-4 h-4 text-swiss-accent border-gray-300 focus:ring-swiss-accent"
                         />
                         {option.label}
                       </label>
@@ -345,7 +345,7 @@ export const AiAgentEditorView: React.FC<Props> = ({ agentId, pathname }) => {
                         setAgent((prev) => (prev ? { ...prev, conversationCloseWaitMins } : prev));
                         scheduleSave({ conversationCloseWaitMins });
                       }}
-                      className="h-auto w-20 border border-swiss-line rounded-lg py-2 px-3 text-sm text-center focus:ring-2 focus:ring-primary/20 outline-none"
+                      className="h-auto w-20 border border-swiss-line rounded-lg py-2 px-3 text-sm text-center focus:ring-2 focus:ring-swiss-accent/20 outline-none"
                     />
                     <span className="text-sm text-swiss-muted font-medium">mins</span>
                   </div>

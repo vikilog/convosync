@@ -148,7 +148,7 @@ export function AutomationControlsPanel() {
                 type="checkbox"
                 checked={paused}
                 onChange={(e) => setPaused(e.target.checked)}
-                className="h-4 w-4 accent-primary"
+                className="h-4 w-4 accent-swiss-accent"
               />
             </label>
           </div>
@@ -168,7 +168,7 @@ export function AutomationControlsPanel() {
             type="checkbox"
             checked={defaultEnabled}
             onChange={(e) => setDefaultEnabled(e.target.checked)}
-            className="h-4 w-4 accent-primary"
+            className="h-4 w-4 accent-swiss-accent"
           />
         </label>
         <Textarea
@@ -176,7 +176,7 @@ export function AutomationControlsPanel() {
           onChange={(e) => setDefaultText(e.target.value)}
           rows={3}
           placeholder="Thanks for messaging us — a teammate will get back shortly."
-          className="min-h-0 w-full rounded-lg border-[0.5px] border-border-subtle bg-white px-3 py-2 text-sm text-dark-navy focus:outline-none focus:ring-2 focus:ring-primary/20"
+          className="min-h-0 w-full rounded-lg border-[0.5px] border-border-subtle bg-white px-3 py-2 text-sm text-dark-navy focus:outline-none focus:ring-2 focus:ring-swiss-accent/20"
           disabled={!defaultEnabled}
         />
       </section>
@@ -196,7 +196,7 @@ export function AutomationControlsPanel() {
             type="checkbox"
             checked={menuEnabled}
             onChange={(e) => setMenuEnabled(e.target.checked)}
-            className="h-4 w-4 accent-primary"
+            className="h-4 w-4 accent-swiss-accent"
           />
         </label>
 
@@ -269,7 +269,7 @@ export function AutomationControlsPanel() {
             <button
               type="button"
               onClick={() => setMenuItems((rows) => [...rows, newItem()])}
-              className="inline-flex cursor-pointer items-center gap-1.5 text-sm font-semibold text-primary"
+              className="inline-flex cursor-pointer items-center gap-1.5 text-sm font-semibold text-swiss-accent"
             >
               <Plus className="h-4 w-4" />
               Add item
@@ -283,7 +283,7 @@ export function AutomationControlsPanel() {
           type="button"
           onClick={() => void save()}
           disabled={saving}
-          className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-hover disabled:opacity-50"
+          className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-swiss-accent px-4 py-2 text-sm font-semibold text-white hover:bg-swiss-accent-hover disabled:opacity-50"
         >
           {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           Save

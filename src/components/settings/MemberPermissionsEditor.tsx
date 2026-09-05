@@ -26,7 +26,7 @@ export function MemberPermissionsEditor({
   }
 
   return (
-    <div className="space-y-2 rounded-xl border border-swiss-line bg-slate-50 p-3">
+    <div className="space-y-2 rounded-xl border border-swiss-line bg-white p-3">
       <div className="flex items-center justify-between gap-2">
         <p className="text-sm font-bold uppercase tracking-wide text-swiss-muted">
           Permissions
@@ -35,7 +35,7 @@ export function MemberPermissionsEditor({
           type="button"
           disabled={disabled}
           onClick={() => onChange([...DEFAULT_AGENT_PERMISSIONS])}
-          className="text-sm font-bold text-primary hover:underline disabled:opacity-50"
+          className="text-sm font-bold text-swiss-accent hover:underline disabled:opacity-50"
         >
           Reset defaults
         </button>

@@ -65,7 +65,7 @@ function Toggle({
       aria-label={label}
       onClick={() => onChange(!checked)}
       className={`relative h-6 w-11 shrink-0 cursor-pointer rounded-full transition-colors ${
-        checked ? 'bg-primary' : 'bg-slate-200'
+        checked ? 'bg-swiss-accent' : 'bg-slate-200'
       }`}
     >
       <span
@@ -112,7 +112,7 @@ export function SocialListeningAgentSettingsForm({
 
   return (
     <div className="space-y-5">
-      <section className="rounded-2xl bg-surface-muted/60 p-4">
+      <section className="rounded-2xl border border-swiss-line bg-white p-4">
         <div className="flex items-start justify-between gap-3">
           <div>
             <h3 className="text-sm font-bold text-swiss-ink">Agent</h3>
@@ -160,7 +160,7 @@ export function SocialListeningAgentSettingsForm({
                 autoResponseEnabled: id ? d.autoResponseEnabled : false,
               }));
             }}
-            className="mt-2 w-full cursor-pointer rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-semibold text-swiss-ink outline-none focus:ring-2 focus:ring-primary/20"
+            className="mt-2 w-full cursor-pointer rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-semibold text-swiss-ink outline-none focus:ring-2 focus:ring-swiss-accent/20"
           >
             <option value="">Select funnel…</option>
             {funnels.map((f) => (
@@ -232,7 +232,7 @@ export function SocialListeningAgentSettingsForm({
                 onChange={(e) =>
                   patch(row.key, e.target.value as SocialListeningSettingsState[typeof row.key])
                 }
-                className="rounded-lg border border-swiss-line bg-slate-50 px-2 py-1.5 text-xs font-semibold text-swiss-ink outline-none"
+                className="rounded-lg border border-swiss-line bg-white px-2 py-1.5 text-xs font-semibold text-swiss-ink outline-none"
               >
                 {row.options.map((o) => (
                   <option key={o.value} value={o.value}>
@@ -259,7 +259,7 @@ export function SocialListeningAgentSettingsForm({
           max={100}
           value={draft.confidenceThreshold}
           onChange={(e) => patch('confidenceThreshold', Number(e.target.value))}
-          className="mt-2 w-full accent-[var(--color-primary,#4f46e5)]"
+          className="mt-2 w-full accent-[var(--color-swiss-accent,#4f46e5)]"
         />
         <p className="mt-1 text-xs text-swiss-muted">
           Auto-respond only above {draft.confidenceThreshold}% confidence.
@@ -278,7 +278,7 @@ export function SocialListeningAgentSettingsForm({
                 e.target.value as SocialListeningSettingsState['publicReplyTone']
               )
             }
-            className="mt-1 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+            className="mt-1 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-swiss-accent/20"
           >
             <option value="friendly">Friendly</option>
             <option value="professional">Professional</option>
@@ -290,7 +290,7 @@ export function SocialListeningAgentSettingsForm({
           <select
             value={draft.dmAgentSkillId || ''}
             onChange={(e) => patch('dmAgentSkillId', e.target.value || null)}
-            className="mt-1 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+            className="mt-1 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-swiss-accent/20"
           >
             <option value="">None (default prompts)</option>
             {skills.map((s) => (
@@ -307,7 +307,7 @@ export function SocialListeningAgentSettingsForm({
             onChange={(e) => patch('fallbackMessage', e.target.value || null)}
             rows={3}
             placeholder="Used for DM if AI generation fails"
-            className="min-h-0 mt-1 w-full resize-none rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+            className="min-h-0 mt-1 w-full resize-none rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-swiss-accent/20"
           />
         </label>
       </section>
@@ -322,7 +322,7 @@ export function SocialListeningAgentSettingsForm({
               e.target.value as SocialListeningSettingsState['leadCreationRule']
             )
           }
-          className="mt-2 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+          className="mt-2 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-swiss-accent/20"
         >
           <option value="interested_only">Interested comments only</option>
           <option value="interested_and_questions">Interested + Questions</option>
@@ -340,13 +340,13 @@ export function SocialListeningAgentSettingsForm({
             max={10000}
             value={draft.maxAutoDmsPerDay}
             onChange={(e) => patch('maxAutoDmsPerDay', Math.max(0, Number(e.target.value) || 0))}
-            className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+            className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-swiss-accent/20"
           />
           <p className="mt-1 text-[11px] text-swiss-faint">
             Sent today: {draft.autoDmsSentToday} / {draft.maxAutoDmsPerDay}
           </p>
         </label>
-        <div className="flex items-center justify-between gap-3 rounded-xl bg-surface-muted/50 px-3 py-2.5">
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-swiss-line bg-white px-3 py-2.5">
           <div>
             <p className="text-sm font-semibold text-swiss-ink">Working hours only</p>
             <p className="text-[11px] text-swiss-faint">

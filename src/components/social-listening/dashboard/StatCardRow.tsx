@@ -104,7 +104,7 @@ export function StatCardRow({
         footer={
           <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
             <div
-              className="h-full rounded-full bg-primary transition-all"
+              className="h-full rounded-full bg-swiss-accent transition-all"
               style={{ width: `${dmPct}%` }}
             />
           </div>

@@ -15,7 +15,7 @@ export const AGENT_TYPE_OPTIONS: AgentTypeOption[] = [
     title: 'AI Agent',
     description:
       'Configure agent behavior through system instructions for personalized and scenario-specific automation.',
-    iconClass: 'text-primary bg-primary/10',
+    iconClass: 'text-swiss-accent bg-swiss-accent/10',
   },
   // Responsive AI Agent — hidden for now
   // {
@@ -45,7 +45,7 @@ export const AgentTypeSelector: React.FC<Props> = ({ onSelect }) => (
         key={option.id}
         type="button"
         onClick={() => onSelect(option.id)}
-        className="w-full text-left px-4 py-4 hover:bg-primary/10 border-b border-gray-100 last:border-b-0 transition-colors flex gap-3"
+        className="w-full text-left px-4 py-4 hover:bg-swiss-accent/10 border-b border-gray-100 last:border-b-0 transition-colors flex gap-3"
       >
         <div className={`p-2 rounded-full shrink-0 h-fit ${option.iconClass}`}>
           <Bot className="w-5 h-5" />

@@ -283,7 +283,7 @@ export function CompanyInfoPanel() {
             inputMode="numeric"
             autoComplete="one-time-code"
             placeholder="Enter OTP"
-            className="h-auto min-w-0 flex-1 rounded-xl border border-swiss-line px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+            className="h-auto min-w-0 flex-1 rounded-xl border border-swiss-line px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-swiss-accent/20"
           />
           <button
             type="button"
@@ -365,7 +365,7 @@ export function CompanyInfoPanel() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24 text-swiss-faint">
-        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+        <Loader2 className="w-6 h-6 animate-spin text-swiss-accent" />
       </div>
     );
   }
@@ -378,7 +378,7 @@ export function CompanyInfoPanel() {
       <form onSubmit={handleSave}>
         <div className="bg-white rounded-2xl border border-swiss-line p-6 ">
         <h3 className="text-sm font-bold text-swiss-ink flex items-center gap-2 mb-1">
-          <Building2 className="w-4 h-4 text-primary" />
+          <Building2 className="w-4 h-4 text-swiss-accent" />
           Company profile
         </h3>
         <p className="text-xs text-swiss-faint mb-6">
@@ -395,7 +395,7 @@ export function CompanyInfoPanel() {
                 className="h-20 w-20 rounded-xl border border-swiss-line bg-white object-contain p-1"
               />
             ) : (
-              <div className="flex h-20 w-20 items-center justify-center rounded-xl border border-dashed border-swiss-line bg-slate-50 text-slate-400">
+              <div className="flex h-20 w-20 items-center justify-center rounded-xl border border-dashed border-swiss-line bg-white text-slate-400">
                 <Building2 className="h-8 w-8" aria-hidden />
               </div>
             )}
@@ -445,7 +445,7 @@ export function CompanyInfoPanel() {
               required
               value={form.name}
               onChange={(e) => update('name', e.target.value)}
-              className="h-auto mt-1 w-full text-sm border border-swiss-line rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="h-auto mt-1 w-full text-sm border border-swiss-line rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-swiss-accent/20"
             />
           </label>
           <label className="block md:col-span-2">
@@ -453,7 +453,7 @@ export function CompanyInfoPanel() {
             <Input
               value={form.legalName}
               onChange={(e) => update('legalName', e.target.value)}
-              className="h-auto mt-1 w-full text-sm border border-swiss-line rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="h-auto mt-1 w-full text-sm border border-swiss-line rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-swiss-accent/20"
               placeholder="Registered business name"
             />
           </label>
@@ -462,7 +462,7 @@ export function CompanyInfoPanel() {
             <Input
               value={form.industry}
               onChange={(e) => update('industry', e.target.value)}
-              className="h-auto mt-1 w-full text-sm border border-swiss-line rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="h-auto mt-1 w-full text-sm border border-swiss-line rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-swiss-accent/20"
               placeholder="Education, Retail, …"
             />
           </label>
@@ -471,7 +471,7 @@ export function CompanyInfoPanel() {
             <Input
               value={form.taxId}
               onChange={(e) => update('taxId', e.target.value)}
-              className="h-auto mt-1 w-full text-sm border border-swiss-line rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="h-auto mt-1 w-full text-sm border border-swiss-line rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-swiss-accent/20"
             />
           </label>
           <label className="block">
@@ -481,7 +481,7 @@ export function CompanyInfoPanel() {
               <Input
                 value={form.website}
                 onChange={(e) => update('website', e.target.value)}
-                className="h-auto w-full pl-9 pr-3 py-2.5 text-sm border border-swiss-line rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
+                className="h-auto w-full pl-9 pr-3 py-2.5 text-sm border border-swiss-line rounded-xl focus:outline-none focus:ring-2 focus:ring-swiss-accent/20"
                 placeholder="https://example.com"
               />
             </div>
@@ -495,7 +495,7 @@ export function CompanyInfoPanel() {
                   type="email"
                   value={form.email}
                   onChange={(e) => update('email', e.target.value)}
-                  className="h-auto w-full pl-9 pr-3 py-2.5 text-sm border border-swiss-line rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="h-auto w-full pl-9 pr-3 py-2.5 text-sm border border-swiss-line rounded-xl focus:outline-none focus:ring-2 focus:ring-swiss-accent/20"
                 />
               </div>
               {renderVerifyControls('company_email', {
@@ -514,7 +514,7 @@ export function CompanyInfoPanel() {
                 <Input
                   value={form.phone}
                   onChange={(e) => update('phone', e.target.value)}
-                  className="h-auto w-full pl-9 pr-3 py-2.5 text-sm border border-swiss-line rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="h-auto w-full pl-9 pr-3 py-2.5 text-sm border border-swiss-line rounded-xl focus:outline-none focus:ring-2 focus:ring-swiss-accent/20"
                   placeholder="+919876543210"
                 />
               </div>
@@ -543,7 +543,7 @@ export function CompanyInfoPanel() {
                 value={form.address}
                 onChange={(e) => update('address', e.target.value)}
                 rows={2}
-                className="min-h-0 w-full pl-9 pr-3 py-2.5 text-sm border border-swiss-line rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
+                className="min-h-0 w-full pl-9 pr-3 py-2.5 text-sm border border-swiss-line rounded-xl focus:outline-none focus:ring-2 focus:ring-swiss-accent/20 resize-none"
               />
             </div>
           </label>
@@ -552,7 +552,7 @@ export function CompanyInfoPanel() {
             <Input
               value={form.city}
               onChange={(e) => update('city', e.target.value)}
-              className="h-auto mt-1 w-full text-sm border border-swiss-line rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="h-auto mt-1 w-full text-sm border border-swiss-line rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-swiss-accent/20"
             />
           </label>
           <label className="block">
@@ -560,7 +560,7 @@ export function CompanyInfoPanel() {
             <Input
               value={form.state}
               onChange={(e) => update('state', e.target.value)}
-              className="h-auto mt-1 w-full text-sm border border-swiss-line rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="h-auto mt-1 w-full text-sm border border-swiss-line rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-swiss-accent/20"
             />
           </label>
           <label className="block">
@@ -568,7 +568,7 @@ export function CompanyInfoPanel() {
             <Input
               value={form.postalCode}
               onChange={(e) => update('postalCode', e.target.value)}
-              className="h-auto mt-1 w-full text-sm border border-swiss-line rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="h-auto mt-1 w-full text-sm border border-swiss-line rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-swiss-accent/20"
             />
           </label>
         </div>
@@ -577,7 +577,7 @@ export function CompanyInfoPanel() {
           <button
             type="submit"
             disabled={saving}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white text-sm font-bold hover:bg-primary-hover disabled:opacity-60"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-swiss-accent text-white text-sm font-bold hover:bg-swiss-accent-hover disabled:opacity-60"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             Save changes

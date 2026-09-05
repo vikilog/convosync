@@ -61,7 +61,7 @@ export function FunnelInsightsBar({
               className={`rounded-lg px-2 py-1 text-[10px] font-bold ${
                 s.isFinal
                   ? 'bg-emerald-50 text-emerald-700'
-                  : 'bg-slate-100 text-slate-600'
+                  : 'bg-white border border-gray-200 text-slate-600'
               }`}
             >
               {s.name}

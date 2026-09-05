@@ -179,7 +179,7 @@ function UtilBar({
         ? 'bg-red-500'
         : pct >= 80
           ? 'bg-amber-500'
-          : 'bg-primary';
+          : 'bg-swiss-accent';
 
   return (
     <div>
@@ -191,7 +191,7 @@ function UtilBar({
           {pct != null ? ` · ${pct}%` : ''}
         </span>
       </div>
-      <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+      <div className="h-2 overflow-hidden rounded-full border border-swiss-line bg-white">
         <div
           className={`h-full rounded-full transition-all duration-300 ${tone}`}
           style={{ width: unlimited ? '8%' : `${width}%` }}
@@ -811,7 +811,7 @@ export function PlansPanel() {
               initial={reduceMotion ? false : { opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
-              className="flex items-center gap-2 rounded-2xl border border-primary/20 bg-accent-green-bg px-4 py-3 text-sm font-medium text-primary"
+              className="flex items-center gap-2 rounded-2xl border border-swiss-accent/20 bg-accent-green-bg px-4 py-3 text-sm font-medium text-swiss-accent"
             >
               <Check className="h-4 w-4 shrink-0" aria-hidden />
               {actionMessage}
@@ -878,7 +878,7 @@ export function PlansPanel() {
 
             {currentPlan ? (
               <div className="mt-4 flex flex-wrap items-start gap-4">
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-accent-green-bg text-primary ring-1 ring-primary/12">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-accent-green-bg text-swiss-accent ring-1 ring-swiss-accent/12">
                   <CurrentIcon className="h-7 w-7" aria-hidden />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -900,7 +900,7 @@ export function PlansPanel() {
                     <span
                       className={`inline-flex min-h-8 items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold ${
                         paid
-                          ? 'bg-accent-green-bg text-primary ring-1 ring-primary/20'
+                          ? 'bg-accent-green-bg text-swiss-accent ring-1 ring-swiss-accent/20'
                           : 'bg-white text-slate-700 ring-1 ring-black/5'
                       }`}
                     >
@@ -944,7 +944,7 @@ export function PlansPanel() {
                       type="button"
                       disabled={cancelBusy}
                       onClick={() => void handleCancel()}
-                      className="mt-5 min-h-11 cursor-pointer text-sm font-semibold text-slate-500 underline-offset-2 transition-colors duration-200 hover:text-slate-800 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-50"
+                      className="mt-5 min-h-11 cursor-pointer text-sm font-semibold text-slate-500 underline-offset-2 transition-colors duration-200 hover:text-slate-800 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-swiss-accent disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {cancelBusy ? 'Cancelling…' : 'Cancel subscription'}
                     </button>
@@ -965,7 +965,7 @@ export function PlansPanel() {
 
           <motion.aside
             variants={itemVariants}
-            className="flex flex-col justify-between rounded-3xl border border-primary bg-primary p-6 text-white sm:p-7"
+            className="flex flex-col justify-between rounded-3xl border border-swiss-accent bg-swiss-accent p-6 text-white sm:p-7"
           >
             <div>
               <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/70">
@@ -999,7 +999,7 @@ export function PlansPanel() {
                 }
                 scrollToCatalog();
               }}
-              className="mt-6 inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-white px-4 py-2.5 text-sm font-bold text-primary transition-colors duration-200 hover:bg-accent-green-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="mt-6 inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-white px-4 py-2.5 text-sm font-bold text-swiss-accent transition-colors duration-200 hover:bg-accent-green-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               {recommended
                 ? isCustomPriced(recommended, currency)
@@ -1017,7 +1017,7 @@ export function PlansPanel() {
             className="rounded-3xl border border-border-subtle bg-white p-6 sm:p-7"
           >
             <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-accent-green-bg text-primary ring-1 ring-primary/10">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-accent-green-bg text-swiss-accent ring-1 ring-swiss-accent/10">
                 <Gauge className="h-5 w-5" aria-hidden />
               </div>
               <div>
@@ -1117,7 +1117,7 @@ export function PlansPanel() {
                   type="button"
                   aria-pressed={cycle === key}
                   onClick={() => setCycle(key)}
-                  className="relative inline-flex min-h-10 cursor-pointer items-center gap-1.5 rounded-xl px-3.5 text-sm font-semibold capitalize focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                  className="relative inline-flex min-h-10 cursor-pointer items-center gap-1.5 rounded-xl px-3.5 text-sm font-semibold capitalize focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-swiss-accent"
                 >
                   {cycle === key ? (
                     <motion.span
@@ -1134,7 +1134,7 @@ export function PlansPanel() {
                     {key}
                   </span>
                   {key === 'annual' && maxAnnualSave > 0 ? (
-                    <span className="relative z-10 rounded-md bg-accent-green-bg px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
+                    <span className="relative z-10 rounded-md bg-accent-green-bg px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-swiss-accent">
                       Save {maxAnnualSave}%
                     </span>
                   ) : null}
@@ -1170,16 +1170,16 @@ export function PlansPanel() {
                 animate="show"
                 className={`relative flex flex-col rounded-3xl border bg-white p-5 outline-none sm:p-6 ${
                   isCurrent
-                    ? 'border-primary'
+                    ? 'border-swiss-accent'
                     : featured
-                      ? 'border-primary/50'
+                      ? 'border-swiss-accent/50'
                       : 'border-border-subtle'
                 }`}
               >
                 {(isCurrent || featured) && (
                   <span
                     className={`mb-3 inline-flex w-fit items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white ${
-                      isCurrent ? 'bg-primary' : 'bg-channel-green'
+                      isCurrent ? 'bg-swiss-accent' : 'bg-channel-green'
                     }`}
                   >
                     {isCurrent ? 'Current' : 'Most popular'}
@@ -1187,7 +1187,7 @@ export function PlansPanel() {
                 )}
 
                 <div className="flex items-start justify-between gap-2">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-accent-green-bg text-primary ring-1 ring-primary/10">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-accent-green-bg text-swiss-accent ring-1 ring-swiss-accent/10">
                     <Icon className="h-5 w-5" aria-hidden />
                   </div>
                   <AnimatePresence mode="wait">
@@ -1197,7 +1197,7 @@ export function PlansPanel() {
                         initial={reduceMotion ? false : { opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.9 }}
-                        className="rounded-lg bg-accent-green-bg px-2 py-0.5 text-[11px] font-bold text-primary"
+                        className="rounded-lg bg-accent-green-bg px-2 py-0.5 text-[11px] font-bold text-swiss-accent"
                       >
                         −{savePct}%
                       </motion.span>
@@ -1247,7 +1247,7 @@ export function PlansPanel() {
                       key={item}
                       className="flex items-start gap-2.5 text-sm leading-snug text-slate-700"
                     >
-                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent-green-bg text-primary">
+                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent-green-bg text-swiss-accent">
                         <Check className="h-3 w-3" strokeWidth={3} aria-hidden />
                       </span>
                       <span>{item}</span>
@@ -1265,12 +1265,12 @@ export function PlansPanel() {
                   aria-label={
                     isCurrent ? `${plan.name} is your current plan` : `${label} — ${plan.name}`
                   }
-                  className={`mt-6 inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-60 ${
+                  className={`mt-6 inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-swiss-accent disabled:cursor-not-allowed disabled:opacity-60 ${
                     isCurrent
                       ? 'bg-white text-slate-500'
                       : custom
                         ? 'border border-border-subtle bg-white text-slate-800 hover:bg-surface-muted'
-                        : 'bg-primary text-white hover:bg-primary-hover'
+                        : 'bg-swiss-accent text-white hover:bg-swiss-accent-hover'
                   }`}
                 >
                   {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null}
@@ -1318,7 +1318,7 @@ export function PlansPanel() {
             </div>
 
             <div className="px-5 py-4">
-              <div className="rounded-2xl border border-primary/15 bg-accent-green-bg/60 px-4 py-3">
+              <div className="rounded-2xl border border-swiss-accent/15 bg-accent-green-bg/60 px-4 py-3">
                 <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">
                   {cycle} billing
                 </p>
@@ -1341,7 +1341,7 @@ export function PlansPanel() {
                   </p>
                 ) : null}
                 {appliedCoupon ? (
-                  <p className="mt-2 text-sm font-semibold text-primary">
+                  <p className="mt-2 text-sm font-semibold text-swiss-accent">
                     Pay {formatMinor(appliedCoupon.finalAmountPaise, currency)}{' '}
                     <span className="font-normal text-slate-500 line-through">
                       {formatMinor(appliedCoupon.originalAmountPaise, currency)}
@@ -1352,7 +1352,7 @@ export function PlansPanel() {
 
               <div className="mt-4">
                 <div className="flex items-start gap-2.5">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent-green-bg text-primary ring-1 ring-primary/10">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent-green-bg text-swiss-accent ring-1 ring-swiss-accent/10">
                     <Ticket className="h-4 w-4" aria-hidden />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -1376,14 +1376,14 @@ export function PlansPanel() {
                     placeholder="Enter code"
                     autoComplete="off"
                     spellCheck={false}
-                    className="h-auto min-h-10 flex-1 rounded-xl border border-border-subtle bg-white px-3 text-sm font-medium uppercase tracking-wide text-slate-900 placeholder:normal-case placeholder:font-normal placeholder:tracking-normal placeholder:text-slate-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-60"
+                    className="h-auto min-h-10 flex-1 rounded-xl border border-border-subtle bg-white px-3 text-sm font-medium uppercase tracking-wide text-slate-900 placeholder:normal-case placeholder:font-normal placeholder:tracking-normal placeholder:text-slate-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-swiss-accent disabled:cursor-not-allowed disabled:opacity-60"
                   />
                   {appliedCoupon ? (
                     <button
                       type="button"
                       onClick={handleRemoveCoupon}
                       disabled={checkoutBusy}
-                      className="inline-flex min-h-10 shrink-0 cursor-pointer items-center gap-1.5 rounded-xl border border-border-subtle bg-white px-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-surface-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex min-h-10 shrink-0 cursor-pointer items-center gap-1.5 rounded-xl border border-border-subtle bg-white px-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-surface-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-swiss-accent disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       <X className="h-4 w-4" aria-hidden />
                       Remove
@@ -1393,7 +1393,7 @@ export function PlansPanel() {
                       type="button"
                       onClick={() => void handleApplyCoupon()}
                       disabled={couponBusy || !couponInput.trim() || checkoutBusy}
-                      className="inline-flex min-h-10 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-white transition-colors hover:bg-primary-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex min-h-10 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-xl bg-swiss-accent px-4 text-sm font-semibold text-white transition-colors hover:bg-swiss-accent-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-swiss-accent disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {couponBusy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null}
                       Apply
@@ -1409,7 +1409,7 @@ export function PlansPanel() {
 
                 {appliedCoupon ? (
                   <p className="mt-2 text-sm text-slate-700">
-                    <span className="font-semibold text-primary">{appliedCoupon.code}</span>
+                    <span className="font-semibold text-swiss-accent">{appliedCoupon.code}</span>
                     {' · '}
                     {formatMinor(appliedCoupon.discountPaise, currency)} off
                   </p>
@@ -1435,7 +1435,7 @@ export function PlansPanel() {
                 type="button"
                 disabled={checkoutBusy}
                 onClick={() => void handleConfirmCheckout()}
-                className="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-primary px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
+                className="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-swiss-accent px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-swiss-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {checkoutBusy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null}
                 {checkoutBusy

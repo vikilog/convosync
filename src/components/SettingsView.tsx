@@ -153,7 +153,7 @@ export function SettingsView() {
   }, [permissions, role, section]);
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden bg-white selection:bg-primary/15">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden bg-white font-swiss selection:bg-swiss-accent/15">
       <div className="border-b border-swiss-line bg-white px-3 py-2.5 md:hidden">
         <label htmlFor="settings-section-mobile" className="sr-only">
           Settings section
@@ -164,7 +164,7 @@ export function SettingsView() {
         >
           <SelectTrigger
             id="settings-section-mobile"
-            className="h-auto w-full rounded-lg bg-white px-3 py-2 text-sm font-medium text-slate-800 ring-1 ring-swiss-line focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
+            className="h-auto w-full rounded-lg bg-white px-3 py-2 text-sm font-medium text-slate-800 ring-1 ring-swiss-line focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swiss-accent/20"
           >
             <SelectValue />
           </SelectTrigger>
@@ -195,8 +195,8 @@ export function SettingsView() {
                       className={({ isActive }) =>
                         `flex items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-sm transition-colors ${
                           isActive
-                            ? 'bg-primary/10 text-primary font-semibold ring-1 ring-primary/20'
-                            : 'text-slate-600 hover:bg-surface-muted hover:text-slate-900'
+                            ? 'bg-swiss-accent/10 text-swiss-accent font-semibold ring-1 ring-swiss-accent/20'
+                            : 'text-slate-600 hover:bg-swiss-accent-soft hover:text-slate-900'
                         }`
                       }
                     >

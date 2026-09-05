@@ -102,28 +102,28 @@ export function GbpSyncPanel({ connectionId, connectionEmail }: GbpSyncPanelProp
       )}
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-        <div className="rounded-xl border border-swiss-line bg-slate-50 p-3">
+        <div className="rounded-xl border border-swiss-line bg-white p-3">
           <p className="text-sm font-bold uppercase text-swiss-faint">Accounts</p>
           <p className="font-semibold text-swiss-ink mt-1">
             {formatLastSync(status?.lastSync.accounts ?? null)}
           </p>
           <p className="text-xs text-swiss-faint mt-0.5">{status?.counts.accounts ?? 0} cached</p>
         </div>
-        <div className="rounded-xl border border-swiss-line bg-slate-50 p-3">
+        <div className="rounded-xl border border-swiss-line bg-white p-3">
           <p className="text-sm font-bold uppercase text-swiss-faint">Locations</p>
           <p className="font-semibold text-swiss-ink mt-1">
             {formatLastSync(status?.lastSync.locations ?? null)}
           </p>
           <p className="text-xs text-swiss-faint mt-0.5">{status?.counts.locations ?? 0} cached</p>
         </div>
-        <div className="rounded-xl border border-swiss-line bg-slate-50 p-3">
+        <div className="rounded-xl border border-swiss-line bg-white p-3">
           <p className="text-sm font-bold uppercase text-swiss-faint">Reviews</p>
           <p className="font-semibold text-swiss-ink mt-1">
             {formatLastSync(status?.lastSync.reviews ?? null)}
           </p>
           <p className="text-xs text-swiss-faint mt-0.5">{status?.counts.reviews ?? 0} cached</p>
         </div>
-        <div className="rounded-xl border border-swiss-line bg-slate-50 p-3">
+        <div className="rounded-xl border border-swiss-line bg-white p-3">
           <p className="text-sm font-bold uppercase text-swiss-faint">Metrics</p>
           <p className="font-semibold text-swiss-ink mt-1">
             {formatLastSync(status?.lastSync.metrics ?? null)}
@@ -181,7 +181,7 @@ export function GbpSyncPanel({ connectionId, connectionEmail }: GbpSyncPanelProp
         ) : (
           <div className="max-h-56 overflow-auto rounded-xl border border-swiss-line">
             <Table className="text-meta">
-              <TableHeader className="bg-slate-50 sticky top-0">
+              <TableHeader className="bg-white sticky top-0">
                 <TableRow className="text-left text-swiss-muted">
                   <TableHead className="px-3 py-2 font-bold whitespace-normal">Type</TableHead>
                   <TableHead className="px-3 py-2 font-bold whitespace-normal">Status</TableHead>

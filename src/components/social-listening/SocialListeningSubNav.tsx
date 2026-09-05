@@ -37,7 +37,7 @@ export function SocialListeningSubNav({
   return (
     <div className="flex shrink-0 flex-wrap items-center justify-between gap-3">
       <div className="flex flex-wrap items-center gap-2">
-        <nav className="inline-flex flex-wrap gap-1 rounded-xl bg-surface-muted p-1">
+        <nav className="inline-flex flex-wrap gap-1 rounded-xl border border-swiss-line bg-white p-1">
           {LINKS.map((link) => {
             const active = link.match(pathname);
             return (

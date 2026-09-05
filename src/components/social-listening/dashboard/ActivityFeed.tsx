@@ -13,7 +13,7 @@ const DOT: Record<string, string> = {
   auto_dm: 'bg-violet-500',
   auto_ignore: 'bg-slate-400',
   auto_escalate: 'bg-red-500',
-  manual_approve_dm: 'bg-primary',
+  manual_approve_dm: 'bg-swiss-accent',
   dm_sent: 'bg-emerald-500',
   dm_failed: 'bg-amber-500',
   lead_created: 'bg-sky-500',

@@ -275,7 +275,7 @@ export const MetaAdsIntegrationPanel: React.FC<MetaAdsIntegrationPanelProps> = (
               value={account.id}
               disabled={switchingAccount}
               onChange={(e) => void handleSwitchAccount(e.target.value)}
-              className="w-full max-w-md px-3 py-2 bg-slate-50 border border-swiss-line text-sm font-medium rounded-xl cursor-pointer disabled:opacity-50"
+              className="w-full max-w-md px-3 py-2 bg-white border border-swiss-line text-sm font-medium rounded-xl cursor-pointer disabled:opacity-50"
             >
               {adAccounts.map((item) => (
                 <option key={item.id} value={item.id}>

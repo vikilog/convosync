@@ -112,14 +112,14 @@ export const AIAgentList: React.FC = () => {
   const liveCount = agents.filter((a) => a.isEnabled).length;
 
   return (
-    <div className="w-full text-left">
+    <div className="w-full text-left font-swiss">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <h1 className="font-display font-bold text-slate-900 text-xl leading-tight">AI Agent</h1>
             {!loading && agents.length > 0 && (
-              <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+              <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-white border border-gray-200 text-slate-600">
                 {agents.length} total · {liveCount} live
               </span>
             )}
@@ -164,7 +164,7 @@ export const AIAgentList: React.FC = () => {
           <button
             type="button"
             onClick={openCreateAgent}
-            className="bg-primary hover:bg-primary-hover text-white px-3.5 py-2 rounded-lg flex items-center gap-1.5 text-sm font-semibold transition-colors cursor-pointer"
+            className="bg-swiss-accent hover:bg-swiss-accent-hover text-white px-3.5 py-2 rounded-lg flex items-center gap-1.5 text-sm font-semibold transition-colors cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             Create Agent
@@ -184,9 +184,9 @@ export const AIAgentList: React.FC = () => {
           Loading agents…
         </div>
       ) : agents.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-black/10 bg-surface-muted/50 px-6 py-10 text-center">
+        <div className="rounded-xl border border-dashed border-black/10 bg-white px-6 py-10 text-center">
           <div className="w-12 h-12 bg-white border border-swiss-line flex items-center justify-center mx-auto mb-3">
-            <Sparkles className="w-6 h-6 text-primary" />
+            <Sparkles className="w-6 h-6 text-swiss-accent" />
           </div>
           <p className="text-sm font-semibold text-slate-900">No agents yet</p>
           <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
@@ -195,7 +195,7 @@ export const AIAgentList: React.FC = () => {
           <button
             type="button"
             onClick={openCreateAgent}
-            className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-primary hover:bg-primary-hover rounded-lg transition-colors cursor-pointer"
+            className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-swiss-accent hover:bg-swiss-accent-hover rounded-lg transition-colors cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             Create Agent

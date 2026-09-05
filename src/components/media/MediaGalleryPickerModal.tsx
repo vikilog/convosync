@@ -205,7 +205,7 @@ export function MediaGalleryBrowser({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={`Search ${noun}s…`}
-            className="h-auto w-full rounded-xl border border-black/10 bg-surface-muted py-2 pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+            className="h-auto w-full rounded-xl border border-black/10 bg-white py-2 pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-swiss-accent/20"
           />
         </div>
       </div>
@@ -260,11 +260,11 @@ export function MediaGalleryBrowser({
                     onClick={() => void handlePick(item)}
                     className={`group text-left rounded-xl border overflow-hidden transition-all disabled:opacity-60 ${
                       selected
-                        ? 'border-primary ring-2 ring-primary/30'
-                        : 'border-swiss-line bg-surface-muted/40 hover:border-primary/40 hover:ring-2 hover:ring-primary/15'
+                        ? 'border-swiss-accent ring-2 ring-swiss-accent/30'
+                        : 'border-swiss-line bg-white hover:border-swiss-accent/40 hover:ring-2 hover:ring-swiss-accent/15'
                     }`}
                   >
-                    <div className="aspect-[4/3] bg-slate-100 overflow-hidden relative flex items-center justify-center">
+                    <div className="aspect-[4/3] bg-white overflow-hidden relative flex items-center justify-center">
                       {item.thumbUrl ? (
                         <img
                           src={item.thumbUrl}
@@ -275,13 +275,13 @@ export function MediaGalleryBrowser({
                         <TypeIcon className="w-8 h-8 text-gray-300" />
                       )}
                       {multiple && selected ? (
-                        <span className="absolute top-1.5 right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[11px] font-black text-white shadow">
+                        <span className="absolute top-1.5 right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-swiss-accent text-[11px] font-black text-white shadow">
                           {selectedIds.indexOf(item.id) + 1}
                         </span>
                       ) : null}
                       {busy ? (
                         <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
-                          <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                          <Loader2 className="w-6 h-6 animate-spin text-swiss-accent" />
                         </div>
                       ) : null}
                     </div>
@@ -314,7 +314,7 @@ export function MediaGalleryBrowser({
             type="button"
             disabled={selectedIds.length === 0 || confirming}
             onClick={() => void handleConfirmSelection()}
-            className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-hover disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-xl bg-swiss-accent px-4 py-2 text-sm font-bold text-white hover:bg-swiss-accent-hover disabled:opacity-50"
           >
             {confirming ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
             Add {selectedIds.length || ''}
@@ -357,7 +357,7 @@ export function MediaGalleryPickerModal({
       <div
         role="dialog"
         aria-labelledby="media-gallery-picker-title"
-        className="w-full max-w-2xl max-h-[min(80vh,640px)] flex flex-col rounded-2xl border border-swiss-line bg-surface shadow-xl"
+        className="w-full max-w-2xl max-h-[min(80vh,640px)] flex flex-col rounded-2xl border border-swiss-line bg-white shadow-xl"
       >
         <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-swiss-line shrink-0">
           <div className="min-w-0">
@@ -365,7 +365,7 @@ export function MediaGalleryPickerModal({
               id="media-gallery-picker-title"
               className="text-sm font-bold text-swiss-ink flex items-center gap-2"
             >
-              <TypeIcon className="w-4 h-4 text-primary" />
+              <TypeIcon className="w-4 h-4 text-swiss-accent" />
               {multiple
                 ? `Pick ${noun}s from Media Gallery${maxSelect ? ` (up to ${maxSelect})` : ''}`
                 : `Pick a ${noun} from Media Gallery`}

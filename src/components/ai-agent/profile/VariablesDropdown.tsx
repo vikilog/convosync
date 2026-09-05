@@ -48,7 +48,7 @@ export const VariablesDropdown: React.FC<Props> = ({ onSelect }) => {
                 onSelect(v.value);
                 setOpen(false);
               }}
-              className="w-full text-left px-3 py-2 text-xs hover:bg-primary/10 transition-colors"
+              className="w-full text-left px-3 py-2 text-xs hover:bg-swiss-accent/10 transition-colors"
             >
               <span className="font-semibold text-[#111827]">{v.label}</span>
               <span className="block text-[#6B7280] font-mono mt-0.5">{v.value}</span>

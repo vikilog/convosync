@@ -108,7 +108,7 @@ export const ReviewCard: React.FC<{
                   {item.intent} · {confidencePct}%
                 </span>
                 {item.status !== 'pending' && (
-                  <span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                  <span className="rounded-md bg-white border border-gray-200 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">
                     {item.status}
                   </span>
                 )}

@@ -166,7 +166,7 @@ export function InboxScopeEditor({ value, onChange, disabled }: InboxScopeEditor
   }
 
   return (
-    <div className="space-y-3 rounded-xl border border-swiss-line bg-slate-50 p-3">
+    <div className="space-y-3 rounded-xl border border-swiss-line bg-white p-3">
       <div>
         <p className="text-sm font-bold uppercase tracking-wide text-swiss-muted">Inbox access</p>
         <p className="text-xs text-swiss-faint mt-0.5">

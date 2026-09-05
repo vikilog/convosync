@@ -124,12 +124,12 @@ export const AddKnowledgeModal: React.FC<Props> = ({
                   onClick={() => setSelected(opt.id)}
                   className={`text-left p-5 rounded-xl border-2 transition-colors ${
                     selected === opt.id
-                      ? 'border-primary bg-primary/10'
-                      : 'border-swiss-line hover:border-primary hover:bg-primary/5'
+                      ? 'border-swiss-accent bg-swiss-accent/10'
+                      : 'border-swiss-line hover:border-swiss-accent hover:bg-swiss-accent/5'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2 mb-3">
-                    <div className="p-2 rounded-lg bg-primary/10 text-primary">{opt.icon}</div>
+                    <div className="p-2 rounded-lg bg-swiss-accent/10 text-swiss-accent">{opt.icon}</div>
                     {opt.badge && (
                       <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-green-100 text-green-700">
                         {opt.badge}
@@ -181,7 +181,7 @@ export const AddKnowledgeModal: React.FC<Props> = ({
                   handleSubmit();
                 }
               }}
-              className="px-6 py-2.5 bg-primary hover:bg-primary-hover disabled:opacity-50 text-white rounded-xl text-sm font-bold"
+              className="px-6 py-2.5 bg-swiss-accent hover:bg-swiss-accent-hover disabled:opacity-50 text-white rounded-xl text-sm font-bold"
             >
               {step === 'select' ? 'Next' : submitting ? 'Adding…' : 'Add knowledge'}
             </button>

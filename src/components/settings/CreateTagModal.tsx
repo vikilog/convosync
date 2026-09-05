@@ -83,7 +83,7 @@ export function CreateTagModal({ open, onClose, onSaved, folders, editingTag }: 
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. VIP"
-            className="h-auto w-full rounded-xl border border-swiss-line px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+            className="h-auto w-full rounded-xl border border-swiss-line px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-swiss-accent/20"
           />
         </label>
 
@@ -94,7 +94,7 @@ export function CreateTagModal({ open, onClose, onSaved, folders, editingTag }: 
             onChange={(e) => setFolder(e.target.value)}
             list={folderListId}
             placeholder="Tags"
-            className="h-auto w-full rounded-xl border border-swiss-line px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+            className="h-auto w-full rounded-xl border border-swiss-line px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-swiss-accent/20"
           />
           <datalist id={folderListId}>
             {folders.map((f) => (
@@ -118,7 +118,7 @@ export function CreateTagModal({ open, onClose, onSaved, folders, editingTag }: 
           <button
             type="submit"
             disabled={saving}
-            className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-hover disabled:opacity-50"
+            className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-swiss-accent px-4 py-2 text-sm font-semibold text-white hover:bg-swiss-accent-hover disabled:opacity-50"
           >
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
             {isEdit ? 'Save' : 'Create'}

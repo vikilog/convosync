@@ -220,7 +220,7 @@ export const SkillEditor: React.FC<Props> = ({ agentId, skillId }) => {
         <button
           type="button"
           onClick={() => navigate(pathForAgent(agentId, 'skills'))}
-          className="mt-3 text-sm font-bold text-primary hover:underline"
+          className="mt-3 text-sm font-bold text-swiss-accent hover:underline"
         >
           Back to skills
         </button>
@@ -250,7 +250,7 @@ export const SkillEditor: React.FC<Props> = ({ agentId, skillId }) => {
           </button>
           <span className="text-sm text-[#6B7280]">Skill</span>
           <span className="text-sm font-bold text-[#111827] truncate">{skill.title}</span>
-          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-swiss-muted capitalize">
+          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-white border border-gray-200 text-swiss-muted capitalize">
             {skill.status}
           </span>
           {readOnly && (
@@ -314,7 +314,7 @@ export const SkillEditor: React.FC<Props> = ({ agentId, skillId }) => {
             type="button"
             disabled={saving || skill.status === 'live'}
             onClick={() => void handlePublish()}
-            className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-60 text-white rounded-xl text-sm font-bold"
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-swiss-accent hover:bg-swiss-accent-hover disabled:opacity-60 text-white rounded-xl text-sm font-bold"
           >
             <Play className="w-4 h-4" />
             Set live
@@ -346,7 +346,7 @@ export const SkillEditor: React.FC<Props> = ({ agentId, skillId }) => {
             onChange={(e) => scheduleSave({ description: e.target.value.slice(0, 500) })}
             placeholder="Optional short blurb"
             rows={2}
-            className="min-h-0 w-full border border-swiss-line rounded-xl p-3 text-sm text-[#111827] placeholder:text-[#6B7280] resize-none focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+            className="min-h-0 w-full border border-swiss-line rounded-xl p-3 text-sm text-[#111827] placeholder:text-[#6B7280] resize-none focus:ring-2 focus:ring-swiss-accent/20 focus:border-swiss-accent outline-none"
           />
         )}
       </section>
@@ -403,7 +403,7 @@ export const SkillEditor: React.FC<Props> = ({ agentId, skillId }) => {
                     <button
                       type="button"
                       onClick={() => setPreviewId(previewId === item.id ? null : item.id)}
-                      className="text-xs font-medium text-primary hover:underline shrink-0"
+                      className="text-xs font-medium text-swiss-accent hover:underline shrink-0"
                     >
                       {previewId === item.id ? 'Hide' : 'Preview'}
                     </button>
@@ -445,7 +445,7 @@ export const SkillEditor: React.FC<Props> = ({ agentId, skillId }) => {
               onChange={(e) => handleInstructionsChange(e.target.value)}
               placeholder="Type '/' for commands"
               rows={12}
-              className="min-h-0 w-full border border-swiss-line rounded-xl p-4 text-sm text-[#111827] placeholder:text-[#6B7280] resize-none focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+              className="min-h-0 w-full border border-swiss-line rounded-xl p-4 text-sm text-[#111827] placeholder:text-[#6B7280] resize-none focus:ring-2 focus:ring-swiss-accent/20 focus:border-swiss-accent outline-none"
             />
             {showSlashMenu && filteredCommands.length > 0 && (
               <div className="absolute left-0 mt-1 w-64 bg-white border border-swiss-line shadow-lg z-10 overflow-hidden">
@@ -454,9 +454,9 @@ export const SkillEditor: React.FC<Props> = ({ agentId, skillId }) => {
                     key={cmd.id}
                     type="button"
                     onClick={() => insertSlashCommand(cmd.label)}
-                    className="w-full text-left px-4 py-2.5 hover:bg-primary/10 transition-colors"
+                    className="w-full text-left px-4 py-2.5 hover:bg-swiss-accent/10 transition-colors"
                   >
-                    <p className="text-sm font-bold text-primary">{cmd.label}</p>
+                    <p className="text-sm font-bold text-swiss-accent">{cmd.label}</p>
                     <p className="text-xs text-[#6B7280]">{cmd.description}</p>
                   </button>
                 ))}

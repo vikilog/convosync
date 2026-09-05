@@ -397,7 +397,7 @@ export const SocialListeningReviewView: React.FC = () => {
   };
 
   return (
-    <div className="relative flex h-full min-h-0 flex-1 flex-col gap-4 overflow-y-auto bg-white p-4 md:p-6 selection:bg-sky-500/15">
+    <div className="relative flex h-full min-h-0 flex-1 flex-col gap-4 overflow-y-auto bg-white font-swiss p-4 md:p-6 selection:bg-sky-500/15">
       <SocialListeningSubNav trailing={<SocialListeningPlatformSwitcher />} />
 
       {loadError && (
@@ -452,7 +452,7 @@ export const SocialListeningReviewView: React.FC = () => {
                       ? theme
                         ? 'bg-white/70'
                         : 'bg-white/15 text-white/80'
-                      : 'bg-slate-100 text-slate-500'
+                      : 'bg-white border border-gray-200 text-slate-500'
                   }`}
                 >
                   {tab.count}
@@ -571,7 +571,7 @@ export const SocialListeningReviewView: React.FC = () => {
               <select
                 value={pickFunnelId}
                 onChange={(e) => setPickFunnelId(e.target.value)}
-                className="mt-4 w-full cursor-pointer rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-semibold outline-none focus:ring-2 focus:ring-primary/20"
+                className="mt-4 w-full cursor-pointer rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-semibold outline-none focus:ring-2 focus:ring-swiss-accent/20"
               >
                 <option value="">Select funnel…</option>
                 {funnels.map((f) => (
@@ -599,7 +599,7 @@ export const SocialListeningReviewView: React.FC = () => {
                 type="button"
                 disabled={!pickFunnelId || Boolean(addLeadBusyId)}
                 onClick={() => void confirmAddLead()}
-                className="cursor-pointer rounded-xl bg-primary px-3 py-2 text-sm font-bold text-white hover:bg-primary-hover disabled:opacity-60"
+                className="cursor-pointer rounded-xl bg-swiss-accent px-3 py-2 text-sm font-bold text-white hover:bg-swiss-accent-hover disabled:opacity-60"
               >
                 {addLeadBusyId ? 'Adding…' : 'Add to lead'}
               </button>

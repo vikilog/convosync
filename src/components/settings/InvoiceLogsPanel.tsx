@@ -62,8 +62,8 @@ export function InvoiceLogsPanel() {
 
   return (
     <div className="w-full space-y-4">
-      <div className="flex items-start gap-3 rounded-xl border border-primary/15 bg-primary/[0.06] px-4 py-3 text-sm text-swiss-ink">
-        <Receipt className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+      <div className="flex items-start gap-3 rounded-xl border border-swiss-accent/15 bg-swiss-accent/[0.06] px-4 py-3 text-sm text-swiss-ink">
+        <Receipt className="mt-0.5 h-4 w-4 shrink-0 text-swiss-accent" />
         <p>
           Every charge, renewal, and add-on purchase with Razorpay payment and order IDs.
         </p>

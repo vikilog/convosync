@@ -85,7 +85,7 @@ function statusClass(status: string): string {
   if (status === 'connected') return 'bg-[#e6f7ec] text-[#006d2f] border-[#5dfd8a]/40';
   if (status === 'error') return 'bg-red-50 text-red-700 border-red-200';
   if (status === 'syncing') return 'bg-[#e8f4ff] text-[#4285F4] border-[#4285F4]/20';
-  return 'bg-gray-50 text-swiss-muted border-gray-200';
+  return 'bg-white text-swiss-muted border-gray-200';
 }
 
 type GoogleProductCardProps = {
@@ -176,7 +176,7 @@ function GoogleProductCard({
             type="button"
             disabled={busy || connections.length === 0}
             onClick={() => selectedConnection && onConnect(selectedConnection)}
-            className="flex-1 min-w-[80px] px-3 py-2 rounded-lg text-sm font-bold bg-primary hover:bg-primary-hover text-white disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 min-w-[80px] px-3 py-2 rounded-lg text-sm font-bold bg-swiss-accent hover:bg-swiss-accent-hover text-white disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Connect
           </button>
@@ -186,7 +186,7 @@ function GoogleProductCard({
               type="button"
               disabled={busy}
               onClick={onSync}
-              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-sm font-black border border-primary/20 text-primary bg-primary/10 hover:bg-primary/20 disabled:opacity-50"
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-sm font-black border border-swiss-accent/20 text-swiss-accent bg-swiss-accent/10 hover:bg-swiss-accent/20 disabled:opacity-50"
             >
               <RefreshCw className={`w-3 h-3 ${busy ? 'animate-spin' : ''}`} />
               Sync
@@ -195,7 +195,7 @@ function GoogleProductCard({
               type="button"
               disabled={busy}
               onClick={onManage}
-              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-sm font-black border border-gray-200 text-swiss-muted bg-gray-50 hover:bg-gray-100 disabled:opacity-50"
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-sm font-black border border-gray-200 text-swiss-muted bg-white hover:bg-gray-100 disabled:opacity-50"
             >
               <Settings className="w-3 h-3" />
               Manage
@@ -358,7 +358,7 @@ export function GooglePanel() {
             type="button"
             onClick={() => void handleConnectAccount()}
             disabled={connectingAccount}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold bg-primary hover:bg-primary-hover text-white disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold bg-swiss-accent hover:bg-swiss-accent-hover text-white disabled:opacity-50"
           >
             {connectingAccount ? <Loader2 className="w-4 h-4 animate-spin" /> : <FolderOpen className="w-4 h-4" />}
             {connectingAccount ? 'Redirecting…' : 'Connect Google account'}
@@ -370,7 +370,7 @@ export function GooglePanel() {
             {connections.map((c) => (
               <li
                 key={c.id}
-                className="flex items-center justify-between gap-3 px-3 py-2 rounded-xl border border-swiss-line bg-slate-50"
+                className="flex items-center justify-between gap-3 px-3 py-2 rounded-xl border border-swiss-line bg-white"
               >
                 <div className="flex items-center gap-2 min-w-0">
                   {c.pictureUrl ? (
@@ -448,14 +448,14 @@ export function GooglePanel() {
             <p className="text-xs text-swiss-muted mt-1 font-medium">
               Integration config and sync metadata (for Journey Engine, AI Agent, and webhooks).
             </p>
-            <pre className="mt-4 text-xs font-mono bg-gray-50 border border-gray-100 rounded-xl p-3 overflow-auto max-h-48">
+            <pre className="mt-4 text-xs font-mono bg-white border border-gray-100 rounded-xl p-3 overflow-auto max-h-48">
               {JSON.stringify(manageSummary.config ?? {}, null, 2)}
             </pre>
             <div className="mt-4 flex justify-end">
               <button
                 type="button"
                 onClick={() => setManageProduct(null)}
-                className="px-4 py-2 rounded-lg text-sm font-bold bg-primary hover:bg-primary-hover text-white"
+                className="px-4 py-2 rounded-lg text-sm font-bold bg-swiss-accent hover:bg-swiss-accent-hover text-white"
               >
                 Close
               </button>

@@ -83,7 +83,7 @@ export function NeedsAttentionList({
         </div>
         <Link
           to="/social-listening/review"
-          className="text-[11px] font-bold text-primary hover:underline"
+          className="text-[11px] font-bold text-swiss-accent hover:underline"
         >
           Full queue →
         </Link>
@@ -178,7 +178,7 @@ export function NeedsAttentionList({
                 {item.suggestedAction === 'open_review' ? (
                   <Link
                     to="/social-listening/review"
-                    className="inline-flex shrink-0 cursor-pointer items-center gap-1 self-center rounded-lg bg-primary px-2.5 py-1.5 text-[11px] font-bold text-white hover:bg-primary-hover"
+                    className="inline-flex shrink-0 cursor-pointer items-center gap-1 self-center rounded-lg bg-swiss-accent px-2.5 py-1.5 text-[11px] font-bold text-white hover:bg-swiss-accent-hover"
                   >
                     <ExternalLink className="h-3 w-3" />
                     Review
@@ -188,7 +188,7 @@ export function NeedsAttentionList({
                     type="button"
                     disabled={busyIds.has(item.id)}
                     onClick={() => void runAction(item)}
-                    className="inline-flex shrink-0 cursor-pointer items-center gap-1 self-center rounded-lg bg-primary px-2.5 py-1.5 text-[11px] font-bold text-white hover:bg-primary-hover disabled:opacity-60"
+                    className="inline-flex shrink-0 cursor-pointer items-center gap-1 self-center rounded-lg bg-swiss-accent px-2.5 py-1.5 text-[11px] font-bold text-white hover:bg-swiss-accent-hover disabled:opacity-60"
                   >
                     <ActionIcon className={`h-3 w-3 ${busyIds.has(item.id) ? 'animate-spin' : ''}`} />
                     {busyIds.has(item.id) ? '…' : actionLabel}

@@ -109,7 +109,7 @@ export function TelegramConnectPanel({
           placeholder="123456789:AAHdd2ZjhP9k...  "
           spellCheck={false}
           autoComplete="off"
-          className="h-auto w-full px-3.5 py-2.5 rounded-xl border border-swiss-line bg-white text-sm font-mono text-swiss-ink placeholder:text-swiss-faint focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+          className="h-auto w-full px-3.5 py-2.5 rounded-xl border border-swiss-line bg-white text-sm font-mono text-swiss-ink placeholder:text-swiss-faint focus:outline-none focus:ring-2 focus:ring-swiss-accent/30 focus:border-swiss-accent"
         />
         {touched && trimmedToken && !looksValid ? (
           <p className="mt-1.5 text-xs font-bold text-amber-700">
@@ -123,7 +123,7 @@ export function TelegramConnectPanel({
           </p>
         )}
         {info && (
-          <p className="mt-3 text-sm font-bold text-primary bg-accent-green-bg border border-primary/15 rounded-xl px-4 py-2">
+          <p className="mt-3 text-sm font-bold text-swiss-accent bg-accent-green-bg border border-swiss-accent/15 rounded-xl px-4 py-2">
             {info}
           </p>
         )}
@@ -132,7 +132,7 @@ export function TelegramConnectPanel({
           type="button"
           onClick={onConnect}
           disabled={connecting || !trimmedToken}
-          className="mt-4 inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary-hover disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-xl text-sm font-black transition-all"
+          className="mt-4 inline-flex items-center justify-center gap-2 px-6 py-3 bg-swiss-accent hover:bg-swiss-accent-hover disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-xl text-sm font-black transition-all"
         >
           <Send className="w-4 h-4" />
           {connecting ? 'Connecting…' : 'Connect Telegram bot'}

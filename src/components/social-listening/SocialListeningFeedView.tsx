@@ -231,7 +231,7 @@ export const SocialListeningFeedView: React.FC = () => {
 
   if (platform === 'facebook') {
     return (
-      <div className="relative flex h-full min-h-0 flex-1 flex-col gap-4 overflow-y-auto bg-white p-4 md:p-6">
+      <div className="relative flex h-full min-h-0 flex-1 flex-col gap-4 overflow-y-auto bg-white font-swiss p-4 md:p-6">
         <SocialListeningSubNav trailing={<SocialListeningPlatformSwitcher />} />
 
         {error && (
@@ -296,7 +296,7 @@ export const SocialListeningFeedView: React.FC = () => {
               type="button"
               onClick={() => void handleConnectFacebook()}
               disabled={connectingFacebook}
-              className="mt-6 inline-flex items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-black text-white hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-6 inline-flex items-center justify-center rounded-xl bg-swiss-accent px-5 py-2.5 text-sm font-black text-white hover:bg-swiss-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
             >
               {connectingFacebook ? 'Redirecting…' : 'Connect Facebook Page'}
             </button>
@@ -339,7 +339,7 @@ export const SocialListeningFeedView: React.FC = () => {
                     loading="lazy"
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-slate-50 text-gray-300">
+                  <div className="flex h-full w-full items-center justify-center bg-white border border-swiss-line text-gray-300">
                     <ImageIcon className="h-8 w-8" />
                   </div>
                 )}
@@ -395,7 +395,7 @@ export const SocialListeningFeedView: React.FC = () => {
           <button
             type="button"
             onClick={() => navigate(pathForIntegrationsChannel('instagram'))}
-            className="mt-6 inline-flex items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-black text-white hover:bg-primary-hover"
+            className="mt-6 inline-flex items-center justify-center rounded-xl bg-swiss-accent px-5 py-2.5 text-sm font-black text-white hover:bg-swiss-accent-hover"
           >
             Connect Instagram
           </button>
@@ -405,7 +405,7 @@ export const SocialListeningFeedView: React.FC = () => {
   }
 
   return (
-    <div className="relative flex h-full min-h-0 flex-1 flex-col gap-4 overflow-y-auto bg-white p-4 md:p-6">
+    <div className="relative flex h-full min-h-0 flex-1 flex-col gap-4 overflow-y-auto bg-white font-swiss p-4 md:p-6">
       <SocialListeningSubNav
         trailing={
           <div className="flex flex-wrap items-center gap-2">
@@ -413,7 +413,7 @@ export const SocialListeningFeedView: React.FC = () => {
               type="button"
               disabled={!selectedIgId || loadingProfile || loadingMedia}
               onClick={() => loadFeed()}
-              className="inline-flex items-center gap-1.5 bg-white border border-swiss-line px-3 py-1.5 text-xs font-bold text-swiss-ink hover:bg-surface-muted disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 bg-white border border-swiss-line px-3 py-1.5 text-xs font-bold text-swiss-ink hover:bg-swiss-accent-soft disabled:opacity-50"
             >
               <RefreshCw className={`h-3.5 w-3.5 ${loadingProfile || loadingMedia ? 'animate-spin' : ''}`} />
               Refresh
@@ -438,7 +438,7 @@ export const SocialListeningFeedView: React.FC = () => {
                 className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-colors ${
                   active
                     ? 'bg-[#0F172A] text-white'
-                    : 'bg-white ring-1 ring-swiss-line text-swiss-muted hover:bg-surface-muted'
+                    : 'bg-white ring-1 ring-swiss-line text-swiss-muted hover:bg-swiss-accent-soft'
                 }`}
               >
                 {label}
@@ -565,7 +565,7 @@ export const SocialListeningFeedView: React.FC = () => {
                       loading="lazy"
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-slate-50 text-gray-300">
+                    <div className="flex h-full w-full items-center justify-center bg-white border border-swiss-line text-gray-300">
                       <ImageIcon className="h-8 w-8" />
                     </div>
                   )}
@@ -632,7 +632,7 @@ export const SocialListeningFeedView: React.FC = () => {
                 type="button"
                 disabled={loadingMore}
                 onClick={() => void loadMore()}
-                className="bg-white border border-swiss-line px-5 py-2 text-sm font-bold text-swiss-ink hover:bg-surface-muted disabled:opacity-50"
+                className="bg-white border border-swiss-line px-5 py-2 text-sm font-bold text-swiss-ink hover:bg-swiss-accent-soft disabled:opacity-50"
               >
                 {loadingMore ? 'Loading…' : 'Load more'}
               </button>

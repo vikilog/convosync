@@ -106,7 +106,7 @@ export const EditKnowledgeModal: React.FC<Props> = ({
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="h-auto mt-1.5 w-full px-3 py-2 border border-swiss-line rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+              className="h-auto mt-1.5 w-full px-3 py-2 border border-swiss-line rounded-xl text-sm focus:ring-2 focus:ring-swiss-accent/20 focus:border-swiss-accent outline-none"
             />
           </label>
 
@@ -117,7 +117,7 @@ export const EditKnowledgeModal: React.FC<Props> = ({
                 type="url"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
-                className="h-auto mt-1.5 w-full px-3 py-2 border border-swiss-line rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                className="h-auto mt-1.5 w-full px-3 py-2 border border-swiss-line rounded-xl text-sm focus:ring-2 focus:ring-swiss-accent/20 focus:border-swiss-accent outline-none"
               />
             </label>
           )}
@@ -135,7 +135,7 @@ export const EditKnowledgeModal: React.FC<Props> = ({
                       setPairs(next);
                     }}
                     placeholder="Question"
-                    className="h-auto w-full px-3 py-2 border border-swiss-line rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                    className="h-auto w-full px-3 py-2 border border-swiss-line rounded-xl text-sm outline-none focus:ring-2 focus:ring-swiss-accent/20"
                   />
                   <Textarea
                     value={pair.answer}
@@ -146,14 +146,14 @@ export const EditKnowledgeModal: React.FC<Props> = ({
                     }}
                     placeholder="Answer"
                     rows={3}
-                    className="min-h-0 w-full px-3 py-2 border border-swiss-line rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/20 resize-none"
+                    className="min-h-0 w-full px-3 py-2 border border-swiss-line rounded-xl text-sm outline-none focus:ring-2 focus:ring-swiss-accent/20 resize-none"
                   />
                 </div>
               ))}
               <button
                 type="button"
                 onClick={() => setPairs([...pairs, { question: '', answer: '' }])}
-                className="text-sm font-bold text-primary hover:underline"
+                className="text-sm font-bold text-swiss-accent hover:underline"
               >
                 + Add Q&A pair
               </button>
@@ -172,7 +172,7 @@ export const EditKnowledgeModal: React.FC<Props> = ({
                     ? 'Cached page text (optional — re-add URL to refresh from web)'
                     : 'Knowledge content the agent can use…'
                 }
-                className="min-h-0 mt-1.5 w-full px-3 py-2 border border-swiss-line rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none resize-y min-h-[140px]"
+                className="min-h-0 mt-1.5 w-full px-3 py-2 border border-swiss-line rounded-xl text-sm focus:ring-2 focus:ring-swiss-accent/20 focus:border-swiss-accent outline-none resize-y min-h-[140px]"
               />
             </label>
           )}
@@ -192,7 +192,7 @@ export const EditKnowledgeModal: React.FC<Props> = ({
             type="button"
             disabled={submitting || !canSave}
             onClick={handleSave}
-            className="px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-60 text-white rounded-xl text-sm font-bold"
+            className="px-4 py-2 bg-swiss-accent hover:bg-swiss-accent-hover disabled:opacity-60 text-white rounded-xl text-sm font-bold"
           >
             {submitting ? 'Saving…' : 'Save changes'}
           </button>

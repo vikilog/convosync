@@ -136,7 +136,7 @@ function IntegrationCard({
   iconClass,
   connectLabel = 'Connect',
   connectDisabled,
-  connectBtnClass = 'bg-primary hover:bg-primary-hover',
+  connectBtnClass = 'bg-swiss-accent hover:bg-swiss-accent-hover',
   onConnect,
 }: IntegrationCardProps) {
   return (
@@ -160,7 +160,7 @@ function IntegrationCard({
           onClick={onConnect}
           className={`w-full px-3 py-2 rounded-lg text-sm font-bold transition-all border border-transparent ${
             connectDisabled
-              ? 'bg-gray-100 text-swiss-faint cursor-not-allowed'
+              ? 'bg-white border-gray-200 text-swiss-faint cursor-not-allowed'
               : /\btext-/.test(connectBtnClass)
                 ? connectBtnClass
                 : `${connectBtnClass} text-white`
@@ -402,7 +402,7 @@ function ConnectedChannelCard({
               type="button"
               onClick={onManage}
               aria-label={`Manage ${title}`}
-              className="p-1 rounded-md text-swiss-faint hover:text-primary hover:bg-primary/10 transition-colors cursor-pointer"
+              className="p-1 rounded-md text-swiss-faint hover:text-swiss-accent hover:bg-swiss-accent/10 transition-colors cursor-pointer"
             >
               <Settings className="w-3.5 h-3.5" />
             </button>
@@ -506,7 +506,7 @@ function WhatsAppGroupedCard({ accounts, onManage, onEditProfile }: WhatsAppGrou
               key={account.id}
               type="button"
               onClick={() => onEditProfile?.(account)}
-              className="inline-flex max-w-full items-center gap-1 rounded-md bg-slate-50 border border-slate-100 px-2 py-1 text-[10px] leading-none hover:border-channel-green/40 hover:bg-[#e6f7ec] transition-colors cursor-pointer"
+              className="inline-flex max-w-full items-center gap-1 rounded-md bg-white border border-slate-100 px-2 py-1 text-[10px] leading-none hover:border-channel-green/40 hover:bg-[#e6f7ec] transition-colors cursor-pointer"
               title={`Edit business profile · ${title} · ${phone}`}
             >
               <span className="font-semibold text-swiss-ink truncate">{title}</span>
@@ -516,7 +516,7 @@ function WhatsAppGroupedCard({ accounts, onManage, onEditProfile }: WhatsAppGrou
           ) : (
             <div
               key={account.id}
-              className="inline-flex max-w-full items-center gap-1 rounded-md bg-slate-50 border border-slate-100 px-2 py-1 text-[10px] leading-none"
+              className="inline-flex max-w-full items-center gap-1 rounded-md bg-white border border-slate-100 px-2 py-1 text-[10px] leading-none"
               title={`${title} · ${phone}`}
             >
               <span className="font-semibold text-swiss-ink truncate">{title}</span>
@@ -1198,7 +1198,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
             setMessengerAutoLaunch(false);
             setMessengerConnectError('');
           }}
-          className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-primary transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-swiss-accent transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Back to integrations
@@ -1247,7 +1247,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
             setInstagramAutoLaunch(false);
             setInstagramConnectError('');
           }}
-          className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-primary transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-swiss-accent transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Back to integrations
@@ -1275,7 +1275,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
         <button
           type="button"
           onClick={goToHub}
-          className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-primary transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-swiss-accent transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Back to integrations
@@ -1303,7 +1303,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
             <button
               type="button"
               onClick={goToHub}
-              className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-primary transition-colors"
+              className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-swiss-accent transition-colors"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               Back to integrations
@@ -1318,7 +1318,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
           <button
             type="button"
             onClick={goToHub}
-            className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-primary transition-colors"
+            className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-swiss-accent transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             Back to integrations
@@ -1353,7 +1353,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
               type="button"
               disabled={enablingEmail}
               onClick={() => void handleEnableEmail()}
-              className="w-full px-4 py-2.5 bg-primary hover:bg-primary-hover disabled:opacity-60 text-white text-sm font-bold rounded-xl transition-all"
+              className="w-full px-4 py-2.5 bg-swiss-accent hover:bg-swiss-accent-hover disabled:opacity-60 text-white text-sm font-bold rounded-xl transition-all"
             >
               {enablingEmail ? 'Enabling…' : 'Enable Email'}
             </button>
@@ -1367,7 +1367,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
         <button
           type="button"
           onClick={goToHub}
-          className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-primary transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-swiss-accent transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Back to integrations
@@ -1409,7 +1409,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
         <button
           type="button"
           onClick={goToHub}
-          className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-primary transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-swiss-accent transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Back to integrations
@@ -1440,7 +1440,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
         <button
           type="button"
           onClick={goToHub}
-          className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-primary transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-swiss-accent transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Back to integrations
@@ -1448,7 +1448,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
         <div className="bg-white border border-swiss-line p-6 text-center space-y-3">
           <h3 className="text-lg font-semibold text-gray-950">{channel.title}</h3>
           <p className="text-sm text-swiss-muted font-medium">{channel.description}</p>
-          <span className="inline-block text-sm font-black uppercase tracking-wider px-3 py-1 rounded-full bg-[#f3eeff] text-primary">
+          <span className="inline-block text-sm font-black uppercase tracking-wider px-3 py-1 rounded-full bg-[#f3eeff] text-swiss-accent">
             Coming soon
           </span>
         </div>
@@ -1462,7 +1462,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
         <button
           type="button"
           onClick={goToHub}
-          className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-primary transition-colors cursor-pointer"
+          className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-swiss-accent transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Back to integrations
@@ -1494,7 +1494,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
         <button
           type="button"
           onClick={goToHub}
-          className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-primary transition-colors cursor-pointer"
+          className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-swiss-accent transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Back to integrations
@@ -1555,7 +1555,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
           <button
             type="button"
             onClick={goToHub}
-            className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-primary transition-colors"
+            className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-swiss-accent transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             Back to integrations
@@ -1571,7 +1571,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
           <button
             type="button"
             onClick={goToHub}
-            className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-primary transition-colors"
+            className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-swiss-accent transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             Back to integrations
@@ -1710,7 +1710,7 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto space-y-5 pb-8 animate-scale-up">
+    <div className="w-full max-w-6xl mx-auto space-y-5 pb-8 animate-scale-up font-swiss">
       {emailError && (
         <p className="text-sm font-bold text-red-600 bg-red-50 border border-red-100 rounded-xl px-4 py-2">
           {emailError}
@@ -1994,8 +1994,8 @@ export const IntegrationsView: FC<IntegrationsViewProps> = ({ isActive = true })
             connectLabel={aiProviderLocked ? 'Upgrade plan' : 'Manage'}
             connectBtnClass={
               aiProviderLocked
-                ? 'bg-gray-100 text-swiss-muted hover:bg-gray-200'
-                : 'bg-primary hover:bg-primary-hover'
+                ? 'bg-white border-gray-200 text-swiss-muted hover:bg-swiss-line/40'
+                : 'bg-swiss-accent hover:bg-swiss-accent-hover'
             }
             onConnect={() => {
               if (aiProviderLocked) {

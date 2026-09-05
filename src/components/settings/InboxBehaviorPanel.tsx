@@ -356,13 +356,13 @@ export function InboxBehaviorPanel() {
               onClick={() => void saveMode(card.id)}
               className={`flex flex-col items-start gap-1.5 rounded-xl border p-4 text-left transition-colors disabled:opacity-60 ${
                 active
-                  ? 'border-primary bg-primary/5 ring-1 ring-primary/30'
-                  : 'border-border-subtle bg-white hover:border-primary/40'
+                  ? 'border-swiss-accent bg-swiss-accent/5 ring-1 ring-swiss-accent/30'
+                  : 'border-border-subtle bg-white hover:border-swiss-accent/40'
               }`}
             >
               <span className="flex w-full items-center justify-between gap-2">
                 <span className="text-sm font-semibold text-dark-navy">{card.title}</span>
-                {active ? <Check className="h-4 w-4 text-primary" /> : null}
+                {active ? <Check className="h-4 w-4 text-swiss-accent" /> : null}
               </span>
               <span className="text-xs text-slate-500">{card.description}</span>
             </button>
@@ -376,7 +376,7 @@ export function InboxBehaviorPanel() {
             <div className="flex items-center justify-between gap-2">
               <div>
                 <h3 className="flex items-center gap-1.5 text-sm font-semibold text-dark-navy">
-                  <Users2 className="h-4 w-4 text-primary" /> Groups
+                  <Users2 className="h-4 w-4 text-swiss-accent" /> Groups
                 </h3>
                 <p className="mt-0.5 text-xs text-slate-500">
                   Route a rule to a group and it round-robins among that group's eligible members.
@@ -394,7 +394,7 @@ export function InboxBehaviorPanel() {
               <button
                 type="button"
                 onClick={() => void createGroup()}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-white hover:bg-primary-hover"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-swiss-accent px-3 py-2 text-sm font-semibold text-white hover:bg-swiss-accent-hover"
               >
                 <Plus className="h-4 w-4" /> Add group
               </button>
@@ -460,7 +460,7 @@ export function InboxBehaviorPanel() {
                         <button
                           type="button"
                           onClick={() => void addGroupMember(group.id)}
-                          className="rounded-lg border-[0.5px] border-border-subtle px-3 py-1.5 text-sm font-semibold text-primary hover:bg-primary/5"
+                          className="rounded-lg border-[0.5px] border-border-subtle px-3 py-1.5 text-sm font-semibold text-swiss-accent hover:bg-swiss-accent/5"
                         >
                           Add
                         </button>
@@ -486,7 +486,7 @@ export function InboxBehaviorPanel() {
               <button
                 type="button"
                 onClick={openNewRuleForm}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-white hover:bg-primary-hover"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-swiss-accent px-3 py-2 text-sm font-semibold text-white hover:bg-swiss-accent-hover"
               >
                 <Plus className="h-4 w-4" /> Add rule
               </button>
@@ -506,7 +506,7 @@ export function InboxBehaviorPanel() {
                         type="button"
                         disabled={index === 0}
                         onClick={() => void moveRule(index, -1)}
-                        className="text-slate-400 hover:text-primary disabled:opacity-30"
+                        className="text-slate-400 hover:text-swiss-accent disabled:opacity-30"
                         aria-label="Move up"
                       >
                         <ArrowUp className="h-3.5 w-3.5" />
@@ -515,7 +515,7 @@ export function InboxBehaviorPanel() {
                         type="button"
                         disabled={index === rules.length - 1}
                         onClick={() => void moveRule(index, 1)}
-                        className="text-slate-400 hover:text-primary disabled:opacity-30"
+                        className="text-slate-400 hover:text-swiss-accent disabled:opacity-30"
                         aria-label="Move down"
                       >
                         <ArrowDown className="h-3.5 w-3.5" />
@@ -532,14 +532,14 @@ export function InboxBehaviorPanel() {
                         type="checkbox"
                         checked={rule.enabled}
                         onChange={() => void toggleRuleEnabled(rule)}
-                        className="h-3.5 w-3.5 accent-primary"
+                        className="h-3.5 w-3.5 accent-swiss-accent"
                       />
                       Enabled
                     </label>
                     <button
                       type="button"
                       onClick={() => openEditRuleForm(rule)}
-                      className="text-sm font-semibold text-primary hover:underline"
+                      className="text-sm font-semibold text-swiss-accent hover:underline"
                     >
                       Edit
                     </button>
@@ -601,7 +601,7 @@ export function InboxBehaviorPanel() {
                             : prev.channels.filter((c) => c !== ch),
                         }))
                       }
-                      className="h-4 w-4 accent-primary"
+                      className="h-4 w-4 accent-swiss-accent"
                     />
                     {ch}
                   </label>
@@ -634,7 +634,7 @@ export function InboxBehaviorPanel() {
                   onChange={(e) =>
                     setRuleForm((prev) => ({ ...prev, businessHoursEnabled: e.target.checked }))
                   }
-                  className="h-4 w-4 accent-primary"
+                  className="h-4 w-4 accent-swiss-accent"
                 />
               </label>
               {ruleForm.businessHoursEnabled ? (
@@ -653,7 +653,7 @@ export function InboxBehaviorPanel() {
                                 : prev.days.filter((v) => v !== d.value),
                             }))
                           }
-                          className="h-3.5 w-3.5 accent-primary"
+                          className="h-3.5 w-3.5 accent-swiss-accent"
                         />
                         {d.label}
                       </label>
@@ -687,7 +687,7 @@ export function InboxBehaviorPanel() {
                     type="radio"
                     checked={ruleForm.actionType === 'group'}
                     onChange={() => setRuleForm((prev) => ({ ...prev, actionType: 'group' }))}
-                    className="h-4 w-4 accent-primary"
+                    className="h-4 w-4 accent-swiss-accent"
                   />
                   Group
                 </label>
@@ -696,7 +696,7 @@ export function InboxBehaviorPanel() {
                     type="radio"
                     checked={ruleForm.actionType === 'user'}
                     onChange={() => setRuleForm((prev) => ({ ...prev, actionType: 'user' }))}
-                    className="h-4 w-4 accent-primary"
+                    className="h-4 w-4 accent-swiss-accent"
                   />
                   Specific member
                 </label>
@@ -750,7 +750,7 @@ export function InboxBehaviorPanel() {
                 type="button"
                 onClick={() => void saveRule()}
                 disabled={savingRule}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-swiss-accent px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
               >
                 {savingRule ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
                 Save rule

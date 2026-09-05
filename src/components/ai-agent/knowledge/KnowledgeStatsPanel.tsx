@@ -66,7 +66,7 @@ export const KnowledgeStatsPanel: React.FC<Props> = ({ agentId }) => {
                 ? 'bg-amber-400'
                 : path === 'full_llm'
                   ? 'bg-gray-300'
-                  : 'bg-primary/70'
+                  : 'bg-swiss-accent/70'
             }
             style={{ width: `${Math.max(stats.percentages[path] ?? 0, stats.counts[path] > 0 ? 1 : 0)}%` }}
             title={`${LABELS[path]}: ${stats.percentages[path] ?? 0}%`}

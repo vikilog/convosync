@@ -18,8 +18,8 @@ type SharedProps = {
 
 const categoryStyles: Record<AgentBot['category'], { badge: string; avatar: string }> = {
   ai_agent: {
-    badge: 'bg-primary/10 text-primary ring-primary/20',
-    avatar: 'bg-gradient-to-br from-primary/5 to-primary/10 text-primary',
+    badge: 'bg-swiss-accent/10 text-swiss-accent ring-swiss-accent/20',
+    avatar: 'bg-gradient-to-br from-swiss-accent/5 to-swiss-accent/10 text-swiss-accent',
   },
   responsive: {
     badge: 'bg-violet-50 text-violet-700 ring-violet-100',
@@ -76,8 +76,8 @@ function StatusBadge({ enabled }: { enabled: boolean }) {
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary">
-      <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-swiss-accent">
+      <span className="w-1.5 h-1.5 rounded-full bg-swiss-accent" />
       Live
     </span>
   );
@@ -92,7 +92,7 @@ function AgentActionButtons({ onEdit, onDelete, deleting }: AgentActionsProps) {
           e.stopPropagation();
           onEdit();
         }}
-        className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-slate-500 hover:text-primary hover:bg-primary/5 transition-colors cursor-pointer"
+        className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-slate-500 hover:text-swiss-accent hover:bg-swiss-accent/5 transition-colors cursor-pointer"
         aria-label="Edit agent"
         title="Edit"
       >
@@ -158,7 +158,7 @@ export const AgentListRow: React.FC<SharedProps> = ({ agent, onEdit, onDelete, d
 
 export const AgentGridCard: React.FC<SharedProps> = ({ agent, onEdit, onDelete, deleting }) => {
   return (
-    <div className="group relative flex flex-col bg-white border border-swiss-line p-4 hover:border-primary/20 transition-all duration-200">
+    <div className="group relative flex flex-col bg-white border border-swiss-line p-4 hover:border-swiss-accent/20 transition-all duration-200">
       <div className="flex items-start justify-between gap-2">
         <button type="button" onClick={onEdit} className="flex items-start gap-3 min-w-0 flex-1 text-left cursor-pointer">
           <AgentAvatar agent={agent} size="lg" />

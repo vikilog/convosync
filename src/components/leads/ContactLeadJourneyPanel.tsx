@@ -83,7 +83,7 @@ export function ContactLeadJourneyPanel({
     <article className="rounded-xl border border-swiss-line bg-white p-3">
       <div className="flex items-start justify-between gap-2">
         <h4 className="flex items-center gap-1.5 text-sm font-bold text-swiss-ink">
-          <Filter className="h-3.5 w-3.5 text-primary" />
+          <Filter className="h-3.5 w-3.5 text-swiss-accent" />
           Lead journey
         </h4>
         <span className="rounded-md bg-white px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-swiss-faint ring-1 ring-swiss-line">
@@ -116,7 +116,7 @@ export function ContactLeadJourneyPanel({
                     ? 'bg-emerald-500'
                     : item.type === 'created'
                       ? 'bg-sky-500'
-                      : 'bg-primary'
+                      : 'bg-swiss-accent'
                 }`}
               />
               <p className="text-[10px] font-semibold uppercase tracking-wide text-swiss-faint">

@@ -29,7 +29,7 @@ export function AutomationSettingsPanel() {
             onClick={() => navigate(tab.path)}
             className={`cursor-pointer rounded-md px-3 py-1.5 text-sm font-semibold transition-colors ${
               activeKey === tab.key
-                ? 'bg-primary/10 text-primary'
+                ? 'bg-swiss-accent/10 text-swiss-accent'
                 : 'text-slate-500 hover:text-slate-800'
             }`}
           >

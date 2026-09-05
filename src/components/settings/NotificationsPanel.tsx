@@ -123,8 +123,8 @@ function Switch({
       aria-checked={checked}
       aria-label={label}
       onClick={() => onChange(!checked)}
-      className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
-        checked ? 'bg-primary' : 'bg-slate-300'
+      className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-swiss-accent ${
+        checked ? 'bg-swiss-accent' : 'bg-slate-300'
       }`}
     >
       <span
@@ -145,7 +145,7 @@ function FieldLabel({ htmlFor, children }: { htmlFor: string; children: React.Re
 }
 
 const inputClass =
-  'w-full rounded-xl border border-border-subtle bg-white px-3.5 py-2.5 text-sm text-dark-navy placeholder:text-slate-400 transition-colors duration-200 focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/15';
+  'w-full rounded-xl border border-border-subtle bg-white px-3.5 py-2.5 text-sm text-dark-navy placeholder:text-slate-400 transition-colors duration-200 focus:border-swiss-accent/40 focus:outline-none focus:ring-2 focus:ring-swiss-accent/15';
 
 export function NotificationsPanel() {
   const [loading, setLoading] = useState(true);
@@ -380,7 +380,7 @@ export function NotificationsPanel() {
       <section className="overflow-hidden rounded-2xl border border-border-subtle bg-white">
         <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
           <div className="flex min-w-0 items-start gap-4">
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-accent-green-bg text-primary">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-accent-green-bg text-swiss-accent">
               <BellRing className="h-5 w-5" aria-hidden />
             </span>
             <div className="min-w-0">
@@ -425,7 +425,7 @@ export function NotificationsPanel() {
         <section
           className={`flex flex-col rounded-2xl border bg-white transition-colors duration-200 ${
             channels.email.enabled
-              ? 'border-primary/25 ring-1 ring-primary/10'
+              ? 'border-swiss-accent/25 ring-1 ring-swiss-accent/10'
               : 'border-border-subtle'
           }`}
         >
@@ -434,7 +434,7 @@ export function NotificationsPanel() {
               <span
                 className={`flex h-10 w-10 items-center justify-center rounded-xl ${
                   channels.email.enabled
-                    ? 'bg-primary text-white'
+                    ? 'bg-swiss-accent text-white'
                     : 'bg-white text-slate-500'
                 }`}
               >
@@ -470,7 +470,7 @@ export function NotificationsPanel() {
                     key={v.key}
                     type="button"
                     onClick={() => insertVariable(v.key)}
-                    className="cursor-pointer rounded-lg border border-border-subtle bg-white px-2.5 py-1 font-mono text-[11px] font-medium text-slate-700 transition-colors duration-200 hover:border-primary/30 hover:bg-accent-green-bg hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                    className="cursor-pointer rounded-lg border border-border-subtle bg-white px-2.5 py-1 font-mono text-[11px] font-medium text-slate-700 transition-colors duration-200 hover:border-swiss-accent/30 hover:bg-accent-green-bg hover:text-swiss-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-swiss-accent"
                   >
                     {`{{${v.key}}}`}
                   </button>
@@ -545,16 +545,16 @@ export function NotificationsPanel() {
                     },
                   }))
                 }
-                className={`mb-2 flex w-full cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+                className={`mb-2 flex w-full cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-swiss-accent ${
                   channels.email.recipients.workspaceEmail
-                    ? 'border-primary/30 bg-accent-green-bg'
+                    ? 'border-swiss-accent/30 bg-accent-green-bg'
                     : 'border-border-subtle bg-white hover:bg-surface'
                 }`}
               >
                 <span
                   className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ${
                     channels.email.recipients.workspaceEmail
-                      ? 'border-primary bg-primary text-white'
+                      ? 'border-swiss-accent bg-swiss-accent text-white'
                       : 'border-slate-300 bg-white'
                   }`}
                 >
@@ -580,12 +580,12 @@ export function NotificationsPanel() {
                           type="button"
                           onClick={() => toggleEmailUser(m.userId)}
                           className={`flex w-full cursor-pointer items-center gap-3 rounded-lg px-2.5 py-2 text-left transition-colors duration-200 ${
-                            on ? 'bg-white ring-1 ring-primary/20' : 'hover:bg-white/70'
+                            on ? 'bg-white ring-1 ring-swiss-accent/20' : 'hover:bg-white/70'
                           }`}
                         >
                           <span
                             className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ${
-                              on ? 'border-primary bg-primary text-white' : 'border-slate-300 bg-white'
+                              on ? 'border-swiss-accent bg-swiss-accent text-white' : 'border-slate-300 bg-white'
                             }`}
                           >
                             {on ? <Check className="h-3 w-3" strokeWidth={3} aria-hidden /> : null}
@@ -813,7 +813,7 @@ export function NotificationsPanel() {
         <p className="text-xs text-slate-500">
           Applies on the next <span className="font-medium text-slate-700">escalate_to_human</span>
         </p>
-        <button type="submit" disabled={saving} className="btn-primary min-h-11 px-5">
+        <button type="submit" disabled={saving} className="btn-swiss-accent min-h-11 px-5">
           {saving ? (
             <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
           ) : (

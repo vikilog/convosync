@@ -48,7 +48,7 @@ const VERTICAL_LABELS: Record<string, string> = {
 };
 
 const inputClass =
-  'w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15';
+  'w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-swiss-accent focus:outline-none focus:ring-2 focus:ring-swiss-accent/15';
 
 const labelClass = 'block text-[11px] font-bold uppercase tracking-wide text-slate-500 mb-1.5';
 
@@ -157,7 +157,7 @@ export function WhatsAppProfileSideSheet({ open, account, onClose, onSaved }: Pr
           >
             <header className="flex items-start justify-between gap-3 border-b border-swiss-line px-5 py-4 shrink-0">
               <div className="flex gap-3 min-w-0">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-swiss-accent/10 text-swiss-accent">
                   <Building2 className="h-5 w-5" />
                 </div>
                 <div className="min-w-0">
@@ -185,7 +185,7 @@ export function WhatsAppProfileSideSheet({ open, account, onClose, onSaved }: Pr
                 </div>
               ) : (
                 <>
-                  <section className="rounded-2xl bg-surface-muted/80 p-4">
+                  <section className="rounded-2xl border border-swiss-line bg-white p-4">
                     <div className="flex items-center gap-3">
                       {pictureUrl ? (
                         <img
@@ -194,7 +194,7 @@ export function WhatsAppProfileSideSheet({ open, account, onClose, onSaved }: Pr
                           className="h-14 w-14 rounded-full object-cover border border-swiss-line bg-white"
                         />
                       ) : (
-                        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white border border-swiss-line text-primary">
+                        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white border border-swiss-line text-swiss-accent">
                           <Phone className="h-6 w-6" />
                         </div>
                       )}
@@ -240,7 +240,7 @@ export function WhatsAppProfileSideSheet({ open, account, onClose, onSaved }: Pr
                     </div>
                   )}
                   {success && (
-                    <p className="text-sm font-medium text-primary bg-primary/10 border border-primary/15 rounded-xl px-3 py-2">
+                    <p className="text-sm font-medium text-swiss-accent bg-swiss-accent/10 border border-swiss-accent/15 rounded-xl px-3 py-2">
                       {success}
                     </p>
                   )}
@@ -367,7 +367,7 @@ export function WhatsAppProfileSideSheet({ open, account, onClose, onSaved }: Pr
                 type="button"
                 disabled={loading || saving || !about.trim()}
                 onClick={() => void handleSave()}
-                className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                className="inline-flex items-center gap-2 rounded-xl bg-swiss-accent px-4 py-2 text-sm font-bold text-white hover:bg-swiss-accent-hover disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                 Save profile

@@ -177,7 +177,7 @@ function statusBadge(status: string) {
     pending: 'bg-[#fff5e6] text-[#f2994a] border-[#f2994a]/30',
     failed: 'bg-red-50 text-red-700 border-red-200',
     sent: 'bg-[#e6f7ec] text-[#006d2f] border-[#5dfd8a]/40',
-    queued: 'bg-gray-50 text-swiss-muted border-gray-200',
+    queued: 'bg-white text-swiss-muted border-gray-200',
     delivered: 'bg-indigo-50 text-indigo-700 border-indigo-200',
     opened: 'bg-sky-50 text-sky-800 border-sky-200',
     clicked: 'bg-violet-50 text-violet-800 border-violet-200',
@@ -185,11 +185,11 @@ function statusBadge(status: string) {
     complained: 'bg-orange-50 text-orange-800 border-orange-200',
     rejected: 'bg-red-50 text-red-700 border-red-200',
     active: 'bg-[#e6f7ec] text-[#006d2f] border-[#5dfd8a]/40',
-    disabled: 'bg-gray-100 text-swiss-muted border-gray-200',
+    disabled: 'bg-white text-swiss-muted border-gray-200',
     credentials_missing: 'bg-amber-50 text-amber-800 border-amber-200',
     connection_failed: 'bg-red-50 text-red-700 border-red-200',
   };
-  return map[status] ?? 'bg-gray-50 text-swiss-muted border-gray-200';
+  return map[status] ?? 'bg-white text-swiss-muted border-gray-200';
 }
 
 function domainFromEmail(email: string | null | undefined): string | null {
@@ -661,8 +661,8 @@ export function EmailPanel() {
             onClick={() => setTab(id)}
             className={`px-3 py-1.5 rounded-lg text-sm font-bold border cursor-pointer transition-colors duration-150 ${
               tab === id
-                ? 'bg-primary text-white border-primary'
-                : 'bg-white text-swiss-muted border-swiss-line hover:border-primary/30'
+                ? 'bg-swiss-accent text-white border-swiss-accent'
+                : 'bg-white text-swiss-muted border-swiss-line hover:border-swiss-accent/30'
             }`}
           >
             {label}
@@ -671,7 +671,7 @@ export function EmailPanel() {
         <button
           type="button"
           onClick={() => void load()}
-          className="ml-auto inline-flex items-center gap-1 px-2 py-1.5 text-sm font-semibold text-swiss-muted hover:text-primary cursor-pointer"
+          className="ml-auto inline-flex items-center gap-1 px-2 py-1.5 text-sm font-semibold text-swiss-muted hover:text-swiss-accent cursor-pointer"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
           Refresh
@@ -705,7 +705,7 @@ export function EmailPanel() {
               id="email-sending-as-heading"
               className="text-sm font-bold text-swiss-ink mb-1 flex items-center gap-2"
             >
-              <Globe className="w-4 h-4 text-primary" aria-hidden />
+              <Globe className="w-4 h-4 text-swiss-accent" aria-hidden />
               Sending as
             </h4>
             <p className="text-xs text-swiss-muted mb-3">
@@ -715,7 +715,7 @@ export function EmailPanel() {
                 : '.'}
             </p>
             {activeFromEmail ? (
-              <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/15 bg-slate-50 px-4 py-3">
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-swiss-accent/15 bg-white px-4 py-3">
                 <div className="min-w-0">
                   <p className="text-sm font-bold text-swiss-ink">
                     {activeDomain ?? activeProviderLabel ?? 'Email'}
@@ -730,7 +730,7 @@ export function EmailPanel() {
                     </p>
                   )}
                 </div>
-                <span className="shrink-0 text-sm font-bold text-primary uppercase">
+                <span className="shrink-0 text-sm font-bold text-swiss-accent uppercase">
                   Active
                 </span>
               </div>
@@ -745,7 +745,7 @@ export function EmailPanel() {
           <div className="bg-white rounded-2xl border border-swiss-line p-4">
             <div className="flex items-center justify-between gap-2 mb-3">
               <h4 className="text-sm font-bold text-swiss-ink flex items-center gap-2">
-                <Settings className="w-4 h-4 text-primary" aria-hidden />
+                <Settings className="w-4 h-4 text-swiss-accent" aria-hidden />
                 Providers
               </h4>
               {!showAddProvider && availableProviderTypes.length > 0 && (
@@ -766,7 +766,7 @@ export function EmailPanel() {
                       isDefault: true,
                     }));
                   }}
-                  className="px-3 py-1.5 rounded-full bg-primary hover:bg-primary-hover text-white text-sm font-bold inline-flex items-center gap-1"
+                  className="px-3 py-1.5 rounded-full bg-swiss-accent hover:bg-swiss-accent-hover text-white text-sm font-bold inline-flex items-center gap-1"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   Add provider
@@ -805,7 +805,7 @@ export function EmailPanel() {
                             {p.status.replace(/_/g, ' ')}
                           </span>
                           {p.isDefault && (
-                            <span className="text-sm font-bold text-primary uppercase">
+                            <span className="text-sm font-bold text-swiss-accent uppercase">
                               Default
                             </span>
                           )}
@@ -869,7 +869,7 @@ export function EmailPanel() {
                             type="button"
                             disabled={saving}
                             onClick={() => void handleSetDefaultProvider(p.id)}
-                            className="px-2 py-1 text-sm font-bold rounded border border-swiss-line hover:border-primary/30"
+                            className="px-2 py-1 text-sm font-bold rounded border border-swiss-line hover:border-swiss-accent/30"
                           >
                             Set default
                           </button>
@@ -878,7 +878,7 @@ export function EmailPanel() {
                           type="button"
                           disabled={saving}
                           onClick={() => void handleTestProvider(p.id)}
-                          className="px-2 py-1 text-sm font-bold rounded border border-swiss-line hover:border-primary/30 inline-flex items-center gap-1"
+                          className="px-2 py-1 text-sm font-bold rounded border border-swiss-line hover:border-swiss-accent/30 inline-flex items-center gap-1"
                         >
                           <Zap className="w-3 h-3" />
                           Test
@@ -887,7 +887,7 @@ export function EmailPanel() {
                           type="button"
                           disabled={saving}
                           onClick={() => void handleToggleProviderStatus(p)}
-                          className="px-2 py-1 text-sm font-bold rounded border border-swiss-line hover:border-primary/30"
+                          className="px-2 py-1 text-sm font-bold rounded border border-swiss-line hover:border-swiss-accent/30"
                         >
                           {p.status === 'disabled' ? 'Enable' : 'Disable'}
                         </button>
@@ -912,7 +912,7 @@ export function EmailPanel() {
                                 resetSesFormState();
                               }
                             }}
-                            className="px-2 py-1 text-sm font-bold rounded border border-swiss-line hover:border-primary/30"
+                            className="px-2 py-1 text-sm font-bold rounded border border-swiss-line hover:border-swiss-accent/30"
                           >
                             Edit
                           </button>
@@ -1010,7 +1010,7 @@ export function EmailPanel() {
                                 : undefined
                             }
                             onClick={() => void handleUpdateProvider(p.id)}
-                            className="px-3 py-1.5 rounded-full bg-primary hover:bg-primary-hover text-white text-sm font-bold disabled:opacity-50"
+                            className="px-3 py-1.5 rounded-full bg-swiss-accent hover:bg-swiss-accent-hover text-white text-sm font-bold disabled:opacity-50"
                           >
                             Save
                           </button>
@@ -1132,7 +1132,7 @@ export function EmailPanel() {
                       : undefined
                   }
                   onClick={() => void handleCreateProvider()}
-                  className="px-4 py-2 rounded-full bg-primary hover:bg-primary-hover text-white text-sm font-bold disabled:opacity-50"
+                  className="px-4 py-2 rounded-full bg-swiss-accent hover:bg-swiss-accent-hover text-white text-sm font-bold disabled:opacity-50"
                 >
                   Add provider
                 </button>
@@ -1156,7 +1156,7 @@ export function EmailPanel() {
               id="email-test-send-heading"
               className="text-sm font-bold text-swiss-ink flex items-center gap-2"
             >
-              <Send className="w-4 h-4 text-primary" aria-hidden />
+              <Send className="w-4 h-4 text-swiss-accent" aria-hidden />
               Send test email
             </h4>
             <p className="text-xs text-swiss-muted">
@@ -1184,13 +1184,13 @@ export function EmailPanel() {
               value={testSend.to}
               onChange={(e) => setTestSend((s) => ({ ...s, to: e.target.value }))}
               placeholder="recipient@example.com"
-              className="h-auto w-full text-sm border border-swiss-line rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+              className="h-auto w-full text-sm border border-swiss-line rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-swiss-accent/30 focus:border-swiss-accent"
             />
             <button
               type="button"
               disabled={saving || !testSend.to.trim()}
               onClick={() => void handleTestSend()}
-              className="px-4 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white text-sm font-bold disabled:opacity-50 cursor-pointer"
+              className="px-4 py-2 rounded-lg bg-swiss-accent hover:bg-swiss-accent-hover text-white text-sm font-bold disabled:opacity-50 cursor-pointer"
             >
               Send test
             </button>
@@ -1219,7 +1219,7 @@ export function EmailPanel() {
                   <col className="w-[8%]" />
                   <col className="w-[8%]" />
                 </colgroup>
-                <TableHeader className="bg-slate-50 text-swiss-muted font-bold border-b border-swiss-line">
+                <TableHeader className="bg-white text-swiss-muted font-bold border-b border-swiss-line">
                   <TableRow>
                     <TableHead scope="col" className="px-3 py-2.5 whitespace-nowrap">
                       Time

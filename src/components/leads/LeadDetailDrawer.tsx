@@ -38,7 +38,7 @@ function InlineField({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm font-medium text-swiss-ink outline-none focus:ring-2 focus:ring-primary/20"
+        className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm font-medium text-swiss-ink outline-none focus:ring-2 focus:ring-swiss-accent/20"
       />
     </label>
   );
@@ -236,7 +236,7 @@ export function LeadDetailDrawer({
                         }}
                         className={`cursor-pointer rounded-lg px-2.5 py-1 text-xs font-bold transition-colors ${
                           active
-                            ? 'bg-primary text-white'
+                            ? 'bg-swiss-accent text-white'
                             : 'border border-black/10 bg-white text-swiss-muted hover:bg-surface-muted'
                         }`}
                       >
@@ -344,7 +344,7 @@ export function LeadDetailDrawer({
                     onChange={(e) => patch({ notes: e.target.value })}
                     rows={8}
                     placeholder="Internal notes…"
-                    className="min-h-0 mt-1 w-full resize-none rounded-xl border border-swiss-line px-3 py-2 text-sm text-swiss-ink outline-none focus:ring-2 focus:ring-primary/20"
+                    className="min-h-0 mt-1 w-full resize-none rounded-xl border border-swiss-line px-3 py-2 text-sm text-swiss-ink outline-none focus:ring-2 focus:ring-swiss-accent/20"
                   />
                 </label>
               )}

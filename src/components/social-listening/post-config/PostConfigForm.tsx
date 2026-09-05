@@ -43,7 +43,7 @@ export function PostConfigForm({
           <select
             value={values.funnelId || ''}
             onChange={(e) => patch('funnelId', e.target.value || null)}
-            className="mt-1.5 w-full cursor-pointer rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-semibold text-swiss-ink outline-none focus:ring-2 focus:ring-primary/20"
+            className="mt-1.5 w-full cursor-pointer rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-semibold text-swiss-ink outline-none focus:ring-2 focus:ring-swiss-accent/20"
           >
             <option value="">Select funnel…</option>
             {MOCK_FUNNELS.map((f) => (
@@ -59,7 +59,7 @@ export function PostConfigForm({
           <select
             value={values.skillId || ''}
             onChange={(e) => patch('skillId', e.target.value || null)}
-            className="mt-1.5 w-full cursor-pointer rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-semibold text-swiss-ink outline-none focus:ring-2 focus:ring-primary/20"
+            className="mt-1.5 w-full cursor-pointer rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-semibold text-swiss-ink outline-none focus:ring-2 focus:ring-swiss-accent/20"
           >
             <option value="">None (default prompts)</option>
             {MOCK_SKILLS.map((s) => (
@@ -98,7 +98,7 @@ export function PostConfigForm({
         type="button"
         disabled={saving || !values.funnelId}
         onClick={onSave}
-        className="mt-5 inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-white hover:bg-primary-hover disabled:opacity-50"
+        className="mt-5 inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-swiss-accent px-4 py-2.5 text-sm font-bold text-white hover:bg-swiss-accent-hover disabled:opacity-50"
       >
         {saving ? (
           <>

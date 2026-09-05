@@ -62,7 +62,7 @@ export function WalletUsageCalculator({
       <div className="flex items-start justify-between gap-3 shrink-0">
         <div>
           <h3 className="text-sm font-bold text-slate-900 inline-flex items-center gap-1.5">
-            <Calculator className="h-4 w-4 text-primary" aria-hidden />
+            <Calculator className="h-4 w-4 text-swiss-accent" aria-hidden />
             Usage calculator
           </h3>
           <p className="mt-0.5 text-xs text-slate-500">
@@ -128,7 +128,7 @@ export function WalletUsageCalculator({
         })}
       </div>
 
-      <div className="mt-4 shrink-0 rounded-lg border border-primary/20 bg-primary/10 p-3.5">
+      <div className="mt-4 shrink-0 rounded-lg border border-swiss-accent/20 bg-swiss-accent/10 p-3.5">
         {hasUsage ? (
           <ul className="space-y-1 text-[11px] text-slate-700 max-h-28 overflow-y-auto">
             {breakdown.map((row) => (
@@ -147,7 +147,7 @@ export function WalletUsageCalculator({
           <p className="text-xs text-slate-500">Adjust sliders to estimate monthly usage.</p>
         )}
 
-        <div className="mt-3 border-t border-primary/20 pt-3">
+        <div className="mt-3 border-t border-swiss-accent/20 pt-3">
           <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
             Estimated total
           </p>
@@ -168,7 +168,7 @@ export function WalletUsageCalculator({
         <button
           type="button"
           onClick={() => onSuggestRecharge(suggestedRechargeCc)}
-          className="mt-3 w-full shrink-0 btn-primary text-sm"
+          className="mt-3 w-full shrink-0 btn-swiss-accent text-sm"
         >
           Recharge {formatCc(suggestedRechargeCc, { compact: true })}
         </button>

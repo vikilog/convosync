@@ -332,10 +332,10 @@ export function RechargeWalletPanel({
         <p className="mt-1 text-sm text-slate-500">{formatCcInrSubtitle(balanceCc)}</p>
 
         <div className="mt-5 flex flex-wrap gap-2">
-          <span className="inline-flex items-center rounded-full border border-swiss-line bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-700">
+          <span className="inline-flex items-center rounded-full border border-swiss-line bg-white px-3 py-1.5 text-xs font-medium text-slate-700">
             This month: <span className="ml-1 font-bold">{formatCc(monthSpentCc)}</span> spent
           </span>
-          <span className="inline-flex items-center rounded-full border border-swiss-line bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-700">
+          <span className="inline-flex items-center rounded-full border border-swiss-line bg-white px-3 py-1.5 text-xs font-medium text-slate-700">
             Alert threshold:{' '}
             {editingAlert ? (
               <span className="ml-1 inline-flex items-center gap-1">
@@ -449,7 +449,7 @@ export function RechargeWalletPanel({
         <p className="mt-3 text-xs text-slate-500">1 CC = ₹1 • 18% GST applicable</p>
 
         {/* AUTO_RECHARGE_DISABLED — re-enable later
-        <label className="mt-4 flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-swiss-line bg-slate-50/70 px-3 py-3">
+        <label className="mt-4 flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-swiss-line bg-white/70 px-3 py-3">
           <span className="text-sm text-slate-700">
             Auto-recharge {formatCc(AUTO_RECHARGE_CC)} when balance drops below{' '}
             {formatCc(alertCc)}
@@ -480,7 +480,7 @@ export function RechargeWalletPanel({
       <SectionCard title="How ConvoCoins are used">
         <div className="rounded-lg border border-swiss-line">
           <Table className="min-w-full text-left text-sm">
-            <TableHeader className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <TableHeader className="bg-white text-xs font-semibold uppercase tracking-wide text-slate-500">
               <TableRow>
                 <TableHead className="px-4 py-3 whitespace-normal">Feature</TableHead>
                 <TableHead className="px-4 py-3 whitespace-normal">Cost per use</TableHead>

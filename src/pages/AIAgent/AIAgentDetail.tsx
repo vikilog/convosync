@@ -170,7 +170,7 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
         <button
           type="button"
           onClick={() => navigate(pathForTab('ai-agent'))}
-          className="mt-4 text-sm font-bold text-primary hover:underline"
+          className="mt-4 text-sm font-bold text-swiss-accent hover:underline"
         >
           Back to agents
         </button>
@@ -181,14 +181,14 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
     `block px-3 py-2 rounded-lg text-sm transition-colors ${
       isActive
-        ? 'bg-primary/10 text-primary font-bold'
+        ? 'bg-swiss-accent/10 text-swiss-accent font-bold'
         : 'text-[#6B7280] hover:bg-surface-muted hover:text-[#111827]'
     }`;
 
   const subNavLinkClass = ({ isActive }: { isActive: boolean }) =>
     `block pl-8 pr-3 py-2 rounded-lg text-sm transition-colors ${
       isActive
-        ? 'bg-primary/10 text-primary font-bold'
+        ? 'bg-swiss-accent/10 text-swiss-accent font-bold'
         : 'text-[#6B7280] hover:bg-surface-muted hover:text-[#111827]'
     }`;
 
@@ -210,7 +210,7 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
   const closeTest = () => setTestOpen(false);
 
   return (
-    <div className="flex-1 w-full pb-12 text-left">
+    <div className="flex-1 w-full pb-12 text-left font-swiss">
       <div className="flex flex-col lg:flex-row w-full min-h-[calc(100vh-12rem)] gap-0">
         <div className="lg:hidden mb-4">
           <label htmlFor="agent-section-mobile" className="sr-only">
@@ -245,7 +245,7 @@ export const AIAgentDetail: React.FC<Props> = ({ agentId, pathname }) => {
           </div>
           {lastAutoSavedAt && section === 'profile' ? (
             <p className="mb-4 flex items-center gap-1.5 text-xs text-[#6B7280] pl-6">
-              <CloudCheck className="w-3.5 h-3.5 text-primary" />
+              <CloudCheck className="w-3.5 h-3.5 text-swiss-accent" />
               Auto Saved at {lastAutoSavedAt}
             </p>
           ) : null}

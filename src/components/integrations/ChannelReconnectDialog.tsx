@@ -73,7 +73,7 @@ export function ChannelReconnectDialog({
               <button
                 type="button"
                 onClick={() => onReconnect(alert)}
-                className="shrink-0 rounded-lg bg-primary px-3 py-2 text-xs font-bold text-white hover:bg-primary-hover"
+                className="shrink-0 rounded-lg bg-swiss-accent px-3 py-2 text-xs font-bold text-white hover:bg-swiss-accent-hover"
               >
                 Reconnect
               </button>

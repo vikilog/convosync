@@ -87,9 +87,9 @@ export const DocumentUpload: React.FC<Props> = ({ agentId, onSaved }) => {
           e.preventDefault();
           addFiles(e.dataTransfer.files);
         }}
-        className="border-2 border-dashed border-swiss-line rounded-xl p-8 text-center hover:border-primary hover:bg-primary/5 transition-colors cursor-pointer"
+        className="border-2 border-dashed border-swiss-line rounded-xl p-8 text-center hover:border-swiss-accent hover:bg-swiss-accent/5 transition-colors cursor-pointer"
       >
-        <Upload className="w-8 h-8 text-primary mx-auto mb-3" />
+        <Upload className="w-8 h-8 text-swiss-accent mx-auto mb-3" />
         <p className="text-sm font-medium text-[#111827]">Drag & drop or click to browse</p>
         <p className="text-xs text-[#6B7280] mt-1">PDF, DOCX, TXT, MD — uploads immediately</p>
         <input
@@ -110,7 +110,7 @@ export const DocumentUpload: React.FC<Props> = ({ agentId, onSaved }) => {
               className="flex items-center justify-between gap-3 px-3 py-2 bg-white border border-swiss-line rounded-xl"
             >
               <div className="flex items-center gap-2 min-w-0 flex-1">
-                <FileText className="w-4 h-4 text-primary shrink-0" />
+                <FileText className="w-4 h-4 text-swiss-accent shrink-0" />
                 <div className="min-w-0">
                   <span className="text-sm text-[#111827] truncate block">
                     {entry.file.name}
@@ -121,7 +121,7 @@ export const DocumentUpload: React.FC<Props> = ({ agentId, onSaved }) => {
                 </div>
               </div>
               {entry.status === 'uploading' && (
-                <Loader2 className="w-4 h-4 text-primary animate-spin shrink-0" />
+                <Loader2 className="w-4 h-4 text-swiss-accent animate-spin shrink-0" />
               )}
               {entry.status === 'done' && (
                 <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" />

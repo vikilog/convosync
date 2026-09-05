@@ -228,7 +228,7 @@ export function UsersTeamsPanel() {
   return (
     <div className="space-y-4">
       {message && (
-        <p className="text-sm font-bold text-primary bg-primary/10 border border-primary/20 rounded-xl px-4 py-2">
+        <p className="text-sm font-bold text-swiss-accent bg-swiss-accent/10 border border-swiss-accent/20 rounded-xl px-4 py-2">
           {message}
         </p>
       )}
@@ -255,7 +255,7 @@ export function UsersTeamsPanel() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search by name or email"
-                className="h-auto w-full pl-9 pr-3 py-2 text-xs border border-swiss-line rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
+                className="h-auto w-full pl-9 pr-3 py-2 text-xs border border-swiss-line rounded-xl focus:outline-none focus:ring-2 focus:ring-swiss-accent/20"
               />
             </div>
             {canManageUsers && (
@@ -271,7 +271,7 @@ export function UsersTeamsPanel() {
                   setShowInvite(true);
                   setError(null);
                 }}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary hover:bg-primary-hover text-white text-sm font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-swiss-accent hover:bg-swiss-accent-hover text-white text-sm font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <UserPlus className="w-3.5 h-3.5" />
                 {atMemberLimit ? 'Limit reached' : 'Add user'}
@@ -282,7 +282,7 @@ export function UsersTeamsPanel() {
 
         {loading ? (
           <div className="flex justify-center py-16">
-            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            <Loader2 className="w-6 h-6 animate-spin text-swiss-accent" />
           </div>
         ) : (
           <Table className="text-left text-xs">
@@ -314,7 +314,7 @@ export function UsersTeamsPanel() {
                               className="h-9 w-9 shrink-0 rounded-full object-cover ring-1 ring-swiss-line"
                             />
                           ) : (
-                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#c4c0ff] text-sm font-bold text-primary">
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#c4c0ff] text-sm font-bold text-swiss-accent">
                               {m.name.charAt(0).toUpperCase()}
                             </div>
                           )}
@@ -337,7 +337,7 @@ export function UsersTeamsPanel() {
                             onChange={(e) =>
                               void handleRoleChange(m, e.target.value as 'admin' | 'agent')
                             }
-                            className="text-sm font-bold border border-swiss-line rounded-lg px-2 py-1.5 bg-white capitalize focus:outline-none focus:ring-2 focus:ring-primary/20"
+                            className="text-sm font-bold border border-swiss-line rounded-lg px-2 py-1.5 bg-white capitalize focus:outline-none focus:ring-2 focus:ring-swiss-accent/20"
                           >
                             <option value="admin">Admin</option>
                             <option value="agent">Agent</option>
@@ -346,7 +346,7 @@ export function UsersTeamsPanel() {
                           <span className="inline-flex items-center gap-1 font-bold text-swiss-ink capitalize">
                             {m.role}
                             {m.isOwner && (
-                              <span className="text-xs bg-sky-50 text-primary px-1.5 py-0.5 rounded font-bold">
+                              <span className="text-xs bg-sky-50 text-swiss-accent px-1.5 py-0.5 rounded font-bold">
                                 Owner
                               </span>
                             )}
@@ -373,7 +373,7 @@ export function UsersTeamsPanel() {
                                     resolveEffectiveInboxScope(m.role, m.inboxScope)
                                   );
                                 }}
-                              className="inline-flex items-center gap-1 text-sm font-bold text-primary hover:underline"
+                              className="inline-flex items-center gap-1 text-sm font-bold text-swiss-accent hover:underline"
                             >
                               <Pencil className="w-3 h-3" />
                                 Edit
@@ -397,7 +397,7 @@ export function UsersTeamsPanel() {
                               onChange={(e) =>
                                 void handleAutoAssignChange(m, { autoAssignEligible: e.target.checked })
                               }
-                              className="h-3.5 w-3.5 accent-primary disabled:opacity-50"
+                              className="h-3.5 w-3.5 accent-swiss-accent disabled:opacity-50"
                             />
                             <span className="text-swiss-muted font-medium">Eligible</span>
                           </label>
@@ -418,8 +418,8 @@ export function UsersTeamsPanel() {
                         </div>
                       </TableCell>
                       <TableCell className="px-5 py-4">
-                        <span className="inline-flex items-center gap-1.5 text-primary font-bold capitalize">
-                          <span className="w-2 h-2 rounded-full bg-primary" />
+                        <span className="inline-flex items-center gap-1.5 text-swiss-accent font-bold capitalize">
+                          <span className="w-2 h-2 rounded-full bg-swiss-accent" />
                           {m.status}
                         </span>
                       </TableCell>
@@ -500,7 +500,7 @@ export function UsersTeamsPanel() {
                 onChange={(e) =>
                   setInvite((prev) => ({ ...prev, email: e.target.value.toLowerCase() }))
                 }
-                className="h-auto w-full px-3 py-2 text-xs border border-swiss-line rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
+                className="h-auto w-full px-3 py-2 text-xs border border-swiss-line rounded-xl focus:outline-none focus:ring-2 focus:ring-swiss-accent/20"
               />
             </label>
 
@@ -513,7 +513,7 @@ export function UsersTeamsPanel() {
                 value={invite.name}
                 onChange={(e) => setInvite((prev) => ({ ...prev, name: e.target.value }))}
                 placeholder="Required if email is not registered yet"
-                className="h-auto w-full px-3 py-2 text-xs border border-swiss-line rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
+                className="h-auto w-full px-3 py-2 text-xs border border-swiss-line rounded-xl focus:outline-none focus:ring-2 focus:ring-swiss-accent/20"
               />
             </label>
 
@@ -526,7 +526,7 @@ export function UsersTeamsPanel() {
                 value={invite.password}
                 onChange={(e) => setInvite((prev) => ({ ...prev, password: e.target.value }))}
                 placeholder="Min 8 characters"
-                className="h-auto w-full px-3 py-2 text-xs border border-swiss-line rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
+                className="h-auto w-full px-3 py-2 text-xs border border-swiss-line rounded-xl focus:outline-none focus:ring-2 focus:ring-swiss-accent/20"
               />
             </label>
 
@@ -540,7 +540,7 @@ export function UsersTeamsPanel() {
                     role: e.target.value as 'admin' | 'agent',
                   }))
                 }
-                className="w-full px-3 py-2 text-xs border border-swiss-line rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"
+                className="w-full px-3 py-2 text-xs border border-swiss-line rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-swiss-accent/20"
               >
                 <option value="agent">Agent — custom permissions</option>
                 <option value="admin">Admin — full access</option>
@@ -574,7 +574,7 @@ export function UsersTeamsPanel() {
               <button
                 type="submit"
                 disabled={saving}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-white text-sm font-bold disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-swiss-accent text-white text-sm font-bold disabled:opacity-50"
               >
                 {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
                 Add user
@@ -630,7 +630,7 @@ export function UsersTeamsPanel() {
                 type="button"
                 disabled={saving}
                 onClick={() => void handleSavePermissions()}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-white text-sm font-bold disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-swiss-accent text-white text-sm font-bold disabled:opacity-50"
               >
                 {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
                 Save permissions

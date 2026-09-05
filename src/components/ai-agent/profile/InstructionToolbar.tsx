@@ -63,7 +63,7 @@ export const InstructionToolbar: React.FC<Props> = ({
       <button
         type="button"
         onClick={onOpenGuide}
-        className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:text-primary-hover"
+        className="inline-flex items-center gap-1.5 text-xs font-bold text-swiss-accent hover:text-swiss-accent-hover"
       >
         <BookOpen className="w-3.5 h-3.5" />
         Learn how to write this

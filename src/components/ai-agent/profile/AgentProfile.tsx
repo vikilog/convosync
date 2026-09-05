@@ -225,7 +225,7 @@ export const AgentProfile: React.FC<Props> = ({
               <button
                 type="button"
                 onClick={onTestAgent}
-                className="inline-flex items-center gap-1.5 rounded-xl border border-swiss-line bg-white px-3 py-2 text-sm font-bold text-[#111827] hover:border-primary hover:text-primary transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-swiss-line bg-white px-3 py-2 text-sm font-bold text-[#111827] hover:border-swiss-accent hover:text-swiss-accent transition-colors cursor-pointer"
               >
                 <MessageSquare className="w-4 h-4" />
                 Test Agent
@@ -234,7 +234,7 @@ export const AgentProfile: React.FC<Props> = ({
             <span
               className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ${
                 local.isPublished
-                  ? 'bg-primary/10 text-primary'
+                  ? 'bg-swiss-accent/10 text-swiss-accent'
                   : 'bg-amber-50 text-amber-700'
               }`}
             >
@@ -244,7 +244,7 @@ export const AgentProfile: React.FC<Props> = ({
               type="button"
               disabled={saving}
               onClick={() => setShowPublishConfirm(true)}
-              className="inline-flex items-center rounded-xl bg-primary px-4 py-2 text-sm font-bold text-white hover:bg-primary-hover disabled:opacity-60"
+              className="inline-flex items-center rounded-xl bg-swiss-accent px-4 py-2 text-sm font-bold text-white hover:bg-swiss-accent-hover disabled:opacity-60"
             >
               {local.isPublished ? 'Republish' : 'Publish'}
             </button>
@@ -255,7 +255,7 @@ export const AgentProfile: React.FC<Props> = ({
             <button
               type="button"
               onClick={() => setShowEdit(true)}
-              className="absolute top-4 right-4 inline-flex items-center gap-1.5 text-sm font-bold text-[#6B7280] hover:text-primary transition-colors"
+              className="absolute top-4 right-4 inline-flex items-center gap-1.5 text-sm font-bold text-[#6B7280] hover:text-swiss-accent transition-colors"
             >
               <Pencil className="w-4 h-4" />
               Edit
@@ -274,11 +274,11 @@ export const AgentProfile: React.FC<Props> = ({
                     className="w-16 h-16 rounded-full object-cover border border-swiss-line"
                   />
                 ) : (
-                  <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center border border-swiss-line">
+                  <div className="w-16 h-16 rounded-full bg-swiss-accent/10 text-swiss-accent flex items-center justify-center border border-swiss-line">
                     <Bot className="w-8 h-8" />
                   </div>
                 )}
-                <span className="absolute inset-0 flex items-center justify-center rounded-full bg-black/0 text-white opacity-0 transition-opacity group-hover:bg-primary-hover/40 group-hover:opacity-100 text-[10px] font-bold">
+                <span className="absolute inset-0 flex items-center justify-center rounded-full bg-black/0 text-white opacity-0 transition-opacity group-hover:bg-swiss-accent-hover/40 group-hover:opacity-100 text-[10px] font-bold">
                   Edit
                 </span>
               </button>
@@ -301,7 +301,7 @@ export const AgentProfile: React.FC<Props> = ({
                     onClick={() => patchLocal({ toneOfVoice: opt.id })}
                     className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold border transition-colors ${
                       selected
-                        ? 'border-primary/30 bg-primary/10 text-primary'
+                        ? 'border-swiss-accent/30 bg-swiss-accent/10 text-swiss-accent'
                         : 'border-swiss-line bg-white text-[#6B7280] hover:border-black/10'
                     }`}
                   >
@@ -326,7 +326,7 @@ export const AgentProfile: React.FC<Props> = ({
                     fallbackLanguage: e.target.value as AgentProfileData['fallbackLanguage'],
                   })
                 }
-                className="w-full appearance-none border border-swiss-line rounded-lg py-2.5 pl-3 pr-9 text-sm text-[#111827] focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none bg-white"
+                className="w-full appearance-none border border-swiss-line rounded-lg py-2.5 pl-3 pr-9 text-sm text-[#111827] focus:ring-2 focus:ring-swiss-accent/20 focus:border-swiss-accent outline-none bg-white"
               >
                 {(Object.keys(LANGUAGE_LABELS) as Array<keyof typeof LANGUAGE_LABELS>).map(
                   (key) => (
@@ -370,7 +370,7 @@ export const AgentProfile: React.FC<Props> = ({
               onChange={(e) =>
                 patchLocal({ similarityLowThreshold: Number(e.target.value) / 100 })
               }
-              className="mt-2 w-full accent-[var(--color-primary,#4f46e5)]"
+              className="mt-2 w-full accent-[var(--color-swiss-accent,#4f46e5)]"
             />
             <p className="mt-1.5 text-xs text-[#6B7280]">
               Default 70%. Higher = stricter KB matches; lower = more answers from weaker matches.
@@ -389,7 +389,7 @@ export const AgentProfile: React.FC<Props> = ({
                 onChange={(e) => patchLocal({ instructions: e.target.value.slice(0, 5000) })}
                 placeholder={INSTRUCTIONS_PLACEHOLDER}
                 rows={10}
-                className="min-h-0 w-full border border-swiss-line rounded-lg py-3 px-3 text-sm resize-y min-h-[200px] max-h-[400px] focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                className="min-h-0 w-full border border-swiss-line rounded-lg py-3 px-3 text-sm resize-y min-h-[200px] max-h-[400px] focus:ring-2 focus:ring-swiss-accent/20 focus:border-swiss-accent outline-none"
               />
               <span className="absolute bottom-3 right-3 text-xs text-[#6B7280]">
                 {local.instructions.length}/5000
@@ -451,7 +451,7 @@ export const AgentProfile: React.FC<Props> = ({
                         patchLocal({ voiceAgentEnabled: !local.voiceAgentEnabled })
                       }
                       className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${
-                        local.voiceAgentEnabled ? 'bg-primary' : 'bg-[#D1D5DB]'
+                        local.voiceAgentEnabled ? 'bg-swiss-accent' : 'bg-[#D1D5DB]'
                       }`}
                     >
                       <span
@@ -474,7 +474,7 @@ export const AgentProfile: React.FC<Props> = ({
                           id="voice-stt-provider"
                           value={local.voiceSttProvider || VOICE_STT_PROVIDERS[0]?.value}
                           onChange={(e) => patchLocal({ voiceSttProvider: e.target.value })}
-                          className="w-full max-w-xs rounded-lg bg-white ring-1 ring-swiss-line px-3 py-2 text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/30"
+                          className="w-full max-w-xs rounded-lg bg-white ring-1 ring-swiss-line px-3 py-2 text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-swiss-accent/30"
                         >
                           {VOICE_STT_PROVIDERS.map((opt) => (
                             <option key={opt.value} value={opt.value}>
@@ -500,7 +500,7 @@ export const AgentProfile: React.FC<Props> = ({
                               voiceTtsVoiceId: defaultVoiceForTtsProvider(provider),
                             });
                           }}
-                          className="w-full max-w-xs rounded-lg bg-white ring-1 ring-swiss-line px-3 py-2 text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/30"
+                          className="w-full max-w-xs rounded-lg bg-white ring-1 ring-swiss-line px-3 py-2 text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-swiss-accent/30"
                         >
                           {VOICE_TTS_PROVIDERS.map((opt) => (
                             <option key={opt.value} value={opt.value}>
@@ -525,7 +525,7 @@ export const AgentProfile: React.FC<Props> = ({
                             onChange={(e) =>
                               patchLocal({ voiceTtsVoiceId: e.target.value || null })
                             }
-                            className="w-full max-w-xs rounded-lg bg-white ring-1 ring-swiss-line px-3 py-2 text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/30"
+                            className="w-full max-w-xs rounded-lg bg-white ring-1 ring-swiss-line px-3 py-2 text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-swiss-accent/30"
                           >
                             {CARTESIA_TTS_VOICES.map((opt) => (
                               <option key={opt.value} value={opt.value}>
@@ -551,7 +551,7 @@ export const AgentProfile: React.FC<Props> = ({
                             onChange={(e) =>
                               patchLocal({ voiceTtsVoiceId: e.target.value || null })
                             }
-                            className="w-full max-w-xs rounded-lg bg-white ring-1 ring-swiss-line px-3 py-2 text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/30"
+                            className="w-full max-w-xs rounded-lg bg-white ring-1 ring-swiss-line px-3 py-2 text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-swiss-accent/30"
                           >
                             {OPENAI_TTS_VOICES.map((opt) => (
                               <option key={opt.value} value={opt.value}>
@@ -577,7 +577,7 @@ export const AgentProfile: React.FC<Props> = ({
                             onChange={(e) =>
                               patchLocal({ voiceTtsVoiceId: e.target.value || null })
                             }
-                            className="w-full max-w-xs rounded-lg bg-white ring-1 ring-swiss-line px-3 py-2 text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-primary/30"
+                            className="w-full max-w-xs rounded-lg bg-white ring-1 ring-swiss-line px-3 py-2 text-sm text-[#111827] focus:outline-none focus:ring-2 focus:ring-swiss-accent/30"
                           >
                             {DEEPGRAM_TTS_VOICES.map((opt) => (
                               <option key={opt.value} value={opt.value}>
@@ -616,7 +616,7 @@ export const AgentProfile: React.FC<Props> = ({
                 onChange={(e) => patchLocal({ brandBackground: e.target.value.slice(0, 1200) })}
                 placeholder="Enter brand information"
                 rows={5}
-                className="min-h-0 w-full border border-swiss-line rounded-xl py-3 px-3 text-sm resize-none focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                className="min-h-0 w-full border border-swiss-line rounded-xl py-3 px-3 text-sm resize-none focus:ring-2 focus:ring-swiss-accent/20 focus:border-swiss-accent outline-none"
               />
               <span className="absolute bottom-3 right-3 text-xs text-[#6B7280]">
                 {local.brandBackground.length}/1200
@@ -654,7 +654,7 @@ export const AgentProfile: React.FC<Props> = ({
                 type="button"
                 disabled={saving}
                 onClick={() => void handlePublish()}
-                className="px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-60 text-white rounded-xl text-sm font-bold"
+                className="px-4 py-2 bg-swiss-accent hover:bg-swiss-accent-hover disabled:opacity-60 text-white rounded-xl text-sm font-bold"
               >
                 Publish
               </button>

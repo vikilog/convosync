@@ -149,7 +149,7 @@ export function WhatsAppPaymentModePanel({
     <div className="bg-white border border-swiss-line p-6 sm:p-8 space-y-5">
       {variant === 'post_connect' ? (
         <div>
-          <span className="inline-block px-3 py-1 rounded-full text-sm font-black uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 mb-4">
+          <span className="inline-block px-3 py-1 rounded-full text-sm font-black uppercase tracking-wider bg-swiss-accent/10 text-swiss-accent border border-swiss-accent/20 mb-4">
             Step 3 — Payment mode
           </span>
           <h4 className="text-xl font-semibold text-gray-950">How will Meta bill WhatsApp usage?</h4>
@@ -174,8 +174,8 @@ export function WhatsAppPaymentModePanel({
           onClick={() => void selectSelfPay()}
           className={`text-left rounded-xl border p-4 transition-colors ${
             modeChosen
-              ? 'border-primary/40 bg-primary/5 ring-1 ring-primary/20'
-              : 'border-black/10 bg-white hover:border-primary/30 hover:bg-primary/5 cursor-pointer'
+              ? 'border-swiss-accent/40 bg-swiss-accent/5 ring-1 ring-swiss-accent/20'
+              : 'border-black/10 bg-white hover:border-swiss-accent/30 hover:bg-swiss-accent/5 cursor-pointer'
           } disabled:cursor-default`}
         >
           <div className="flex items-start gap-3">
@@ -189,7 +189,7 @@ export function WhatsAppPaymentModePanel({
                 directly.
               </p>
               {modeChosen ? (
-                <p className="mt-2 text-xs font-bold text-primary">Selected</p>
+                <p className="mt-2 text-xs font-bold text-swiss-accent">Selected</p>
               ) : null}
             </div>
           </div>
@@ -197,7 +197,7 @@ export function WhatsAppPaymentModePanel({
 
         <div
           aria-disabled
-          className="rounded-xl border border-swiss-line bg-slate-50 p-4 opacity-60 cursor-not-allowed"
+          className="rounded-xl border border-swiss-line bg-white p-4 opacity-60 cursor-not-allowed"
         >
           <div className="flex items-start gap-3">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-200 text-slate-500">
@@ -219,10 +219,10 @@ export function WhatsAppPaymentModePanel({
       </div>
 
       {modeChosen ? (
-        <div className="rounded-xl bg-surface-muted p-4 space-y-3">
+        <div className="rounded-xl border border-swiss-line bg-white p-4 space-y-3">
           {hasPm ? (
             <div className="flex items-start gap-3">
-              <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" aria-hidden />
+              <CheckCircle2 className="h-5 w-5 text-swiss-accent shrink-0 mt-0.5" aria-hidden />
               <div>
                 <p className="text-sm font-bold text-slate-900">Payment method connected</p>
                 <p className="mt-0.5 text-xs text-slate-500">
@@ -232,7 +232,7 @@ export function WhatsAppPaymentModePanel({
             </div>
           ) : acknowledged ? (
             <div className="flex items-start gap-3">
-              <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" aria-hidden />
+              <CheckCircle2 className="h-5 w-5 text-swiss-accent shrink-0 mt-0.5" aria-hidden />
               <div>
                 <p className="text-sm font-bold text-slate-900">Payment method noted</p>
               </div>
@@ -249,7 +249,7 @@ export function WhatsAppPaymentModePanel({
                   href={status?.metaPaymentSetupUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-black text-white hover:bg-primary-hover transition-colors"
+                  className="inline-flex items-center gap-2 rounded-xl bg-swiss-accent px-4 py-2 text-sm font-black text-white hover:bg-swiss-accent-hover transition-colors"
                 >
                   Open Meta payment methods
                   <ExternalLink className="h-3.5 w-3.5" aria-hidden />
@@ -267,7 +267,7 @@ export function WhatsAppPaymentModePanel({
                   type="button"
                   disabled={busy}
                   onClick={() => void acknowledge()}
-                  className="inline-flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-4 py-2 text-sm font-bold text-primary hover:bg-primary/10 disabled:opacity-50"
+                  className="inline-flex items-center gap-2 rounded-xl border border-swiss-accent/30 bg-swiss-accent/5 px-4 py-2 text-sm font-bold text-swiss-accent hover:bg-swiss-accent/10 disabled:opacity-50"
                 >
                   I&apos;ve added a payment method
                 </button>
@@ -285,7 +285,7 @@ export function WhatsAppPaymentModePanel({
                   href={status?.metaPaymentSetupUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-black text-white hover:bg-primary-hover transition-colors"
+                  className="inline-flex items-center gap-2 rounded-xl bg-swiss-accent px-4 py-2 text-sm font-black text-white hover:bg-swiss-accent-hover transition-colors"
                 >
                   Open Meta payment methods
                   <ExternalLink className="h-3.5 w-3.5" aria-hidden />
@@ -307,7 +307,7 @@ export function WhatsAppPaymentModePanel({
               type="button"
               disabled={busy}
               onClick={refresh}
-              className="inline-flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-primary"
+              className="inline-flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-swiss-accent"
             >
               <RefreshCw className={`h-3 w-3 ${busy ? 'animate-spin' : ''}`} aria-hidden />
               Refresh status

@@ -249,7 +249,7 @@ export const NewSkillModal: React.FC<Props> = ({
             type="button"
             onClick={() => setMode('single')}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium ${
-              mode === 'single' ? 'bg-primary/15 text-primary' : 'text-[#6B7280] hover:bg-surface-muted'
+              mode === 'single' ? 'bg-swiss-accent/15 text-swiss-accent' : 'text-[#6B7280] hover:bg-surface-muted'
             }`}
           >
             Single
@@ -258,7 +258,7 @@ export const NewSkillModal: React.FC<Props> = ({
             type="button"
             onClick={() => setMode('bulk')}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium ${
-              mode === 'bulk' ? 'bg-primary/15 text-primary' : 'text-[#6B7280] hover:bg-surface-muted'
+              mode === 'bulk' ? 'bg-swiss-accent/15 text-swiss-accent' : 'text-[#6B7280] hover:bg-surface-muted'
             }`}
           >
             Bulk
@@ -275,7 +275,7 @@ export const NewSkillModal: React.FC<Props> = ({
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search skills or enter a name"
-                  className="h-auto w-full pl-10 pr-3 py-2.5 border border-swiss-line rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                  className="h-auto w-full pl-10 pr-3 py-2.5 border border-swiss-line rounded-xl text-sm focus:ring-2 focus:ring-swiss-accent/20 focus:border-swiss-accent outline-none"
                 />
               </div>
 
@@ -289,7 +289,7 @@ export const NewSkillModal: React.FC<Props> = ({
                     setSelected(null);
                   }}
                   placeholder="Enter name here"
-                  className="h-auto w-full border border-swiss-line rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                  className="h-auto w-full border border-swiss-line rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-swiss-accent/20 focus:border-swiss-accent outline-none"
                 />
               </div>
 
@@ -302,7 +302,7 @@ export const NewSkillModal: React.FC<Props> = ({
                   onChange={(e) => setDescription(e.target.value.slice(0, 500))}
                   rows={2}
                   placeholder="Short blurb for the skills list"
-                  className="min-h-0 w-full border border-swiss-line rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none resize-none"
+                  className="min-h-0 w-full border border-swiss-line rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-swiss-accent/20 focus:border-swiss-accent outline-none resize-none"
                 />
               </div>
 
@@ -333,8 +333,8 @@ export const NewSkillModal: React.FC<Props> = ({
                       }}
                       className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
                         selected?.title === s.title
-                          ? 'bg-primary/15 text-[#111827] font-medium'
-                          : 'text-[#111827] hover:bg-primary/10'
+                          ? 'bg-swiss-accent/15 text-[#111827] font-medium'
+                          : 'text-[#111827] hover:bg-swiss-accent/10'
                       }`}
                     >
                       {s.title}
@@ -347,7 +347,7 @@ export const NewSkillModal: React.FC<Props> = ({
                 type="button"
                 disabled={creating || (!title.trim() && !search.trim())}
                 onClick={handleCreate}
-                className="w-full py-2.5 bg-primary hover:bg-primary-hover disabled:opacity-60 text-white rounded-xl text-sm font-bold"
+                className="w-full py-2.5 bg-swiss-accent hover:bg-swiss-accent-hover disabled:opacity-60 text-white rounded-xl text-sm font-bold"
               >
                 {creating ? 'Creating…' : 'Create Skill'}
               </button>
@@ -363,14 +363,14 @@ export const NewSkillModal: React.FC<Props> = ({
                   onChange={(e) => setJsonPaste(e.target.value)}
                   rows={3}
                   placeholder='[{"title":"…","trigger":"","instructions":"","description":"","knowledgeItemIds":[]}]'
-                  className="min-h-0 w-full border border-swiss-line rounded-xl py-2.5 px-3 text-xs font-mono focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none resize-none"
+                  className="min-h-0 w-full border border-swiss-line rounded-xl py-2.5 px-3 text-xs font-mono focus:ring-2 focus:ring-swiss-accent/20 focus:border-swiss-accent outline-none resize-none"
                 />
                 {jsonError && <p className="text-xs text-red-600 mt-1">{jsonError}</p>}
                 <button
                   type="button"
                   onClick={applyJsonPaste}
                   disabled={!jsonPaste.trim()}
-                  className="mt-2 text-sm font-medium text-primary hover:underline disabled:opacity-50"
+                  className="mt-2 text-sm font-medium text-swiss-accent hover:underline disabled:opacity-50"
                 >
                   Apply JSON to rows
                 </button>
@@ -401,7 +401,7 @@ export const NewSkillModal: React.FC<Props> = ({
                         )
                       }
                       placeholder="Name"
-                      className="h-auto w-full border border-swiss-line rounded-lg py-2 px-3 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                      className="h-auto w-full border border-swiss-line rounded-lg py-2 px-3 text-sm outline-none focus:ring-2 focus:ring-swiss-accent/20"
                     />
                     <Input
                       type="text"
@@ -414,7 +414,7 @@ export const NewSkillModal: React.FC<Props> = ({
                         )
                       }
                       placeholder="Description (optional)"
-                      className="h-auto w-full border border-swiss-line rounded-lg py-2 px-3 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                      className="h-auto w-full border border-swiss-line rounded-lg py-2 px-3 text-sm outline-none focus:ring-2 focus:ring-swiss-accent/20"
                     />
                     <Textarea
                       value={row.trigger}
@@ -425,7 +425,7 @@ export const NewSkillModal: React.FC<Props> = ({
                       }
                       placeholder="Trigger (optional — empty OK)"
                       rows={2}
-                      className="min-h-0 w-full border border-swiss-line rounded-lg py-2 px-3 text-sm outline-none focus:ring-2 focus:ring-primary/20 resize-none"
+                      className="min-h-0 w-full border border-swiss-line rounded-lg py-2 px-3 text-sm outline-none focus:ring-2 focus:ring-swiss-accent/20 resize-none"
                     />
                     <KnowledgeMultiSelect
                       items={kbItems}
@@ -444,7 +444,7 @@ export const NewSkillModal: React.FC<Props> = ({
               <button
                 type="button"
                 onClick={() => setRows((r) => [...r, emptyRow()])}
-                className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-swiss-accent hover:underline"
               >
                 <Plus className="w-4 h-4" />
                 Add row
@@ -454,7 +454,7 @@ export const NewSkillModal: React.FC<Props> = ({
                 type="button"
                 disabled={creating || !onBulkCreate || !rows.some((r) => r.title.trim())}
                 onClick={handleBulk}
-                className="w-full py-2.5 bg-primary hover:bg-primary-hover disabled:opacity-60 text-white rounded-xl text-sm font-bold"
+                className="w-full py-2.5 bg-swiss-accent hover:bg-swiss-accent-hover disabled:opacity-60 text-white rounded-xl text-sm font-bold"
               >
                 {creating ? 'Creating…' : 'Create skills'}
               </button>

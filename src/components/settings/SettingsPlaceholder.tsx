@@ -5,7 +5,7 @@ export function SettingsPlaceholder({ title }: { title: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
       <div className="w-14 h-14 rounded-2xl bg-sky-50 flex items-center justify-center mb-4">
-        <Construction className="w-7 h-7 text-primary" />
+        <Construction className="w-7 h-7 text-swiss-accent" />
       </div>
       <h3 className="text-sm font-bold text-swiss-ink">{title}</h3>
       <p className="text-xs text-swiss-faint mt-2 max-w-sm">

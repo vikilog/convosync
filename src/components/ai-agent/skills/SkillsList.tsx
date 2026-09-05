@@ -144,7 +144,7 @@ export const SkillsList: React.FC<Props> = ({ agentId }) => {
               setBulkErrors([]);
               setShowNew(true);
             }}
-            className="px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-xl text-sm font-bold"
+            className="px-4 py-2 bg-swiss-accent hover:bg-swiss-accent-hover text-white rounded-xl text-sm font-bold"
           >
             + New Skill
           </button>
@@ -170,7 +170,7 @@ export const SkillsList: React.FC<Props> = ({ agentId }) => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name"
-            className="h-auto w-full pl-10 pr-3 py-2 border border-swiss-line rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+            className="h-auto w-full pl-10 pr-3 py-2 border border-swiss-line rounded-xl text-sm focus:ring-2 focus:ring-swiss-accent/20 focus:border-swiss-accent outline-none"
           />
         </div>
         <button
@@ -186,8 +186,8 @@ export const SkillsList: React.FC<Props> = ({ agentId }) => {
         <p className="text-sm text-[#6B7280] text-center py-12">Loading skills…</p>
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-            <HelpCircle className="w-8 h-8 text-primary" />
+          <div className="w-16 h-16 rounded-full bg-swiss-accent/10 flex items-center justify-center mb-4">
+            <HelpCircle className="w-8 h-8 text-swiss-accent" />
           </div>
           <p className="text-sm font-medium text-[#6B7280]">No data</p>
         </div>
@@ -198,7 +198,7 @@ export const SkillsList: React.FC<Props> = ({ agentId }) => {
               key={skill.id}
               type="button"
               onClick={() => navigate(pathForAgentSkill(agentId, skill.id))}
-              className="w-full text-left bg-white border border-swiss-line p-4 hover:border-primary hover:bg-primary/5 transition-colors"
+              className="w-full text-left bg-white border border-swiss-line p-4 hover:border-swiss-accent hover:bg-swiss-accent/5 transition-colors"
             >
               <div className="flex items-center justify-between gap-3">
                 <p className="text-sm font-bold text-[#111827]">{skill.title}</p>
@@ -206,7 +206,7 @@ export const SkillsList: React.FC<Props> = ({ agentId }) => {
                   className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
                     skill.status === 'live'
                       ? 'bg-green-100 text-green-700'
-                      : 'bg-gray-100 text-swiss-muted'
+                      : 'bg-white text-swiss-muted border border-gray-200'
                   }`}
                 >
                   {skill.status === 'live' ? 'Live' : 'Draft'}

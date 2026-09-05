@@ -180,7 +180,7 @@ export function ConnectFlowModal({ open, onClose, tableId, columns }: Props) {
                 <select
                   value={pickingFlowId}
                   onChange={(e) => void handlePickFlow(e.target.value)}
-                  className="w-full rounded-xl border border-swiss-line px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="w-full rounded-xl border border-swiss-line px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-swiss-accent/20"
                 >
                   <option value="">Select a flow…</option>
                   {available.map((f) => (
@@ -213,7 +213,7 @@ export function ConnectFlowModal({ open, onClose, tableId, columns }: Props) {
                         onChange={(e) =>
                           setFieldMap((prev) => ({ ...prev, [col.key]: e.target.value }))
                         }
-                        className="flex-1 rounded-lg border border-swiss-line px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        className="flex-1 rounded-lg border border-swiss-line px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-swiss-accent/20"
                       >
                         <option value="">— not mapped —</option>
                         {flowFields.map((f) => (
@@ -229,7 +229,7 @@ export function ConnectFlowModal({ open, onClose, tableId, columns }: Props) {
                       type="button"
                       disabled={saving}
                       onClick={() => void handleConnect()}
-                      className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-1.5 text-xs font-bold text-white hover:bg-primary-hover disabled:opacity-50"
+                      className="inline-flex items-center gap-2 rounded-lg bg-swiss-accent px-4 py-1.5 text-xs font-bold text-white hover:bg-swiss-accent-hover disabled:opacity-50"
                     >
                       {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
                       Connect

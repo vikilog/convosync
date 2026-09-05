@@ -48,8 +48,8 @@ const STATUS_LABELS: Record<SyncStatus, string> = {
 };
 
 const STATUS_STYLES: Record<SyncStatus, string> = {
-  pending: 'bg-gray-100 text-swiss-muted border-gray-200',
-  syncing: 'bg-sky-50 text-primary border-primary/20',
+  pending: 'bg-white text-swiss-muted border-gray-200',
+  syncing: 'bg-sky-50 text-swiss-accent border-swiss-accent/20',
   success: 'bg-[#e6f7ec] text-accent-green border-[#5dfd8a]/40',
   failed: 'bg-red-50 text-danger-red border-red-200',
 };
@@ -321,7 +321,7 @@ export function AiKnowledgePanel() {
     <div className="max-w-3xl space-y-6">
       <div className="bg-white border border-swiss-line p-5 ">
         <div className="flex items-start gap-3 mb-5">
-          <div className="p-2.5 rounded-xl bg-sky-50 text-primary">
+          <div className="p-2.5 rounded-xl bg-sky-50 text-swiss-accent">
             <Database className="w-5 h-5" />
           </div>
           <div>
@@ -344,13 +344,13 @@ export function AiKnowledgePanel() {
                 value={connectionString}
                 onChange={(e) => setConnectionString(e.target.value)}
                 placeholder="mongodb+srv://user:pass@cluster/db"
-                className="h-auto w-full rounded-xl border border-swiss-line bg-slate-50 px-3 py-2.5 pr-10 text-xs font-mono focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                className="h-auto w-full rounded-xl border border-swiss-line bg-white px-3 py-2.5 pr-10 text-xs font-mono focus:ring-2 focus:ring-swiss-accent/20 focus:border-swiss-accent outline-none"
                 autoComplete="off"
               />
               <button
                 type="button"
                 onClick={() => setShowConnection((v) => !v)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-swiss-faint hover:text-primary"
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-swiss-faint hover:text-swiss-accent"
                 aria-label={showConnection ? 'Hide connection string' : 'Show connection string'}
               >
                 {showConnection ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -372,7 +372,7 @@ export function AiKnowledgePanel() {
               value={venueId}
               onChange={(e) => setVenueId(e.target.value)}
               placeholder="Salon / venue / branch ObjectId"
-              className="h-auto w-full rounded-xl border border-swiss-line bg-slate-50 px-3 py-2.5 text-xs font-mono focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+              className="h-auto w-full rounded-xl border border-swiss-line bg-white px-3 py-2.5 text-xs font-mono focus:ring-2 focus:ring-swiss-accent/20 focus:border-swiss-accent outline-none"
             />
           </div>
 
@@ -402,7 +402,7 @@ export function AiKnowledgePanel() {
               type="button"
               onClick={() => void handleSyncAll()}
               disabled={syncing || loadingCollections}
-              className="inline-flex items-center gap-2 rounded-xl bg-primary hover:bg-primary-hover disabled:opacity-60 text-white text-sm font-bold px-4 py-2.5 transition-colors"
+              className="inline-flex items-center gap-2 rounded-xl bg-swiss-accent hover:bg-swiss-accent-hover disabled:opacity-60 text-white text-sm font-bold px-4 py-2.5 transition-colors"
             >
               {syncingAll ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -422,7 +422,7 @@ export function AiKnowledgePanel() {
               Collections ({collections.filter((c) => c.synced).length}/{collections.length} synced)
             </p>
             {syncAllProgress && (
-              <p className="text-sm font-semibold text-primary">
+              <p className="text-sm font-semibold text-swiss-accent">
                 {syncAllProgress.current}/{syncAllProgress.total} — {syncAllProgress.name}
               </p>
             )}
@@ -453,7 +453,7 @@ export function AiKnowledgePanel() {
                       type="button"
                       onClick={() => void handleSyncCollection(col.name)}
                       disabled={syncing}
-                      className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/10 hover:bg-primary hover:text-white disabled:opacity-50 text-primary text-sm font-bold px-2.5 py-1.5 transition-colors"
+                      className="inline-flex items-center gap-1 rounded-full border border-swiss-accent/20 bg-swiss-accent/10 hover:bg-swiss-accent hover:text-white disabled:opacity-50 text-swiss-accent text-sm font-bold px-2.5 py-1.5 transition-colors"
                     >
                       {isActive ? (
                         <Loader2 className="w-3 h-3 animate-spin" />
@@ -510,7 +510,7 @@ export function AiKnowledgePanel() {
             {syncAllProgress && (
               <div className="h-2 rounded-full bg-sky-50 overflow-hidden">
                 <div
-                  className="h-full bg-primary transition-all duration-300"
+                  className="h-full bg-swiss-accent transition-all duration-300"
                   style={{
                     width: `${Math.round((syncAllProgress.current / syncAllProgress.total) * 100)}%`,
                   }}

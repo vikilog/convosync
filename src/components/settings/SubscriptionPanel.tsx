@@ -206,7 +206,7 @@ export function SubscriptionPanel({
         </div>
       ) : null}
       {actionMessage ? (
-        <div className="rounded-xl border border-primary/20 bg-primary/10 px-4 py-3 text-sm text-primary">
+        <div className="rounded-xl border border-swiss-accent/20 bg-swiss-accent/10 px-4 py-3 text-sm text-swiss-accent">
           {actionMessage}
         </div>
       ) : null}
@@ -222,7 +222,7 @@ export function SubscriptionPanel({
           <span
             className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold ${
               active
-                ? 'bg-primary/10 text-primary ring-1 ring-primary/20'
+                ? 'bg-swiss-accent/10 text-swiss-accent ring-1 ring-swiss-accent/20'
                 : 'bg-white text-slate-600 ring-1 ring-black/5'
             }`}
           >
@@ -258,7 +258,7 @@ export function SubscriptionPanel({
             type="button"
             disabled={checkoutBusy}
             onClick={() => void handleSubscribe()}
-            className="mt-5 inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-hover disabled:opacity-60"
+            className="mt-5 inline-flex items-center gap-2 rounded-lg bg-swiss-accent px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-swiss-accent-hover disabled:opacity-60"
           >
             {checkoutBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
             Subscribe to {PLAN_NAME}
@@ -273,7 +273,7 @@ export function SubscriptionPanel({
         <ul className="mt-4 space-y-2.5">
           {INCLUDED_FEATURES.map((feature) => (
             <li key={feature} className="flex items-start gap-2.5 text-sm text-slate-700">
-              <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+              <Check className="mt-0.5 h-4 w-4 shrink-0 text-swiss-accent" />
               <span>{feature}</span>
             </li>
           ))}

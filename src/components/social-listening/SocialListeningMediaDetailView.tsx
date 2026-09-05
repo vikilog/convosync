@@ -394,7 +394,7 @@ function CommentRow({
                   type="button"
                   disabled={replySending || !replyText.trim()}
                   onClick={onSendReply}
-                  className="inline-flex items-center gap-1 rounded-xl bg-primary px-3 py-2 text-xs font-black text-white hover:bg-primary-hover disabled:opacity-50"
+                  className="inline-flex items-center gap-1 rounded-xl bg-swiss-accent px-3 py-2 text-xs font-black text-white hover:bg-swiss-accent-hover disabled:opacity-50"
                 >
                   <Send className="h-3.5 w-3.5" />
                   {replySending ? '…' : 'Send'}
@@ -410,7 +410,7 @@ function CommentRow({
             )}
 
             {(comment.publicReplyText || comment.dmReplyText || comment.dmStatus === 'failed') && (
-              <div className="mt-3 space-y-2 rounded-lg bg-surface-muted/80 p-2.5">
+              <div className="mt-3 space-y-2 rounded-lg border border-swiss-line bg-white p-2.5">
                 {comment.publicReplyText && (
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-wide text-swiss-faint">
@@ -950,7 +950,7 @@ export const SocialListeningMediaDetailView: React.FC = () => {
   const commentClubs = useMemo(() => clubCommentsByUser(comments), [comments]);
 
   return (
-    <div className="flex h-full min-h-0 flex-1 flex-col gap-3 overflow-hidden bg-white p-3 md:p-4">
+    <div className="flex h-full min-h-0 flex-1 flex-col gap-3 overflow-hidden bg-white font-swiss p-3 md:p-4">
       <div className="flex shrink-0 flex-wrap items-center justify-between gap-2">
         <button
           type="button"
@@ -963,7 +963,7 @@ export const SocialListeningMediaDetailView: React.FC = () => {
                   : '/social-listening/content'
             )
           }
-          className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-primary"
+          className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-swiss-accent"
         >
           ← Back to content
         </button>
@@ -1215,7 +1215,7 @@ export const SocialListeningMediaDetailView: React.FC = () => {
               <select
                 value={pickFunnelId}
                 onChange={(e) => setPickFunnelId(e.target.value)}
-                className="mt-4 w-full cursor-pointer rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-semibold outline-none focus:ring-2 focus:ring-primary/20"
+                className="mt-4 w-full cursor-pointer rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-semibold outline-none focus:ring-2 focus:ring-swiss-accent/20"
               >
                 <option value="">Select funnel…</option>
                 {funnels.map((f) => (
@@ -1243,7 +1243,7 @@ export const SocialListeningMediaDetailView: React.FC = () => {
                 type="button"
                 disabled={!pickFunnelId || addLeadBusy}
                 onClick={() => void confirmAddLead()}
-                className="cursor-pointer rounded-xl bg-primary px-3 py-2 text-sm font-bold text-white hover:bg-primary-hover disabled:opacity-60"
+                className="cursor-pointer rounded-xl bg-swiss-accent px-3 py-2 text-sm font-bold text-white hover:bg-swiss-accent-hover disabled:opacity-60"
               >
                 {addLeadBusy ? 'Adding…' : 'Add to lead'}
               </button>

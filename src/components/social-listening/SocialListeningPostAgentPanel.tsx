@@ -161,7 +161,7 @@ export function SocialListeningPostAgentPanel({
           type="button"
           disabled={loading || saving}
           onClick={() => void save()}
-          className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-primary px-3 py-1.5 text-xs font-bold text-white hover:bg-primary-hover disabled:opacity-60"
+          className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-swiss-accent px-3 py-1.5 text-xs font-bold text-white hover:bg-swiss-accent-hover disabled:opacity-60"
         >
           {saving ? (
             <>
@@ -181,7 +181,7 @@ export function SocialListeningPostAgentPanel({
         ) : (
           <>
             {platform === 'instagram' && (
-              <div className="rounded-xl bg-surface-muted/40 p-3">
+              <div className="rounded-xl border border-swiss-line bg-white p-3">
                 <div className="flex items-start gap-2">
                   <Route className="mt-0.5 h-4 w-4 shrink-0 text-sky-600" />
                   <div className="min-w-0 flex-1">
@@ -233,7 +233,7 @@ export function SocialListeningPostAgentPanel({
       </div>
 
       {toast && (
-        <div className="pointer-events-none absolute right-4 top-4 z-10 rounded-xl bg-primary px-3 py-2 text-xs font-bold text-white shadow-lg">
+        <div className="pointer-events-none absolute right-4 top-4 z-10 rounded-xl bg-swiss-accent px-3 py-2 text-xs font-bold text-white shadow-lg">
           {toast}
         </div>
       )}

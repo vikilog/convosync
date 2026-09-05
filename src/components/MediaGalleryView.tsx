@@ -560,7 +560,7 @@ export const MediaGalleryView: React.FC = () => {
       : `${filtered.length} of ${items.length}`;
 
   return (
-    <div className="flex h-full min-h-0 flex-1 flex-col overflow-y-auto bg-white selection:bg-primary/15">
+    <div className="flex h-full min-h-0 flex-1 flex-col overflow-y-auto bg-white font-swiss selection:bg-swiss-accent/15">
       <div className="mx-auto w-full max-w-7xl px-4 py-5 sm:px-6 sm:py-6 md:px-8">
         <AnimatePresence>
           {toast && (
@@ -570,7 +570,7 @@ export const MediaGalleryView: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={reduceMotion ? undefined : { opacity: 0, y: -6 }}
               transition={{ duration: reduceMotion ? 0 : 0.2, ease: EASE }}
-              className="fixed top-6 right-6 z-50 bg-primary text-white text-sm font-medium px-4 py-3 rounded-xl shadow-lg"
+              className="fixed top-6 right-6 z-50 bg-swiss-accent text-white text-sm font-medium px-4 py-3 rounded-xl shadow-lg"
             >
               {toast}
             </motion.div>
@@ -586,7 +586,7 @@ export const MediaGalleryView: React.FC = () => {
 
         {/* Command bar — search, storage, add */}
         <div className="relative mb-5 overflow-hidden bg-white border border-swiss-line">
-          <div className="absolute inset-x-0 top-0 h-0.5 bg-primary" />
+          <div className="absolute inset-x-0 top-0 h-0.5 bg-swiss-accent" />
           <div className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:gap-4 sm:p-4">
             <div className="relative min-w-0 flex-1">
               <label htmlFor="media-search" className="sr-only">
@@ -602,7 +602,7 @@ export const MediaGalleryView: React.FC = () => {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search by title, tag, or filename"
-                className="h-auto min-h-11 rounded-lg border-swiss-line bg-slate-50 py-2.5 pl-10 pr-3 text-base text-slate-900 outline-none ring-primary/20 transition-colors duration-200 placeholder:text-slate-400 focus-visible:border-primary/40 focus-visible:bg-white focus-visible:ring-2 sm:text-sm"
+                className="h-auto min-h-11 rounded-lg border-swiss-line bg-white py-2.5 pl-10 pr-3 text-base text-slate-900 outline-none ring-swiss-accent/20 transition-colors duration-200 placeholder:text-slate-400 focus-visible:border-swiss-accent/40 focus-visible:bg-white focus-visible:ring-2 sm:text-sm"
               />
             </div>
 
@@ -629,7 +629,7 @@ export const MediaGalleryView: React.FC = () => {
                 {storageUsage.limitBytes != null && (
                   <div className="h-1.5 w-full overflow-hidden rounded-sm bg-black/[0.04]">
                     <motion.div
-                      className="h-full origin-left rounded-sm bg-primary"
+                      className="h-full origin-left rounded-sm bg-swiss-accent"
                       style={{
                         width: `${Math.max(usagePercent, usagePercent > 0 ? 1.5 : 0)}%`,
                       }}
@@ -654,7 +654,7 @@ export const MediaGalleryView: React.FC = () => {
               type="button"
               disabled={!galleryAllowed}
               onClick={openCreate}
-              className="inline-flex min-h-11 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-white transition-colors duration-200 hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-60"
+              className="inline-flex min-h-11 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-xl bg-swiss-accent px-5 py-2.5 text-sm font-bold text-white transition-colors duration-200 hover:bg-swiss-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swiss-accent focus-visible:ring-offset-2 disabled:opacity-60"
             >
               <Plus className="h-4 w-4" aria-hidden />
               Add media
@@ -683,7 +683,7 @@ export const MediaGalleryView: React.FC = () => {
             className="relative overflow-hidden bg-white border border-swiss-line"
             role="status"
           >
-            <div className="absolute inset-x-0 top-0 h-0.5 bg-primary" />
+            <div className="absolute inset-x-0 top-0 h-0.5 bg-swiss-accent" />
             <div
               className="pointer-events-none absolute inset-0 opacity-[0.35]"
               style={{
@@ -694,7 +694,7 @@ export const MediaGalleryView: React.FC = () => {
               aria-hidden
             />
             <div className="relative flex flex-col items-center justify-center px-6 py-16 text-center sm:py-20">
-              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15">
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-swiss-accent/10 text-swiss-accent ring-1 ring-swiss-accent/15">
                 <Cloud className="h-8 w-8" aria-hidden />
               </div>
               {hasSearch ? (
@@ -706,7 +706,7 @@ export const MediaGalleryView: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setSearch('')}
-                    className="mt-6 min-h-11 cursor-pointer rounded-xl border border-swiss-line px-5 py-2.5 text-sm font-bold text-slate-700 transition-colors duration-200 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    className="mt-6 min-h-11 cursor-pointer rounded-xl border border-swiss-line px-5 py-2.5 text-sm font-bold text-slate-700 transition-colors duration-200 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swiss-accent"
                   >
                     Clear search
                   </button>
@@ -721,7 +721,7 @@ export const MediaGalleryView: React.FC = () => {
                     type="button"
                     disabled={!galleryAllowed}
                     onClick={openCreate}
-                    className="mt-6 inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-white transition-colors duration-200 hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-60"
+                    className="mt-6 inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl bg-swiss-accent px-5 py-2.5 text-sm font-bold text-white transition-colors duration-200 hover:bg-swiss-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swiss-accent focus-visible:ring-offset-2 disabled:opacity-60"
                   >
                     <Upload className="h-4 w-4" aria-hidden />
                     Upload first file
@@ -770,7 +770,7 @@ export const MediaGalleryView: React.FC = () => {
                     }
                     className="group relative flex min-w-0 flex-col overflow-hidden bg-white border border-swiss-line transition-[box-shadow] duration-200 hover:ring-slate-300"
                   >
-                    <div className="relative aspect-[4/3] overflow-hidden bg-slate-50 text-primary">
+                    <div className="relative aspect-[4/3] overflow-hidden bg-white text-swiss-accent">
                       {thumb ? (
                         <img
                           src={thumb}
@@ -779,7 +779,7 @@ export const MediaGalleryView: React.FC = () => {
                           loading="lazy"
                         />
                       ) : (
-                        <div className="flex h-full w-full flex-col items-center justify-center gap-1.5 bg-gradient-to-br from-primary/[0.06] to-slate-50">
+                        <div className="flex h-full w-full flex-col items-center justify-center gap-1.5 bg-gradient-to-br from-swiss-accent/[0.06] to-slate-50">
                           {TYPE_ICON[item.type]}
                           <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
                             {item.type}
@@ -789,13 +789,13 @@ export const MediaGalleryView: React.FC = () => {
                       <span
                         className={`absolute left-2 top-2 inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-semibold backdrop-blur-sm ${
                           item.isActive
-                            ? 'bg-white/90 text-primary ring-1 ring-primary/15'
+                            ? 'bg-white/90 text-swiss-accent ring-1 ring-swiss-accent/15'
                             : 'bg-white/90 text-slate-500 ring-1 ring-swiss-line'
                         }`}
                       >
                         <span
                           className={`h-1.5 w-1.5 rounded-full ${
-                            item.isActive ? 'bg-primary' : 'bg-slate-300'
+                            item.isActive ? 'bg-swiss-accent' : 'bg-slate-300'
                           }`}
                           aria-hidden
                         />
@@ -814,7 +814,7 @@ export const MediaGalleryView: React.FC = () => {
                           onClick={() =>
                             setOpenMenuId((id) => (id === item.id ? null : item.id))
                           }
-                          className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg bg-white/90 text-slate-600 opacity-100 ring-1 ring-swiss-line transition-opacity duration-150 hover:bg-white hover:text-slate-900 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100 data-[open=true]:opacity-100"
+                          className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg bg-white/90 text-slate-600 opacity-100 ring-1 ring-swiss-line transition-opacity duration-150 hover:bg-white hover:text-slate-900 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swiss-accent disabled:cursor-not-allowed disabled:opacity-50 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100 data-[open=true]:opacity-100"
                           data-open={menuOpen}
                         >
                           {busyIds.has(item.id) ? (
@@ -894,7 +894,7 @@ export const MediaGalleryView: React.FC = () => {
                         >
                           {item.filename || item.type}
                         </p>
-                        <span className="shrink-0 truncate rounded-md bg-slate-50 px-1.5 py-0.5 text-[10px] font-medium capitalize text-slate-500 ring-1 ring-swiss-line">
+                        <span className="shrink-0 truncate rounded-md bg-white px-1.5 py-0.5 text-[10px] font-medium capitalize text-slate-500 ring-1 ring-swiss-line">
                           {metaTag}
                         </span>
                       </div>
@@ -930,7 +930,7 @@ export const MediaGalleryView: React.FC = () => {
                   onClick={closeForm}
                   disabled={submitting}
                   aria-label="Close dialog"
-                  className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-xl text-slate-500 transition-colors duration-200 hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-40"
+                  className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-xl text-slate-500 transition-colors duration-200 hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swiss-accent disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <X className="h-5 w-5" aria-hidden />
                 </button>
@@ -964,10 +964,10 @@ export const MediaGalleryView: React.FC = () => {
                     setDragOver(false);
                     pickFile(e.dataTransfer.files?.[0]);
                   }}
-                  className={`relative cursor-pointer rounded-2xl border-2 border-dashed p-6 text-center motion-safe:transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:p-8 ${
+                  className={`relative cursor-pointer rounded-2xl border-2 border-dashed p-6 text-center motion-safe:transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swiss-accent sm:p-8 ${
                     dragOver
-                      ? 'border-primary bg-primary/10'
-                      : 'border-black/10 hover:border-primary hover:bg-primary/5'
+                      ? 'border-swiss-accent bg-swiss-accent/10'
+                      : 'border-black/10 hover:border-swiss-accent hover:bg-swiss-accent/5'
                   }`}
                 >
                   <input
@@ -990,7 +990,7 @@ export const MediaGalleryView: React.FC = () => {
                       className="mx-auto mb-3 max-h-36 rounded-xl object-contain"
                     />
                   ) : (
-                    <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-swiss-accent/10 text-swiss-accent">
                       {editing ? TYPE_ICON[editing.type] : <Upload className="h-6 w-6" aria-hidden />}
                     </div>
                   )}
@@ -1038,7 +1038,7 @@ export const MediaGalleryView: React.FC = () => {
                     id={titleId}
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    className="mt-1.5 h-auto min-h-11 rounded-xl border-black/10 px-3 py-2 text-base outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 sm:text-sm"
+                    className="mt-1.5 h-auto min-h-11 rounded-xl border-black/10 px-3 py-2 text-base outline-none focus-visible:border-swiss-accent focus-visible:ring-2 focus-visible:ring-swiss-accent/20 sm:text-sm"
                     placeholder="Price list PDF"
                     autoComplete="off"
                   />
@@ -1054,7 +1054,7 @@ export const MediaGalleryView: React.FC = () => {
                     onChange={(e) => setDescription(e.target.value)}
                     rows={3}
                     placeholder="When should this be sent? e.g. customer asks for pricing"
-                    className="mt-1.5 resize-none rounded-xl border-black/10 px-3 py-2.5 text-base leading-relaxed outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 sm:text-sm"
+                    className="mt-1.5 resize-none rounded-xl border-black/10 px-3 py-2.5 text-base leading-relaxed outline-none focus-visible:border-swiss-accent focus-visible:ring-2 focus-visible:ring-swiss-accent/20 sm:text-sm"
                   />
                 </div>
 
@@ -1066,7 +1066,7 @@ export const MediaGalleryView: React.FC = () => {
                     <Select value={scope} onValueChange={(value) => setScope(value as MediaScope)}>
                       <SelectTrigger
                         id={scopeId}
-                        className="mt-1.5 h-auto min-h-11 w-full cursor-pointer rounded-xl bg-white px-3 py-2 text-sm shadow-none ring-1 ring-swiss-line focus-visible:ring-2 focus-visible:ring-primary/20"
+                        className="mt-1.5 h-auto min-h-11 w-full cursor-pointer rounded-xl bg-white px-3 py-2 text-sm shadow-none ring-1 ring-swiss-line focus-visible:ring-2 focus-visible:ring-swiss-accent/20"
                       >
                         <SelectValue />
                       </SelectTrigger>
@@ -1085,7 +1085,7 @@ export const MediaGalleryView: React.FC = () => {
                       id={usageId}
                       value={usage}
                       onChange={(e) => setUsage(e.target.value)}
-                      className="mt-1.5 h-auto min-h-11 rounded-xl border-black/10 px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
+                      className="mt-1.5 h-auto min-h-11 rounded-xl border-black/10 px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-swiss-accent/20"
                       placeholder="agent, catalog"
                       autoComplete="off"
                     />
@@ -1100,7 +1100,7 @@ export const MediaGalleryView: React.FC = () => {
                     id={tagsId}
                     value={tags}
                     onChange={(e) => setTags(e.target.value)}
-                    className="mt-1.5 h-auto min-h-11 rounded-xl border-black/10 px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
+                    className="mt-1.5 h-auto min-h-11 rounded-xl border-black/10 px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-swiss-accent/20"
                     placeholder="pricing, brochure"
                     autoComplete="off"
                   />
@@ -1121,7 +1121,7 @@ export const MediaGalleryView: React.FC = () => {
                   type="button"
                   onClick={closeForm}
                   disabled={submitting}
-                  className="min-h-11 cursor-pointer rounded-xl px-4 py-2 text-sm font-bold text-slate-500 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-40"
+                  className="min-h-11 cursor-pointer rounded-xl px-4 py-2 text-sm font-bold text-slate-500 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swiss-accent disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   Cancel
                 </button>
@@ -1129,7 +1129,7 @@ export const MediaGalleryView: React.FC = () => {
                   type="button"
                   disabled={submitting || (!editing && !file)}
                   onClick={() => void handleSave()}
-                  className="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-white transition-colors duration-200 hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-60"
+                  className="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl bg-swiss-accent px-5 py-2.5 text-sm font-bold text-white transition-colors duration-200 hover:bg-swiss-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swiss-accent focus-visible:ring-offset-2 disabled:opacity-60"
                 >
                   {submitting ? (
                     <>

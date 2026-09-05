@@ -63,13 +63,13 @@ export const EditProfileModal: React.FC<Props> = ({ profile, onClose, onSave, sa
                 type="button"
                 onClick={() => fileRef.current?.click()}
                 disabled={uploading || saving}
-                className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border border-swiss-line bg-primary/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border border-swiss-line bg-swiss-accent/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-swiss-accent/40"
                 aria-label="Upload bot image"
               >
                 {avatarUrl ? (
                   <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
                 ) : (
-                  <span className="flex h-full w-full items-center justify-center text-primary">
+                  <span className="flex h-full w-full items-center justify-center text-swiss-accent">
                     <Camera className="h-6 w-6" />
                   </span>
                 )}
@@ -122,7 +122,7 @@ export const EditProfileModal: React.FC<Props> = ({ profile, onClose, onSave, sa
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="h-auto w-full border border-swiss-line rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+              className="h-auto w-full border border-swiss-line rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-swiss-accent/20 focus:border-swiss-accent outline-none"
             />
           </div>
 
@@ -132,7 +132,7 @@ export const EditProfileModal: React.FC<Props> = ({ profile, onClose, onSave, sa
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-              className="min-h-0 w-full border border-swiss-line rounded-xl py-2.5 px-3 text-sm resize-none focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+              className="min-h-0 w-full border border-swiss-line rounded-xl py-2.5 px-3 text-sm resize-none focus:ring-2 focus:ring-swiss-accent/20 focus:border-swiss-accent outline-none"
             />
           </div>
 
@@ -147,7 +147,7 @@ export const EditProfileModal: React.FC<Props> = ({ profile, onClose, onSave, sa
             <button
               type="submit"
               disabled={saving || uploading}
-              className="px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-60 text-white rounded-xl text-sm font-bold"
+              className="px-4 py-2 bg-swiss-accent hover:bg-swiss-accent-hover disabled:opacity-60 text-white rounded-xl text-sm font-bold"
             >
               {saving ? 'Saving…' : 'Save'}
             </button>

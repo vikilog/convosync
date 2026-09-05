@@ -25,7 +25,7 @@ export const PromptTemplatesModal: React.FC<Props> = ({ onClose, onSelect }) => 
               onSelect(t.content);
               onClose();
             }}
-            className="w-full text-left p-4 border border-swiss-line rounded-xl hover:border-primary/30 hover:bg-primary/5 transition-colors"
+            className="w-full text-left p-4 border border-swiss-line rounded-xl hover:border-swiss-accent/30 hover:bg-swiss-accent/5 transition-colors"
           >
             <p className="text-sm font-bold text-[#111827]">{t.title}</p>
             <p className="text-xs text-[#6B7280] mt-1 line-clamp-2 whitespace-pre-line">

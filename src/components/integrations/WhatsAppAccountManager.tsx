@@ -32,11 +32,11 @@ function AccountMetric({
   tone?: 'default' | 'success';
 }) {
   return (
-    <div className="rounded-xl bg-surface-muted px-3 py-2.5 min-w-[7.5rem]">
+    <div className="rounded-xl border border-swiss-line bg-white px-3 py-2.5 min-w-[7.5rem]">
       <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">{label}</p>
       <p
         className={`mt-0.5 text-sm font-semibold truncate ${
-          tone === 'success' ? 'text-primary' : 'text-slate-800'
+          tone === 'success' ? 'text-swiss-accent' : 'text-slate-800'
         }`}
       >
         {value}
@@ -70,17 +70,17 @@ export function WhatsAppAccountManager({
             </div>
           </div>
           <div className="flex flex-wrap gap-2 sm:justify-end">
-            <div className="rounded-xl bg-surface-muted px-3 py-2 text-center min-w-[5.5rem]">
+            <div className="rounded-xl border border-swiss-line bg-white px-3 py-2 text-center min-w-[5.5rem]">
               <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
                 Connected
               </p>
               <p className="text-lg font-bold text-slate-900">{connectedCount}</p>
             </div>
-            <div className="rounded-xl border border-primary/20 bg-primary/10 px-3 py-2 text-center min-w-[5.5rem]">
-              <p className="text-[11px] font-medium uppercase tracking-wide text-primary">
+            <div className="rounded-xl border border-swiss-accent/20 bg-swiss-accent/10 px-3 py-2 text-center min-w-[5.5rem]">
+              <p className="text-[11px] font-medium uppercase tracking-wide text-swiss-accent">
                 Verified
               </p>
-              <p className="text-lg font-bold text-primary">{verifiedCount}</p>
+              <p className="text-lg font-bold text-swiss-accent">{verifiedCount}</p>
             </div>
           </div>
         </div>
@@ -113,13 +113,13 @@ export function WhatsAppAccountManager({
                           {account.label}
                         </h3>
                         {account.verified ? (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary ring-1 ring-primary/20">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-swiss-accent/10 px-2.5 py-0.5 text-xs font-semibold text-swiss-accent ring-1 ring-swiss-accent/20">
                             <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
                             Meta verified
                           </span>
                         ) : null}
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
-                          <span className="h-1.5 w-1.5 rounded-full bg-primary" aria-hidden />
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-swiss-accent/10 px-2.5 py-0.5 text-xs font-medium text-swiss-accent">
+                          <span className="h-1.5 w-1.5 rounded-full bg-swiss-accent" aria-hidden />
                           {account.status}
                         </span>
                       </div>
@@ -137,7 +137,7 @@ export function WhatsAppAccountManager({
                       <button
                         type="button"
                         onClick={() => onEditProfile(account)}
-                        className="inline-flex items-center gap-2 rounded-xl bg-surface-muted px-3.5 py-2 text-sm font-semibold text-slate-800 transition-colors duration-200 hover:bg-primary/10 hover:text-primary hover:border-primary/20 cursor-pointer"
+                        className="inline-flex items-center gap-2 rounded-xl border border-swiss-line bg-white px-3.5 py-2 text-sm font-semibold text-slate-800 transition-colors duration-200 hover:bg-swiss-accent/10 hover:text-swiss-accent hover:border-swiss-accent/20 cursor-pointer"
                       >
                         <Settings2 className="h-4 w-4" aria-hidden />
                         Edit profile

@@ -73,7 +73,7 @@ export function TopPostsTable({
                   <TableCell className="py-2.5 text-right">
                     <Link
                       to={`/social-listening/media/${encodeURIComponent(p.postId)}`}
-                      className="font-bold text-primary hover:underline"
+                      className="font-bold text-swiss-accent hover:underline"
                     >
                       Open →
                     </Link>

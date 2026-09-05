@@ -80,8 +80,8 @@ export const QnAForm: React.FC<Props> = ({ onChange }) => {
           }}
           className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-bold border transition-colors ${
             bulkMode === 'paste'
-              ? 'border-primary bg-primary/10 text-primary'
-              : 'border-swiss-line text-[#111827] hover:border-primary'
+              ? 'border-swiss-accent bg-swiss-accent/10 text-swiss-accent'
+              : 'border-swiss-line text-[#111827] hover:border-swiss-accent'
           }`}
         >
           <ClipboardPaste className="w-4 h-4" />
@@ -94,7 +94,7 @@ export const QnAForm: React.FC<Props> = ({ onChange }) => {
             setBulkError(null);
             fileRef.current?.click();
           }}
-          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-bold border border-swiss-line text-[#111827] hover:border-primary"
+          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-bold border border-swiss-line text-[#111827] hover:border-swiss-accent"
         >
           <FileUp className="w-4 h-4" />
           Import file
@@ -118,7 +118,7 @@ export const QnAForm: React.FC<Props> = ({ onChange }) => {
             onChange={(e) => setPasteText(e.target.value)}
             rows={8}
             placeholder={`Paste FAQs here, e.g.\n\nQ: What are your hours?\nA: Mon–Fri 9 AM–6 PM.\n\nQ: Do you ship internationally?\nA: Yes, to most countries.`}
-            className="min-h-0 w-full border border-swiss-line rounded-xl py-2.5 px-3 text-sm font-mono resize-y focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+            className="min-h-0 w-full border border-swiss-line rounded-xl py-2.5 px-3 text-sm font-mono resize-y focus:ring-2 focus:ring-swiss-accent/20 focus:border-swiss-accent outline-none"
           />
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <p className="text-xs text-[#6B7280]">
@@ -128,7 +128,7 @@ export const QnAForm: React.FC<Props> = ({ onChange }) => {
               type="button"
               disabled={!pasteText.trim()}
               onClick={() => applyParsed(pasteText)}
-              className="px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-50 text-white rounded-xl text-sm font-bold"
+              className="px-4 py-2 bg-swiss-accent hover:bg-swiss-accent-hover disabled:opacity-50 text-white rounded-xl text-sm font-bold"
             >
               Load FAQs
             </button>
@@ -161,7 +161,7 @@ export const QnAForm: React.FC<Props> = ({ onChange }) => {
               value={pair.question}
               onChange={(e) => updatePair(index, { question: e.target.value })}
               placeholder="What are your business hours?"
-              className="h-auto w-full border border-swiss-line rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+              className="h-auto w-full border border-swiss-line rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-swiss-accent/20 focus:border-swiss-accent outline-none"
             />
           </div>
           <div>
@@ -171,7 +171,7 @@ export const QnAForm: React.FC<Props> = ({ onChange }) => {
               onChange={(e) => updatePair(index, { answer: e.target.value })}
               placeholder="We are open Monday to Friday, 9 AM to 6 PM."
               rows={3}
-              className="min-h-0 w-full border border-swiss-line rounded-xl py-2.5 px-3 text-sm resize-none focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+              className="min-h-0 w-full border border-swiss-line rounded-xl py-2.5 px-3 text-sm resize-none focus:ring-2 focus:ring-swiss-accent/20 focus:border-swiss-accent outline-none"
             />
           </div>
         </div>
@@ -180,7 +180,7 @@ export const QnAForm: React.FC<Props> = ({ onChange }) => {
       <button
         type="button"
         onClick={addPair}
-        className="inline-flex items-center gap-1.5 text-sm font-bold text-primary hover:text-primary-hover"
+        className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-accent hover:text-swiss-accent-hover"
       >
         <Plus className="w-4 h-4" />
         Add another Q&A

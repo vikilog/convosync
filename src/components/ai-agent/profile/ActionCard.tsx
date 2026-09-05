@@ -35,7 +35,7 @@ export const ActionCard: React.FC<Props> = ({
           aria-checked={action.enabled}
           onClick={() => onChange({ enabled: !action.enabled })}
           className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${
-            action.enabled ? 'bg-primary' : 'bg-[#D1D5DB]'
+            action.enabled ? 'bg-swiss-accent' : 'bg-[#D1D5DB]'
           }`}
         >
           <span
@@ -58,7 +58,7 @@ export const ActionCard: React.FC<Props> = ({
               onChange={(e) => onChange({ instruction: e.target.value.slice(0, 1000) })}
               placeholder={placeholder}
               rows={6}
-              className="min-h-0 w-full bg-white rounded-lg py-3 px-3 pr-10 text-sm resize-y min-h-[120px] focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+              className="min-h-0 w-full bg-white rounded-lg py-3 px-3 pr-10 text-sm resize-y min-h-[120px] focus:ring-2 focus:ring-swiss-accent/20 focus:border-swiss-accent outline-none"
             />
             <span className="absolute bottom-3 right-3 text-xs text-[#6B7280]">
               {action.instruction.length}/1000

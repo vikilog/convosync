@@ -189,7 +189,7 @@ export function UsageMeteringSection({ refreshKey = 0 }: { refreshKey?: number }
       ) : (
         <div className="rounded-lg border border-swiss-line">
           <Table className="min-w-full text-left text-sm">
-            <TableHeader className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <TableHeader className="bg-white text-xs font-semibold uppercase tracking-wide text-slate-500">
               <TableRow>
                 <TableHead className="px-4 py-3 whitespace-normal">Feature</TableHead>
                 <TableHead className="px-4 py-3 whitespace-normal">Billing</TableHead>

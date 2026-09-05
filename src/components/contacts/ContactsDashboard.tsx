@@ -546,7 +546,7 @@ export const ContactsDashboard: React.FC<{
                         {t.count.toLocaleString()} · {pct}%
                       </span>
                     </div>
-                    <div className="h-1.5 overflow-hidden rounded-full bg-white">
+                    <div className="h-1.5 overflow-hidden rounded-full border border-swiss-line bg-white">
                       <div
                         className="h-full rounded-full bg-swiss-accent"
                         style={{ width: `${Math.max(pct, 2)}%` }}

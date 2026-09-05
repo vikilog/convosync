@@ -55,9 +55,9 @@ export const AttachmentUpload: React.FC<Props> = ({ onSaved }) => {
         tabIndex={0}
         onClick={() => inputRef.current?.click()}
         onKeyDown={(e) => e.key === 'Enter' && inputRef.current?.click()}
-        className="border-2 border-dashed border-swiss-line rounded-xl p-8 text-center hover:border-primary hover:bg-primary/5 transition-colors cursor-pointer"
+        className="border-2 border-dashed border-swiss-line rounded-xl p-8 text-center hover:border-swiss-accent hover:bg-swiss-accent/5 transition-colors cursor-pointer"
       >
-        <Upload className="w-8 h-8 text-primary mx-auto mb-3" />
+        <Upload className="w-8 h-8 text-swiss-accent mx-auto mb-3" />
         <p className="text-sm font-medium text-[#111827]">
           {file ? file.name : 'Upload PDF, image, video, or audio'}
         </p>
@@ -79,7 +79,7 @@ export const AttachmentUpload: React.FC<Props> = ({ onSaved }) => {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Attachment name"
-            className="h-auto w-full pl-10 pr-3 py-2.5 border border-swiss-line rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+            className="h-auto w-full pl-10 pr-3 py-2.5 border border-swiss-line rounded-xl text-sm focus:ring-2 focus:ring-swiss-accent/20 focus:border-swiss-accent outline-none"
           />
         </div>
       </div>
@@ -91,7 +91,7 @@ export const AttachmentUpload: React.FC<Props> = ({ onSaved }) => {
           onChange={(e) => setDescription(e.target.value)}
           placeholder="When should this attachment be sent?"
           rows={3}
-          className="min-h-0 w-full border border-swiss-line rounded-xl py-2.5 px-3 text-sm resize-none focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+          className="min-h-0 w-full border border-swiss-line rounded-xl py-2.5 px-3 text-sm resize-none focus:ring-2 focus:ring-swiss-accent/20 focus:border-swiss-accent outline-none"
         />
       </div>
 
@@ -105,7 +105,7 @@ export const AttachmentUpload: React.FC<Props> = ({ onSaved }) => {
         type="button"
         onClick={() => void handleSave()}
         disabled={!file || !name.trim() || saving || done}
-        className="w-full inline-flex items-center justify-center gap-2 py-2.5 bg-primary hover:bg-primary-hover disabled:opacity-60 text-white rounded-xl text-sm font-bold"
+        className="w-full inline-flex items-center justify-center gap-2 py-2.5 bg-swiss-accent hover:bg-swiss-accent-hover disabled:opacity-60 text-white rounded-xl text-sm font-bold"
       >
         {saving ? (
           <>

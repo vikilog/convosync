@@ -354,13 +354,13 @@ export function WalletPanel() {
             </div>
 
             <div className="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-[#E5E7EB] bg-[#E5E7EB]">
-              <div className="bg-slate-50 px-3 py-2.5">
+              <div className="bg-white px-3 py-2.5">
                 <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
                   This month spent
                 </p>
                 <p className="mt-0.5 text-sm font-bold text-slate-900">{formatCc(monthSpentCc)}</p>
               </div>
-              <div className="bg-slate-50 px-3 py-2.5">
+              <div className="bg-white px-3 py-2.5">
                 <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
                   Low balance alert
                 </p>
@@ -389,7 +389,7 @@ export function WalletPanel() {
                           lowBalanceThresholdPaise: ccToPaise(Math.round(parsed)),
                         }).then(() => setEditingAlert(false));
                       }}
-                      className="cursor-pointer text-xs font-semibold text-primary hover:underline disabled:opacity-50"
+                      className="cursor-pointer text-xs font-semibold text-swiss-accent hover:underline disabled:opacity-50"
                     >
                       Save
                     </button>
@@ -410,7 +410,7 @@ export function WalletPanel() {
                     <button
                       type="button"
                       onClick={() => setEditingAlert(true)}
-                      className="cursor-pointer text-xs font-semibold text-primary hover:underline"
+                      className="cursor-pointer text-xs font-semibold text-swiss-accent hover:underline"
                     >
                       (Edit)
                     </button>
@@ -440,8 +440,8 @@ export function WalletPanel() {
                     }}
                     className={`cursor-pointer rounded-lg border px-2 py-2 text-center transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
                       selected
-                        ? 'border-transparent bg-primary text-white hover:bg-primary-hover'
-                        : 'border-swiss-line bg-white text-slate-800 hover:border-primary/30'
+                        ? 'border-transparent bg-swiss-accent text-white hover:bg-swiss-accent-hover'
+                        : 'border-swiss-line bg-white text-slate-800 hover:border-swiss-accent/30'
                     }`}
                   >
                     <span className="block text-xs font-bold sm:text-sm">{formatCc(cc)}</span>
@@ -479,7 +479,7 @@ export function WalletPanel() {
                   }
                   openRechargeConfirm(Math.round(parsed));
                 }}
-                className="inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50 sm:shrink-0"
+                className="inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-swiss-accent px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-swiss-accent-hover disabled:cursor-not-allowed disabled:opacity-50 sm:shrink-0"
               >
                 {checkoutBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                 Recharge Now
@@ -494,7 +494,7 @@ export function WalletPanel() {
             </p>
 
             {/* AUTO_RECHARGE_DISABLED — re-enable later
-            <label className="mt-3 flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-[#E5E7EB] bg-slate-50 px-3 py-2.5">
+            <label className="mt-3 flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-[#E5E7EB] bg-white px-3 py-2.5">
               <span className="text-xs leading-snug text-slate-700 sm:text-sm">
                 Auto-recharge {formatCc(paiseToCc(wallet?.autoRechargeAmountPaise ?? 100_000))}{' '}
                 when balance drops below {formatCc(alertCc)}
@@ -537,7 +537,7 @@ export function WalletPanel() {
             <div className="mt-3 overflow-hidden rounded-lg border border-[#E5E7EB]">
               <Table className="text-left text-xs sm:text-sm">
                 <TableHeader>
-                  <TableRow className="bg-slate-50 text-[10px] font-semibold uppercase tracking-wide text-slate-500 sm:text-xs">
+                  <TableRow className="bg-white text-[10px] font-semibold uppercase tracking-wide text-slate-500 sm:text-xs">
                     <TableHead className="px-3 py-2 whitespace-normal">Feature</TableHead>
                     <TableHead className="px-3 py-2 whitespace-normal">Per use</TableHead>
                     <TableHead className="px-3 py-2 text-right whitespace-normal">CC cost</TableHead>
@@ -549,7 +549,7 @@ export function WalletPanel() {
                     return (
                       <TableRow
                         key={row.key}
-                        className={index % 2 === 0 ? 'bg-white' : 'bg-surface-muted/80'}
+                        className={index % 2 === 0 ? 'bg-white' : 'bg-white/80'}
                       >
                         <TableCell className="px-3 py-2 font-medium text-slate-900 whitespace-normal">
                           <span className="inline-flex items-center gap-1.5">
@@ -600,7 +600,7 @@ export function WalletPanel() {
           <button
             type="button"
             onClick={() => void openAllTransactions()}
-            className="inline-flex cursor-pointer items-center gap-1 text-xs font-semibold text-primary hover:underline"
+            className="inline-flex cursor-pointer items-center gap-1 text-xs font-semibold text-swiss-accent hover:underline"
           >
             View all transactions
             <ArrowRight className="h-3 w-3" />
@@ -637,7 +637,7 @@ export function WalletPanel() {
                   </div>
                   <p
                     className={`shrink-0 text-sm font-bold tabular-nums ${
-                      isCredit ? 'text-primary' : 'text-[#EF4444]'
+                      isCredit ? 'text-swiss-accent' : 'text-[#EF4444]'
                     }`}
                   >
                     {isCredit ? '+' : '−'}
@@ -717,7 +717,7 @@ export function WalletPanel() {
                         </div>
                         <p
                           className={`shrink-0 text-sm font-bold ${
-                            isCredit ? 'text-primary' : 'text-[#EF4444]'
+                            isCredit ? 'text-swiss-accent' : 'text-[#EF4444]'
                           }`}
                         >
                           {isCredit ? '+' : '−'}

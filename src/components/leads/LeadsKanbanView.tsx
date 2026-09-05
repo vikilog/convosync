@@ -57,7 +57,7 @@ function sourceBadge(source: LeadSource) {
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-600">
+    <span className="inline-flex items-center gap-1 rounded-md bg-white border border-gray-200 px-1.5 py-0.5 text-[10px] font-bold text-slate-600">
       Manual
     </span>
   );
@@ -74,7 +74,7 @@ const LeadCard: React.FC<{
   return (
     <div
       className={`w-full rounded-xl border border-swiss-line bg-white p-3 text-left transition-shadow ${
-        dragging ? 'shadow-lg ring-2 ring-primary/30 opacity-95' : ''
+        dragging ? 'shadow-lg ring-2 ring-swiss-accent/30 opacity-95' : ''
       }`}
     >
       <button
@@ -109,7 +109,7 @@ const LeadCard: React.FC<{
                 className="h-5 w-5 rounded-full object-cover"
               />
             ) : (
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-100">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white border border-gray-200">
                 <UserRound className="h-3 w-3 text-slate-500" />
               </span>
             )}
@@ -230,7 +230,7 @@ const StageColumn: React.FC<{
     <div
       ref={setNodeRef}
       className={`flex w-72 shrink-0 flex-col bg-white border border-swiss-line ${
-        isOver ? 'ring-2 ring-primary/20' : ''
+        isOver ? 'ring-2 ring-swiss-accent/20' : ''
       }`}
     >
       <div className="flex items-center gap-1.5 border-b border-swiss-line px-2.5 py-2">
@@ -252,7 +252,7 @@ const StageColumn: React.FC<{
             disabled={saving}
             autoFocus
             aria-label="Board name"
-            className="h-auto min-w-0 flex-1 rounded-md border border-primary/30 bg-white px-2 py-1 text-xs font-bold text-swiss-ink outline-none focus:ring-2 focus:ring-primary/20"
+            className="h-auto min-w-0 flex-1 rounded-md border border-swiss-accent/30 bg-white px-2 py-1 text-xs font-bold text-swiss-ink outline-none focus:ring-2 focus:ring-swiss-accent/20"
           />
         ) : (
           <button
@@ -269,7 +269,7 @@ const StageColumn: React.FC<{
             ) : null}
           </button>
         )}
-        <span className="shrink-0 rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-500">
+        <span className="shrink-0 rounded-md bg-white border border-gray-200 px-1.5 py-0.5 text-[10px] font-bold text-slate-500">
           {leads.length}
         </span>
         {!editing ? (
@@ -342,7 +342,7 @@ function FunnelFormModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Instagram inbound"
-              className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+              className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-swiss-accent/20"
               autoFocus
             />
           </label>
@@ -353,7 +353,7 @@ function FunnelFormModal({
               onChange={(e) => setDescription(e.target.value)}
               rows={2}
               placeholder="What this funnel is for"
-              className="min-h-0 mt-1 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+              className="min-h-0 mt-1 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-swiss-accent/20"
             />
           </label>
           <label className="block">
@@ -362,7 +362,7 @@ function FunnelFormModal({
               value={goal}
               onChange={(e) => setGoal(e.target.value)}
               placeholder="e.g. 50 qualified demos / month"
-              className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+              className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-swiss-accent/20"
             />
           </label>
         </div>
@@ -384,7 +384,7 @@ function FunnelFormModal({
                 goal: goal.trim(),
               })
             }
-            className="cursor-pointer rounded-xl bg-primary px-3 py-2 text-sm font-bold text-white hover:bg-primary-hover disabled:opacity-60"
+            className="cursor-pointer rounded-xl bg-swiss-accent px-3 py-2 text-sm font-bold text-white hover:bg-swiss-accent-hover disabled:opacity-60"
           >
             {saving ? 'Saving…' : 'Save'}
           </button>
@@ -779,7 +779,7 @@ export const LeadsKanbanView: React.FC = () => {
         <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 bg-white border border-swiss-line p-4">
           <div>
             <h2 className="flex items-center gap-2 text-base font-semibold text-swiss-ink">
-              <Filter className="h-5 w-5 text-primary" />
+              <Filter className="h-5 w-5 text-swiss-accent" />
               Lead funnels
             </h2>
             <p className="mt-0.5 text-xs font-medium text-swiss-faint">
@@ -789,7 +789,7 @@ export const LeadsKanbanView: React.FC = () => {
           <button
             type="button"
             onClick={() => setCreateOpen(true)}
-            className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-sm font-bold text-white shadow-primary/15 hover:bg-primary-hover"
+            className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-swiss-accent px-3 py-2 text-sm font-bold text-white shadow-swiss-accent/15 hover:bg-swiss-accent-hover"
           >
             <Plus className="h-3.5 w-3.5" /> Create funnel
           </button>
@@ -829,11 +829,11 @@ export const LeadsKanbanView: React.FC = () => {
                 key={f.id}
                 type="button"
                 onClick={() => navigate(pathForLeadFunnel(f.id))}
-                className="cursor-pointer bg-white border border-swiss-line p-4 text-left shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-colors hover:border-primary/20 hover:bg-white"
+                className="cursor-pointer bg-white border border-swiss-line p-4 text-left shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-colors hover:border-swiss-accent/20 hover:bg-white"
               >
                 <div className="flex items-start justify-between gap-2">
                   <p className="text-sm font-bold text-[#0F172A]">{f.name}</p>
-                  <span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold tabular-nums text-slate-500">
+                  <span className="rounded-md bg-white border border-gray-200 px-1.5 py-0.5 text-[10px] font-bold tabular-nums text-slate-500">
                     {f.leadCount} leads
                   </span>
                 </div>
@@ -849,7 +849,7 @@ export const LeadsKanbanView: React.FC = () => {
                   </p>
                 ) : null}
                 <div className="mt-3 flex gap-2">
-                  <span className="text-[11px] font-bold text-primary">Open board →</span>
+                  <span className="text-[11px] font-bold text-swiss-accent">Open board →</span>
                   <span
                     role="button"
                     tabIndex={0}
@@ -891,7 +891,7 @@ export const LeadsKanbanView: React.FC = () => {
 
   // —— Kanban inside selected funnel ——
   return (
-    <div className="flex h-full min-h-0 flex-1 flex-col gap-4 overflow-hidden bg-white p-4 md:p-6 selection:bg-primary/15">
+    <div className="flex h-full min-h-0 flex-1 flex-col gap-4 overflow-hidden bg-white font-swiss p-4 md:p-6 selection:bg-swiss-accent/15">
       <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 bg-white border border-swiss-line p-4">
         <div className="min-w-0">
           <button
@@ -901,12 +901,12 @@ export const LeadsKanbanView: React.FC = () => {
               navigate(pathForTab('leads'));
               void refreshFunnels();
             }}
-            className="mb-1 inline-flex cursor-pointer items-center gap-1 text-xs font-bold text-slate-500 hover:text-primary"
+            className="mb-1 inline-flex cursor-pointer items-center gap-1 text-xs font-bold text-slate-500 hover:text-swiss-accent"
           >
             <ArrowLeft className="h-3.5 w-3.5" /> All funnels
           </button>
           <h2 className="flex items-center gap-2 text-base font-semibold text-swiss-ink">
-            <Users className="h-5 w-5 text-primary" />
+            <Users className="h-5 w-5 text-swiss-accent" />
             {activeFunnel?.name ?? 'Funnel'}
           </h2>
           <p className="mt-0.5 truncate text-xs font-medium text-swiss-faint">
@@ -922,7 +922,7 @@ export const LeadsKanbanView: React.FC = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search leads…"
-              className="h-auto w-full rounded-xl border border-swiss-line bg-slate-50 py-1.5 pl-9 pr-3 text-meta font-semibold outline-none focus:ring-2 focus:ring-primary/15"
+              className="h-auto w-full rounded-xl border border-swiss-line bg-white py-1.5 pl-9 pr-3 text-meta font-semibold outline-none focus:ring-2 focus:ring-swiss-accent/15"
             />
           </div>
           <select
@@ -945,7 +945,7 @@ export const LeadsKanbanView: React.FC = () => {
           <button
             type="button"
             onClick={() => setAddOpen(true)}
-            className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-sm font-bold text-white shadow-primary/15 hover:bg-primary-hover"
+            className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl bg-swiss-accent px-3 py-2 text-sm font-bold text-white shadow-swiss-accent/15 hover:bg-swiss-accent-hover"
           >
             <Plus className="h-3.5 w-3.5" /> Add Lead
           </button>
@@ -983,7 +983,7 @@ export const LeadsKanbanView: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setAddBoardOpen(true)}
-                      className="flex w-56 shrink-0 cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-black/15 bg-white/50 text-sm font-bold text-slate-500 hover:border-primary/30 hover:text-primary"
+                      className="flex w-56 shrink-0 cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-black/15 bg-white/50 text-sm font-bold text-slate-500 hover:border-swiss-accent/30 hover:text-swiss-accent"
                     >
                       <Plus className="h-5 w-5" />
                       Add board
@@ -1007,7 +1007,7 @@ export const LeadsKanbanView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setAddBoardOpen(true)}
-                  className="flex w-56 shrink-0 cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-black/15 bg-white/50 text-sm font-bold text-slate-500 hover:border-primary/30 hover:text-primary"
+                  className="flex w-56 shrink-0 cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-black/15 bg-white/50 text-sm font-bold text-slate-500 hover:border-swiss-accent/30 hover:text-swiss-accent"
                 >
                   <Plus className="h-5 w-5" />
                   Add board
@@ -1066,7 +1066,7 @@ export const LeadsKanbanView: React.FC = () => {
                   value={draftName}
                   onChange={(e) => setDraftName(e.target.value)}
                   placeholder="Optional"
-                  className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                  className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-swiss-accent/20"
                 />
               </label>
               <label className="block">
@@ -1075,7 +1075,7 @@ export const LeadsKanbanView: React.FC = () => {
                   value={draftRequirement}
                   onChange={(e) => setDraftRequirement(e.target.value)}
                   placeholder="What are they looking for?"
-                  className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                  className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-swiss-accent/20"
                 />
               </label>
             </div>
@@ -1091,7 +1091,7 @@ export const LeadsKanbanView: React.FC = () => {
                 type="button"
                 disabled={saving}
                 onClick={() => void addLead()}
-                className="cursor-pointer rounded-xl bg-primary px-3 py-2 text-sm font-bold text-white hover:bg-primary-hover disabled:opacity-60"
+                className="cursor-pointer rounded-xl bg-swiss-accent px-3 py-2 text-sm font-bold text-white hover:bg-swiss-accent-hover disabled:opacity-60"
               >
                 {saving ? 'Creating…' : 'Create'}
               </button>
@@ -1113,17 +1113,17 @@ export const LeadsKanbanView: React.FC = () => {
                 value={boardName}
                 onChange={(e) => setBoardName(e.target.value)}
                 placeholder="e.g. Won / Closed"
-                className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-swiss-accent/20"
                 autoFocus
               />
             </label>
             {!hasFinalBoard ? (
-              <label className="mt-3 flex cursor-pointer items-start gap-2.5 rounded-xl bg-surface-muted px-3 py-2.5">
+              <label className="mt-3 flex cursor-pointer items-start gap-2.5 rounded-xl border border-swiss-line bg-white px-3 py-2.5">
                 <input
                   type="checkbox"
                   checked={boardIsFinal}
                   onChange={(e) => setBoardIsFinal(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary/30"
+                  className="mt-0.5 h-4 w-4 rounded border-slate-300 text-swiss-accent focus:ring-swiss-accent/30"
                 />
                 <span>
                   <span className="block text-xs font-bold text-swiss-ink">Final step</span>
@@ -1153,7 +1153,7 @@ export const LeadsKanbanView: React.FC = () => {
                 type="button"
                 disabled={boardSaving || !boardName.trim()}
                 onClick={() => void addBoard()}
-                className="cursor-pointer rounded-xl bg-primary px-3 py-2 text-sm font-bold text-white hover:bg-primary-hover disabled:opacity-60"
+                className="cursor-pointer rounded-xl bg-swiss-accent px-3 py-2 text-sm font-bold text-white hover:bg-swiss-accent-hover disabled:opacity-60"
               >
                 {boardSaving ? 'Adding…' : 'Add board'}
               </button>

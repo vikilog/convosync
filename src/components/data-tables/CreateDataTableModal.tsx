@@ -105,7 +105,7 @@ export function CreateDataTableModal({ open, onClose, onCreated }: Props) {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Appointment bookings"
-            className="h-auto w-full rounded-xl border border-swiss-line px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+            className="h-auto w-full rounded-xl border border-swiss-line px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-swiss-accent/20"
           />
         </label>
 
@@ -117,7 +117,7 @@ export function CreateDataTableModal({ open, onClose, onCreated }: Props) {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Optional"
-            className="h-auto w-full rounded-xl border border-swiss-line px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+            className="h-auto w-full rounded-xl border border-swiss-line px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-swiss-accent/20"
           />
         </label>
 
@@ -130,12 +130,12 @@ export function CreateDataTableModal({ open, onClose, onCreated }: Props) {
                   value={col.label}
                   onChange={(e) => updateColumn(i, { label: e.target.value })}
                   placeholder="Column name"
-                  className="h-auto flex-1 rounded-lg border border-swiss-line px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="h-auto flex-1 rounded-lg border border-swiss-line px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-swiss-accent/20"
                 />
                 <select
                   value={col.type}
                   onChange={(e) => updateColumn(i, { type: e.target.value as DataColumnType })}
-                  className="w-36 rounded-lg border border-swiss-line px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="w-36 rounded-lg border border-swiss-line px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-swiss-accent/20"
                 >
                   {DATA_COLUMN_TYPE_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>
@@ -160,7 +160,7 @@ export function CreateDataTableModal({ open, onClose, onCreated }: Props) {
                   value={col.options}
                   onChange={(e) => updateColumn(i, { options: e.target.value })}
                   placeholder={`Choices for "${col.label || 'column'}", comma separated`}
-                  className="h-auto w-full rounded-lg border border-swiss-line px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="h-auto w-full rounded-lg border border-swiss-line px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-swiss-accent/20"
                 />
               ) : null
             )}
@@ -168,7 +168,7 @@ export function CreateDataTableModal({ open, onClose, onCreated }: Props) {
           <button
             type="button"
             onClick={() => setColumns((prev) => [...prev, { label: '', type: 'text', options: '' }])}
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:text-primary-hover"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-swiss-accent hover:text-swiss-accent-hover"
           >
             <Plus className="w-3.5 h-3.5" />
             Add column
@@ -189,7 +189,7 @@ export function CreateDataTableModal({ open, onClose, onCreated }: Props) {
           <button
             type="submit"
             disabled={saving}
-            className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-hover disabled:opacity-50"
+            className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-swiss-accent px-4 py-2 text-sm font-semibold text-white hover:bg-swiss-accent-hover disabled:opacity-50"
           >
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
             Create table

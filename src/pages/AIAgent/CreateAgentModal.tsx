@@ -32,7 +32,7 @@ export const CreateAgentModal: React.FC<Props> = ({
     >
       <div className="flex justify-between items-start pb-4 border-b border-gray-100">
         <div>
-          <p className="text-sm font-black uppercase tracking-wider text-primary mb-1">
+          <p className="text-sm font-black uppercase tracking-wider text-swiss-accent mb-1">
             {CATEGORY_LABELS[category]}
           </p>
           <h4 className="font-bold text-[#111827] text-sm">Name your agent</h4>
@@ -57,14 +57,14 @@ export const CreateAgentModal: React.FC<Props> = ({
             value={name}
             onChange={(e) => onNameChange(e.target.value)}
             placeholder="e.g. Support Bot"
-            className="h-auto w-full bg-white border border-swiss-line rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+            className="h-auto w-full bg-white border border-swiss-line rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-swiss-accent/20 focus:border-swiss-accent outline-none"
           />
         </div>
 
         <button
           type="submit"
           disabled={creating || !name.trim()}
-          className="w-full py-2.5 bg-primary hover:bg-primary-hover disabled:opacity-60 text-white rounded-xl text-sm font-bold transition-all"
+          className="w-full py-2.5 bg-swiss-accent hover:bg-swiss-accent-hover disabled:opacity-60 text-white rounded-xl text-sm font-bold transition-all"
         >
           {creating ? 'Creating…' : 'Create Agent'}
         </button>

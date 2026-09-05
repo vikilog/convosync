@@ -190,7 +190,7 @@ export const SocialListeningDashboardView: React.FC = () => {
   };
 
   return (
-    <div className="relative flex h-full min-h-0 flex-1 flex-col gap-4 overflow-y-auto bg-white p-4 md:p-6">
+    <div className="relative flex h-full min-h-0 flex-1 flex-col gap-4 overflow-y-auto bg-white font-swiss p-4 md:p-6">
       <SocialListeningSubNav
         navExtra={<RangeDropdown range={range} onChange={setRange} />}
         trailing={<SocialListeningPlatformSwitcher />}
@@ -209,7 +209,7 @@ export const SocialListeningDashboardView: React.FC = () => {
           <button
             type="button"
             onClick={() => navigate(pathForIntegrationsChannel('instagram'))}
-            className="mt-6 inline-flex items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-black text-white hover:bg-primary-hover"
+            className="mt-6 inline-flex items-center justify-center rounded-xl bg-swiss-accent px-5 py-2.5 text-sm font-black text-white hover:bg-swiss-accent-hover"
           >
             Connect Instagram
           </button>
@@ -235,7 +235,7 @@ export const SocialListeningDashboardView: React.FC = () => {
             type="button"
             onClick={() => void handleConnectFacebook()}
             disabled={connectingFacebook}
-            className="mt-6 inline-flex items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-black text-white hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
+            className="mt-6 inline-flex items-center justify-center rounded-xl bg-swiss-accent px-5 py-2.5 text-sm font-black text-white hover:bg-swiss-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
           >
             {connectingFacebook ? 'Redirecting…' : 'Connect Facebook Page'}
           </button>
@@ -247,7 +247,7 @@ export const SocialListeningDashboardView: React.FC = () => {
           {emptyWorkspace && (
             <div className="rounded-xl border border-dashed border-black/10 bg-white px-4 py-3 text-sm text-swiss-muted">
               No comment data yet — open{' '}
-              <Link to={contentHref} className="font-bold text-primary hover:underline">
+              <Link to={contentHref} className="font-bold text-swiss-accent hover:underline">
                 Content
               </Link>{' '}
               to sync posts and pull comments.

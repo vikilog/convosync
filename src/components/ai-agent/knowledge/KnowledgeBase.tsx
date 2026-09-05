@@ -158,7 +158,7 @@ export const KnowledgeBase: React.FC<Props> = ({ agentId }) => {
   return (
     <div className="w-full relative">
       {toast && (
-        <div className="fixed top-6 right-6 z-50 bg-primary text-white text-sm font-medium px-4 py-3 rounded-xl shadow-lg">
+        <div className="fixed top-6 right-6 z-50 bg-swiss-accent text-white text-sm font-medium px-4 py-3 rounded-xl shadow-lg">
           {toast}
         </div>
       )}
@@ -173,7 +173,7 @@ export const KnowledgeBase: React.FC<Props> = ({ agentId }) => {
         <button
           type="button"
           onClick={() => setShowAdd(true)}
-          className="px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-xl text-sm font-bold"
+          className="px-4 py-2 bg-swiss-accent hover:bg-swiss-accent-hover text-white rounded-xl text-sm font-bold"
         >
           + Add knowledge
         </button>
@@ -188,7 +188,7 @@ export const KnowledgeBase: React.FC<Props> = ({ agentId }) => {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search knowledge"
-          className="h-auto w-full pl-10 pr-3 py-2 border border-swiss-line rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+          className="h-auto w-full pl-10 pr-3 py-2 border border-swiss-line rounded-xl text-sm focus:ring-2 focus:ring-swiss-accent/20 focus:border-swiss-accent outline-none"
         />
       </div>
 
@@ -200,8 +200,8 @@ export const KnowledgeBase: React.FC<Props> = ({ agentId }) => {
         <p className="text-sm text-[#6B7280] text-center py-12">Loading knowledge…</p>
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-            <HelpCircle className="w-8 h-8 text-primary" />
+          <div className="w-16 h-16 rounded-full bg-swiss-accent/10 flex items-center justify-center mb-4">
+            <HelpCircle className="w-8 h-8 text-swiss-accent" />
           </div>
           <p className="text-sm font-medium text-[#6B7280]">No data</p>
         </div>
@@ -217,7 +217,7 @@ export const KnowledgeBase: React.FC<Props> = ({ agentId }) => {
                 onClick={() => setEditTarget(item)}
                 className="flex items-center gap-3 min-w-0 text-left flex-1 hover:opacity-90"
               >
-                <div className="p-2 rounded-lg bg-primary/10 text-primary shrink-0">
+                <div className="p-2 rounded-lg bg-swiss-accent/10 text-swiss-accent shrink-0">
                   {TYPE_ICONS[item.type]}
                 </div>
                 <div className="min-w-0">
@@ -229,7 +229,7 @@ export const KnowledgeBase: React.FC<Props> = ({ agentId }) => {
                       {item.status}
                     </span>
                     {qnaPairCount(item) !== null && (
-                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-swiss-accent/10 text-swiss-accent">
                         {qnaPairCount(item)} pairs
                       </span>
                     )}
@@ -244,7 +244,7 @@ export const KnowledgeBase: React.FC<Props> = ({ agentId }) => {
                 <button
                   type="button"
                   onClick={() => setEditTarget(item)}
-                  className="inline-flex items-center gap-1 text-xs font-bold text-primary hover:text-primary-hover"
+                  className="inline-flex items-center gap-1 text-xs font-bold text-swiss-accent hover:text-swiss-accent-hover"
                 >
                   <Pencil className="w-3.5 h-3.5" />
                   Edit

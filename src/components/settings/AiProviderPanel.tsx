@@ -219,7 +219,7 @@ export function AiProviderPanel() {
                 onClick={() => setMode(opt.id)}
                 className={`rounded-xl border p-4 text-left transition ${
                   mode === opt.id
-                    ? 'border-primary bg-primary/10 ring-1 ring-primary/20'
+                    ? 'border-swiss-accent bg-swiss-accent/10 ring-1 ring-swiss-accent/20'
                     : 'border-swiss-line hover:border-black/10'
                 } ${!isAdmin ? 'opacity-60 cursor-not-allowed' : ''}`}
               >
@@ -321,7 +321,7 @@ export function AiProviderPanel() {
         )}
 
         {mode === 'convosync' && (
-          <div className="rounded-xl border border-primary/20 bg-primary/10 px-4 py-3 text-sm text-primary">
+          <div className="rounded-xl border border-swiss-accent/20 bg-swiss-accent/10 px-4 py-3 text-sm text-swiss-accent">
             Managed AI is ready to use for agents, inbox copilot, and journeys.
           </div>
         )}
@@ -333,7 +333,7 @@ export function AiProviderPanel() {
           </div>
         )}
         {success && (
-          <div className="flex items-start gap-2 rounded-xl border border-primary/20 bg-primary/10 px-3 py-2 text-sm text-primary">
+          <div className="flex items-start gap-2 rounded-xl border border-swiss-accent/20 bg-swiss-accent/10 px-3 py-2 text-sm text-swiss-accent">
             <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
             {success}
           </div>
@@ -344,7 +344,7 @@ export function AiProviderPanel() {
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-xl bg-swiss-accent px-4 py-2.5 text-sm font-semibold text-white hover:bg-swiss-accent-hover disabled:opacity-60"
             >
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
               Save settings

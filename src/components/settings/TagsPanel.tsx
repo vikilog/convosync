@@ -99,7 +99,7 @@ export function TagsPanel() {
           <button
             type="button"
             onClick={openCreate}
-            className="inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-white hover:bg-primary-hover"
+            className="inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg bg-swiss-accent px-3 py-2 text-sm font-semibold text-white hover:bg-swiss-accent-hover"
           >
             <Plus className="h-4 w-4" />
             New Tag
@@ -121,7 +121,7 @@ export function TagsPanel() {
           <button
             type="button"
             onClick={openCreate}
-            className="mt-2 inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-white hover:bg-primary-hover"
+            className="mt-2 inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-swiss-accent px-3 py-2 text-sm font-semibold text-white hover:bg-swiss-accent-hover"
           >
             <Plus className="h-4 w-4" />
             New Tag
@@ -155,7 +155,7 @@ export function TagsPanel() {
                   <div className="divide-y divide-swiss-line border-t border-swiss-line">
                     {group.items.map((tag) => (
                       <div key={tag.id} className="flex items-center justify-between gap-2 px-4 py-2.5">
-                        <span className="rounded-md bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+                        <span className="rounded-md bg-swiss-accent/10 px-2 py-0.5 text-xs font-semibold text-swiss-accent">
                           {tag.name}
                         </span>
                         <div className="flex items-center gap-1">

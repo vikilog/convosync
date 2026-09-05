@@ -192,7 +192,7 @@ export function AiCopilotPanel() {
       <div className="bg-white border border-swiss-line p-4 ">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex items-start gap-3">
-            <div className="p-2.5 rounded-xl bg-sky-50 text-primary">
+            <div className="p-2.5 rounded-xl bg-sky-50 text-swiss-accent">
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
@@ -204,7 +204,7 @@ export function AiCopilotPanel() {
           </div>
           <Link
             to={pathForSettingsSection('ai-knowledge')}
-            className="text-meta font-bold text-primary hover:underline"
+            className="text-meta font-bold text-swiss-accent hover:underline"
           >
             Manage knowledge →
           </Link>
@@ -236,7 +236,7 @@ export function AiCopilotPanel() {
             <select
               value={channel}
               onChange={(e) => setChannel(e.target.value as typeof channel)}
-              className="rounded-lg border border-swiss-line bg-slate-50 px-2 py-1 text-meta font-semibold"
+              className="rounded-lg border border-swiss-line bg-white px-2 py-1 text-meta font-semibold"
             >
               {CHANNELS.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -267,7 +267,7 @@ export function AiCopilotPanel() {
       <div className="bg-white border border-swiss-line overflow-hidden flex flex-col min-h-[420px] max-h-[560px]">
         <div
           ref={scrollRef}
-          className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50"
+          className="flex-1 overflow-y-auto p-4 space-y-4 bg-white"
         >
           {messages.length === 0 && (
             <div className="flex flex-col items-center justify-center py-12 text-center text-swiss-faint">
@@ -287,12 +287,12 @@ export function AiCopilotPanel() {
               <div
                 className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
                   msg.role === 'user'
-                    ? 'bg-primary text-white rounded-br-md'
+                    ? 'bg-swiss-accent text-white rounded-br-md'
                     : 'bg-white border border-swiss-line text-swiss-ink rounded-bl-md '
                 }`}
               >
                 {msg.role === 'assistant' && (
-                  <div className="flex items-center gap-1.5 mb-1.5 text-sm font-bold text-primary uppercase tracking-wide">
+                  <div className="flex items-center gap-1.5 mb-1.5 text-sm font-bold text-swiss-accent uppercase tracking-wide">
                     <Bot className="w-3.5 h-3.5" />
                     AI Copilot
                   </div>
@@ -302,7 +302,7 @@ export function AiCopilotPanel() {
                   <div className="mt-2 pt-2 border-t border-swiss-line flex flex-wrap gap-2 text-xs">
                     <span className="font-bold text-swiss-muted">
                       Intent:{' '}
-                      <span className="text-primary">{formatIntent(msg.intent)}</span>
+                      <span className="text-swiss-accent">{formatIntent(msg.intent)}</span>
                     </span>
                     {msg.confidence != null && (
                       <span className="font-bold text-swiss-muted">
@@ -325,7 +325,7 @@ export function AiCopilotPanel() {
           {sending && (
             <div className="flex justify-start">
               <div className="bg-white border border-swiss-line rounded-2xl rounded-bl-md px-4 py-3 ">
-                <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                <Loader2 className="w-4 h-4 animate-spin text-swiss-accent" />
               </div>
             </div>
           )}
@@ -339,7 +339,7 @@ export function AiCopilotPanel() {
                 type="button"
                 disabled={sending || !knowledgeReady}
                 onClick={() => void sendMessage(prompt)}
-                className="text-sm font-semibold px-2.5 py-1 rounded-full border border-swiss-line bg-slate-50 hover:border-primary/40 hover:text-primary disabled:opacity-50 transition-colors"
+                className="text-sm font-semibold px-2.5 py-1 rounded-full border border-swiss-line bg-white hover:border-swiss-accent/40 hover:text-swiss-accent disabled:opacity-50 transition-colors"
               >
                 {prompt}
               </button>
@@ -357,12 +357,12 @@ export function AiCopilotPanel() {
                   : 'Sync AI Knowledge first to test chat'
               }
               disabled={sending || !knowledgeReady}
-              className="h-auto flex-1 rounded-xl border border-swiss-line bg-slate-50 px-3 py-2.5 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none disabled:opacity-60"
+              className="h-auto flex-1 rounded-xl border border-swiss-line bg-white px-3 py-2.5 text-sm focus:ring-2 focus:ring-swiss-accent/20 focus:border-swiss-accent outline-none disabled:opacity-60"
             />
             <button
               type="submit"
               disabled={sending || !input.trim() || !knowledgeReady}
-              className="inline-flex items-center justify-center rounded-xl bg-primary hover:bg-primary-hover disabled:opacity-50 text-white px-4 py-2.5 transition-colors"
+              className="inline-flex items-center justify-center rounded-xl bg-swiss-accent hover:bg-swiss-accent-hover disabled:opacity-50 text-white px-4 py-2.5 transition-colors"
               aria-label="Send message"
             >
               {sending ? (

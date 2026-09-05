@@ -127,7 +127,7 @@ export const OnlineDataForm: React.FC<Props> = ({ agentId, onSaved }) => {
               }}
               disabled={fetching}
               placeholder="https://example.com/pricing"
-              className="h-auto w-full pl-10 pr-3 py-2.5 border border-swiss-line rounded-xl text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none disabled:opacity-60"
+              className="h-auto w-full pl-10 pr-3 py-2.5 border border-swiss-line rounded-xl text-sm focus:ring-2 focus:ring-swiss-accent/20 focus:border-swiss-accent outline-none disabled:opacity-60"
             />
           </div>
           <button
@@ -154,7 +154,7 @@ export const OnlineDataForm: React.FC<Props> = ({ agentId, onSaved }) => {
           value={refreshInterval}
           onChange={(e) => setRefreshInterval(e.target.value)}
           disabled={fetching}
-          className="w-full border border-swiss-line rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none disabled:opacity-60"
+          className="w-full border border-swiss-line rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-swiss-accent/20 focus:border-swiss-accent outline-none disabled:opacity-60"
         >
           <option value="daily">Daily</option>
           <option value="weekly">Weekly</option>
@@ -191,7 +191,7 @@ export const OnlineDataForm: React.FC<Props> = ({ agentId, onSaved }) => {
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="w-full py-2.5 bg-primary hover:bg-primary-hover disabled:opacity-60 text-white rounded-xl text-sm font-bold"
+            className="w-full py-2.5 bg-swiss-accent hover:bg-swiss-accent-hover disabled:opacity-60 text-white rounded-xl text-sm font-bold"
           >
             {saving ? 'Saving…' : 'Save to Knowledge Base'}
           </button>
