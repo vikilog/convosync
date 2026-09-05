@@ -1376,6 +1376,22 @@ export const api = {
   updateTemplate: (id: string, data: unknown) => put(`/templates/${id}`, data),
   submitTemplate: (id: string) => post(`/templates/${id}/submit`),
   refreshTemplateStatus: (id: string) => post(`/templates/${id}/refresh-status`),
+  getTemplateInsights: (id: string, days?: number) =>
+    get(`/templates/${id}/insights`, days ? { days: String(days) } : undefined) as Promise<{
+      templateId: string;
+      waTemplateId: string;
+      start: number;
+      end: number;
+      dataPoints: Array<{
+        start: number;
+        end: number;
+        sent: number;
+        delivered: number;
+        read: number;
+        clicked: Array<{ type: string; button_content?: string; count: number }>;
+      }>;
+      totals: { sent: number; delivered: number; read: number; clicked: Record<string, number> };
+    }>,
   deleteTemplate: (id: string) => del(`/templates/${id}`),
   syncTemplates: () => post('/templates/sync'),
   uploadTemplateHeaderMedia: async (file: File, opts?: { persistOnly?: boolean }) => {

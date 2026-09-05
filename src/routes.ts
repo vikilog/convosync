@@ -290,7 +290,7 @@ export function pathForLeadFunnel(funnelId: string): string {
   return `/leads/${funnelId}`;
 }
 
-export type TemplateChannel = 'whatsapp' | 'email' | 'canned' | 'flow';
+export type TemplateChannel = 'whatsapp' | 'email' | 'canned' | 'flow' | 'insights';
 
 export type TemplateEditorRoute = {
   channel: TemplateChannel | null;
@@ -307,12 +307,16 @@ export function templateEditorFromPath(pathname: string): TemplateEditorRoute {
     return { channel: null, mode: 'list', id: null };
   }
   const ch = parts[1];
-  if (ch !== 'whatsapp' && ch !== 'email' && ch !== 'canned' && ch !== 'flow') {
+  if (ch !== 'whatsapp' && ch !== 'email' && ch !== 'canned' && ch !== 'flow' && ch !== 'insights') {
     return { channel: null, mode: 'list', id: null };
   }
   const channel = ch as TemplateChannel;
   if (channel === 'canned' || !parts[2]) {
     return { channel, mode: 'list', id: null };
+  }
+  if (channel === 'insights') {
+    // Deep link to a pre-selected template — insights has no editor, always 'list'.
+    return { channel, mode: 'list', id: parts[2] };
   }
   if (parts[2] === 'new') {
     return { channel, mode: 'new', id: null };
@@ -325,12 +329,17 @@ export function pathForTemplatesList(channel?: TemplateChannel): string {
   if (channel === 'whatsapp') return '/templates/whatsapp';
   if (channel === 'canned') return '/templates/canned';
   if (channel === 'flow') return '/templates/flow';
+  if (channel === 'insights') return '/templates/insights';
   return '/templates';
 }
 
 export function pathForTemplateEditor(channel: TemplateChannel, id?: string | null): string {
   if (!id) return `/templates/${channel}/new`;
   return `/templates/${channel}/${id}`;
+}
+
+export function pathForTemplateInsights(templateId?: string | null): string {
+  return templateId ? `/templates/insights/${templateId}` : '/templates/insights';
 }
 
 export function isTemplateSubRoute(pathname: string): boolean {

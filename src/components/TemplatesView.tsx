@@ -6,7 +6,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useKeepAliveActivation } from './KeepAlive';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Plus, Search, Pencil, Trash2, Send, Loader2, Mail, MessageCircle, MessageSquareText, RefreshCw, LayoutGrid } from 'lucide-react';
+import { Plus, Search, Pencil, Trash2, Send, Loader2, Mail, MessageCircle, MessageSquareText, RefreshCw, LayoutGrid, BarChart3 } from 'lucide-react';
 import { CampaignTemplate, EmailTemplateRecord } from '../types';
 import { api } from '../lib/api';
 import { mapTemplateFromApi } from '../lib/mappers';
@@ -14,6 +14,7 @@ import { useInboxAssigneeMeta } from '../hooks/inbox/useInboxMeta';
 import {
   pathForTab,
   pathForTemplateEditor,
+  pathForTemplateInsights,
   pathForTemplatesList,
   templateEditorFromPath,
   type TemplateChannel,
@@ -21,6 +22,7 @@ import {
 import { WhatsAppTemplateBuilder } from './templates/WhatsAppTemplateBuilder';
 import { EmailTemplateBuilder } from './templates/EmailTemplateBuilder';
 import { WhatsAppTemplatePreview } from './templates/WhatsAppTemplatePreview';
+import { TemplateInsightsView } from './templates/TemplateInsightsView';
 import { TemplateStatusBadge } from './templates/TemplateStatusBadge';
 import {
   TEMPLATE_CATEGORIES,
@@ -518,6 +520,20 @@ export const TemplatesView: React.FC = () => {
             Flows
           </button>
         )}
+        {whatsappConnected && (
+          <button
+            type="button"
+            onClick={() => navigate(pathForTemplatesList('insights'))}
+            className={`px-3 py-2 rounded-xl text-sm font-bold border inline-flex items-center gap-1.5 ${
+              channel === 'insights'
+                ? 'bg-swiss-accent text-white border-swiss-accent'
+                : 'bg-white text-swiss-ink border-swiss-line'
+            }`}
+          >
+            <BarChart3 className="w-3.5 h-3.5" />
+            Insights
+          </button>
+        )}
       </div>
 
       <p className="shrink-0 text-xs text-swiss-muted">
@@ -545,6 +561,10 @@ export const TemplatesView: React.FC = () => {
       ) : channel === 'flow' ? (
         <div className="min-h-0 flex-1 overflow-hidden">
           <WhatsAppFlowsView />
+        </div>
+      ) : channel === 'insights' ? (
+        <div className="min-h-0 flex-1 overflow-hidden">
+          <TemplateInsightsView initialTemplateId={editorRoute.id} />
         </div>
       ) : (
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto">
@@ -634,6 +654,9 @@ export const TemplatesView: React.FC = () => {
                 onSubmit={() => void handleSubmitWa(template)}
                 onRefreshStatus={() => handleRefreshWaStatus(template)}
                 onDelete={() => void handleDeleteWa(template)}
+                onViewInsights={() =>
+                  template.id && navigate(pathForTemplateInsights(template.id))
+                }
               />
             ))}
           </div>
@@ -697,6 +720,7 @@ function WhatsAppCard({
   onSubmit,
   onRefreshStatus,
   onDelete,
+  onViewInsights,
 }: {
   template: CampaignTemplate;
   busy?: boolean;
@@ -705,6 +729,7 @@ function WhatsAppCard({
   onSubmit: () => void;
   onRefreshStatus: () => Promise<void>;
   onDelete: () => void;
+  onViewInsights: () => void;
 }) {
   const [refreshing, setRefreshing] = useState(false);
 
@@ -815,6 +840,17 @@ function WhatsAppCard({
                 ) : (
                   <Send className="w-3 h-3" />
                 )}
+              </button>
+            )}
+          {template.id &&
+            (template.status === 'Approved' || template.status === 'Paused') && (
+              <button
+                type="button"
+                title="View insights from Meta"
+                onClick={onViewInsights}
+                className="p-1 rounded-md hover:bg-swiss-accent-soft text-swiss-muted hover:text-swiss-accent"
+              >
+                <BarChart3 className="w-3 h-3" />
               </button>
             )}
           {template.id && (
