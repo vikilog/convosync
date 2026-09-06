@@ -35,6 +35,7 @@ export function AuthPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const passwordReset = (location.state as { passwordReset?: boolean } | null)?.passwordReset;
 
   const t = (duration: number) =>
     reduceMotion ? { duration: 0 } : { duration, ease: easeOut };
@@ -131,6 +132,12 @@ export function AuthPage() {
             Sign in to your workspace to continue.
           </p>
 
+          {passwordReset && (
+            <p className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-2.5 text-xs font-medium text-emerald-700">
+              Password reset. Log in with your new password.
+            </p>
+          )}
+
           <form onSubmit={handleSubmit} className="mt-7 space-y-4" noValidate>
             <label htmlFor="login-email" className="block">
               <span className="text-meta font-bold uppercase tracking-wide text-slate-600">
@@ -156,9 +163,17 @@ export function AuthPage() {
             </label>
 
             <label htmlFor="login-password" className="block">
-              <span className="text-meta font-bold uppercase tracking-wide text-slate-600">
-                Password
-              </span>
+              <div className="flex items-center justify-between">
+                <span className="text-meta font-bold uppercase tracking-wide text-slate-600">
+                  Password
+                </span>
+                <Link
+                  to="/forgot-password"
+                  className="cursor-pointer text-xs font-semibold text-emerald-700 underline-offset-2 transition-colors duration-200 hover:text-emerald-800 hover:underline"
+                >
+                  Forgot password?
+                </Link>
+              </div>
               <div className="relative mt-1.5">
                 <Lock
                   className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"

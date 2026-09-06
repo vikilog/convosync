@@ -331,6 +331,12 @@ async function delJson(path: string, body?: unknown) {
 export const api = {
   login: (email: string, password: string) =>
     postPublic('/auth/login', { email, password }),
+  forgotPassword: (email: string) =>
+    postPublic('/auth/forgot-password', { email }) as Promise<{ message: string }>,
+  verifyResetCode: (data: { email: string; code: string }) =>
+    postPublic('/auth/verify-reset-code', data) as Promise<{ resetToken: string }>,
+  resetPassword: (data: { resetToken: string; newPassword: string }) =>
+    postPublic('/auth/reset-password', data) as Promise<{ success: boolean }>,
   getMe: () => get('/auth/me'),
   updateProfile: (data: { name?: string; phone?: string | null }) => patch('/auth/profile', data),
   updateAvatar: (avatar: string | null) => patch('/auth/avatar', { avatar }),

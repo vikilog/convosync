@@ -10,6 +10,7 @@ import { SidebarProvider } from './contexts/SidebarContext';
 import { TrialBanner } from './components/TrialBanner';
 import { ImpersonatePage } from './components/ImpersonatePage';
 import { AuthPage } from './components/AuthPage';
+import { ResetPasswordPage } from './components/ResetPasswordPage';
 import { SignupPage } from './components/SignupPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { DashboardView } from './components/DashboardView';
@@ -474,6 +475,15 @@ function SignupRedirect() {
   return <SignupPage />;
 }
 
+function ForgotPasswordRedirect() {
+  if (isLoggedIn()) {
+    return (
+      <Navigate to={firstAccessibleTabPath(getUserPermissions(), getUserRole())} replace />
+    );
+  }
+  return <ResetPasswordPage />;
+}
+
 function NotFoundRedirect() {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
@@ -491,6 +501,7 @@ export default function App() {
       <Toaster position="top-right" />
       <Routes>
       <Route path="/login" element={<LoginRedirect />} />
+      <Route path="/forgot-password" element={<ForgotPasswordRedirect />} />
       <Route path="/c/:code" element={<CallShortRedirectPage />} />
       <Route path="/call/:callId" element={<CallPage />} />
       <Route path="/auth/impersonate" element={<ImpersonatePage />} />
