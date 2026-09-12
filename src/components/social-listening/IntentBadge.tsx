@@ -1,126 +1,72 @@
-import type { IntentLabel, TriageSectionId } from './types';
-import { LOW_CONFIDENCE_THRESHOLD, triageSectionFor } from './types';
-import { SECTION_THEMES, primaryActionFor, type PrimaryActionKind } from './intentConfig';
-
-export function sectionForClassification(input: {
-  intentLabel: IntentLabel | null;
-  confidence: number | null;
-  classificationStatus: string | null;
-}): TriageSectionId | null {
-  if (input.classificationStatus !== 'classified' || !input.intentLabel) return null;
-  return triageSectionFor({
-    id: '_',
-    platform: 'instagram',
-    username: '',
-    profilePicUrl: null,
-    commentText: '',
-    postThumbnailUrl: '',
-    postCaption: '',
-    intent: input.intentLabel,
-    confidence: input.confidence ?? 0,
-    status: 'pending',
-    suggestedDm: '',
-    createdAt: new Date().toISOString(),
-  });
-}
+import { LOW_CONFIDENCE_THRESHOLD, triageSectionFor, type IntentLabel } from '@/lib/socialListening'
+import { TRIAGE_THEME } from '@/components/social-listening/intentConfig'
 
 export function IntentBadge({
-  intentLabel,
+  intent,
   confidence,
   classificationStatus,
   classificationError,
   onRetry,
   retrying,
 }: {
-  intentLabel: IntentLabel | null;
-  confidence: number | null;
-  classificationStatus: string | null;
-  classificationError?: string | null;
-  onRetry?: () => void;
-  retrying?: boolean;
+  intent?: IntentLabel | null
+  confidence?: number | null
+  classificationStatus?: string | null
+  classificationError?: string | null
+  onRetry?: () => void
+  retrying?: boolean
 }) {
   if (classificationStatus === 'pending' || classificationStatus === null) {
     return (
-      <span className="inline-flex animate-pulse items-center rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500">
+      <span className="bg-muted text-muted-foreground inline-flex animate-pulse items-center rounded-full px-2 py-0.5 text-[11px] font-medium">
         Analyzing…
       </span>
-    );
+    )
   }
 
   if (classificationStatus === 'failed') {
     return (
       <span className="inline-flex flex-wrap items-center gap-1.5">
-        <span className="rounded-md bg-red-50 px-2 py-0.5 text-[10px] font-bold text-red-600">
+        <span className="rounded-full bg-red-50 px-2 py-0.5 text-[11px] font-medium text-red-600">
           Classification failed
         </span>
-        {onRetry && (
+        {onRetry ? (
           <button
             type="button"
             disabled={retrying}
             onClick={onRetry}
-            className="cursor-pointer text-[10px] font-bold text-sky-600 hover:underline disabled:opacity-50"
+            className="text-primary text-[11px] font-medium hover:underline disabled:opacity-50"
           >
             {retrying ? 'Retrying…' : 'Retry'}
           </button>
-        )}
-        {classificationError && (
-          <span className="text-[10px] font-medium text-slate-400">{classificationError}</span>
-        )}
+        ) : null}
+        {classificationError ? (
+          <span className="text-muted-foreground text-[11px]">{classificationError}</span>
+        ) : null}
       </span>
-    );
+    )
   }
 
-  const section = sectionForClassification({
-    intentLabel,
-    confidence,
-    classificationStatus,
-  });
-  if (!section || !intentLabel) return null;
-
-  const theme = SECTION_THEMES[section];
-  const pct =
-    confidence == null ? null : Math.round((confidence > 1 ? confidence : confidence * 100));
-
-  const shortLabel =
+  if (!intent) return null
+  const section = triageSectionFor(intent, confidence ?? 0)
+  const theme = TRIAGE_THEME[section]
+  const pct = confidence == null ? null : Math.round(confidence > 1 ? confidence : confidence * 100)
+  const label =
     section === 'low_confidence'
       ? confidence != null && confidence < LOW_CONFIDENCE_THRESHOLD
         ? 'Low confidence'
-        : intentLabel === 'Spam'
+        : intent === 'Spam'
           ? 'Spam'
           : 'Unclear'
-      : intentLabel;
+      : intent
 
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-bold ${theme.accentBg} ${theme.accentText}`}
+      className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium ${theme.bg} ${theme.text}`}
     >
-      <span className={`h-1.5 w-1.5 rounded-full ${theme.accentDot}`} />
-      {shortLabel}
-      {pct != null ? ` — ${pct}%` : ''}
+      <span className={`size-1.5 rounded-full ${theme.dot}`} />
+      {label}
+      {pct != null ? ` · ${pct}%` : ''}
     </span>
-  );
-}
-
-export function primaryActionForComment(input: {
-  intentLabel: IntentLabel | null;
-  confidence: number | null;
-  classificationStatus: string | null;
-  status: string | null;
-}): { kind: PrimaryActionKind | 'ignore_only'; label: string; className: string } | null {
-  if (input.status && input.status !== 'new') return null;
-  if (input.classificationStatus !== 'classified' || !input.intentLabel) return null;
-
-  const section = sectionForClassification(input);
-  if (!section) return null;
-
-  if (section === 'low_confidence' && (input.intentLabel === 'Spam' || input.intentLabel === 'Neutral')) {
-    return {
-      kind: 'ignore_only',
-      label: 'Ignore',
-      className:
-        'text-swiss-ink bg-white ring-1 ring-swiss-line hover:bg-surface-muted',
-    };
-  }
-
-  return primaryActionFor(section);
+  )
 }

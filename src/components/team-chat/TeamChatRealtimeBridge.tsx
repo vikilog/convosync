@@ -1,154 +1,111 @@
 /**
- * Global team-chat socket listener: SideNav unread badge + toast/sound when not viewing that DM.
+ * Global team-chat socket listener: nav unread badge + toast/sound when not viewing that DM.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { MessageSquare, X } from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
-import { getUserId } from '../../lib/api';
-import { getSocket } from '../../lib/socket';
-import { playMessageNotifySound } from '../../lib/messageNotifySound';
-import { isViewingTeamChatPeer } from '../../lib/teamChatFocus';
+import { useEffect } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
+
+import { useAuth } from '@/context/AuthContext'
+import { playMessageNotifySound } from '@/lib/messageNotifySound'
+import { connectSocket } from '@/lib/socket'
+import { dispatchOpenTeamChatPeer, incrementTeamChatUnread } from '@/lib/teamChatEvents'
+import { isViewingTeamChatPeer } from '@/lib/teamChatFocus'
+import { profileResource } from '@/services/profile.service'
 import {
-  dispatchOpenTeamChatPeer,
-  incrementTeamChatUnread,
-} from '../../lib/teamChatEvents';
-import { pathForTab } from '../../routes';
-
-type TeamChatToast = {
-  id: string;
-  peerUserId: string;
-  senderName: string;
-  preview: string;
-};
-
-type TeamChatSocketMessage = {
-  id: string;
-  body: string;
-  recipientUserId: string;
-  sender: { id: string; name: string };
-};
+  applyIncomingTeamChatMessage,
+  applyIncomingTeamPresence,
+  type TeamChatMessage,
+} from '@/services/realTeamChat.service'
 
 function maybeDesktopNotify(title: string, body: string) {
-  if (typeof Notification === 'undefined') return;
-  if (Notification.permission !== 'granted') return;
-  if (!document.hidden) return;
+  if (typeof Notification === 'undefined') return
+  if (Notification.permission !== 'granted') return
+  if (!document.hidden) return
   try {
-    new Notification(title, { body, silent: true });
+    new Notification(title, { body, silent: true })
   } catch {
     // unsupported / blocked
   }
 }
 
 export function TeamChatRealtimeBridge() {
-  const navigate = useNavigate();
-  const selfId = getUserId();
-  const [toast, setToast] = useState<TeamChatToast | null>(null);
-  const toastTimerRef = useRef<number | null>(null);
-
-  const showToast = useCallback((next: TeamChatToast) => {
-    setToast(next);
-    playMessageNotifySound();
-    if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
-    toastTimerRef.current = window.setTimeout(() => {
-      setToast(null);
-      toastTimerRef.current = null;
-    }, 4000);
-  }, []);
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const { user } = useAuth()
+  const { data: me } = profileResource.useGet()
+  const workspaceId = me?.activeWorkspaceId || me?.workspaceId
+  const selfId = user?.id ?? ''
 
   useEffect(() => {
-    const socket = getSocket();
+    if (!workspaceId || !selfId) return
+    const socket = connectSocket(workspaceId)
 
-    const onMsg = (payload: TeamChatSocketMessage) => {
-      if (!payload?.sender?.id || payload.sender.id === selfId) return;
+    const openPeer = (peerUserId: string) => {
+      navigate('/team-chat')
+      dispatchOpenTeamChatPeer(peerUserId)
+    }
 
-      const peerUserId = payload.sender.id;
-      // Viewing this exact thread with the window visible → don't annoy
-      if (isViewingTeamChatPeer(peerUserId) && !document.hidden) return;
+    const onMsg = (payload: TeamChatMessage) => {
+      if (!payload?.sender?.id) return
+      applyIncomingTeamChatMessage(queryClient, payload, selfId)
+      if (payload.sender.id === selfId) return
 
-      incrementTeamChatUnread(peerUserId);
+      const peerUserId = payload.sender.id
+      if (isViewingTeamChatPeer(peerUserId) && !document.hidden) return
 
-      const previewRaw = typeof payload.body === 'string' ? payload.body.trim() : '';
-      if (!previewRaw) return;
+      incrementTeamChatUnread(peerUserId)
 
-      const senderName = payload.sender.name?.trim() || 'Team mate';
-      const preview = previewRaw.length > 72 ? `${previewRaw.slice(0, 69)}…` : previewRaw;
+      const previewRaw = typeof payload.body === 'string' ? payload.body.trim() : ''
+      if (!previewRaw) return
 
-      showToast({
-        id: `${payload.id}-${Date.now()}`,
-        peerUserId,
-        senderName,
-        preview,
-      });
-      maybeDesktopNotify(senderName, preview);
-    };
+      const senderName = payload.sender.name?.trim() || 'Team mate'
+      const preview = previewRaw.length > 72 ? `${previewRaw.slice(0, 69)}…` : previewRaw
 
-    socket.on('team_chat_message', onMsg);
-    return () => {
-      socket.off('team_chat_message', onMsg);
-    };
-  }, [selfId, showToast]);
-
-  useEffect(
-    () => () => {
-      if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
-    },
-    []
-  );
-
-  const openPeer = (peerUserId: string) => {
-    setToast(null);
-    navigate(pathForTab('team-chat'));
-    dispatchOpenTeamChatPeer(peerUserId);
-  };
-
-  return (
-    <AnimatePresence>
-      {toast && (
-        <motion.div
-          key={toast.id}
-          initial={{ opacity: 0, y: 12, scale: 0.98 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 8, scale: 0.98 }}
-          transition={{ duration: 0.18 }}
-          className="fixed bottom-4 right-4 z-[200] w-[min(100vw-1.5rem,20rem)]"
-        >
-          <div
-            role="status"
-            className="relative overflow-hidden rounded-xl border border-swiss-line/90 bg-white text-swiss-ink shadow-lg shadow-slate-900/10"
+      playMessageNotifySound()
+      toast.custom(
+        (id) => (
+          <button
+            type="button"
+            className="bg-popover text-popover-foreground w-[min(100vw-2rem,20rem)] rounded-lg border p-3 text-left shadow-md"
+            onClick={() => {
+              toast.dismiss(id)
+              openPeer(peerUserId)
+            }}
           >
-            <button
-              type="button"
-              onClick={() => openPeer(toast.peerUserId)}
-              className="w-full px-3 py-2.5 pr-9 text-left transition-colors hover:bg-sky-50/70"
-            >
-              <div className="flex min-w-0 items-center gap-2.5">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-sky-100 bg-sky-50 text-sky-600">
-                  <MessageSquare className="h-3.5 w-3.5" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-baseline justify-between gap-2">
-                    <p className="truncate text-sm font-bold text-swiss-ink">{toast.senderName}</p>
-                    <span className="shrink-0 text-[10px] font-bold uppercase tracking-wide text-channel-green">
-                      Team
-                    </span>
-                  </div>
-                  <p className="mt-0.5 truncate text-xs leading-snug text-swiss-muted">{toast.preview}</p>
-                </div>
-              </div>
-            </button>
-            <button
-              type="button"
-              onClick={() => setToast(null)}
-              className="absolute right-1.5 top-1.5 rounded-md p-1 text-swiss-faint transition-colors hover:bg-slate-100 hover:text-swiss-ink"
-              aria-label="Dismiss notification"
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
+            <div className="flex items-baseline justify-between gap-2">
+              <p className="truncate text-sm font-semibold">{senderName}</p>
+              <span className="text-muted-foreground shrink-0 text-[10px] font-medium uppercase">
+                Team
+              </span>
+            </div>
+            <p className="text-muted-foreground mt-0.5 truncate text-xs">{preview}</p>
+          </button>
+        ),
+        { duration: 4000 }
+      )
+      maybeDesktopNotify(senderName, preview)
+    }
+
+    const onPresence = (payload: { online?: Array<{ userId: string }> }) => {
+      applyIncomingTeamPresence(queryClient, payload)
+    }
+
+    const onReconnect = () => {
+      socket.emit('join-workspace', workspaceId)
+    }
+
+    socket.on('team_chat_message', onMsg)
+    socket.on('team_presence', onPresence)
+    socket.io.on('reconnect', onReconnect)
+
+    return () => {
+      socket.off('team_chat_message', onMsg)
+      socket.off('team_presence', onPresence)
+      socket.io.off('reconnect', onReconnect)
+    }
+  }, [navigate, queryClient, selfId, workspaceId])
+
+  return null
 }

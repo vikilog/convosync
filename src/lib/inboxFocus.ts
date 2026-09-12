@@ -1,24 +1,24 @@
 /** Conversation open in the visible Inbox tab (KeepAlive-hidden does not count). */
-let activeConversationId = '';
-let inboxVisible = false;
+let activeConversationId = ''
+let inboxVisible = false
 
 export function setInboxVisible(visible: boolean) {
-  inboxVisible = visible;
+  inboxVisible = visible
 }
 
 export function setActiveInboxConversationId(conversationId: string) {
-  activeConversationId = conversationId;
+  activeConversationId = conversationId
 }
 
 export function getActiveInboxConversationId() {
-  return activeConversationId;
+  return activeConversationId
 }
 
 /** Id to treat as "currently reading" for toast skip + unread exclusion. */
 export function getViewingInboxConversationId() {
-  return inboxVisible ? activeConversationId : '';
+  return inboxVisible ? activeConversationId : ''
 }
 
 export function isViewingInboxConversation(conversationId: string) {
-  return Boolean(conversationId) && getViewingInboxConversationId() === conversationId;
+  return Boolean(conversationId) && getViewingInboxConversationId() === conversationId
 }

@@ -1,120 +1,89 @@
-import type { TriageSectionId } from './types';
+import { AlertTriangle, Check, Eye } from 'lucide-react'
 
-/** Brand accents for this triage UI (cyan sales CTA + navy headers). */
-export const SL_CYAN = '#0EA5E9';
-export const SL_NAVY = '#0F172A';
+import { LOW_CONFIDENCE_THRESHOLD, triageSectionFor, type IntentLabel, type TriageSection } from '@/lib/socialListening'
 
-export type SectionTheme = {
-  id: TriageSectionId;
-  label: string;
-  /** Tailwind-ish accent classes for border/header/pills */
-  accentBorder: string;
-  accentBg: string;
-  accentText: string;
-  accentDot: string;
-  headerBg: string;
-  /** Default collapsed? Low confidence starts collapsed. */
-  defaultCollapsed: boolean;
-  muted: boolean;
-};
+export type TriageTheme = {
+  label: string
+  border: string
+  bg: string
+  text: string
+  dot: string
+  actionLabel: string
+  actionIcon: React.ComponentType<{ className?: string }>
+}
 
-export const SECTION_ORDER: TriageSectionId[] = [
-  'complaints',
-  'sales',
-  'questions',
-  'low_confidence',
-];
-
-export const SECTION_THEMES: Record<TriageSectionId, SectionTheme> = {
+export const TRIAGE_THEME: Record<TriageSection, TriageTheme> = {
   complaints: {
-    id: 'complaints',
     label: 'Complaints',
-    accentBorder: 'border-l-orange-500',
-    accentBg: 'bg-orange-50',
-    accentText: 'text-orange-800',
-    accentDot: 'bg-orange-500',
-    headerBg: 'bg-orange-50/80',
-    defaultCollapsed: false,
-    muted: false,
+    border: 'border-l-orange-500',
+    bg: 'bg-orange-50 dark:bg-orange-950/20',
+    text: 'text-orange-700 dark:text-orange-400',
+    dot: 'bg-orange-500',
+    actionLabel: 'Escalate to Support',
+    actionIcon: AlertTriangle,
   },
   sales: {
-    id: 'sales',
     label: 'Sales Interest',
-    accentBorder: 'border-l-emerald-500',
-    accentBg: 'bg-emerald-50',
-    accentText: 'text-emerald-800',
-    accentDot: 'bg-emerald-500',
-    headerBg: 'bg-emerald-50/60',
-    defaultCollapsed: false,
-    muted: false,
+    border: 'border-l-emerald-500',
+    bg: 'bg-emerald-50 dark:bg-emerald-950/20',
+    text: 'text-emerald-700 dark:text-emerald-400',
+    dot: 'bg-emerald-500',
+    actionLabel: 'Approve & Send DM',
+    actionIcon: Check,
   },
   questions: {
-    id: 'questions',
     label: 'Questions',
-    accentBorder: 'border-l-sky-500',
-    accentBg: 'bg-sky-50',
-    accentText: 'text-sky-800',
-    accentDot: 'bg-sky-500',
-    headerBg: 'bg-sky-50/70',
-    defaultCollapsed: false,
-    muted: false,
+    border: 'border-l-sky-500',
+    bg: 'bg-sky-50 dark:bg-sky-950/20',
+    text: 'text-sky-700 dark:text-sky-400',
+    dot: 'bg-sky-500',
+    actionLabel: 'Approve & Reply',
+    actionIcon: Check,
   },
   low_confidence: {
-    id: 'low_confidence',
     label: 'Low Confidence / Unclear',
-    accentBorder: 'border-l-slate-300',
-    accentBg: 'bg-slate-100',
-    accentText: 'text-slate-600',
-    accentDot: 'bg-slate-400',
-    headerBg: 'bg-slate-50',
-    defaultCollapsed: true,
-    muted: true,
+    border: 'border-l-slate-400',
+    bg: 'bg-muted/50',
+    text: 'text-muted-foreground',
+    dot: 'bg-slate-400',
+    actionLabel: 'Review',
+    actionIcon: Eye,
   },
-};
+}
 
-export type PrimaryActionKind = 'approve_dm' | 'approve_reply' | 'escalate' | 'review';
+export type PrimaryActionKind = 'approve_dm' | 'approve_reply' | 'escalate' | 'review'
 
-export function primaryActionFor(section: TriageSectionId): {
-  kind: PrimaryActionKind;
-  label: string;
-  className: string;
-} {
-  // Match Integrations tab button pattern: tint fill + border + accent text
+export function primaryActionFor(section: TriageSection): { kind: PrimaryActionKind; label: string } {
   switch (section) {
     case 'sales':
-      return {
-        kind: 'approve_dm',
-        label: 'Approve & Send DM',
-        className:
-          'text-emerald-700 bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/15',
-      };
+      return { kind: 'approve_dm', label: TRIAGE_THEME.sales.actionLabel }
     case 'questions':
-      return {
-        kind: 'approve_reply',
-        label: 'Approve & Reply',
-        className:
-          'text-sky-700 bg-sky-500/10 border border-sky-500/20 hover:bg-sky-500/15',
-      };
+      return { kind: 'approve_reply', label: TRIAGE_THEME.questions.actionLabel }
     case 'complaints':
-      return {
-        kind: 'escalate',
-        label: 'Escalate to Support',
-        className:
-          'text-orange-700 bg-orange-500/10 border border-orange-500/20 hover:bg-orange-500/15',
-      };
+      return { kind: 'escalate', label: TRIAGE_THEME.complaints.actionLabel }
     case 'low_confidence':
-      return {
-        kind: 'review',
-        label: 'Review',
-        className:
-          'text-slate-700 bg-slate-500/10 border border-slate-500/20 hover:bg-slate-500/15',
-      };
+      return { kind: 'review', label: TRIAGE_THEME.low_confidence.actionLabel }
   }
 }
 
-export const IGNORE_BTN_CLASS =
-  'text-neutral-700 bg-white ring-1 ring-slate-200/80 hover:bg-surface-muted';
-
-/** Same shell as IntegrationsView IntegrationCard / ConnectedChannelCard */
-export const REVIEW_CARD_SHELL =
-  'bg-white rounded-xl border border-black/5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]';
+export function primaryActionForComment(input: {
+  intentLabel: IntentLabel | null
+  confidence: number | null
+  classificationStatus: string | null
+  status: string | null
+}): { kind: PrimaryActionKind | 'ignore_only'; label: string } | null {
+  if (input.status && input.status !== 'new') return null
+  if (input.classificationStatus !== 'classified' || !input.intentLabel) return null
+  const section = triageSectionFor(input.intentLabel, input.confidence ?? 0)
+  if (section === 'low_confidence' && (input.intentLabel === 'Spam' || input.intentLabel === 'Neutral')) {
+    return { kind: 'ignore_only', label: 'Ignore' }
+  }
+  if (
+    section === 'low_confidence' &&
+    input.confidence != null &&
+    input.confidence < LOW_CONFIDENCE_THRESHOLD
+  ) {
+    return primaryActionFor(section)
+  }
+  return primaryActionFor(section)
+}

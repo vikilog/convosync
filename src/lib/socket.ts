@@ -1,47 +1,32 @@
-import { io, Socket } from 'socket.io-client';
-import { getWorkspaceId } from './api';
-import { resolveSocketUrl } from './publicUrls';
+import { io, type Socket } from 'socket.io-client'
 
-let socket: Socket | null = null;
+import { API_BASE_URL } from '@/lib/apiConfig'
+import { getStoredToken } from '@/lib/authSession'
 
-function authToken(): string {
-  return localStorage.getItem('convosync_token') ?? '';
+let socket: Socket | null = null
+
+function socketUrl(): string {
+  return API_BASE_URL.replace(/\/api\/?$/, '')
 }
 
 export function getSocket(): Socket {
   if (!socket) {
-    const url = resolveSocketUrl();
-    socket = io(url, {
+    socket = io(socketUrl(), {
       transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionAttempts: 10,
-      auth: { token: authToken() },
-    });
+      auth: { token: getStoredToken() ?? '' },
+    })
     socket.on('connect', () => {
-      // Refresh token on each connect (login / company switch).
-      socket!.auth = { token: authToken() };
-      const workspaceId = getWorkspaceId();
-      if (workspaceId) socket?.emit('join-workspace', workspaceId);
-    });
-    socket.io.on('reconnect', () => {
-      socket!.auth = { token: authToken() };
-      const workspaceId = getWorkspaceId();
-      if (workspaceId) socket?.emit('join-workspace', workspaceId);
-    });
+      socket!.auth = { token: getStoredToken() ?? '' }
+    })
   }
-  return socket;
+  return socket
 }
 
-export function connectSocket(workspaceId: string) {
-  const s = getSocket();
-  s.auth = { token: authToken() };
-  s.emit('join-workspace', workspaceId);
-  return s;
-}
-
-export function disconnectSocket() {
-  if (socket) {
-    socket.disconnect();
-    socket = null;
-  }
+export function connectSocket(workspaceId: string): Socket {
+  const s = getSocket()
+  s.auth = { token: getStoredToken() ?? '' }
+  s.emit('join-workspace', workspaceId)
+  return s
 }

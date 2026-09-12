@@ -1,73 +1,62 @@
-import React from 'react';
-import { ArrowUpRight, Crown } from 'lucide-react';
+import { ArrowUpRight, Crown } from 'lucide-react'
 
-export type DashboardTeamMember = {
-  id: string;
-  name: string;
-  role: string;
-  avatar?: string | null;
-  isOwner: boolean;
-  conversationsCount?: number;
-};
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import type { DashboardTeamMember } from '@/lib/dashboardMockData'
 
 interface TeamPanelProps {
-  members: DashboardTeamMember[];
-  onViewAll: () => void;
+  members: DashboardTeamMember[]
+  onViewAll: () => void
 }
 
-export const TeamPanel: React.FC<TeamPanelProps> = ({ members, onViewAll }) => {
-  const items = members.slice(0, 5);
+export function TeamPanel({ members, onViewAll }: TeamPanelProps) {
+  const items = members.slice(0, 5)
 
   return (
-    <div className="flex h-full flex-col font-swiss">
-      <p className="mb-3 text-[13.5px] font-bold text-swiss-ink">Team</p>
+    <Card className="h-full">
+      <CardHeader>
+        <CardTitle>Team</CardTitle>
+      </CardHeader>
 
-      {items.length === 0 ? (
-        <div className="flex flex-1 flex-col items-center justify-center py-6 text-center">
-          <p className="text-sm text-swiss-muted">No team members yet.</p>
-        </div>
-      ) : (
-        <ul className="divide-y divide-swiss-line">
-          {items.map((member) => (
-            <li key={member.id} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
-              {member.avatar ? (
-                <img
-                  src={member.avatar}
-                  alt=""
-                  className="h-7 w-7 shrink-0 rounded-full object-cover"
-                />
-              ) : (
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-swiss-line text-[11px] font-semibold text-swiss-ink">
-                  {member.name.charAt(0).toUpperCase()}
+      <CardContent>
+        {items.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-6 text-center">
+            <p className="text-muted-foreground text-sm">No team members yet.</p>
+          </div>
+        ) : (
+          <ul className="divide-y">
+            {items.map((member) => (
+              <li key={member.id} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
+                <Avatar className="size-7">
+                  {member.avatar ? <AvatarImage src={member.avatar} alt="" /> : null}
+                  <AvatarFallback>{member.name.charAt(0).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1">
+                    <p className="truncate text-sm font-medium">{member.name}</p>
+                    {member.isOwner ? <Crown className="text-primary h-3 w-3 shrink-0" aria-hidden /> : null}
+                  </div>
+                  <p className="text-muted-foreground truncate text-xs capitalize">{member.role}</p>
                 </div>
-              )}
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1">
-                  <p className="truncate text-[13px] font-medium text-swiss-ink">{member.name}</p>
-                  {member.isOwner ? (
-                    <Crown className="h-3 w-3 shrink-0 text-swiss-accent" aria-hidden />
-                  ) : null}
-                </div>
-                <p className="truncate text-[11px] capitalize text-swiss-muted">{member.role}</p>
-              </div>
-              {typeof member.conversationsCount === 'number' ? (
-                <span className="shrink-0 text-[11px] tabular-nums text-swiss-faint">
-                  {member.conversationsCount} convos
-                </span>
-              ) : null}
-            </li>
-          ))}
-        </ul>
-      )}
+                {typeof member.conversationsCount === 'number' ? (
+                  <Badge variant="outline" className="shrink-0">
+                    {member.conversationsCount} convos
+                  </Badge>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        )}
+      </CardContent>
 
-      <button
-        type="button"
-        onClick={onViewAll}
-        className="mt-3 inline-flex cursor-pointer items-center justify-center gap-1 text-[11.5px] font-semibold text-swiss-accent"
-      >
-        View all
-        <ArrowUpRight className="h-3 w-3" />
-      </button>
-    </div>
-  );
-};
+      <CardFooter>
+        <Button variant="link" size="sm" className="mx-auto" onClick={onViewAll}>
+          View all
+          <ArrowUpRight />
+        </Button>
+      </CardFooter>
+    </Card>
+  )
+}

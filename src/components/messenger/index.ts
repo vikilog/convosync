@@ -1,1 +1,0 @@
-export { MessengerConnectPanel } from './MessengerConnectPanel';

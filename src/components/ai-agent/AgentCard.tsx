@@ -1,188 +1,176 @@
-import React from 'react';
-import { Bot, GitBranch, MessageSquare, Pencil, Trash2 } from 'lucide-react';
-import type { AgentBot } from '../../types';
-import { CATEGORY_LABELS } from './types';
+import { Bot, Copy, GitBranch, MessageSquare, Pause, Pencil, Play, Trash2 } from 'lucide-react'
 
-type AgentActionsProps = {
-  onEdit: () => void;
-  onDelete: () => void;
-  deleting?: boolean;
-};
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { CATEGORY_LABELS } from '@/lib/aiAgentLabels'
+import type { Agent } from '@/services/realAgents.service'
 
-type SharedProps = {
-  agent: AgentBot;
-  onEdit: () => void;
-  onDelete: () => void;
-  deleting?: boolean;
-};
-
-const categoryStyles: Record<AgentBot['category'], { badge: string; avatar: string }> = {
-  ai_agent: {
-    badge: 'bg-swiss-accent/10 text-swiss-accent ring-swiss-accent/20',
-    avatar: 'bg-gradient-to-br from-swiss-accent/5 to-swiss-accent/10 text-swiss-accent',
-  },
-  responsive: {
-    badge: 'bg-violet-50 text-violet-700 ring-violet-100',
-    avatar: 'bg-gradient-to-br from-violet-50 to-fuchsia-50 text-violet-600',
-  },
-  rule_based: {
-    badge: 'bg-slate-100 text-slate-600 ring-swiss-line',
-    avatar: 'bg-slate-100 text-slate-600',
-  },
-};
-
-function AgentAvatar({ agent, size = 'md' }: { agent: AgentBot; size?: 'md' | 'lg' }) {
-  const dim = size === 'lg' ? 'w-12 h-12' : 'w-10 h-10';
-  const iconDim = size === 'lg' ? 'w-6 h-6' : 'w-5 h-5';
-  const styles = categoryStyles[agent.category];
-
-  if (agent.avatarUrl) {
-    return (
-      <img
-        src={agent.avatarUrl}
-        alt=""
-        className={`${dim} rounded-xl object-cover border border-swiss-line shrink-0`}
-      />
-    );
-  }
-
-  return (
-    <div
-      className={`${dim} rounded-xl shrink-0 flex items-center justify-center border border-slate-100 ${styles.avatar}`}
-    >
-      <Bot className={iconDim} />
-    </div>
-  );
-}
-
-function CategoryBadge({ category }: { category: AgentBot['category'] }) {
-  const styles = categoryStyles[category];
+function StatusDot({ enabled }: { enabled: boolean }) {
   return (
     <span
-      className={`inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded-md ring-1 ring-inset ${styles.badge}`}
+      className={`inline-flex items-center gap-1 text-[11px] font-medium ${enabled ? 'text-primary' : 'text-muted-foreground'}`}
     >
-      {CATEGORY_LABELS[category]}
+      <span className={`size-1.5 rounded-full ${enabled ? 'bg-primary' : 'bg-muted-foreground/50'}`} />
+      {enabled ? 'Live' : 'Offline'}
     </span>
-  );
+  )
 }
 
-function StatusBadge({ enabled }: { enabled: boolean }) {
-  if (!enabled) {
-    return (
-      <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400">
-        <span className="w-1.5 h-1.5 rounded-full bg-slate-300" />
-        Offline
-      </span>
-    );
-  }
+function Actions({
+  agent,
+  onEdit,
+  onDelete,
+  onToggle,
+  onDuplicate,
+}: {
+  agent: Agent
+  onEdit: () => void
+  onDelete: () => void
+  onToggle: () => void
+  onDuplicate: () => void
+}) {
   return (
-    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-swiss-accent">
-      <span className="w-1.5 h-1.5 rounded-full bg-swiss-accent" />
-      Live
-    </span>
-  );
-}
-
-function AgentActionButtons({ onEdit, onDelete, deleting }: AgentActionsProps) {
-  return (
-    <div className="flex items-center gap-1 shrink-0">
-      <button
-        type="button"
+    <div className="flex shrink-0 items-center gap-1">
+      <Button
+        variant="ghost"
+        size="icon-sm"
         onClick={(e) => {
-          e.stopPropagation();
-          onEdit();
+          e.stopPropagation()
+          onToggle()
         }}
-        className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-slate-500 hover:text-swiss-accent hover:bg-swiss-accent/5 transition-colors cursor-pointer"
+        aria-label={agent.isEnabled ? 'Pause agent' : 'Resume agent'}
+        title={agent.isEnabled ? 'Pause' : 'Resume'}
+      >
+        {agent.isEnabled ? <Pause /> : <Play />}
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        onClick={(e) => {
+          e.stopPropagation()
+          onDuplicate()
+        }}
+        aria-label="Duplicate agent"
+      >
+        <Copy />
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        onClick={(e) => {
+          e.stopPropagation()
+          onEdit()
+        }}
         aria-label="Edit agent"
-        title="Edit"
       >
-        <Pencil className="w-4 h-4" />
-      </button>
-      <button
-        type="button"
+        <Pencil />
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        className="text-muted-foreground hover:text-destructive"
         onClick={(e) => {
-          e.stopPropagation();
-          onDelete();
+          e.stopPropagation()
+          onDelete()
         }}
-        disabled={deleting}
-        className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-slate-500 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer disabled:opacity-50"
         aria-label="Delete agent"
-        title="Delete"
       >
-        <Trash2 className="w-4 h-4" />
-      </button>
+        <Trash2 />
+      </Button>
     </div>
-  );
+  )
 }
 
-function AgentMeta({ agent }: { agent: AgentBot }) {
+export function AgentListRow({
+  agent,
+  onOpen,
+  onDelete,
+  onToggle,
+  onDuplicate,
+}: {
+  agent: Agent
+  onOpen: () => void
+  onDelete: () => void
+  onToggle: () => void
+  onDuplicate: () => void
+}) {
   return (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-[11px] text-slate-500">
-      <span className="inline-flex items-center gap-1">
-        <MessageSquare className="w-3 h-3" />
-        {agent.conversationsCount} chats
-      </span>
-      {agent.category === 'rule_based' && (
-        <span className="inline-flex items-center gap-1">
-          <GitBranch className="w-3 h-3" />
-          {agent.flowsCount} flows
+    <div className="group hover:bg-muted/40 flex items-center gap-3 border-b px-4 py-3 last:border-b-0">
+      <button type="button" onClick={onOpen} className="flex min-w-0 flex-1 items-center gap-3 text-left">
+        <span className="bg-primary/10 text-primary flex size-10 shrink-0 items-center justify-center rounded-xl">
+          <Bot className="size-5" />
         </span>
-      )}
-    </div>
-  );
-}
-
-export const AgentListRow: React.FC<SharedProps> = ({ agent, onEdit, onDelete, deleting }) => {
-  return (
-    <div className="group flex items-center gap-3 px-4 py-3 border-b border-swiss-line last:border-b-0 hover:bg-surface-muted/80 transition-colors">
-      <button
-        type="button"
-        onClick={onEdit}
-        className="flex items-center gap-3 min-w-0 flex-1 text-left cursor-pointer"
-      >
-        <AgentAvatar agent={agent} />
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 flex-wrap">
-            <p className="text-sm font-semibold text-slate-900 truncate">{agent.name}</p>
-            <CategoryBadge category={agent.category} />
-            <StatusBadge enabled={agent.isEnabled} />
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="truncate text-sm font-semibold">{agent.name}</p>
+            <Badge variant="outline">{CATEGORY_LABELS[agent.category]}</Badge>
+            <StatusDot enabled={agent.isEnabled} />
           </div>
-          <p className="text-xs text-slate-500 mt-0.5 line-clamp-1">{agent.description}</p>
-          <AgentMeta agent={agent} />
+          <p className="text-muted-foreground mt-0.5 line-clamp-1 text-xs">{agent.description}</p>
+          <p className="text-muted-foreground mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
+            <span className="inline-flex items-center gap-1">
+              <MessageSquare className="size-3" />
+              {agent.conversationsCount.toLocaleString()} chats
+            </span>
+            {agent.category === 'rule_based' ? (
+              <span className="inline-flex items-center gap-1">
+                <GitBranch className="size-3" />
+                {agent.flowsCount} flows
+              </span>
+            ) : null}
+          </p>
         </div>
       </button>
-      <AgentActionButtons onEdit={onEdit} onDelete={onDelete} deleting={deleting} />
+      <Actions agent={agent} onEdit={onOpen} onDelete={onDelete} onToggle={onToggle} onDuplicate={onDuplicate} />
     </div>
-  );
-};
+  )
+}
 
-export const AgentGridCard: React.FC<SharedProps> = ({ agent, onEdit, onDelete, deleting }) => {
+export function AgentGridCard({
+  agent,
+  onOpen,
+  onDelete,
+  onToggle,
+  onDuplicate,
+}: {
+  agent: Agent
+  onOpen: () => void
+  onDelete: () => void
+  onToggle: () => void
+  onDuplicate: () => void
+}) {
   return (
-    <div className="group relative flex flex-col bg-white border border-swiss-line p-4 hover:border-swiss-accent/20 transition-all duration-200">
+    <div className="group bg-card hover:border-primary/30 flex flex-col rounded-xl border p-4 transition-colors">
       <div className="flex items-start justify-between gap-2">
-        <button type="button" onClick={onEdit} className="flex items-start gap-3 min-w-0 flex-1 text-left cursor-pointer">
-          <AgentAvatar agent={agent} size="lg" />
+        <button type="button" onClick={onOpen} className="flex min-w-0 flex-1 items-start gap-3 text-left">
+          <span className="bg-primary/10 text-primary flex size-11 shrink-0 items-center justify-center rounded-xl">
+            <Bot className="size-5" />
+          </span>
           <div className="min-w-0 flex-1 pt-0.5">
-            <p className="text-sm font-semibold text-slate-900 truncate">{agent.name}</p>
-            <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
-              <CategoryBadge category={agent.category} />
-              <StatusBadge enabled={agent.isEnabled} />
+            <p className="truncate text-sm font-semibold">{agent.name}</p>
+            <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+              <Badge variant="outline">{CATEGORY_LABELS[agent.category]}</Badge>
+              <StatusDot enabled={agent.isEnabled} />
             </div>
           </div>
         </button>
-        <AgentActionButtons onEdit={onEdit} onDelete={onDelete} deleting={deleting} />
+        <Actions agent={agent} onEdit={onOpen} onDelete={onDelete} onToggle={onToggle} onDuplicate={onDuplicate} />
       </div>
-
-      <button type="button" onClick={onEdit} className="mt-3 text-left cursor-pointer flex-1">
-        <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">{agent.description}</p>
-        <AgentMeta agent={agent} />
+      <button type="button" onClick={onOpen} className="mt-3 flex-1 text-left">
+        <p className="text-muted-foreground line-clamp-2 text-xs leading-relaxed">{agent.description}</p>
+        <p className="text-muted-foreground mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
+          <span className="inline-flex items-center gap-1">
+            <MessageSquare className="size-3" />
+            {agent.conversationsCount.toLocaleString()} chats
+          </span>
+          {agent.category === 'rule_based' ? (
+            <span className="inline-flex items-center gap-1">
+              <GitBranch className="size-3" />
+              {agent.flowsCount} flows
+            </span>
+          ) : null}
+        </p>
       </button>
     </div>
-  );
-};
-
-/** @deprecated Use AgentListRow or AgentGridCard */
-export const AgentCard: React.FC<{ agent: AgentBot; onClick: () => void }> = ({
-  agent,
-  onClick,
-}) => <AgentListRow agent={agent} onEdit={onClick} onDelete={() => {}} />;
+  )
+}

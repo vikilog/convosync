@@ -1,471 +1,207 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
+import { useEffect, useMemo, useState } from 'react'
+import { FileText, Search } from 'lucide-react'
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { X, Search, Send, Loader2, ImageIcon, Video, FileText, Upload } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
-import type { CampaignTemplate } from '../../types';
-import { api } from '../../lib/api';
-import { mapTemplateFromApi } from '../../lib/mappers';
-import { statusUiToSlug } from '../../lib/templateLabels';
-import { TemplateStatusBadge } from '../templates/TemplateStatusBadge';
-import { WhatsAppTemplatePreview } from '../templates/WhatsAppTemplatePreview';
-import { Input } from '../ui/input';
-import {
-  countBodyVariables,
-  headerFormatFromApi,
-  HEADER_MEDIA_ACCEPT,
-  HEADER_MEDIA_HINT,
-  type HeaderFormat,
-} from '../templates/templateBuilderUtils';
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { Skeleton } from '@/components/ui/skeleton'
+import { WhatsAppBubblePreview } from '@/components/templates/WhatsAppBubblePreview'
+import { realTemplateStatusBadgeVariant } from '@/components/templates/template-status'
+import { countBodyVariables } from '@/lib/messagingWindow'
+import type { HeaderFormat } from '@/lib/templatesMockData'
+import { realTemplatesService, type TemplateHeaderFormat } from '@/services/realTemplates.service'
 
-type Props = {
-  open: boolean;
-  contactName: string;
-  onClose: () => void;
-  onSend: (
-    templateId: string,
-    variables: string[],
-    headerMediaFile?: File | null
-  ) => Promise<void>;
-  sendError?: string | null;
-};
-
-function isMediaHeaderFormat(format: HeaderFormat): format is 'image' | 'video' | 'document' {
-  return format === 'image' || format === 'video' || format === 'document';
+function previewHeaderFormat(format: TemplateHeaderFormat, hasTextHeader: boolean): HeaderFormat {
+  if (format === 'IMAGE') return 'image'
+  if (format === 'VIDEO') return 'video'
+  if (format === 'DOCUMENT') return 'document'
+  if (format === 'TEXT' || hasTextHeader) return 'text'
+  return 'none'
 }
 
-export const InboxTemplatePicker: React.FC<Props> = ({
+function isMediaHeader(format: TemplateHeaderFormat): format is 'IMAGE' | 'VIDEO' | 'DOCUMENT' {
+  return format === 'IMAGE' || format === 'VIDEO' || format === 'DOCUMENT'
+}
+
+export function InboxTemplatePicker({
   open,
-  contactName,
-  onClose,
+  onOpenChange,
+  sending,
   onSend,
-  sendError,
-}) => {
-  const [templates, setTemplates] = useState<CampaignTemplate[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [loadError, setLoadError] = useState<string | null>(null);
-  const [search, setSearch] = useState('');
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [variableValues, setVariableValues] = useState<string[]>([]);
-  const [headerMediaFile, setHeaderMediaFile] = useState<File | null>(null);
-  const [headerMediaPreviewUrl, setHeaderMediaPreviewUrl] = useState('');
-  const [sending, setSending] = useState(false);
-  const headerMediaInputRef = useRef<HTMLInputElement>(null);
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  sending: boolean
+  onSend: (templateId: string, variables: string[], headerMediaFile?: File | null) => Promise<void>
+}) {
+  const { data: templates = [], isLoading, isError, error } = realTemplatesService.useList()
+  const [query, setQuery] = useState('')
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [variableValues, setVariableValues] = useState<string[]>([])
+  const [headerMediaFile, setHeaderMediaFile] = useState<File | null>(null)
 
   useEffect(() => {
-    if (!open) return;
-    setLoading(true);
-    setLoadError(null);
-    setSearch('');
-    setSelectedId(null);
-    setVariableValues([]);
-    setHeaderMediaFile(null);
-    setHeaderMediaPreviewUrl('');
-
-    api
-      .getTemplates()
-      .then((rows: Record<string, unknown>[]) => {
-        const mapped = rows.map((r) => mapTemplateFromApi(r));
-        setTemplates(mapped);
-        const firstApproved = mapped.find((t) => t.status === 'Approved' && t.id);
-        if (firstApproved?.id) {
-          setSelectedId(firstApproved.id);
-        } else if (mapped[0]?.id) {
-          setSelectedId(mapped[0].id);
-        }
-      })
-      .catch((err) => {
-        setLoadError(err instanceof Error ? err.message : 'Failed to load templates');
-      })
-      .finally(() => setLoading(false));
-  }, [open]);
-
-  const selected = useMemo(
-    () => templates.find((t) => t.id === selectedId) ?? null,
-    [templates, selectedId]
-  );
-
-  const headerFormat = selected
-    ? headerFormatFromApi(selected.headerFormat, Boolean(selected.header))
-    : 'none';
-
-  const requiresHeaderMedia = isMediaHeaderFormat(headerFormat);
-  const templateDefaultMediaUrl =
-    selected?.headerMediaStorageKey
-      ? api.templateHeaderMediaUrl(selected.headerMediaStorageKey)
-      : '';
-
-  const varCount = selected ? countBodyVariables(selected.bodyPattern) : 0;
-
-  useEffect(() => {
-    return () => {
-      if (headerMediaPreviewUrl.startsWith('blob:')) {
-        URL.revokeObjectURL(headerMediaPreviewUrl);
-      }
-    };
-  }, [headerMediaPreviewUrl]);
-
-  useEffect(() => {
-    setHeaderMediaFile(null);
-    if (headerMediaPreviewUrl.startsWith('blob:')) {
-      URL.revokeObjectURL(headerMediaPreviewUrl);
-    }
-    setHeaderMediaPreviewUrl(requiresHeaderMedia ? templateDefaultMediaUrl : '');
-  }, [selected?.id, requiresHeaderMedia, templateDefaultMediaUrl]);
-
-  useEffect(() => {
-    if (!selected) {
-      setVariableValues([]);
-      return;
-    }
-    const count = countBodyVariables(selected.bodyPattern);
-    setVariableValues((prev) => {
-      const next = Array.from({ length: count }, (_, i) => prev[i] ?? '');
-      if (count > 0 && !next[0]?.trim() && contactName) {
-        const label = (selected.variables[0] || '').toLowerCase();
-        if (label.includes('name') || label.includes('first')) {
-          next[0] = contactName;
-        }
-      }
-      return next;
-    });
-  }, [selected?.id, selected?.bodyPattern, contactName]);
+    if (!open) return
+    setQuery('')
+    setHeaderMediaFile(null)
+    const firstApproved = templates.find((t) => t.status === 'approved')
+    setSelectedId(firstApproved?.id ?? templates[0]?.id ?? null)
+  }, [open, templates])
 
   const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return templates;
+    const q = query.trim().toLowerCase()
+    if (!q) return templates
     return templates.filter(
-      (t) =>
-        t.name.toLowerCase().includes(q) ||
-        t.category.toLowerCase().includes(q) ||
-        t.bodyPattern.toLowerCase().includes(q)
-    );
-  }, [templates, search]);
+      (t) => t.name.toLowerCase().includes(q) || t.bodyPattern.toLowerCase().includes(q)
+    )
+  }, [templates, query])
 
-  const hasHeaderMediaReady =
-    !requiresHeaderMedia || Boolean(headerMediaFile || selected?.headerMediaStorageKey);
-
+  const selected = filtered.find((t) => t.id === selectedId) ?? filtered[0] ?? null
+  const varCount = selected ? countBodyVariables(selected.bodyPattern) : 0
+  const approved = selected?.status === 'approved'
+  const needsHeaderMedia = selected ? isMediaHeader(selected.headerFormat) : false
   const canSend =
-    selected?.status === 'Approved' && selected.id && !sending && hasHeaderMediaReady;
+    Boolean(selected) &&
+    approved &&
+    !sending &&
+    variableValues.length === varCount &&
+    variableValues.every((v) => v.trim()) &&
+    (!needsHeaderMedia || Boolean(headerMediaFile) || Boolean(selected?.headerMediaStorageKey))
 
-  const handleHeaderMediaChange = (file: File | null) => {
-    if (headerMediaPreviewUrl.startsWith('blob:')) {
-      URL.revokeObjectURL(headerMediaPreviewUrl);
-    }
-    setHeaderMediaFile(file);
-    if (file) {
-      setHeaderMediaPreviewUrl(URL.createObjectURL(file));
-    } else {
-      setHeaderMediaPreviewUrl(templateDefaultMediaUrl);
-    }
-  };
-
-  const handleSend = async () => {
-    if (!selected?.id || selected.status !== 'Approved') return;
-    if (variableValues.some((v) => !v.trim()) && varCount > 0) return;
-    if (requiresHeaderMedia && !hasHeaderMediaReady) return;
-
-    setSending(true);
-    try {
-      await onSend(
-        selected.id,
-        variableValues.map((v) => v.trim()),
-        headerMediaFile
-      );
-      onClose();
-    } finally {
-      setSending(false);
-    }
-  };
+  useEffect(() => {
+    setVariableValues(Array.from({ length: varCount }, () => ''))
+    setHeaderMediaFile(null)
+  }, [selected?.id, varCount])
 
   return (
-    <AnimatePresence>
-      {open && (
-        <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={onClose}
-        >
-          <motion.div
-            role="dialog"
-            aria-labelledby="inbox-template-picker-title"
-            className="bg-surface rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden border border-swiss-line"
-            initial={{ scale: 0.96, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.96, opacity: 0 }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between px-5 py-4 border-b border-swiss-line">
-              <div>
-                <h2 id="inbox-template-picker-title" className="text-sm font-semibold text-swiss-ink">
-                  WhatsApp templates
-                </h2>
-                <p className="text-meta text-swiss-muted mt-0.5">
-                  Templates from your workspace · only Approved can be sent
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={onClose}
-                className="p-2 rounded-lg text-swiss-faint hover:text-swiss-ink hover:bg-gray-50"
-                aria-label="Close"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="right" className="data-[side=right]:sm:max-w-2xl">
+        <SheetHeader>
+          <SheetTitle className="flex items-center gap-2">
+            <FileText className="size-4" />
+            WhatsApp templates
+          </SheetTitle>
+        </SheetHeader>
 
-            {sendError && (
-              <p className="mx-5 mt-3 text-sm font-semibold text-danger-red bg-red-50 border border-red-100 rounded-lg px-3 py-2">
-                {sendError}
-              </p>
-            )}
+        <div className="flex min-h-0 flex-1 flex-col px-4">
+          <div className="relative mb-3">
+            <Search className="text-muted-foreground absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search templates…"
+              className="pl-8"
+            />
+          </div>
 
-            {loading ? (
-              <div className="flex-1 flex items-center justify-center py-16 text-swiss-faint">
-                <Loader2 className="w-6 h-6 animate-spin mr-2" />
-                <span className="text-sm font-bold">Loading templates…</span>
-              </div>
-            ) : loadError ? (
-              <p className="p-8 text-sm font-bold text-danger-red text-center">{loadError}</p>
-            ) : templates.length === 0 ? (
-              <p className="p-8 text-sm text-swiss-muted text-center">
-                No templates yet. Create or sync templates from the Templates page.
-              </p>
-            ) : (
-              <div className="flex flex-1 min-h-0 flex-col md:flex-row">
-                <div className="md:w-[280px] border-b md:border-b-0 md:border-r border-swiss-line flex flex-col min-h-0">
-                  <div className="p-3 border-b border-swiss-line">
-                    <div className="relative">
-                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-swiss-faint" />
-                      <Input
-                        type="search"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Search templates…"
-                        className="h-auto w-full pl-8 pr-3 py-2 text-xs border border-swiss-line rounded-lg focus:ring-2 focus:ring-emerald-100 focus:border-channel-green outline-none"
-                      />
-                    </div>
-                  </div>
-                  <ul className="flex-1 overflow-y-auto p-2 space-y-1">
-                    {filtered.length === 0 ? (
-                      <li className="px-3 py-6 text-xs text-swiss-faint text-center">No matches</li>
-                    ) : (
-                      filtered.map((t) => {
-                        const active = t.id === selectedId;
-                        return (
-                          <li key={t.id ?? t.name}>
-                            <button
-                              type="button"
-                              onClick={() => t.id && setSelectedId(t.id)}
-                              className={`w-full text-left px-3 py-2.5 rounded-xl transition-colors ${
-                                active
-                                  ? 'bg-sky-50 border border-sky-200'
-                                  : 'hover:bg-gray-50 border border-transparent'
-                              }`}
-                            >
-                              <p className="text-sm font-bold text-swiss-ink font-mono truncate">{t.name}</p>
-                              <div className="flex items-center gap-2 mt-1 flex-wrap">
-                                <TemplateStatusBadge status={statusUiToSlug(t.status)} />
-                                <span className="text-xs text-swiss-faint">{t.category}</span>
-                              </div>
-                            </button>
-                          </li>
-                        );
-                      })
-                    )}
-                  </ul>
+          {isLoading ? (
+            <Skeleton className="h-40 w-full" />
+          ) : isError ? (
+            <p className="text-destructive text-sm">
+              {error instanceof Error ? error.message : 'Failed to load templates'}
+            </p>
+          ) : filtered.length === 0 ? (
+            <p className="text-muted-foreground py-8 text-center text-sm">
+              No templates yet. Create or sync templates from the Templates page.
+            </p>
+          ) : (
+            <div className="flex min-h-0 flex-1 gap-3">
+              <ScrollArea className="w-2/5 min-w-0 rounded-lg border">
+                <div className="p-1">
+                  {filtered.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setSelectedId(item.id)}
+                      className={`hover:bg-muted w-full rounded-md px-2.5 py-2 text-left ${
+                        selected?.id === item.id ? 'bg-muted' : ''
+                      }`}
+                    >
+                      <p className="truncate text-sm font-medium">{item.name}</p>
+                      <Badge variant={realTemplateStatusBadgeVariant(item.status)} className="mt-1">
+                        {item.status}
+                      </Badge>
+                    </button>
+                  ))}
                 </div>
+              </ScrollArea>
 
-                <div className="flex-1 flex flex-col min-h-0 overflow-y-auto">
-                  {selected ? (
-                    <>
-                      <div className="p-4 border-b border-swiss-line grid md:grid-cols-2 gap-4">
-                        <div className="space-y-3">
-                          <div>
-                            <p className="text-sm font-bold text-swiss-faint uppercase tracking-wide">
-                              Selected
-                            </p>
-                            <p className="text-sm font-mono font-bold text-swiss-ink">{selected.name}</p>
-                          </div>
-                          {selected.status !== 'Approved' && (
-                            <p className="text-xs text-amber-800 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
-                              This template is {selected.status}. Only Approved templates can be sent on
-                              WhatsApp.
-                            </p>
-                          )}
-                          {requiresHeaderMedia && (
-                            <div className="space-y-2">
-                              <p className="text-sm font-bold text-swiss-faint uppercase tracking-wide">
-                                Header media
-                              </p>
-                              <p className="text-xs text-swiss-muted">
-                                This template needs a {headerFormat} for the header. Use the template
-                                sample or upload a different file before sending.
-                              </p>
-                              <input
-                                ref={headerMediaInputRef}
-                                type="file"
-                                accept={HEADER_MEDIA_ACCEPT[headerFormat]}
-                                className="hidden"
-                                onChange={(e) => {
-                                  const file = e.target.files?.[0] ?? null;
-                                  handleHeaderMediaChange(file);
-                                  e.target.value = '';
-                                }}
-                              />
-                              <div className="rounded-xl border border-swiss-line bg-slate-50 p-3 space-y-2">
-                                {headerFormat === 'image' && headerMediaPreviewUrl ? (
-                                  <img
-                                    src={headerMediaPreviewUrl}
-                                    alt="Header preview"
-                                    className="w-full max-h-32 object-cover rounded-lg"
-                                  />
-                                ) : headerFormat === 'video' && headerMediaPreviewUrl ? (
-                                  <video
-                                    src={headerMediaPreviewUrl}
-                                    className="w-full max-h-32 rounded-lg bg-black"
-                                    controls
-                                    muted
-                                  />
-                                ) : (
-                                  <div className="flex items-center gap-2 text-swiss-muted py-2">
-                                    {headerFormat === 'video' ? (
-                                      <Video className="w-5 h-5" />
-                                    ) : headerFormat === 'document' ? (
-                                      <FileText className="w-5 h-5" />
-                                    ) : (
-                                      <ImageIcon className="w-5 h-5" />
-                                    )}
-                                    <span className="text-xs truncate">
-                                      {headerMediaFile?.name ||
-                                        selected.headerMediaFileName ||
-                                        `${headerFormat} header`}
-                                    </span>
-                                  </div>
-                                )}
-                                <div className="flex flex-wrap gap-2">
-                                  <button
-                                    type="button"
-                                    onClick={() => headerMediaInputRef.current?.click()}
-                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-sky-700 bg-surface border border-sky-200 rounded-lg hover:bg-sky-50"
-                                  >
-                                    <Upload className="w-3.5 h-3.5" />
-                                    {headerMediaFile ? 'Change media' : 'Upload media'}
-                                  </button>
-                                  {headerMediaFile && selected.headerMediaStorageKey && (
-                                    <button
-                                      type="button"
-                                      onClick={() => handleHeaderMediaChange(null)}
-                                      className="px-3 py-1.5 text-xs font-bold text-swiss-muted bg-surface border border-swiss-line rounded-lg hover:bg-gray-50"
-                                    >
-                                      Use template sample
-                                    </button>
-                                  )}
-                                </div>
-                                <p className="text-meta text-swiss-faint">{HEADER_MEDIA_HINT[headerFormat]}</p>
-                                {!hasHeaderMediaReady && (
-                                  <p className="text-xs font-semibold text-amber-800">
-                                    Upload header media to send this template.
-                                  </p>
-                                )}
-                              </div>
-                            </div>
-                          )}
-                          {varCount > 0 && (
-                            <div className="space-y-2">
-                              <p className="text-sm font-bold text-swiss-faint uppercase tracking-wide">
-                                Variables
-                              </p>
-                              {Array.from({ length: varCount }, (_, i) => {
-                                const label = selected.variables[i] || `Variable {{${i + 1}}}`;
-                                return (
-                                  <label key={i} className="block">
-                                    <span className="text-sm font-bold text-swiss-muted">{label}</span>
-                                    <Input
-                                      type="text"
-                                      value={variableValues[i] ?? ''}
-                                      onChange={(e) => {
-                                        const v = e.target.value;
-                                        setVariableValues((prev) => {
-                                          const next = [...prev];
-                                          next[i] = v;
-                                          return next;
-                                        });
-                                      }}
-                                      className="h-auto mt-1 w-full text-xs border border-swiss-line rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-100 focus:border-channel-green outline-none"
-                                      placeholder={`Value for {{${i + 1}}}`}
-                                    />
-                                  </label>
-                                );
-                              })}
-                            </div>
-                          )}
-                        </div>
-                        <div className="min-h-[320px]">
-                          <WhatsAppTemplatePreview
-                            headerFormat={headerFormat}
-                            header={selected.header ?? ''}
-                            headerMediaPreviewUrl={headerMediaPreviewUrl || undefined}
-                            headerMediaFileName={
-                              headerMediaFile?.name || selected.headerMediaFileName || undefined
+              {selected ? (
+                <div className="flex min-w-0 flex-1 flex-col gap-3 overflow-y-auto">
+                  {!approved ? (
+                    <p className="text-muted-foreground text-xs">
+                      This template is {selected.status}. Only approved templates can be sent.
+                    </p>
+                  ) : null}
+
+                  {varCount > 0
+                    ? Array.from({ length: varCount }, (_, i) => (
+                        <div key={i} className="space-y-1">
+                          <Label htmlFor={`tpl-var-${i}`}>{`{{${i + 1}}}`}</Label>
+                          <Input
+                            id={`tpl-var-${i}`}
+                            value={variableValues[i] ?? ''}
+                            onChange={(e) =>
+                              setVariableValues((prev) => {
+                                const next = [...prev]
+                                next[i] = e.target.value
+                                return next
+                              })
                             }
-                            body={selected.bodyPattern}
-                            footer={selected.footer ?? ''}
-                            variableSamples={variableValues}
-                            buttonType={
-                              selected.buttonType === 'URL' ||
-                              selected.buttonType === 'QUICK_REPLY' ||
-                              selected.buttonType === 'PHONE_NUMBER'
-                                ? selected.buttonType
-                                : ''
-                            }
-                            buttonText={selected.buttonText ?? ''}
-                            languageLabel={selected.language}
-                            category={selected.category}
-                            templateName={selected.name}
+                            placeholder={`Value for {{${i + 1}}}`}
                           />
                         </div>
-                      </div>
-                      <div className="p-4 border-t border-swiss-line flex justify-end gap-2">
-                        <button
-                          type="button"
-                          onClick={onClose}
-                          className="px-4 py-2 text-sm font-bold text-swiss-muted rounded-lg border border-swiss-line hover:bg-gray-50"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          type="button"
-                          disabled={
-                            !canSend ||
-                            (varCount > 0 && variableValues.some((v) => !v.trim()))
-                          }
-                          onClick={handleSend}
-                          className="flex items-center gap-2 px-4 py-2 text-sm font-black text-white bg-channel-green rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#20bd5a]"
-                        >
-                          {sending ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <Send className="w-4 h-4" />
-                          )}
-                          Send template
-                        </button>
-                      </div>
-                    </>
-                  ) : (
-                    <p className="p-8 text-sm text-swiss-faint text-center">Select a template</p>
-                  )}
+                      ))
+                    : null}
+
+                  {needsHeaderMedia ? (
+                    <div className="space-y-1">
+                      <Label htmlFor="tpl-header-media">Header media</Label>
+                      <Input
+                        id="tpl-header-media"
+                        type="file"
+                        onChange={(e) => setHeaderMediaFile(e.target.files?.[0] ?? null)}
+                      />
+                      {!headerMediaFile && selected.headerMediaStorageKey ? (
+                        <p className="text-muted-foreground text-xs">
+                          Template sample media will be used if you don&apos;t upload a file.
+                        </p>
+                      ) : null}
+                    </div>
+                  ) : null}
+
+                  <WhatsAppBubblePreview
+                    headerFormat={previewHeaderFormat(selected.headerFormat, Boolean(selected.header))}
+                    header={selected.header ?? ''}
+                    body={selected.bodyPattern}
+                    footer={selected.footer ?? ''}
+                    variableSamples={variableValues}
+                    buttonText={selected.buttonText ?? ''}
+                  />
                 </div>
-              </div>
-            )}
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-};
+              ) : null}
+            </div>
+          )}
+        </div>
+
+        <SheetFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button
+            disabled={!canSend}
+            onClick={() => {
+              if (!selected) return
+              void onSend(selected.id, variableValues, headerMediaFile).then(() => onOpenChange(false))
+            }}
+          >
+            {sending ? 'Sending…' : 'Send template'}
+          </Button>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
+  )
+}

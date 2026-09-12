@@ -1,615 +1,418 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react'
 import {
-  Users,
-  UserX,
-  Ban,
-  MessageCircle,
-  Instagram,
-  Facebook,
-  Tag,
-  Mail,
-  Globe,
-} from 'lucide-react';
-import {
-  ResponsiveContainer,
-  AreaChart,
   Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  PieChart,
-  Pie,
-  Cell,
-  BarChart,
-  Bar,
-} from 'recharts';
-import { api } from '../../lib/api';
-import { ThemeDateInput } from './ThemeDateInput';
+} from 'recharts'
+import { Ban, Globe, Mail, Tag, UserX, Users } from 'lucide-react'
 
-export type ContactDashboardStats = {
-  all: number;
-  unsubscribe: number;
-  blocklist: number;
-  withEmail: number;
-  channels: { whatsapp: number; instagram: number; messenger: number };
-  sources: { source: string; count: number }[];
-  topTags: { tag: string; count: number }[];
-  countries: { country: string; count: number }[];
-};
+import { ChannelIcon, CHANNEL_LABEL } from '@/components/channel-icon'
+import { StatTile } from '@/components/stat-tile'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useConnectedInboxChannels } from '@/hooks/useConnectedInboxChannels'
+import { realContactsService, type GrowthRange } from '@/services/realContacts.service'
 
-type GrowthRange = 'today' | 'yesterday' | 'week' | 'month' | 'custom';
+const DASH_CHANNELS = ['whatsapp', 'instagram', 'messenger'] as const
+type DashChannel = (typeof DASH_CHANNELS)[number]
 
-type GrowthPoint = { date: string; count: number; label: string };
+const COUNTRY_NAMES: Record<string, string> = {
+  IN: 'India',
+  US: 'United States',
+  GB: 'United Kingdom',
+  AE: 'United Arab Emirates',
+  CA: 'Canada',
+  AU: 'Australia',
+}
 
-const GROWTH_RANGES: { id: GrowthRange; label: string }[] = [
+const CHANNEL_COLOR: Record<'whatsapp' | 'instagram' | 'messenger', string> = {
+  whatsapp: '#25d366',
+  instagram: '#C13584',
+  messenger: '#1877F2',
+}
+
+const SOURCE_PALETTE = ['#0d9488', '#14b8a6', '#2dd4bf', '#5eead4', '#0f766e', '#115e59', '#134e4a']
+
+const RANGE_TABS: { id: GrowthRange; label: string }[] = [
   { id: 'today', label: 'Today' },
   { id: 'yesterday', label: 'Yesterday' },
-  { id: 'week', label: 'This week' },
-  { id: 'month', label: 'This month' },
+  { id: 'week', label: '7D' },
+  { id: 'month', label: '30D' },
   { id: 'custom', label: 'Custom' },
-];
+]
 
-const CHANNEL_COLORS = {
-  whatsapp: '#078038',
-  instagram: '#0aa347',
-  messenger: '#0d6b52',
-};
-
-const SOURCE_COLORS = [
-  '#078038',
-  '#0aa347',
-  '#0d6b52',
-  '#14805f',
-  '#2a9a74',
-  '#4aad8c',
-  '#6bbfa5',
-  '#8fd0bb',
-];
-
-// "UK" isn't a real ISO-3166 region code (GB is) — Intl.DisplayNames won't
-// resolve it, and it's what our own CSV imports use, so override it explicitly.
-const COUNTRY_NAME_OVERRIDES: Record<string, string> = { UK: 'United Kingdom' };
-let regionDisplayNames: Intl.DisplayNames | null = null;
-try {
-  regionDisplayNames = new Intl.DisplayNames(['en'], { type: 'region' });
-} catch {
-  regionDisplayNames = null;
-}
-function countryNameFor(code: string): string {
-  const upper = code.trim().toUpperCase();
-  if (COUNTRY_NAME_OVERRIDES[upper]) return COUNTRY_NAME_OVERRIDES[upper];
-  try {
-    const name = regionDisplayNames?.of(upper);
-    if (name && name !== upper) return name;
-  } catch {
-    // invalid/unrecognized region code — fall back to showing the raw code
-  }
-  return upper;
+/** Mount the chart a frame after first paint so ResponsiveContainer measures
+ * the settled grid layout instead of a pre-layout size (avoids near-zero
+ * Pie/Bar geometry on first render — see UsagePanel/SocialListeningDashboard). */
+function useChartReady() {
+  const [ready, setReady] = useState(false)
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setReady(true))
+    return () => cancelAnimationFrame(id)
+  }, [])
+  return ready
 }
 
-function CountryTooltip({
-  active,
-  payload,
+function ChartCard({
+  title,
+  subtitle,
+  action,
+  className,
+  children,
 }: {
-  active?: boolean;
-  payload?: { payload: { name: string; fullName: string; count: number } }[];
-}) {
-  if (!active || !payload?.length) return null;
-  const point = payload[0].payload;
-  return (
-    <div
-      style={{
-        borderRadius: 10,
-        border: '1px solid rgba(6,78,59,0.15)',
-        fontSize: 12,
-        background: 'white',
-        padding: '6px 10px',
-      }}
-    >
-      <p style={{ fontWeight: 600, margin: 0 }}>
-        {point.name} · {point.fullName}
-      </p>
-      <p style={{ margin: 0, color: '#475569' }}>{point.count.toLocaleString()} contacts</p>
-    </div>
-  );
-}
-
-function StatCard({
-  label,
-  value,
-  icon,
-}: {
-  label: string;
-  value: number;
-  icon: React.ReactNode;
+  title: React.ReactNode
+  subtitle?: string
+  action?: React.ReactNode
+  className?: string
+  children: React.ReactNode
 }) {
   return (
-    <div className="rounded-xl border border-swiss-accent/15 bg-swiss-accent/[0.04] p-4">
-      <div className="flex items-start justify-between gap-3">
+    <Card className={className}>
+      <CardHeader className="flex-row flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-swiss-accent/70">{label}</p>
-          <p className="mt-1 text-2xl font-bold tabular-nums text-slate-900">
-            {value.toLocaleString()}
-          </p>
+          <CardTitle>{title}</CardTitle>
+          {subtitle ? <p className="text-muted-foreground text-xs">{subtitle}</p> : null}
         </div>
-        <div className="rounded-lg bg-swiss-accent/10 p-2 text-swiss-accent">{icon}</div>
-      </div>
-    </div>
-  );
+        {action}
+      </CardHeader>
+      <CardContent>{children}</CardContent>
+    </Card>
+  )
 }
 
-function rangeHint(range: GrowthRange): string {
-  switch (range) {
-    case 'today':
-      return 'Hourly · today';
-    case 'yesterday':
-      return 'Hourly · yesterday';
-    case 'week':
-      return 'Daily · this week (Mon–today)';
-    case 'month':
-      return 'Daily · this calendar month';
-    case 'custom':
-      return 'Daily · selected range';
-  }
-}
+export function ContactsDashboard() {
+  const chartReady = useChartReady()
+  const channels = useConnectedInboxChannels()
+  const [growthRange, setGrowthRange] = useState<GrowthRange>('month')
+  const [customFrom, setCustomFrom] = useState('')
+  const [customTo, setCustomTo] = useState('')
 
-export const ContactsDashboard: React.FC<{
-  connectedChannels?: Array<'whatsapp' | 'instagram' | 'messenger'>;
-}> = ({ connectedChannels }) => {
-  const [stats, setStats] = useState<ContactDashboardStats | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const { data: stats, isLoading: statsLoading, isError: statsError } = realContactsService.useStats()
+  const { data: growthData, isLoading: growthLoading } = realContactsService.useGrowth(growthRange, {
+    dateFrom: customFrom,
+    dateTo: customTo,
+  })
 
-  const [growthRange, setGrowthRange] = useState<GrowthRange>('month');
-  const [customFrom, setCustomFrom] = useState('');
-  const [customTo, setCustomTo] = useState('');
-  const [growthPoints, setGrowthPoints] = useState<GrowthPoint[]>([]);
-  const [growthTotal, setGrowthTotal] = useState(0);
-  const [growthLoading, setGrowthLoading] = useState(false);
+  const connected = new Set<DashChannel>(
+    channels.isLoading
+      ? DASH_CHANNELS
+      : channels.connected.filter((ch): ch is DashChannel => (DASH_CHANNELS as readonly string[]).includes(ch))
+  )
+  const customReady = growthRange !== 'custom' || (Boolean(customFrom) && Boolean(customTo))
 
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    api
-      .getContactStats()
-      .then((raw) => {
-        if (cancelled) return;
-        setStats(raw as ContactDashboardStats);
-        setError('');
-      })
-      .catch((err) => {
-        if (cancelled) return;
-        setError(err instanceof Error ? err.message : 'Failed to load stats');
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (growthRange === 'custom' && (!customFrom || !customTo)) {
-      setGrowthPoints([]);
-      setGrowthTotal(0);
-      return;
-    }
-    let cancelled = false;
-    setGrowthLoading(true);
-    const params: Record<string, string> = {
-      range: growthRange,
-      tz: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata',
-    };
-    if (growthRange === 'custom') {
-      params.dateFrom = customFrom;
-      params.dateTo = customTo;
-    }
-    api
-      .getContactGrowth(params)
-      .then((res) => {
-        if (cancelled) return;
-        setGrowthPoints(res.createdByDay ?? []);
-        setGrowthTotal(res.total ?? 0);
-      })
-      .catch(() => {
-        if (cancelled) return;
-        setGrowthPoints([]);
-        setGrowthTotal(0);
-      })
-      .finally(() => {
-        if (!cancelled) setGrowthLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [growthRange, customFrom, customTo]);
-
-  if (loading) {
+  if (statsLoading) {
     return (
-      <div className="flex h-full items-center justify-center text-sm text-slate-500">
-        Loading dashboard…
+      <div className="min-h-0 flex-1 space-y-4 overflow-auto p-4">
+        <Skeleton className="h-24 w-full" />
+        <Skeleton className="h-64 w-full" />
       </div>
-    );
+    )
   }
 
-  if (error || !stats) {
-    return (
-      <div className="flex h-full items-center justify-center px-4 text-sm text-red-600">
-        {error || 'No stats available'}
-      </div>
-    );
+  if (statsError || !stats) {
+    return <div className="text-destructive p-4 text-sm">Couldn't load contact stats.</div>
   }
 
-  const connected = new Set(connectedChannels ?? ['whatsapp', 'instagram', 'messenger']);
+  const growth = growthData?.createdByDay ?? []
+  const growthTotal = growthData?.total ?? 0
 
-  const channelPie = (
-    [
-      { id: 'whatsapp' as const, name: 'WhatsApp', value: stats.channels.whatsapp, color: CHANNEL_COLORS.whatsapp },
-      { id: 'instagram' as const, name: 'Instagram', value: stats.channels.instagram, color: CHANNEL_COLORS.instagram },
-      { id: 'messenger' as const, name: 'Messenger', value: stats.channels.messenger, color: CHANNEL_COLORS.messenger },
-    ] as const
-  ).filter((c) => connected.has(c.id) && c.value > 0);
-
-  const channelLegend = (
-    [
-      { id: 'whatsapp' as const, name: 'WhatsApp', value: stats.channels.whatsapp, icon: MessageCircle },
-      { id: 'instagram' as const, name: 'Instagram', value: stats.channels.instagram, icon: Instagram },
-      { id: 'messenger' as const, name: 'Messenger', value: stats.channels.messenger, icon: Facebook },
-    ] as const
-  ).filter((c) => connected.has(c.id));
-
-  const channelSubtitle = channelLegend.map((c) => c.name).join(' · ') || 'No channels';
-
-  const sourceData = stats.sources.map((s, i) => ({
-    name: s.source,
-    count: s.count,
-    fill: SOURCE_COLORS[i % SOURCE_COLORS.length],
-  }));
-
-  // Only worth a panel once contacts actually span more than one country —
-  // otherwise it's a single full-width bar telling you nothing.
-  const showCountries = stats.countries.length > 1;
-  const countryData = stats.countries.map((c, i) => ({
-    name: c.country,
-    fullName: countryNameFor(c.country),
-    count: c.count,
-    fill: SOURCE_COLORS[i % SOURCE_COLORS.length],
-  }));
-
-  const customReady = growthRange !== 'custom' || (Boolean(customFrom) && Boolean(customTo));
+  const channelPie = DASH_CHANNELS
+    .filter((channel) => connected.has(channel) && stats.channels[channel] > 0)
+    .map((channel) => ({ channel, value: stats.channels[channel] }))
+  const channelLegend = DASH_CHANNELS.filter((channel) => connected.has(channel)).map((channel) => ({
+    channel,
+    value: stats.channels[channel],
+  }))
 
   return (
-    <div className="h-full min-h-0 overflow-auto bg-white p-3 md:p-4 space-y-4">
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-        <StatCard label="Total contacts" value={stats.all} icon={<Users className="h-4 w-4" />} />
-        <StatCard
-          label="With email"
-          value={stats.withEmail}
-          icon={<Mail className="h-4 w-4" />}
-        />
-        {connected.has('whatsapp') && (
-          <StatCard
-            label="WhatsApp"
-            value={stats.channels.whatsapp}
-            icon={<MessageCircle className="h-4 w-4" />}
-          />
-        )}
-        {connected.has('instagram') && (
-          <StatCard
-            label="Instagram"
-            value={stats.channels.instagram}
-            icon={<Instagram className="h-4 w-4" />}
-          />
-        )}
-        {connected.has('messenger') && (
-          <StatCard
-            label="Messenger"
-            value={stats.channels.messenger}
-            icon={<Facebook className="h-4 w-4" />}
-          />
-        )}
-        <StatCard
-          label="Unsubscribed"
-          value={stats.unsubscribe}
-          icon={<UserX className="h-4 w-4" />}
-        />
-        <StatCard label="Blocklist" value={stats.blocklist} icon={<Ban className="h-4 w-4" />} />
+    <div className="min-h-0 flex-1 space-y-4 overflow-auto p-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
+        <StatTile label="Total contacts" value={stats.all} icon={Users} />
+        <StatTile label="With email" value={stats.withEmail} icon={Mail} />
+        {connected.has('whatsapp') ? (
+          <StatTile label="WhatsApp" value={stats.channels.whatsapp} icon={Users} tone="text-channel-green" />
+        ) : null}
+        {connected.has('instagram') ? (
+          <StatTile label="Instagram" value={stats.channels.instagram} icon={Users} tone="text-[#C13584]" />
+        ) : null}
+        {connected.has('messenger') ? (
+          <StatTile label="Messenger" value={stats.channels.messenger} icon={Users} tone="text-[#1877F2]" />
+        ) : null}
+        <StatTile label="Unsubscribed" value={stats.unsubscribe} icon={UserX} />
+        <StatTile label="Blocklist" value={stats.blocklist} icon={Ban} />
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-3">
-        <div className="xl:col-span-2 rounded-xl border border-swiss-accent/15 bg-swiss-accent/[0.03] p-4">
-          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-            <div className="min-w-0 shrink-0">
-              <h3 className="text-sm font-bold text-slate-900">New contacts</h3>
-              <p className="text-xs text-slate-500">{rangeHint(growthRange)}</p>
-            </div>
-
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+        <ChartCard
+          title="New contacts"
+          subtitle={`+${growthTotal} new`}
+          className="xl:col-span-2"
+          action={
             <div className="flex flex-wrap items-center gap-2">
-              <div className="inline-flex flex-wrap rounded-lg border border-swiss-accent/15 bg-black/[0.03] p-0.5">
-                {GROWTH_RANGES.map((r) => (
-                  <button
-                    key={r.id}
-                    type="button"
-                    onClick={() => setGrowthRange(r.id)}
-                    className={`rounded-md px-2.5 py-1 text-[11px] font-semibold transition-colors ${
-                      growthRange === r.id
-                        ? 'bg-swiss-accent text-white '
-                        : 'text-slate-600 hover:text-swiss-accent'
-                    }`}
-                  >
-                    {r.label}
-                  </button>
-                ))}
-              </div>
-              {growthRange === 'custom' && (
+              <Tabs value={growthRange} onValueChange={(v) => setGrowthRange(v as GrowthRange)}>
+                <TabsList>
+                  {RANGE_TABS.map((tab) => (
+                    <TabsTrigger key={tab.id} value={tab.id}>
+                      {tab.label}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </Tabs>
+              {growthRange === 'custom' ? (
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <ThemeDateInput
+                  <Input
+                    type="date"
                     value={customFrom}
-                    onChange={setCustomFrom}
-                    aria-label="Growth from"
-                    placeholder="From"
                     max={customTo || undefined}
+                    onChange={(e) => setCustomFrom(e.target.value)}
+                    aria-label="Growth from"
+                    className="w-[9.5rem]"
                   />
-                  <ThemeDateInput
+                  <Input
+                    type="date"
                     value={customTo}
-                    onChange={setCustomTo}
-                    aria-label="Growth to"
-                    placeholder="To"
                     min={customFrom || undefined}
+                    onChange={(e) => setCustomTo(e.target.value)}
+                    aria-label="Growth to"
+                    className="w-[9.5rem]"
                   />
                 </div>
-              )}
-              <p className="text-sm font-bold tabular-nums text-swiss-accent">
-                +{growthTotal.toLocaleString()}
-              </p>
+              ) : null}
             </div>
-          </div>
-
-          <div className="h-[220px] w-full">
-            {growthLoading ? (
-              <div className="flex h-full items-center justify-center text-sm text-slate-400">
-                Loading…
-              </div>
-            ) : !customReady ? (
-              <div className="flex h-full items-center justify-center text-sm text-slate-400">
-                Pick a from and to date
-              </div>
-            ) : growthTotal === 0 ? (
-              <div className="flex h-full items-center justify-center text-sm text-slate-400">
-                No new contacts in this range
-              </div>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={growthPoints} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="contactGrowthFill" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#078038" stopOpacity={0.35} />
-                      <stop offset="100%" stopColor="#078038" stopOpacity={0.02} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e2dc" vertical={false} />
-                  <XAxis
-                    dataKey="label"
-                    tick={{ fontSize: 11, fill: '#64748b' }}
-                    axisLine={false}
-                    tickLine={false}
-                    interval="preserveStartEnd"
-                  />
-                  <YAxis
-                    allowDecimals={false}
-                    tick={{ fontSize: 11, fill: '#64748b' }}
-                    axisLine={false}
-                    tickLine={false}
-                    width={32}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      borderRadius: 10,
-                      border: '1px solid rgba(6,78,59,0.15)',
-                      fontSize: 12,
-                    }}
-                    labelStyle={{ fontWeight: 600 }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="count"
-                    name="New"
-                    stroke="#078038"
-                    strokeWidth={2}
-                    fill="url(#contactGrowthFill)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            )}
-          </div>
-        </div>
-
-        <div className="rounded-xl border border-swiss-accent/15 bg-swiss-accent/[0.03] p-4">
-          <h3 className="text-sm font-bold text-slate-900">By channel</h3>
-          <p className="mb-2 text-xs text-slate-500">{channelSubtitle}</p>
-          <div className="h-[180px] w-full">
-            {channelPie.length === 0 ? (
-              <div className="flex h-full items-center justify-center text-sm text-slate-400">
-                No channel data
-              </div>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={[...channelPie]}
-                    dataKey="value"
-                    nameKey="name"
-                    innerRadius={48}
-                    outerRadius={72}
-                    paddingAngle={2}
-                    stroke="none"
-                  >
-                    {channelPie.map((entry) => (
-                      <Cell key={entry.name} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    contentStyle={{
-                      borderRadius: 10,
-                      border: '1px solid rgba(0,0,0,0.06)',
-                      fontSize: 12,
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            )}
-          </div>
-          <div className="mt-1 flex flex-wrap justify-center gap-x-3 gap-y-1">
-            {channelLegend.map((c) => (
-              <div key={c.name} className="flex items-center gap-1.5 text-xs text-slate-600">
-                <c.icon className="h-3.5 w-3.5 text-swiss-accent" />
-                <span>{c.name}</span>
-                <span className="font-semibold text-slate-800">{c.value.toLocaleString()}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-        <div className="rounded-xl border border-swiss-accent/15 bg-swiss-accent/[0.03] p-4">
-          <h3 className="text-sm font-bold text-slate-900">Top sources</h3>
-          <p className="mb-3 text-xs text-slate-500">Where contacts came from</p>
-          <div className="h-[200px] w-full">
-            {sourceData.length === 0 ? (
-              <div className="flex h-full items-center justify-center text-sm text-slate-400">
-                No source data yet
-              </div>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={sourceData}
-                  layout="vertical"
-                  margin={{ top: 4, right: 12, left: 8, bottom: 4 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e2dc" horizontal={false} />
-                  <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11, fill: '#64748b' }} />
-                  <YAxis
-                    type="category"
-                    dataKey="name"
-                    width={88}
-                    tick={{ fontSize: 11, fill: '#475569' }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      borderRadius: 10,
-                      border: '1px solid rgba(6,78,59,0.15)',
-                      fontSize: 12,
-                    }}
-                  />
-                  <Bar dataKey="count" name="Contacts" radius={[0, 6, 6, 0]}>
-                    {sourceData.map((entry) => (
-                      <Cell key={entry.name} fill={entry.fill} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </div>
-        </div>
-
-        <div className="rounded-xl border border-swiss-accent/15 bg-swiss-accent/[0.03] p-4">
-          <div className="mb-3 flex items-center gap-2">
-            <Tag className="h-4 w-4 text-swiss-accent" />
-            <div>
-              <h3 className="text-sm font-bold text-slate-900">Top tags</h3>
-              <p className="text-xs text-slate-500">Most used labels</p>
+          }
+        >
+          {growthLoading ? (
+            <div className="h-[220px]" />
+          ) : !customReady ? (
+            <div className="flex h-56 items-center justify-center rounded-lg border border-dashed">
+              <p className="text-muted-foreground text-sm">Pick a from and to date</p>
             </div>
-          </div>
-          {stats.topTags.length === 0 ? (
-            <div className="flex h-[200px] items-center justify-center text-sm text-slate-400">
-              No tags yet
+          ) : growthTotal === 0 ? (
+            <div className="flex h-56 items-center justify-center rounded-lg border border-dashed">
+              <p className="text-muted-foreground text-sm">No new contacts in this range</p>
             </div>
-          ) : (
-            <ul className="space-y-2">
-              {stats.topTags.map((t) => {
-                const pct = stats.all > 0 ? Math.round((t.count / stats.all) * 100) : 0;
-                return (
-                  <li key={t.tag}>
-                    <div className="mb-1 flex items-center justify-between gap-2 text-xs">
-                      <span className="font-semibold text-slate-800 truncate">{t.tag}</span>
-                      <span className="tabular-nums text-slate-500">
-                        {t.count.toLocaleString()} · {pct}%
-                      </span>
-                    </div>
-                    <div className="h-1.5 overflow-hidden rounded-full border border-swiss-line bg-white">
-                      <div
-                        className="h-full rounded-full bg-swiss-accent"
-                        style={{ width: `${Math.max(pct, 2)}%` }}
-                      />
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </div>
-      </div>
-
-      {showCountries && (
-        <div className="rounded-xl border border-swiss-accent/15 bg-swiss-accent/[0.03] p-4">
-          <div className="mb-3 flex items-center gap-2">
-            <Globe className="h-4 w-4 text-swiss-accent" />
-            <div>
-              <h3 className="text-sm font-bold text-slate-900">By country</h3>
-              <p className="text-xs text-slate-500">Contacts across {countryData.length} countries</p>
-            </div>
-          </div>
-          <div className="h-[200px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={countryData} margin={{ top: 4, right: 12, left: 0, bottom: 4 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e2dc" vertical={false} />
+          ) : chartReady ? (
+            <ResponsiveContainer width="100%" height={220}>
+              <AreaChart data={growth} margin={{ top: 4, right: 4, left: -12, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="contactGrowthFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="var(--color-primary)" stopOpacity={0.3} />
+                    <stop offset="100%" stopColor="var(--color-primary)" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-border" />
                 <XAxis
-                  dataKey="name"
-                  tick={{ fontSize: 11, fill: '#475569' }}
+                  dataKey="label"
                   axisLine={false}
                   tickLine={false}
+                  tick={{ fontSize: 11 }}
+                  className="text-muted-foreground"
+                  interval={growth.length > 14 ? Math.ceil(growth.length / 8) : 0}
                 />
                 <YAxis
-                  allowDecimals={false}
-                  tick={{ fontSize: 11, fill: '#64748b' }}
                   axisLine={false}
                   tickLine={false}
-                  width={32}
+                  tick={{ fontSize: 11 }}
+                  width={28}
+                  allowDecimals={false}
+                  className="text-muted-foreground"
                 />
-                <Tooltip content={<CountryTooltip />} cursor={{ fill: 'rgba(0,0,0,0.03)' }} />
-                <Bar dataKey="count" name="Contacts" radius={[6, 6, 0, 0]}>
-                  {countryData.map((entry) => (
-                    <Cell key={entry.name} fill={entry.fill} />
+                <Tooltip cursor={{ stroke: 'var(--border)' }} />
+                <Area
+                  type="monotone"
+                  dataKey="count"
+                  name="New contacts"
+                  stroke="var(--color-primary)"
+                  strokeWidth={2}
+                  fill="url(#contactGrowthFill)"
+                  dot={false}
+                  activeDot={{ r: 3 }}
+                  isAnimationActive={false}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-[220px]" />
+          )}
+        </ChartCard>
+
+        <ChartCard title="By channel" subtitle={channelLegend.map((c) => CHANNEL_LABEL[c.channel]).join(' · ') || 'No channels'}>
+          {channelPie.length === 0 ? (
+            <div className="flex h-44 items-center justify-center rounded-lg border border-dashed">
+              <p className="text-muted-foreground text-sm">No channel data</p>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-3">
+              <div className="h-[180px] w-[180px]">
+                {chartReady ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={channelPie}
+                        dataKey="value"
+                        nameKey="channel"
+                        innerRadius={48}
+                        outerRadius={72}
+                        paddingAngle={2}
+                        stroke="none"
+                        isAnimationActive={false}
+                      >
+                        {channelPie.map((entry) => (
+                          <Cell key={entry.channel} fill={CHANNEL_COLOR[entry.channel]} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : null}
+              </div>
+              <div className="flex w-full flex-wrap justify-center gap-3">
+                {channelLegend.map((entry) => (
+                  <span key={entry.channel} className="flex items-center gap-1.5 text-xs">
+                    <ChannelIcon channel={entry.channel} className="size-3.5" />
+                    {CHANNEL_LABEL[entry.channel]}
+                    <span className="font-semibold tabular-nums">{entry.value}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </ChartCard>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <ChartCard title="Top sources" subtitle="Where contacts came from">
+          {stats.sources.length === 0 ? (
+            <div className="flex h-48 items-center justify-center rounded-lg border border-dashed">
+              <p className="text-muted-foreground text-sm">No source data yet</p>
+            </div>
+          ) : chartReady ? (
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart
+                data={stats.sources}
+                layout="vertical"
+                margin={{ left: 8, right: 8, top: 4, bottom: 4 }}
+              >
+                <XAxis type="number" hide />
+                <YAxis
+                  type="category"
+                  dataKey="source"
+                  width={96}
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 11 }}
+                  className="text-muted-foreground"
+                />
+                <Tooltip cursor={{ fill: 'var(--muted)' }} />
+                <Bar dataKey="count" radius={[0, 6, 6, 0]} isAnimationActive={false}>
+                  {stats.sources.map((entry, i) => (
+                    <Cell key={entry.source} fill={SOURCE_PALETTE[i % SOURCE_PALETTE.length]} />
                   ))}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
-          </div>
-          <div className="mt-1 flex flex-wrap justify-center gap-x-3 gap-y-1">
-            {countryData.map((c) => (
-              <div key={c.name} className="flex items-center gap-1.5 text-xs text-slate-600">
-                <span
-                  className="h-2.5 w-2.5 rounded-full"
-                  style={{ backgroundColor: c.fill }}
-                  aria-hidden="true"
+          ) : (
+            <div className="h-[200px]" />
+          )}
+        </ChartCard>
+
+        <ChartCard
+          title={
+            <span className="flex items-center gap-1.5">
+              <Tag className="size-4" />
+              Top tags
+            </span>
+          }
+          subtitle="Most used labels"
+        >
+          {stats.topTags.length === 0 ? (
+            <div className="flex h-48 items-center justify-center rounded-lg border border-dashed">
+              <p className="text-muted-foreground text-sm">No tags yet</p>
+            </div>
+          ) : (
+            <ul className="space-y-2.5">
+              {stats.topTags.map((tag) => {
+                const pct = stats.all > 0 ? Math.round((tag.count / stats.all) * 100) : 0
+                return (
+                  <li key={tag.tag} className="space-y-1">
+                    <div className="flex items-center justify-between gap-2 text-sm">
+                      <span className="truncate capitalize">{tag.tag}</span>
+                      <span className="text-muted-foreground shrink-0 text-xs tabular-nums">
+                        {tag.count} · {pct}%
+                      </span>
+                    </div>
+                    <div className="bg-muted h-1.5 overflow-hidden rounded-full">
+                      <div
+                        className="bg-primary h-full rounded-full"
+                        style={{ width: `${Math.max(pct, 2)}%` }}
+                      />
+                    </div>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+        </ChartCard>
+      </div>
+
+      {stats.countries.length > 1 ? (
+        <ChartCard
+          title={
+            <span className="flex items-center gap-1.5">
+              <Globe className="size-4" />
+              By country
+            </span>
+          }
+          subtitle={`Contacts across ${stats.countries.length} countries`}
+        >
+          {chartReady ? (
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={stats.countries} margin={{ left: -20, right: 8, top: 4, bottom: 4 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-border" />
+                <XAxis
+                  dataKey="country"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 11 }}
+                  className="text-muted-foreground"
                 />
-                <span>{c.name}</span>
-                <span className="font-semibold text-slate-800">{c.count.toLocaleString()}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 11 }}
+                  width={28}
+                  allowDecimals={false}
+                />
+                <Tooltip
+                  cursor={{ fill: 'var(--muted)' }}
+                  formatter={(value, _name, entry) => {
+                    const countryCode = (entry as { payload?: { country?: string } }).payload?.country ?? ''
+                    return [`${value} contacts`, COUNTRY_NAMES[countryCode] ?? countryCode]
+                  }}
+                />
+                <Bar dataKey="count" radius={[6, 6, 0, 0]} isAnimationActive={false}>
+                  {stats.countries.map((entry, i) => (
+                    <Cell key={entry.country} fill={SOURCE_PALETTE[i % SOURCE_PALETTE.length]} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-[200px]" />
+          )}
+        </ChartCard>
+      ) : null}
     </div>
-  );
-};
+  )
+}

@@ -1,40 +1,43 @@
-export const INBOX_UNREAD_TOTAL_EVENT = 'convosync:inbox-unread-total';
-export const INBOX_MESSAGE_NOTIFICATION_EVENT = 'convosync:inbox-message-notification';
-export const INBOX_OPEN_CONVERSATION_EVENT = 'convosync:open-inbox-conversation';
+import { httpClient } from '@/lib/httpClient'
+import { isConversationInInboxScope, type InboxScope } from '@/lib/inboxScope'
+import { sumUnreadForNav } from '@/lib/navUnread'
+import type { Conversation } from '@/services/realInbox.service'
 
-export function dispatchInboxUnreadTotal(total: number) {
+export const INBOX_MESSAGE_NOTIFICATION_EVENT = 'convosync:inbox-message-notification'
+export const INBOX_OPEN_CONVERSATION_EVENT = 'convosync:open-inbox-conversation'
+
+let pendingOpenConversationId = ''
+
+export function dispatchOpenInboxConversation(conversationId: string) {
+  if (!conversationId) return
+  pendingOpenConversationId = conversationId
+  if (typeof window === 'undefined') return
   window.dispatchEvent(
-    new CustomEvent(INBOX_UNREAD_TOTAL_EVENT, { detail: { total: Math.max(0, total) } })
-  );
+    new CustomEvent(INBOX_OPEN_CONVERSATION_EVENT, { detail: { conversationId } })
+  )
+}
+
+/** Consume a toast-open that arrived before Inbox mounted. */
+export function consumePendingOpenInboxConversation() {
+  const id = pendingOpenConversationId
+  pendingOpenConversationId = ''
+  return id
 }
 
 export function dispatchInboxMessageNotification(detail: {
-  conversationId: string;
-  contactName: string;
-  preview: string;
-  channel?: string;
+  conversationId: string
+  contactName: string
+  preview: string
 }) {
-  window.dispatchEvent(
-    new CustomEvent(INBOX_MESSAGE_NOTIFICATION_EVENT, { detail })
-  );
-}
-
-export function dispatchOpenInboxConversation(conversationId: string) {
-  window.dispatchEvent(
-    new CustomEvent(INBOX_OPEN_CONVERSATION_EVENT, { detail: { conversationId } })
-  );
+  if (!detail.conversationId || typeof window === 'undefined') return
+  window.dispatchEvent(new CustomEvent(INBOX_MESSAGE_NOTIFICATION_EVENT, { detail }))
 }
 
 export async function fetchInboxUnreadTotal(
-  excludeConversationId?: string
+  excludeConversationId?: string | null,
+  scope?: InboxScope
 ): Promise<number> {
-  const { api } = await import('./api');
-  const convs = (await api.getConversations()) as Array<{
-    id?: string;
-    unreadCount?: number;
-  }>;
-  return convs.reduce((sum, conv) => {
-    if (excludeConversationId && conv.id === excludeConversationId) return sum;
-    return sum + Number(conv.unreadCount ?? 0);
-  }, 0);
+  const convs = await httpClient.get<Conversation[]>('/conversations')
+  const scoped = scope ? convs.filter((c) => isConversationInInboxScope(c, scope)) : convs
+  return sumUnreadForNav(scoped, excludeConversationId)
 }

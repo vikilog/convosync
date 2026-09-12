@@ -1,764 +1,354 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ArrowDown, ArrowUp, Check, Loader2, Plus, Save, Trash2, Users2 } from 'lucide-react';
-import { api } from '../../lib/api';
-import { Input } from '../ui/input';
+import { useState } from 'react'
+import { ArrowDown, ArrowUp, GitBranch, Loader2, Plus, Shuffle, Trash2, X } from 'lucide-react'
 
-type Mode = 'off' | 'basic' | 'advanced';
+import { InboxRuleFormSheet } from '@/components/settings/InboxRuleFormSheet'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
+import { inboxRuleSummary } from '@/lib/inboxRuleForm'
+import { listTimezoneOptions } from '@/lib/locale/timezones'
+import { realWorkspaceMembersService } from '@/services/realWorkspaceMembers.service'
+import {
+  realWorkspaceSettingsService,
+  type InboxAssignmentMode,
+  type InboxRule,
+} from '@/services/realWorkspaceSettings.service'
 
-type Member = {
-  id: string;
-  userId: string;
-  name: string;
-  email: string;
-  role: string;
-};
-
-type GroupMember = { membershipId: string; userId: string; name: string; email: string };
-type Group = { id: string; name: string; members: GroupMember[] };
-
-type BusinessHours = { days: number[]; start: string; end: string; timezone?: string };
-type RuleConditions = {
-  channels?: string[];
-  contactTags?: string[];
-  businessHours?: BusinessHours;
-};
-type Rule = {
-  id: string;
-  name: string;
-  enabled: boolean;
-  priority: number;
-  conditions: RuleConditions;
-  actionType: 'group' | 'user';
-  actionGroupId?: string | null;
-  actionUserId?: string | null;
-};
-
-const CHANNELS = ['whatsapp', 'instagram', 'messenger'] as const;
-const DAYS = [
-  { value: 0, label: 'Sun' },
-  { value: 1, label: 'Mon' },
-  { value: 2, label: 'Tue' },
-  { value: 3, label: 'Wed' },
-  { value: 4, label: 'Thu' },
-  { value: 5, label: 'Fri' },
-  { value: 6, label: 'Sat' },
-];
-
-const MODE_CARDS: Array<{ id: Mode; title: string; description: string }> = [
-  { id: 'off', title: 'Off', description: 'New conversations stay unassigned until a teammate picks them up.' },
-  {
-    id: 'basic',
-    title: 'Basic — round robin',
-    description: 'Evenly rotate new conversations across eligible team members.',
-  },
+const MODES: {
+  id: InboxAssignmentMode
+  label: string
+  description: string
+  icon: React.ComponentType<{ className?: string }>
+}[] = [
+  { id: 'off', label: 'Off', description: 'Conversations stay unassigned.', icon: X },
+  { id: 'basic', label: 'Basic', description: 'Round-robin across the whole team.', icon: Shuffle },
   {
     id: 'advanced',
-    title: 'Advanced — rules',
-    description: 'Route by channel, contact tags, or business hours, with round robin as fallback.',
+    label: 'Advanced',
+    description: 'Rules based on channel, tag, and hours.',
+    icon: GitBranch,
   },
-];
+]
 
-function emptyRuleForm(): {
-  name: string;
-  enabled: boolean;
-  channels: string[];
-  contactTags: string;
-  businessHoursEnabled: boolean;
-  days: number[];
-  start: string;
-  end: string;
-  actionType: 'group' | 'user';
-  actionGroupId: string;
-  actionUserId: string;
-} {
-  return {
-    name: '',
-    enabled: true,
-    channels: [],
-    contactTags: '',
-    businessHoursEnabled: false,
-    days: [1, 2, 3, 4, 5],
-    start: '09:00',
-    end: '18:00',
-    actionType: 'group',
-    actionGroupId: '',
-    actionUserId: '',
-  };
+function GroupsCard() {
+  const { data } = realWorkspaceSettingsService.useInboxGroups()
+  const { data: membersData } = realWorkspaceMembersService.useList()
+  const createGroup = realWorkspaceSettingsService.useCreateInboxGroup()
+  const deleteGroup = realWorkspaceSettingsService.useDeleteInboxGroup()
+  const addMember = realWorkspaceSettingsService.useAddInboxGroupMember()
+  const removeMember = realWorkspaceSettingsService.useRemoveInboxGroupMember()
+
+  const [newGroupName, setNewGroupName] = useState('')
+  const groups = data?.groups ?? []
+  const members = membersData ?? []
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Team groups</CardTitle>
+        <p className="text-muted-foreground text-xs">Used as rule actions below.</p>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {groups.map((group) => (
+          <div key={group.id} className="space-y-2 rounded-lg border p-3">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-sm font-medium">{group.name}</p>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                className="text-muted-foreground hover:text-destructive"
+                onClick={() => deleteGroup.mutate(group.id)}
+                aria-label={`Delete ${group.name}`}
+              >
+                <Trash2 />
+              </Button>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {group.members.map((m) => (
+                <Badge key={m.membershipId} variant="secondary" className="gap-1">
+                  {m.name}
+                  <button
+                    type="button"
+                    onClick={() => removeMember.mutate({ groupId: group.id, membershipId: m.membershipId })}
+                    aria-label={`Remove ${m.name}`}
+                  >
+                    <X className="size-3" />
+                  </button>
+                </Badge>
+              ))}
+            </div>
+            <Select
+              value=""
+              onValueChange={(membershipId) => addMember.mutate({ groupId: group.id, membershipId })}
+            >
+              <SelectTrigger size="sm" className="w-full">
+                <SelectValue placeholder="Add member…" />
+              </SelectTrigger>
+              <SelectContent>
+                {members
+                  .filter((m) => !group.members.some((gm) => gm.membershipId === m.id))
+                  .map((m) => (
+                    <SelectItem key={m.id} value={m.id}>
+                      {m.name}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+          </div>
+        ))}
+
+        <div className="flex gap-2">
+          <Input
+            value={newGroupName}
+            onChange={(e) => setNewGroupName(e.target.value)}
+            placeholder="New group name"
+            className="flex-1"
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={!newGroupName.trim()}
+            onClick={() => {
+              createGroup.mutate(newGroupName.trim())
+              setNewGroupName('')
+            }}
+          >
+            <Plus />
+            Add group
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  )
 }
 
-function ruleSummary(rule: Rule, groups: Group[], members: Member[]): string {
-  const parts: string[] = [];
-  if (rule.conditions.channels?.length) parts.push(rule.conditions.channels.join('/'));
-  if (rule.conditions.contactTags?.length) parts.push(`tags: ${rule.conditions.contactTags.join(', ')}`);
-  if (rule.conditions.businessHours) {
-    const bh = rule.conditions.businessHours;
-    parts.push(`${bh.start}–${bh.end}`);
-  }
-  const conditionText = parts.length ? parts.join(' · ') : 'Any conversation';
-  const target =
-    rule.actionType === 'group'
-      ? (groups.find((g) => g.id === rule.actionGroupId)?.name ?? 'Deleted group')
-      : (members.find((m) => m.userId === rule.actionUserId)?.name ?? 'Deleted member');
-  return `${conditionText} → ${target}`;
-}
+function RuleRow({
+  rule,
+  index,
+  total,
+  groups,
+  members,
+  onEdit,
+}: {
+  rule: InboxRule
+  index: number
+  total: number
+  groups: { id: string; name: string }[]
+  members: { userId: string; name: string }[]
+  onEdit: () => void
+}) {
+  const update = realWorkspaceSettingsService.useUpdateInboxRule()
+  const remove = realWorkspaceSettingsService.useDeleteInboxRule()
+  const reorder = realWorkspaceSettingsService.useReorderInboxRules()
+  const { data: rulesData } = realWorkspaceSettingsService.useInboxRules()
 
-export function InboxBehaviorPanel() {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
-
-  const [mode, setMode] = useState<Mode>('off');
-  const [savingMode, setSavingMode] = useState(false);
-
-  const [groups, setGroups] = useState<Group[]>([]);
-  const [rules, setRules] = useState<Rule[]>([]);
-  const [members, setMembers] = useState<Member[]>([]);
-
-  const [newGroupName, setNewGroupName] = useState('');
-  const [groupMemberPick, setGroupMemberPick] = useState<Record<string, string>>({});
-
-  const [showRuleForm, setShowRuleForm] = useState(false);
-  const [editingRuleId, setEditingRuleId] = useState<string | null>(null);
-  const [ruleForm, setRuleForm] = useState(emptyRuleForm());
-  const [savingRule, setSavingRule] = useState(false);
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const [behavior, groupsRes, rulesRes, membersRes] = await Promise.all([
-        api.getInboxBehavior() as Promise<{ mode: Mode }>,
-        api.getInboxGroups() as Promise<{ groups: Group[] }>,
-        api.getInboxRules() as Promise<{ rules: Rule[] }>,
-        api.getWorkspaceMembers() as Promise<Member[]>,
-      ]);
-      setMode(behavior.mode);
-      setGroups(groupsRes.groups);
-      setRules(rulesRes.rules);
-      setMembers(membersRes);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to load Inbox Behavior');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void load();
-  }, [load]);
-
-  const saveMode = async (next: Mode) => {
-    setSavingMode(true);
-    setError(null);
-    setMessage(null);
-    try {
-      await api.updateInboxBehavior({ mode: next });
-      setMode(next);
-      setMessage('Saved');
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to update mode');
-    } finally {
-      setSavingMode(false);
-    }
-  };
-
-  const createGroup = async () => {
-    if (!newGroupName.trim()) return;
-    setError(null);
-    try {
-      const group = (await api.createInboxGroup(newGroupName.trim())) as Group;
-      setGroups((prev) => [...prev, group]);
-      setNewGroupName('');
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to create group');
-    }
-  };
-
-  const deleteGroup = async (groupId: string) => {
-    if (!window.confirm('Delete this group? Rules pointing to it will stop matching.')) return;
-    setError(null);
-    try {
-      await api.deleteInboxGroup(groupId);
-      setGroups((prev) => prev.filter((g) => g.id !== groupId));
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to delete group');
-    }
-  };
-
-  const addGroupMember = async (groupId: string) => {
-    const membershipId = groupMemberPick[groupId];
-    if (!membershipId) return;
-    setError(null);
-    try {
-      const updated = (await api.addInboxGroupMember(groupId, membershipId)) as Group;
-      setGroups((prev) => prev.map((g) => (g.id === groupId ? updated : g)));
-      setGroupMemberPick((prev) => ({ ...prev, [groupId]: '' }));
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to add member');
-    }
-  };
-
-  const removeGroupMember = async (groupId: string, membershipId: string) => {
-    setError(null);
-    try {
-      const updated = (await api.removeInboxGroupMember(groupId, membershipId)) as Group;
-      setGroups((prev) => prev.map((g) => (g.id === groupId ? updated : g)));
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to remove member');
-    }
-  };
-
-  const openNewRuleForm = () => {
-    setEditingRuleId(null);
-    setRuleForm(emptyRuleForm());
-    setShowRuleForm(true);
-  };
-
-  const openEditRuleForm = (rule: Rule) => {
-    setEditingRuleId(rule.id);
-    setRuleForm({
-      name: rule.name,
-      enabled: rule.enabled,
-      channels: rule.conditions.channels ?? [],
-      contactTags: (rule.conditions.contactTags ?? []).join(', '),
-      businessHoursEnabled: Boolean(rule.conditions.businessHours),
-      days: rule.conditions.businessHours?.days ?? [1, 2, 3, 4, 5],
-      start: rule.conditions.businessHours?.start ?? '09:00',
-      end: rule.conditions.businessHours?.end ?? '18:00',
-      actionType: rule.actionType,
-      actionGroupId: rule.actionGroupId ?? '',
-      actionUserId: rule.actionUserId ?? '',
-    });
-    setShowRuleForm(true);
-  };
-
-  const saveRule = async () => {
-    if (!ruleForm.name.trim()) {
-      setError('Rule name is required');
-      return;
-    }
-    if (ruleForm.actionType === 'group' && !ruleForm.actionGroupId) {
-      setError('Select a group for this rule');
-      return;
-    }
-    if (ruleForm.actionType === 'user' && !ruleForm.actionUserId) {
-      setError('Select a team member for this rule');
-      return;
-    }
-
-    const conditions: RuleConditions = {};
-    if (ruleForm.channels.length) conditions.channels = ruleForm.channels;
-    const tags = ruleForm.contactTags
-      .split(',')
-      .map((t) => t.trim())
-      .filter(Boolean);
-    if (tags.length) conditions.contactTags = tags;
-    if (ruleForm.businessHoursEnabled) {
-      conditions.businessHours = { days: ruleForm.days, start: ruleForm.start, end: ruleForm.end };
-    }
-
-    const payload = {
-      name: ruleForm.name.trim(),
-      enabled: ruleForm.enabled,
-      conditions,
-      actionType: ruleForm.actionType,
-      actionGroupId: ruleForm.actionType === 'group' ? ruleForm.actionGroupId : null,
-      actionUserId: ruleForm.actionType === 'user' ? ruleForm.actionUserId : null,
-    };
-
-    setSavingRule(true);
-    setError(null);
-    try {
-      if (editingRuleId) {
-        const updated = (await api.updateInboxRule(editingRuleId, payload)) as Rule;
-        setRules((prev) => prev.map((r) => (r.id === editingRuleId ? updated : r)));
-      } else {
-        const created = (await api.createInboxRule(payload)) as Rule;
-        setRules((prev) => [...prev, created]);
-      }
-      setShowRuleForm(false);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to save rule');
-    } finally {
-      setSavingRule(false);
-    }
-  };
-
-  const deleteRule = async (ruleId: string) => {
-    if (!window.confirm('Delete this rule?')) return;
-    setError(null);
-    try {
-      await api.deleteInboxRule(ruleId);
-      setRules((prev) => prev.filter((r) => r.id !== ruleId));
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to delete rule');
-    }
-  };
-
-  const toggleRuleEnabled = async (rule: Rule) => {
-    setError(null);
-    try {
-      const updated = (await api.updateInboxRule(rule.id, { enabled: !rule.enabled })) as Rule;
-      setRules((prev) => prev.map((r) => (r.id === rule.id ? updated : r)));
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to update rule');
-    }
-  };
-
-  const moveRule = async (index: number, direction: -1 | 1) => {
-    const targetIndex = index + direction;
-    if (targetIndex < 0 || targetIndex >= rules.length) return;
-    const reordered = [...rules];
-    [reordered[index], reordered[targetIndex]] = [reordered[targetIndex], reordered[index]];
-    setRules(reordered);
-    setError(null);
-    try {
-      const res = (await api.reorderInboxRules(reordered.map((r) => r.id))) as { rules: Rule[] };
-      setRules(res.rules);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to reorder rules');
-      void load();
-    }
-  };
-
-  const groupsById = useMemo(() => new Map(groups.map((g) => [g.id, g])), [groups]);
-
-  if (loading) {
-    return (
-      <div className="flex h-40 items-center justify-center text-sm text-slate-500">
-        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        Loading…
-      </div>
-    );
+  const move = (direction: -1 | 1) => {
+    const rules = [...(rulesData?.rules ?? [])].sort((a, b) => a.priority - b.priority)
+    const target = index + direction
+    if (target < 0 || target >= rules.length) return
+    const next = [...rules]
+    const a = next[index]
+    const b = next[target]
+    if (!a || !b) return
+    next[index] = b
+    next[target] = a
+    reorder.mutate(next.map((r) => r.id))
   }
 
   return (
-    <div className="w-full space-y-6 p-1">
-      {error ? (
-        <div className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
-          {error}
+    <div className="flex items-center justify-between gap-3 rounded-lg border p-3">
+      <div className="flex min-w-0 items-start gap-2">
+        <div className="flex shrink-0 flex-col">
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            disabled={index === 0}
+            onClick={() => move(-1)}
+            aria-label="Move up"
+          >
+            <ArrowUp />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            disabled={index === total - 1}
+            onClick={() => move(1)}
+            aria-label="Move down"
+          >
+            <ArrowDown />
+          </Button>
         </div>
-      ) : null}
-      {message ? (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
-          {message}
+        <div className="min-w-0">
+          <p className="truncate text-sm font-medium">{rule.name}</p>
+          <p className="text-muted-foreground mt-0.5 text-xs">{inboxRuleSummary(rule, groups, members)}</p>
         </div>
-      ) : null}
+      </div>
+      <div className="flex shrink-0 items-center gap-1">
+        <Switch
+          checked={rule.enabled}
+          onCheckedChange={(checked) => update.mutate({ id: rule.id, patch: { enabled: checked } })}
+        />
+        <Button variant="ghost" size="sm" className="text-xs" onClick={onEdit}>
+          Edit
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className="text-muted-foreground hover:text-destructive"
+          onClick={() => remove.mutate(rule.id)}
+          aria-label={`Delete ${rule.name}`}
+        >
+          <Trash2 />
+        </Button>
+      </div>
+    </div>
+  )
+}
 
-      <section className="grid gap-3 sm:grid-cols-3">
-        {MODE_CARDS.map((card) => {
-          const active = mode === card.id;
-          return (
-            <button
-              key={card.id}
-              type="button"
-              disabled={savingMode}
-              onClick={() => void saveMode(card.id)}
-              className={`flex flex-col items-start gap-1.5 rounded-xl border p-4 text-left transition-colors disabled:opacity-60 ${
-                active
-                  ? 'border-swiss-accent bg-swiss-accent/5 ring-1 ring-swiss-accent/30'
-                  : 'border-border-subtle bg-white hover:border-swiss-accent/40'
-              }`}
-            >
-              <span className="flex w-full items-center justify-between gap-2">
-                <span className="text-sm font-semibold text-dark-navy">{card.title}</span>
-                {active ? <Check className="h-4 w-4 text-swiss-accent" /> : null}
-              </span>
-              <span className="text-xs text-slate-500">{card.description}</span>
-            </button>
-          );
-        })}
-      </section>
+export function InboxBehaviorPanel() {
+  const { data: behavior, isLoading } = realWorkspaceSettingsService.useInboxBehavior()
+  const updateBehavior = realWorkspaceSettingsService.useUpdateInboxBehavior()
+  const { data: rulesData } = realWorkspaceSettingsService.useInboxRules()
+  const { data: groupsData } = realWorkspaceSettingsService.useInboxGroups()
+  const { data: membersData } = realWorkspaceMembersService.useList()
+  const createRule = realWorkspaceSettingsService.useCreateInboxRule()
+  const updateRule = realWorkspaceSettingsService.useUpdateInboxRule()
 
-      {mode === 'advanced' ? (
+  const [formOpen, setFormOpen] = useState(false)
+  const [editing, setEditing] = useState<InboxRule | null>(null)
+
+  if (isLoading || !behavior) {
+    return (
+      <div className="text-muted-foreground flex items-center gap-2 py-12 text-sm">
+        <Loader2 className="size-4 animate-spin" />
+        Loading inbox behavior…
+      </div>
+    )
+  }
+
+  const rules = [...(rulesData?.rules ?? [])].sort((a, b) => a.priority - b.priority)
+  const groups = groupsData?.groups ?? []
+  const members = membersData ?? []
+  const tz = behavior.timezone ?? behavior.effectiveTimezone ?? ''
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        {MODES.map((m) => (
+          <button
+            key={m.id}
+            type="button"
+            onClick={() => updateBehavior.mutate({ mode: m.id })}
+            className={`rounded-xl border p-4 text-left transition-colors ${
+              behavior.mode === m.id ? 'border-primary bg-primary/5' : 'hover:border-primary/30'
+            }`}
+          >
+            <m.icon
+              className={`size-5 ${behavior.mode === m.id ? 'text-primary' : 'text-muted-foreground'}`}
+            />
+            <p className="mt-2 text-sm font-semibold">{m.label}</p>
+            <p className="text-muted-foreground mt-0.5 text-xs">{m.description}</p>
+          </button>
+        ))}
+      </div>
+
+      {behavior.mode === 'advanced' ? (
         <>
-          <section className="space-y-3 rounded-xl border-[0.5px] border-border-subtle bg-white p-4">
-            <div className="flex items-center justify-between gap-2">
-              <div>
-                <h3 className="flex items-center gap-1.5 text-sm font-semibold text-dark-navy">
-                  <Users2 className="h-4 w-4 text-swiss-accent" /> Groups
-                </h3>
-                <p className="mt-0.5 text-xs text-slate-500">
-                  Route a rule to a group and it round-robins among that group's eligible members.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex gap-2">
-              <Input
-                value={newGroupName}
-                onChange={(e) => setNewGroupName(e.target.value)}
-                placeholder="New group name"
-                className="h-auto flex-1 rounded-lg border-[0.5px] border-border-subtle bg-white px-3 py-2 text-sm"
-              />
-              <button
-                type="button"
-                onClick={() => void createGroup()}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-swiss-accent px-3 py-2 text-sm font-semibold text-white hover:bg-swiss-accent-hover"
+          <Card>
+            <CardContent className="space-y-1.5 pt-6">
+              <Label>Workspace timezone</Label>
+              <Select
+                value={tz || 'Asia/Kolkata'}
+                onValueChange={(value) => updateBehavior.mutate({ timezone: value })}
               >
-                <Plus className="h-4 w-4" /> Add group
-              </button>
-            </div>
+                <SelectTrigger className="w-full max-w-md">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {listTimezoneOptions().map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-muted-foreground text-xs">
+                Used when a rule’s business hours omit a timezone.
+              </p>
+            </CardContent>
+          </Card>
 
-            <div className="space-y-2">
-              {groups.map((group) => {
-                const memberIds = new Set(group.members.map((m) => m.membershipId));
-                const available = members.filter((m) => !memberIds.has(m.id));
-                return (
-                  <div
-                    key={group.id}
-                    className="rounded-lg border-[0.5px] border-border-subtle bg-white p-3"
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-sm font-semibold text-dark-navy">{group.name}</span>
-                      <button
-                        type="button"
-                        onClick={() => void deleteGroup(group.id)}
-                        className="text-slate-400 hover:text-rose-600"
-                        aria-label="Delete group"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                    <div className="mt-2 flex flex-wrap gap-1.5">
-                      {group.members.map((m) => (
-                        <span
-                          key={m.membershipId}
-                          className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-1 text-xs font-medium text-slate-700 ring-1 ring-border-subtle"
-                        >
-                          {m.name}
-                          <button
-                            type="button"
-                            onClick={() => void removeGroupMember(group.id, m.membershipId)}
-                            className="text-slate-400 hover:text-rose-600"
-                            aria-label={`Remove ${m.name}`}
-                          >
-                            ×
-                          </button>
-                        </span>
-                      ))}
-                      {group.members.length === 0 ? (
-                        <span className="text-xs text-slate-400">No members yet.</span>
-                      ) : null}
-                    </div>
-                    {available.length > 0 ? (
-                      <div className="mt-2 flex gap-2">
-                        <select
-                          value={groupMemberPick[group.id] ?? ''}
-                          onChange={(e) =>
-                            setGroupMemberPick((prev) => ({ ...prev, [group.id]: e.target.value }))
-                          }
-                          className="flex-1 rounded-lg border-[0.5px] border-border-subtle bg-white px-2 py-1.5 text-sm"
-                        >
-                          <option value="">Add member…</option>
-                          {available.map((m) => (
-                            <option key={m.id} value={m.id}>
-                              {m.name}
-                            </option>
-                          ))}
-                        </select>
-                        <button
-                          type="button"
-                          onClick={() => void addGroupMember(group.id)}
-                          className="rounded-lg border-[0.5px] border-border-subtle px-3 py-1.5 text-sm font-semibold text-swiss-accent hover:bg-swiss-accent/5"
-                        >
-                          Add
-                        </button>
-                      </div>
-                    ) : null}
-                  </div>
-                );
-              })}
-              {groups.length === 0 ? (
-                <p className="text-xs text-slate-400">No groups yet — create one to target it from a rule.</p>
-              ) : null}
-            </div>
-          </section>
-
-          <section className="space-y-3 rounded-xl border-[0.5px] border-border-subtle bg-white p-4">
-            <div className="flex items-center justify-between gap-2">
-              <div>
-                <h3 className="text-sm font-semibold text-dark-navy">Rules</h3>
-                <p className="mt-0.5 text-xs text-slate-500">
-                  Evaluated top to bottom. First match wins. No match falls back to Basic round robin.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={openNewRuleForm}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-swiss-accent px-3 py-2 text-sm font-semibold text-white hover:bg-swiss-accent-hover"
-              >
-                <Plus className="h-4 w-4" /> Add rule
-              </button>
-            </div>
-
-            <div className="space-y-2">
-              {rules.map((rule, index) => (
-                <div
-                  key={rule.id}
-                  className={`flex items-center justify-between gap-3 rounded-lg border-[0.5px] p-3 ${
-                    rule.enabled ? 'border-border-subtle bg-white' : 'border-border-subtle bg-white opacity-60'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="flex flex-col">
-                      <button
-                        type="button"
-                        disabled={index === 0}
-                        onClick={() => void moveRule(index, -1)}
-                        className="text-slate-400 hover:text-swiss-accent disabled:opacity-30"
-                        aria-label="Move up"
-                      >
-                        <ArrowUp className="h-3.5 w-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        disabled={index === rules.length - 1}
-                        onClick={() => void moveRule(index, 1)}
-                        className="text-slate-400 hover:text-swiss-accent disabled:opacity-30"
-                        aria-label="Move down"
-                      >
-                        <ArrowDown className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-dark-navy">{rule.name}</p>
-                      <p className="text-xs text-slate-500">{ruleSummary(rule, groups, members)}</p>
-                    </div>
-                  </div>
-                  <div className="flex shrink-0 items-center gap-3">
-                    <label className="flex cursor-pointer items-center gap-1.5 text-xs font-medium text-slate-600">
-                      <input
-                        type="checkbox"
-                        checked={rule.enabled}
-                        onChange={() => void toggleRuleEnabled(rule)}
-                        className="h-3.5 w-3.5 accent-swiss-accent"
-                      />
-                      Enabled
-                    </label>
-                    <button
-                      type="button"
-                      onClick={() => openEditRuleForm(rule)}
-                      className="text-sm font-semibold text-swiss-accent hover:underline"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => void deleteRule(rule.id)}
-                      className="text-slate-400 hover:text-rose-600"
-                      aria-label="Delete rule"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
+          <GroupsCard />
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <CardTitle>Assignment rules</CardTitle>
+                  <p className="text-muted-foreground text-xs">
+                    First match wins — falls back to basic round-robin.
+                  </p>
                 </div>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    setEditing(null)
+                    setFormOpen(true)
+                  }}
+                >
+                  <Plus />
+                  Add rule
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {rules.map((rule, index) => (
+                <RuleRow
+                  key={rule.id}
+                  rule={rule}
+                  index={index}
+                  total={rules.length}
+                  groups={groups}
+                  members={members}
+                  onEdit={() => {
+                    setEditing(rule)
+                    setFormOpen(true)
+                  }}
+                />
               ))}
               {rules.length === 0 ? (
-                <p className="text-xs text-slate-400">
+                <p className="text-muted-foreground text-xs">
                   No rules yet — unmatched conversations fall back to Basic round robin.
                 </p>
               ) : null}
-            </div>
-          </section>
+            </CardContent>
+          </Card>
+
+          <InboxRuleFormSheet
+            open={formOpen}
+            onOpenChange={setFormOpen}
+            rule={editing}
+            groups={groups}
+            members={members}
+            fallbackTimezone={tz}
+            pending={createRule.isPending || updateRule.isPending}
+            onSave={(input, onDone) => {
+              if ('error' in input) {
+                onDone(false)
+                return
+              }
+              if (editing) {
+                updateRule.mutate({ id: editing.id, patch: input }, { onSuccess: () => onDone(true) })
+              } else {
+                createRule.mutate(input, { onSuccess: () => onDone(true) })
+              }
+            }}
+          />
         </>
       ) : null}
-
-      {showRuleForm ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30">
-          <div
-            className="absolute inset-0"
-            onClick={() => !savingRule && setShowRuleForm(false)}
-            aria-hidden
-          />
-          <div className="relative w-full max-w-lg space-y-4 bg-white border border-swiss-line p-6 shadow-xl max-h-[90vh] overflow-y-auto">
-            <h3 className="text-base font-semibold text-gray-950">
-              {editingRuleId ? 'Edit rule' : 'New rule'}
-            </h3>
-
-            <label className="block space-y-1">
-              <span className="text-sm font-bold text-swiss-muted uppercase tracking-wide">Name</span>
-              <Input
-                value={ruleForm.name}
-                onChange={(e) => setRuleForm((prev) => ({ ...prev, name: e.target.value }))}
-                className="h-auto w-full rounded-xl border border-swiss-line px-3 py-2 text-sm"
-              />
-            </label>
-
-            <div className="space-y-1.5">
-              <span className="text-sm font-bold text-swiss-muted uppercase tracking-wide">Channels</span>
-              <div className="flex gap-3">
-                {CHANNELS.map((ch) => (
-                  <label key={ch} className="flex items-center gap-1.5 text-sm capitalize">
-                    <input
-                      type="checkbox"
-                      checked={ruleForm.channels.includes(ch)}
-                      onChange={(e) =>
-                        setRuleForm((prev) => ({
-                          ...prev,
-                          channels: e.target.checked
-                            ? [...prev.channels, ch]
-                            : prev.channels.filter((c) => c !== ch),
-                        }))
-                      }
-                      className="h-4 w-4 accent-swiss-accent"
-                    />
-                    {ch}
-                  </label>
-                ))}
-              </div>
-              <p className="text-xs text-slate-400">Leave empty to match any channel.</p>
-            </div>
-
-            <label className="block space-y-1">
-              <span className="text-sm font-bold text-swiss-muted uppercase tracking-wide">
-                Contact tags (any match)
-              </span>
-              <Input
-                value={ruleForm.contactTags}
-                onChange={(e) => setRuleForm((prev) => ({ ...prev, contactTags: e.target.value }))}
-                placeholder="vip, priority"
-                className="h-auto w-full rounded-xl border border-swiss-line px-3 py-2 text-sm"
-              />
-              <span className="text-xs text-slate-400">Comma-separated. Leave empty to match any contact.</span>
-            </label>
-
-            <div className="space-y-2 rounded-xl border-[0.5px] border-border-subtle p-3">
-              <label className="flex cursor-pointer items-center justify-between gap-2">
-                <span className="text-sm font-bold text-swiss-muted uppercase tracking-wide">
-                  Business hours
-                </span>
-                <input
-                  type="checkbox"
-                  checked={ruleForm.businessHoursEnabled}
-                  onChange={(e) =>
-                    setRuleForm((prev) => ({ ...prev, businessHoursEnabled: e.target.checked }))
-                  }
-                  className="h-4 w-4 accent-swiss-accent"
-                />
-              </label>
-              {ruleForm.businessHoursEnabled ? (
-                <>
-                  <div className="flex flex-wrap gap-2">
-                    {DAYS.map((d) => (
-                      <label key={d.value} className="flex items-center gap-1 text-xs">
-                        <input
-                          type="checkbox"
-                          checked={ruleForm.days.includes(d.value)}
-                          onChange={(e) =>
-                            setRuleForm((prev) => ({
-                              ...prev,
-                              days: e.target.checked
-                                ? [...prev.days, d.value]
-                                : prev.days.filter((v) => v !== d.value),
-                            }))
-                          }
-                          className="h-3.5 w-3.5 accent-swiss-accent"
-                        />
-                        {d.label}
-                      </label>
-                    ))}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="time"
-                      value={ruleForm.start}
-                      onChange={(e) => setRuleForm((prev) => ({ ...prev, start: e.target.value }))}
-                      className="h-auto rounded-lg border-[0.5px] border-border-subtle px-2 py-1.5 text-sm"
-                    />
-                    <span className="text-xs text-slate-400">to</span>
-                    <Input
-                      type="time"
-                      value={ruleForm.end}
-                      onChange={(e) => setRuleForm((prev) => ({ ...prev, end: e.target.value }))}
-                      className="h-auto rounded-lg border-[0.5px] border-border-subtle px-2 py-1.5 text-sm"
-                    />
-                  </div>
-                  <p className="text-xs text-slate-400">Uses the workspace's Inbox Behavior timezone.</p>
-                </>
-              ) : null}
-            </div>
-
-            <div className="space-y-2">
-              <span className="text-sm font-bold text-swiss-muted uppercase tracking-wide">Assign to</span>
-              <div className="flex gap-3">
-                <label className="flex items-center gap-1.5 text-sm">
-                  <input
-                    type="radio"
-                    checked={ruleForm.actionType === 'group'}
-                    onChange={() => setRuleForm((prev) => ({ ...prev, actionType: 'group' }))}
-                    className="h-4 w-4 accent-swiss-accent"
-                  />
-                  Group
-                </label>
-                <label className="flex items-center gap-1.5 text-sm">
-                  <input
-                    type="radio"
-                    checked={ruleForm.actionType === 'user'}
-                    onChange={() => setRuleForm((prev) => ({ ...prev, actionType: 'user' }))}
-                    className="h-4 w-4 accent-swiss-accent"
-                  />
-                  Specific member
-                </label>
-              </div>
-              {ruleForm.actionType === 'group' ? (
-                <select
-                  value={ruleForm.actionGroupId}
-                  onChange={(e) => setRuleForm((prev) => ({ ...prev, actionGroupId: e.target.value }))}
-                  className="w-full bg-white border border-swiss-line px-3 py-2 text-sm"
-                >
-                  <option value="">Select a group…</option>
-                  {groups.map((g) => (
-                    <option key={g.id} value={g.id}>
-                      {g.name} ({g.members.length})
-                    </option>
-                  ))}
-                </select>
-              ) : (
-                <select
-                  value={ruleForm.actionUserId}
-                  onChange={(e) => setRuleForm((prev) => ({ ...prev, actionUserId: e.target.value }))}
-                  className="w-full bg-white border border-swiss-line px-3 py-2 text-sm"
-                >
-                  <option value="">Select a member…</option>
-                  {members.map((m) => (
-                    <option key={m.id} value={m.userId}>
-                      {m.name}
-                    </option>
-                  ))}
-                </select>
-              )}
-              {ruleForm.actionType === 'group' && ruleForm.actionGroupId
-                ? groupsById.get(ruleForm.actionGroupId)?.members.length === 0
-                  ? (
-                    <p className="text-xs text-amber-600">This group has no members yet.</p>
-                  )
-                  : null
-                : null}
-            </div>
-
-            <div className="flex justify-end gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => setShowRuleForm(false)}
-                disabled={savingRule}
-                className="rounded-xl px-4 py-2 text-sm font-bold text-swiss-muted hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => void saveRule()}
-                disabled={savingRule}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-swiss-accent px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
-              >
-                {savingRule ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
-                Save rule
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
     </div>
-  );
+  )
 }

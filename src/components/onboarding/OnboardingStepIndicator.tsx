@@ -1,72 +1,48 @@
-import { Check } from 'lucide-react';
-import { ONBOARDING_STEP_LABELS } from '../../lib/onboarding';
+import { Check } from 'lucide-react'
 
-type Props = {
-  currentStep: number;
-};
+import { Progress } from '@/components/ui/progress'
+import { ONBOARDING_STEP_LABELS } from '@/lib/onboarding'
 
-export function OnboardingStepIndicator({ currentStep }: Props) {
-  const steps = ONBOARDING_STEP_LABELS.map((label, index) => ({
-    id: index + 1,
-    label,
-  }));
-  const pct = Math.round((currentStep / steps.length) * 100);
+export function OnboardingStepIndicator({ currentStep }: { currentStep: number }) {
+  const total = ONBOARDING_STEP_LABELS.length
+  const pct = Math.round((currentStep / total) * 100)
 
   return (
     <nav aria-label="Onboarding progress" className="w-full">
-      <div className="mb-3 flex items-center justify-between text-xs text-slate-600">
+      <div className="text-muted-foreground mb-3 flex items-center justify-between text-xs">
         <span className="font-semibold">
-          Step {currentStep} of {steps.length}
+          Step {currentStep} of {total}
         </span>
         <span className="font-medium tabular-nums">{pct}% complete</span>
       </div>
-      <div
-        className="h-2 w-full overflow-hidden rounded-full bg-accent-green-bg"
-        role="progressbar"
-        aria-valuemin={1}
-        aria-valuemax={steps.length}
-        aria-valuenow={currentStep}
-        aria-label={`Onboarding step ${currentStep} of ${steps.length}`}
-      >
-        <div
-          className="h-full rounded-full bg-primary transition-[width] duration-300 ease-out motion-reduce:transition-none"
-          style={{ width: `${(currentStep / steps.length) * 100}%` }}
-        />
-      </div>
+      <Progress value={pct} className="h-2" />
       <ol className="mt-5 hidden gap-1.5 md:grid md:grid-cols-7">
-        {steps.map((step) => {
-          const isComplete = step.id < currentStep;
-          const isActive = step.id === currentStep;
+        {ONBOARDING_STEP_LABELS.map((label, index) => {
+          const id = index + 1
+          const isComplete = id < currentStep
+          const isActive = id === currentStep
           return (
-            <li key={step.id} className="flex flex-col items-center gap-1.5 text-center">
+            <li key={id} className="flex flex-col items-center gap-1.5 text-center">
               <span
-                className={[
-                  'flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold transition-colors duration-200',
-                  isComplete
-                    ? 'bg-primary text-white'
-                    : isActive
-                      ? 'bg-primary text-white ring-4 ring-primary/15'
-                      : 'border border-swiss-line bg-white text-slate-400',
-                ].join(' ')}
+                className={`flex size-8 items-center justify-center rounded-full text-sm font-bold ${
+                  isComplete || isActive
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground border'
+                } ${isActive ? 'ring-primary/20 ring-4' : ''}`}
               >
-                {isComplete ? (
-                  <Check className="h-4 w-4" strokeWidth={3} aria-hidden />
-                ) : (
-                  step.id
-                )}
+                {isComplete ? <Check className="size-4" strokeWidth={3} aria-hidden /> : id}
               </span>
               <span
-                className={[
-                  'text-[11px] font-semibold leading-tight',
-                  isActive ? 'text-primary' : isComplete ? 'text-slate-700' : 'text-slate-400',
-                ].join(' ')}
+                className={`text-[11px] leading-tight font-semibold ${
+                  isActive ? 'text-primary' : isComplete ? 'text-foreground' : 'text-muted-foreground'
+                }`}
               >
-                {step.label}
+                {label}
               </span>
             </li>
-          );
+          )
         })}
       </ol>
     </nav>
-  );
+  )
 }

@@ -1,278 +1,196 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { AlertCircle, Database, Loader2, RefreshCw, Sparkles } from 'lucide-react'
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import {
-  AlertCircle,
-  Database,
-  Loader2,
-  RefreshCw,
-  Sparkles,
-} from 'lucide-react';
-import { pathForSettingsSection } from '../../routes';
-import { api, parseApiError } from '../../lib/api';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
-
-type AiSyncDashboard = {
-  connectionStatus: string;
-  lastSyncTime: string | null;
-  lastEventTime: string | null;
-  venueId: string | null;
-  knowledgeHealth: {
-    services: number;
-    products: number;
-    customers: number;
-    staff: number;
-  };
-  pendingQueueJobs: number;
-  failedEvents: number;
-};
-
-type SyncEvent = {
-  id: string;
-  eventType: string;
-  status: string;
-  errorMessage: string | null;
-  createdAt: string;
-  processedAt: string | null;
-};
-
-const STATUS_STYLES: Record<string, string> = {
-  connected: 'bg-[#e6f7ec] text-accent-green border-[#5dfd8a]/40',
-  syncing: 'bg-sky-50 text-primary border-primary/20',
-  failed: 'bg-red-50 text-danger-red border-red-200',
-  disconnected: 'bg-amber-50 text-amber-700 border-amber-200',
-  not_configured: 'bg-gray-100 text-swiss-muted border-gray-200',
-};
+import { Button } from '@/components/ui/button'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { realDevelopersService, type AiConnectionStatus, type SyncEvent } from '@/services/realDevelopers.service'
 
 function formatDate(iso: string | null): string {
-  if (!iso) return '—';
-  try {
-    return new Date(iso).toLocaleString();
-  } catch {
-    return iso;
-  }
+  if (!iso) return '—'
+  return new Date(iso).toLocaleString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+const STATUS_STYLES: Record<string, string> = {
+  connected: 'bg-[#e6f7ec] text-channel-green border-[#25d366]/40',
+  syncing: 'bg-sky-50 text-primary border-primary/20',
+  failed: 'bg-destructive/10 text-destructive border-destructive/20',
+  disconnected: 'bg-amber-50 text-amber-700 border-amber-200',
+  not_configured: 'bg-muted text-muted-foreground border-border',
+}
+
+const EVENT_STATUS_CLASS: Record<SyncEvent['status'], string> = {
+  completed: 'text-channel-green',
+  failed: 'text-destructive',
+  pending: 'text-amber-600',
+  processing: 'text-amber-600',
 }
 
 export function AiSyncPanel() {
-  const [dashboard, setDashboard] = useState<AiSyncDashboard | null>(null);
-  const [events, setEvents] = useState<SyncEvent[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [rebuilding, setRebuilding] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [rebuildMsg, setRebuildMsg] = useState<string | null>(null);
+  const dashQ = realDevelopersService.useAiSync()
+  const eventsQ = realDevelopersService.useAiSyncEvents()
+  const rebuild = realDevelopersService.useRebuildKnowledge()
+  const [rebuildMsg, setRebuildMsg] = useState<string | null>(null)
 
-  const load = useCallback(async () => {
-    setError(null);
-    try {
-      const [dash, evts] = await Promise.all([
-        api.getDeveloperAiSync() as Promise<AiSyncDashboard>,
-        api.getDeveloperAiSyncEvents() as Promise<SyncEvent[]>,
-      ]);
-      setDashboard(dash);
-      setEvents(evts);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : parseApiError(String(e)));
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const dashboard = dashQ.data
+  const events = eventsQ.data ?? []
+  const error = dashQ.error ?? eventsQ.error ?? rebuild.error
+  const status = (dashboard?.connectionStatus ?? 'not_configured') as AiConnectionStatus
+  const loading = dashQ.isLoading && !dashboard
 
-  useEffect(() => {
-    void load();
-    const interval = window.setInterval(() => void load(), 8000);
-    return () => window.clearInterval(interval);
-  }, [load]);
-
-  const rebuild = async () => {
-    setRebuilding(true);
-    setRebuildMsg(null);
-    setError(null);
-    try {
-      const res = (await api.rebuildDeveloperKnowledge()) as { message?: string };
-      setRebuildMsg(res.message ?? 'Rebuild queued');
-      await load();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : parseApiError(String(e)));
-    } finally {
-      setRebuilding(false);
-    }
-  };
-
-  if (loading && !dashboard) {
-    return (
-      <div className="flex items-center gap-2 text-sm text-swiss-muted py-8">
-        <Loader2 className="w-4 h-4 animate-spin" />
-        Loading AI Sync…
-      </div>
-    );
+  const refresh = () => {
+    void dashQ.refetch()
+    void eventsQ.refetch()
   }
 
-  const status = dashboard?.connectionStatus ?? 'not_configured';
-  const health = dashboard?.knowledgeHealth;
+  if (loading) {
+    return (
+      <div className="text-muted-foreground flex items-center gap-2 py-8 text-sm">
+        <Loader2 className="size-4 animate-spin" />
+        Loading AI Sync…
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <p className="text-xs text-swiss-muted max-w-lg">
-          Uses existing AI Knowledge Sync. Rebuild enqueues an event-driven full sync — ready for
-          Vector DB, AI Agent, and Journey Engine pipelines.
+        <p className="text-muted-foreground max-w-lg text-xs">
+          Uses existing AI Knowledge Sync. Rebuild enqueues an event-driven full sync — ready for Vector DB,
+          AI Agent, and Journey Engine pipelines.
         </p>
-        <Link
-          to={pathForSettingsSection('ai-knowledge')}
-          className="text-meta font-bold text-primary hover:underline shrink-0"
-        >
+        <Link to="/settings?section=ai-knowledge" className="text-primary shrink-0 text-xs font-semibold hover:underline">
           Configure MongoDB →
         </Link>
       </div>
 
-      {error && (
-        <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-xs text-danger-red">
-          <AlertCircle className="w-4 h-4 shrink-0" />
-          <span>{error}</span>
+      {error ? (
+        <div className="border-destructive/20 bg-destructive/10 text-destructive flex items-start gap-2 rounded-lg border px-3 py-2.5 text-xs">
+          <AlertCircle className="size-4 shrink-0" />
+          <span>{error instanceof Error ? error.message : 'Failed to load AI Sync'}</span>
         </div>
-      )}
+      ) : null}
 
-      {rebuildMsg && (
-        <div className="rounded-xl border border-[#5dfd8a]/40 bg-[#e6f7ec] px-3 py-2 text-xs text-accent-green font-semibold">
+      {rebuildMsg ? (
+        <div className="border-channel-green/40 text-channel-green rounded-lg border bg-[#e6f7ec] px-3 py-2 text-xs font-medium">
           {rebuildMsg}
         </div>
-      )}
+      ) : null}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div className="rounded-2xl border border-swiss-line bg-white p-4 ">
-          <div className="flex items-center gap-2 mb-3">
-            <Database className="w-4 h-4 text-primary" />
-            <h4 className="text-sm font-bold text-swiss-ink">Connection</h4>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="space-y-3 rounded-2xl border p-4">
+          <div className="flex items-center gap-2">
+            <Database className="text-muted-foreground size-4" />
+            <p className="text-sm font-semibold">Connection</p>
           </div>
           <span
-            className={`inline-flex text-sm font-bold px-2 py-0.5 rounded-lg border capitalize ${STATUS_STYLES[status] ?? STATUS_STYLES.not_configured}`}
+            className={`inline-flex w-fit rounded-full border px-2.5 py-1 text-xs font-semibold capitalize ${STATUS_STYLES[status] ?? STATUS_STYLES.not_configured}`}
           >
-            {status.replace('_', ' ')}
+            {status.replace(/_/g, ' ')}
           </span>
-          <dl className="mt-3 space-y-2 text-xs">
+          <dl className="space-y-1.5 text-xs">
             <div className="flex justify-between gap-2">
-              <dt className="text-swiss-muted">Venue ID</dt>
-              <dd className="font-mono font-semibold text-swiss-ink truncate max-w-[180px]">
-                {dashboard?.venueId ?? '—'}
-              </dd>
+              <dt className="text-muted-foreground">Venue ID</dt>
+              <dd className="truncate font-mono">{dashboard?.venueId ?? '—'}</dd>
             </div>
             <div className="flex justify-between gap-2">
-              <dt className="text-swiss-muted">Last sync</dt>
-              <dd className="text-swiss-ink">{formatDate(dashboard?.lastSyncTime ?? null)}</dd>
+              <dt className="text-muted-foreground">Last sync</dt>
+              <dd>{formatDate(dashboard?.lastSyncTime ?? null)}</dd>
             </div>
             <div className="flex justify-between gap-2">
-              <dt className="text-swiss-muted">Last event</dt>
-              <dd className="text-swiss-ink">{formatDate(dashboard?.lastEventTime ?? null)}</dd>
+              <dt className="text-muted-foreground">Last event</dt>
+              <dd>{formatDate(dashboard?.lastEventTime ?? null)}</dd>
             </div>
           </dl>
         </div>
 
-        <div className="rounded-2xl border border-swiss-line bg-white p-4 ">
-          <div className="flex items-center gap-2 mb-3">
-            <Sparkles className="w-4 h-4 text-primary" />
-            <h4 className="text-sm font-bold text-swiss-ink">Knowledge health</h4>
+        <div className="space-y-3 rounded-2xl border p-4">
+          <div className="flex items-center gap-2">
+            <Sparkles className="text-muted-foreground size-4" />
+            <p className="text-sm font-semibold">Knowledge health</p>
           </div>
           <div className="grid grid-cols-2 gap-2">
-            {[
-              { label: 'Services', value: health?.services ?? 0 },
-              { label: 'Products', value: health?.products ?? 0 },
-              { label: 'Customers', value: health?.customers ?? 0 },
-              { label: 'Staff', value: health?.staff ?? 0 },
-            ].map((item) => (
-              <div
-                key={item.label}
-                className="rounded-xl bg-slate-50 border border-swiss-line px-3 py-2 text-center"
-              >
-                <p className="text-lg font-bold text-swiss-ink">{item.value}</p>
-                <p className="text-sm font-semibold text-swiss-muted">{item.label}</p>
+            {(
+              [
+                ['Services', dashboard?.knowledgeHealth.services ?? 0],
+                ['Products', dashboard?.knowledgeHealth.products ?? 0],
+                ['Customers', dashboard?.knowledgeHealth.customers ?? 0],
+                ['Staff', dashboard?.knowledgeHealth.staff ?? 0],
+              ] as const
+            ).map(([label, value]) => (
+              <div key={label} className="bg-muted/40 rounded-xl border px-3 py-2 text-center">
+                <p className="font-mono text-lg font-bold tabular-nums">{value.toLocaleString()}</p>
+                <p className="text-muted-foreground text-xs">{label}</p>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-swiss-line bg-white p-4 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex gap-4 text-xs">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border p-4">
+        <div className="flex flex-wrap items-center gap-4 text-sm">
           <span>
-            <span className="text-swiss-muted">Pending jobs: </span>
-            <span className="font-bold text-amber-600">{dashboard?.pendingQueueJobs ?? 0}</span>
+            Pending jobs:{' '}
+            <span className="font-semibold text-amber-600">{dashboard?.pendingQueueJobs ?? 0}</span>
           </span>
           <span>
-            <span className="text-swiss-muted">Failed events: </span>
-            <span className="font-bold text-danger-red">{dashboard?.failedEvents ?? 0}</span>
+            Failed events: <span className="text-destructive font-semibold">{dashboard?.failedEvents ?? 0}</span>
           </span>
         </div>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => void load()}
-            className="inline-flex items-center gap-1 text-sm font-semibold text-swiss-muted hover:text-primary px-3 py-2 rounded-lg border border-swiss-line"
-          >
-            <RefreshCw className="w-3.5 h-3.5" />
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={refresh}>
+            <RefreshCw />
             Refresh
-          </button>
-          <button
-            type="button"
-            disabled={rebuilding || status === 'not_configured'}
-            onClick={() => void rebuild()}
-            className="inline-flex items-center gap-1.5 text-sm font-bold px-4 py-2 rounded-full bg-channel-green text-white disabled:opacity-50"
+          </Button>
+          <Button
+            size="sm"
+            disabled={rebuild.isPending || status === 'not_configured'}
+            onClick={() => {
+              setRebuildMsg(null)
+              void rebuild.mutateAsync().then((res) => setRebuildMsg(res.message ?? 'Rebuild queued'))
+            }}
           >
-            {rebuilding ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <RefreshCw className="w-3.5 h-3.5" />
-            )}
+            {rebuild.isPending ? <Loader2 className="animate-spin" /> : <RefreshCw />}
             Rebuild knowledge
-          </button>
+          </Button>
         </div>
       </div>
 
-      {events.length > 0 && (
-          <div className="rounded-2xl border border-swiss-line bg-white overflow-hidden">
-          <div className="px-4 py-2 bg-slate-50 text-sm font-bold uppercase text-swiss-muted">
-            Recent sync events
-          </div>
-          <Table className="text-xs">
-            <TableHeader className="text-left text-sm font-bold uppercase text-swiss-muted">
+      {events.length > 0 ? (
+        <div className="overflow-hidden rounded-2xl border">
+          <div className="bg-muted/50 px-4 py-2 text-xs font-semibold tracking-wide uppercase">Recent sync events</div>
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableHead className="px-3 py-2 whitespace-normal">Time</TableHead>
-                <TableHead className="px-3 py-2 whitespace-normal">Type</TableHead>
-                <TableHead className="px-3 py-2 whitespace-normal">Status</TableHead>
+                <TableHead>Time</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {events.map((ev) => (
-                <TableRow key={ev.id} className="border-t border-swiss-line">
-                  <TableCell className="px-3 py-2 text-swiss-muted">{formatDate(ev.createdAt)}</TableCell>
-                  <TableCell className="px-3 py-2 font-mono text-xs">{ev.eventType}</TableCell>
-                  <TableCell className="px-3 py-2 capitalize">
-                    <span
-                      className={
-                        ev.status === 'completed'
-                          ? 'text-accent-green font-bold'
-                          : ev.status === 'failed'
-                            ? 'text-danger-red font-bold'
-                            : 'text-amber-600 font-bold'
-                      }
-                    >
-                      {ev.status}
+              {events.map((event) => (
+                <TableRow key={event.id}>
+                  <TableCell className="text-muted-foreground text-xs">{formatDate(event.createdAt)}</TableCell>
+                  <TableCell className="font-mono text-xs">{event.eventType}</TableCell>
+                  <TableCell>
+                    <span className={`text-xs font-semibold capitalize ${EVENT_STATUS_CLASS[event.status] ?? ''}`}>
+                      {event.status}
                     </span>
-                    {ev.errorMessage && (
-                      <p className="text-xs text-swiss-faint truncate max-w-[240px]">
-                        {ev.errorMessage}
-                      </p>
-                    )}
+                    {event.errorMessage ? (
+                      <p className="text-muted-foreground mt-0.5 max-w-xs truncate text-[11px]">{event.errorMessage}</p>
+                    ) : null}
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </div>
-      )}
+      ) : null}
     </div>
-  );
+  )
 }

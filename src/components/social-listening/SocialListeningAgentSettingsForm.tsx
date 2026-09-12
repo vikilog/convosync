@@ -1,89 +1,50 @@
-import React, { useMemo } from 'react';
-import { AlertTriangle } from 'lucide-react';
-import { Input } from '../ui/input';
-import { Textarea } from '../ui/textarea';
+import type { Dispatch, SetStateAction } from 'react'
+import { AlertTriangle } from 'lucide-react'
 
-export type SocialListeningSettingsState = {
-  autoResponseEnabled: boolean;
-  leadFunnelId: string | null;
-  interestedMode: 'auto' | 'review' | 'off';
-  questionMode: 'auto' | 'review' | 'off';
-  complaintMode: 'review' | 'escalate_only';
-  spamMode: 'auto_ignore' | 'review';
-  confidenceThreshold: number;
-  publicReplyTone: 'friendly' | 'professional' | 'playful';
-  dmAgentSkillId: string | null;
-  fallbackMessage: string | null;
-  leadCreationRule: 'interested_only' | 'interested_and_questions' | 'never';
-  maxAutoDmsPerDay: number;
-  workingHoursOnly: boolean;
-  workingHoursStart: string | null;
-  workingHoursEnd: string | null;
-  autoDmsSentToday: number;
-};
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Slider } from '@/components/ui/slider'
+import { Switch } from '@/components/ui/switch'
+import { Textarea } from '@/components/ui/textarea'
+import type { DmSkillOption, PostAgentSettings } from '@/lib/socialListeningPostSettings'
 
-export type SkillOption = {
-  id: string;
-  title: string;
-  agentId: string;
-  agentName: string;
-};
-
-export const AGENT_SETTINGS_DEFAULTS: SocialListeningSettingsState = {
-  autoResponseEnabled: false,
-  leadFunnelId: null,
-  interestedMode: 'review',
-  questionMode: 'review',
-  complaintMode: 'review',
-  spamMode: 'review',
-  confidenceThreshold: 80,
-  publicReplyTone: 'friendly',
-  dmAgentSkillId: null,
-  fallbackMessage: null,
-  leadCreationRule: 'interested_only',
-  maxAutoDmsPerDay: 50,
-  workingHoursOnly: false,
-  workingHoursStart: '09:00',
-  workingHoursEnd: '18:00',
-  autoDmsSentToday: 0,
-};
-
-function Toggle({
-  checked,
-  onChange,
-  label,
-}: {
-  checked: boolean;
-  onChange: (v: boolean) => void;
-  label: string;
-}) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      aria-label={label}
-      onClick={() => onChange(!checked)}
-      className={`relative h-6 w-11 shrink-0 cursor-pointer rounded-full transition-colors ${
-        checked ? 'bg-swiss-accent' : 'bg-slate-200'
-      }`}
-    >
-      <span
-        className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
-          checked ? 'translate-x-5' : 'translate-x-0'
-        }`}
-      />
-    </button>
-  );
-}
-
-function FieldLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="text-[11px] font-semibold uppercase tracking-wide text-swiss-faint">
-      {children}
-    </span>
-  );
-}
+const INTENT_ROWS = [
+  {
+    key: 'interestedMode' as const,
+    label: 'Interested',
+    options: [
+      { value: 'auto', label: 'Auto' },
+      { value: 'review', label: 'Review' },
+      { value: 'off', label: 'Off' },
+    ],
+  },
+  {
+    key: 'questionMode' as const,
+    label: 'Question',
+    options: [
+      { value: 'auto', label: 'Auto' },
+      { value: 'review', label: 'Review' },
+      { value: 'off', label: 'Off' },
+    ],
+  },
+  {
+    key: 'complaintMode' as const,
+    label: 'Complaint',
+    options: [
+      { value: 'review', label: 'Review' },
+      { value: 'escalate_only', label: 'Escalate' },
+    ],
+  },
+  {
+    key: 'spamMode' as const,
+    label: 'Spam',
+    options: [
+      { value: 'auto_ignore', label: 'Auto-ignore' },
+      { value: 'review', label: 'Review' },
+    ],
+  },
+] as const
 
 export function SocialListeningAgentSettingsForm({
   draft,
@@ -93,301 +54,236 @@ export function SocialListeningAgentSettingsForm({
   error,
   onError,
 }: {
-  draft: SocialListeningSettingsState;
-  setDraft: React.Dispatch<React.SetStateAction<SocialListeningSettingsState>>;
-  skills: SkillOption[];
-  funnels: Array<{ id: string; name: string }>;
-  error: string | null;
-  onError: (msg: string | null) => void;
+  draft: PostAgentSettings
+  setDraft: Dispatch<SetStateAction<PostAgentSettings>>
+  skills: DmSkillOption[]
+  funnels: Array<{ id: string; name: string }>
+  error: string | null
+  onError: (msg: string | null) => void
 }) {
-  const patch = <K extends keyof SocialListeningSettingsState>(
-    key: K,
-    value: SocialListeningSettingsState[K]
-  ) => setDraft((d) => ({ ...d, [key]: value }));
-
-  const autoWarning = useMemo(() => {
-    if (!draft.autoResponseEnabled) return false;
-    return draft.interestedMode === 'auto' || draft.questionMode === 'auto';
-  }, [draft]);
+  const patch = <K extends keyof PostAgentSettings>(key: K, value: PostAgentSettings[K]) =>
+    setDraft((d) => ({ ...d, [key]: value }))
+  const autoWarning = draft.autoResponseEnabled && (draft.interestedMode === 'auto' || draft.questionMode === 'auto')
 
   return (
     <div className="space-y-5">
-      <section className="rounded-2xl border border-swiss-line bg-white p-4">
+      <section className="rounded-xl border p-4">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h3 className="text-sm font-bold text-swiss-ink">Agent</h3>
-            <p className="mt-1 text-xs leading-relaxed text-swiss-muted">
+            <p className="text-sm font-semibold">Agent</p>
+            <p className="text-muted-foreground mt-1 text-xs">
               {draft.autoResponseEnabled
                 ? 'On: matching comments on this post can be handled automatically.'
                 : 'Off (safe): every comment on this post stays in the review queue.'}
             </p>
           </div>
-          <Toggle
+          <Switch
             checked={draft.autoResponseEnabled}
-            onChange={(v) => {
+            onCheckedChange={(v) => {
               if (v && !draft.leadFunnelId) {
-                onError(
-                  'Select a lead funnel below before enabling the agent (create one under Leads first).'
-                );
-                return;
+                onError('Select a lead funnel below before enabling the agent.')
+                return
               }
-              onError(null);
-              patch('autoResponseEnabled', v);
+              onError(null)
+              patch('autoResponseEnabled', v)
             }}
-            label="Enable agent"
+            aria-label="Enable agent"
           />
         </div>
       </section>
 
-      <section>
-        <FieldLabel>Lead funnel (required for agent)</FieldLabel>
-        <p className="mt-1 text-xs text-swiss-muted">
-          Leads from this post go into the selected funnel.
-        </p>
+      <section className="space-y-1.5">
+        <Label>Lead funnel (required for agent)</Label>
         {funnels.length === 0 ? (
-          <p className="mt-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs font-medium text-amber-900">
-            No funnels yet. Create one under <strong>Leads</strong> before enabling the agent.
+          <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+            No funnels yet. Create one under Leads before enabling the agent.
           </p>
         ) : (
-          <select
-            value={draft.leadFunnelId || ''}
-            onChange={(e) => {
-              const id = e.target.value || null;
-              onError(null);
-              setDraft((d) => ({
-                ...d,
-                leadFunnelId: id,
-                autoResponseEnabled: id ? d.autoResponseEnabled : false,
-              }));
+          <Select
+            value={draft.leadFunnelId || 'none'}
+            onValueChange={(v) => {
+              const id = v === 'none' ? null : v
+              onError(null)
+              setDraft((d) => ({ ...d, leadFunnelId: id, autoResponseEnabled: id ? d.autoResponseEnabled : false }))
             }}
-            className="mt-2 w-full cursor-pointer rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-semibold text-swiss-ink outline-none focus:ring-2 focus:ring-swiss-accent/20"
           >
-            <option value="">Select funnel…</option>
-            {funnels.map((f) => (
-              <option key={f.id} value={f.id}>
-                {f.name}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select funnel…" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">Select funnel…</SelectItem>
+              {funnels.map((f) => (
+                <SelectItem key={f.id} value={f.id}>
+                  {f.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         )}
       </section>
 
-      {autoWarning && (
-        <div className="flex gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs font-medium text-amber-900">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
-          <span>
-            Comments matching these rules will be handled without human review (public reply + DM).
-          </span>
+      {autoWarning ? (
+        <div className="flex gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+          <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+          Comments matching these rules will be handled without human review.
         </div>
-      )}
+      ) : null}
 
       <section>
-        <FieldLabel>Automation by intent</FieldLabel>
-        <div className="mt-2 overflow-hidden rounded-xl border border-swiss-line">
-          {(
-            [
-              {
-                key: 'interestedMode' as const,
-                label: 'Interested',
-                options: [
-                  { value: 'auto', label: 'Auto' },
-                  { value: 'review', label: 'Review' },
-                  { value: 'off', label: 'Off' },
-                ],
-              },
-              {
-                key: 'questionMode' as const,
-                label: 'Question',
-                options: [
-                  { value: 'auto', label: 'Auto' },
-                  { value: 'review', label: 'Review' },
-                  { value: 'off', label: 'Off' },
-                ],
-              },
-              {
-                key: 'complaintMode' as const,
-                label: 'Complaint',
-                options: [
-                  { value: 'review', label: 'Review' },
-                  { value: 'escalate_only', label: 'Escalate' },
-                ],
-              },
-              {
-                key: 'spamMode' as const,
-                label: 'Spam',
-                options: [
-                  { value: 'auto_ignore', label: 'Auto-ignore' },
-                  { value: 'review', label: 'Review' },
-                ],
-              },
-            ] as const
-          ).map((row) => (
-            <div
-              key={row.key}
-              className="flex items-center justify-between gap-3 border-b border-swiss-line bg-white px-3 py-2.5 last:border-b-0"
-            >
-              <span className="text-sm font-semibold text-swiss-ink">{row.label}</span>
-              <select
+        <p className="text-muted-foreground mb-2 text-[11px] font-semibold tracking-wide uppercase">Automation by intent</p>
+        <div className="overflow-hidden rounded-xl border">
+          {INTENT_ROWS.map((row) => (
+            <div key={row.key} className="flex items-center justify-between gap-3 border-b px-3 py-2.5 last:border-b-0">
+              <span className="text-sm font-medium">{row.label}</span>
+              <Select
                 value={draft[row.key]}
-                onChange={(e) =>
-                  patch(row.key, e.target.value as SocialListeningSettingsState[typeof row.key])
-                }
-                className="rounded-lg border border-swiss-line bg-white px-2 py-1.5 text-xs font-semibold text-swiss-ink outline-none"
+                onValueChange={(v) => patch(row.key, v as PostAgentSettings[typeof row.key])}
               >
-                {row.options.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="h-8 w-32 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {row.options.map((o) => (
+                    <SelectItem key={o.value} value={o.value}>
+                      {o.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           ))}
         </div>
-        <p className="mt-1.5 text-[11px] text-swiss-faint">
-          Complaints never auto-DM — only Review or Escalate.
-        </p>
       </section>
 
       <section>
-        <div className="flex items-center justify-between gap-2">
-          <FieldLabel>Confidence threshold</FieldLabel>
-          <span className="text-xs font-bold text-swiss-ink">{draft.confidenceThreshold}%</span>
+        <div className="mb-2 flex items-center justify-between">
+          <Label>Confidence threshold</Label>
+          <span className="text-xs font-semibold tabular-nums">{draft.confidenceThreshold}%</span>
         </div>
-        <input
-          type="range"
-          min={0}
+        <Slider
+          value={[draft.confidenceThreshold]}
           max={100}
-          value={draft.confidenceThreshold}
-          onChange={(e) => patch('confidenceThreshold', Number(e.target.value))}
-          className="mt-2 w-full accent-[var(--color-swiss-accent,#4f46e5)]"
+          step={1}
+          onValueChange={([v]) => patch('confidenceThreshold', v)}
         />
-        <p className="mt-1 text-xs text-swiss-muted">
-          Auto-respond only above {draft.confidenceThreshold}% confidence.
-        </p>
       </section>
 
       <section className="space-y-3">
-        <FieldLabel>Message settings</FieldLabel>
-        <label className="block">
-          <span className="text-xs font-semibold text-swiss-muted">Public reply tone</span>
-          <select
-            value={draft.publicReplyTone}
-            onChange={(e) =>
-              patch(
-                'publicReplyTone',
-                e.target.value as SocialListeningSettingsState['publicReplyTone']
-              )
-            }
-            className="mt-1 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-swiss-accent/20"
+        <Label>Public reply tone</Label>
+        <Select
+          value={draft.publicReplyTone}
+          onValueChange={(v) => patch('publicReplyTone', v as PostAgentSettings['publicReplyTone'])}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="friendly">Friendly</SelectItem>
+            <SelectItem value="professional">Professional</SelectItem>
+            <SelectItem value="playful">Playful</SelectItem>
+          </SelectContent>
+        </Select>
+        <div className="space-y-1.5">
+          <Label>DM agent skill</Label>
+          <Select
+            value={draft.dmAgentSkillId || 'none'}
+            onValueChange={(v) => patch('dmAgentSkillId', v === 'none' ? null : v)}
           >
-            <option value="friendly">Friendly</option>
-            <option value="professional">Professional</option>
-            <option value="playful">Playful</option>
-          </select>
-        </label>
-        <label className="block">
-          <span className="text-xs font-semibold text-swiss-muted">DM Agent Skill</span>
-          <select
-            value={draft.dmAgentSkillId || ''}
-            onChange={(e) => patch('dmAgentSkillId', e.target.value || null)}
-            className="mt-1 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-swiss-accent/20"
-          >
-            <option value="">None (default prompts)</option>
-            {skills.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.title} · {s.agentName}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="block">
-          <span className="text-xs font-semibold text-swiss-muted">Fallback message</span>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="None" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">None (default prompts)</SelectItem>
+              {skills.map((s) => (
+                <SelectItem key={s.id} value={s.id}>
+                  {s.title} · {s.agentName}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="sl-fallback">Fallback message</Label>
           <Textarea
+            id="sl-fallback"
             value={draft.fallbackMessage || ''}
             onChange={(e) => patch('fallbackMessage', e.target.value || null)}
             rows={3}
             placeholder="Used for DM if AI generation fails"
-            className="min-h-0 mt-1 w-full resize-none rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-swiss-accent/20"
           />
-        </label>
+        </div>
       </section>
 
-      <section>
-        <FieldLabel>Lead creation</FieldLabel>
-        <select
+      <section className="space-y-1.5">
+        <Label>Lead creation</Label>
+        <Select
           value={draft.leadCreationRule}
-          onChange={(e) =>
-            patch(
-              'leadCreationRule',
-              e.target.value as SocialListeningSettingsState['leadCreationRule']
-            )
-          }
-          className="mt-2 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-swiss-accent/20"
+          onValueChange={(v) => patch('leadCreationRule', v as PostAgentSettings['leadCreationRule'])}
         >
-          <option value="interested_only">Interested comments only</option>
-          <option value="interested_and_questions">Interested + Questions</option>
-          <option value="never">Never create leads</option>
-        </select>
+          <SelectTrigger className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="interested_only">Interested comments only</SelectItem>
+            <SelectItem value="interested_and_questions">Interested + Questions</SelectItem>
+            <SelectItem value="never">Never create leads</SelectItem>
+          </SelectContent>
+        </Select>
       </section>
 
       <section className="space-y-3">
-        <FieldLabel>Safety limits</FieldLabel>
-        <label className="block">
-          <span className="text-xs font-semibold text-swiss-muted">Max auto-DMs per day (this post)</span>
+        <div className="space-y-1.5">
+          <Label htmlFor="sl-max-dm">Max auto-DMs per day (this post)</Label>
           <Input
+            id="sl-max-dm"
             type="number"
             min={0}
             max={10000}
             value={draft.maxAutoDmsPerDay}
             onChange={(e) => patch('maxAutoDmsPerDay', Math.max(0, Number(e.target.value) || 0))}
-            className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-swiss-accent/20"
           />
-          <p className="mt-1 text-[11px] text-swiss-faint">
+          <p className="text-muted-foreground text-[11px]">
             Sent today: {draft.autoDmsSentToday} / {draft.maxAutoDmsPerDay}
           </p>
-        </label>
-        <div className="flex items-center justify-between gap-3 rounded-xl border border-swiss-line bg-white px-3 py-2.5">
+        </div>
+        <div className="flex items-center justify-between gap-3 rounded-xl border px-3 py-2.5">
           <div>
-            <p className="text-sm font-semibold text-swiss-ink">Working hours only</p>
-            <p className="text-[11px] text-swiss-faint">
-              Outside the window, auto-eligible comments go to review.
-            </p>
+            <p className="text-sm font-medium">Working hours only</p>
+            <p className="text-muted-foreground text-[11px]">Outside the window, auto-eligible comments go to review.</p>
           </div>
-          <Toggle
+          <Switch
             checked={draft.workingHoursOnly}
-            onChange={(v) => patch('workingHoursOnly', v)}
-            label="Working hours only"
+            onCheckedChange={(v) => patch('workingHoursOnly', v)}
+            aria-label="Working hours only"
           />
         </div>
-        {draft.workingHoursOnly && (
+        {draft.workingHoursOnly ? (
           <div className="grid grid-cols-2 gap-2">
-            <label className="block">
-              <span className="text-xs font-semibold text-swiss-muted">Start</span>
+            <div className="space-y-1.5">
+              <Label htmlFor="sl-wh-start">Start</Label>
               <Input
+                id="sl-wh-start"
                 type="time"
                 value={draft.workingHoursStart || '09:00'}
                 onChange={(e) => patch('workingHoursStart', e.target.value)}
-                className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none"
               />
-            </label>
-            <label className="block">
-              <span className="text-xs font-semibold text-swiss-muted">End</span>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="sl-wh-end">End</Label>
               <Input
+                id="sl-wh-end"
                 type="time"
                 value={draft.workingHoursEnd || '18:00'}
                 onChange={(e) => patch('workingHoursEnd', e.target.value)}
-                className="h-auto mt-1 w-full rounded-lg border border-swiss-line px-3 py-2 text-sm outline-none"
               />
-            </label>
+            </div>
           </div>
-        )}
+        ) : null}
       </section>
 
-      {error && (
-        <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700">
-          {error}
-        </p>
-      )}
+      {error ? (
+        <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-700">{error}</p>
+      ) : null}
     </div>
-  );
+  )
 }

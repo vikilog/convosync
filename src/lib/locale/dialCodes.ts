@@ -52,20 +52,20 @@ export const DIAL_BY_ISO: Record<string, string> = {
   US: '1',
   VN: '84',
   ZA: '27',
-};
+}
 
-export type DialOption = { dial: string; label: string };
+export type DialOption = { dial: string; label: string }
 
-const DEFAULT_ISO = 'IN';
+const DEFAULT_ISO = 'IN'
 
 /** Unique +dial options for a select (US/CA share +1). */
 export function listDialCodeOptions(): DialOption[] {
-  const byDial = new Map<string, string[]>();
+  const byDial = new Map<string, string[]>()
   for (const [iso, digits] of Object.entries(DIAL_BY_ISO)) {
-    const dial = `+${digits}`;
-    const list = byDial.get(dial) ?? [];
-    list.push(iso);
-    byDial.set(dial, list);
+    const dial = `+${digits}`
+    const list = byDial.get(dial) ?? []
+    list.push(iso)
+    byDial.set(dial, list)
   }
   return [...byDial.entries()]
     .map(([dial, isos]) => ({
@@ -73,23 +73,21 @@ export function listDialCodeOptions(): DialOption[] {
       label: `${isos.sort().join('/')} ${dial}`,
     }))
     .sort((a, b) => {
-      if (a.dial === '+91') return -1;
-      if (b.dial === '+91') return 1;
-      return a.label.localeCompare(b.label);
-    });
+      if (a.dial === '+91') return -1
+      if (b.dial === '+91') return 1
+      return a.label.localeCompare(b.label)
+    })
 }
 
 export function dialForCountry(iso?: string | null): string {
-  const code = (iso || DEFAULT_ISO).toUpperCase();
-  const digits = DIAL_BY_ISO[code] ?? DIAL_BY_ISO[DEFAULT_ISO];
-  return `+${digits}`;
+  const code = (iso || DEFAULT_ISO).toUpperCase()
+  const digits = DIAL_BY_ISO[code] ?? DIAL_BY_ISO[DEFAULT_ISO]
+  return `+${digits}`
 }
 
 /** Longest-first dial strings like '+971', '+91', '+1'. */
 function knownDials(): string[] {
-  return [...new Set(Object.values(DIAL_BY_ISO).map((d) => `+${d}`))].sort(
-    (a, b) => b.length - a.length
-  );
+  return [...new Set(Object.values(DIAL_BY_ISO).map((d) => `+${d}`))].sort((a, b) => b.length - a.length)
 }
 
 /**
@@ -100,47 +98,50 @@ export function splitPhone(
   phone: string | null | undefined,
   fallbackIso?: string | null
 ): { dial: string; national: string } {
-  const fallback = dialForCountry(fallbackIso);
-  const raw = (phone ?? '').trim();
-  if (!raw) return { dial: fallback, national: '' };
+  const fallback = dialForCountry(fallbackIso)
+  const raw = (phone ?? '').trim()
+  if (!raw) return { dial: fallback, national: '' }
 
-  const dials = knownDials();
+  const dials = knownDials()
 
   if (raw.startsWith('+')) {
-    const match = dials.find((d) => raw.startsWith(d));
+    const match = dials.find((d) => raw.startsWith(d))
     if (match) {
-      return { dial: match, national: raw.slice(match.length).replace(/\D/g, '') };
+      return { dial: match, national: raw.slice(match.length).replace(/\D/g, '') }
     }
-    return { dial: fallback, national: raw.replace(/\D/g, '') };
+    return { dial: fallback, national: raw.replace(/\D/g, '') }
   }
 
-  const digits = raw.replace(/\D/g, '');
-  if (!digits) return { dial: fallback, national: '' };
+  const digits = raw.replace(/\D/g, '')
+  if (!digits) return { dial: fallback, national: '' }
 
-  const fallbackDigits = fallback.replace(/\D/g, '');
-  if (
-    digits.startsWith(fallbackDigits) &&
-    digits.length - fallbackDigits.length >= 6
-  ) {
-    return { dial: fallback, national: digits.slice(fallbackDigits.length) };
+  const fallbackDigits = fallback.replace(/\D/g, '')
+  if (digits.startsWith(fallbackDigits) && digits.length - fallbackDigits.length >= 6) {
+    return { dial: fallback, national: digits.slice(fallbackDigits.length) }
   }
 
   const match = dials.find((d) => {
-    const cc = d.replace(/\D/g, '');
-    return digits.startsWith(cc) && digits.length - cc.length >= 6;
-  });
+    const cc = d.replace(/\D/g, '')
+    return digits.startsWith(cc) && digits.length - cc.length >= 6
+  })
   if (match) {
-    return { dial: match, national: digits.slice(match.replace(/\D/g, '').length) };
+    return { dial: match, national: digits.slice(match.replace(/\D/g, '').length) }
   }
 
-  return { dial: fallback, national: digits };
+  return { dial: fallback, national: digits }
 }
 
 /** Compose E.164; avoids doubling if national already includes the dial digits. */
 export function toE164(dial: string, national: string): string {
-  const digits = national.replace(/\D/g, '');
-  if (!digits) return '';
-  const cc = dial.replace(/\D/g, '') || DIAL_BY_ISO[DEFAULT_ISO];
-  if (digits.startsWith(cc) && digits.length - cc.length >= 6) return `+${digits}`;
-  return `+${cc}${digits}`;
+  const digits = national.replace(/\D/g, '')
+  if (!digits) return ''
+  const cc = dial.replace(/\D/g, '') || DIAL_BY_ISO[DEFAULT_ISO]
+  if (digits.startsWith(cc) && digits.length - cc.length >= 6) return `+${digits}`
+  return `+${cc}${digits}`
+}
+
+/** Backend create/import accept 10–15 digits (E.164 leading + is not counted). */
+export function isValidContactPhone(e164: string): boolean {
+  const n = e164.replace(/\D/g, '').length
+  return n >= 10 && n <= 15
 }

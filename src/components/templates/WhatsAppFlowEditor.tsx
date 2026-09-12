@@ -1,16 +1,12 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
+import { useEffect, useState } from 'react'
+import { ArrowLeft, Code2, LayoutGrid, Loader2, Rocket, Save, Send } from 'lucide-react'
 
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Loader2, Save, Rocket, Send, Code2, LayoutGrid } from 'lucide-react';
-import { api, FlowValidationError } from '../../lib/api';
-import { pathForTemplateEditor } from '../../routes';
-import { WhatsAppFlowVisualBuilder } from './WhatsAppFlowVisualBuilder';
-import { Input } from '../ui/input';
-import { Textarea } from '../ui/textarea';
+import { useConfirm } from '@/components/common/ConfirmDialogProvider'
+import { WhatsAppFlowVisualBuilder } from '@/components/templates/WhatsAppFlowVisualBuilder'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import {
   builderStateToFlowJson,
   emptyBuilderState,
@@ -18,20 +14,13 @@ import {
   newFieldId,
   newScreenId,
   type BuilderState,
-} from './flowBuilderTypes';
+} from '@/lib/flowBuilderTypes'
+import { realFlowsService } from '@/services/realFlows.service'
 
-type Props = {
-  flowId: string | null;
-  onBack: () => void;
-};
-
-const STARTER_TEMPLATES: Record<
-  string,
-  { label: string; description: string; state: () => BuilderState }
-> = {
+const STARTERS: Record<string, { label: string; description: string; state: () => BuilderState }> = {
   lead_capture: {
     label: 'Lead capture',
-    description: 'Name, phone, and a short message — good for inbound inquiries.',
+    description: 'Name, phone, and a short message.',
     state: () => ({
       screens: [
         {
@@ -42,14 +31,7 @@ const STARTER_TEMPLATES: Record<
           fields: [
             { id: newFieldId(), type: 'TextInput', label: 'Full name', name: 'full_name', required: true, options: [] },
             { id: newFieldId(), type: 'TextInput', label: 'Phone number', name: 'phone', required: true, options: [] },
-            {
-              id: newFieldId(),
-              type: 'TextArea',
-              label: 'What are you looking for?',
-              name: 'message',
-              required: false,
-              options: [],
-            },
+            { id: newFieldId(), type: 'TextArea', label: 'What are you looking for?', name: 'message', required: false, options: [] },
           ],
         },
       ],
@@ -57,7 +39,7 @@ const STARTER_TEMPLATES: Record<
   },
   appointment_booking: {
     label: 'Appointment booking',
-    description: 'Preferred date/time + service — good for salons, clinics, consultations.',
+    description: 'Preferred date plus a service.',
     state: () => ({
       screens: [
         {
@@ -75,14 +57,7 @@ const STARTER_TEMPLATES: Record<
               required: true,
               options: ['Consultation', 'Follow-up'],
             },
-            {
-              id: newFieldId(),
-              type: 'DatePicker',
-              label: 'Preferred date',
-              name: 'preferred_date',
-              required: true,
-              options: [],
-            },
+            { id: newFieldId(), type: 'DatePicker', label: 'Preferred date', name: 'preferred_date', required: true, options: [] },
           ],
         },
       ],
@@ -90,7 +65,7 @@ const STARTER_TEMPLATES: Record<
   },
   feedback_survey: {
     label: 'Feedback survey',
-    description: 'A quick satisfaction check-in — one rating + one open comment.',
+    description: 'A rating plus an open comment.',
     state: () => ({
       screens: [
         {
@@ -107,413 +82,324 @@ const STARTER_TEMPLATES: Record<
               required: true,
               options: ['Excellent', 'Good', 'Okay', 'Poor', 'Very poor'],
             },
-            {
-              id: newFieldId(),
-              type: 'TextArea',
-              label: 'Anything you want to add?',
-              name: 'comment',
-              required: false,
-              options: [],
-            },
+            { id: newFieldId(), type: 'TextArea', label: 'Anything you want to add?', name: 'comment', required: false, options: [] },
           ],
         },
       ],
     }),
   },
-};
+}
 
-export const WhatsAppFlowEditor: React.FC<Props> = ({ flowId, onBack }) => {
-  const navigate = useNavigate();
-  const isEdit = Boolean(flowId);
-  const [name, setName] = useState('');
-  const [mode, setMode] = useState<'visual' | 'json'>('visual');
-  const [visualUnavailable, setVisualUnavailable] = useState(false);
-  const [builderState, setBuilderState] = useState<BuilderState>(() => emptyBuilderState());
-  const [jsonText, setJsonText] = useState('');
-  const [status, setStatus] = useState<'draft' | 'published'>('draft');
-  const [loading, setLoading] = useState(isEdit);
-  const [saving, setSaving] = useState(false);
-  const [publishing, setPublishing] = useState(false);
-  const [error, setError] = useState('');
-  const [jsonError, setJsonError] = useState('');
-  const [notice, setNotice] = useState('');
-  const [testPhone, setTestPhone] = useState('');
-  const [sendingTest, setSendingTest] = useState(false);
-  const [testError, setTestError] = useState('');
-  const [testNotice, setTestNotice] = useState('');
+type Props = {
+  flowId: string | null
+  onBack: () => void
+}
+
+export function WhatsAppFlowEditor({ flowId, onBack }: Props) {
+  const confirm = useConfirm()
+  const isEdit = Boolean(flowId)
+  const { data, isLoading } = realFlowsService.useGet(flowId)
+  const createMutation = realFlowsService.useCreate()
+  const updateMutation = realFlowsService.useUpdate()
+  const publishMutation = realFlowsService.usePublish()
+  const sendTestMutation = realFlowsService.useSendTest()
+
+  const [name, setName] = useState('')
+  const [mode, setMode] = useState<'visual' | 'json'>('visual')
+  const [visualUnavailable, setVisualUnavailable] = useState(false)
+  const [builderState, setBuilderState] = useState<BuilderState>(() => emptyBuilderState())
+  const [jsonText, setJsonText] = useState('')
+  const [status, setStatus] = useState<'draft' | 'published'>('draft')
+  const [error, setError] = useState('')
+  const [jsonError, setJsonError] = useState('')
+  const [notice, setNotice] = useState('')
+  const [testPhone, setTestPhone] = useState('')
+  const [testError, setTestError] = useState('')
+  const [testNotice, setTestNotice] = useState('')
+  const [savedId, setSavedId] = useState<string | null>(flowId)
 
   useEffect(() => {
-    if (!flowId) return;
-    let cancelled = false;
-    setLoading(true);
-    api
-      .getWhatsAppFlow(flowId)
-      .then((res) => {
-        if (cancelled) return;
-        const item = (res as { item?: { name: string; flowJson: unknown; status: string } }).item;
-        if (item) {
-          setName(item.name);
-          setStatus(item.status === 'published' ? 'published' : 'draft');
-          const parsed = flowJsonToBuilderState(item.flowJson);
-          if (parsed) {
-            setBuilderState(parsed);
-            setMode('visual');
-          } else {
-            setVisualUnavailable(true);
-            setMode('json');
-          }
-          setJsonText(JSON.stringify(item.flowJson, null, 2));
-        }
-      })
-      .catch((err) => {
-        if (!cancelled) setError(err instanceof Error ? err.message : 'Failed to load flow');
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [flowId]);
+    const item = data?.item
+    if (!item) return
+    setName(item.name)
+    setSavedId(item.id)
+    setStatus(item.status === 'published' ? 'published' : 'draft')
+    const parsed = flowJsonToBuilderState(item.flowJson)
+    if (parsed) {
+      setBuilderState(parsed)
+      setMode('visual')
+      setVisualUnavailable(false)
+    } else {
+      setVisualUnavailable(true)
+      setMode('json')
+    }
+    setJsonText(JSON.stringify(item.flowJson, null, 2))
+  }, [data])
 
   const applyStarter = (key: string) => {
-    const starter = STARTER_TEMPLATES[key];
-    if (!starter) return;
-    const state = starter.state();
-    setBuilderState(state);
-    setJsonText(JSON.stringify(builderStateToFlowJson(state), null, 2));
-    setJsonError('');
-    if (!name.trim()) setName(starter.label);
-  };
+    const starter = STARTERS[key]
+    if (!starter) return
+    const state = starter.state()
+    setBuilderState(state)
+    setJsonText(JSON.stringify(builderStateToFlowJson(state), null, 2))
+    setJsonError('')
+    if (!name.trim()) setName(starter.label)
+  }
 
-  const switchToJson = () => {
-    setJsonText(JSON.stringify(builderStateToFlowJson(builderState), null, 2));
-    setJsonError('');
-    setMode('json');
-  };
-
-  const switchToVisual = () => {
-    let parsedJson: unknown;
+  const resolveFlowJson = (): unknown | null => {
+    if (mode === 'visual') return builderStateToFlowJson(builderState)
     try {
-      parsedJson = JSON.parse(jsonText);
+      return JSON.parse(jsonText)
     } catch {
-      setJsonError('This is not valid JSON — check for a missing comma or bracket.');
-      return;
+      setJsonError('This is not valid JSON — check for a missing comma or bracket.')
+      return null
     }
-    const parsed = flowJsonToBuilderState(parsedJson);
-    if (!parsed) {
-      setJsonError(
-        'This JSON has a shape the visual builder can\'t represent (multiple screens or an unrecognized component) — keep editing it here.'
-      );
-      return;
-    }
-    setJsonError('');
-    setBuilderState(parsed);
-    setMode('visual');
-  };
+  }
 
-  const resolveFlowJson = (): { flowJson: unknown } | null => {
-    if (mode === 'visual') {
-      return { flowJson: builderStateToFlowJson(builderState) };
-    }
-    try {
-      return { flowJson: JSON.parse(jsonText) };
-    } catch {
-      setJsonError('This is not valid JSON — check for a missing comma or bracket.');
-      return null;
-    }
-  };
-
-  const handleSave = async () => {
-    setError('');
-    setJsonError('');
-    setNotice('');
+  const saveDraft = async () => {
+    setError('')
+    setJsonError('')
+    setNotice('')
     if (!name.trim()) {
-      setError('Give this flow a name');
-      return;
+      setError('Give this flow a name')
+      return
     }
-    const resolved = resolveFlowJson();
-    if (!resolved) return;
-    setSaving(true);
+    const flowJson = resolveFlowJson()
+    if (!flowJson) return
     try {
-      if (isEdit && flowId) {
-        await api.updateWhatsAppFlow(flowId, { name: name.trim(), flowJson: resolved.flowJson });
-        setNotice('Saved.');
+      if (savedId) {
+        await updateMutation.mutateAsync({ id: savedId, patch: { name: name.trim(), flowJson } })
+        setNotice('Saved.')
       } else {
-        const res = (await api.createWhatsAppFlow({
-          name: name.trim(),
-          flowJson: resolved.flowJson,
-        })) as { item?: { id: string } };
-        if (res.item?.id) {
-          navigate(pathForTemplateEditor('flow', res.item.id), { replace: true });
-        } else {
-          onBack();
-        }
+        const res = await createMutation.mutateAsync({ name: name.trim(), flowJson })
+        setSavedId(res.item.id)
+        setNotice('Saved.')
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save flow');
-    } finally {
-      setSaving(false);
+      setError(err instanceof Error ? err.message : 'Failed to save flow')
     }
-  };
+  }
 
-  const handlePublish = async () => {
-    setError('');
-    setJsonError('');
-    setNotice('');
-    if (!flowId) return;
-    const resolved = resolveFlowJson();
-    if (!resolved) return;
-    if (
-      !window.confirm(
-        'Publish this flow to WhatsApp? Once published it goes live on your Meta Business Account and the JSON can no longer be edited — you would need to create a new flow instead.'
-      )
-    ) {
-      return;
-    }
-    setPublishing(true);
+  const publish = async () => {
+    if (!savedId) return
+    const flowJson = resolveFlowJson()
+    if (!flowJson) return
+    const ok = await confirm({
+      title: 'Publish this flow to WhatsApp?',
+      description:
+        'Once published it goes live on your Meta Business Account and the JSON can no longer be edited.',
+      confirmLabel: 'Publish',
+    })
+    if (!ok) return
+    setError('')
     try {
-      // Publish whatever is currently in the editor, not just the last-saved
-      // version — otherwise an unsaved edit would silently be dropped.
-      await api.updateWhatsAppFlow(flowId, { name: name.trim(), flowJson: resolved.flowJson });
-      await api.publishWhatsAppFlow(flowId);
-      setStatus('published');
-      setNotice('Published to Meta.');
+      await updateMutation.mutateAsync({ id: savedId, patch: { name: name.trim(), flowJson } })
+      await publishMutation.mutateAsync(savedId)
+      setStatus('published')
+      setNotice('Published to Meta.')
     } catch (err) {
-      if (err instanceof FlowValidationError) {
-        const details = err.validationErrors
-          .map((v) => {
-            const e = v as { message?: string; pointers?: Array<{ path?: string }> };
-            const path = e.pointers?.[0]?.path;
-            return path ? `${path}: ${e.message}` : e.message;
-          })
-          .filter(Boolean)
-          .join(' · ');
-        setError(details ? `${err.message} — ${details}` : err.message);
-      } else {
-        setError(err instanceof Error ? err.message : 'Failed to publish flow');
-      }
-    } finally {
-      setPublishing(false);
+      setError(err instanceof Error ? err.message : 'Failed to publish flow')
     }
-  };
+  }
 
-  const handleSendTest = async () => {
-    setTestError('');
-    setTestNotice('');
-    if (!flowId) return;
+  const sendTest = async () => {
+    if (!savedId) return
+    setTestError('')
+    setTestNotice('')
     if (!testPhone.trim()) {
-      setTestError('Enter a phone number, with country code');
-      return;
+      setTestError('Enter a phone number, with country code')
+      return
     }
-    setSendingTest(true);
     try {
-      await api.sendTestWhatsAppFlow(flowId, { phone: testPhone.trim() });
-      setTestNotice(`Sent to ${testPhone.trim()}.`);
+      await sendTestMutation.mutateAsync({ id: savedId, phone: testPhone.trim() })
+      setTestNotice(`Sent to ${testPhone.trim()}.`)
     } catch (err) {
-      setTestError(err instanceof Error ? err.message : 'Failed to send test message');
-    } finally {
-      setSendingTest(false);
+      setTestError(err instanceof Error ? err.message : 'Failed to send test message')
     }
-  };
+  }
 
-  if (loading) {
+  const locked = status === 'published'
+  const pending = createMutation.isPending || updateMutation.isPending || publishMutation.isPending
+
+  if (isEdit && isLoading) {
     return (
-      <div className="flex justify-center py-24 text-swiss-faint">
-        <Loader2 className="w-8 h-8 animate-spin" />
+      <div className="flex flex-1 items-center justify-center">
+        <Loader2 className="text-muted-foreground size-6 animate-spin" />
       </div>
-    );
+    )
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-4 animate-scale-up">
-      <button
-        type="button"
-        onClick={onBack}
-        className="inline-flex items-center gap-1.5 text-sm font-bold text-swiss-muted hover:text-primary transition-colors w-fit"
-      >
-        <ArrowLeft className="w-3.5 h-3.5" />
-        Back to flows
-      </button>
-
-      {error ? (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {error}
+    <div className="flex h-full min-h-0 flex-1 flex-col">
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b p-4">
+        <Button variant="ghost" size="sm" onClick={onBack}>
+          <ArrowLeft />
+          Back to flows
+        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          {status === 'draft' ? (
+            <>
+              <Button variant="outline" size="sm" disabled={pending} onClick={() => void saveDraft()}>
+                {updateMutation.isPending || createMutation.isPending ? <Loader2 className="animate-spin" /> : <Save />}
+                Save draft
+              </Button>
+              {savedId ? (
+                <Button size="sm" disabled={pending} onClick={() => void publish()}>
+                  {publishMutation.isPending ? <Loader2 className="animate-spin" /> : <Rocket />}
+                  Publish
+                </Button>
+              ) : null}
+            </>
+          ) : null}
         </div>
-      ) : null}
-      {notice ? (
-        <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
-          {notice}
-        </div>
-      ) : null}
+      </div>
 
-      <div className="p-4 bg-white border border-swiss-line space-y-3 shrink-0">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <label className="block flex-1 min-w-[200px]">
-            <span className="text-xs font-bold text-swiss-muted uppercase tracking-wide">
-              Flow name
-            </span>
+      <div className="min-h-0 flex-1 space-y-4 overflow-auto p-4">
+        {error ? (
+          <p className="border-destructive/20 bg-destructive/10 text-destructive rounded-xl border px-3 py-2 text-sm">
+            {error}
+          </p>
+        ) : null}
+        {notice ? (
+          <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+            {notice}
+          </p>
+        ) : null}
+
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="min-w-[200px] flex-1 space-y-1.5">
+            <Label htmlFor="flow-name">Flow name</Label>
             <Input
-              type="text"
+              id="flow-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Appointment booking"
-              disabled={status === 'published'}
-              className="h-auto mt-1 w-full bg-slate-50 border border-swiss-line rounded-xl py-2 px-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-70 disabled:cursor-not-allowed"
+              disabled={locked}
             />
-          </label>
-
-          {status === 'draft' && (
-            <div className="flex bg-slate-100 rounded-xl p-1">
-              <button
+          </div>
+          {status === 'draft' ? (
+            <div className="bg-muted flex rounded-lg p-1">
+              <Button
                 type="button"
-                onClick={switchToVisual}
-                disabled={mode === 'visual'}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 ${
-                  mode === 'visual' ? 'bg-white text-swiss-ink' : 'text-swiss-muted'
-                }`}
+                size="sm"
+                variant={mode === 'visual' ? 'default' : 'ghost'}
+                onClick={() => {
+                  const parsed = flowJsonToBuilderState(
+                    (() => {
+                      try {
+                        return JSON.parse(jsonText || '{}')
+                      } catch {
+                        return null
+                      }
+                    })()
+                  )
+                  if (mode === 'json') {
+                    if (jsonText.trim()) {
+                      try {
+                        JSON.parse(jsonText)
+                      } catch {
+                        setJsonError('This is not valid JSON — check for a missing comma or bracket.')
+                        return
+                      }
+                      const next = flowJsonToBuilderState(JSON.parse(jsonText))
+                      if (!next) {
+                        setJsonError(
+                          "This JSON has a shape the visual builder can't represent — keep editing it here."
+                        )
+                        return
+                      }
+                      setBuilderState(next)
+                    }
+                    setJsonError('')
+                    setMode('visual')
+                    return
+                  }
+                  if (parsed) setBuilderState(parsed)
+                }}
               >
-                <LayoutGrid className="w-3.5 h-3.5" />
-                Visual builder
-              </button>
-              <button
+                <LayoutGrid />
+                Visual
+              </Button>
+              <Button
                 type="button"
-                onClick={switchToJson}
-                disabled={mode === 'json'}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 ${
-                  mode === 'json' ? 'bg-white text-swiss-ink' : 'text-swiss-muted'
-                }`}
+                size="sm"
+                variant={mode === 'json' ? 'default' : 'ghost'}
+                onClick={() => {
+                  setJsonText(JSON.stringify(builderStateToFlowJson(builderState), null, 2))
+                  setJsonError('')
+                  setMode('json')
+                }}
               >
-                <Code2 className="w-3.5 h-3.5" />
-                Advanced (JSON)
-              </button>
+                <Code2 />
+                JSON
+              </Button>
             </div>
-          )}
+          ) : null}
         </div>
 
-        {mode === 'visual' && !isEdit && (
-          <div>
-            <span className="text-xs font-bold text-swiss-muted uppercase tracking-wide">
-              Start from a template
-            </span>
-            <div className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-2">
-              {Object.entries(STARTER_TEMPLATES).map(([key, tpl]) => (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => applyStarter(key)}
-                  className="text-left p-3 rounded-xl border border-swiss-line hover:border-primary/40 hover:bg-primary/5 transition-colors"
-                >
-                  <p className="text-xs font-bold text-swiss-ink">{tpl.label}</p>
-                  <p className="text-[11px] text-swiss-muted mt-0.5">{tpl.description}</p>
-                </button>
-              ))}
-            </div>
+        {mode === 'visual' && !isEdit ? (
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+            {Object.entries(STARTERS).map(([key, tpl]) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => applyStarter(key)}
+                className="hover:bg-muted/60 rounded-xl border p-3 text-left"
+              >
+                <p className="text-xs font-semibold">{tpl.label}</p>
+                <p className="text-muted-foreground mt-0.5 text-[11px]">{tpl.description}</p>
+              </button>
+            ))}
           </div>
-        )}
+        ) : null}
 
-        {visualUnavailable && mode === 'json' && (
-          <p className="text-[11px] text-amber-700">
-            This flow's JSON has a shape the visual builder can't represent, so it opened in
-            Advanced mode.
+        {visualUnavailable && mode === 'json' ? (
+          <p className="text-xs text-amber-700">
+            This flow's JSON has a shape the visual builder can't represent, so it opened in JSON mode.
           </p>
-        )}
-      </div>
+        ) : null}
 
-      <div className="min-h-0 flex-1 flex flex-col">
         {mode === 'visual' ? (
-          <WhatsAppFlowVisualBuilder
-            value={builderState}
-            onChange={setBuilderState}
-            readOnly={status === 'published'}
-          />
+          <WhatsAppFlowVisualBuilder value={builderState} onChange={setBuilderState} readOnly={locked} />
         ) : (
-          <div className="min-h-0 flex-1 flex flex-col p-4 bg-white border border-swiss-line">
-            <span className="text-xs font-bold text-swiss-muted uppercase tracking-wide mb-2">
-              Flow JSON
-            </span>
+          <div className="space-y-2">
+            <Label>Flow JSON</Label>
             <Textarea
               value={jsonText}
               onChange={(e) => setJsonText(e.target.value)}
               spellCheck={false}
-              disabled={status === 'published'}
-              placeholder='{"version": "7.1", "screens": [...]}'
-              className="min-h-0 flex-1 min-h-[320px] w-full bg-slate-50 border border-swiss-line rounded-xl p-3 text-xs font-mono outline-none focus:ring-2 focus:ring-primary/20 resize-none disabled:opacity-60 disabled:cursor-not-allowed"
+              disabled={locked}
+              rows={16}
+              className="font-mono text-xs"
             />
-            {jsonError ? (
-              <p className="mt-2 text-xs font-semibold text-red-600">{jsonError}</p>
-            ) : null}
+            {jsonError ? <p className="text-destructive text-xs">{jsonError}</p> : null}
           </div>
         )}
-      </div>
 
-      {status === 'published' ? (
-        <div className="shrink-0 p-4 bg-white border border-swiss-line space-y-3">
-          <span className="text-xs font-bold text-swiss-muted uppercase tracking-wide">
-            Send a test message
-          </span>
-          <div className="flex flex-wrap gap-2">
-            <Input
-              type="tel"
-              value={testPhone}
-              onChange={(e) => setTestPhone(e.target.value)}
-              placeholder="e.g. 919992492168"
-              className="h-auto flex-1 min-w-[200px] bg-slate-50 border border-swiss-line rounded-xl py-2 px-3 text-sm font-semibold outline-none focus:ring-2 focus:ring-primary/20"
-            />
-            <button
-              type="button"
-              disabled={sendingTest}
-              onClick={() => void handleSendTest()}
-              className="px-4 py-2 rounded-xl text-sm font-bold bg-[#008069] hover:bg-[#006e59] text-white inline-flex items-center gap-1.5 disabled:opacity-60"
-            >
-              {sendingTest ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              ) : (
-                <Send className="w-3.5 h-3.5" />
-              )}
-              Send test
-            </button>
+        {locked ? (
+          <div className="space-y-2 rounded-xl border p-4">
+            <Label>Send a test message</Label>
+            <div className="flex flex-wrap gap-2">
+              <Input
+                type="tel"
+                value={testPhone}
+                onChange={(e) => setTestPhone(e.target.value)}
+                placeholder="e.g. 919992492168"
+                className="min-w-[200px] flex-1"
+              />
+              <Button
+                disabled={sendTestMutation.isPending}
+                onClick={() => void sendTest()}
+              >
+                {sendTestMutation.isPending ? <Loader2 className="animate-spin" /> : <Send />}
+                Send test
+              </Button>
+            </div>
+            {testError ? <p className="text-destructive text-xs">{testError}</p> : null}
+            {testNotice ? <p className="text-xs text-emerald-700">{testNotice}</p> : null}
           </div>
-          {testError ? <p className="text-xs font-semibold text-red-600">{testError}</p> : null}
-          {testNotice ? <p className="text-xs font-semibold text-channel-green">{testNotice}</p> : null}
-        </div>
-      ) : null}
-
-      <div className="shrink-0 flex justify-end gap-2">
-        <button
-          type="button"
-          onClick={onBack}
-          className="px-4 py-2 rounded-xl text-sm font-bold border border-swiss-line bg-white text-swiss-ink hover:bg-gray-50"
-        >
-          Cancel
-        </button>
-        {status === 'draft' && (
-          <button
-            type="button"
-            disabled={saving}
-            onClick={() => void handleSave()}
-            className="px-4 py-2 rounded-xl text-sm font-bold bg-primary hover:bg-primary-hover text-white inline-flex items-center gap-1.5 disabled:opacity-60"
-          >
-            {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-            Save draft
-          </button>
-        )}
-        {isEdit && status === 'draft' && (
-          <button
-            type="button"
-            disabled={publishing}
-            onClick={() => void handlePublish()}
-            className="px-4 py-2 rounded-xl text-sm font-bold bg-[#008069] hover:bg-[#006e59] text-white inline-flex items-center gap-1.5 disabled:opacity-60"
-          >
-            {publishing ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <Rocket className="w-3.5 h-3.5" />
-            )}
-            Publish to Meta
-          </button>
-        )}
+        ) : null}
       </div>
     </div>
-  );
-};
+  )
+}

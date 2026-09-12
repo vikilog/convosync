@@ -1,0 +1,41 @@
+/* Tailwind preflight shrinks images; Easy Email canvas needs the MJML widths. */
+.easy-email-canvas {
+  height: 100%;
+  min-height: 0;
+  isolation: isolate;
+  background: #fff;
+  color: #1d2129;
+  font-family: var(--font-sans);
+
+  /*
+   * Arco Design (the library easy-email is built on) ships a blue accent
+   * theme. These are Arco's own CSS variables — overriding them re-skins
+   * every Arco component (buttons, tabs, radios, focus rings, selection
+   * highlights) to our neutral/near-black shadcn palette without touching
+   * vendor code. Values are our --primary/--foreground/--muted-foreground
+   * tokens pre-resolved to sRGB (Arco expects "r,g,b" triplets, not oklch).
+   */
+  --primary-1: 245, 245, 245;
+  --primary-2: 206, 206, 206;
+  --primary-3: 158, 158, 158;
+  --primary-4: 115, 115, 115;
+  --primary-5: 58, 58, 58;
+  --primary-6: 23, 23, 23;
+  --primary-7: 10, 10, 10;
+  --primary-8: 2, 2, 2;
+  --primary-9: 0, 0, 0;
+  --primary-10: 0, 0, 0;
+
+  --border-radius-small: var(--radius-sm);
+  --border-radius-medium: var(--radius-md);
+  --border-radius-large: var(--radius-lg);
+}
+
+.easy-email-canvas img {
+  max-width: none;
+}
+
+.easy-email-canvas .arco-btn-primary,
+.easy-email-canvas .arco-btn-primary:hover {
+  color: var(--primary-foreground);
+}

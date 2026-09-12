@@ -1,227 +1,134 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
+import { useState } from 'react'
+import { Save, Zap } from 'lucide-react'
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { AlertCircle, Loader2, Save, Zap } from 'lucide-react';
-import { api, parseApiError } from '../../lib/api';
-import { Input } from '../ui/input';
-import { Textarea } from '../ui/textarea';
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
+import { Textarea } from '@/components/ui/textarea'
+import type { ActionMethod, DeveloperAction } from '@/lib/developersMockData'
+import { realDevelopersService } from '@/services/realDevelopers.service'
 
-type DeveloperAction = {
-  id: string;
-  actionType: string;
-  name: string;
-  method: string;
-  url: string;
-  headers: Record<string, string>;
-  timeoutMs: number;
-  enabled: boolean;
-};
+const METHODS: ActionMethod[] = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
 
-const METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] as const;
+function ActionCard({ action }: { action: DeveloperAction }) {
+  const updateAction = realDevelopersService.useUpsertDeveloperAction()
 
-export function ActionsPanel() {
-  const [actions, setActions] = useState<DeveloperAction[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [drafts, setDrafts] = useState<Record<string, DeveloperAction>>({});
-  const [headersText, setHeadersText] = useState<Record<string, string>>({});
+  const [name, setName] = useState(action.name)
+  const [method, setMethod] = useState<ActionMethod>(action.method)
+  const [url, setUrl] = useState(action.url)
+  const [timeoutMs, setTimeoutMs] = useState(action.timeoutMs)
+  const [headersText, setHeadersText] = useState(JSON.stringify(action.headers, null, 2))
+  const [enabled, setEnabled] = useState(action.enabled)
+  const [error, setError] = useState<string | null>(null)
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+  const save = () => {
+    let headers: Record<string, string>
     try {
-      const rows = (await api.getDeveloperActions()) as DeveloperAction[];
-      setActions(rows);
-      const map: Record<string, DeveloperAction> = {};
-      const headersMap: Record<string, string> = {};
-      for (const a of rows) {
-        map[a.actionType] = { ...a };
-        headersMap[a.actionType] = JSON.stringify(a.headers ?? {}, null, 2);
-      }
-      setDrafts(map);
-      setHeadersText(headersMap);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : parseApiError(String(e)));
-    } finally {
-      setLoading(false);
+      headers = headersText.trim() ? JSON.parse(headersText) : {}
+    } catch {
+      setError(`Invalid JSON headers for ${action.actionType}`)
+      return
     }
-  }, []);
-
-  useEffect(() => {
-    void load();
-  }, [load]);
-
-  const updateDraft = (actionType: string, patch: Partial<DeveloperAction>) => {
-    setDrafts((prev) => ({
-      ...prev,
-      [actionType]: { ...prev[actionType], ...patch },
-    }));
-  };
-
-  const saveAction = async (actionType: string) => {
-    const draft = drafts[actionType];
-    if (!draft) return;
-    setSaving(actionType);
-    setError(null);
-    try {
-      let headers: Record<string, string> = {};
-      try {
-        headers = JSON.parse(headersText[actionType] ?? '{}') as Record<string, string>;
-      } catch {
-        setError(`Invalid JSON headers for ${actionType}`);
-        return;
-      }
-
-      const saved = (await api.upsertDeveloperAction({
-        actionType: draft.actionType,
-        name: draft.name,
-        method: draft.method,
-        url: draft.url,
-        headers,
-        timeoutMs: draft.timeoutMs,
-        enabled: draft.enabled,
-      })) as DeveloperAction;
-
-      setActions((prev) => prev.map((a) => (a.actionType === actionType ? saved : a)));
-      setDrafts((prev) => ({ ...prev, [actionType]: saved }));
-      setHeadersText((prev) => ({
-        ...prev,
-        [actionType]: JSON.stringify(saved.headers ?? {}, null, 2),
-      }));
-    } catch (e) {
-      setError(e instanceof Error ? e.message : parseApiError(String(e)));
-    } finally {
-      setSaving(null);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center gap-2 text-sm text-swiss-muted py-8">
-        <Loader2 className="w-4 h-4 animate-spin" />
-        Loading actions…
-      </div>
-    );
+    setError(null)
+    updateAction.mutate({
+      actionType: action.actionType,
+      name: name.trim() || action.name,
+      method,
+      url: url.trim(),
+      timeoutMs,
+      headers,
+      enabled,
+    })
   }
 
   return (
-    <div className="space-y-4">
-      <p className="text-xs text-swiss-muted">
-        Configure HTTP endpoints for AI Agents and Journey Engine. Each action type maps to one
-        external API call.
-      </p>
-
-      {error && (
-        <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-xs text-danger-red">
-          <AlertCircle className="w-4 h-4 shrink-0" />
-          <span>{error}</span>
+    <div className="space-y-3 rounded-2xl border p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-start gap-3">
+          <div className="text-primary flex size-9 shrink-0 items-center justify-center rounded-xl bg-sky-50">
+            <Zap className="size-4" />
+          </div>
+          <div className="min-w-0">
+            <code className="text-primary text-xs font-semibold">{action.actionType}</code>
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="block w-full border-0 bg-transparent p-0 text-sm font-semibold outline-none"
+            />
+          </div>
         </div>
-      )}
+        <div className="flex shrink-0 items-center gap-2">
+          <span className="text-muted-foreground text-xs">Enabled</span>
+          <Switch checked={enabled} onCheckedChange={setEnabled} />
+        </div>
+      </div>
 
-      <div className="space-y-3">
-        {actions.map((action) => {
-          const draft = drafts[action.actionType] ?? action;
-          const headersStr = headersText[action.actionType] ?? '{}';
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-4">
+        <Select value={method} onValueChange={(v) => setMethod(v as ActionMethod)}>
+          <SelectTrigger className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {METHODS.map((m) => (
+              <SelectItem key={m} value={m}>
+                {m}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Input
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          placeholder="https://api.example.com/..."
+          className="sm:col-span-2"
+        />
+        <Input
+          type="number"
+          min={1000}
+          max={120000}
+          value={timeoutMs}
+          onChange={(e) => setTimeoutMs(Number(e.target.value))}
+          title="Timeout (ms)"
+        />
+      </div>
 
-          return (
-            <div
-              key={action.actionType}
-              className="rounded-2xl border border-swiss-line bg-white p-4 space-y-3"
-            >
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-lg bg-sky-50 text-primary">
-                    <Zap className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <code className="text-sm font-bold text-primary">{action.actionType}</code>
-                    <Input
-                      value={draft.name}
-                      onChange={(e) => updateDraft(action.actionType, { name: e.target.value })}
-                      className="h-auto block text-sm font-bold text-swiss-ink bg-transparent border-none p-0 focus:ring-0 w-full"
-                    />
-                  </div>
-                </div>
-                <label className="flex items-center gap-2 text-sm font-semibold text-swiss-muted">
-                  <input
-                    type="checkbox"
-                    checked={draft.enabled}
-                    onChange={(e) =>
-                      updateDraft(action.actionType, { enabled: e.target.checked })
-                    }
-                    className="rounded border-gray-300"
-                  />
-                  Enabled
-                </label>
-              </div>
+      <div className="space-y-1.5">
+        <p className="text-muted-foreground text-xs font-medium">Headers (JSON)</p>
+        <Textarea
+          value={headersText}
+          onChange={(e) => setHeadersText(e.target.value)}
+          rows={3}
+          className="font-mono text-xs"
+        />
+      </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
-                <select
-                  value={draft.method}
-                  onChange={(e) => updateDraft(action.actionType, { method: e.target.value })}
-                  className="rounded-lg border border-swiss-line bg-slate-50 px-2 py-2 text-sm font-semibold"
-                >
-                  {METHODS.map((m) => (
-                    <option key={m} value={m}>
-                      {m}
-                    </option>
-                  ))}
-                </select>
-                <Input
-                  placeholder="https://api.example.com/..."
-                  value={draft.url}
-                  onChange={(e) => updateDraft(action.actionType, { url: e.target.value })}
-                  className="h-auto md:col-span-2 rounded-lg border border-swiss-line bg-slate-50 px-3 py-2 text-xs"
-                />
-                <Input
-                  type="number"
-                  min={1000}
-                  max={120000}
-                  value={draft.timeoutMs}
-                  onChange={(e) =>
-                    updateDraft(action.actionType, { timeoutMs: Number(e.target.value) })
-                  }
-                  className="h-auto rounded-lg border border-swiss-line bg-slate-50 px-2 py-2 text-xs"
-                  title="Timeout (ms)"
-                />
-              </div>
+      {error ? <p className="text-destructive text-xs">{error}</p> : null}
 
-              <div>
-                <label className="text-sm font-bold uppercase text-swiss-muted">Headers (JSON)</label>
-                <Textarea
-                  rows={3}
-                  value={headersStr}
-                  onChange={(e) =>
-                    setHeadersText((prev) => ({
-                      ...prev,
-                      [action.actionType]: e.target.value,
-                    }))
-                  }
-                  className="min-h-0 mt-1 w-full rounded-lg border border-swiss-line bg-slate-50 px-3 py-2 text-xs font-mono"
-                />
-              </div>
-
-              <button
-                type="button"
-                disabled={saving === action.actionType}
-                onClick={() => void saveAction(action.actionType)}
-                className="inline-flex items-center gap-1.5 text-sm font-bold px-3 py-1.5 rounded-full bg-channel-green text-white disabled:opacity-50"
-              >
-                {saving === action.actionType ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <Save className="w-3.5 h-3.5" />
-                )}
-                Save
-              </button>
-            </div>
-          );
-        })}
+      <div className="flex justify-end">
+        <Button size="sm" onClick={save}>
+          <Save />
+          Save
+        </Button>
       </div>
     </div>
-  );
+  )
+}
+
+export function ActionsPanel() {
+  const { data: actions = [] } = realDevelopersService.useDeveloperActions()
+
+  return (
+    <div className="space-y-4">
+      <p className="text-muted-foreground text-xs">
+        Configure HTTP endpoints for AI Agents and Journey Engine. Each action type maps to one external API
+        call.
+      </p>
+      <div className="space-y-3">
+        {actions.map((action) => (
+          <ActionCard key={action.id} action={action} />
+        ))}
+      </div>
+    </div>
+  )
 }

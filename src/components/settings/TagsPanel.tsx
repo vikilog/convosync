@@ -1,211 +1,153 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
+import { useState } from 'react'
+import { ChevronDown, ChevronRight, Loader2, Pencil, Plus, Tag as TagIcon, Trash2 } from 'lucide-react'
 
-import { useCallback, useEffect, useState } from 'react';
-import { ChevronDown, ChevronRight, Loader2, Pencil, Plus, Tag as TagIcon, Trash2 } from 'lucide-react';
-import { api, type WorkspaceTagRecord } from '../../lib/api';
-import { groupTagsByFolder } from '../../lib/tagFolders';
-import { CreateTagModal } from './CreateTagModal';
+import { CreateTagSheet } from '@/components/settings/CreateTagSheet'
+import { useConfirm } from '@/components/common/ConfirmDialogProvider'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { ApiError } from '@/lib/httpClient'
+import { groupTagsByFolder } from '@/lib/tagFolders'
+import { workspaceTagsService, type WorkspaceTagRecord } from '@/services/workspaceTags.service'
 
 export function TagsPanel() {
-  const [tags, setTags] = useState<WorkspaceTagRecord[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editingTag, setEditingTag] = useState<WorkspaceTagRecord | null>(null);
-  const [collapsedFolders, setCollapsedFolders] = useState<Set<string>>(new Set());
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const { data: tags = [], isLoading } = workspaceTagsService.useList()
+  const removeTag = workspaceTagsService.useRemove()
+  const confirm = useConfirm()
+  const [modalOpen, setModalOpen] = useState(false)
+  const [editingTag, setEditingTag] = useState<WorkspaceTagRecord | null>(null)
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set())
+  const [error, setError] = useState<string | null>(null)
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await api.getWorkspaceTags();
-      setTags(res.items);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to load tags');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void load();
-  }, [load]);
+  const groups = groupTagsByFolder(tags)
+  const folders = [...new Set(tags.map((t) => t.folder).filter((f): f is string => Boolean(f)))].sort()
 
   const openCreate = () => {
-    setEditingTag(null);
-    setModalOpen(true);
-  };
-
-  const toggleFolder = (folder: string) => {
-    setCollapsedFolders((prev) => {
-      const next = new Set(prev);
-      if (next.has(folder)) next.delete(folder);
-      else next.add(folder);
-      return next;
-    });
-  };
+    setEditingTag(null)
+    setModalOpen(true)
+  }
 
   const handleDelete = async (tag: WorkspaceTagRecord) => {
-    if (
-      !window.confirm(
-        `Remove "${tag.name}" from the tag registry? Contacts that already have this tag keep it — this only removes it from pickers.`
-      )
-    ) {
-      return;
-    }
-    setDeletingId(tag.id);
-    setError(null);
-    try {
-      await api.deleteWorkspaceTag(tag.id);
-      setTags((prev) => prev.filter((t) => t.id !== tag.id));
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to delete tag');
-    } finally {
-      setDeletingId(null);
-    }
-  };
+    const ok = await confirm({
+      title: `Remove "${tag.name}"?`,
+      description:
+        'Contacts that already have this tag keep it — this only removes it from pickers.',
+      confirmLabel: 'Remove',
+      destructive: true,
+    })
+    if (!ok) return
+    setError(null)
+    removeTag.mutate(tag.id, {
+      onError: (err) => setError(err instanceof ApiError ? err.message : 'Could not delete tag'),
+    })
+  }
 
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="flex h-40 items-center justify-center text-sm text-slate-500">
-        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        Loading…
+      <div className="text-muted-foreground flex items-center gap-2 py-12 text-sm">
+        <Loader2 className="size-4 animate-spin" />
+        Loading tags…
       </div>
-    );
+    )
   }
-
-  const groups = groupTagsByFolder<WorkspaceTagRecord>(tags);
-  const folderNames: string[] = [];
-  for (const tag of tags) {
-    if (tag.folder && !folderNames.includes(tag.folder)) folderNames.push(tag.folder);
-  }
-  const folders = folderNames.sort((a, b) => a.localeCompare(b));
 
   return (
-    <div className="mx-auto max-w-2xl space-y-4 p-1">
+    <div className="space-y-4">
       <div className="flex items-start justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-bold text-dark-navy">Tags</h2>
-          <p className="mt-1 text-sm text-slate-500">
-            Manage the tags contacts can be labeled with — used across Contacts, Journeys, and
-            AgentFlow.
-          </p>
-        </div>
+        <p className="text-muted-foreground text-sm">
+          Tags contacts can be labeled with — used across Contacts, Journeys, and AgentFlow.
+        </p>
         {tags.length > 0 ? (
-          <button
-            type="button"
-            onClick={openCreate}
-            className="inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg bg-swiss-accent px-3 py-2 text-sm font-semibold text-white hover:bg-swiss-accent-hover"
-          >
-            <Plus className="h-4 w-4" />
-            New Tag
-          </button>
+          <Button size="sm" onClick={openCreate}>
+            <Plus />
+            New tag
+          </Button>
         ) : null}
       </div>
 
-      {error ? (
-        <div className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
-          {error}
-        </div>
-      ) : null}
+      {error ? <p className="text-destructive text-sm">{error}</p> : null}
 
       {tags.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-2 rounded-xl border-[0.5px] border-dashed border-border-subtle bg-white py-12 text-center">
-          <TagIcon className="h-8 w-8 text-slate-300" aria-hidden />
-          <p className="text-sm font-bold text-dark-navy">No Tags</p>
-          <p className="text-xs text-slate-500">Create your first Tag!</p>
-          <button
-            type="button"
-            onClick={openCreate}
-            className="mt-2 inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-swiss-accent px-3 py-2 text-sm font-semibold text-white hover:bg-swiss-accent-hover"
-          >
-            <Plus className="h-4 w-4" />
-            New Tag
-          </button>
-        </div>
+        <Card>
+          <CardContent className="flex flex-col items-center gap-2 py-12 text-center">
+            <TagIcon className="text-muted-foreground size-8" />
+            <p className="text-sm font-medium">No tags yet</p>
+            <Button size="sm" onClick={openCreate}>
+              <Plus />
+              New tag
+            </Button>
+          </CardContent>
+        </Card>
       ) : (
         <div className="space-y-3">
           {groups.map((group) => {
-            const isCollapsed = collapsedFolders.has(group.folder);
+            const isCollapsed = collapsed.has(group.folder)
             return (
-              <section
-                key={group.folder}
-                className="overflow-hidden rounded-xl border-[0.5px] border-border-subtle bg-white"
-              >
+              <Card key={group.folder}>
                 <button
                   type="button"
-                  onClick={() => toggleFolder(group.folder)}
-                  className="flex w-full cursor-pointer items-center justify-between gap-2 px-4 py-2.5 text-left hover:bg-surface-muted/60"
+                  className="flex w-full items-center gap-1.5 px-4 py-2.5 text-left text-sm font-medium"
+                  onClick={() =>
+                    setCollapsed((prev) => {
+                      const next = new Set(prev)
+                      if (next.has(group.folder)) next.delete(group.folder)
+                      else next.add(group.folder)
+                      return next
+                    })
+                  }
                 >
-                  <span className="inline-flex items-center gap-1.5 text-sm font-bold text-dark-navy">
-                    {isCollapsed ? (
-                      <ChevronRight className="h-4 w-4 text-slate-400" aria-hidden />
-                    ) : (
-                      <ChevronDown className="h-4 w-4 text-slate-400" aria-hidden />
-                    )}
-                    {group.folder}
-                    <span className="font-normal text-slate-400">({group.items.length})</span>
-                  </span>
+                  {isCollapsed ? (
+                    <ChevronRight className="text-muted-foreground size-4" />
+                  ) : (
+                    <ChevronDown className="text-muted-foreground size-4" />
+                  )}
+                  {group.folder}
+                  <span className="text-muted-foreground font-normal">({group.items.length})</span>
                 </button>
-                {!isCollapsed && (
-                  <div className="divide-y divide-swiss-line border-t border-swiss-line">
+                {!isCollapsed ? (
+                  <CardContent className="divide-y pt-0">
                     {group.items.map((tag) => (
-                      <div key={tag.id} className="flex items-center justify-between gap-2 px-4 py-2.5">
-                        <span className="rounded-md bg-swiss-accent/10 px-2 py-0.5 text-xs font-semibold text-swiss-accent">
+                      <div key={tag.id} className="flex items-center justify-between gap-2 py-2">
+                        <span className="bg-primary/10 text-primary rounded-md px-2 py-0.5 text-xs font-medium">
                           {tag.name}
                         </span>
                         <div className="flex items-center gap-1">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditingTag(tag);
-                              setModalOpen(true);
-                            }}
-                            className="cursor-pointer rounded-md p-1.5 text-slate-400 hover:bg-surface-muted hover:text-slate-700"
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
                             aria-label={`Edit ${tag.name}`}
+                            onClick={() => {
+                              setEditingTag(tag)
+                              setModalOpen(true)
+                            }}
                           >
-                            <Pencil className="h-3.5 w-3.5" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => void handleDelete(tag)}
-                            disabled={deletingId === tag.id}
-                            className="cursor-pointer rounded-md p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600 disabled:opacity-50"
+                            <Pencil />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            className="text-muted-foreground hover:text-destructive"
                             aria-label={`Delete ${tag.name}`}
+                            onClick={() => void handleDelete(tag)}
                           >
-                            {deletingId === tag.id ? (
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                            ) : (
-                              <Trash2 className="h-3.5 w-3.5" />
-                            )}
-                          </button>
+                            <Trash2 />
+                          </Button>
                         </div>
                       </div>
                     ))}
-                  </div>
-                )}
-              </section>
-            );
+                  </CardContent>
+                ) : null}
+              </Card>
+            )
           })}
         </div>
       )}
 
-      <CreateTagModal
+      <CreateTagSheet
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onOpenChange={setModalOpen}
         editingTag={editingTag}
         folders={folders}
-        onSaved={(tag) => {
-          setTags((prev) => {
-            const exists = prev.some((t) => t.id === tag.id);
-            return exists ? prev.map((t) => (t.id === tag.id ? tag : t)) : [...prev, tag];
-          });
-        }}
       />
     </div>
-  );
+  )
 }

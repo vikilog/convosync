@@ -1,32 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { Loader2 } from 'lucide-react';
-import { api } from '../../lib/api';
+import { Loader2 } from 'lucide-react'
+
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
 import {
   defaultRestrictedInboxScope,
   FULL_INBOX_SCOPE,
   type InboxChannel,
   type InboxScope,
-} from '../../lib/inboxScope';
-
-type WhatsAppAccount = {
-  phoneNumberId: string;
-  phoneNumber?: string | null;
-  displayName?: string | null;
-  label?: string | null;
-};
-
-type SocialAccount = {
-  pageId: string;
-  label?: string;
-  username?: string;
-  displayName?: string;
-};
-
-type InboxScopeEditorProps = {
-  value: InboxScope;
-  onChange: (next: InboxScope) => void;
-  disabled?: boolean;
-};
+} from '@/lib/inboxScope'
+import { realIntegrationsService } from '@/services/realIntegrations.service'
 
 const CHANNEL_LABELS: Record<InboxChannel, string> = {
   whatsapp: 'WhatsApp',
@@ -34,235 +16,170 @@ const CHANNEL_LABELS: Record<InboxChannel, string> = {
   messenger: 'Messenger',
   telegram: 'Telegram',
   email: 'Email',
-};
-
-function waLabel(acc: WhatsAppAccount) {
-  return acc.label || acc.displayName || acc.phoneNumber || acc.phoneNumberId;
 }
 
-export function InboxScopeEditor({ value, onChange, disabled }: InboxScopeEditorProps) {
-  const [loading, setLoading] = useState(true);
-  const [whatsappAccounts, setWhatsappAccounts] = useState<WhatsAppAccount[]>([]);
-  const [instagramAccounts, setInstagramAccounts] = useState<SocialAccount[]>([]);
-  const [messengerAccounts, setMessengerAccounts] = useState<SocialAccount[]>([]);
-  const [telegramAccounts, setTelegramAccounts] = useState<SocialAccount[]>([]);
+const SCOPE_CHANNELS: InboxChannel[] = ['whatsapp', 'instagram', 'messenger', 'telegram', 'email']
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
-      try {
-        const [waRaw, igRaw, msRaw, tgRaw] = await Promise.all([
-          api.getWhatsAppAccounts() as Promise<WhatsAppAccount[] | { accounts?: WhatsAppAccount[] }>,
-          api.getInstagramAccounts() as Promise<{ accounts?: SocialAccount[] }>,
-          api.getMessengerAccounts() as Promise<{ accounts?: SocialAccount[] }>,
-          api.getTelegramAccounts() as Promise<{
-            accounts?: Array<{ id: string; botId: string; botUsername?: string; botName?: string; label: string }>;
-          }>,
-        ]);
-        if (cancelled) return;
-        const waList = Array.isArray(waRaw) ? waRaw : (waRaw.accounts ?? []);
-        setWhatsappAccounts(waList);
-        setInstagramAccounts(igRaw.accounts ?? []);
-        setMessengerAccounts(msRaw.accounts ?? []);
-        setTelegramAccounts(
-          (tgRaw.accounts ?? []).map((a) => ({ pageId: a.botId, label: a.label }))
-        );
-      } catch {
-        if (!cancelled) {
-          setWhatsappAccounts([]);
-          setInstagramAccounts([]);
-          setMessengerAccounts([]);
-          setTelegramAccounts([]);
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+export function InboxScopeEditor({
+  value,
+  onChange,
+  disabled,
+}: {
+  value: InboxScope
+  onChange: (next: InboxScope) => void
+  disabled?: boolean
+}) {
+  const { data: wa, isLoading: waLoading } = realIntegrationsService.useWhatsAppAccounts()
+  const { data: ig, isLoading: igLoading } = realIntegrationsService.useInstagramAccounts()
+  const { data: ms, isLoading: msLoading } = realIntegrationsService.useMessengerAccounts()
+  const { data: tg, isLoading: tgLoading } = realIntegrationsService.useTelegramAccounts()
+  const loading = waLoading || igLoading || msLoading || tgLoading
 
-  const restricted = value.mode === 'restricted';
-  const channels = new Set(value.channels ?? []);
-  const accounts = value.accounts ?? {};
+  const restricted = value.mode === 'restricted'
+  const channels = new Set(value.channels ?? [])
+  const accounts = value.accounts ?? {}
 
-  function setRestricted(next: InboxScope) {
-    onChange(next.mode === 'all' ? FULL_INBOX_SCOPE : next);
-  }
+  const setRestricted = (next: InboxScope) => onChange(next.mode === 'all' ? FULL_INBOX_SCOPE : next)
 
-  function toggleMode(all: boolean) {
-    if (disabled) return;
-    if (all) setRestricted(FULL_INBOX_SCOPE);
-    else setRestricted(defaultRestrictedInboxScope());
-  }
-
-  function toggleChannel(channel: InboxChannel) {
-    if (disabled || !restricted) return;
-    const nextChannels = new Set(channels);
-    const nextAccounts = { ...accounts };
+  const toggleChannel = (channel: InboxChannel) => {
+    if (disabled || !restricted) return
+    const nextChannels = new Set(channels)
+    const nextAccounts = { ...accounts }
     if (nextChannels.has(channel)) {
-      nextChannels.delete(channel);
-      delete nextAccounts[channel];
+      nextChannels.delete(channel)
+      delete nextAccounts[channel]
     } else {
-      nextChannels.add(channel);
+      nextChannels.add(channel)
     }
     setRestricted({
       mode: 'restricted',
       channels: [...nextChannels],
       accounts: Object.keys(nextAccounts).length ? nextAccounts : undefined,
-    });
+    })
   }
 
-  function toggleAccount(channel: InboxChannel, accountId: string) {
-    if (disabled || !restricted) return;
-    const current = new Set(accounts[channel] ?? []);
-    if (current.has(accountId)) current.delete(accountId);
-    else current.add(accountId);
-    const nextAccounts = { ...accounts };
-    if (current.size) nextAccounts[channel] = [...current];
-    else delete nextAccounts[channel];
-    const nextChannels = new Set(channels);
-    if (current.size > 0) nextChannels.add(channel);
+  const toggleAccount = (channel: InboxChannel, accountId: string) => {
+    if (disabled || !restricted) return
+    const current = new Set(accounts[channel] ?? [])
+    if (current.has(accountId)) current.delete(accountId)
+    else current.add(accountId)
+    const nextAccounts = { ...accounts }
+    if (current.size) nextAccounts[channel] = [...current]
+    else delete nextAccounts[channel]
+    const nextChannels = new Set(channels)
+    if (current.size > 0) nextChannels.add(channel)
     setRestricted({
       mode: 'restricted',
       channels: [...nextChannels],
       accounts: Object.keys(nextAccounts).length ? nextAccounts : undefined,
-    });
+    })
   }
 
-  function renderAccountList(channel: InboxChannel, list: { id: string; label: string }[]) {
-    if (!list.length) {
-      return (
-        <p className="text-xs text-swiss-faint font-medium pl-6">
-          No connected {CHANNEL_LABELS[channel]} accounts
-        </p>
-      );
-    }
-    const selected = new Set(accounts[channel] ?? []);
-    const channelWide = channels.has(channel) && selected.size === 0;
-    return (
-      <ul className="pl-6 space-y-1">
-        {list.map((item) => (
-          <li key={item.id}>
-            <label className="flex items-center gap-2 text-xs text-swiss-ink cursor-pointer">
-              <input
-                type="checkbox"
-                className="accent-sky-600"
-                disabled={disabled || channelWide}
-                checked={channelWide || selected.has(item.id)}
-                onChange={() => toggleAccount(channel, item.id)}
-              />
-              <span className="font-medium">{item.label}</span>
-            </label>
-          </li>
-        ))}
-        <p className="text-xs text-swiss-faint pt-1">
-          Leave all unchecked with channel enabled for full channel access, or pick specific numbers/pages.
-        </p>
-      </ul>
-    );
+  const lists: Record<InboxChannel, { id: string; label: string }[]> = {
+    whatsapp: (wa?.accounts ?? []).map((a) => ({
+      id: a.phoneNumberId,
+      label: a.label || a.displayName || a.phoneNumber || a.phoneNumberId,
+    })),
+    instagram: (ig?.accounts ?? []).map((a) => ({
+      id: a.instagramUserId,
+      label: a.label || a.username || a.displayName || a.instagramUserId,
+    })),
+    messenger: (ms?.accounts ?? []).map((a) => ({
+      id: a.pageId,
+      label: a.label || a.displayName || a.pageName || a.pageId,
+    })),
+    telegram: (tg?.accounts ?? []).map((a) => ({
+      id: a.botId,
+      label: a.label || a.botUsername || a.botName || a.botId,
+    })),
+    email: [],
   }
 
   return (
-    <div className="space-y-3 rounded-xl border border-swiss-line bg-white p-3">
+    <div className="space-y-3 rounded-lg border p-3">
       <div>
-        <p className="text-sm font-bold uppercase tracking-wide text-swiss-muted">Inbox access</p>
-        <p className="text-xs text-swiss-faint mt-0.5">
+        <p className="text-sm font-medium">Inbox access</p>
+        <p className="text-muted-foreground mt-0.5 text-xs">
           Choose which channels and connected numbers/pages this user can manage.
         </p>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        <label className="inline-flex items-center gap-2 text-xs font-medium text-swiss-ink">
+      <div className="flex flex-wrap gap-4">
+        <Label className="flex items-center gap-2 font-normal">
           <input
             type="radio"
             name="inbox-scope-mode"
             checked={!restricted}
             disabled={disabled}
-            onChange={() => toggleMode(true)}
+            onChange={() => onChange(FULL_INBOX_SCOPE)}
           />
           All connected inboxes
-        </label>
-        <label className="inline-flex items-center gap-2 text-xs font-medium text-swiss-ink">
+        </Label>
+        <Label className="flex items-center gap-2 font-normal">
           <input
             type="radio"
             name="inbox-scope-mode"
             checked={restricted}
             disabled={disabled}
-            onChange={() => toggleMode(false)}
+            onChange={() => onChange(defaultRestrictedInboxScope())}
           />
           Selected only
-        </label>
+        </Label>
       </div>
 
-      {restricted && (
+      {restricted ? (
         <div className="space-y-3">
           {loading ? (
-            <div className="flex items-center gap-2 text-xs text-swiss-muted py-2">
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            <p className="text-muted-foreground flex items-center gap-2 text-xs">
+              <Loader2 className="size-3.5 animate-spin" />
               Loading connected accounts…
-            </div>
+            </p>
           ) : (
-            (['whatsapp', 'instagram', 'messenger', 'telegram', 'email'] as InboxChannel[]).map((channel) => {
-              if (channel === 'email') {
-                return (
-                  <div key={channel} className="space-y-1.5">
-                    <label className="flex items-center gap-2 text-sm font-bold text-swiss-ink">
-                      <input
-                        type="checkbox"
-                        className="accent-sky-600"
-                        checked={channels.has(channel)}
-                        disabled={disabled}
-                        onChange={() => toggleChannel(channel)}
-                      />
-                      {CHANNEL_LABELS[channel]}
-                    </label>
-                  </div>
-                );
-              }
-              const list =
-                channel === 'whatsapp'
-                  ? whatsappAccounts.map((a) => ({
-                      id: a.phoneNumberId,
-                      label: waLabel(a),
-                    }))
-                  : channel === 'instagram'
-                    ? instagramAccounts.map((a) => ({
-                        id: a.pageId,
-                        label: a.label || a.username || a.displayName || a.pageId,
-                      }))
-                    : channel === 'telegram'
-                      ? telegramAccounts.map((a) => ({
-                          id: a.pageId,
-                          label: a.label || a.pageId,
-                        }))
-                      : messengerAccounts.map((a) => ({
-                          id: a.pageId,
-                          label: a.label || a.displayName || a.pageId,
-                        }));
-
+            SCOPE_CHANNELS.map((channel) => {
+              const list = lists[channel]
+              const selected = new Set(accounts[channel] ?? [])
+              const channelWide = channels.has(channel) && selected.size === 0
               return (
                 <div key={channel} className="space-y-1.5">
-                  <label className="flex items-center gap-2 text-sm font-bold text-swiss-ink">
-                    <input
-                      type="checkbox"
-                      className="accent-sky-600"
-                      checked={channels.has(channel) || (accounts[channel]?.length ?? 0) > 0}
+                  <Label className="flex items-center gap-2 text-sm font-medium">
+                    <Checkbox
+                      checked={channels.has(channel) || selected.size > 0}
                       disabled={disabled}
-                      onChange={() => toggleChannel(channel)}
+                      onCheckedChange={() => toggleChannel(channel)}
                     />
                     {CHANNEL_LABELS[channel]}
-                  </label>
-                  {(channels.has(channel) || (accounts[channel]?.length ?? 0) > 0) &&
-                    renderAccountList(channel, list)}
+                  </Label>
+                  {channel !== 'email' && (channels.has(channel) || selected.size > 0) ? (
+                    list.length === 0 ? (
+                      <p className="text-muted-foreground pl-6 text-xs">
+                        No connected {CHANNEL_LABELS[channel]} accounts
+                      </p>
+                    ) : (
+                      <ul className="space-y-1 pl-6">
+                        {list.map((item) => (
+                          <li key={item.id}>
+                            <Label className="flex items-center gap-2 text-xs font-normal">
+                              <Checkbox
+                                disabled={disabled || channelWide}
+                                checked={channelWide || selected.has(item.id)}
+                                onCheckedChange={() => toggleAccount(channel, item.id)}
+                              />
+                              {item.label}
+                            </Label>
+                          </li>
+                        ))}
+                        <p className="text-muted-foreground pt-1 text-xs">
+                          Leave all unchecked with the channel enabled for full channel access.
+                        </p>
+                      </ul>
+                    )
+                  ) : null}
                 </div>
-              );
+              )
             })
           )}
         </div>
-      )}
+      ) : null}
     </div>
-  );
+  )
 }

@@ -1,62 +1,21 @@
-import { useEffect, useState, type ReactNode } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import { AppLoadingScreen } from '../ui/AppLoadingScreen';
-import { api } from '../../lib/api';
-import {
-  getOnboardingCache,
-  isOnboardingCacheFresh,
-  setOnboardingCache,
-} from '../../lib/session';
+import { type ReactNode } from 'react'
+import { Navigate, useLocation } from 'react-router-dom'
 
-type Props = {
-  children: ReactNode;
-};
+import { PageSkeleton } from '@/components/PageSkeleton'
+import { getOnboardingCache, isOnboardingCacheFresh } from '@/lib/onboardingCache'
+import { profileResource } from '@/services/profile.service'
 
-export function OnboardingGuard({ children }: Props) {
-  const location = useLocation();
-  const [checking, setChecking] = useState(true);
-  const [needsOnboarding, setNeedsOnboarding] = useState(false);
+export function OnboardingGuard({ children }: { children: ReactNode }) {
+  const location = useLocation()
+  const cached = getOnboardingCache()
+  const { data, isPending, isError } = profileResource.useOnboarding()
+  const completed =
+    data?.onboardingCompleted ??
+    (isOnboardingCacheFresh(cached) ? cached!.onboardingCompleted : undefined)
 
-  useEffect(() => {
-    let cancelled = false;
-
-    const cached = getOnboardingCache();
-    if (isOnboardingCacheFresh(cached) && cached) {
-      setNeedsOnboarding(!cached.onboardingCompleted);
-      setChecking(false);
-      return;
-    }
-
-    (async () => {
-      try {
-        const state = await api.getOnboarding();
-        if (cancelled) return;
-        setOnboardingCache({
-          onboardingCompleted: state.onboardingCompleted,
-          onboardingStep: state.onboardingStep,
-          progressPercent: state.progressPercent,
-          onboardingSkippedSteps: state.onboardingSkippedSteps,
-        });
-        setNeedsOnboarding(!state.onboardingCompleted);
-      } catch {
-        if (!cancelled) setNeedsOnboarding(false);
-      } finally {
-        if (!cancelled) setChecking(false);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [location.pathname]);
-
-  if (checking) {
-    return <AppLoadingScreen message="Preparing your workspace" />;
+  if (completed === undefined && !isError && isPending) return <PageSkeleton />
+  if (!isError && completed === false) {
+    return <Navigate to="/onboarding" replace state={{ from: location.pathname }} />
   }
-
-  if (needsOnboarding) {
-    return <Navigate to="/onboarding" replace state={{ from: location.pathname }} />;
-  }
-
-  return <>{children}</>;
+  return <>{children}</>
 }

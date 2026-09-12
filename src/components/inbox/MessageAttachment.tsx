@@ -1,79 +1,62 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
+import { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { createPortal } from 'react-dom'
+import { Download, FileText, MapPin, X } from 'lucide-react'
 
-import { useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
-import { Download, FileText, Loader2, MapPin, X } from 'lucide-react';
-import type { ChatMessage } from '../../types';
-import { api } from '../../lib/api';
+import { useObjectUrl } from '@/hooks/useBlobUrl'
+import { httpClient } from '@/lib/httpClient'
+import { messageMediaFromMetadata, type MessageMedia } from '@/lib/messageMedia'
+import type { ConversationMessage } from '@/services/realInbox.service'
 
-type Props = {
-  message: ChatMessage;
-};
+const MEDIA_FRAME = 'relative w-[min(280px,72vw)] aspect-[4/3] overflow-hidden rounded-md bg-muted'
 
-/** Fixed frame so skeleton → media doesn't jump (WhatsApp-style). */
-const MEDIA_FRAME =
-  'relative w-[min(280px,72vw)] aspect-[4/3] overflow-hidden rounded-md bg-[#ece5dd]';
-
-function MediaSkeleton({ className = MEDIA_FRAME }: { className?: string }) {
-  return (
-    <div className={`${className} animate-pulse`} aria-hidden>
-      <div className="absolute inset-0 bg-gradient-to-br from-[#d1d7db]/90 via-[#c4ccd2]/70 to-[#d1d7db]/90" />
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="h-8 w-8 rounded-full bg-white/40" />
-      </div>
-    </div>
-  );
-}
-
-function SendingClockOverlay() {
-  return (
-    <div className="absolute inset-0 flex items-center justify-center rounded-md bg-black/25 pointer-events-none">
-      <div className="flex items-center gap-2 rounded-full bg-black/45 px-3 py-1.5 text-white">
-        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-        <span className="text-meta font-semibold">Sending…</span>
-      </div>
-    </div>
-  );
+function useAttachmentUrl(messageId: string, index?: number, media?: MessageMedia) {
+  const remoteUrl = media?.mediaUrl
+  const hasFile = Boolean(media?.storageKey) || index !== undefined
+  const enabled = Boolean(!remoteUrl && hasFile)
+  const { data: blob, isPending, isError } = useQuery({
+    queryKey: ['inbox-attachment', messageId, index ?? null],
+    queryFn: () =>
+      httpClient.getBlob(
+        index === undefined
+          ? `/conversations/messages/${messageId}/attachment`
+          : `/conversations/messages/${messageId}/attachment?index=${index}`,
+      ),
+    enabled,
+    staleTime: Infinity,
+  })
+  const blobUrl = useObjectUrl(blob)
+  return { url: remoteUrl || blobUrl || null, loading: enabled && isPending && !blob, error: isError }
 }
 
 function downloadFromUrl(url: string, fileName: string) {
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = fileName;
-  a.rel = 'noopener';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
+  const a = document.createElement('a')
+  a.href = url
+  a.download = fileName
+  a.rel = 'noopener'
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
 }
 
 function MediaPreviewModal({
   url,
   type,
   fileName,
-  caption,
   onClose,
 }: {
-  url: string;
-  type: 'image' | 'sticker' | 'video';
-  fileName: string;
-  caption?: string;
-  onClose: () => void;
+  url: string
+  type: 'image' | 'sticker' | 'video'
+  fileName: string
+  onClose: () => void
 }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.removeEventListener('keydown', onKey);
-      document.body.style.overflow = prev;
-    };
-  }, [onClose]);
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [onClose])
 
   return createPortal(
     <div
@@ -83,318 +66,143 @@ function MediaPreviewModal({
       aria-label="Media preview"
       onClick={onClose}
     >
-      <div
-        className="flex items-center justify-between gap-3 px-4 py-3 shrink-0"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <p className="text-sm text-white/90 font-medium truncate min-w-0">
-          {caption || fileName}
-        </p>
-        <div className="flex items-center gap-2 shrink-0">
+      <div className="flex shrink-0 items-center justify-between gap-3 px-4 py-3" onClick={(e) => e.stopPropagation()}>
+        <p className="min-w-0 truncate text-sm font-medium text-white/90">{fileName}</p>
+        <div className="flex shrink-0 items-center gap-2">
           <button
             type="button"
             onClick={() => downloadFromUrl(url, fileName)}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-white/15 hover:bg-white/25 px-3 py-2 text-sm font-bold text-white transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-white/15 px-3 py-2 text-sm font-medium text-white hover:bg-white/25"
           >
-            <Download className="w-4 h-4" />
+            <Download className="size-4" />
             Download
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-white/15 hover:bg-white/25 text-white transition-colors"
+            className="inline-flex size-9 items-center justify-center rounded-lg bg-white/15 text-white hover:bg-white/25"
             aria-label="Close preview"
           >
-            <X className="w-5 h-5" />
+            <X className="size-5" />
           </button>
         </div>
       </div>
-
-      <div
-        className="flex-1 flex items-center justify-center p-4 min-h-0"
-        onClick={onClose}
-      >
-        <div
-          className="max-w-full max-h-full"
-          onClick={(e) => e.stopPropagation()}
-        >
+      <div className="flex min-h-0 flex-1 items-center justify-center p-4" onClick={onClose}>
+        <div className="max-h-full max-w-full" onClick={(e) => e.stopPropagation()}>
           {type === 'video' ? (
-            <video
-              src={url}
-              controls
-              autoPlay
-              className="max-w-[min(960px,94vw)] max-h-[min(80vh,900px)] rounded-lg bg-black"
-            />
+            <video src={url} controls autoPlay className="max-h-[min(80vh,900px)] max-w-[min(960px,94vw)] rounded-lg bg-black" />
           ) : (
-            <img
-              src={url}
-              alt={caption || fileName}
-              className="max-w-[min(960px,94vw)] max-h-[min(80vh,900px)] rounded-lg object-contain"
-            />
+            <img src={url} alt={fileName} className="max-h-[min(80vh,900px)] max-w-[min(960px,94vw)] rounded-lg object-contain" />
           )}
         </div>
       </div>
     </div>,
     document.body
-  );
+  )
 }
 
-export function MessageAttachment({ message }: Props) {
-  const [blobUrl, setBlobUrl] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
-  const [previewOpen, setPreviewOpen] = useState(false);
+function CarouselTile({ messageId, index }: { messageId: string; index: number }) {
+  const { url, loading } = useAttachmentUrl(messageId, index, { storageKey: 'item' })
+  if (loading || !url) return <div className="bg-muted size-24 shrink-0 animate-pulse rounded-md" />
+  return <img src={url} alt="" className="size-24 shrink-0 rounded-md object-cover" />
+}
 
-  const type = message.type ?? 'text';
-  const media = message.media;
-  const hasFile = Boolean(media?.storageKey);
-  const remoteUrl = media?.mediaUrl;
-  const isSending = message.status === 'sending';
-  const localPreviewUrl = message.localPreviewUrl;
-  const isMediaType =
-    type === 'image' ||
-    type === 'video' ||
-    type === 'audio' ||
-    type === 'document' ||
-    type === 'sticker' ||
-    type === 'location';
-
-  useEffect(() => {
-    if (localPreviewUrl || remoteUrl || !hasFile || type === 'location') {
-      setLoading(false);
-      return;
-    }
-    let active = true;
-    let objectUrl: string | null = null;
-
-    setLoading(true);
-    setError(false);
-
-    void api
-      .fetchMessageAttachment(message.id)
-      .then((blob) => {
-        if (!active) return;
-        objectUrl = URL.createObjectURL(blob);
-        setBlobUrl(objectUrl);
-      })
-      .catch(() => {
-        if (active) setError(true);
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-
-    return () => {
-      active = false;
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
-    };
-  }, [hasFile, localPreviewUrl, remoteUrl, message.id, type]);
-
-  const previewUrl = localPreviewUrl || remoteUrl || blobUrl;
-  const showSkeleton = !previewUrl && loading && hasFile;
+export function MessageAttachment({ message }: { message: ConversationMessage }) {
+  const type = message.type ?? 'text'
+  const media = messageMediaFromMetadata(message.metadata)
+  const { url, loading, error } = useAttachmentUrl(message.id, undefined, media)
+  const [previewOpen, setPreviewOpen] = useState(false)
+  const caption = media?.caption?.trim()
+  const fileName = media?.fileName || 'attachment'
 
   if (type === 'location' && media?.latitude != null && media?.longitude != null) {
-    const label = media.locationName || media.locationAddress || 'Shared location';
-    const mapsUrl = `https://www.google.com/maps?q=${media.latitude},${media.longitude}`;
+    const label = media.locationName || media.locationAddress || 'Shared location'
+    const mapsUrl = `https://www.google.com/maps?q=${media.latitude},${media.longitude}`
     return (
       <a
         href={mapsUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-start gap-2 rounded-lg border border-[#d1d7db] bg-[#f0f2f5] px-3 py-2 text-[#111b21] hover:bg-[#e9edef] transition-colors"
+        className="bg-muted/60 hover:bg-muted flex items-start gap-2 rounded-lg border px-3 py-2"
       >
-        <MapPin className="w-4 h-4 shrink-0 text-[#128C7E] mt-0.5" />
+        <MapPin className="text-channel-green mt-0.5 size-4 shrink-0" />
         <span className="text-sm leading-snug">
-          <span className="font-semibold block">{label}</span>
-          <span className="text-meta text-[#667781]">Open in Maps</span>
+          <span className="block font-semibold">{label}</span>
+          <span className="text-muted-foreground text-xs">Open in Maps</span>
         </span>
       </a>
-    );
+    )
   }
 
-  if (!hasFile && !localPreviewUrl && !remoteUrl) {
-    if (isMediaType) {
-      // Still show a document chip when we know the type/name but URL failed.
-      if (type === 'document') {
-        const label = media?.fileName || message.content || '📎 Document';
-        // `media.fileName` isn't reliably a real filename — some sources (e.g. an
-        // IG share) stash the whole caption there. Only single-line-truncate when
-        // it actually looks like a filename; otherwise wrap it like a message
-        // (long, unbroken content here was forcing the bubble wider than its
-        // container and showing a horizontal scrollbar).
-        const isRealFileName =
-          Boolean(media?.fileName) &&
-          media!.fileName!.length <= 100 &&
-          !media!.fileName!.includes('\n');
-        return (
-          <div className="flex items-start gap-2 rounded-lg border border-[#d1d7db] bg-[#f0f2f5] px-3 py-2 text-[#111b21] max-w-full">
-            <FileText className="w-4 h-4 shrink-0 text-[#128C7E] mt-0.5" />
-            <span
-              className={`min-w-0 flex-1 text-sm font-medium ${
-                isRealFileName ? 'truncate' : 'whitespace-pre-wrap break-words'
-              }`}
-            >
-              {label}
-            </span>
-          </div>
-        );
-      }
-      return (
-        <p className="text-sm text-[#667781] italic px-1.5 py-2">
-          {message.content === '[media]' || message.content === 'Media unavailable'
-            ? 'Media unavailable'
-            : message.content}
-        </p>
-      );
-    }
-    return null;
+  if (type === 'carousel' && (media?.items?.length ?? 0) > 0) {
+    return (
+      <div className="flex max-w-[min(280px,72vw)] gap-1.5 overflow-x-auto">
+        {media!.items!.map((_, i) => (
+          <CarouselTile key={i} messageId={message.id} index={i} />
+        ))}
+      </div>
+    )
   }
 
-  if (showSkeleton) {
-    if (type === 'audio') {
-      return (
-        <div className="min-w-[220px] h-10 rounded-full bg-[#d1d7db]/70 animate-pulse" />
-      );
+  if (loading) {
+    if (type === 'audio') return <div className="bg-muted h-10 w-[220px] animate-pulse rounded-full" />
+    if (type === 'document') {
+      return <div className="bg-muted h-10 w-[200px] animate-pulse rounded-lg" />
     }
+    return <div className={`${MEDIA_FRAME} animate-pulse`} />
+  }
+
+  if (!url) {
     if (type === 'document') {
       return (
-        <div className="flex items-center gap-2 min-w-[200px] rounded-lg border border-[#E5E7EB] bg-[#f0f2f5] px-3 py-2.5 animate-pulse">
-          <div className="h-4 w-4 rounded bg-[#d1d7db]" />
-          <div className="h-3 flex-1 rounded bg-[#d1d7db]" />
+        <div className="bg-muted/60 flex items-start gap-2 rounded-lg border px-3 py-2">
+          <FileText className="text-channel-green mt-0.5 size-4 shrink-0" />
+          <span className="text-sm font-medium break-words">{fileName || message.content || 'Document'}</span>
         </div>
-      );
+      )
     }
-    return <MediaSkeleton />;
+    return (
+      <p className="text-muted-foreground px-1.5 py-2 text-sm italic">
+        {error || message.content === '[media]' ? 'Media unavailable' : message.content}
+      </p>
+    )
   }
-
-  if (!previewUrl && (error || !blobUrl)) {
-    return <p className="text-sm text-[#667781] px-1.5 py-2">{message.content}</p>;
-  }
-
-  const caption = media?.caption?.trim();
-  const fileName =
-    media?.fileName ||
-    message.content.match(/^\[(?:file|document|image|video|audio)\]\s*(.+)$/i)?.[1]?.trim() ||
-    'attachment';
-  const canPreview =
-    Boolean(previewUrl) &&
-    !isSending &&
-    (type === 'image' || type === 'sticker' || type === 'video');
 
   if (type === 'image' || type === 'sticker') {
     return (
       <div className="w-fit max-w-full">
-        <button
-          type="button"
-          disabled={!canPreview}
-          onClick={() => canPreview && setPreviewOpen(true)}
-          className={`${MEDIA_FRAME} block text-left ${canPreview ? 'cursor-zoom-in' : 'cursor-default'}`}
-        >
-          <img
-            src={previewUrl ?? undefined}
-            alt={caption || fileName}
-            className={`absolute inset-0 h-full w-full object-cover ${isSending ? 'opacity-90' : ''}`}
-          />
-          {isSending && <SendingClockOverlay />}
+        <button type="button" onClick={() => setPreviewOpen(true)} className={`${MEDIA_FRAME} block cursor-zoom-in text-left`}>
+          <img src={url} alt={caption || fileName} className="absolute inset-0 size-full object-cover" />
         </button>
-        {caption && (
-          <p className="text-sm whitespace-pre-wrap break-words px-1.5 pt-1 pb-5 text-[#111b21]">
-            {caption}
-          </p>
-        )}
-        {previewOpen && previewUrl && (
-          <MediaPreviewModal
-            url={previewUrl}
-            type={type}
-            fileName={fileName.endsWith('.jpg') || fileName.includes('.') ? fileName : `${fileName}.jpg`}
-            caption={caption}
-            onClose={() => setPreviewOpen(false)}
-          />
-        )}
+        {caption ? <p className="px-1.5 pt-1 text-sm break-words whitespace-pre-wrap">{caption}</p> : null}
+        {previewOpen ? (
+          <MediaPreviewModal url={url} type={type} fileName={fileName} onClose={() => setPreviewOpen(false)} />
+        ) : null}
       </div>
-    );
+    )
   }
 
   if (type === 'video') {
     return (
       <div className="w-fit max-w-full">
-        <button
-          type="button"
-          disabled={!canPreview}
-          onClick={() => canPreview && setPreviewOpen(true)}
-          className={`${MEDIA_FRAME} bg-black block text-left ${canPreview ? 'cursor-zoom-in' : 'cursor-default'}`}
-        >
-          <video
-            src={previewUrl ?? undefined}
-            muted
-            playsInline
-            preload="metadata"
-            className={`absolute inset-0 h-full w-full object-contain pointer-events-none ${isSending ? 'opacity-90' : ''}`}
-          />
-          {!isSending && (
-            <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <span className="h-12 w-12 rounded-full bg-black/50 flex items-center justify-center">
-                <span className="ml-1 border-y-8 border-y-transparent border-l-[14px] border-l-white" />
-              </span>
-            </span>
-          )}
-          {isSending && <SendingClockOverlay />}
-        </button>
-        {caption && (
-          <p className="text-sm whitespace-pre-wrap break-words px-1.5 pt-1 pb-5 text-[#111b21]">
-            {caption}
-          </p>
-        )}
-        {previewOpen && previewUrl && (
-          <MediaPreviewModal
-            url={previewUrl}
-            type="video"
-            fileName={fileName.includes('.') ? fileName : `${fileName}.mp4`}
-            caption={caption}
-            onClose={() => setPreviewOpen(false)}
-          />
-        )}
+        <video src={url} controls className="max-h-64 max-w-[min(280px,72vw)] rounded-md bg-black" />
+        {caption ? <p className="px-1.5 pt-1 text-sm break-words whitespace-pre-wrap">{caption}</p> : null}
       </div>
-    );
+    )
   }
 
   if (type === 'audio') {
-    return (
-      <div className="relative min-w-[220px]">
-        <audio src={previewUrl ?? undefined} controls={!isSending} className="w-full h-9" />
-        {isSending && (
-          <div className="flex items-center gap-2 mt-1 text-meta text-[#667781] font-medium">
-            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            Sending…
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  if (isSending) {
-    return (
-      <div className="flex items-center gap-2 rounded-lg border border-[#d1d7db] bg-[#f0f2f5] px-3 py-2.5 text-[#111b21] max-w-full">
-        <Loader2 className="w-4 h-4 shrink-0 animate-spin text-[#128C7E]" />
-        <span className="min-w-0 flex-1 truncate text-sm font-medium">{fileName}</span>
-      </div>
-    );
+    return <audio src={url} controls className="max-w-[min(280px,72vw)]" />
   }
 
   return (
-    <div className="flex items-center gap-2 rounded-lg border border-[#d1d7db] bg-[#f0f2f5] px-3 py-2 text-[#111b21] max-w-full">
-      <FileText className="w-4 h-4 shrink-0 text-[#128C7E]" />
-      <span className="min-w-0 flex-1 truncate text-sm font-medium">{fileName}</span>
-      {previewUrl && (
-        <button
-          type="button"
-          onClick={() => downloadFromUrl(previewUrl, fileName)}
-          className="inline-flex items-center gap-1 shrink-0 text-xs font-bold text-[#128C7E] hover:underline"
-        >
-          <Download className="w-3.5 h-3.5" />
-          Download
-        </button>
-      )}
-    </div>
-  );
+    <a
+      href={url}
+      download={fileName}
+      className="bg-muted/60 hover:bg-muted flex items-start gap-2 rounded-lg border px-3 py-2"
+    >
+      <FileText className="text-channel-green mt-0.5 size-4 shrink-0" />
+      <span className="text-sm font-medium break-words">{fileName}</span>
+    </a>
+  )
 }

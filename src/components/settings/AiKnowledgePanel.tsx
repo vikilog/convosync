@@ -1,545 +1,282 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
+import { useEffect, useState } from 'react'
+import { AlertCircle, CheckCircle2, Database, Eye, EyeOff, Loader2, RefreshCw } from 'lucide-react'
 
-import React, { useCallback, useEffect, useState } from 'react';
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Progress } from '@/components/ui/progress'
+import { ApiError } from '@/lib/httpClient'
 import {
-  AlertCircle,
-  CheckCircle2,
-  Database,
-  Eye,
-  EyeOff,
-  Loader2,
-  RefreshCw,
-} from 'lucide-react';
-import { api, parseApiError } from '../../lib/api';
-import { Input } from '../ui/input';
+  aiKnowledgeService,
+  type KnowledgeCollection,
+  type KnowledgeSyncStatus,
+} from '@/services/aiKnowledge.service'
 
-type SyncStatus = 'pending' | 'syncing' | 'success' | 'failed';
-
-type SyncProgress = {
-  step: number;
-  totalSteps: number;
-  message: string;
-};
-
-type KnowledgeConfig = {
-  venueId: string | null;
-  connectionStringMasked: string | null;
-  hasConnectionString: boolean;
-  updatedAt: string | null;
-};
-
-type KnowledgeRecord = {
-  venueId: string;
-  status: SyncStatus;
-  syncedAt: string | null;
-  errorMessage: string | null;
-  syncProgress: SyncProgress | null;
-  data: Record<string, unknown>;
-};
-
-const STATUS_LABELS: Record<SyncStatus, string> = {
+const STATUS_LABEL: Record<KnowledgeSyncStatus, string> = {
   pending: 'Not synced',
   syncing: 'Syncing…',
   success: 'Synced',
   failed: 'Failed',
-};
-
-const STATUS_STYLES: Record<SyncStatus, string> = {
-  pending: 'bg-white text-swiss-muted border-gray-200',
-  syncing: 'bg-sky-50 text-swiss-accent border-swiss-accent/20',
-  success: 'bg-[#e6f7ec] text-accent-green border-[#5dfd8a]/40',
-  failed: 'bg-red-50 text-danger-red border-red-200',
-};
-
-function formatDate(iso: string | null): string {
-  if (!iso) return '—';
-  try {
-    return new Date(iso).toLocaleString();
-  } catch {
-    return iso;
-  }
 }
 
-type CollectionItem = {
-  name: string;
-  synced: boolean;
-  documentsFound: number | null;
-};
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => window.setTimeout(resolve, ms));
-}
-
-function countPreviewItems(data: Record<string, unknown>): string {
-  const parts: string[] = [];
-  const salon = data.salon as Record<string, unknown> | undefined;
-  const workingHours = salon?.workingHours;
-  if (Array.isArray(workingHours) && workingHours.length > 0) {
-    parts.push(`${workingHours.length} working days`);
-  } else if (
-    workingHours &&
-    typeof workingHours === 'object' &&
-    Object.keys(workingHours as object).length > 0
-  ) {
-    parts.push('working hours set');
-  }
-
-  for (const key of [
-    'services',
-    'staff',
-    'customersSummary',
-    'memberships',
-    'vouchers',
-    'products',
-    'faqs',
-    'policies',
-    'branches',
-    'serviceCategories',
-  ]) {
-    const arr = data[key];
-    if (Array.isArray(arr) && arr.length > 0) {
-      parts.push(`${arr.length} ${key}`);
-    }
-  }
-  return parts.length ? parts.join(' · ') : 'No records found';
+function sleep(ms: number) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms))
 }
 
 export function AiKnowledgePanel() {
-  const [connectionString, setConnectionString] = useState('');
-  const [venueId, setVenueId] = useState('');
-  const [showConnection, setShowConnection] = useState(false);
-  const [config, setConfig] = useState<KnowledgeConfig | null>(null);
-  const [record, setRecord] = useState<KnowledgeRecord | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [syncingCollection, setSyncingCollection] = useState<string | null>(null);
-  const [syncingAll, setSyncingAll] = useState(false);
-  const [loadingCollections, setLoadingCollections] = useState(false);
-  const [collections, setCollections] = useState<CollectionItem[]>([]);
-  const [syncAllProgress, setSyncAllProgress] = useState<{ current: number; total: number; name: string } | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const { data: config, isLoading } = aiKnowledgeService.useConfig()
+  const [venueId, setVenueId] = useState('')
+  const [connectionString, setConnectionString] = useState('')
+  const [showConnection, setShowConnection] = useState(false)
+  const [collections, setCollections] = useState<KnowledgeCollection[]>([])
+  const [error, setError] = useState<string | null>(null)
+  const [syncingCollection, setSyncingCollection] = useState<string | null>(null)
+  const [syncProgress, setSyncProgress] = useState<{ current: number; total: number; name: string } | null>(
+    null
+  )
 
-  const loadRecord = useCallback(async (id: string) => {
-    try {
-      const data = (await api.getAiKnowledge(id)) as KnowledgeRecord;
-      setRecord(data);
-      return data;
-    } catch {
-      setRecord(null);
-      return null;
-    }
-  }, []);
-
-  const loadInitial = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const cfg = (await api.getAiKnowledgeConfig()) as KnowledgeConfig;
-      setConfig(cfg);
-      if (cfg.venueId) {
-        setVenueId(cfg.venueId);
-        await loadRecord(cfg.venueId);
-      }
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to load settings');
-    } finally {
-      setLoading(false);
-    }
-  }, [loadRecord]);
+  const { data: record } = aiKnowledgeService.useRecord(config?.venueId ?? null)
+  const listCollections = aiKnowledgeService.useListCollections()
+  const syncCollection = aiKnowledgeService.useSyncCollection()
 
   useEffect(() => {
-    void loadInitial();
-  }, [loadInitial]);
+    if (config?.venueId) setVenueId(config.venueId)
+  }, [config?.venueId])
 
-  const requireCredentials = () => {
+  const credentials = () => {
     if (!connectionString.trim() || !venueId.trim()) {
-      setError('Connection string and Venue ID are both required.');
-      return false;
+      setError('Connection string and Venue ID are both required.')
+      return null
     }
-    return true;
-  };
+    return { connectionString: connectionString.trim(), venueId: venueId.trim() }
+  }
 
-  const handleLoadCollections = async () => {
-    if (!requireCredentials()) return;
-    setLoadingCollections(true);
-    setError(null);
-    try {
-      const result = (await api.listAiKnowledgeCollections({
-        connectionString: connectionString.trim(),
-        venueId: venueId.trim(),
-      })) as { collections: CollectionItem[] };
-      setCollections(result.collections);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : parseApiError(String(e)));
-    } finally {
-      setLoadingCollections(false);
-    }
-  };
+  const handleLoad = () => {
+    const input = credentials()
+    if (!input) return
+    setError(null)
+    listCollections.mutate(input, {
+      onSuccess: (res) => setCollections(res.collections),
+      onError: (err) => setError(err instanceof ApiError ? err.message : 'Could not load collections'),
+    })
+  }
 
-  const handleSyncCollection = async (collectionName: string) => {
-    if (!requireCredentials()) return;
-    setSyncingCollection(collectionName);
-    setError(null);
-    try {
-      const result = (await api.syncAiKnowledgeCollection({
-        connectionString: connectionString.trim(),
-        venueId: venueId.trim(),
-        collectionName,
-      })) as {
-        documentsFound: number;
-        data: Record<string, unknown>;
-        syncedCollections: string[];
-      };
-
-      setCollections((prev) =>
-        prev.map((c) =>
-          c.name === collectionName
-            ? { ...c, synced: true, documentsFound: result.documentsFound }
-            : c
-        )
-      );
-
-      setRecord({
-        venueId: venueId.trim(),
-        status: 'success',
-        syncedAt: new Date().toISOString(),
-        errorMessage: null,
-        syncProgress: null,
-        data: result.data ?? {},
-      });
-
-      setConfig((c) => ({
-        venueId: venueId.trim(),
-        connectionStringMasked: c?.connectionStringMasked ?? 'mongodb://****',
-        hasConnectionString: true,
-        updatedAt: new Date().toISOString(),
-      }));
-    } catch (e) {
-      setError(e instanceof Error ? e.message : parseApiError(String(e)));
-    } finally {
-      setSyncingCollection(null);
-    }
-  };
+  const handleSyncOne = (collectionName: string) => {
+    const input = credentials()
+    if (!input) return
+    setError(null)
+    setSyncingCollection(collectionName)
+    syncCollection.mutate(
+      { ...input, collectionName },
+      {
+        onSuccess: (res) => {
+          setCollections((prev) =>
+            prev.map((c) =>
+              c.name === collectionName
+                ? { ...c, synced: true, documentsFound: res.documentsFound }
+                : c
+            )
+          )
+        },
+        onError: (err) => setError(err instanceof ApiError ? err.message : 'Sync failed'),
+        onSettled: () => setSyncingCollection(null),
+      }
+    )
+  }
 
   const handleSyncAll = async () => {
-    if (!requireCredentials()) return;
-
-    setSyncingAll(true);
-    setError(null);
-
-    let list = collections;
+    const input = credentials()
+    if (!input) return
+    setError(null)
+    let list = collections
     if (list.length === 0) {
-      setLoadingCollections(true);
       try {
-        const result = (await api.listAiKnowledgeCollections({
-          connectionString: connectionString.trim(),
-          venueId: venueId.trim(),
-        })) as { collections: CollectionItem[] };
-        list = result.collections;
-        setCollections(list);
-      } catch (e) {
-        setError(e instanceof Error ? e.message : parseApiError(String(e)));
-        setSyncingAll(false);
-        setLoadingCollections(false);
-        return;
-      } finally {
-        setLoadingCollections(false);
+        const res = await listCollections.mutateAsync(input)
+        list = res.collections
+        setCollections(list)
+      } catch (err) {
+        setError(err instanceof ApiError ? err.message : 'Could not load collections')
+        return
       }
     }
-
     if (list.length === 0) {
-      setError('No collections found in this database.');
-      setSyncingAll(false);
-      return;
+      setError('No collections found in this database.')
+      return
     }
-
-    const total = list.length;
-
     try {
       for (let i = 0; i < list.length; i++) {
-        const col = list[i];
-        setSyncAllProgress({ current: i + 1, total, name: col.name });
-        setSyncingCollection(col.name);
-
-        const result = (await api.syncAiKnowledgeCollection({
-          connectionString: connectionString.trim(),
-          venueId: venueId.trim(),
-          collectionName: col.name,
-        })) as { documentsFound: number; data: Record<string, unknown> };
-
+        const col = list[i]
+        if (!col) continue
+        setSyncProgress({ current: i + 1, total: list.length, name: col.name })
+        setSyncingCollection(col.name)
+        const res = await syncCollection.mutateAsync({ ...input, collectionName: col.name })
         setCollections((prev) =>
           prev.map((c) =>
-            c.name === col.name
-              ? { ...c, synced: true, documentsFound: result.documentsFound }
-              : c
+            c.name === col.name ? { ...c, synced: true, documentsFound: res.documentsFound } : c
           )
-        );
-
-        setRecord({
-          venueId: venueId.trim(),
-          status: 'success',
-          syncedAt: new Date().toISOString(),
-          errorMessage: null,
-          syncProgress: null,
-          data: result.data ?? {},
-        });
-
-        await sleep(300);
+        )
+        await sleep(300)
       }
-
-      setConfig((c) => ({
-        venueId: venueId.trim(),
-        connectionStringMasked: c?.connectionStringMasked ?? 'mongodb://****',
-        hasConnectionString: true,
-        updatedAt: new Date().toISOString(),
-      }));
-    } catch (e) {
-      setError(e instanceof Error ? e.message : parseApiError(String(e)));
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Sync failed')
     } finally {
-      setSyncingAll(false);
-      setSyncingCollection(null);
-      setSyncAllProgress(null);
-      void loadRecord(venueId.trim());
+      setSyncingCollection(null)
+      setSyncProgress(null)
     }
-  };
+  }
 
-  const syncing = syncingAll || syncingCollection !== null;
-  const status: SyncStatus = syncing ? 'syncing' : record?.status ?? 'pending';
+  const syncing = syncingCollection !== null
+  const status: KnowledgeSyncStatus = syncing ? 'syncing' : (record?.status ?? 'pending')
 
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="flex items-center gap-2 text-sm text-swiss-muted">
-        <Loader2 className="w-4 h-4 animate-spin" />
-        Loading AI Knowledge settings…
+      <div className="text-muted-foreground flex items-center gap-2 py-12 text-sm">
+        <Loader2 className="size-4 animate-spin" />
+        Loading AI Knowledge…
       </div>
-    );
+    )
   }
 
   return (
-    <div className="max-w-3xl space-y-6">
-      <div className="bg-white border border-swiss-line p-5 ">
-        <div className="flex items-start gap-3 mb-5">
-          <div className="p-2.5 rounded-xl bg-sky-50 text-swiss-accent">
-            <Database className="w-5 h-5" />
-          </div>
-          <div>
-            <h3 className="text-sm font-bold text-swiss-ink">External salon database</h3>
-            <p className="text-xs text-swiss-muted mt-1 leading-relaxed">
-              Sync one MongoDB collection at a time — no timeout, full control. Start with{' '}
-              <span className="font-mono font-semibold">Venue</span>, then Service, Client, etc.
-            </p>
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <div>
-            <label className="block text-meta font-bold text-swiss-muted uppercase tracking-wide mb-1.5">
-              MongoDB connection string
-            </label>
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Database className="size-4" />
+            External salon database
+          </CardTitle>
+          <p className="text-muted-foreground text-xs">
+            Sync MongoDB collections scoped to a venue. Start with Venue, then Service, Client, etc.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="ak-conn">MongoDB connection string</Label>
             <div className="relative">
               <Input
+                id="ak-conn"
                 type={showConnection ? 'text' : 'password'}
                 value={connectionString}
                 onChange={(e) => setConnectionString(e.target.value)}
                 placeholder="mongodb+srv://user:pass@cluster/db"
-                className="h-auto w-full rounded-xl border border-swiss-line bg-white px-3 py-2.5 pr-10 text-xs font-mono focus:ring-2 focus:ring-swiss-accent/20 focus:border-swiss-accent outline-none"
+                className="pr-10 font-mono text-xs"
                 autoComplete="off"
               />
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon-sm"
+                className="absolute top-1/2 right-1.5 -translate-y-1/2"
                 onClick={() => setShowConnection((v) => !v)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-swiss-faint hover:text-swiss-accent"
                 aria-label={showConnection ? 'Hide connection string' : 'Show connection string'}
               >
-                {showConnection ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
+                {showConnection ? <EyeOff /> : <Eye />}
+              </Button>
             </div>
-            {config?.hasConnectionString && config.connectionStringMasked && (
-              <p className="text-xs text-swiss-faint mt-1 font-mono">
-                Saved: {config.connectionStringMasked}
-              </p>
-            )}
+            {config?.hasConnectionString && config.connectionStringMasked ? (
+              <p className="text-muted-foreground font-mono text-xs">Saved: {config.connectionStringMasked}</p>
+            ) : null}
           </div>
-
-          <div>
-            <label className="block text-meta font-bold text-swiss-muted uppercase tracking-wide mb-1.5">
-              Venue ID
-            </label>
+          <div className="space-y-1.5">
+            <Label htmlFor="ak-venue">Venue ID</Label>
             <Input
-              type="text"
+              id="ak-venue"
               value={venueId}
               onChange={(e) => setVenueId(e.target.value)}
               placeholder="Salon / venue / branch ObjectId"
-              className="h-auto w-full rounded-xl border border-swiss-line bg-white px-3 py-2.5 text-xs font-mono focus:ring-2 focus:ring-swiss-accent/20 focus:border-swiss-accent outline-none"
+              className="font-mono text-xs"
             />
           </div>
-
-          {error && (
-            <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-xs text-danger-red">
-              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-              <span>{error}</span>
-            </div>
-          )}
-
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => void handleLoadCollections()}
-              disabled={loadingCollections || syncing}
-              className="inline-flex items-center gap-2 rounded-xl border border-swiss-line bg-white hover:bg-slate-50 disabled:opacity-60 text-swiss-ink text-sm font-bold px-4 py-2.5 transition-colors"
-            >
-              {loadingCollections ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <Database className="w-4 h-4" />
-              )}
-              {loadingCollections ? 'Loading…' : 'Load collections'}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => void handleSyncAll()}
-              disabled={syncing || loadingCollections}
-              className="inline-flex items-center gap-2 rounded-xl bg-swiss-accent hover:bg-swiss-accent-hover disabled:opacity-60 text-white text-sm font-bold px-4 py-2.5 transition-colors"
-            >
-              {syncingAll ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <RefreshCw className="w-4 h-4" />
-              )}
-              {syncingAll ? 'Syncing all…' : 'Sync all (one by one)'}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {collections.length > 0 && (
-      <div className="bg-white border border-swiss-line p-5 ">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-meta font-bold text-swiss-faint uppercase tracking-wide">
-              Collections ({collections.filter((c) => c.synced).length}/{collections.length} synced)
+          {error ? (
+            <p className="text-destructive flex items-start gap-1.5 text-xs">
+              <AlertCircle className="mt-0.5 size-3.5 shrink-0" />
+              {error}
             </p>
-            {syncAllProgress && (
-              <p className="text-sm font-semibold text-swiss-accent">
-                {syncAllProgress.current}/{syncAllProgress.total} — {syncAllProgress.name}
-              </p>
-            )}
+          ) : null}
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" size="sm" disabled={listCollections.isPending || syncing} onClick={handleLoad}>
+              {listCollections.isPending ? <Loader2 className="animate-spin" /> : <Database />}
+              Load collections
+            </Button>
+            <Button size="sm" disabled={syncing || listCollections.isPending} onClick={() => void handleSyncAll()}>
+              {syncProgress ? <Loader2 className="animate-spin" /> : <RefreshCw />}
+              {syncProgress ? 'Syncing all…' : 'Sync all'}
+            </Button>
           </div>
-          <div className="max-h-80 overflow-y-auto rounded-xl border border-swiss-line divide-y divide-slate-200">
-            {collections.map((col) => {
-              const isActive = syncingCollection === col.name;
-              return (
-                <div
-                  key={col.name}
-                  className="flex items-center justify-between gap-3 px-3 py-2.5 bg-white hover:bg-slate-50"
-                >
-                  <div className="min-w-0">
-                    <p className="text-xs font-mono font-semibold text-swiss-ink truncate">{col.name}</p>
-                    <p className="text-xs text-swiss-muted mt-0.5">
-                      {col.synced
-                        ? col.documentsFound != null
-                          ? `${col.documentsFound} document(s) synced`
-                          : 'Synced'
-                        : 'Not synced yet'}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    {col.synced && (
-                      <CheckCircle2 className="w-4 h-4 text-accent-green" aria-hidden />
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => void handleSyncCollection(col.name)}
-                      disabled={syncing}
-                      className="inline-flex items-center gap-1 rounded-full border border-swiss-accent/20 bg-swiss-accent/10 hover:bg-swiss-accent hover:text-white disabled:opacity-50 text-swiss-accent text-sm font-bold px-2.5 py-1.5 transition-colors"
-                    >
-                      {isActive ? (
-                        <Loader2 className="w-3 h-3 animate-spin" />
-                      ) : (
-                        <RefreshCw className="w-3 h-3" />
-                      )}
-                      Sync
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
+        </CardContent>
+      </Card>
 
-      <div className="bg-white border border-swiss-line p-5 space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+      {collections.length > 0 ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              Collections ({collections.filter((c) => c.synced).length}/{collections.length} synced)
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="divide-y">
+            {collections.map((col) => (
+              <div key={col.name} className="flex items-center justify-between gap-3 py-2.5">
+                <div className="min-w-0">
+                  <p className="truncate font-mono text-xs font-medium">{col.name}</p>
+                  <p className="text-muted-foreground text-xs">
+                    {col.synced
+                      ? col.documentsFound != null
+                        ? `${col.documentsFound} document(s) synced`
+                        : 'Synced'
+                      : 'Not synced yet'}
+                  </p>
+                </div>
+                <div className="flex shrink-0 items-center gap-2">
+                  {col.synced ? <CheckCircle2 className="size-4 text-emerald-600" /> : null}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={syncing}
+                    onClick={() => handleSyncOne(col.name)}
+                  >
+                    {syncingCollection === col.name ? <Loader2 className="animate-spin" /> : <RefreshCw />}
+                    Sync
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      ) : null}
+
+      <Card>
+        <CardContent className="flex flex-wrap items-center justify-between gap-3 pt-6">
           <div>
-            <p className="text-meta font-bold text-swiss-faint uppercase tracking-wide">Status</p>
-            <span
-              className={`inline-flex items-center gap-1.5 mt-1 px-2.5 py-1 rounded-lg border text-meta font-bold ${STATUS_STYLES[status]}`}
-            >
-              {status === 'success' && <CheckCircle2 className="w-3.5 h-3.5" />}
-              {status === 'syncing' && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-              {status === 'failed' && <AlertCircle className="w-3.5 h-3.5" />}
-              {STATUS_LABELS[status]}
-            </span>
+            <p className="text-muted-foreground text-xs">Status</p>
+            <Badge variant={status === 'success' ? 'default' : 'outline'} className="mt-1">
+              {STATUS_LABEL[status]}
+            </Badge>
           </div>
           <div className="text-right">
-            <p className="text-meta font-bold text-swiss-faint uppercase tracking-wide">Last sync</p>
-            <p className="text-sm font-semibold text-swiss-ink mt-1">
-              {formatDate(record?.syncedAt ?? config?.updatedAt ?? null)}
+            <p className="text-muted-foreground text-xs">Last sync</p>
+            <p className="text-sm font-medium">
+              {record?.syncedAt || config?.updatedAt
+                ? new Date(record?.syncedAt ?? config?.updatedAt ?? '').toLocaleString()
+                : '—'}
             </p>
           </div>
-        </div>
-
-        {(syncing || syncAllProgress) && (
-          <div>
-            <div className="flex justify-between text-sm font-semibold text-swiss-muted mb-1">
-              <span>
-                {syncAllProgress
-                  ? `Syncing ${syncAllProgress.name}…`
-                  : syncingCollection
-                    ? `Syncing ${syncingCollection}…`
-                    : 'Syncing…'}
-              </span>
-              {syncAllProgress && (
-                <span>
-                  {Math.round((syncAllProgress.current / syncAllProgress.total) * 100)}%
-                </span>
-              )}
-            </div>
-            {syncAllProgress && (
-              <div className="h-2 rounded-full bg-sky-50 overflow-hidden">
-                <div
-                  className="h-full bg-swiss-accent transition-all duration-300"
-                  style={{
-                    width: `${Math.round((syncAllProgress.current / syncAllProgress.total) * 100)}%`,
-                  }}
-                />
-              </div>
-            )}
-          </div>
-        )}
-
-        {record?.errorMessage && status === 'failed' && (
-          <p className="text-xs text-danger-red">{record.errorMessage}</p>
-        )}
-      </div>
-
-      {record?.data && Object.keys(record.data).length > 0 && (
-      <div className="bg-white border border-swiss-line p-5 ">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <p className="text-meta font-bold text-swiss-faint uppercase tracking-wide">
-                Preview data
-              </p>
-              <p className="text-xs text-swiss-muted mt-1">{countPreviewItems(record.data)}</p>
-            </div>
-          </div>
-          <pre className="max-h-96 overflow-auto rounded-xl bg-[#0f0f1a] text-slate-300 p-4 text-meta font-mono leading-relaxed">
-            {JSON.stringify(record.data, null, 2)}
-          </pre>
-        </div>
-      )}
+        </CardContent>
+        {syncProgress ? (
+          <CardContent>
+            <p className="mb-1 text-xs">
+              Syncing {syncProgress.name}… {syncProgress.current}/{syncProgress.total}
+            </p>
+            <Progress value={Math.round((syncProgress.current / syncProgress.total) * 100)} />
+          </CardContent>
+        ) : null}
+        {record?.errorMessage && status === 'failed' ? (
+          <CardContent>
+            <p className="text-destructive text-xs">{record.errorMessage}</p>
+          </CardContent>
+        ) : null}
+      </Card>
     </div>
-  );
+  )
 }

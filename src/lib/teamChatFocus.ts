@@ -1,24 +1,24 @@
-/** Peer open in the visible Team Chat tab (KeepAlive-hidden does not count). */
-let activePeerUserId = '';
-let teamChatVisible = false;
+/** Peer open on the visible Team Chat page. Hidden/other routes do not count. */
+let activePeerUserId = ''
+let teamChatVisible = false
 
 export function setTeamChatVisible(visible: boolean) {
-  teamChatVisible = visible;
+  teamChatVisible = visible
 }
 
 export function setActiveTeamChatPeerId(peerUserId: string) {
-  activePeerUserId = peerUserId;
+  activePeerUserId = peerUserId
 }
 
 export function getActiveTeamChatPeerId() {
-  return activePeerUserId;
+  return activePeerUserId
 }
 
 /** Peer id to treat as "currently reading" for toast skip + unread exclusion. */
 export function getViewingTeamChatPeerId() {
-  return teamChatVisible ? activePeerUserId : '';
+  return teamChatVisible ? activePeerUserId : ''
 }
 
 export function isViewingTeamChatPeer(peerUserId: string) {
-  return Boolean(peerUserId) && getViewingTeamChatPeerId() === peerUserId;
+  return Boolean(peerUserId) && getViewingTeamChatPeerId() === peerUserId
 }
