@@ -28,6 +28,10 @@ export type VirtualNumberStatus = {
   releasedAt?: string | null
   missedCallAutoReplyEnabled?: boolean
   missedCallMessage?: string | null
+  missedCallTemplateId?: string | null
+  userMissedCallAutoReplyEnabled?: boolean
+  userMissedCallMessage?: string | null
+  userMissedCallTemplateId?: string | null
 }
 
 /** One number the workspace actually owns — a workspace can hold several. */
@@ -42,6 +46,10 @@ export type OwnedNumber = {
   activatedAt: string | null
   missedCallAutoReplyEnabled: boolean
   missedCallMessage: string | null
+  missedCallTemplateId: string | null
+  userMissedCallAutoReplyEnabled: boolean
+  userMissedCallMessage: string | null
+  userMissedCallTemplateId: string | null
 }
 
 export type CallPricing = {
@@ -179,6 +187,10 @@ export const virtualNumberService = {
         description?: string
         missedCallAutoReplyEnabled?: boolean
         missedCallMessage?: string
+        missedCallTemplateId?: string | null
+        userMissedCallAutoReplyEnabled?: boolean
+        userMissedCallMessage?: string
+        userMissedCallTemplateId?: string | null
       }) => httpClient.patch<VirtualNumberStatus>(`/virtual-number/${id}/settings`, body),
       onSuccess: () => void queryClient.invalidateQueries({ queryKey: NUMBERS_KEY }),
     })

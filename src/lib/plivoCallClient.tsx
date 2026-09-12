@@ -1,9 +1,12 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import Plivo from 'plivo-browser-sdk'
 import type { Client as PlivoSdkClient } from 'plivo-browser-sdk/client'
 
 import { getSocket } from '@/lib/socket'
 import { virtualNumberService } from '@/services/virtualNumber.service'
+
+const CALL_LOG_QUERY_KEY = ['virtualNumber', 'callLog']
 
 export type CallDirection = 'inbound' | 'outbound'
 export type CallPhase = 'idle' | 'ringing-out' | 'ringing-in' | 'active' | 'ended'
@@ -65,6 +68,13 @@ export function PlivoCallProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<PlivoCallState>(IDLE_STATE)
   const phaseRef = useRef(state.phase)
   phaseRef.current = state.phase
+  const queryClient = useQueryClient()
+  /** Call list rows only get their final status/duration once the backend's hangup
+   * webhook lands — refetch on every call-ending signal so it shows up without a
+   * manual reload. Partial key match invalidates every number's call log. */
+  const refreshCallLog = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: CALL_LOG_QUERY_KEY })
+  }, [queryClient])
 
   // The SIP registration behind this client has a short TTL and needs the tab's JS
   // timers running to keep renewing — browsers throttle those in a backgrounded tab,
@@ -119,11 +129,11 @@ export function PlivoCallProvider({ children }: { children: ReactNode }) {
     }
 
     const onIncomingCallEnded = (payload: { callUuid: string | null }) => {
-      setState((s) =>
-        s.phase === 'ringing-in' && (!payload.callUuid || s.callUuid === payload.callUuid)
-          ? { ...IDLE_STATE, ready: s.ready }
-          : s,
-      )
+      setState((s) => {
+        if (s.phase !== 'ringing-in' || (payload.callUuid && s.callUuid !== payload.callUuid)) return s
+        refreshCallLog()
+        return { ...IDLE_STATE, ready: s.ready }
+      })
     }
 
     socket.on('incoming_call', onIncomingCall)
@@ -132,7 +142,7 @@ export function PlivoCallProvider({ children }: { children: ReactNode }) {
       socket.off('incoming_call', onIncomingCall)
       socket.off('incoming_call_ended', onIncomingCallEnded)
     }
-  }, [])
+  }, [refreshCallLog])
 
   const startTimer = useCallback(() => {
     if (timerRef.current) return
@@ -176,7 +186,11 @@ export function PlivoCallProvider({ children }: { children: ReactNode }) {
     })
 
     client.on('onIncomingCallCanceled', () => {
-      setState((s) => (s.phase === 'ringing-in' ? { ...IDLE_STATE, ready: s.ready } : s))
+      setState((s) => {
+        if (s.phase !== 'ringing-in') return s
+        refreshCallLog()
+        return { ...IDLE_STATE, ready: s.ready }
+      })
     })
 
     client.on('onCallAnswered', () => {
@@ -186,11 +200,13 @@ export function PlivoCallProvider({ children }: { children: ReactNode }) {
 
     client.on('onCallTerminated', () => {
       stopTimer()
+      refreshCallLog()
       setState((s) => ({ ...IDLE_STATE, ready: s.ready }))
     })
 
     client.on('onCallFailed', (reason: string) => {
       stopTimer()
+      refreshCallLog()
       setState((s) => ({
         ...IDLE_STATE,
         ready: s.ready,
@@ -210,7 +226,7 @@ export function PlivoCallProvider({ children }: { children: ReactNode }) {
       client.logout()
       clientRef.current = null
     }
-  }, [credentials, reconnectKey, startTimer, stopTimer])
+  }, [credentials, reconnectKey, startTimer, stopTimer, refreshCallLog])
 
   const call = useCallback((number: string, callerId?: string) => {
     const client = clientRef.current
@@ -239,8 +255,9 @@ export function PlivoCallProvider({ children }: { children: ReactNode }) {
 
   const reject = useCallback(() => {
     clientRef.current?.reject('')
+    refreshCallLog()
     setState((s) => ({ ...IDLE_STATE, ready: s.ready }))
-  }, [])
+  }, [refreshCallLog])
 
   const hangup = useCallback(() => {
     clientRef.current?.hangup()
