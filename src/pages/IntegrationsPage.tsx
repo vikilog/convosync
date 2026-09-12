@@ -318,7 +318,7 @@ export function IntegrationsPage() {
         channel: 'virtual_number',
         channelLabel: CHANNEL_LABEL.virtual_number,
         title: 'Virtual Number',
-        subtitle: primary.label || primary.number || undefined,
+        subtitle: primary.label || primary.number || '',
         detail:
           ownedNumbers.length > 1
             ? `+${ownedNumbers.length - 1} more number${ownedNumbers.length > 2 ? 's' : ''}`

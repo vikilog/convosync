@@ -507,7 +507,7 @@ export function VirtualNumberFlow({ onBack }: { onBack: () => void }) {
       case 'not_requested':
         return (
           <InstructionsStep
-            onSend={(label) => requestAccess.mutate(label || undefined)}
+            onSend={(label) => requestAccess.mutate(label ? { label } : undefined)}
             sending={requestAccess.isPending}
           />
         )
