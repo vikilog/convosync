@@ -13,9 +13,12 @@ export type VirtualNumberStage =
   | 'active'
   | 'released'
 
+export type VoiceProviderName = 'plivo' | 'telnyx'
+
 export type VirtualNumberStatus = {
   stage: VirtualNumberStage
   label?: string | null
+  provider?: VoiceProviderName
   requestedAt?: string
   approvedAt?: string | null
   rejectedAt?: string | null
@@ -39,6 +42,7 @@ export type OwnedNumber = {
   id: string
   label: string | null
   description: string | null
+  provider: VoiceProviderName
   number: string | null
   rawNumber: string | null
   city: string | null
@@ -57,7 +61,7 @@ export type CallPricing = {
   countryName: string
   outboundPerMinInrPaise: number
   markupRate: number
-  source: 'plivo' | 'mock'
+  source: VoiceProviderName | 'mock'
 }
 
 export type AvailableNumber = {
@@ -69,18 +73,22 @@ export type AvailableNumber = {
 }
 
 export type AvailableNumbersPage = {
-  source: 'plivo' | 'mock'
+  source: VoiceProviderName | 'mock'
   numbers: AvailableNumber[]
   totalCount: number
   hasMore: boolean
 }
 
-/** Prefixes offered in the picker — same set Plivo's own console shows for India. */
-export const NUMBER_PREFIXES = [
-  { label: '022 · Mumbai', value: '22' },
-  { label: '080 · Bengaluru', value: '80' },
-  { label: '160 · Other', value: '160' },
-] as const
+/** Area-code prefixes offered in the picker, by provider — India (Plivo) supports
+ * city-level prefix search; Telnyx-routed countries show a flat number list instead. */
+export const NUMBER_PREFIXES_BY_PROVIDER: Record<VoiceProviderName, readonly { label: string; value: string }[]> = {
+  plivo: [
+    { label: '022 · Mumbai', value: '22' },
+    { label: '080 · Bengaluru', value: '80' },
+    { label: '160 · Other', value: '160' },
+  ],
+  telnyx: [],
+}
 
 const STATUS_KEY = ['virtualNumber', 'status']
 const NUMBERS_KEY = ['virtualNumber', 'numbers']
@@ -205,12 +213,15 @@ export const virtualNumberService = {
     })
   },
 
-  /** SIP/WebRTC login for the workspace's shared browser-calling identity (Plivo Browser SDK) —
-   * one login covers every number the workspace owns. */
+  /** SIP/WebRTC login for the workspace's shared browser-calling identity (Plivo Browser SDK
+   * or Telnyx WebRTC SDK, per `provider`) — one login covers every number the workspace owns. */
   useBrowserCredentials: (enabled: boolean) =>
     useQuery({
       queryKey: ['virtualNumber', 'browserCredentials'],
-      queryFn: () => httpClient.get<{ username: string; password: string }>('/virtual-number/browser-credentials'),
+      queryFn: () =>
+        httpClient.get<{ username: string; password: string; provider: VoiceProviderName }>(
+          '/virtual-number/browser-credentials',
+        ),
       enabled,
       staleTime: Infinity,
       retry: 1,

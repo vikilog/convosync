@@ -24,7 +24,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { usePlivoCall } from '@/lib/plivoCallClient'
+import { useCall } from '@/lib/callClient'
 import {
   CALL_STATUS_LABEL,
   CALL_STATUS_TONE,
@@ -254,7 +254,7 @@ export function CallingPage() {
   )
   const [pickerOpen, setPickerOpen] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
-  const plivoCall = usePlivoCall()
+  const activeCall = useCall()
   const { data: numbersData } = virtualNumberService.useNumbers()
   const numbers = numbersData?.numbers ?? []
 
@@ -274,7 +274,7 @@ export function CallingPage() {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = callingService.useCallLog(selected?.id, { refetchIntervalMs: plivoCall.phase !== 'idle' ? 3000 : false })
+  } = callingService.useCallLog(selected?.id, { refetchIntervalMs: activeCall.phase !== 'idle' ? 3000 : false })
 
   const entries = useMemo(() => callLog?.pages.flatMap((p) => p.entries) ?? [], [callLog])
 
@@ -304,8 +304,8 @@ export function CallingPage() {
     })
   }, [entries, query, statusFilters, directionFilters])
 
-  const onCall = plivoCall.phase !== 'idle'
-  const placeCall = (to: string) => plivoCall.call(to, selected?.rawNumber ?? undefined)
+  const onCall = activeCall.phase !== 'idle'
+  const placeCall = (to: string) => activeCall.call(to, selected?.rawNumber ?? undefined)
 
   return (
     <div className="w-full space-y-6 p-6">
@@ -313,7 +313,7 @@ export function CallingPage() {
         <div>
           <h1 className="text-base font-semibold">Calls</h1>
           <p className="text-muted-foreground mt-1 text-xs">
-            Every call placed or received on your Plivo numbers.
+            Every call placed or received on your virtual numbers.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -457,13 +457,13 @@ export function CallingPage() {
             <EmptyState
               icon={Phone}
               title="No virtual number yet"
-              description="Connect a Plivo number from Integrations to start seeing calls here."
+              description="Connect a virtual number from Integrations to start seeing calls here."
             />
           ) : filtered.length === 0 ? (
             <EmptyState
               icon={Phone}
               title="No calls yet"
-              description="Once your Plivo number starts placing and receiving calls, they'll show up here."
+              description="Once your virtual number starts placing and receiving calls, they'll show up here."
             />
           ) : (
             <Table>

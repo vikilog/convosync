@@ -53,7 +53,9 @@ const IDLE_STATE: PlivoCallState = {
   error: null,
 }
 
-const PlivoCallContext = createContext<(PlivoCallState & PlivoCallActions) | null>(null)
+/** Exported (not just the throwing usePlivoCall hook) so callClient.tsx can read it
+ * directly without throwing when Plivo isn't this workspace's active provider. */
+export const PlivoCallContext = createContext<(PlivoCallState & PlivoCallActions) | null>(null)
 
 /** Mounted once at the app layout level so incoming calls ring no matter what page
  * the agent is on. Logs the workspace's browser (one shared identity per workspace)
@@ -158,7 +160,10 @@ export function PlivoCallProvider({ children }: { children: ReactNode }) {
   }, [])
 
   useEffect(() => {
-    if (!credentials) return
+    // Guards against logging into Plivo's WebRTC network with another provider's
+    // credentials — a Telnyx-routed workspace's /browser-credentials response is never
+    // meant for this client. See callClient.tsx for how the two providers coexist.
+    if (!credentials || credentials.provider !== 'plivo') return
 
     const plivo = new Plivo({
       permOnClick: true,

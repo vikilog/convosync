@@ -199,7 +199,7 @@ export function CallingSettingsPage() {
     const ok = await confirm({
       title: `Release ${number?.label || number?.number}?`,
       description:
-        'This permanently releases the number back to Plivo. Calling and WhatsApp on this number stop immediately, billing stops, and this cannot be undone.',
+        'This permanently releases the number back to the carrier. Calling and WhatsApp on this number stop immediately, billing stops, and this cannot be undone.',
       confirmLabel: 'Release number',
       destructive: true,
     })
@@ -249,7 +249,7 @@ export function CallingSettingsPage() {
                   </span>
                   <div>
                     <p className="font-mono text-sm font-semibold tabular-nums">{number.number}</p>
-                    <p className="text-muted-foreground text-xs">{number.city ?? 'India'}</p>
+                    <p className="text-muted-foreground text-xs">{number.city ?? '—'}</p>
                   </div>
                 </div>
                 <div className="space-y-1.5">
@@ -311,7 +311,7 @@ export function CallingSettingsPage() {
                       <span className="text-muted-foreground text-xs">/ minute, outgoing calls</span>
                     </div>
                     <p className="text-muted-foreground text-xs">
-                      Live Plivo rate for {pricing.countryName}, plus our {(pricing.markupRate * 100).toFixed(0)}%
+                      Live carrier rate for {pricing.countryName}, plus our {(pricing.markupRate * 100).toFixed(0)}%
                       service markup. Billed per call to your workspace credits.
                     </p>
                   </>
@@ -327,7 +327,7 @@ export function CallingSettingsPage() {
               </CardHeader>
               <CardContent className="space-y-3">
                 <p className="text-muted-foreground text-xs">
-                  Releasing this number returns it to Plivo permanently. You'll stop receiving calls and WhatsApp
+                  Releasing this number returns it to the carrier permanently. You'll stop receiving calls and WhatsApp
                   messages on it, and it cannot be recovered.
                 </p>
                 {releaseError ? <p className="text-destructive text-xs">{releaseError}</p> : null}

@@ -12,6 +12,9 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 const LoginPage = lazy(() => import('@/pages/LoginPage').then((m) => ({ default: m.LoginPage })))
 const SignupPage = lazy(() => import('@/pages/SignupPage').then((m) => ({ default: m.SignupPage })))
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })))
+const ImpersonateRoute = lazy(() =>
+  import('@/pages/routes/ImpersonateRoute').then((m) => ({ default: m.ImpersonateRoute }))
+)
 
 const DashboardRoute = lazy(() =>
   import('@/pages/routes/DashboardRoute').then((m) => ({ default: m.DashboardRoute }))
@@ -124,6 +127,8 @@ function App() {
             </RequireGuest>
           }
         />
+        {/* Super-admin "Login as" landing page — opened in a fresh tab, so no auth guard. */}
+        <Route path="/auth/impersonate" element={<ImpersonateRoute />} />
 
         <Route
           path="/instagram/callback"

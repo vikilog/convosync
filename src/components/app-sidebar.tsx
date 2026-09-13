@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { ChevronsUpDown, LogOut } from 'lucide-react'
 
 import { useAuth } from '@/context/AuthContext'
+import { companyResource } from '@/services/company.service'
 import { getNavUnreadSnapshot, NAV_UNREAD_CHANGED_EVENT } from '@/lib/navUnread'
 import { BOTTOM_NAV_ITEMS, NAV_SECTIONS, type NavItem } from '@/lib/navigation'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -63,6 +64,7 @@ export function AppSidebar() {
   const location = useLocation()
   const navigate = useNavigate()
   const { user, logout } = useAuth()
+  const { data: company } = companyResource.useGet()
   const [navUnread, setNavUnread] = useState(getNavUnreadSnapshot)
 
   useEffect(() => {
@@ -82,9 +84,9 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarHeader>
         <div className="flex items-center gap-2 px-2 py-1.5">
-          <img src="/convosync-logo.png" alt="" className="size-8 shrink-0" />
+          <img src={company?.logoUrl || '/convosync-logo.png'} alt="" className="size-8 shrink-0 rounded object-cover" />
           <div className="flex flex-col leading-none group-data-[collapsible=icon]:hidden">
-            <span className="text-sm font-semibold">ConvoSync</span>
+            <span className="truncate text-sm font-semibold">{company?.name || 'ConvoSync'}</span>
             <span className="text-muted-foreground text-xs">Workspace</span>
           </div>
         </div>

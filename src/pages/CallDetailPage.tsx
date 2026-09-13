@@ -28,7 +28,7 @@ function InsightRow({ label, value }: { label: string; value: string }) {
   )
 }
 
-/** Mirrors the field set Plivo's own "Call Insights" panel shows — everything here
+/** Mirrors the field set the carrier's own "Call Insights" panel shows — everything here
  * comes straight from the CDR (network-lookup labels like "Originator" are console-only,
  * not exposed via the REST API, so they're left out rather than guessed). */
 function CallInsights({ call }: { call: CallDetail }) {
@@ -160,7 +160,7 @@ export function CallDetailPage() {
               ) : (
                 <p className="text-muted-foreground text-xs">
                   {call.recordUrl
-                    ? 'Transcription is still processing — Plivo delivers it a little after the recording finishes. Check back shortly.'
+                    ? 'Transcription is still processing — it arrives a little after the recording finishes. Check back shortly.'
                     : 'No transcript available for this call.'}
                 </p>
               )}

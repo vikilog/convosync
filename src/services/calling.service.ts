@@ -17,7 +17,7 @@ export type CallLogEntry = {
 }
 
 export type CallLogResponse = {
-  source: 'plivo' | 'mock' | 'none'
+  source: 'plivo' | 'telnyx' | 'mock' | 'none'
   entries: CallLogEntry[]
   nextCursor: number | null
 }
@@ -25,7 +25,7 @@ export type CallLogResponse = {
 export type ContactCallEntry = CallLogEntry & { numberId: string; numberLabel: string | null }
 
 export type ContactCallsResponse = {
-  source: 'plivo' | 'mock' | 'none'
+  source: 'plivo' | 'telnyx' | 'mock' | 'none'
   entries: ContactCallEntry[]
 }
 
@@ -87,7 +87,7 @@ export const callingService = {
       enabled: Boolean(numberId && callId),
     }),
 
-  /** Places a real outbound call — rings `to` and bills the workspace's Plivo account per minute. */
+  /** Places a real outbound call — rings `to` and bills the workspace's carrier account per minute. */
   usePlaceCall: (numberId: string | undefined) => {
     const queryClient = useQueryClient()
     return useMutation({

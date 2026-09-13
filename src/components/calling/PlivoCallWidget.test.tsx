@@ -22,8 +22,8 @@ const { call } = vi.hoisted(() => ({
   },
 }))
 
-vi.mock('@/lib/plivoCallClient', () => ({
-  usePlivoCall: () => call,
+vi.mock('@/lib/callClient', () => ({
+  useCall: () => call,
 }))
 
 import { PlivoCallWidget } from './PlivoCallWidget'

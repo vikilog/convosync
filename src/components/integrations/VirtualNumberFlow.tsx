@@ -26,12 +26,13 @@ import { Label } from '@/components/ui/label'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Textarea } from '@/components/ui/textarea'
 import {
-  NUMBER_PREFIXES,
+  NUMBER_PREFIXES_BY_PROVIDER,
   virtualNumberService,
   type AvailableNumber,
   type OwnedNumber,
   type VirtualNumberStage,
   type VirtualNumberStatus,
+  type VoiceProviderName,
 } from '@/services/virtualNumber.service'
 
 const STAGE_PROGRESS: VirtualNumberStage[] = ['not_requested', 'pending_approval', 'approved', 'active']
@@ -175,8 +176,15 @@ function RejectedStep({ reason }: { reason: string | null | undefined }) {
   )
 }
 
-function SelectStep({ selectedNumber }: { selectedNumber: VirtualNumberStatus['selectedNumber'] }) {
+function SelectStep({
+  selectedNumber,
+  provider,
+}: {
+  selectedNumber: VirtualNumberStatus['selectedNumber']
+  provider: VoiceProviderName
+}) {
   const [pattern, setPattern] = useState<string | undefined>(undefined)
+  const prefixes = NUMBER_PREFIXES_BY_PROVIDER[provider]
   const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } =
     virtualNumberService.useAvailableNumbers(true, pattern)
   const selectNumber = virtualNumberService.useSelectNumber()
@@ -217,33 +225,35 @@ function SelectStep({ selectedNumber }: { selectedNumber: VirtualNumberStatus['s
           <p className="text-muted-foreground text-sm">You're approved — pick a number to activate.</p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-1.5">
-          <button
-            type="button"
-            onClick={() => setPattern(undefined)}
-            className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
-              pattern === undefined
-                ? 'border-primary bg-primary text-primary-foreground'
-                : 'hover:bg-muted/50'
-            }`}
-          >
-            All prefixes
-          </button>
-          {NUMBER_PREFIXES.map((p) => (
+        {prefixes.length > 0 ? (
+          <div className="flex flex-wrap items-center gap-1.5">
             <button
-              key={p.value}
               type="button"
-              onClick={() => setPattern(p.value)}
+              onClick={() => setPattern(undefined)}
               className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
-                pattern === p.value
+                pattern === undefined
                   ? 'border-primary bg-primary text-primary-foreground'
                   : 'hover:bg-muted/50'
               }`}
             >
-              {p.label}
+              All prefixes
             </button>
-          ))}
-        </div>
+            {prefixes.map((p) => (
+              <button
+                key={p.value}
+                type="button"
+                onClick={() => setPattern(p.value)}
+                className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
+                  pattern === p.value
+                    ? 'border-primary bg-primary text-primary-foreground'
+                    : 'hover:bg-muted/50'
+                }`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+        ) : null}
 
         {isLoading ? (
           <div className="text-muted-foreground flex items-center gap-2 text-sm">
@@ -524,7 +534,7 @@ export function VirtualNumberFlow({ onBack }: { onBack: () => void }) {
       case 'approved':
       case 'number_selected':
       case 'paid':
-        return <SelectStep selectedNumber={status.selectedNumber} />
+        return <SelectStep selectedNumber={status.selectedNumber} provider={status.provider ?? 'plivo'} />
       case 'active':
         return null
     }

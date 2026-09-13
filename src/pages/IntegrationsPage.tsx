@@ -327,7 +327,7 @@ export function IntegrationsPage() {
       },
       onManage: () => navigate('/integrations/virtual-number'),
       onDisconnect: () =>
-        window.alert('To release a number, open its Settings from the Calls tab — it stops billing on Plivo too.'),
+        window.alert('To release a number, open its Settings from the Calls tab — it stops billing on the carrier too.'),
     })
   } else if (virtualNumber) {
     calling.push({
@@ -335,7 +335,7 @@ export function IntegrationsPage() {
       channel: 'virtual_number',
       title: 'Virtual Number',
       description:
-        'Get a Plivo-powered phone number for your team to call from — routed through an AI agent or Journey, with recordings and transcripts.',
+        'Get a phone number for your team to call from — routed through an AI agent or Journey, with recordings and transcripts.',
       connectLabel:
         virtualNumber.stage === 'pending_approval'
           ? 'Requested'

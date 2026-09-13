@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { Mic, MicOff, Phone, PhoneOff } from 'lucide-react'
 
 import { callerInitials, displayCallerNumber, isWhatsAppCaller } from '@/lib/callDisplay'
-import { usePlivoCall } from '@/lib/plivoCallClient'
+import { useCall } from '@/lib/callClient'
 
 function formatDuration(seconds: number): string {
   const m = Math.floor(seconds / 60)
@@ -13,7 +13,7 @@ function formatDuration(seconds: number): string {
 /** Live call chrome for the whole app: incoming sheet, or a bottom dock once connected.
  * Mounted once in AppLayout so a call rings on any page. */
 export function PlivoCallWidget() {
-  const call = usePlivoCall()
+  const call = useCall()
   const number = displayCallerNumber(call.remoteNumber)
   const name = call.remoteName?.trim() || null
   const whatsapp = isWhatsAppCaller(call.remoteNumber)

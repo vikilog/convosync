@@ -9,7 +9,7 @@ import { SectionKeepAliveSlots } from '@/components/SectionKeepAliveSlots'
 import { SocialListeningRealtimeBridge } from '@/components/social-listening/SocialListeningRealtimeBridge'
 import { TeamChatRealtimeBridge } from '@/components/team-chat/TeamChatRealtimeBridge'
 import { PageSkeleton } from '@/components/PageSkeleton'
-import { PlivoCallProvider } from '@/lib/plivoCallClient'
+import { CallProvider } from '@/lib/callClient'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 
 const FULL_BLEED_PREFIXES = [
@@ -33,7 +33,7 @@ export function AppLayout() {
   const isFullBleed = FULL_BLEED_PREFIXES.some((prefix) => location.pathname.startsWith(prefix))
 
   return (
-    <PlivoCallProvider>
+    <CallProvider>
       <SidebarProvider className="h-svh overflow-hidden">
         <InboxRealtimeBridge />
         <TeamChatRealtimeBridge />
@@ -51,6 +51,6 @@ export function AppLayout() {
         </SidebarInset>
       </SidebarProvider>
       <PlivoCallWidget />
-    </PlivoCallProvider>
+    </CallProvider>
   )
 }
