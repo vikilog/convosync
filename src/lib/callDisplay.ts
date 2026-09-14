@@ -1,20 +1,25 @@
 import { DIAL_BY_ISO, splitPhone } from '@/lib/locale/dialCodes'
 
 /**
- * Plivo/Telnyx/WhatsApp SIP ids arrive as `+9139…WhatsApp-p1.live…` or `sip:user@host`,
- * sometimes as a bare local number with no country code. `countryIso` picks which dial
- * code to assume in that bare-number case — pass the number's own provider/workspace
- * country (defaults to 'IN' to match this app's original Plivo-only behavior).
+ * Plivo/Telnyx/WhatsApp SIP ids arrive as `+9139…WhatsApp-p1.live…` or `sip:user@host`.
+ * Plivo specifically can hand back a *bare* local number with no country code at all —
+ * `countryIso` says which dial code to assume in that case (defaults to 'IN', matching
+ * this app's original Plivo-only behavior). Pass `null` for any provider that never omits
+ * the country code (Telnyx) — a bare 10-digit number is ambiguous across countries (e.g. a
+ * complete Singapore E.164 number is also 10 digits: 65 + 8), so guessing there does more
+ * harm than good; `null` skips the guess and just formats whatever digits already arrived.
  */
-export function displayCallerNumber(raw: string | null | undefined, countryIso = 'IN'): string {
+export function displayCallerNumber(raw: string | null | undefined, countryIso: string | null = 'IN'): string {
   if (!raw?.trim()) return ''
   const local = raw.replace(/^sip:/i, '').split('@')[0]
   const head = local.replace(/[a-zA-Z].*$/, '').trim()
   let digits = head.replace(/\D/g, '')
-  const dialCode = DIAL_BY_ISO[countryIso.toUpperCase()] ?? DIAL_BY_ISO.IN
-  // A bare local number (no country code) arrives at the ISO's national significant-number
-  // length for IN/US/SG (10 digits) — GB numbers vary, so this heuristic only applies there.
-  if (digits.length === 10 && countryIso.toUpperCase() !== 'GB') digits = `${dialCode}${digits}`
+  if (countryIso) {
+    const dialCode = DIAL_BY_ISO[countryIso.toUpperCase()] ?? DIAL_BY_ISO.IN
+    // A bare local number (no country code) arrives at the ISO's national significant-number
+    // length for IN/US/SG (10 digits) — GB numbers vary, so this heuristic only applies there.
+    if (digits.length === 10 && countryIso.toUpperCase() !== 'GB') digits = `${dialCode}${digits}`
+  }
   if (digits.length < 10) return head || raw
   const { dial, national } = splitPhone(`+${digits}`)
   return `${dial} ${national}`

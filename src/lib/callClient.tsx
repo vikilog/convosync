@@ -36,5 +36,7 @@ export function useCall() {
   if (!ctx) {
     throw new Error('useCall must be used within a CallProvider')
   }
-  return ctx
+  // Exposed so callers can pick the right country context for display (e.g. whether a bare
+  // 10-digit number should be assumed Indian) instead of hardcoding 'IN' for every provider.
+  return { ...ctx, provider: (credentials?.provider ?? 'plivo') as 'plivo' | 'telnyx' }
 }

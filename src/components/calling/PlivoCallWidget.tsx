@@ -14,7 +14,10 @@ function formatDuration(seconds: number): string {
  * Mounted once in AppLayout so a call rings on any page. */
 export function PlivoCallWidget() {
   const call = useCall()
-  const number = displayCallerNumber(call.remoteNumber)
+  // Plivo can hand back a bare 10-digit number needing '+91' assumed; Telnyx never omits
+  // the country code, and a bare-10-digit guess there would mangle e.g. a complete
+  // Singapore number — see displayCallerNumber's own comment.
+  const number = displayCallerNumber(call.remoteNumber, call.provider === 'telnyx' ? null : 'IN')
   const name = call.remoteName?.trim() || null
   const whatsapp = isWhatsAppCaller(call.remoteNumber)
   const initials = callerInitials(name, number)

@@ -73,6 +73,24 @@ export function TelnyxCallProvider({ children }: { children: ReactNode }) {
 
   const clientRef = useRef<TelnyxRTC | null>(null)
   const activeCallRef = useRef<TelnyxCall | null>(null)
+  // The SDK's docs say it auto-creates + appends a remote <audio> element when none is
+  // given — confirmed live that it does NOT in this app's setup (checked the DOM mid-call:
+  // zero <audio> elements existed even though "First remote audio/video track received"
+  // fired), so the far end's voice had nowhere to play even though it was arriving fine.
+  // Owning the element ourselves and passing it as `remoteElement` sidesteps relying on
+  // that auto-creation at all.
+  const remoteAudioRef = useRef<HTMLAudioElement | null>(null)
+  useEffect(() => {
+    const el = document.createElement('audio')
+    el.autoplay = true
+    el.style.display = 'none'
+    document.body.appendChild(el)
+    remoteAudioRef.current = el
+    return () => {
+      el.remove()
+      remoteAudioRef.current = null
+    }
+  }, [])
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const [state, setState] = useState<TelnyxCallState>(IDLE_STATE)
   const phaseRef = useRef(state.phase)
@@ -235,13 +253,14 @@ export function TelnyxCallProvider({ children }: { children: ReactNode }) {
     const callerDigits = callerId?.replace(/\D/g, '')
     const newCall = client.newCall({
       destinationNumber: dest,
+      ...(remoteAudioRef.current ? { remoteElement: remoteAudioRef.current } : {}),
       ...(callerDigits ? { customHeaders: [{ name: 'X-Telnyx-CallerId', value: callerDigits }] } : {}),
     })
     activeCallRef.current = newCall
   }, [])
 
   const answer = useCallback(() => {
-    activeCallRef.current?.answer()
+    activeCallRef.current?.answer(remoteAudioRef.current ? { remoteElement: remoteAudioRef.current } : {})
   }, [])
 
   const reject = useCallback(() => {

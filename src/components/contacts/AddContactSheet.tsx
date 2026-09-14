@@ -15,7 +15,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
-import { isValidContactPhone, dialForCountry, listDialCodeOptions, toE164 } from '@/lib/locale/dialCodes'
+import { isValidContactPhone, dialForCountry, listDialCodeOptions, splitPhone, toE164 } from '@/lib/locale/dialCodes'
 import { realWorkspaceMembersService } from '@/services/realWorkspaceMembers.service'
 
 const DIAL_OPTIONS = listDialCodeOptions()
@@ -35,11 +35,16 @@ export function AddContactSheet({
   trigger,
   open: openProp,
   onOpenChange,
+  initialPhone,
+  initialName,
 }: {
   onAdd: (contact: NewContactInput) => void
   trigger?: ReactNode
   open?: boolean
   onOpenChange?: (open: boolean) => void
+  /** Prefills the phone field (E.164 or bare digits) — e.g. from a call to an unsaved number. */
+  initialPhone?: string
+  initialName?: string
 }) {
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
   const open = openProp ?? uncontrolledOpen
@@ -47,9 +52,10 @@ export function AddContactSheet({
     if (openProp === undefined) setUncontrolledOpen(next)
     onOpenChange?.(next)
   }
-  const [name, setName] = useState('')
-  const [phoneDial, setPhoneDial] = useState(DEFAULT_DIAL)
-  const [phone, setPhone] = useState('')
+  const initialSplit = useMemo(() => splitPhone(initialPhone), [initialPhone])
+  const [name, setName] = useState(initialName ?? '')
+  const [phoneDial, setPhoneDial] = useState(initialPhone ? initialSplit.dial : DEFAULT_DIAL)
+  const [phone, setPhone] = useState(initialPhone ? initialSplit.national : '')
   const [email, setEmail] = useState('')
   const [ownerId, setOwnerId] = useState('')
   const [tags, setTags] = useState<string[]>([])
@@ -71,9 +77,9 @@ export function AddContactSheet({
   }, [open, members])
 
   const reset = () => {
-    setName('')
-    setPhoneDial(DEFAULT_DIAL)
-    setPhone('')
+    setName(initialName ?? '')
+    setPhoneDial(initialPhone ? initialSplit.dial : DEFAULT_DIAL)
+    setPhone(initialPhone ? initialSplit.national : '')
     setEmail('')
     setOwnerId('')
     setTags([])

@@ -1,9 +1,13 @@
+import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Loader2, PhoneIncoming, PhoneMissed, PhoneOutgoing, UserRound } from 'lucide-react'
+import { ArrowLeft, Loader2, PhoneIncoming, PhoneMissed, PhoneOutgoing, UserPlus, UserRound } from 'lucide-react'
+import { toast } from 'sonner'
 
+import { AddContactSheet, type NewContactInput } from '@/components/contacts/AddContactSheet'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { ContactAvatar } from '@/components/inbox/ContactAvatar'
+import { realContactsService } from '@/services/realContacts.service'
 import { CALL_STATUS_LABEL, CALL_STATUS_TONE, callingService, type CallDetail } from '@/services/calling.service'
 
 function formatDuration(seconds: number): string {
@@ -78,8 +82,20 @@ export function CallDetailPage() {
   const { numberId, callId } = useParams<{ numberId: string; callId: string }>()
   const navigate = useNavigate()
   const { data: call, isLoading, error } = callingService.useCallDetail(numberId, callId)
+  const createContact = realContactsService.useCreate()
+  const [addContactOpen, setAddContactOpen] = useState(false)
 
   const back = () => navigate('/calling')
+
+  const saveAsContact = (input: NewContactInput) => {
+    createContact.mutate(
+      { ...input, source: 'Added from call' },
+      {
+        onSuccess: () => toast.success('Contact saved.'),
+        onError: (err) => toast.error(err instanceof Error ? err.message : 'Could not save contact.'),
+      },
+    )
+  }
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-6 p-6">
@@ -126,7 +142,12 @@ export function CallDetailPage() {
                 <UserRound className="size-3.5" />
                 View contact
               </Button>
-            ) : null}
+            ) : (
+              <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setAddContactOpen(true)}>
+                <UserPlus className="size-3.5" />
+                Add to contacts
+              </Button>
+            )}
             <span
               className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${CALL_STATUS_TONE[call.status]}`}
             >
@@ -166,6 +187,16 @@ export function CallDetailPage() {
               )}
             </CardContent>
           </Card>
+
+          {!call.contact.contactId ? (
+            <AddContactSheet
+              trigger={null}
+              open={addContactOpen}
+              onOpenChange={setAddContactOpen}
+              initialPhone={call.contact.phone}
+              onAdd={saveAsContact}
+            />
+          ) : null}
         </>
       )}
     </div>
