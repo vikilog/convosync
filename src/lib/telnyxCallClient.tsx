@@ -25,7 +25,7 @@ export type TelnyxCallState = {
 }
 
 type TelnyxCallActions = {
-  call: (number: string, callerId?: string) => void
+  call: (number: string, callerId?: string, name?: string) => void
   answer: () => void
   reject: () => void
   hangup: () => void
@@ -234,7 +234,7 @@ export function TelnyxCallProvider({ children }: { children: ReactNode }) {
     }
   }, [credentials, reconnectKey, startTimer, stopTimer, refreshCallLog])
 
-  const call = useCallback((number: string, callerId?: string) => {
+  const call = useCallback((number: string, callerId?: string, name?: string) => {
     const client = clientRef.current
     if (!client) {
       setState((s) => ({ ...s, error: 'Calling isn’t ready yet — try again in a moment.' }))
@@ -245,6 +245,7 @@ export function TelnyxCallProvider({ children }: { children: ReactNode }) {
       phase: 'ringing-out',
       direction: 'outbound',
       remoteNumber: number,
+      remoteName: name?.trim() || null,
       muted: false,
       elapsedSeconds: 0,
       error: null,

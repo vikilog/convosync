@@ -94,7 +94,7 @@ export function ContactPickerSheet({
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onCall: (to: string) => void
+  onCall: (to: string, name?: string) => void
 }) {
   const [tab, setTab] = useState<'contacts' | 'keypad'>('contacts')
   const [search, setSearch] = useState('')
@@ -113,8 +113,8 @@ export function ContactPickerSheet({
   const dialableQuery = search.replace(/\D/g, '')
   const showManualDial = dialableQuery.length >= 8
 
-  const call = (to: string) => {
-    onCall(to)
+  const call = (to: string, name?: string) => {
+    onCall(to, name)
     onOpenChange(false)
   }
 
@@ -189,7 +189,7 @@ export function ContactPickerSheet({
                     <button
                       key={c.id}
                       type="button"
-                      onClick={() => call(c.phone)}
+                      onClick={() => call(c.phone, c.name || undefined)}
                       className="hover:bg-muted/50 flex w-full items-center gap-2.5 rounded-lg p-2 text-left"
                     >
                       <ContactAvatar name={c.name || c.phone} src={c.avatar} className="size-8 shrink-0" />

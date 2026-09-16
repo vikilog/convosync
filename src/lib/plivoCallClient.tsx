@@ -32,7 +32,7 @@ export type PlivoCallState = {
 type PlivoCallActions = {
   /** `callerId` picks which of the workspace's numbers shows up as caller ID — required
    * when the workspace owns more than one, since the browser identity is shared across all. */
-  call: (number: string, callerId?: string) => void
+  call: (number: string, callerId?: string, name?: string) => void
   answer: () => void
   reject: () => void
   hangup: () => void
@@ -233,7 +233,7 @@ export function PlivoCallProvider({ children }: { children: ReactNode }) {
     }
   }, [credentials, reconnectKey, startTimer, stopTimer, refreshCallLog])
 
-  const call = useCallback((number: string, callerId?: string) => {
+  const call = useCallback((number: string, callerId?: string, name?: string) => {
     const client = clientRef.current
     if (!client) {
       setState((s) => ({ ...s, error: 'Calling isn’t ready yet — try again in a moment.' }))
@@ -244,6 +244,7 @@ export function PlivoCallProvider({ children }: { children: ReactNode }) {
       phase: 'ringing-out',
       direction: 'outbound',
       remoteNumber: number,
+      remoteName: name?.trim() || null,
       muted: false,
       elapsedSeconds: 0,
       error: null,

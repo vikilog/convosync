@@ -305,7 +305,7 @@ export function CallingPage() {
   }, [entries, query, statusFilters, directionFilters])
 
   const onCall = activeCall.phase !== 'idle'
-  const placeCall = (to: string) => activeCall.call(to, selected?.rawNumber ?? undefined)
+  const placeCall = (to: string, name?: string) => activeCall.call(to, selected?.rawNumber ?? undefined, name)
 
   return (
     <div className="w-full space-y-6 p-6">
@@ -482,7 +482,7 @@ export function CallingPage() {
                     key={entry.id}
                     entry={entry}
                     onOpen={() => navigate(`/calling/${selected.id}/${entry.id}`)}
-                    onRecall={() => placeCall(entry.contact.rawPhone)}
+                    onRecall={() => placeCall(entry.contact.rawPhone, entry.contact.name ?? undefined)}
                     onViewContact={() => navigate(`/contacts/${entry.contact.contactId}`)}
                     recallDisabled={onCall}
                   />
