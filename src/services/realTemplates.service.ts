@@ -29,6 +29,7 @@ export type WhatsAppTemplate = {
   headerMediaStorageKey?: string | null
   headerMediaMimeType?: string | null
   headerMediaFileName?: string | null
+  groupId: string | null
   updatedAt: string
 }
 
@@ -53,6 +54,7 @@ export type WhatsAppTemplateInput = {
   buttonFlowId?: string | null
   buttonUrlSample?: string | null
   submitToMeta?: boolean
+  groupId?: string | null
 }
 
 export type NewWhatsAppTemplateInput = WhatsAppTemplateInput & {
@@ -127,6 +129,7 @@ export function mapWhatsAppTemplate(raw: Record<string, unknown>): WhatsAppTempl
     headerMediaStorageKey: raw.headerMediaStorageKey != null ? String(raw.headerMediaStorageKey) : null,
     headerMediaMimeType: raw.headerMediaMimeType != null ? String(raw.headerMediaMimeType) : null,
     headerMediaFileName: raw.headerMediaFileName != null ? String(raw.headerMediaFileName) : null,
+    groupId: raw.groupId != null ? String(raw.groupId) : null,
     updatedAt: raw.updatedAt ? String(raw.updatedAt) : '',
   }
 }
@@ -234,4 +237,49 @@ export const realTemplatesService = {
       enabled: Boolean(id),
       retry: false,
     }),
+}
+
+export type TemplateGroup = {
+  id: string
+  name: string
+  order: number
+  templateCount: number
+}
+
+const groupsKey = ['realTemplates', 'groups'] as const
+
+export const templateGroupsService = {
+  useList: () =>
+    useQuery({
+      queryKey: groupsKey,
+      queryFn: () => httpClient.get<TemplateGroup[]>('/template-groups'),
+    }),
+
+  useCreate: () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+      mutationFn: (name: string) => httpClient.post<TemplateGroup>('/template-groups', { name }),
+      onSuccess: () => void queryClient.invalidateQueries({ queryKey: groupsKey }),
+    })
+  },
+
+  useUpdate: () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+      mutationFn: ({ id, patch }: { id: string; patch: { name?: string; order?: number } }) =>
+        httpClient.put<TemplateGroup>(`/template-groups/${id}`, patch),
+      onSuccess: () => void queryClient.invalidateQueries({ queryKey: groupsKey }),
+    })
+  },
+
+  useRemove: () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+      mutationFn: (id: string) => httpClient.del<{ ok: boolean }>(`/template-groups/${id}`),
+      onSuccess: () => {
+        void queryClient.invalidateQueries({ queryKey: groupsKey })
+        void queryClient.invalidateQueries({ queryKey: listKey })
+      },
+    })
+  },
 }
