@@ -482,7 +482,7 @@ export function CallingPage() {
                     key={entry.id}
                     entry={entry}
                     onOpen={() => navigate(`/calling/${selected.id}/${entry.id}`)}
-                    onRecall={() => placeCall(entry.contact.phone.replace(/\D/g, ''))}
+                    onRecall={() => placeCall(entry.contact.rawPhone)}
                     onViewContact={() => navigate(`/contacts/${entry.contact.contactId}`)}
                     recallDisabled={onCall}
                   />

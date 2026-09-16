@@ -114,7 +114,8 @@ export function PlivoCallWidget() {
       </span>
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-semibold">{title}</p>
-        <p className="text-[11px] text-zinc-400 tabular-nums">
+        <p className="truncate text-[11px] text-zinc-400 tabular-nums">
+          {name && number ? <>{number} · </> : null}
           {isActive ? <span className="text-channel-green">● Live</span> : null}
           {isActive ? ' · ' : null}
           {label}

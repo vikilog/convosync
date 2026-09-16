@@ -9,7 +9,7 @@ export type CallLogEntry = {
   id: string
   direction: CallDirection
   status: CallStatus
-  contact: { phone: string; name: string | null; contactId: string | null }
+  contact: { phone: string; rawPhone: string; name: string | null; contactId: string | null }
   fromNumber: string
   startedAt: string | null
   durationSeconds: number
