@@ -134,3 +134,77 @@
     @apply font-sans;
   }
 }
+
+/* Login hero: slow ambient drift + a breathing glow behind the AI node.
+   Purely decorative/atmospheric (rare, first-impression viewing), so a
+   long, gentle loop is appropriate — not a UI-feedback animation. */
+@keyframes hero-drift {
+  0% {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+  100% {
+    transform: scale(1.07) translate3d(-1%, -1%, 0);
+  }
+}
+
+@keyframes hero-glow-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(0.94);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes hero-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes hero-twinkle {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+.animate-hero-drift {
+  animation: hero-drift 16s cubic-bezier(0.77, 0, 0.175, 1) infinite alternate;
+}
+
+.animate-hero-glow {
+  animation: hero-glow-pulse 4.5s cubic-bezier(0.77, 0, 0.175, 1) infinite;
+}
+
+.animate-hero-float {
+  animation-name: hero-float;
+  animation-timing-function: cubic-bezier(0.77, 0, 0.175, 1);
+  animation-iteration-count: infinite;
+}
+
+.animate-hero-twinkle {
+  animation-name: hero-twinkle;
+  animation-duration: 2.6s;
+  animation-timing-function: cubic-bezier(0.77, 0, 0.175, 1);
+  animation-iteration-count: infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-hero-drift,
+  .animate-hero-glow,
+  .animate-hero-float,
+  .animate-hero-twinkle {
+    animation: none;
+  }
+}

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, IndianRupee, Loader2, Phone, PhoneOff, Save } from 'lucide-react'
+import { ArrowLeft, FileText, HardDrive, IndianRupee, Loader2, Phone, PhoneOff, Save } from 'lucide-react'
 
 import { useConfirm } from '@/components/common/ConfirmDialogProvider'
 import { EmptyState } from '@/components/common/EmptyState'
@@ -24,6 +24,20 @@ type ReplyMode = 'message' | 'template'
 function formatInr(paise: number): string {
   if (!Number.isFinite(paise)) return '—'
   return (paise / 100).toFixed(2)
+}
+
+function formatAddOnRate(ratePerMinMinor: number, currency: string): string {
+  const amount = ratePerMinMinor / 100
+  if (amount === 0) return 'Free'
+  try {
+    return `${new Intl.NumberFormat(currency === 'INR' ? 'en-IN' : 'en-US', {
+      style: 'currency',
+      currency,
+      minimumFractionDigits: amount % 1 === 0 ? 0 : 2,
+    }).format(amount)}/min`
+  } catch {
+    return `${currency} ${amount.toFixed(2)}/min`
+  }
 }
 
 function MissReplyFields({
@@ -133,6 +147,7 @@ export function CallingSettingsPage() {
   const { data: numbersData, isLoading } = virtualNumberService.useNumbers()
   const number = numbersData?.numbers.find((n) => n.id === id) ?? null
   const { data: pricing, isLoading: pricingLoading } = virtualNumberService.usePricing(number?.id)
+  const { data: addOnPricing } = virtualNumberService.useAddOnPricing(Boolean(number))
   const updateSettings = virtualNumberService.useUpdateSettings(number?.id)
   const releaseNumber = virtualNumberService.useReleaseNumber(number?.id)
 
@@ -146,6 +161,8 @@ export function CallingSettingsPage() {
   const [userMode, setUserMode] = useState<ReplyMode>('message')
   const [userMessage, setUserMessage] = useState(DEFAULT_USER_MISS_MESSAGE)
   const [userTemplateId, setUserTemplateId] = useState('')
+  const [transcriptionEnabled, setTranscriptionEnabled] = useState(false)
+  const [recordingStorageEnabled, setRecordingStorageEnabled] = useState(false)
   const [saved, setSaved] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [releaseError, setReleaseError] = useState<string | null>(null)
@@ -162,6 +179,8 @@ export function CallingSettingsPage() {
     setUserMessage(number.userMissedCallMessage || DEFAULT_USER_MISS_MESSAGE)
     setUserTemplateId(number.userMissedCallTemplateId || '')
     setUserMode(number.userMissedCallTemplateId ? 'template' : 'message')
+    setTranscriptionEnabled(Boolean(number.transcriptionEnabled))
+    setRecordingStorageEnabled(Boolean(number.recordingStorageEnabled))
   }, [
     number?.label,
     number?.description,
@@ -171,6 +190,8 @@ export function CallingSettingsPage() {
     number?.userMissedCallAutoReplyEnabled,
     number?.userMissedCallMessage,
     number?.userMissedCallTemplateId,
+    number?.transcriptionEnabled,
+    number?.recordingStorageEnabled,
   ])
 
   const handleSave = async () => {
@@ -186,6 +207,8 @@ export function CallingSettingsPage() {
         userMissedCallAutoReplyEnabled: userEnabled,
         userMissedCallMessage: userMessage.trim(),
         userMissedCallTemplateId: userMode === 'template' ? userTemplateId || null : null,
+        transcriptionEnabled,
+        recordingStorageEnabled,
       })
       setSaved(true)
       setTimeout(() => setSaved(false), 2500)
@@ -318,6 +341,91 @@ export function CallingSettingsPage() {
                 ) : (
                   <p className="text-muted-foreground text-xs">Could not load pricing right now.</p>
                 )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Call transcription</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-medium">Enable transcription</p>
+                    <p className="text-muted-foreground text-xs">
+                      Transcribe calls on this number and charge per minute of talk time from your wallet, based on
+                      actual usage — unlike the flat monthly number price.
+                    </p>
+                  </div>
+                  <Switch checked={transcriptionEnabled} onCheckedChange={setTranscriptionEnabled} />
+                </div>
+                <div className="flex items-center gap-2">
+                  <FileText className="text-muted-foreground size-4" />
+                  <span className="text-sm font-semibold tabular-nums">
+                    {formatAddOnRate(
+                      addOnPricing?.transcription?.ratePerMinMinor ?? 0,
+                      addOnPricing?.transcription?.currency ?? 'INR',
+                    )}
+                  </span>
+                </div>
+                <p className="text-muted-foreground text-xs">
+                  This is a preference for now — turning it on doesn't start recording or billing yet. We'll notify
+                  you once usage-based transcription billing goes live for this number.
+                </p>
+                <div className="flex items-center gap-2">
+                  <Button size="sm" disabled={updateSettings.isPending} onClick={() => void handleSave()}>
+                    {updateSettings.isPending ? (
+                      <Loader2 className="size-3.5 animate-spin" />
+                    ) : (
+                      <Save className="size-3.5" />
+                    )}
+                    Save
+                  </Button>
+                  {saved ? <span className="text-channel-green text-xs font-medium">Saved</span> : null}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Recording storage</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-medium">Keep recordings in storage</p>
+                    <p className="text-muted-foreground text-xs">
+                      Store call recordings past the free window and charge per minute-per-month from your wallet,
+                      based on actual usage.
+                    </p>
+                  </div>
+                  <Switch checked={recordingStorageEnabled} onCheckedChange={setRecordingStorageEnabled} />
+                </div>
+                <div className="flex items-center gap-2">
+                  <HardDrive className="text-muted-foreground size-4" />
+                  <span className="text-sm font-semibold tabular-nums">
+                    {formatAddOnRate(
+                      addOnPricing?.storage?.ratePerMinMinor ?? 0,
+                      addOnPricing?.storage?.currency ?? 'INR',
+                    )}
+                    {addOnPricing?.storage?.ratePerMinMinor ? '/month' : ''}
+                  </span>
+                </div>
+                <p className="text-muted-foreground text-xs">
+                  This is a preference for now — turning it on doesn't start storing or billing yet. We'll notify
+                  you once usage-based storage billing goes live for this number.
+                </p>
+                <div className="flex items-center gap-2">
+                  <Button size="sm" disabled={updateSettings.isPending} onClick={() => void handleSave()}>
+                    {updateSettings.isPending ? (
+                      <Loader2 className="size-3.5 animate-spin" />
+                    ) : (
+                      <Save className="size-3.5" />
+                    )}
+                    Save
+                  </Button>
+                  {saved ? <span className="text-channel-green text-xs font-medium">Saved</span> : null}
+                </div>
               </CardContent>
             </Card>
 

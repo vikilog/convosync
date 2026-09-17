@@ -5,6 +5,7 @@ import { Eye, EyeOff, Loader2, Lock, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { LoginHeroGraphic } from '@/components/LoginHeroGraphic'
 import { useAuth } from '@/context/AuthContext'
 
 export function LoginPage() {
@@ -40,7 +41,7 @@ export function LoginPage() {
   return (
     <div className="bg-background flex min-h-svh">
       <div className="relative hidden w-1/2 items-end overflow-hidden bg-black lg:flex">
-        <img src="/images/login-hero.png" alt="" className="absolute inset-0 h-full w-full object-cover" />
+        <LoginHeroGraphic />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-black/40" />
         <div className="relative z-10 p-10 text-white">
           <div className="mb-8 flex items-center gap-2.5">

@@ -21,6 +21,7 @@ import { useConfirm } from '@/components/common/ConfirmDialogProvider'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
@@ -28,6 +29,7 @@ import { Textarea } from '@/components/ui/textarea'
 import {
   NUMBER_PREFIXES_BY_PROVIDER,
   virtualNumberService,
+  type AddOnRate,
   type AvailableNumber,
   type OwnedNumber,
   type VirtualNumberStage,
@@ -35,20 +37,44 @@ import {
   type VoiceProviderName,
 } from '@/services/virtualNumber.service'
 
-const STAGE_PROGRESS: VirtualNumberStage[] = ['not_requested', 'pending_approval', 'approved', 'active']
+const STAGE_PROGRESS: VirtualNumberStage[] = ['not_requested', 'pending_approval', 'approved', 'paid', 'active']
 
 /** Client-side preview only — the backend recomputes and charges the authoritative total. */
 const GST_RATE = 0.18
 
+/** The only currencies this Razorpay account has ever actually settled an order in —
+ * see CHECKOUT_CURRENCY in the backend's virtualNumber.schemas.ts. A number priced in
+ * anything else (an admin-configured GBP/SGD row) can't be purchased yet. */
+const SUPPORTED_CHECKOUT_CURRENCIES = new Set(['INR', 'USD'])
+
+function formatMoney(amountMinor: number, currency: string) {
+  const amount = amountMinor / 100
+  try {
+    return new Intl.NumberFormat(currency === 'INR' ? 'en-IN' : 'en-US', {
+      style: 'currency',
+      currency,
+      minimumFractionDigits: amount % 1 === 0 ? 0 : 2,
+    }).format(amount)
+  } catch {
+    return `${currency} ${amount.toFixed(2)}`
+  }
+}
+
+function formatAddOnRate(rate: AddOnRate, unit: 'min' | 'min/month' = 'min') {
+  if (!rate) return 'Not offered'
+  if (rate.ratePerMinMinor === 0) return 'Free'
+  return `${formatMoney(rate.ratePerMinMinor, rate.currency)}/${unit}`
+}
+
 function progressIndex(stage: VirtualNumberStage) {
   if (stage === 'rejected') return 1
-  if (stage === 'number_selected' || stage === 'paid') return 2
+  if (stage === 'number_selected') return 2
   return Math.max(0, STAGE_PROGRESS.indexOf(stage))
 }
 
 function StageProgress({ stage }: { stage: VirtualNumberStage }) {
   const index = progressIndex(stage)
-  const labels = ['Request', 'Review', 'Choose number', 'Active']
+  const labels = ['Request', 'Review', 'Choose number', 'Activating', 'Active']
   return (
     <div className="shrink-0 space-y-1 px-4 pt-2">
       <p className="text-muted-foreground text-xs">
@@ -158,6 +184,42 @@ function PendingStep({
   )
 }
 
+function AwaitingActivationStep({
+  paidAt,
+  onRefresh,
+  refreshing,
+}: {
+  paidAt: string | null | undefined
+  onRefresh: () => void
+  refreshing: boolean
+}) {
+  return (
+    <Card className="mt-8 max-w-lg">
+      <CardContent className="space-y-5 p-8 text-center">
+        <div className="bg-muted mx-auto flex size-12 items-center justify-center rounded-full">
+          <Clock className="text-muted-foreground size-5" />
+        </div>
+        <div className="space-y-1.5">
+          <Badge variant="secondary" className="gap-1">
+            <Clock className="size-3" />
+            Activating
+          </Badge>
+          <h2 className="text-lg font-semibold">Payment received</h2>
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            Your number is being set up by the ConvoSync team — this usually only takes a few
+            minutes. We'll let you know the moment it's ready to use.
+          </p>
+          {paidAt ? <p className="text-muted-foreground text-xs">Paid {new Date(paidAt).toLocaleString()}</p> : null}
+        </div>
+        <Button variant="outline" size="sm" disabled={refreshing} onClick={onRefresh}>
+          {refreshing ? <Loader2 className="size-3.5 animate-spin" /> : <RefreshCw className="size-3.5" />}
+          Check status
+        </Button>
+      </CardContent>
+    </Card>
+  )
+}
+
 function RejectedStep({ reason }: { reason: string | null | undefined }) {
   return (
     <Card className="mt-8 max-w-lg">
@@ -176,6 +238,179 @@ function RejectedStep({ reason }: { reason: string | null | undefined }) {
   )
 }
 
+function AddOnsPanel({
+  transcriptionSelected,
+  onTranscriptionChange,
+  storageSelected,
+  onStorageChange,
+}: {
+  transcriptionSelected: boolean
+  onTranscriptionChange: (checked: boolean) => void
+  storageSelected: boolean
+  onStorageChange: (checked: boolean) => void
+}) {
+  const { data, isLoading } = virtualNumberService.useAddOnPricing(true)
+  if (isLoading || !data) return null
+
+  return (
+    <Card>
+      <CardContent className="space-y-3">
+        <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+          Call add-ons
+        </p>
+
+        <div className="flex items-center justify-between gap-3 text-sm">
+          <span className="text-muted-foreground">Recording</span>
+          <span className="tabular-nums">{formatAddOnRate(data.recording)}</span>
+        </div>
+
+        <label className="flex items-center justify-between gap-3 text-sm">
+          <span className="flex items-center gap-2">
+            <Checkbox
+              checked={transcriptionSelected}
+              onCheckedChange={(checked) => onTranscriptionChange(checked === true)}
+              disabled={!data.transcription}
+            />
+            Transcription
+          </span>
+          <span className="tabular-nums">{formatAddOnRate(data.transcription)}</span>
+        </label>
+
+        <label className="flex items-center justify-between gap-3 text-sm">
+          <span className="flex items-center gap-2">
+            <Checkbox
+              checked={storageSelected}
+              onCheckedChange={(checked) => onStorageChange(checked === true)}
+              disabled={!data.storage}
+            />
+            Recording storage
+          </span>
+          <span className="tabular-nums">{formatAddOnRate(data.storage, 'min/month')}</span>
+        </label>
+
+        <p className="text-muted-foreground text-[11px] leading-relaxed">
+          Recording's included free. Tick an add-on to opt in — it's billed separately based on
+          actual usage (storage free for the first 90 days), not part of the number's monthly
+          charge above. You can change this later from the number's Calling settings.
+        </p>
+      </CardContent>
+    </Card>
+  )
+}
+
+/** Dedicated "proper" checkout screen — replaces the picker entirely once a number is
+ * chosen, so paying isn't a cramped sidebar squeezed next to the browse grid. Every
+ * amount here comes from the frozen selectedNumber (see the comment where `selected`
+ * is built), so what's shown is exactly what /pay/create-order will charge. */
+function ReviewAndPayStep({
+  selected,
+  currency,
+  checkoutSupported,
+  baseMinor,
+  taxLabel,
+  taxRatePercent,
+  taxMinor,
+  totalMinor,
+  payPending,
+  payError,
+  transcriptionSelected,
+  onTranscriptionChange,
+  storageSelected,
+  onStorageChange,
+  onPay,
+  onChangeNumber,
+}: {
+  selected: { displayNumber: string; city: string | null; type: string }
+  currency: string
+  checkoutSupported: boolean
+  baseMinor: number
+  taxLabel: string
+  taxRatePercent: number
+  taxMinor: number
+  totalMinor: number
+  payPending: boolean
+  payError: string | null
+  transcriptionSelected: boolean
+  onTranscriptionChange: (checked: boolean) => void
+  storageSelected: boolean
+  onStorageChange: (checked: boolean) => void
+  onPay: () => void
+  onChangeNumber: () => void
+}) {
+  return (
+    <div className="mx-auto w-full max-w-lg space-y-5 py-6">
+      <div className="space-y-1">
+        <h2 className="text-lg font-semibold">Review &amp; pay</h2>
+        <p className="text-muted-foreground text-sm">
+          Confirm your number and price before activating.
+        </p>
+      </div>
+
+      <Card>
+        <CardContent className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+              Selected number
+            </p>
+            <p className="mt-1 font-mono text-lg font-semibold tabular-nums">{selected.displayNumber}</p>
+            <p className="text-muted-foreground text-xs capitalize">
+              {selected.city ?? '—'} · {selected.type}
+            </p>
+          </div>
+          <Button variant="outline" size="sm" onClick={onChangeNumber} disabled={payPending}>
+            Change number
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="space-y-1.5">
+          <p className="text-muted-foreground mb-1 text-xs font-semibold tracking-wide uppercase">
+            Price
+          </p>
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Base price</span>
+            <span className="tabular-nums">{formatMoney(baseMinor, currency)}</span>
+          </div>
+          {taxRatePercent > 0 ? (
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">
+                {taxLabel} ({taxRatePercent}%)
+              </span>
+              <span className="tabular-nums">{formatMoney(taxMinor, currency)}</span>
+            </div>
+          ) : null}
+          <div className="flex items-center justify-between border-t pt-1.5 text-sm font-semibold">
+            <span>Total / month</span>
+            <span className="tabular-nums">{formatMoney(totalMinor, currency)}</span>
+          </div>
+        </CardContent>
+      </Card>
+
+      <AddOnsPanel
+        transcriptionSelected={transcriptionSelected}
+        onTranscriptionChange={onTranscriptionChange}
+        storageSelected={storageSelected}
+        onStorageChange={onStorageChange}
+      />
+
+      {checkoutSupported ? (
+        <div className="space-y-2">
+          {payError ? <p className="text-destructive text-xs">{payError}</p> : null}
+          <Button className="w-full" size="lg" disabled={payPending} onClick={onPay}>
+            {payPending ? <Loader2 className="size-4 animate-spin" /> : null}
+            {payPending ? 'Processing payment…' : `Pay ${formatMoney(totalMinor, currency)}`}
+          </Button>
+        </div>
+      ) : (
+        <p className="text-destructive rounded-lg border border-destructive/20 bg-destructive/5 p-3 text-xs">
+          Checkout isn't available in {currency} yet — choose a different number, or contact support.
+        </p>
+      )}
+    </div>
+  )
+}
+
 function SelectStep({
   selectedNumber,
   provider,
@@ -184,45 +419,94 @@ function SelectStep({
   provider: VoiceProviderName
 }) {
   const [pattern, setPattern] = useState<string | undefined>(undefined)
+  const [changingNumber, setChangingNumber] = useState(false)
   const prefixes = NUMBER_PREFIXES_BY_PROVIDER[provider]
   const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } =
     virtualNumberService.useAvailableNumbers(true, pattern)
   const selectNumber = virtualNumberService.useSelectNumber()
   const payAndActivate = virtualNumberService.usePayAndActivate()
   const [payError, setPayError] = useState<string | null>(null)
+  const [wantTranscription, setWantTranscription] = useState(false)
+  const [wantStorage, setWantStorage] = useState(false)
+
+  const { data: taxInfo } = virtualNumberService.useTaxInfo(true)
 
   const numbers = data?.pages.flatMap((p) => p.numbers) ?? []
-  const selected =
-    numbers.find((n) => n.number === selectedNumber?.number) ??
-    (selectedNumber
-      ? {
-          number: selectedNumber.number,
-          displayNumber: selectedNumber.number,
-          city: selectedNumber.city,
-          type: 'fixed',
-          priceInrPaise: selectedNumber.priceInrPaise ?? 0,
-        }
-      : null)
+  // IMPORTANT: once a number is selected, its price is frozen server-side
+  // (VirtualNumberRequest.selectedPriceMinor) and that frozen value — not a fresh
+  // /available-numbers lookup — is exactly what /pay/create-order charges. If admin
+  // pricing changes between selection and payment, the live list can disagree with
+  // the frozen price; showing the live number here would silently under/over-state
+  // what Razorpay is about to charge. So the summary always trusts selectedNumber.
+  const selected = selectedNumber
+    ? {
+        number: selectedNumber.number,
+        displayNumber: selectedNumber.number,
+        city: selectedNumber.city,
+        type: 'fixed',
+        priceMinor: selectedNumber.priceMinor ?? selectedNumber.priceInrPaise ?? 0,
+        currency: selectedNumber.currency ?? 'INR',
+      }
+    : null
 
   const pay = async () => {
     setPayError(null)
     try {
-      await payAndActivate.mutateAsync()
+      await payAndActivate.mutateAsync({
+        transcriptionEnabled: wantTranscription,
+        recordingStorageEnabled: wantStorage,
+      })
     } catch (err) {
       setPayError(err instanceof Error ? err.message : 'Payment failed')
     }
   }
 
-  const baseInrPaise = selected?.priceInrPaise ?? 0
-  const gstInrPaise = Math.round(baseInrPaise * GST_RATE)
-  const totalInrPaise = baseInrPaise + gstInrPaise
+  const currency = selected?.currency ?? 'INR'
+  const checkoutSupported = SUPPORTED_CHECKOUT_CURRENCIES.has(currency)
+  const baseMinor = selected?.priceMinor ?? 0
+  // Server-resolved, country-specific — see /tax-info; falls back to the same
+  // "18% GST for India, else 0%" rule /pay/create-order applies when unset.
+  const taxLabel = taxInfo?.taxLabel ?? (currency === 'INR' ? 'GST' : 'Tax')
+  const taxRatePercent = taxInfo?.taxRatePercent ?? (currency === 'INR' ? GST_RATE * 100 : 0)
+  const taxMinor = Math.round(baseMinor * (taxRatePercent / 100))
+  const totalMinor = baseMinor + taxMinor
+
+  if (selected && !changingNumber) {
+    return (
+      <ReviewAndPayStep
+        selected={selected}
+        currency={currency}
+        checkoutSupported={checkoutSupported}
+        baseMinor={baseMinor}
+        taxLabel={taxLabel}
+        taxRatePercent={taxRatePercent}
+        taxMinor={taxMinor}
+        totalMinor={totalMinor}
+        payPending={payAndActivate.isPending}
+        payError={payError}
+        transcriptionSelected={wantTranscription}
+        onTranscriptionChange={setWantTranscription}
+        storageSelected={wantStorage}
+        onStorageChange={setWantStorage}
+        onPay={() => void pay()}
+        onChangeNumber={() => setChangingNumber(true)}
+      />
+    )
+  }
 
   return (
-    <div className="flex h-full min-h-0 w-full flex-col gap-6 py-6 md:flex-row">
+    <div className="flex h-full min-h-0 w-full flex-col gap-6 py-6">
       <div className="min-w-0 flex-1 space-y-5 overflow-y-auto">
-        <div className="space-y-1">
-          <h2 className="text-lg font-semibold">Choose your number</h2>
-          <p className="text-muted-foreground text-sm">You're approved — pick a number to activate.</p>
+        <div className="flex items-center justify-between gap-3">
+          <div className="space-y-1">
+            <h2 className="text-lg font-semibold">Choose your number</h2>
+            <p className="text-muted-foreground text-sm">You're approved — pick a number to activate.</p>
+          </div>
+          {changingNumber ? (
+            <Button variant="ghost" size="sm" onClick={() => setChangingNumber(false)}>
+              Cancel
+            </Button>
+          ) : null}
         </div>
 
         {prefixes.length > 0 ? (
@@ -263,17 +547,26 @@ function SelectStep({
         ) : error ? (
           <p className="text-destructive text-sm">Could not load available numbers. Try again shortly.</p>
         ) : (
-          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
             {numbers.map((number: AvailableNumber) => {
               const isSelected = number.number === selectedNumber?.number
+              const purchasable = SUPPORTED_CHECKOUT_CURRENCIES.has(number.currency)
               return (
                 <button
                   key={number.number}
                   type="button"
-                  disabled={selectNumber.isPending}
-                  onClick={() => selectNumber.mutate(number)}
+                  disabled={selectNumber.isPending || !purchasable}
+                  onClick={() => {
+                    selectNumber.mutate(number)
+                    setChangingNumber(false)
+                  }}
+                  title={purchasable ? undefined : `Checkout isn't available in ${number.currency} yet`}
                   className={`flex items-start justify-between gap-2 rounded-xl border p-3.5 text-left transition-colors ${
-                    isSelected ? 'border-primary ring-primary/15 ring-2' : 'hover:bg-muted/50'
+                    isSelected
+                      ? 'border-primary ring-primary/15 ring-2'
+                      : purchasable
+                        ? 'hover:bg-muted/50'
+                        : 'cursor-not-allowed opacity-50'
                   }`}
                 >
                   <div className="min-w-0">
@@ -284,8 +577,11 @@ function SelectStep({
                       {number.city ?? '—'} · {number.type}
                     </p>
                     <p className="mt-1.5 text-xs font-semibold tabular-nums">
-                      ₹{(number.priceInrPaise / 100).toFixed(0)}/mo
+                      {formatMoney(number.priceMinor, number.currency)}/mo
                     </p>
+                    {!purchasable ? (
+                      <p className="text-muted-foreground mt-0.5 text-[11px]">Checkout coming soon</p>
+                    ) : null}
                   </div>
                   <span
                     className={`mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border-2 ${
@@ -313,53 +609,6 @@ function SelectStep({
             </Button>
           </div>
         ) : null}
-      </div>
-
-      <div className="shrink-0 md:w-64 md:border-l md:pl-6">
-        <div className="md:sticky md:top-6">
-          {selected ? (
-            <Card>
-              <CardContent className="space-y-3">
-                <div>
-                  <p className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
-                    Selected number
-                  </p>
-                  <p className="mt-1 font-mono text-base font-semibold tabular-nums">
-                    {selected.displayNumber}
-                  </p>
-                  <p className="text-muted-foreground text-xs capitalize">
-                    {selected.city ?? '—'} · {selected.type}
-                  </p>
-                </div>
-                <div className="space-y-1.5 border-t pt-3 text-sm">
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Base price</span>
-                    <span className="tabular-nums">₹{(baseInrPaise / 100).toFixed(0)}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">GST (18%)</span>
-                    <span className="tabular-nums">₹{(gstInrPaise / 100).toFixed(2)}</span>
-                  </div>
-                  <div className="flex items-center justify-between border-t pt-1.5 font-semibold">
-                    <span>Total / month</span>
-                    <span className="tabular-nums">₹{(totalInrPaise / 100).toFixed(2)}</span>
-                  </div>
-                </div>
-                {payError ? <p className="text-destructive text-xs">{payError}</p> : null}
-                <Button className="w-full" disabled={payAndActivate.isPending} onClick={() => void pay()}>
-                  {payAndActivate.isPending ? <Loader2 className="size-4 animate-spin" /> : null}
-                  {payAndActivate.isPending
-                    ? 'Processing payment…'
-                    : `Pay ₹${(totalInrPaise / 100).toFixed(2)}`}
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="text-muted-foreground rounded-xl border border-dashed p-6 text-center text-xs">
-              Select a number on the left to see pricing here.
-            </div>
-          )}
-        </div>
       </div>
     </div>
   )
@@ -533,8 +782,15 @@ export function VirtualNumberFlow({ onBack }: { onBack: () => void }) {
         return <RejectedStep reason={status.rejectionReason} />
       case 'approved':
       case 'number_selected':
-      case 'paid':
         return <SelectStep selectedNumber={status.selectedNumber} provider={status.provider ?? 'plivo'} />
+      case 'paid':
+        return (
+          <AwaitingActivationStep
+            paidAt={status.paidAt}
+            onRefresh={() => void refetch()}
+            refreshing={isFetching}
+          />
+        )
       case 'active':
         return null
     }
